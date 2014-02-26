@@ -43,11 +43,8 @@ namespace RTS {
             using(FileStream fs = File.OpenRead("res/g/anim/Unit.png")) {
                 t = Texture2D.FromStream(GraphicsDevice, fs);
             }
-            using(var bmp = System.Drawing.Bitmap.FromFile("res/g/anim/Unit.png") as System.Drawing.Bitmap) {
+            using(var bmp = System.Drawing.Bitmap.FromFile("res/g/anim/Unit1.png") as System.Drawing.Bitmap) {
                 tModel = new Texture2D(GraphicsDevice, t.Width, t.Height, false, SurfaceFormat.Single);
-                Color[] data = new Color[t.Width * t.Height];
-                t.GetData(data);
-                tModel.SetData(data);
                 float[] sData = new float[t.Width * t.Height];
                 byte[] datac = new byte[4];
                 for(int i = 0; i < sData.Length; i++) {
@@ -56,10 +53,6 @@ namespace RTS {
                     datac[1] = col.G;
                     datac[2] = col.R;
                     datac[3] = col.A;
-                    //datac[0] = data[i].B;
-                    //datac[1] = data[i].G;
-                    //datac[2] = data[i].R;
-                    //datac[3] = data[i].A;
                     sData[i] = BitConverter.ToSingle(datac, 0);
                 }
                 tModel.SetData(sData);
@@ -94,9 +87,9 @@ namespace RTS {
                 instances[i].AnimationFrame = r.Next(0, 64);
             }
             instances[0].World =
-                Matrix.CreateScale(5f) *
+                Matrix.CreateScale(3f) *
                 Matrix.CreateRotationY(-MathHelper.PiOver2 - 0.7f) *
-                Matrix.CreateTranslation(0, -1.4f, 10);
+                Matrix.CreateTranslation(0, -1.4f * 3, 10);
             dvbInst = new DynamicVertexBuffer(GraphicsDevice, VertexRTSAnimInst.Declaration, instances.Length, BufferUsage.WriteOnly);
             dvbInst.SetData(instances);
 
