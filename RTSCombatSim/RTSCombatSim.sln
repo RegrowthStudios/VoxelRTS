@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPGCombatSim", "RPGCombatSim\RPGCombatSim.csproj", "{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSCombatSim", "RTSCombatSim\RTSCombatSim.csproj", "{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}"
 	ProjectSection(ProjectDependencies) = postProject
 		{44A895B1-25FA-4F9D-BA66-D2EB0051BFBE} = {44A895B1-25FA-4F9D-BA66-D2EB0051BFBE}
 		{79AEFEF0-5165-4B43-BD2E-9F925A198C96} = {79AEFEF0-5165-4B43-BD2E-9F925A198C96}
@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSEngine", "..\RTSGame\RTS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Empty", "Empty\Empty\Empty.csproj", "{44A895B1-25FA-4F9D-BA66-D2EB0051BFBE}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "EmptyContent", "Empty\EmptyContent\EmptyContent.contentproj", "{937970D7-3035-4F98-821A-6DEF1020467F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmptyContent", "Empty\EmptyContent\EmptyContent.contentproj", "{937970D7-3035-4F98-821A-6DEF1020467F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

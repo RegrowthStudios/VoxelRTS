@@ -106,7 +106,7 @@ namespace RTS {
             fx.TexModelMap = tModel;
             fx.TexOverlay = tColor;
             fx.World = Matrix.Identity;
-            fx.VP = Matrix.CreateLookAt(Vector3.Backward * 14.4f, Vector3.Zero, Vector3.Up) *
+            fx.VP = Matrix.CreateLookAt(Vector3.Backward * 12.4f, Vector3.Zero, Vector3.Up) *
                 Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.01f, 1000f);
             base.LoadContent();
         }
