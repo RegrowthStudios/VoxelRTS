@@ -69,6 +69,8 @@
     <Compile Include="DataForm.Designer.cs">
       <DependentUpon>DataForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Gameplay\CombatMap.cs" />
+    <Compile Include="Graphics\Renderer.cs" />
     <Compile Include="Graphics\UnitGeometry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

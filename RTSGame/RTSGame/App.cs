@@ -20,7 +20,7 @@ namespace RTS {
         DynamicVertexBuffer dvbInst;
         IndexBuffer ib;
 
-        VertexRTSAnimInst[] instances = new VertexRTSAnimInst[1500];
+        VertexRTSAnimInst[] instances = new VertexRTSAnimInst[9000];
         Random r = new Random(676);
         int counterPause = 0;
 
@@ -40,10 +40,10 @@ namespace RTS {
 
             font = Content.Load<SpriteFont>("Font");
             fx = new RTSEffect(Content.Load<Effect>("FX/RTS"));
-            using(FileStream fs = File.OpenRead("res/g/anim/Unit.png")) {
+            using(FileStream fs = File.OpenRead("res/g/anim/Monkey.png")) {
                 t = Texture2D.FromStream(GraphicsDevice, fs);
             }
-            using(var bmp = System.Drawing.Bitmap.FromFile("res/g/anim/Unit1.png") as System.Drawing.Bitmap) {
+            using(var bmp = System.Drawing.Bitmap.FromFile("res/g/anim/Monkey.png") as System.Drawing.Bitmap) {
                 tModel = new Texture2D(GraphicsDevice, t.Width, t.Height, false, SurfaceFormat.Single);
                 float[] sData = new float[t.Width * t.Height];
                 byte[] datac = new byte[4];
@@ -62,7 +62,7 @@ namespace RTS {
 
             VertexPositionNormalTexture[] verts;
             int[] inds;
-            using(FileStream fs = File.OpenRead("res/g/model/Unit.obj")) {
+            using(FileStream fs = File.OpenRead("res/g/model/Monkey.obj")) {
                 ObjParser.tryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
             }
             for(int i = 0; i < verts.Length; i++) {
@@ -73,7 +73,7 @@ namespace RTS {
             ib = new IndexBuffer(GraphicsDevice, IndexElementSize.ThirtyTwoBits, inds.Length, BufferUsage.WriteOnly);
             ib.SetData(inds);
             for(int i = 0; i < instances.Length; i++) {
-                instances[i].World = Matrix.CreateScale(r.Next(50, 200) / 30f) *
+                instances[i].World = Matrix.CreateScale(r.Next(50, 200) / 80f) *
                     Matrix.CreateFromYawPitchRoll(
                         r.Next(0, 700) / 100f,
                         r.Next(0, 700) / 100f,
@@ -89,13 +89,13 @@ namespace RTS {
             instances[0].World =
                 Matrix.CreateScale(3f) *
                 Matrix.CreateRotationY(-MathHelper.PiOver2 - 0.7f) *
-                Matrix.CreateTranslation(0, -1.4f * 3, 10);
+                Matrix.CreateTranslation(0, -1.4f * 3, 5);
             dvbInst = new DynamicVertexBuffer(GraphicsDevice, VertexRTSAnimInst.Declaration, instances.Length, BufferUsage.WriteOnly);
             dvbInst.SetData(instances);
 
 
 
-            using(FileStream fs = File.OpenRead("res/g/tex/Unit.png")) {
+            using(FileStream fs = File.OpenRead("res/g/tex/Monkey.png")) {
                 tColor = Texture2D.FromStream(GraphicsDevice, fs);
             }
 
@@ -133,7 +133,7 @@ namespace RTS {
             if(counterPause > 1) {
                 for(int i = 0; i < instances.Length; i++) {
                     instances[i].AnimationFrame = instances[i].AnimationFrame + 1f;
-                    if(instances[i].AnimationFrame > 63) instances[i].AnimationFrame = 0;
+                    if(instances[i].AnimationFrame > 31) instances[i].AnimationFrame = 0;
                 }
                 counterPause = 0;
             }

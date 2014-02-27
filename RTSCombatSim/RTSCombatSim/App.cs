@@ -9,14 +9,20 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using RTSCS.Gameplay;
+using RTSCS.Graphics;
 
 namespace RTSCS {
     public class App : Microsoft.Xna.Framework.Game {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Renderer renderer;
+        CombatMap map;
 
         public App() {
             graphics = new GraphicsDeviceManager(this);
+            graphics.GraphicsProfile = GraphicsProfile.HiDef;
+            graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
 
@@ -28,8 +34,18 @@ namespace RTSCS {
         protected override void LoadContent() {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            renderer = new Renderer(GraphicsDevice);
+            renderer.View = Matrix.CreateLookAt(new Vector3(0, 0, -1f), Vector3.Zero, Vector3.Up);
+            renderer.Projection = Matrix.CreateOrthographic(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 2f);
+
+            map = new CombatMap(GraphicsDevice, @"Content\Textures\Smoke.png");
+            map.Tiling = Vector2.One * 10f;
+            map.Scaling = Vector2.One * 200f;
+            map.Translation = Vector3.Zero;
         }
         protected override void UnloadContent() {
+            renderer.Dispose();
+            map.Dispose();
         }
 
         protected override void Update(GameTime gameTime) {
@@ -41,7 +57,7 @@ namespace RTSCS {
         }
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.Black);
-
+            renderer.RenderMap(GraphicsDevice, map);
             base.Draw(gameTime);
         }
 
