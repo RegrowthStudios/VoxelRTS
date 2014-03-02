@@ -90,15 +90,23 @@ namespace RTSCS {
         }
         public void StepGame(float dt) {
             CheckRestartGame();
-            if(gameState == null) return;
+            if (gameState == null) return;
 
+            // Find Decisions
             foreach(RTSTeam team in gameState.teams) {
-                // TODO: Find Decisions For Team
+                foreach(RTSUnitInstance unit in team.Units) {
+                    unit.ActionController.DecideAction(gameState, dt);
+                }
             }
 
+            // Apply Controllers
             foreach(RTSTeam team in gameState.teams) {
-                // TODO: Apply Controllers
+                foreach(RTSUnitInstance unit in team.Units) {
+                    unit.ActionController.ApplyAction(gameState, dt);
+                }
             }
+
+            // 
         }
 
         static void Main(string[] args) {

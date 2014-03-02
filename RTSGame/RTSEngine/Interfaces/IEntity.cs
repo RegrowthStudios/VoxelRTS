@@ -17,15 +17,22 @@ namespace RTSEngine.Interfaces {
         ICollidable CollisionGeometry { get; }
 
         // Targetting Information
-        IEntity Target { get; }
+        IEntity Target { get; set; }
+
+        // These Can Change During The Entity's Lifecycle But Will Always Be There
+        IActionController ActionController { get; set; }
+        ITargettingController TargettingController { get; set; }
     }
 
     public interface IMovingEntity : IEntity {
         // Speed Of Movement For The Entity
         float MovementSpeed { get; }
 
-        // Changes the Position of the Unit by Change
-        void Move (Vector3 change); 
+        // This Can Change During The Entity's Lifecycle But Will Always Be There
+        IMovementController MovementController { get; set; }
+        
+        // Changes the Position of the Unit by the Change
+        void Move (Vector3 change);
     }
 
     public interface IDestructibleEntity : IEntity {
@@ -46,6 +53,9 @@ namespace RTSEngine.Interfaces {
 
         // Event Triggered When This Entity Find A New Attack Target (Null When Can't Find One)
         event Action<ICombatEntity, IDestructibleEntity> OnNewAttackTarget;
+
+        // This Can Change During The Entity's Lifecycle But Will Always Be There
+        ICombatController CombatController { get; set; }
     }
 
 }

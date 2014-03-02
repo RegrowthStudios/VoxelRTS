@@ -21,6 +21,7 @@ namespace RTSEngine.Data.Team {
 
         // Target of the Unit
         protected IEntity CurrentTarget;
+        protected int CurrentHealth;
 
         // The Entity's Team
         public RTSTeam Team {
@@ -54,7 +55,7 @@ namespace RTSEngine.Data.Team {
 
         // The Current Health Of The Entity
         public int Health {
-            get { return UnitData.Health; }
+            get { return CurrentHealth; }
         }
 
         // MovementController of The Unit
@@ -86,6 +87,7 @@ namespace RTSEngine.Data.Team {
             this.RTSTeam = team;
             this.UnitData = data;
             this.Position = position;
+            this.CurrentHealth = UnitData.Health;
         }
 
         // Computes The Damage To Deal With Access To A Random Number
@@ -98,7 +100,7 @@ namespace RTSEngine.Data.Team {
             if (OnDamage != null)
                 OnDamage(this, d);
 
-            UnitData.Health -= d;
+            CurrentHealth -= d;
         }
 
         // Changes the Position of the Unit by Change
