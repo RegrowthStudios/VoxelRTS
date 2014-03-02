@@ -88,9 +88,12 @@ namespace RTSCS {
 
             rArgs = null;
         }
+        static bool IsDead(RTSUnitInstance u) {
+            return u.Health < 0;
+        }
         public void StepGame(float dt) {
             CheckRestartGame();
-            if (gameState == null) return;
+            if(gameState == null) return;
 
             // Find Decisions
             foreach(RTSTeam team in gameState.teams) {
@@ -106,7 +109,10 @@ namespace RTSCS {
                 }
             }
 
-            // 
+            // Kill Dead Units
+            foreach(RTSTeam team in gameState.teams) {
+                team.RemoveAll(IsDead);
+            }
         }
 
         static void Main(string[] args) {
