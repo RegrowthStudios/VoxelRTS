@@ -79,8 +79,6 @@ namespace RTSCS {
 
             // TODO: Restart
 
-
-
             rArgs = null;
         }
         public void StepGame(float dt) {

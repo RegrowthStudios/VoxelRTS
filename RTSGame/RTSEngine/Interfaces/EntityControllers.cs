@@ -23,4 +23,12 @@ namespace RTSEngine.Interfaces {
         // Performs Decision Logic For The Entity
         void PerformDecision(IMovingEntity entity, float dt);
     }
+
+    public interface ITargettingController { 
+        // TODO
+    }
+
+    public interface ICombatController {
+        // TOOD
+    }
 }
