@@ -90,7 +90,7 @@ namespace RTSCS {
         }
         public void StepGame(float dt) {
             CheckRestartGame();
-            if (gameState == null) return;
+            if(gameState == null) return;
 
             foreach(RTSTeam team in gameState.teams) {
                 // TODO: Find Decisions For Team
