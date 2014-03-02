@@ -10,42 +10,35 @@ namespace RTSEngine.Data.Team {
 
     public class RTSUnitInstance : ICombatEntity {
 
-        // RTSUnit Data of The Unit
-        protected RTSUnit UnitData;
+        // RTSUnit Data Of The Unit
+        public RTSUnit UnitData { get; private set; }
 
-        // RTSTeam of The Unit
-        protected RTSTeam RTSTeam;
+        // RTSTeam Of The Unit
+        public RTSTeam Team { get; private set; }
 
-        // Position of The Unit
-        protected Vector3 Position;
-
-        // Target of the Unit
-        protected IEntity CurrentTarget;
-        protected int CurrentHealth;
-
-        // The Entity's Team
-        public RTSTeam Team {
-            get { return RTSTeam; }
-        }
-
-        // Location In The World
+        // Position Of The Unit
+        protected Vector3 worldPosition;
         public Vector3 WorldPosition {
-            get { return Position; }
+            get { return worldPosition; }
         }
+
+        // Target Of The Unit
+        protected IEntity target;
+        public IEntity Target {
+            get { return target; }
+            set {
+                target = value;
+                if(OnNewAttackTarget != null)
+                    OnNewAttackTarget(this, (IDestructibleEntity)target);
+            }
+        }
+
+        // This Unit's Current Health
+        public int Health { get; private set; }
 
         // Collision Geometry
         public ICollidable CollisionGeometry {
             get { return UnitData.ICollidableShape; }
-        }
-
-        // Targetting Information 
-        public IEntity Target {
-            get { return CurrentTarget; }
-            set {
-                CurrentTarget = value;
-                if (OnNewAttackTarget != null)
-                    OnNewAttackTarget(this, (IDestructibleEntity)CurrentTarget);
-            }
         }
 
         // Speed Of Movement For The Entity
@@ -53,41 +46,24 @@ namespace RTSEngine.Data.Team {
             get { return UnitData.MovementSpeed; }
         }
 
-        // The Current Health Of The Entity
-        public int Health {
-            get { return CurrentHealth; }
-        }
-
         // MovementController of The Unit
-        public IMovementController MovementController {
-            get;
-            set;
-        }
+        public IMovementController MovementController { get; set; }
 
         // ActionController of The Unit
-        public IActionController ActionController {
-            get;
-            set;
-        }
+        public IActionController ActionController { get; set; }
 
         // TargettingController of The Unit
-        public ITargettingController TargettingController {
-            get;
-            set;
-        }
+        public ITargettingController TargettingController { get; set; }
 
         // CombatController of The Unit
-        public ICombatController CombatController {
-            get;
-            set;
-        }
+        public ICombatController CombatController { get; set; }
 
         // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
         public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector3 position) {
-            this.RTSTeam = team;
+            this.Team = team;
             this.UnitData = data;
-            this.Position = position;
-            this.CurrentHealth = UnitData.Health;
+            this.worldPosition = position;
+            this.Health = UnitData.Health;
         }
 
         // Computes The Damage To Deal With Access To A Random Number
@@ -100,15 +76,15 @@ namespace RTSEngine.Data.Team {
             if (OnDamage != null)
                 OnDamage(this, d);
 
-            CurrentHealth -= d;
+            Health -= d;
         }
 
         // Changes the Position of the Unit by Change
         public void Move(Vector3 change) {
-            float x = Position.X - change.X;
-            float y = Position.Y - change.Y;
-            float z = Position.Z - change.Z;
-            Position = new Vector3(x, y, z);
+            float x = worldPosition.X - change.X;
+            float y = worldPosition.Y - change.Y;
+            float z = worldPosition.Z - change.Z;
+            worldPosition = new Vector3(x, y, z);
         }
 
         // Event Triggered When This Entity Receives Damage

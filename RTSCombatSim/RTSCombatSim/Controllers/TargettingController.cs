@@ -35,5 +35,16 @@ namespace RTSCS.Controllers {
         public void ChangeTarget(GameState g, float dt) {
             entity.Target = target;
         }
+
+        // Constructor
+        public TargettingController(IEntity entity, IEntity target) {
+            this.entity = entity;
+            this.target = target;
+        }
+
+        public TargettingController(IEntity entity) {
+            this.entity = entity;
+            this.target = null;
+        }
     }
 }
