@@ -30,6 +30,9 @@ namespace RTSEngine.Interfaces {
 
         // This Can Change During The Entity's Lifecycle But Will Always Be There
         IMovementController MovementController { get; set; }
+        
+        // Changes the Position of the Unit by the Change
+        void Move (Vector3 change);
     }
 
     public interface IDestructibleEntity : IEntity {
@@ -44,8 +47,6 @@ namespace RTSEngine.Interfaces {
     }
 
     public interface ICombatEntity : IDestructibleEntity, IMovingEntity {
-        // Information About Whether This Entity Can Attack Yet
-        bool CanAttack { get; }
 
         // Computes The Damage To Deal With Access To A Random Number
         int DealDamage(double rand);
