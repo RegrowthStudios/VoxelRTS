@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RTSEngine.Interfaces;
+using RTSEngine.Data;
 using RTSEngine.Data.Team;
 
-namespace RTSEngine.Data.Controllers {
+namespace RTSCS.Controllers {
     public class CombatController : ICombatController {
         // The Entity That This CombatController Is Controlling
         private ICombatEntity entity;

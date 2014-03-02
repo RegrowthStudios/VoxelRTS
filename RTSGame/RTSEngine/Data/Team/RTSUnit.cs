@@ -5,7 +5,6 @@ using System.Text;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
-    
     public class RTSUnit {
         // Health Of The Unit
         public int Health;

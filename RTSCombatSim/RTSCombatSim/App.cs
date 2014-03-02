@@ -15,6 +15,7 @@ using Microsoft.CSharp;
 using System.CodeDom.Compiler;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
+using RTSCS.Controllers;
 
 namespace RTSCS {
     public class GameRestartArgs {
@@ -23,13 +24,22 @@ namespace RTSCS {
     };
 
     public class App : Microsoft.Xna.Framework.Game {
+        const int MAX_TEAMS = 3;
+        const int MAX_INSTANCES_PER_UNIT = 100;
+
+        static readonly Color[] teamColors = new Color[]{
+            Color.Red,
+            Color.Blue,
+            Color.Green
+        };
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Renderer renderer;
         CombatMap map;
         GameRestartArgs rArgs;
         GameState gameState;
-
+        UnitGeometry[] unitGeometry;
 
         public App() {
             graphics = new GraphicsDeviceManager(this);
@@ -54,6 +64,31 @@ namespace RTSCS {
             map.Tiling = Vector2.One * 10f;
             map.Scaling = Vector2.One * 200f;
             map.Translation = Vector3.Zero;
+
+            RTSUnit[] units = new RTSUnit[1];
+            units[0] = new RTSUnit();
+            units[0].BaseCombatData.Armor = 0;
+            units[0].BaseCombatData.AttackDamage = 10;
+            units[0].BaseCombatData.AttackTimer = 1f;
+            units[0].BaseCombatData.CriticalChance = 0.5;
+            units[0].BaseCombatData.CriticalDamage = 20;
+            units[0].BaseCombatData.MaxRange = 20;
+            units[0].BaseCombatData.MinRange = 0;
+            units[0].Health = 100;
+            units[0].ICollidableShape = new CollisionCircle(3, Vector2.Zero);
+            units[0].MovementSpeed = 2f;
+
+            RTSTeam[] teams = new RTSTeam[1];
+            teams[0] = new RTSTeam();
+            var u = teams[0].AddUnit(units[0], Vector3.Zero);
+            u.ActionController = new ActionController(u);
+            u.CombatController = new CombatController(u);
+            u.MovementController = new MovementContoller(new Vector2[] { new Vector2(10, 10) });
+            u.TargettingController = new TargettingController(u);
+
+            rArgs = new GameRestartArgs();
+            rArgs.Teams = teams;
+            rArgs.Units = units;
         }
         protected override void UnloadContent() {
             renderer.Dispose();
@@ -72,7 +107,14 @@ namespace RTSCS {
         }
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.Black);
+            
             renderer.RenderMap(GraphicsDevice, map);
+
+            foreach(UnitGeometry ug in unitGeometry) {
+                ug.InstanceUnits();
+                ug.Draw(GraphicsDevice);
+            }
+
             base.Draw(gameTime);
         }
 
@@ -82,9 +124,28 @@ namespace RTSCS {
 
             // TODO: Restart
             gameState = new GameState(rArgs.Teams);
-            foreach(var u in rArgs.Units) {
-                gameState.AddRTSUnit(u);
+            unitGeometry = new UnitGeometry[rArgs.Units.Length];
+            for(int i = 0; i < rArgs.Units.Length; i++) {
+                gameState.AddRTSUnit(rArgs.Units[i]);
+                unitGeometry[i] = new UnitGeometry(GraphicsDevice, new VertexPositionColor[] {
+                    new VertexPositionColor(new Vector3(-1, 1, 0), Color.White),
+                    new VertexPositionColor(new Vector3(1, 1, 0), Color.White),
+                    new VertexPositionColor(new Vector3(-1, -1, 0), Color.White),
+                    new VertexPositionColor(new Vector3(1, -1, 0), Color.White)
+                }, new int[]{
+                    0, 1, 2,
+                    2, 1, 3
+                }, MAX_INSTANCES_PER_UNIT, rArgs.Units[i]);
+                int ti = 0;
+                foreach(var team in gameState.teams) {
+                    foreach(var unit in team.Units) {
+                        if(unit.UnitData == rArgs.Units[i])
+                            unitGeometry[i].AddUnit(unit, teamColors[ti]);
+                    }
+                    ti++;
+                }
             }
+
 
             rArgs = null;
         }

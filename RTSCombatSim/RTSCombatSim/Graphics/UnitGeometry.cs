@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RTSEngine.Data.Team;
+
 namespace RTSCS.Graphics {
     #region Instancing Vertex Type
     public struct VertexUnitInstance : IVertexType {
@@ -36,6 +38,10 @@ namespace RTSCS.Graphics {
             Color = c;
         }
     }
+    public struct UnitRenderData {
+        public RTSUnitInstance Unit;
+        public Color Color;
+    }
     #endregion
 
     public class UnitGeometry : IDisposable {
@@ -46,7 +52,10 @@ namespace RTSCS.Graphics {
         // Defines Location And Color Of Geometry Instances
         private DynamicVertexBuffer vbInst;
 
-        // Holds All Instace Information
+        // List Of Units To Render
+        private List<UnitRenderData> units;
+
+        // Holds All Instance Information
         private VertexUnitInstance[] instances;
         public int UnitCount {
             get { return instances.Length; }
@@ -55,8 +64,9 @@ namespace RTSCS.Graphics {
             get { return instances[i]; }
         }
 
-        public UnitGeometry(GraphicsDevice g, VertexPositionColor[] verts, int[] inds, int count) {
+        public UnitGeometry(GraphicsDevice g, VertexPositionColor[] verts, int[] inds, int count, RTSUnit data) {
             IsDisposed = false;
+            units = new List<UnitRenderData>();
 
             // Check Input
             if(verts == null || verts.Length < 3)
@@ -121,6 +131,22 @@ namespace RTSCS.Graphics {
         }
         public void ApplyInstancing() {
             ApplyInstancing(UnitCount);
+        }
+
+        public void AddUnit(RTSUnitInstance u, Color c) {
+            units.Add(new UnitRenderData() { Unit = u, Color = c });
+            SetInstanceMatrix(units.Count - 1, Matrix.CreateTranslation(u.WorldPosition));
+            SetInstanceColor(units.Count - 1, c);
+        }
+        public void RemoveAll(Predicate<RTSUnitInstance> f) {
+            units.RemoveAll((d) => { return f(d.Unit); });
+        }
+        public void InstanceUnits() {
+            for(int i = 0; i < units.Count; i++) {
+                SetInstanceMatrix(i, Matrix.CreateTranslation(units[i].Unit.WorldPosition));
+                SetInstanceColor(i, units[i].Color);
+            }
+            ApplyInstancing(units.Count);
         }
 
         // Activate Buffers On The GPU
