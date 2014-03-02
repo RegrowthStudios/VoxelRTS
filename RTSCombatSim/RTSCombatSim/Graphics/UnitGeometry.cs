@@ -164,5 +164,8 @@ namespace RTSCS.Graphics {
         public void Draw(GraphicsDevice g) {
             Draw(g, UnitCount);
         }
+        public void DrawUnits(GraphicsDevice g) {
+            Draw(g, units.Count);
+        }
     }
 }

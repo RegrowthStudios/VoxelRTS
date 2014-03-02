@@ -83,7 +83,7 @@ namespace RTSCS {
             var u = teams[0].AddUnit(units[0], Vector3.Zero);
             u.ActionController = new ActionController(u);
             u.CombatController = new CombatController(u);
-            u.MovementController = new MovementContoller(new Vector2[] { new Vector2(10, 10) });
+            u.MovementController = new MovementContoller(u, new Vector2[] { new Vector2(10, 10) });
             u.TargettingController = new TargettingController(u);
 
             rArgs = new GameRestartArgs();
@@ -107,12 +107,13 @@ namespace RTSCS {
         }
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.Black);
-            
-            renderer.RenderMap(GraphicsDevice, map);
 
+            renderer.RenderMap(GraphicsDevice, map);
+            renderer.BeginUnitPass();
             foreach(UnitGeometry ug in unitGeometry) {
                 ug.InstanceUnits();
-                ug.Draw(GraphicsDevice);
+                ug.SetBuffers(GraphicsDevice);
+                ug.DrawUnits(GraphicsDevice);
             }
 
             base.Draw(gameTime);

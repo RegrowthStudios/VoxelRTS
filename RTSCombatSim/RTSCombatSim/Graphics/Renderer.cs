@@ -25,6 +25,7 @@ namespace RTSCS.Graphics {
             fxBasic.LightingEnabled = false;
             fxBasic.VertexColorEnabled = false;
             fxBasic.TextureEnabled = true;
+            fxBasic.World = Matrix.Identity;
         }
         #region IDisposalNotifier
         ~Renderer() {
@@ -52,6 +53,8 @@ namespace RTSCS.Graphics {
             g.RasterizerState = RasterizerState.CullNone;
             g.BlendState = BlendState.Opaque;
 
+            fxBasic.TextureEnabled = true;
+            fxBasic.VertexColorEnabled = false;
             fxBasic.Texture = map.Background;
             fxBasic.World = map.WorldTransform;
             fxBasic.CurrentTechnique.Passes[0].Apply();
@@ -59,6 +62,12 @@ namespace RTSCS.Graphics {
             VertexPositionTexture[] verts = new VertexPositionTexture[4];
             map.CopyVertexTriangleStrip(ref verts, 0);
             g.DrawUserPrimitives(PrimitiveType.TriangleStrip, verts, 0, 2, VertexPositionTexture.VertexDeclaration);
+        }
+
+        public void BeginUnitPass() {
+            fxBasic.TextureEnabled = false;
+            fxBasic.VertexColorEnabled = true;
+            fxBasic.CurrentTechnique.Passes[0].Apply();
         }
     }
 }
