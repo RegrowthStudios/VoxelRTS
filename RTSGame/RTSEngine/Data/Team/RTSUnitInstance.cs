@@ -5,102 +5,108 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
-namespace RTSEngine.Data.Team
-{
+namespace RTSEngine.Data.Team {
     // TODO: Implement IDestructibleEntity, ICombatEntity, IMovingEntity
 
-    class RTSUnitInstance : IDestructibleEntity, ICombatEntity, IMovingEntity
-    {
+    public class RTSUnitInstance : ICombatEntity {
 
         // RTSUnit Data of The Unit
         protected RTSUnit UnitData;
 
-        // MovementController of The Unit
-        protected IMovementController MovementController;
-
-        // ActionController of The Unit
-        protected IActionController ActionController;
-
-        // TargettingController of The Unit
-        protected ITargettingController TargettingController;
-
-        // CombatController of The Unit
-        protected ICombatController CombatController;
-
+        // RTSTeam of The Unit
         protected RTSTeam RTSTeam;
+
+        // Position of The Unit
         protected Vector3 Position;
-        protected ICollidable Shape;
+
+        // Target of the Unit
         protected IEntity CurrentTarget;
-        protected Boolean AbleToAttack;
 
         // The Entity's Team
-        public RTSTeam Team
-        {
+        public RTSTeam Team {
             get { return RTSTeam; }
         }
 
         // Location In The World
-        public Vector3 WorldPosition
-        {
+        public Vector3 WorldPosition {
             get { return Position; }
         }
 
         // Collision Geometry
-        public ICollidable CollisionGeometry
-        {
-            get { return Shape; }
+        public ICollidable CollisionGeometry {
+            get { return UnitData.ICollidableShape; }
         }
 
         // Targetting Information 
-        public IEntity Target
-        {
+        public IEntity Target {
             get { return CurrentTarget; }
-            set 
-            {
+            set {
                 CurrentTarget = value;
                 if (OnNewAttackTarget != null)
-                    OnNewAttackTarget(this, (IDestructibleEntity) CurrentTarget); 
+                    OnNewAttackTarget(this, (IDestructibleEntity)CurrentTarget);
             }
         }
 
         // Speed Of Movement For The Entity
-        public float MovementSpeed
-        {
+        public float MovementSpeed {
             get { return UnitData.MovementSpeed; }
         }
 
         // The Current Health Of The Entity
-        public int Health
-        {
+        public int Health {
             get { return UnitData.Health; }
         }
 
-        // Information About Whether This Entity Can Attack Yet
-        public bool CanAttack
-        {
-            get { return AbleToAttack; }
+        // MovementController of The Unit
+        public IMovementController MovementController {
+            get;
+            set;
         }
 
-        public RTSUnitInstance(RTSTeam team, Vector3 position, ICollidable shape)
-        {
+        // ActionController of The Unit
+        public IActionController ActionController {
+            get;
+            set;
+        }
+
+        // TargettingController of The Unit
+        public ITargettingController TargettingController {
+            get;
+            set;
+        }
+
+        // CombatController of The Unit
+        public ICombatController CombatController {
+            get;
+            set;
+        }
+
+        // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
+        public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector3 position) {
             this.RTSTeam = team;
+            this.UnitData = data;
             this.Position = position;
-            this.Shape = shape;
         }
 
         // Computes The Damage To Deal With Access To A Random Number
-        public int DealDamage(double rand)
-        {
+        public int DealDamage(double rand) {
             return UnitData.BaseCombatData.ComputeDamageDealt(rand);
         }
 
         // Applies Damage To Health
-        public void Damage(int d)
-        {
+        public void Damage(int d) {
             if (OnDamage != null)
                 OnDamage(this, d);
 
             UnitData.Health -= d;
+        }
+
+        // Changes the Position of the Unit by the Change
+        public void Move(Vector3 change) {
+            float x = Position.X - change.X;
+            float y = Position.Y - change.Y;
+            float z = Position.Z - change.Z;
+            Position = new Vector3(x, y, z);
         }
 
         // Event Triggered When This Entity Receives Damage

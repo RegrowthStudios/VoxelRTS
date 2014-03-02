@@ -23,6 +23,9 @@ namespace RTSEngine.Interfaces {
     public interface IMovingEntity : IEntity {
         // Speed Of Movement For The Entity
         float MovementSpeed { get; }
+
+        // Changes the Position of the Unit by the Change
+        void Move (Vector3 change); 
     }
 
     public interface IDestructibleEntity : IEntity {
@@ -37,8 +40,6 @@ namespace RTSEngine.Interfaces {
     }
 
     public interface ICombatEntity : IDestructibleEntity, IMovingEntity {
-        // Information About Whether This Entity Can Attack Yet
-        bool CanAttack { get; }
 
         // Computes The Damage To Deal With Access To A Random Number
         int DealDamage(double rand);
