@@ -24,7 +24,7 @@ namespace RTSEngine.Interfaces {
         // Speed Of Movement For The Entity
         float MovementSpeed { get; }
 
-        // Changes the Position of the Unit by the Change
+        // Changes the Position of the Unit by Change
         void Move (Vector3 change); 
     }
 

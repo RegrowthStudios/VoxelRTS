@@ -101,7 +101,7 @@ namespace RTSEngine.Data.Team {
             UnitData.Health -= d;
         }
 
-        // Changes the Position of the Unit by the Change
+        // Changes the Position of the Unit by Change
         public void Move(Vector3 change) {
             float x = Position.X - change.X;
             float y = Position.Y - change.Y;
