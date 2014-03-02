@@ -36,7 +36,7 @@ namespace RTSEngine.Interfaces {
         event Action<IDestructibleEntity, int> OnDamage;
     }
 
-    public interface ICombatEntity : IEntity {
+    public interface ICombatEntity : IDestructibleEntity, IMovingEntity {
         // Information About Whether This Entity Can Attack Yet
         bool CanAttack { get; }
 
