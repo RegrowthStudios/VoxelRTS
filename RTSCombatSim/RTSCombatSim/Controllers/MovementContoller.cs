@@ -28,8 +28,12 @@ namespace RTSCS.Controllers {
         }
 
         // Performs The Critical Logic Of This Controller
-        public void Move(GameState g, float dt) {
+        public void DecideMove(GameState g, float dt) {
             
+        }
+
+        public void ApplyMove(GameState g, float dt) {
+
         }
 
         public MovementContoller(Vector2[] p) {

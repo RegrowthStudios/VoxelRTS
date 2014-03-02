@@ -19,17 +19,25 @@ namespace RTSEngine.Interfaces {
         void SetWaypoints(Vector2[] p);
 
         // Performs The Critical Logic Of This Controller
-        void Move(GameState g, float dt);
+        void DecideMove(GameState g, float dt);
+
+        void ApplyMove(GameState g, float dt);
     }
 
     public interface IActionController : IEntityController {
-        // Performs Decision Logic (Eg., Attack Or Move?) For The Entity
-        void PerformDecision(GameState g, float dt);
+        // Performs Decision Logic For The Entity
+        void DecideAction(GameState g, float dt);
+
+        // Apply The Entity's Decision
+        void ApplyAction(GameState g, float dt);
     }
 
     public interface ITargettingController : IEntityController { 
-        // Find And Set A Target For This Controller's Entity
+        // Find A Target For This Controller's Entity
         void FindTarget(GameState g, float dt);
+
+        // Set A Target For This Controller's Entity
+        void ChangeTarget(GameState g, float dt);
     }
 
     public interface ICombatController : IEntityController {

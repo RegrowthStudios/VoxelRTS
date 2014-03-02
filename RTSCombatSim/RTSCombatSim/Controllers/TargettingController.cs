@@ -18,5 +18,9 @@ namespace RTSCS.Controllers {
 
         }
 
+        public void ChangeTarget(GameState g, float dt) {
+
+        }
+
     }
 }
