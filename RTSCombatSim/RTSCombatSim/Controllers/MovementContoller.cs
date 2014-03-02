@@ -8,7 +8,7 @@ using RTSEngine.Data;
 
 namespace RTSCS.Controllers {
     public class MovementContoller : IMovementController {
-        // TODO
+        // TODO: store decided move
 
         // The Entity That This MovementController Is Moving
         private IMovingEntity entity;
