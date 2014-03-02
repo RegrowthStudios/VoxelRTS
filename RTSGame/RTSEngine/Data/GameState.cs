@@ -6,6 +6,10 @@ using RTSEngine.Data.Team;
 
 namespace RTSEngine.Data {
     public class GameState {
-        private RTSTeam[] teams;
+        public readonly RTSTeam[] teams;
+
+        public GameState(int numTeams) {
+            teams = new RTSTeam[numTeams];
+        }
     }
 }
