@@ -15,33 +15,30 @@ namespace RTSCS.Controllers {
 
         // Performs Decision Logic For The Entity
         public void DecideAction(GameState g, float dt) {
-            if(entity is ICombatEntity) {
-                ICombatEntity centity = entity as ICombatEntity;
-                if(centity != null && centity.Target == null) {
-                    centity.TargettingController.FindTarget(g, dt);
-                }
+            ICombatEntity centity = entity as ICombatEntity;
+            if(centity != null && centity.Target == null) {
+                centity.TargettingController.FindTarget(g, dt);
             }
-            if(entity is IMovingEntity) {
-                IMovingEntity mentity = entity as IMovingEntity;
-                if(mentity != null) mentity.MovementController.DecideMove(g, dt);
-            }  
+            IMovingEntity mentity = entity as IMovingEntity;
+            if(mentity != null) mentity.MovementController.DecideMove(g, dt);  
         }
 
         // Apply The Entity's Decision
         public void ApplyAction(GameState g, float dt) {
-           if(entity is ICombatEntity) {
-                ICombatEntity centity = entity as ICombatEntity;
-                if(centity != null && centity.Target != null) {
-                    centity.CombatController.Attack(g, dt);
-                }
-                else {
-                    centity.TargettingController.ChangeTarget(g, dt);
-                }
+            ICombatEntity centity = entity as ICombatEntity;
+            if(centity != null && centity.Target != null) {
+                centity.CombatController.Attack(g, dt);
             }
-            if(entity is IMovingEntity) {
-                IMovingEntity mentity = entity as IMovingEntity;
-                if(mentity != null) mentity.MovementController.ApplyMove(g, dt);
-            }   
+            else {
+                centity.TargettingController.ChangeTarget(g, dt);
+            }
+            IMovingEntity mentity = entity as IMovingEntity;
+            if(mentity != null) mentity.MovementController.ApplyMove(g, dt);
+        }
+
+        // Constructor
+        public ActionController(IEntity entity) {
+            this.entity = entity;
         }
     }
 }
