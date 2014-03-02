@@ -13,6 +13,7 @@ using RTSCS.Gameplay;
 using RTSCS.Graphics;
 using Microsoft.CSharp;
 using System.CodeDom.Compiler;
+using RTSEngine.Data;
 using RTSEngine.Data.Team;
 
 namespace RTSCS {
@@ -27,6 +28,8 @@ namespace RTSCS {
         Renderer renderer;
         CombatMap map;
         GameRestartArgs rArgs;
+        GameState gameState;
+
 
         public App() {
             graphics = new GraphicsDeviceManager(this);
@@ -78,14 +81,23 @@ namespace RTSCS {
             if(rArgs == null) return;
 
             // TODO: Restart
+            gameState = new GameState(rArgs.Teams);
+            foreach(var u in rArgs.Units) {
+                gameState.AddRTSUnit(u);
+            }
 
             rArgs = null;
         }
         public void StepGame(float dt) {
             CheckRestartGame();
 
+            foreach(RTSTeam team in gameState.teams) {
+                // TODO: Find Decisions For Team
+            }
 
-
+            foreach(RTSTeam team in gameState.teams) {
+                // TODO: Apply Controllers
+            }
         }
 
         static void Main(string[] args) {
