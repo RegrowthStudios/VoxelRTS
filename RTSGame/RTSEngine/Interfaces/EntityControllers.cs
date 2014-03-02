@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 namespace RTSEngine.Interfaces {
     public interface IMovementContoller {
         // List Of Waypoints To Move Each Target
-        IEnumerable<Vector2> Waypoints;
+        IEnumerable<Vector2> Waypoints { get; }
 
         // Provides Controller With A New Move List
         void SetWaypoints(Vector2[] p);

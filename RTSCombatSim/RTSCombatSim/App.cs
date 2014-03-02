@@ -13,13 +13,20 @@ using RTSCS.Gameplay;
 using RTSCS.Graphics;
 using Microsoft.CSharp;
 using System.CodeDom.Compiler;
+using RTSEngine.Data.Team;
 
 namespace RTSCS {
+    public class GameRestartArgs {
+        public RTSTeam[] Teams;
+        public RTSUnit[] Units;
+    };
+
     public class App : Microsoft.Xna.Framework.Game {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Renderer renderer;
         CombatMap map;
+        GameRestartArgs rArgs;
 
         public App() {
             graphics = new GraphicsDeviceManager(this);
@@ -29,7 +36,7 @@ namespace RTSCS {
         }
 
         protected override void Initialize() {
-
+            rArgs = null;
 
             base.Initialize();
         }
@@ -55,12 +62,32 @@ namespace RTSCS {
                 Exit();
                 return;
             }
+
+            StepGame((float)gameTime.ElapsedGameTime.TotalSeconds);
+
             base.Update(gameTime);
         }
         protected override void Draw(GameTime gameTime) {
             GraphicsDevice.Clear(Color.Black);
             renderer.RenderMap(GraphicsDevice, map);
             base.Draw(gameTime);
+        }
+
+        public void CheckRestartGame() {
+            // Check For Restart
+            if(rArgs == null) return;
+
+            // TODO: Restart
+
+
+
+            rArgs = null;
+        }
+        public void StepGame(float dt) {
+            CheckRestartGame();
+
+
+
         }
 
         static void Main(string[] args) {
@@ -70,8 +97,8 @@ namespace RTSCS {
                 // Create Form Thread
                 Thread t = new Thread(() => {
                     using(form = new DataForm()) {
-                        form.OnGameRestart += () => {
-                            game.map.Tiling *= 2f;
+                        form.OnGameRestart += (rA) => {
+                            game.rArgs = rA;
                         };
                         form.ShowDialog();
                     }

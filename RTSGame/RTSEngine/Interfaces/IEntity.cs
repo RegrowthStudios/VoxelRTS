@@ -8,16 +8,16 @@ using RTSEngine.Data.Team;
 namespace RTSEngine.Interfaces {
     public interface IEntity {
         // The Entity's Team
-        public RTSTeam Team { get; }
+        RTSTeam Team { get; }
 
         // Location In The World
-        public Vector3 WorldPosition { get; }
+        Vector3 WorldPosition { get; }
 
         // Collision Geometry
-        public ICollidable CollisionGeometry { get; }
+        ICollidable CollisionGeometry { get; }
 
         // Targetting Information
-        public IEntity Target { get; }
+        IEntity Target { get; }
     }
 
     public interface IMovingEntity : IEntity {

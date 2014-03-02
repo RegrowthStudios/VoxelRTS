@@ -57,10 +57,11 @@
     <Compile Include="Data\DataLibrary.cs" />
     <Compile Include="Data\DiscreteMap.cs" />
     <Compile Include="Data\GameState.cs" />
-    <Compile Include="Interfaces\ICombat.cs" />
+    <Compile Include="Data\Team\RTSTeam.cs" />
+    <Compile Include="Data\Team\RTSUnit.cs" />
+    <Compile Include="Interfaces\EntityControllers.cs" />
+    <Compile Include="Interfaces\ICollidable.cs" />
     <Compile Include="Interfaces\IEntity.cs" />
-    <Compile Include="Data\Team\Team.cs" />
-    <Compile Include="Data\Team\Unit.cs" />
     <Compile Include="Graphics\RTSToggleModel.cs" />
     <Compile Include="Data\Parsers\ObjParser.cs" />
     <Compile Include="Data\Resource.cs" />

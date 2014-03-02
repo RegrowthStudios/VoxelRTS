@@ -7,8 +7,6 @@ using RTSEngine.Data.Team;
 
 namespace RTSCS {
     public interface IDataForm {
-        Unit[] Units { get; }
-
-        event Action OnGameRestart;
+        event Action<GameRestartArgs> OnGameRestart;
     }
 }
