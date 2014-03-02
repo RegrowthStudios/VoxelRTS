@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Collision.cs" />
     <Compile Include="Data\Combat.cs" />
     <Compile Include="Data\DataLibrary.cs" />
     <Compile Include="Data\DiscreteMap.cs" />

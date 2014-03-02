@@ -11,6 +11,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using RTSCS.Gameplay;
 using RTSCS.Graphics;
+using Microsoft.CSharp;
+using System.CodeDom.Compiler;
 
 namespace RTSCS {
     public class App : Microsoft.Xna.Framework.Game {
@@ -62,39 +64,44 @@ namespace RTSCS {
         }
 
         static void Main(string[] args) {
-            // Create Form Thread
-            Thread t = new Thread(() => {
-                using(var f = new DataForm()) {
-                    f.ShowDialog();
-                }
-            });
-            t.SetApartmentState(ApartmentState.STA);
-            t.Priority = ThreadPriority.Lowest;
-            t.IsBackground = true;
-            t.Start();
-
-            // Wait For Max 1 Second To Initialize The Form Else Exit
-            int trials = 10;
-            while(trials > 0) {
-                if(DataForm.Instance != null) {
-                    trials = 10;
-                    break;
-                }
-                Thread.Sleep(100);
-                trials--;
-            }
-
-            // Run The Simulator
             using(App game = new App()) {
-                game.Run();
-            }
+                DataForm form = null;
 
-            // Stop The Form Thread
-            if(t.ThreadState != ThreadState.Stopped || t.ThreadState != ThreadState.Aborted) {
-                t.Abort();
-                while(t.ThreadState == ThreadState.Running || t.ThreadState != ThreadState.Aborted) {
-                    Thread.Sleep(500);
-                    Console.WriteLine("Waiting For Form Thread To Stop");
+                // Create Form Thread
+                Thread t = new Thread(() => {
+                    using(form = new DataForm()) {
+                        form.OnGameRestart += () => {
+                            game.map.Tiling *= 2f;
+                        };
+                        form.ShowDialog();
+                    }
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Priority = ThreadPriority.Lowest;
+                t.IsBackground = true;
+                t.Start();
+
+                // Wait For Max 1 Second To Initialize The Form Else Exit
+                int trials = 10;
+                while(trials > 0) {
+                    if(DataForm.Instance != null) {
+                        trials = 10;
+                        break;
+                    }
+                    Thread.Sleep(100);
+                    trials--;
+                }
+
+                // Run The Simulator
+                game.Run();
+
+                // Stop The Form Thread
+                if(DataForm.Instance != null && form != null) {
+                    form.Invoke(form.Closer);
+                    while(DataForm.Instance != null) {
+                        Thread.Sleep(500);
+                        Console.WriteLine("Waiting For Form Thread To Stop");
+                    }
                 }
             }
         }

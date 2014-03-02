@@ -63,6 +63,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <None Include="Class1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="DataForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -72,6 +75,7 @@
     <Compile Include="Gameplay\CombatMap.cs" />
     <Compile Include="Graphics\Renderer.cs" />
     <Compile Include="Graphics\UnitGeometry.cs" />
+    <Compile Include="IDataForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
