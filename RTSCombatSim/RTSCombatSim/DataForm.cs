@@ -35,6 +35,7 @@ namespace RTSCS {
 
         int selectedIndex;
         int counter = 1;
+        int pos = 0;
         String[] stats;
         String[] spawn1;
         String[] spawn2;
@@ -62,22 +63,26 @@ namespace RTSCS {
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            stats[0] = textBox1.Text;
+            stats[pos] = textBox1.Text;
+            pos++;
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            stats[1] = textBox2.Text;
+            stats[pos] = textBox2.Text;
+            pos++;
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e)
         {
-            stats[2] = textBox3.Text;
+            stats[pos] = textBox3.Text;
+            pos++;
         }
 
         private void textBox4_TextChanged(object sender, EventArgs e)
         {
-            stats[3] = textBox4.Text;
+            stats[pos] = textBox4.Text;
+            pos++;
         }
 
         private void textBox5_TextChanged(object sender, EventArgs e)
