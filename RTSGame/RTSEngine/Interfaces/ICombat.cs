@@ -4,14 +4,6 @@ using System.Linq;
 using System.Text;
 
 namespace RTSEngine.Interfaces {
-    public interface IDestructibleEntity : IEntity {
-        // The Current Health Of The Entity
-        int Health { get; }
-
-        // Applies Damage To Health
-        void Damage(int d);
-    }
-
     public interface ICombatEntity : IEntity {
         // Information About Whether This Entity Can Attack Yet
         bool CanAttack { get; }
