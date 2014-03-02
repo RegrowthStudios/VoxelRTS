@@ -5,7 +5,15 @@ using System.Text;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Controllers {
-    class CombatController : ICombatController {
-        // TODO
+    public class CombatController : ICombatController {
+        // The Entity That This CombatController Is Controlling
+        private ICombatEntity entity;
+        public IEntity Entity {
+            get { return entity; }
+        }
+
+        public void Attack(GameState g, float dt) {
+
+        }
     }
 }

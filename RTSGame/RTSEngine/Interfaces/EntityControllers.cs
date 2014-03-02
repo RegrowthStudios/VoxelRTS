@@ -3,32 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Data;
 
 namespace RTSEngine.Interfaces {
-    public interface IMovementController {
+    public interface IEntityController {
+        // The Entity That This Controller is Controlling
+        IEntity Entity { get; }
+    }
+
+    public interface IMovementController : IEntityController {
         // List Of Waypoints To Move Each Target
         IEnumerable<Vector2> Waypoints { get; }
 
         // Provides Controller With A New Move List
         void SetWaypoints(Vector2[] p);
 
-        // Adds Entities To Be Moved
-        void AddEntities(IMovingEntity[] entities);
-
         // Performs The Critical Logic Of This Controller
-        void MoveTargets(float dt);
+        void Move(GameState g, float dt);
     }
 
-    public interface IActionController {
-        // Performs Decision Logic For The Entity
-        void PerformDecision(IMovingEntity entity, float dt);
+    public interface IActionController : IEntityController {
+        // Performs Decision Logic (Eg., Attack Or Move?) For The Entity
+        void PerformDecision(GameState g, float dt);
     }
 
-    public interface ITargettingController { 
-        // TODO
+    public interface ITargettingController : IEntityController { 
+        // Find And Set A Target For This Controller's Entity
+        void FindTarget(GameState g, float dt);
     }
 
-    public interface ICombatController {
-        // TOOD
+    public interface ICombatController : IEntityController {
+        // Attack This Controller's Entity's Target, If Possible
+        void Attack(GameState g, float dt);
     }
 }

@@ -4,10 +4,17 @@ using System.Linq;
 using System.Text;
 using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework;
+using RTSEngine.Data;
 
 namespace RTSCS.Controllers {
-    class MovementContoller : IMovementController {
+    public class MovementContoller : IMovementController {
         // TODO
+
+        // The Entity That This MovementController Is Moving
+        private IMovingEntity entity;
+        public IEntity Entity {
+            get { return entity; }
+        }
 
         // List Of Waypoints To Move Each Target
         private Vector2[] waypoints;
@@ -20,13 +27,8 @@ namespace RTSCS.Controllers {
             waypoints = p;
         }
 
-        // Adds Entities To Be Moved
-        public void AddEntities(IMovingEntity[] entities) {
-
-        }
-
         // Performs The Critical Logic Of This Controller
-        public void MoveTargets(float dt) {
+        public void Move(GameState g, float dt) {
             
         }
 
