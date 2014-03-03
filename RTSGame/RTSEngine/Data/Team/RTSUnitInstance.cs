@@ -16,10 +16,17 @@ namespace RTSEngine.Data.Team {
         // RTSTeam Of The Unit
         public RTSTeam Team { get; private set; }
 
-        // Position Of The Unit
+        // 3-D Position Of The Unit
         protected Vector3 worldPosition;
         public Vector3 WorldPosition {
             get { return worldPosition; }
+        }
+
+        // 2-D Position Of The Unit
+        public Vector2 GridPosition {
+            get {
+                return new Vector2(worldPosition.X, worldPosition.Y);
+            }
         }
 
         // Target Of The Unit
@@ -80,11 +87,9 @@ namespace RTSEngine.Data.Team {
         }
 
         // Changes the Position of the Unit by Change
-        public void Move(Vector3 change) {
-            float x = worldPosition.X - change.X;
-            float y = worldPosition.Y - change.Y;
-            float z = worldPosition.Z - change.Z;
-            worldPosition = new Vector3(x, y, z);
+        public void Move(Vector2 change) {
+            worldPosition.X += change.X;
+            worldPosition.Y += change.Y;
         }
 
         // Event Triggered When This Entity Receives Damage

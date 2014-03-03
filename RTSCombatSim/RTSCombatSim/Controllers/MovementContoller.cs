@@ -9,7 +9,7 @@ using RTSEngine.Data;
 namespace RTSCS.Controllers {
     public class MovementContoller : IMovementController {
 
-        protected Vector2 move;
+        protected Vector2 waypoint;
 
         // The Entity That This MovementController Is Moving
         protected IMovingEntity entity;
@@ -36,16 +36,20 @@ namespace RTSCS.Controllers {
 
         // Performs The Critical Logic Of This Controller
         public void DecideMove(GameState g, float dt) {
-            move = waypoints[waypoints.Length - 1];
+            waypoint = waypoints[waypoints.Length - 1];
         }
 
         public void ApplyMove(GameState g, float dt) {
-            Vector3 change;
-            Vector2 position = new Vector2(entity.WorldPosition.X, entity.WorldPosition.Y);
-            Vector2 unitChange = new Vector2(move.X - position.X, move.Y - position.Y);
-            unitChange.Normalize();
-            change = new Vector3(unitChange.X * entity.MovementSpeed * dt,unitChange.Y * entity.MovementSpeed * dt,0f);
-            entity.Move(change);
+            Vector2 change = waypoint - entity.GridPosition;
+            if(change != Vector2.Zero) {
+                float magnitude = change.Length();
+                Vector2 scaledChange = (change / magnitude) * entity.MovementSpeed * dt;
+                // This Logic Prevents The Unit From Hovering Around Its Goal
+                if(scaledChange.LengthSquared() > magnitude * magnitude)
+                    entity.Move(change);
+                else
+                    entity.Move(scaledChange);
+            }
         }
 
     }

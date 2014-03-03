@@ -13,6 +13,9 @@ namespace RTSEngine.Interfaces {
         // Location In The World
         Vector3 WorldPosition { get; }
 
+        // Height-Agnostic Grid Location
+        Vector2 GridPosition { get; }
+
         // Collision Geometry
         ICollidable CollisionGeometry { get; }
 
@@ -31,8 +34,8 @@ namespace RTSEngine.Interfaces {
         // This Can Change During The Entity's Lifecycle But Will Always Be There
         IMovementController MovementController { get; set; }
         
-        // Changes the Position of the Unit by the Change
-        void Move (Vector3 change);
+        // Changes The GridPosition Of The Entity
+        void Move (Vector2 change);
     }
 
     public interface IDestructibleEntity : IEntity {
