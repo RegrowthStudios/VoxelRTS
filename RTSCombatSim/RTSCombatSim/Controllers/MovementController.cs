@@ -9,6 +9,7 @@ using RTSEngine.Data;
 namespace RTSCS.Controllers {
     public class MovementController : IMovementController {
 
+        // The Waypoint To Which This Controller Has Decided To Send Its Entity
         protected Vector2 waypoint;
 
         // The Entity That This MovementController Is Moving
