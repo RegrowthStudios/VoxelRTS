@@ -18,7 +18,6 @@ namespace RTSCS {
         public event Action<GameRestartArgs> OnGameRestart;
 
         int selectedIndex;
-        int counter = 1;
         RTSEngine.Data.Team.RTSUnit unit = new RTSEngine.Data.Team.RTSUnit();
         RTSEngine.Data.BaseCombatData data = new RTSEngine.Data.BaseCombatData();
         RTSEngine.Data.Team.RTSTeam team = new RTSEngine.Data.Team.RTSTeam();
@@ -37,11 +36,6 @@ namespace RTSCS {
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) {
             selectedIndex = comboBox1.SelectedIndex;
-        }
-
-        private void button1_Click(object sender, EventArgs e) {
-            comboBox1.Items.Add("Unit " + counter);
-            counter++;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e) {
@@ -100,6 +94,37 @@ namespace RTSCS {
         {
 
         }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+
+        }
+
 
     }
 }
