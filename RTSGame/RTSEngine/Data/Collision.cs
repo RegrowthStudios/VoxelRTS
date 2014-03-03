@@ -147,7 +147,6 @@ namespace RTSEngine.Data
                 if (dx <= rect.width / 2 ||
                     dy <= rect.height / 2 ||
                     cornerDistSqr <= circle.radius * circle.radius) {
-                    Vector2 dir = rect.Center - circle.Center;
                     // Create a collision boundary around the rectangle, in which collision occurs
                     float top = rect.Center.Y + rect.height / 2 + circle.radius;
                     float bottom = rect.Center.Y - rect.height / 2 - circle.radius;
