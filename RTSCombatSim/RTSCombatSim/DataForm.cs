@@ -19,11 +19,9 @@ namespace RTSCS {
 
         int selectedIndex;
         int counter = 1;
-        int pos = 0;
-        String[] stats;
-        String[] spawn1;
-        String[] spawn2;
-        String[] spawn3;
+        RTSEngine.Data.Team.RTSUnit unit = new RTSEngine.Data.Team.RTSUnit();
+        RTSEngine.Data.BaseCombatData data = new RTSEngine.Data.BaseCombatData();
+        RTSEngine.Data.Team.RTSTeam team = new RTSEngine.Data.Team.RTSTeam();
 
         public DataForm() {
             InitializeComponent();
@@ -47,59 +45,60 @@ namespace RTSCS {
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e) {
-            stats[pos] = textBox1.Text;
-            pos++;
+            data.AttackDamage = int.Parse(textBox1.Text);
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e) {
-            stats[pos] = textBox2.Text;
-            pos++;
+            data.Armor = int.Parse(textBox1.Text);
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e) {
-            stats[pos] = textBox3.Text;
-            pos++;
+            unit.MovementSpeed = int.Parse(textBox3.Text);
         }
 
         private void textBox4_TextChanged(object sender, EventArgs e) {
-            stats[pos] = textBox4.Text;
-            pos++;
+            unit.Health = int.Parse(textBox4.Text);
         }
 
         private void textBox5_TextChanged(object sender, EventArgs e) {
-            spawn1[0] = textBox5.Text;
+            
         }
 
         private void textBox8_TextChanged(object sender, EventArgs e) {
-            spawn1[1] = textBox8.Text;
+            
         }
 
         private void textBox6_TextChanged(object sender, EventArgs e) {
-            spawn1[2] = textBox6.Text;
+            
         }
 
         private void textBox10_TextChanged(object sender, EventArgs e) {
-            spawn2[0] = textBox10.Text;
+            
         }
 
         private void textBox9_TextChanged(object sender, EventArgs e) {
-            spawn2[1] = textBox9.Text;
+            
         }
 
         private void textBox7_TextChanged(object sender, EventArgs e) {
-            spawn2[2] = textBox7.Text;
+            
         }
 
         private void textBox13_TextChanged(object sender, EventArgs e) {
-            spawn3[0] = textBox13.Text;
+            
         }
 
         private void textBox12_TextChanged(object sender, EventArgs e) {
-            spawn3[1] = textBox12.Text;
+            
         }
 
         private void textBox11_TextChanged(object sender, EventArgs e) {
-            spawn3[2] = textBox11.Text;
+            
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
         }
 
     }
