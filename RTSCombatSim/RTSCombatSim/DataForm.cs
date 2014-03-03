@@ -21,6 +21,9 @@ namespace RTSCS {
         RTSEngine.Data.Team.RTSUnit unit = new RTSEngine.Data.Team.RTSUnit();
         RTSEngine.Data.BaseCombatData data = new RTSEngine.Data.BaseCombatData();
         RTSEngine.Data.Team.RTSTeam team = new RTSEngine.Data.Team.RTSTeam();
+        int[] unittype1 = new int[4] {4,2,3,4};
+        int[] unittype2 = new int[4] {3,3,3,3};
+        int[] unittype3 = new int[4] {2,4,4,3};
 
         public DataForm() {
             InitializeComponent();
@@ -36,22 +39,52 @@ namespace RTSCS {
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) {
             selectedIndex = comboBox1.SelectedIndex;
+            textBox1.Text = unittype1[1].ToString();
+            textBox2.Text = unittype1[2].ToString();
+            textBox3.Text = unittype1[3].ToString();
+            textBox4.Text = unittype1[1].ToString();
+            
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e) {
             data.AttackDamage = int.Parse(textBox1.Text);
+            if (selectedIndex == 1)
+                unittype1[1] = int.Parse(textBox1.Text);
+            if (selectedIndex == 2)
+                unittype2[1] = int.Parse(textBox1.Text);
+            if (selectedIndex == 3)
+                unittype3[1] = int.Parse(textBox1.Text);
+
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e) {
             data.Armor = int.Parse(textBox1.Text);
+            if (selectedIndex == 1)
+                unittype1[2] = int.Parse(textBox2.Text);
+            if (selectedIndex == 2)
+                unittype2[2] = int.Parse(textBox2.Text);
+            if (selectedIndex == 3)
+                unittype3[2] = int.Parse(textBox2.Text);
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e) {
             unit.MovementSpeed = int.Parse(textBox3.Text);
+            if (selectedIndex == 1)
+                unittype1[3] = int.Parse(textBox3.Text);
+            if (selectedIndex == 2)
+                unittype2[3] = int.Parse(textBox3.Text);
+            if (selectedIndex == 3)
+                unittype3[3] = int.Parse(textBox3.Text);
         }
 
         private void textBox4_TextChanged(object sender, EventArgs e) {
             unit.Health = int.Parse(textBox4.Text);
+            if (selectedIndex == 1)
+                unittype1[4] = int.Parse(textBox4.Text);
+            if (selectedIndex == 2)
+                unittype2[4] = int.Parse(textBox4.Text);
+            if (selectedIndex == 3)
+                unittype3[4] = int.Parse(textBox4.Text);
         }
 
         private void textBox5_TextChanged(object sender, EventArgs e) {
