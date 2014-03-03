@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Data;
 
 namespace RTSCS.Controllers {
-    public class MovementContoller : IMovementController {
+    public class MovementController : IMovementController {
 
         protected Vector2 waypoint;
 
@@ -29,7 +29,7 @@ namespace RTSCS.Controllers {
         }
 
         // Constructs a MovementController to Move the Given Entity to the Waypoints
-        public MovementContoller(IMovingEntity entity, Vector2[] waypoints) {
+        public MovementController(IMovingEntity entity, Vector2[] waypoints) {
             this.entity = entity;
             this.waypoints = waypoints;
         }

@@ -18,6 +18,9 @@ namespace RTSEngine.Data {
 
         // List Of Unit Data
         private RTSUnit[] units;
+        public IEnumerable<RTSUnit> Units {
+            get { return units; }
+        }
 
         // Create With Premade Data
         public GameState(RTSTeam[] t) {
@@ -26,7 +29,7 @@ namespace RTSEngine.Data {
             t.CopyTo(teams, 0);
 
             // No Unit Types Available
-            units = new RTSUnit[MIN_RTSUNIT_ID + 1];
+            units = new RTSUnit[MAX_RTSUNIT_ID + 1];
         }
 
         // Need These Accessors For Unit Types

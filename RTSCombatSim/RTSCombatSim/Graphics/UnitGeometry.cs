@@ -52,6 +52,12 @@ namespace RTSCS.Graphics {
         // Defines Location And Color Of Geometry Instances
         private DynamicVertexBuffer vbInst;
 
+        // A Way To Know If A Unit Belongs In The Batch
+        public RTSUnit UnitData {
+            get;
+            private set;
+        }
+
         // List Of Units To Render
         private List<UnitRenderData> units;
 
@@ -66,6 +72,7 @@ namespace RTSCS.Graphics {
 
         public UnitGeometry(GraphicsDevice g, VertexPositionColor[] verts, int[] inds, int count, RTSUnit data) {
             IsDisposed = false;
+            UnitData = data;
             units = new List<UnitRenderData>();
 
             // Check Input
@@ -127,6 +134,7 @@ namespace RTSCS.Graphics {
         }
         // Apply Count Of Instance Data To The Buffer
         public void ApplyInstancing(int c) {
+            if(c == 0) return;
             vbInst.SetData(instances, 0, c);
         }
         public void ApplyInstancing() {
@@ -159,6 +167,7 @@ namespace RTSCS.Graphics {
         }
         // Issue Draw Call
         public void Draw(GraphicsDevice g, int c) {
+            if(c == 0) return;
             g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, c);
         }
         public void Draw(GraphicsDevice g) {

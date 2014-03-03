@@ -65,7 +65,7 @@
     <Compile Include="App.cs" />
     <Compile Include="Controllers\TargettingController.cs" />
     <Compile Include="Controllers\ActionController.cs" />
-    <Compile Include="Controllers\MovementContoller.cs" />
+    <Compile Include="Controllers\MovementController.cs" />
     <Compile Include="Controllers\CombatController.cs" />
     <Compile Include="DataForm.cs">
       <SubType>Form</SubType>
