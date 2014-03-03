@@ -9,16 +9,28 @@ namespace RTSCS.Graphics {
     public class Renderer : IDisposable {
 
         private BasicEffect fxBasic;
+        private Effect fxUnit;
 
+        private Matrix mView, mProj;
         public Matrix View {
-            set { fxBasic.View = value; }
+            set {
+                mView = value;
+                fxBasic.View = mView;
+                fxUnit.Parameters["VP"].SetValue(mView * mProj);
+            }
         }
         public Matrix Projection {
-            set { fxBasic.Projection = value; }
+            set {
+                mProj = value;
+                fxBasic.Projection = mProj;
+                fxUnit.Parameters["VP"].SetValue(mView * mProj);
+            }
         }
 
-        public Renderer(GraphicsDevice g) {
+        public Renderer(GraphicsDevice g, Effect e) {
             IsDisposed = false;
+            mView = Matrix.Identity;
+            mProj = Matrix.Identity;
 
             fxBasic = new BasicEffect(g);
             fxBasic.FogEnabled = false;
@@ -26,6 +38,8 @@ namespace RTSCS.Graphics {
             fxBasic.VertexColorEnabled = false;
             fxBasic.TextureEnabled = true;
             fxBasic.World = Matrix.Identity;
+
+            fxUnit = e;
         }
         #region IDisposalNotifier
         ~Renderer() {
@@ -53,8 +67,6 @@ namespace RTSCS.Graphics {
             g.RasterizerState = RasterizerState.CullNone;
             g.BlendState = BlendState.Opaque;
 
-            fxBasic.TextureEnabled = true;
-            fxBasic.VertexColorEnabled = false;
             fxBasic.Texture = map.Background;
             fxBasic.World = map.WorldTransform;
             fxBasic.CurrentTechnique.Passes[0].Apply();
@@ -65,9 +77,7 @@ namespace RTSCS.Graphics {
         }
 
         public void BeginUnitPass() {
-            fxBasic.TextureEnabled = false;
-            fxBasic.VertexColorEnabled = true;
-            fxBasic.CurrentTechnique.Passes[0].Apply();
+            fxUnit.CurrentTechnique.Passes[0].Apply();
         }
     }
 }

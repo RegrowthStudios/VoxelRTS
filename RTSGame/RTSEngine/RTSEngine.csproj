@@ -60,6 +60,7 @@
     <Compile Include="Data\Team\RTSUnitInstance.cs" />
     <Compile Include="Data\Team\RTSTeam.cs" />
     <Compile Include="Data\Team\RTSUnit.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Interfaces\EntityControllers.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />
     <Compile Include="Interfaces\IEntity.cs" />
