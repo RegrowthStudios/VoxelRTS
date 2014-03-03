@@ -61,12 +61,6 @@ namespace RTSEngine.Data.Team {
             get { return UnitData.MovementSpeed; }
         }
 
-        // This Unit's View Direction
-        public Vector2 ViewDirection {
-            get;
-            private set;
-        }
-
         // MovementController of The Unit
         public IMovementController MovementController { get; set; }
 
