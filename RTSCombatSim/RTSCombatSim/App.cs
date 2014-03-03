@@ -42,6 +42,13 @@ namespace RTSCS {
         Renderer renderer;
         CombatMap map;
 
+        // For Pausing The Simulation
+        private bool keyToggle;
+        public bool IsPaused {
+            get;
+            set;
+        }
+
         // The Game State
         public GameState GameState {
             get;
@@ -63,6 +70,8 @@ namespace RTSCS {
             graphics.GraphicsProfile = GraphicsProfile.HiDef;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
+            IsPaused = false;
+            keyToggle = false;
 
             // Setup Teams
             RTSTeam[] teams = new RTSTeam[MAX_TEAMS];
@@ -141,12 +150,25 @@ namespace RTSCS {
         }
 
         protected override void Update(GameTime gameTime) {
+            // Kill When Form Is Closed
             if(DataForm.Instance == null) {
                 Exit();
                 return;
             }
 
-            StepGame((float)gameTime.ElapsedGameTime.TotalSeconds);
+            // Make Sure To Apply Logic Only When Paused
+            if(!IsPaused)
+                StepGame((float)gameTime.ElapsedGameTime.TotalSeconds);
+
+            // Toggle Pausing
+            var ks = Keyboard.GetState();
+            if(ks.IsKeyDown(Keys.P) && !keyToggle) {
+                IsPaused = !IsPaused;
+                keyToggle = true;
+            }
+            else if(ks.IsKeyUp(Keys.P)) {
+                keyToggle = false;
+            }
 
             base.Update(gameTime);
         }
