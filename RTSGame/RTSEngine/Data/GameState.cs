@@ -18,6 +18,9 @@ namespace RTSEngine.Data {
 
         // List Of Unit Data
         private RTSUnit[] units;
+        public IEnumerable<RTSUnit> Units {
+            get { return units; }
+        }
 
         // Create With Premade Data
         public GameState(RTSTeam[] t) {
