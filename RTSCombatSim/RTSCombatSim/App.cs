@@ -117,16 +117,24 @@ namespace RTSCS {
                 0, 1, 2,
                 2, 1, 3
             }, MAX_INSTANCES_PER_UNIT, Units[0]);
-            unitGeometry[0] = new UnitGeometry(GraphicsDevice, new VertexPositionColor[] {
+            unitGeometry[1] = new UnitGeometry(GraphicsDevice, new VertexPositionColor[] {
                 new VertexPositionColor(new Vector3(0, 3, 0), Color.White),
                 new VertexPositionColor(new Vector3(0, 0, 0), Color.White),
                 new VertexPositionColor(new Vector3(-3, -3, 0), Color.White),
                 new VertexPositionColor(new Vector3(3, -3, 0), Color.White)
             }, new int[]{
                 0, 1, 2,
-                2, 1, 3
-            }, MAX_INSTANCES_PER_UNIT, Units[0]);
-
+                3, 0, 1
+            }, MAX_INSTANCES_PER_UNIT, Units[1]);
+            unitGeometry[2] = new UnitGeometry(GraphicsDevice, new VertexPositionColor[] {
+                new VertexPositionColor(new Vector3(0, 3, 0), Color.White),
+                new VertexPositionColor(new Vector3(0, 0, 0), Color.White),
+                new VertexPositionColor(new Vector3(-3, -3, 0), Color.White),
+                new VertexPositionColor(new Vector3(3, -3, 0), Color.White)
+            }, new int[]{
+                0, 1, 2,
+                3, 0, 1
+            }, MAX_INSTANCES_PER_UNIT, Units[2]);
 
             Random r = new Random();
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
