@@ -118,19 +118,19 @@ namespace RTSCS {
                 2, 1, 3
             }, MAX_INSTANCES_PER_UNIT, Units[0]);
             unitGeometry[1] = new UnitGeometry(GraphicsDevice, new VertexPositionColor[] {
-                new VertexPositionColor(new Vector3(0, 3, 0), Color.White),
+                new VertexPositionColor(new Vector3(3, 0, 0), Color.White),
                 new VertexPositionColor(new Vector3(0, 0, 0), Color.White),
                 new VertexPositionColor(new Vector3(-3, -3, 0), Color.White),
-                new VertexPositionColor(new Vector3(3, -3, 0), Color.White)
+                new VertexPositionColor(new Vector3(-3, 3, 0), Color.White)
             }, new int[]{
                 0, 1, 2,
                 3, 0, 1
             }, MAX_INSTANCES_PER_UNIT, Units[1]);
             unitGeometry[2] = new UnitGeometry(GraphicsDevice, new VertexPositionColor[] {
-                new VertexPositionColor(new Vector3(0, 3, 0), Color.White),
+                new VertexPositionColor(new Vector3(3, 0, 0), Color.White),
                 new VertexPositionColor(new Vector3(0, 0, 0), Color.White),
                 new VertexPositionColor(new Vector3(-3, -3, 0), Color.White),
-                new VertexPositionColor(new Vector3(3, -3, 0), Color.White)
+                new VertexPositionColor(new Vector3(-3, 3, 0), Color.White)
             }, new int[]{
                 0, 1, 2,
                 3, 0, 1
