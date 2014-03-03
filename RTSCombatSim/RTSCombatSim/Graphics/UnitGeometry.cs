@@ -166,8 +166,8 @@ namespace RTSCS.Graphics {
                 float x = units[i].Unit.ViewDirection.X;
                 float y = units[i].Unit.ViewDirection.Y;
                 SetInstanceMatrix(i, new Matrix(
-                    x, -y, 0, 0,
-                    y, x, 0, 0,
+                    x, y, 0, 0,
+                    y, -x, 0, 0,
                     0, 0, 1, 0,
                     0, 0, 0, 1
                     ) * Matrix.CreateTranslation(units[i].Unit.WorldPosition));
