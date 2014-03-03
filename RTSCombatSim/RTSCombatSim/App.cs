@@ -75,14 +75,14 @@ namespace RTSCS {
                 Units[i] = new RTSUnit();
                 Units[i].BaseCombatData.Armor = 0;
                 Units[i].BaseCombatData.AttackDamage = 10;
-                Units[i].BaseCombatData.AttackTimer = 0.01f;
+                Units[i].BaseCombatData.AttackTimer = 1f;
                 Units[i].BaseCombatData.CriticalChance = 0.5;
                 Units[i].BaseCombatData.CriticalDamage = 20;
-                Units[i].BaseCombatData.MaxRange = 100;
+                Units[i].BaseCombatData.MaxRange = 10;
                 Units[i].BaseCombatData.MinRange = 0;
                 Units[i].Health = 100;
                 Units[i].ICollidableShape = new CollisionCircle(3, Vector2.Zero);
-                Units[i].MovementSpeed = 2f;
+                Units[i].MovementSpeed = 5f;
             }
 
             // Create Game State
@@ -103,8 +103,8 @@ namespace RTSCS {
             renderer.Projection = Matrix.CreateOrthographic(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 2f);
 
             map = new CombatMap(GraphicsDevice, @"Content\Textures\Smoke.png");
-            map.Tiling = Vector2.One * 10f;
-            map.Scaling = Vector2.One * 200f;
+            map.Tiling = Vector2.One * 6f;
+            map.Scaling = Vector2.One * 600f;
             map.Translation = Vector3.Zero;
 
             unitGeometry = new UnitGeometry[Units.Length];
@@ -139,20 +139,20 @@ namespace RTSCS {
             Random r = new Random();
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
                 RTSUnitInstance u = Teams[0].AddUnit(Units[0],
-                    new Vector3(r.Next(-100, 101), r.Next(-100, 101), 0)
+                    new Vector3(r.Next(-200, 201), r.Next(-200, 201), 0)
                     );
                 u.ActionController = new ActionController(u);
-                u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 40 });
+                u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 0 });
                 u.TargettingController = new TargettingController(u);
                 u.CombatController = new CombatController(u);
                 AddNewUnit(u, Color.Red);
             }
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
                 RTSUnitInstance u = Teams[1].AddUnit(Units[1],
-                    new Vector3(r.Next(-100, 101), r.Next(-100, 101), 0)
+                    new Vector3(r.Next(-200, 201), r.Next(-200, 201), 0)
                     );
                 u.ActionController = new ActionController(u);
-                u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * -40 });
+                u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 0 });
                 u.TargettingController = new TargettingController(u);
                 u.CombatController = new CombatController(u);
                 AddNewUnit(u, Color.Blue);

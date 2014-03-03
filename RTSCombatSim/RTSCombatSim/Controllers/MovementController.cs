@@ -23,7 +23,7 @@ namespace RTSCS.Controllers {
         public IEnumerable<Vector2> Waypoints {
             get { return waypoints; }
         }
-       
+
         // Provides Controller With A New Move List
         public void SetWaypoints(Vector2[] p) {
             waypoints = p;
@@ -52,6 +52,5 @@ namespace RTSCS.Controllers {
                     entity.Move(scaledChange);
             }
         }
-
     }
 }
