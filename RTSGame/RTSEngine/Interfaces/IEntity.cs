@@ -31,6 +31,9 @@ namespace RTSEngine.Interfaces {
         // Speed Of Movement For The Entity
         float MovementSpeed { get; }
 
+        // The Direction The Entity Is Looking
+        Vector2 ViewDirection { get; }
+
         // This Can Change During The Entity's Lifecycle But Will Always Be There
         IMovementController MovementController { get; set; }
         
