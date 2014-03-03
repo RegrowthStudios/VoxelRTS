@@ -15,25 +15,25 @@ namespace RTSCS.Controllers {
 
         // Performs Decision Logic For The Entity
         public void DecideAction(GameState g, float dt) {
-            ICombatEntity centity = entity as ICombatEntity;
-            if(centity != null && centity.Target == null) {
-                centity.TargettingController.FindTarget(g, dt);
+            ICombatEntity cEntity = entity as ICombatEntity;
+            if(cEntity != null && cEntity.Target == null) {
+                cEntity.TargettingController.FindTarget(g, dt);
             }
-            IMovingEntity mentity = entity as IMovingEntity;
-            if(mentity != null) mentity.MovementController.DecideMove(g, dt);  
+            IMovingEntity mEntity = entity as IMovingEntity;
+            if(mEntity != null) mEntity.MovementController.DecideMove(g, dt);  
         }
 
         // Apply The Entity's Decision
         public void ApplyAction(GameState g, float dt) {
-            ICombatEntity centity = entity as ICombatEntity;
-            if(centity != null && centity.Target != null) {
-                centity.CombatController.Attack(g, dt);
+            ICombatEntity cEntity = entity as ICombatEntity;
+            if(cEntity != null && cEntity.Target != null) {
+                cEntity.CombatController.Attack(g, dt);
             }
             else {
-                centity.TargettingController.ChangeTarget(g, dt);
+                cEntity.TargettingController.ChangeTarget(g, dt);
             }
-            IMovingEntity mentity = entity as IMovingEntity;
-            if(mentity != null) mentity.MovementController.ApplyMove(g, dt);
+            IMovingEntity mEntity = entity as IMovingEntity;
+            if(mEntity != null) mEntity.MovementController.ApplyMove(g, dt);
         }
 
         // Constructor

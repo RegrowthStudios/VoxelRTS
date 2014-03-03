@@ -20,11 +20,11 @@ namespace RTSCS.Controllers {
         public void FindTarget(GameState g, float dt) {
             foreach(var team in g.teams) {
                 if(team != entity.Team) {
-                    float MinDist = float.MaxValue;
+                    float minDist = float.MaxValue;
                     foreach(var unit in team.Units) {
-                        float dist = (unit.WorldPosition - entity.WorldPosition).LengthSquared();
-                        if(dist < MinDist) {
-                            MinDist = dist;
+                        float dist = (unit.GridPosition - entity.GridPosition).LengthSquared();
+                        if(dist < minDist) {
+                            minDist = dist;
                             target = unit;
                         }
                     }

@@ -15,28 +15,29 @@ namespace RTSCS.Controllers {
         }
 
         // Random Object For Generating And Testing Crit Rolls
-        private static Random CritRoller = new Random();
+        private static Random critRoller = new Random();
 
         // The Amount Of Time Remaining Before This Controller's Entity Can Attack Again
-        private float AttackCooldown; 
+        private float attackCooldown; 
 
         public void Attack(GameState g, float dt) {
-            if(AttackCooldown <= 0) {
+            if(attackCooldown <= 0) {
                 RTSUnitInstance unit = entity as RTSUnitInstance;
                 if(unit != null) {
                     RTSUnitInstance target = entity.Target as RTSUnitInstance;
                     if(target != null) {
-                        float DistSq = (target.WorldPosition - unit.WorldPosition).LengthSquared();
-                        float MinDistSq = (float)Math.Pow(unit.UnitData.BaseCombatData.MinRange, 2);
-                        float MaxDistSq = (float)Math.Pow(unit.UnitData.BaseCombatData.MaxRange, 2);
-                        if(MinDistSq <= DistSq && DistSq <= MaxDistSq) {
-                            target.Damage(unit.DealDamage(100 * CritRoller.NextDouble()));
+                        float distSquared = (target.WorldPosition - unit.WorldPosition).LengthSquared();
+                        float minDistSquared = unit.UnitData.BaseCombatData.MinRange * unit.UnitData.BaseCombatData.MinRange;
+                        float maxDistSquared = unit.UnitData.BaseCombatData.MaxRange * unit.UnitData.BaseCombatData.MaxRange;
+                        if(minDistSquared <= distSquared && distSquared <= maxDistSquared) {
+                            target.Damage(unit.DealDamage(critRoller.NextDouble()));
+                            if(target.Health <= 0) entity.Target = null;
                         }
                     }
                 }
-                AttackCooldown = unit.UnitData.BaseCombatData.AttackTimer;;
+                attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;;
             }
-            else AttackCooldown -= dt;
+            else attackCooldown -= dt;
         }
 
         // Constructor
