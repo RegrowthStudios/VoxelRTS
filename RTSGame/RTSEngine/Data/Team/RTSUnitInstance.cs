@@ -86,10 +86,9 @@ namespace RTSEngine.Data.Team {
 
         // Applies Damage To Health
         public void Damage(int d) {
-            if (OnDamage != null)
-                OnDamage(this, d);
-
             Health -= d;
+            if(OnDamage != null)
+                OnDamage(this, d);
         }
 
         // Changes the Position of the Unit by Change

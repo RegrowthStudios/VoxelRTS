@@ -75,10 +75,10 @@ namespace RTSCS {
                 Units[i] = new RTSUnit();
                 Units[i].BaseCombatData.Armor = 0;
                 Units[i].BaseCombatData.AttackDamage = 10;
-                Units[i].BaseCombatData.AttackTimer = 1f;
+                Units[i].BaseCombatData.AttackTimer = 0.01f;
                 Units[i].BaseCombatData.CriticalChance = 0.5;
                 Units[i].BaseCombatData.CriticalDamage = 20;
-                Units[i].BaseCombatData.MaxRange = 20;
+                Units[i].BaseCombatData.MaxRange = 100;
                 Units[i].BaseCombatData.MinRange = 0;
                 Units[i].Health = 100;
                 Units[i].ICollidableShape = new CollisionCircle(3, Vector2.Zero);
@@ -215,7 +215,9 @@ namespace RTSCS {
             foreach(RTSTeam team in GameState.teams) {
                 team.RemoveAll(IsDead);
             }
-
+            foreach(var ug in unitGeometry) {
+                ug.RemoveAll(IsDead);
+            }
 
         }
 
