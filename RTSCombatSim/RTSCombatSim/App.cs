@@ -27,10 +27,16 @@ namespace RTSCS {
     };
 
     public class App : Microsoft.Xna.Framework.Game {
+        // Instancing And Data Counts
         public const int MAX_TEAMS = 3;
         public const int MAX_UNITS = 3;
         public const int MAX_INSTANCES_PER_UNIT = 100;
 
+        // The Static Instances
+        private static App app;
+        private static DataForm form;
+
+        // Graphics Data
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Renderer renderer;
@@ -158,9 +164,11 @@ namespace RTSCS {
             base.Draw(gameTime);
         }
 
-        static bool IsDead(RTSUnitInstance u) {
+        private static bool IsDead(RTSUnitInstance u) {
             return u.Health < 0;
         }
+
+        // Game Controller
         public void StepGame(float dt) {
             // Find Decisions
             foreach(RTSTeam team in GameState.teams) {
@@ -215,14 +223,15 @@ namespace RTSCS {
             }
         }
 
-        static void Main(string[] args) {
-            using(App game = new App()) {
-                DataForm form = null;
+        #region Entry Point
+        private static void RunMainInstance(string[] args) {
+            using(app = new App()) {
+                form = null;
 
                 // Create Form Thread
                 Thread t = new Thread(() => {
-                    using(form = new DataForm(game.Units, game.Teams)) {
-                        form.OnUnitSpawn += game.AddNewUnit;
+                    using(form = new DataForm(app.Units, app.Teams)) {
+                        form.OnUnitSpawn += app.AddNewUnit;
                         form.ShowDialog();
                     }
                 });
@@ -243,7 +252,7 @@ namespace RTSCS {
                 }
 
                 // Run The Simulator
-                game.Run();
+                app.Run();
 
                 // Stop The Form Thread
                 if(DataForm.Instance != null && form != null) {
@@ -255,5 +264,52 @@ namespace RTSCS {
                 }
             }
         }
+        private static bool InputRunNew() {
+            Console.WriteLine("Want to try and run a new instance?");
+            string input = Console.ReadLine().ToLower().Trim();
+            switch(input) {
+                case "y":
+                case "ye":
+                case "yes":
+                case "yeah":
+                case "sure":
+                case "why not":
+                case "whatever":
+                case "ok":
+                case "okay":
+                case "cool":
+                    return true;
+                    break;
+            }
+            return false;
+        }
+        private static void Main(string[] args) {
+            bool running = true;
+            while(running) {
+                Console.WriteLine("A New Instance Will Attempt To Be Run\n\n");
+                running = false;
+                try {
+                    // Close Out Of Any Previous Instances
+                    try { app.Exit(); app.Dispose(); }
+                    catch(Exception) { }
+                    try { form.Invoke(form.Closer); form.Dispose(); }
+                    catch(Exception) { }
+
+                    RunMainInstance(args);
+
+                    Console.WriteLine("\n\nHooray, no errors appeared.");
+                    running = InputRunNew();
+                }
+                catch(Exception e) {
+                    Console.WriteLine(new string('\n', 10));
+                    Console.WriteLine("Oh man bro... looks like an exception was thrown:");
+                    Console.WriteLine("Exception Type: {0}", e.GetType().Name);
+                    Console.WriteLine("Exception Message:\n{0}\n\n", e.Message);
+                    Console.WriteLine("Stack Trace:\n{0}", e.StackTrace);
+                    running = InputRunNew();
+                }
+            }
+        }
+        #endregion
     }
 }
