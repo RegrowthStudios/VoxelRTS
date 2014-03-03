@@ -177,10 +177,10 @@ namespace RTSEngine.Data {
                 // Choose the closest distance to the collision boundary as the pushing direction
                 float min = Math.Min(Math.Min(Math.Min(distToTop, distToBottom), distToLeft), distToRight);
                 Vector2 pushAmount = new Vector2(); // How much should be pushed relative to circle
-                pushAmount.Y = min == distToTop ? distToTop + OFFSET : 0;
-                pushAmount.Y = min == distToBottom ? -distToBottom + OFFSET : 0;
-                pushAmount.X = min == distToLeft ? -distToLeft + OFFSET : 0;
-                pushAmount.X = min == distToRight ? distToRight + OFFSET : 0;
+                pushAmount.Y += min == distToTop ? distToTop + OFFSET : 0;
+                pushAmount.Y += min == distToBottom ? -distToBottom - OFFSET : 0;
+                pushAmount.X += min == distToLeft ? -distToLeft - OFFSET : 0;
+                pushAmount.X += min == distToRight ? distToRight + OFFSET : 0;
 
                 // Only move the non-static object
                 if(rect.IsStatic)
@@ -218,14 +218,14 @@ namespace RTSEngine.Data {
                         if(right1 - left2 > top2 - bottom1)
                             pushAmount.Y = top2 - bottom1 + OFFSET; // rect1 pushed up
                         else
-                            pushAmount.X = left2 - right1 + OFFSET; // rect1 pushed left
+                            pushAmount.X = left2 - right1 - OFFSET; // rect1 pushed left
                     }
                     // If rect2 is above rect1
                     else {
                         if(right1 - left2 > top1 - bottom2)
-                            pushAmount.Y = bottom2 - top1 + OFFSET; // rect1 pushed down
+                            pushAmount.Y = bottom2 - top1 - OFFSET; // rect1 pushed down
                         else
-                            pushAmount.X = left2 - right1 + OFFSET; // rect1 pushed left
+                            pushAmount.X = left2 - right1 - OFFSET; // rect1 pushed left
                     }
                 }
                 // If rect2 is on the left of rect1
@@ -240,7 +240,7 @@ namespace RTSEngine.Data {
                     // If rect2 is above rect1
                     else {
                         if(right2 - left1 > top1 - bottom2)
-                            pushAmount.Y = bottom2 - top1 + OFFSET; // rect1 pushed down
+                            pushAmount.Y = bottom2 - top1 - OFFSET; // rect1 pushed down
                         else
                             pushAmount.X = right2 - left1 + OFFSET; // rect1 pushed right
                     }
