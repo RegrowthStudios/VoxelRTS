@@ -147,8 +147,34 @@ namespace RTSEngine.Data
                 if (dx <= rect.width / 2 ||
                     dy <= rect.height / 2 ||
                     cornerDistSqr <= circle.radius * circle.radius) {
-                        Vector2 dir = rect.Center - circle.Center;
-                        // TODO: Implement circle-rectangle collision resolution
+                    Vector2 dir = rect.Center - circle.Center;
+                    // Create a collision boundary around the rectangle, in which collision occurs
+                    float top = rect.Center.Y + rect.height / 2 + circle.radius;
+                    float bottom = rect.Center.Y - rect.height / 2 - circle.radius;
+                    float left = rect.Center.X - rect.width / 2 - circle.radius;
+                    float right = rect.Center.X + rect.width / 2 + circle.radius;
+                    float distToTop = Math.Abs(circle.Center.Y - top);
+                    float distToBottom = Math.Abs(circle.Center.Y - bottom);
+                    float distToLeft = Math.Abs(circle.Center.X - left);
+                    float distToRight = Math.Abs(circle.Center.X - right);
+
+                    // Choose the closest distance to the collision boundary as the pushing direction
+                    float min = Math.Min(Math.Min(Math.Min(distToTop, distToBottom), distToLeft), distToRight);
+                    Vector2 pushAmount = new Vector2(); // How much should be pushed relative to circle
+                    pushAmount.Y = min == distToTop ? distToTop : 0;
+                    pushAmount.Y = min == distToBottom ? -distToBottom : 0;
+                    pushAmount.X = min == distToLeft ? -distToLeft : 0;
+                    pushAmount.X = min == distToRight ? distToRight : 0;
+
+                    // Only move the non-static object
+                    if (rect.IsStatic)
+                        circle.Center += pushAmount;
+                    else if (circle.IsStatic)
+                        rect.Center -= pushAmount;
+                    else {
+                        circle.Center += pushAmount / 2;
+                        rect.Center -= pushAmount / 2;
+                    }
                 }
             }
 
