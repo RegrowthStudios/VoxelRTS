@@ -16,6 +16,9 @@ namespace RTSEngine.Data.Team {
         // RTSTeam Of The Unit
         public RTSTeam Team { get; private set; }
 
+        // Unit's View Direction
+        public Vector2 ViewDirection { get; private set; }
+
         // 3-D Position Of The Unit
         protected Vector3 worldPosition;
         public Vector3 WorldPosition {
@@ -95,6 +98,7 @@ namespace RTSEngine.Data.Team {
         public void Move(Vector2 change) {
             worldPosition.X += change.X;
             worldPosition.Y += change.Y;
+            ViewDirection = Vector2.Normalize(change);
         }
 
         // Event Triggered When This Entity Receives Damage
