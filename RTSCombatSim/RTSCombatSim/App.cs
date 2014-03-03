@@ -120,7 +120,7 @@ namespace RTSCS {
                 }, MAX_INSTANCES_PER_UNIT, Units[i]);
             }
 
-            RTSUnitInstance u = new RTSUnitInstance(Teams[0], Units[0], Vector3.Zero);
+            RTSUnitInstance u = Teams[0].AddUnit(Units[0], Vector3.Zero);
             u.ActionController = new ActionController(u);
             u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 40 });
             u.TargettingController = new TargettingController(u);

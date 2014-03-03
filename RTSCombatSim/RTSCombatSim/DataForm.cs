@@ -61,8 +61,8 @@ namespace RTSCS {
             if(!e.Cancel) Instance = null;
         }
 
-        private void SendUnitEvent(RTSUnit ud, int teamIndex) {
-            RTSUnitInstance u = new RTSUnitInstance(teams[teamIndex], ud, teamSpawnPositions[teamIndex]);
+        private void SpawnUnit(RTSUnit ud, int teamIndex) {
+            RTSUnitInstance u = teams[teamIndex].AddUnit(ud, teamSpawnPositions[teamIndex]);
             u.ActionController = new ActionController(u);
             u.MovementController = new MovementController(u, new Vector2[] { teamWaypoints[teamIndex] });
             u.CombatController = new CombatController(u);
