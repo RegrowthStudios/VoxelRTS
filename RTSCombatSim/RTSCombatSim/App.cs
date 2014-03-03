@@ -81,7 +81,7 @@ namespace RTSCS {
                 Units[i].BaseCombatData.MaxRange = 20;
                 Units[i].BaseCombatData.MinRange = 0;
                 Units[i].Health = 100;
-                Units[i].ICollidableShape = new CollisionCircle(15, Vector2.Zero);
+                Units[i].ICollidableShape = new CollisionCircle(3, Vector2.Zero);
                 Units[i].MovementSpeed = 2f;
             }
 
@@ -110,22 +110,37 @@ namespace RTSCS {
             unitGeometry = new UnitGeometry[Units.Length];
             for(int i = 0; i < Units.Length; i++) {
                 unitGeometry[i] = new UnitGeometry(GraphicsDevice, new VertexPositionColor[] {
-                    new VertexPositionColor(new Vector3(-1, 1, 0), Color.White),
-                    new VertexPositionColor(new Vector3(1, 1, 0), Color.White),
-                    new VertexPositionColor(new Vector3(-1, -1, 0), Color.White),
-                    new VertexPositionColor(new Vector3(1, -1, 0), Color.White)
+                    new VertexPositionColor(new Vector3(-3, 3, 0), Color.White),
+                    new VertexPositionColor(new Vector3(3, 3, 0), Color.White),
+                    new VertexPositionColor(new Vector3(-3, -3, 0), Color.White),
+                    new VertexPositionColor(new Vector3(3, -3, 0), Color.White)
                 }, new int[]{
                     0, 1, 2,
                     2, 1, 3
                 }, MAX_INSTANCES_PER_UNIT, Units[i]);
             }
 
-            RTSUnitInstance u = Teams[0].AddUnit(Units[0], Vector3.Zero);
-            u.ActionController = new ActionController(u);
-            u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 40 });
-            u.TargettingController = new TargettingController(u);
-            u.CombatController = new CombatController(u);
-            AddNewUnit(u, Color.Red);
+            Random r = new Random();
+            for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
+                RTSUnitInstance u = Teams[0].AddUnit(Units[0],
+                    new Vector3(r.Next(-100, 101), r.Next(-100, 101), 0)
+                    );
+                u.ActionController = new ActionController(u);
+                u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 40 });
+                u.TargettingController = new TargettingController(u);
+                u.CombatController = new CombatController(u);
+                AddNewUnit(u, Color.Red);
+            }
+            for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
+                RTSUnitInstance u = Teams[1].AddUnit(Units[1],
+                    new Vector3(r.Next(-100, 101), r.Next(-100, 101), 0)
+                    );
+                u.ActionController = new ActionController(u);
+                u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * -40 });
+                u.TargettingController = new TargettingController(u);
+                u.CombatController = new CombatController(u);
+                AddNewUnit(u, Color.Blue);
+            }
         }
         protected override void UnloadContent() {
             renderer.Dispose();
@@ -174,10 +189,34 @@ namespace RTSCS {
                 }
             }
 
+            // Collide
+            foreach(RTSTeam team in GameState.teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
+                    unit.CollisionGeometry.Center = unit.GridPosition;
+                }
+            }
+            foreach(RTSTeam team1 in GameState.teams) {
+                foreach(RTSUnitInstance unit1 in team1.Units) {
+                    foreach(RTSTeam team2 in GameState.teams) {
+                        foreach(RTSUnitInstance unit2 in team2.Units) {
+                            if(unit1 == unit2) continue;
+                            CollisionController.ProcessCollision(unit1.CollisionGeometry, unit2.CollisionGeometry);
+                        }
+                    }
+                }
+            }
+            foreach(RTSTeam team in GameState.teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
+                    unit.GridPosition = unit.CollisionGeometry.Center;
+                }
+            }
+
             // Kill Dead Units
             foreach(RTSTeam team in GameState.teams) {
                 team.RemoveAll(IsDead);
             }
+
+
         }
 
         public void AddNewUnit(RTSUnitInstance u, Color c) {

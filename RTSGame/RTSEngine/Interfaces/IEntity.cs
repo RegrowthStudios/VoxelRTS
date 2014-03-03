@@ -14,7 +14,7 @@ namespace RTSEngine.Interfaces {
         Vector3 WorldPosition { get; }
 
         // Height-Agnostic Grid Location
-        Vector2 GridPosition { get; }
+        Vector2 GridPosition { get; set; }
 
         // Collision Geometry
         ICollidable CollisionGeometry { get; }

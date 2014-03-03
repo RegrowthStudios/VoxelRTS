@@ -10,7 +10,7 @@ namespace RTSEngine.Interfaces {
         Circle = 1,
         Rectangle = 2
     }
-    public interface ICollidable {
+    public interface ICollidable : ICloneable {
         CollisionType CollisionType { get; }
 
         Vector2 Center{ get; set;}

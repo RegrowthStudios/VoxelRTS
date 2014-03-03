@@ -27,6 +27,10 @@ namespace RTSEngine.Data.Team {
             get {
                 return new Vector2(worldPosition.X, worldPosition.Y);
             }
+            set {
+                worldPosition.X = value.X;
+                worldPosition.Y = value.Y;
+            }
         }
 
         // Target Of The Unit
@@ -45,7 +49,8 @@ namespace RTSEngine.Data.Team {
 
         // Collision Geometry
         public ICollidable CollisionGeometry {
-            get { return UnitData.ICollidableShape; }
+            get;
+            private set;
         }
 
         // Speed Of Movement For The Entity
@@ -67,10 +72,11 @@ namespace RTSEngine.Data.Team {
 
         // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
         public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector3 position) {
-            this.Team = team;
-            this.UnitData = data;
-            this.worldPosition = position;
-            this.Health = UnitData.Health;
+            Team = team;
+            UnitData = data;
+            worldPosition = position;
+            Health = UnitData.Health;
+            CollisionGeometry = UnitData.ICollidableShape.Clone() as ICollidable;
         }
 
         // Computes The Damage To Deal With Access To A Random Number
