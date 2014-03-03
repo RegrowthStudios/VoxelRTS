@@ -58,6 +58,12 @@ namespace RTSEngine.Data.Team {
             get { return UnitData.MovementSpeed; }
         }
 
+        // This Unit's View Direction
+        public Vector2 ViewDirection {
+            get;
+            private set;
+        }
+
         // MovementController of The Unit
         public IMovementController MovementController { get; set; }
 
@@ -95,6 +101,7 @@ namespace RTSEngine.Data.Team {
         public void Move(Vector2 change) {
             worldPosition.X += change.X;
             worldPosition.Y += change.Y;
+            ViewDirection = Vector2.Normalize(change);
         }
 
         // Event Triggered When This Entity Receives Damage
@@ -102,6 +109,8 @@ namespace RTSEngine.Data.Team {
 
         // Event Triggered When This Entity Find A New Attack Target (Null When Can't Find One)
         public event Action<ICombatEntity, IDestructibleEntity> OnNewAttackTarget;
+
+
 
     }
 }
