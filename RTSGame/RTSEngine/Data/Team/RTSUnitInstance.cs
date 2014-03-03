@@ -6,10 +6,7 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
-    // TODO: Implement IDestructibleEntity, ICombatEntity, IMovingEntity
-
     public class RTSUnitInstance : ICombatEntity {
-
         // RTSUnit Data Of The Unit
         public RTSUnit UnitData { get; private set; }
 
@@ -44,8 +41,14 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // Event Triggered When This Entity Find A New Attack Target (Null When Can't Find One)
+        public event Action<ICombatEntity, IDestructibleEntity> OnNewAttackTarget;
+
         // This Unit's Current Health
         public int Health { get; private set; }
+
+        // Event Triggered When This Entity Receives Damage
+        public event Action<IDestructibleEntity, int> OnDamage;
 
         // Collision Geometry
         public ICollidable CollisionGeometry {
@@ -103,14 +106,5 @@ namespace RTSEngine.Data.Team {
             worldPosition.Y += change.Y;
             ViewDirection = Vector2.Normalize(change);
         }
-
-        // Event Triggered When This Entity Receives Damage
-        public event Action<IDestructibleEntity, int> OnDamage;
-
-        // Event Triggered When This Entity Find A New Attack Target (Null When Can't Find One)
-        public event Action<ICombatEntity, IDestructibleEntity> OnNewAttackTarget;
-
-
-
     }
 }

@@ -52,6 +52,9 @@ namespace RTSCS.Graphics {
         // Defines Location And Color Of Geometry Instances
         private DynamicVertexBuffer vbInst;
 
+        // The Texture To Be Used By The Unit
+        private Texture2D texture;
+
         // A Way To Know If A Unit Belongs In The Batch
         public RTSUnit UnitData {
             get;
@@ -70,19 +73,28 @@ namespace RTSCS.Graphics {
             get { return instances[i]; }
         }
 
-        public UnitGeometry(GraphicsDevice g, VertexPositionColor[] verts, int[] inds, int count, RTSUnit data) {
+        public UnitGeometry(GraphicsDevice g, string texFile, float scale, int count, RTSUnit data) {
             IsDisposed = false;
             UnitData = data;
             units = new List<UnitRenderData>();
 
-            // Check Input
-            if(verts == null || verts.Length < 3)
-                throw new ArgumentException("Need At Least Three Vertices");
-            if(inds == null || inds.Length < 3)
-                throw new ArgumentException("Need At Least Three Indices");
+            // Load The Texture
+            using(var s = System.IO.File.OpenRead(texFile)) {
+                texture = Texture2D.FromStream(g, s);
+            }
+
+            // Create Model
+            VertexPositionTexture[] verts = {
+                new VertexPositionTexture(new Vector3(-scale, scale, 0), Vector2.Zero),
+                new VertexPositionTexture(new Vector3(scale, scale, 0), Vector2.UnitX),
+                new VertexPositionTexture(new Vector3(-scale, -scale, 0), Vector2.UnitY),
+                new VertexPositionTexture(new Vector3(scale, -scale, 0), Vector2.One)
+            };
+            int[] inds = { 0, 1, 2, 2, 1, 3 };
+
 
             // Create Model Buffers
-            vbModel = new VertexBuffer(g, VertexPositionColor.VertexDeclaration, verts.Length, BufferUsage.WriteOnly);
+            vbModel = new VertexBuffer(g, VertexPositionTexture.VertexDeclaration, verts.Length, BufferUsage.WriteOnly);
             vbModel.SetData(verts);
             ibModel = new IndexBuffer(g, IndexElementSize.ThirtyTwoBits, inds.Length, BufferUsage.WriteOnly);
             ibModel.SetData(inds);
@@ -166,6 +178,8 @@ namespace RTSCS.Graphics {
 
         // Activate Buffers On The GPU
         public void SetBuffers(GraphicsDevice g) {
+            g.Textures[0] = texture;
+            g.SamplerStates[0] = SamplerState.LinearClamp;
             g.SetVertexBuffers(
                 new VertexBufferBinding(vbModel),
                 new VertexBufferBinding(vbInst, 0, 1)

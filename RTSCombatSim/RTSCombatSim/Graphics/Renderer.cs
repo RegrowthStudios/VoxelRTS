@@ -66,6 +66,7 @@ namespace RTSCS.Graphics {
             g.DepthStencilState = DepthStencilState.DepthRead;
             g.RasterizerState = RasterizerState.CullNone;
             g.BlendState = BlendState.Opaque;
+            g.SamplerStates[0] = SamplerState.LinearWrap;
 
             fxBasic.Texture = map.Background;
             fxBasic.World = map.WorldTransform;
