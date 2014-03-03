@@ -49,6 +49,10 @@ namespace RTSCS {
             set;
         }
 
+        // Input States
+        private KeyboardState ks, pks;
+        private MouseState ms, pms;
+
         // The Game State
         public GameState GameState {
             get;
@@ -155,21 +159,7 @@ namespace RTSCS {
                 Exit();
                 return;
             }
-
-            // Make Sure To Apply Logic Only When Paused
-            if(!IsPaused)
-                StepGame((float)gameTime.ElapsedGameTime.TotalSeconds);
-
-            // Toggle Pausing
-            var ks = Keyboard.GetState();
-            if(ks.IsKeyDown(Keys.P) && !keyToggle) {
-                IsPaused = !IsPaused;
-                keyToggle = true;
-            }
-            else if(ks.IsKeyUp(Keys.P)) {
-                keyToggle = false;
-            }
-
+            StepGame((float)gameTime.ElapsedGameTime.TotalSeconds);
             base.Update(gameTime);
         }
         protected override void Draw(GameTime gameTime) {
@@ -192,6 +182,56 @@ namespace RTSCS {
 
         // Game Controller
         public void StepGame(float dt) {
+            // Get Keyboard Input
+            pks = ks; pms = ms;
+            ks = Keyboard.GetState();
+            ms = Mouse.GetState();
+
+            // Toggle Pausing
+            if(ks.IsKeyDown(Keys.P) && !pks.IsKeyDown(Keys.P))
+                IsPaused = !IsPaused;
+
+            // Don't Run When Paused
+            if(IsPaused) return;
+
+            // Check For Selections
+            bool[] selections = {
+                ks.IsKeyDown(Keys.D1),
+                ks.IsKeyDown(Keys.D2),
+                ks.IsKeyDown(Keys.D3)
+            };
+
+            // Check For New Location
+            if(ms.LeftButton == ButtonState.Pressed && pms.LeftButton != ButtonState.Pressed) {
+                Vector3 target = GraphicsDevice.Viewport.Unproject(
+                    new Vector3(ms.X, ms.Y, 1),
+                    renderer.Projection,
+                    renderer.View,
+                    Matrix.Identity
+                    );
+                Vector3 source = GraphicsDevice.Viewport.Unproject(
+                    new Vector3(ms.X, ms.Y, 0),
+                    renderer.Projection,
+                    renderer.View,
+                    Matrix.Identity
+                    );
+                Vector3 dir = Vector3.Normalize(target - source);
+                Ray mouseRay = new Ray(source, dir);
+                Plane pPlane = new Plane(Vector3.Backward, 0);
+                float? distN = mouseRay.Intersects(pPlane);
+                float dist = distN.HasValue ? distN.Value : 0;
+                Vector3 loc = mouseRay.Position + mouseRay.Direction * dist;
+                int ti = 0;
+                foreach(var team in GameState.teams) {
+                    if(selections[ti]) {
+                        foreach(RTSUnitInstance unit in team.Units) {
+                            unit.MovementController = new MovementController(unit, new Vector2[] { new Vector2(loc.X, loc.Y) });
+                        }
+                    }
+                    ti++;
+                }
+            }
+
             // Find Decisions
             foreach(RTSTeam team in GameState.teams) {
                 foreach(RTSUnitInstance unit in team.Units) {

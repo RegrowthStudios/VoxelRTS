@@ -13,6 +13,7 @@ namespace RTSCS.Graphics {
 
         private Matrix mView, mProj;
         public Matrix View {
+            get { return mView; }
             set {
                 mView = value;
                 fxBasic.View = mView;
@@ -20,6 +21,7 @@ namespace RTSCS.Graphics {
             }
         }
         public Matrix Projection {
+            get { return mProj; }
             set {
                 mProj = value;
                 fxBasic.Projection = mProj;
