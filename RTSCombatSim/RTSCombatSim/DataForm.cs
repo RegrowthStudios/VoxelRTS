@@ -10,6 +10,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
 using XColor = Microsoft.Xna.Framework.Color;
+using RTSCS.Controllers;
 
 namespace RTSCS {
     public partial class DataForm : Form, IDataForm {
@@ -21,13 +22,19 @@ namespace RTSCS {
 
         public event Action<RTSUnitInstance, XColor> OnUnitSpawn;
 
-        // This Is The Data That Must Be Modified By The Form
+        // This Is The Unit Data That Must Be Modified By The Form
         private RTSUnit[] units;
+
+        // This Is Team Data That Must Be Modified In A Different Tab
         private RTSTeam[] teams;
         private Vector3[] teamSpawnPositions;
+        private Vector2[] teamWaypoints;
         private XColor[] teamColors;
 
+        // This Should Be Where You Figure Out Which Team You Are Operating On
         int selectedIndex;
+
+        // Probably Scrap All Of This        
         RTSUnit unit = new RTSUnit();
         BaseCombatData data = new BaseCombatData();
         RTSTeam team = new RTSTeam();
@@ -43,6 +50,7 @@ namespace RTSCS {
             units = ud;
             teams = t;
             teamSpawnPositions = new Vector3[teams.Length];
+            teamWaypoints = new Vector2[teams.Length];
             teamColors = new XColor[teams.Length];
         }
 
@@ -55,6 +63,10 @@ namespace RTSCS {
 
         private void SendUnitEvent(RTSUnit ud, int teamIndex) {
             RTSUnitInstance u = new RTSUnitInstance(teams[teamIndex], ud, teamSpawnPositions[teamIndex]);
+            u.ActionController = new ActionController(u);
+            u.MovementController = new MovementController(u, new Vector2[] { teamWaypoints[teamIndex] });
+            u.CombatController = new CombatController(u);
+            u.TargettingController = new TargettingController(u);
             if(OnUnitSpawn != null)
                 OnUnitSpawn(u, teamColors[teamIndex]);
         }
@@ -172,7 +184,5 @@ namespace RTSCS {
         private void button4_Click(object sender, EventArgs e) {
 
         }
-
-
     }
 }

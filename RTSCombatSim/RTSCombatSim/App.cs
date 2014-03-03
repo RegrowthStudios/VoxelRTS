@@ -119,6 +119,13 @@ namespace RTSCS {
                     2, 1, 3
                 }, MAX_INSTANCES_PER_UNIT, Units[i]);
             }
+
+            RTSUnitInstance u = new RTSUnitInstance(Teams[0], Units[0], Vector3.Zero);
+            u.ActionController = new ActionController(u);
+            u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 40 });
+            u.TargettingController = new TargettingController(u);
+            u.CombatController = new CombatController(u);
+            AddNewUnit(u, Color.Red);
         }
         protected override void UnloadContent() {
             renderer.Dispose();
