@@ -27,15 +27,9 @@ namespace RTSCS {
     };
 
     public class App : Microsoft.Xna.Framework.Game {
-        const int MAX_TEAMS = 3;
-        const int MAX_UNITS = 3;
-        const int MAX_INSTANCES_PER_UNIT = 100;
-
-        static readonly Color[] teamColors = new Color[]{
-            Color.Red,
-            Color.Blue,
-            Color.Green
-        };
+        public const int MAX_TEAMS = 3;
+        public const int MAX_UNITS = 3;
+        public const int MAX_INSTANCES_PER_UNIT = 100;
 
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
@@ -93,6 +87,7 @@ namespace RTSCS {
         }
 
         protected override void Initialize() {
+            IsMouseVisible = true;
             base.Initialize();
         }
         protected override void LoadContent() {
