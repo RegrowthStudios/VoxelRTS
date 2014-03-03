@@ -34,14 +34,6 @@ namespace RTSCS {
         // This Should Be Where You Figure Out Which Team You Are Operating On
         int selectedIndex;
 
-        // Probably Scrap All Of This        
-        RTSUnit unit = new RTSUnit();
-        BaseCombatData data = new BaseCombatData();
-        RTSTeam team = new RTSTeam();
-        int[] unittype1 = new int[4] { 4, 2, 3, 4 };
-        int[] unittype2 = new int[4] { 3, 3, 3, 3 };
-        int[] unittype3 = new int[4] { 2, 4, 4, 3 };
-
         public DataForm(RTSUnit[] ud, RTSTeam[] t) {
             InitializeComponent();
             Closer = () => { Close(); };
@@ -73,80 +65,33 @@ namespace RTSCS {
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) {
             selectedIndex = comboBox1.SelectedIndex;
-            textBox1.Text = unittype1[1].ToString();
-            textBox2.Text = unittype1[2].ToString();
-            textBox3.Text = unittype1[3].ToString();
-            textBox4.Text = unittype1[1].ToString();
+            textBox1.Text = units[selectedIndex].BaseCombatData.MinRange.ToString();
+            textBox4.Text = units[selectedIndex].BaseCombatData.MaxRange.ToString();
+            textBox23.Text = units[selectedIndex].BaseCombatData.AttackTimer.ToString();
+            textBox3.Text = units[selectedIndex].BaseCombatData.Armor.ToString();
+            textBox24.Text = units[selectedIndex].BaseCombatData.CriticalDamage.ToString();
+            textBox25.Text = units[selectedIndex].BaseCombatData.CriticalChance.ToString();
+            textBox26.Text = units[selectedIndex].Health.ToString();
+            textBox28.Text = units[selectedIndex].MovementSpeed.ToString();
 
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e) {
-            data.AttackDamage = int.Parse(textBox1.Text);
-            if(selectedIndex == 1)
-                unittype1[1] = int.Parse(textBox1.Text);
-            if(selectedIndex == 2)
-                unittype2[1] = int.Parse(textBox1.Text);
-            if(selectedIndex == 3)
-                unittype3[1] = int.Parse(textBox1.Text);
-
+        private void button5_Click(object sender, EventArgs e)
+        {
+            units[selectedIndex].BaseCombatData.MinRange = int.Parse(textBox1.Text);
+            units[selectedIndex].BaseCombatData.MaxRange = int.Parse(textBox4.Text);
+            units[selectedIndex].BaseCombatData.AttackTimer = int.Parse(textBox23.Text);
+            units[selectedIndex].BaseCombatData.Armor = int.Parse(textBox3.Text);
+            units[selectedIndex].BaseCombatData.CriticalDamage = int.Parse(textBox24.Text);
+            units[selectedIndex].BaseCombatData.CriticalChance = int.Parse(textBox25.Text);
+            units[selectedIndex].Health = int.Parse(textBox26.Text);
+            units[selectedIndex].MovementSpeed = int.Parse(textBox28.Text);
         }
 
-        private void textBox2_TextChanged(object sender, EventArgs e) {
-            data.Armor = int.Parse(textBox1.Text);
-            if(selectedIndex == 1)
-                unittype1[2] = int.Parse(textBox2.Text);
-            if(selectedIndex == 2)
-                unittype2[2] = int.Parse(textBox2.Text);
-            if(selectedIndex == 3)
-                unittype3[2] = int.Parse(textBox2.Text);
-        }
+        
 
-        private void textBox3_TextChanged(object sender, EventArgs e) {
-            unit.MovementSpeed = int.Parse(textBox3.Text);
-            if(selectedIndex == 1)
-                unittype1[3] = int.Parse(textBox3.Text);
-            if(selectedIndex == 2)
-                unittype2[3] = int.Parse(textBox3.Text);
-            if(selectedIndex == 3)
-                unittype3[3] = int.Parse(textBox3.Text);
-        }
 
-        private void textBox4_TextChanged(object sender, EventArgs e) {
-            unit.Health = int.Parse(textBox4.Text);
-            if(selectedIndex == 1)
-                unittype1[4] = int.Parse(textBox4.Text);
-            if(selectedIndex == 2)
-                unittype2[4] = int.Parse(textBox4.Text);
-            if(selectedIndex == 3)
-                unittype3[4] = int.Parse(textBox4.Text);
-        }
 
-        private void button2_Click(object sender, EventArgs e) {
-
-        }
-
-        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e) {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e) {
-
-        }
-
-        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e) {
-
-        }
-
-        private void button3_Click(object sender, EventArgs e) {
-
-        }
-
-        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e) {
-
-        }
-
-        private void button4_Click(object sender, EventArgs e) {
-
-        }
+       
     }
 }
