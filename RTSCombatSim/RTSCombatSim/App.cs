@@ -202,7 +202,7 @@ namespace RTSCS {
             };
 
             // Check For New Location
-            if(ms.LeftButton == ButtonState.Pressed && pms.LeftButton != ButtonState.Pressed) {
+            if(ms.RightButton == ButtonState.Pressed && pms.RightButton != ButtonState.Pressed) {
                 Vector3 target = GraphicsDevice.Viewport.Unproject(
                     new Vector3(ms.X, ms.Y, 1),
                     renderer.Projection,
