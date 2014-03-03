@@ -99,7 +99,7 @@ namespace RTSCS {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             renderer = new Renderer(GraphicsDevice, XNAEffect.Compile(GraphicsDevice, "Content\\FX\\Unit.fx"));
-            renderer.View = Matrix.CreateLookAt(new Vector3(0, 0, -1f), Vector3.Zero, Vector3.Up);
+            renderer.View = Matrix.CreateLookAt(new Vector3(0, 0, 1f), Vector3.Zero, Vector3.Up);
             renderer.Projection = Matrix.CreateOrthographic(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 2f);
 
             map = new CombatMap(GraphicsDevice, @"Content\Textures\Smoke.png");
