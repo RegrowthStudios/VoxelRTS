@@ -134,6 +134,7 @@ namespace RTSCS.Graphics {
         }
         // Apply Count Of Instance Data To The Buffer
         public void ApplyInstancing(int c) {
+            if(c == 0) return;
             vbInst.SetData(instances, 0, c);
         }
         public void ApplyInstancing() {
@@ -166,6 +167,7 @@ namespace RTSCS.Graphics {
         }
         // Issue Draw Call
         public void Draw(GraphicsDevice g, int c) {
+            if(c == 0) return;
             g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, c);
         }
         public void Draw(GraphicsDevice g) {

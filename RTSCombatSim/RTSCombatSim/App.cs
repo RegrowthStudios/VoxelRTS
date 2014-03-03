@@ -72,6 +72,7 @@ namespace RTSCS {
             // Setup Units
             Units = new RTSUnit[MAX_UNITS];
             for(int i = 0; i < Units.Length; i++) {
+                Units[i] = new RTSUnit();
                 Units[i].BaseCombatData.Armor = 0;
                 Units[i].BaseCombatData.AttackDamage = 10;
                 Units[i].BaseCombatData.AttackTimer = 1f;
@@ -106,6 +107,7 @@ namespace RTSCS {
             map.Scaling = Vector2.One * 200f;
             map.Translation = Vector3.Zero;
 
+            unitGeometry = new UnitGeometry[Units.Length];
             for(int i = 0; i < Units.Length; i++) {
                 unitGeometry[i] = new UnitGeometry(GraphicsDevice, new VertexPositionColor[] {
                     new VertexPositionColor(new Vector3(-1, 1, 0), Color.White),
@@ -184,10 +186,8 @@ namespace RTSCS {
 
                 // Create Form Thread
                 Thread t = new Thread(() => {
-                    using(form = new DataForm()) {
-                        form.OnGameRestart += (rA) => {
-                            game.rArgs = rA;
-                        };
+                    using(form = new DataForm(game.Units, game.Teams)) {
+                        form.OnUnitSpawn += game.AddNewUnit;
                         form.ShowDialog();
                     }
                 });
