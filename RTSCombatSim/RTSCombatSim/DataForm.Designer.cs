@@ -303,10 +303,6 @@
             this.spawn1ComboBox.Name = "spawn1ComboBox";
             this.spawn1ComboBox.Size = new System.Drawing.Size(79, 21);
             this.spawn1ComboBox.TabIndex = 34;
-<<<<<<< HEAD
-            this.spawn1ComboBox.SelectedIndexChanged += new System.EventHandler(this.spawn1ComboBox_SelectedIndexChanged);
-=======
->>>>>>> Added UI Redirection
             // 
             // spawn2ComboBox
             // 
@@ -316,10 +312,6 @@
             this.spawn2ComboBox.Name = "spawn2ComboBox";
             this.spawn2ComboBox.Size = new System.Drawing.Size(79, 21);
             this.spawn2ComboBox.TabIndex = 36;
-<<<<<<< HEAD
-            this.spawn2ComboBox.SelectedIndexChanged += new System.EventHandler(this.spawn2ComboBox_SelectedIndexChanged);
-=======
->>>>>>> Added UI Redirection
             // 
             // spawn2Button
             // 
@@ -340,10 +332,6 @@
             this.spawn3ComboBox.Name = "spawn3ComboBox";
             this.spawn3ComboBox.Size = new System.Drawing.Size(79, 21);
             this.spawn3ComboBox.TabIndex = 38;
-<<<<<<< HEAD
-            this.spawn3ComboBox.SelectedIndexChanged += new System.EventHandler(this.spawn3ComboBox_SelectedIndexChanged);
-=======
->>>>>>> Added UI Redirection
             // 
             // spawn3Button
             // 

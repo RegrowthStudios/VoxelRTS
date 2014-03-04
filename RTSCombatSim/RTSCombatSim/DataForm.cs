@@ -325,18 +325,7 @@ namespace RTSCS {
             return new XColor(float.Parse(splitString[0]), float.Parse(splitString[1]), float.Parse(splitString[2]));
         }
 
-<<<<<<< HEAD
-        private void spawnButton_Click(object sender, EventArgs e) {
-=======
-        // Assumes Data Is Input As (x,y)
-        private Vector2 StringToVector2(String s) {
-            String[] splitString = s.Split(',');
-            if(splitString.Length != 2) return Vector2.Zero;
-            return new Vector2(float.Parse(splitString[0]), float.Parse(splitString[1]));
-        }
-
         private void UpdateSpawnInfo() {
->>>>>>> Added UI Redirection
             teamSpawnPositions[0] = StringToVector3(team1SpawnPositionTextBox.Text);
             teamSpawnPositions[1] = StringToVector3(team2SpawnPositionTextBox.Text);
             teamSpawnPositions[2] = StringToVector3(team3SpawnPositionTextBox.Text);
@@ -374,21 +363,6 @@ namespace RTSCS {
             else return team3Unit3TextBox;
         }
 
-<<<<<<< HEAD
-        private void spawn1ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
-            spawn1SelectedIndex = spawn1ComboBox.SelectedIndex;
-        }
-
-        private void spawn2ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
-            spawn2SelectedIndex = spawn2ComboBox.SelectedIndex;
-        }
-
-        private void spawn3ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
-            spawn3SelectedIndex = spawn3ComboBox.SelectedIndex;
-        }
-
-=======
->>>>>>> Added UI Redirection
         private void spawn1Button_Click(object sender, EventArgs e) {
             UpdateSpawnInfo();
             SpawnUnit(spawn1ComboBox.SelectedIndex, 0);
