@@ -127,8 +127,39 @@ namespace RTSCS {
             System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(textBox16.Text);
             XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
             teamColors[3] = color3;
+            int max1 = Math.Max(int.Parse(textBox5.Text),int.Parse(textBox10.Text));
+            int max2 = Math.Max(int.Parse(textBox13.Text),int.Parse(textBox8.Text));
+            int max3 = Math.Max(int.Parse(textBox9.Text),int.Parse(textBox12.Text));
+            int max4 = Math.Max(int.Parse(textBox6.Text),int.Parse(textBox7.Text));
+            int max5 = Math.Max(max1,int.Parse(textBox11.Text));
+            int max6 = Math.Max(max5, max2);
+            int max7 = Math.Max(max6, max3);
+            int max8 = Math.Max(max7, max4);
 
+           for (int j = 1; j <= max8; j++)
+           {
+                    if (j <= int.Parse(textBox5.Text))
+                        teams[1].AddUnit(units[1], teamSpawnPositions[1]);
+                    if (j <= int.Parse(textBox10.Text))
+                        teams[2].AddUnit(units[1], teamSpawnPositions[2]);
+                    if (j <= int.Parse(textBox13.Text))
+                        teams[3].AddUnit(units[1], teamSpawnPositions[3]);
 
+                    if (j <= int.Parse(textBox8.Text))
+                        teams[1].AddUnit(units[2], teamSpawnPositions[1]);
+                    if (j <= int.Parse(textBox9.Text))
+                        teams[2].AddUnit(units[2], teamSpawnPositions[2]);
+                    if (j <= int.Parse(textBox12.Text))
+                        teams[3].AddUnit(units[2], teamSpawnPositions[3]);
+
+                    if (j <= int.Parse(textBox6.Text))
+                        teams[1].AddUnit(units[3], teamSpawnPositions[1]);
+                    if (j <= int.Parse(textBox7.Text))
+                        teams[2].AddUnit(units[3], teamSpawnPositions[2]);
+                    if (j <= int.Parse(textBox11.Text))
+                        teams[3].AddUnit(units[3], teamSpawnPositions[3]);
+           }
+            
         }
 
         
