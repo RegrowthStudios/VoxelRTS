@@ -37,9 +37,6 @@ namespace RTSCS {
 
         // This Should Be Where You Figure Out Which Team You Are Operating On
         int selectedIndex;
-        int spawn1SelectedIndex;
-        int spawn2SelectedIndex;
-        int spawn3SelectedIndex;
 
         // Default Unit Parameters
         const int UNIT_SOLDIER_ARMOR = 0;
@@ -174,7 +171,7 @@ namespace RTSCS {
         private void SetDefaultsForSpawnPage() {
             for(int t = 0; t < teams.Length; t++) {
                 // Initialize Counts for Unit Types
-                for(int u = 0; u < teams.Length; u++) {
+                for(int u = 0; u < units.Length; u++) {
                     TextBox tb = PickUnitCountTextBox(t, u);
                     tb.Text = DEFAULT_UNIT_COUNT_TEXT;
                 }
@@ -183,10 +180,16 @@ namespace RTSCS {
             team1ColorTextBox.Text = DEFAULT_TEAM1_COLOR_TEXT;
             team2ColorTextBox.Text = DEFAULT_TEAM2_COLOR_TEXT;
             team3ColorTextBox.Text = DEFAULT_TEAM3_COLOR_TEXT;
+            teamColors[0] = XColor.Red;
+            teamColors[1] = XColor.Blue;
+            teamColors[2] = XColor.Green;
 
             team1SpawnPositionTextBox.Text = DEFAULT_TEAM1_SPAWN_TEXT;
             team2SpawnPositionTextBox.Text = DEFAULT_TEAM2_SPAWN_TEXT;
             team3SpawnPositionTextBox.Text = DEFAULT_TEAM3_SPAWN_TEXT;
+            teamSpawnPositions[0] = new Vector3(-20, -20, 0);
+            teamSpawnPositions[1] = new Vector3(20, -20, 0);
+            teamSpawnPositions[2] = new Vector3(20, 20, 0);
 
             team1WaypointTextBox.Text = DEFAULT_WAYPOINT_TEXT;
             team2WaypointTextBox.Text = DEFAULT_WAYPOINT_TEXT;
@@ -317,12 +320,23 @@ namespace RTSCS {
 
         // Assumes Data Is Input As (x,y,z)
         private XColor StringToXColor(String s) {
-            String[] splitString = s.Split(',');
+            String[] splitString = s.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             if(splitString.Length != 3) return XColor.Green;
             return new XColor(float.Parse(splitString[0]), float.Parse(splitString[1]), float.Parse(splitString[2]));
         }
 
+<<<<<<< HEAD
         private void spawnButton_Click(object sender, EventArgs e) {
+=======
+        // Assumes Data Is Input As (x,y)
+        private Vector2 StringToVector2(String s) {
+            String[] splitString = s.Split(',');
+            if(splitString.Length != 2) return Vector2.Zero;
+            return new Vector2(float.Parse(splitString[0]), float.Parse(splitString[1]));
+        }
+
+        private void UpdateSpawnInfo() {
+>>>>>>> Added UI Redirection
             teamSpawnPositions[0] = StringToVector3(team1SpawnPositionTextBox.Text);
             teamSpawnPositions[1] = StringToVector3(team2SpawnPositionTextBox.Text);
             teamSpawnPositions[2] = StringToVector3(team3SpawnPositionTextBox.Text);
@@ -334,7 +348,9 @@ namespace RTSCS {
             teamColors[0] = StringToXColor(team1ColorTextBox.Text);
             teamColors[1] = StringToXColor(team2ColorTextBox.Text);
             teamColors[2] = StringToXColor(team3ColorTextBox.Text);
-
+        }
+        private void spawnButton_Click(object sender, EventArgs e) {
+            UpdateSpawnInfo();
             for(int t = 0; t < teams.Length; t++) {
                 for(int u = 0; u < units.Length; u++) {
                     int spawnCount = int.Parse(PickUnitCountTextBox(t, u).Text);
@@ -358,6 +374,7 @@ namespace RTSCS {
             else return team3Unit3TextBox;
         }
 
+<<<<<<< HEAD
         private void spawn1ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             spawn1SelectedIndex = spawn1ComboBox.SelectedIndex;
         }
@@ -370,16 +387,19 @@ namespace RTSCS {
             spawn3SelectedIndex = spawn3ComboBox.SelectedIndex;
         }
 
+=======
+>>>>>>> Added UI Redirection
         private void spawn1Button_Click(object sender, EventArgs e) {
-            SpawnUnit(spawn1SelectedIndex, 0);
+            UpdateSpawnInfo();
+            SpawnUnit(spawn1ComboBox.SelectedIndex, 0);
         }
-
         private void spawn2Button_Click(object sender, EventArgs e) {
-            SpawnUnit(spawn2SelectedIndex, 1);
+            UpdateSpawnInfo();
+            SpawnUnit(spawn2ComboBox.SelectedIndex, 1);
         }
-
         private void spawn3Button_Click(object sender, EventArgs e) {
-            SpawnUnit(spawn3SelectedIndex, 2);
+            UpdateSpawnInfo();
+            SpawnUnit(spawn3ComboBox.SelectedIndex, 2);
         }
 
         private void btnScriptDialog_Click(object sender, EventArgs e) {

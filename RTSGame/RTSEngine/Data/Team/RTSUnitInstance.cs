@@ -134,7 +134,8 @@ namespace RTSEngine.Data.Team {
         public void Move(Vector2 change) {
             worldPosition.X += change.X;
             worldPosition.Y += change.Y;
-            ViewDirection = Vector2.Normalize(change);
+            if(change.X != 0 || change.Y != 0)
+                ViewDirection = Vector2.Normalize(change);
         }
     }
 }

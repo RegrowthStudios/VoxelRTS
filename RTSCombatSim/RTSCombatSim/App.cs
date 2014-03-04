@@ -340,7 +340,8 @@ namespace RTSCS {
                     u.ActionController = sa.AC;
                     u.CombatController = sa.CC;
                     u.MovementController = sa.MC;
-                    u.MovementController.SetWaypoints(sa.Waypoints);
+                    if(u.MovementController != null)
+                        u.MovementController.SetWaypoints(sa.Waypoints);
                     u.TargettingController = sa.TC;
                     foreach(var ug in unitGeometry) {
                         if(ug.UnitData == u.UnitData)
