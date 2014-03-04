@@ -116,9 +116,9 @@ namespace RTSCS {
             map.Translation = Vector3.Zero;
 
             unitGeometry = new UnitGeometry[Units.Length];
-            unitGeometry[0] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", 4, MAX_INSTANCES_PER_UNIT, Units[0]);
-            unitGeometry[1] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", 4, MAX_INSTANCES_PER_UNIT, Units[1]);
-            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", 4, MAX_INSTANCES_PER_UNIT, Units[2]);
+            unitGeometry[0] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[0]);
+            unitGeometry[1] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[1]);
+            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[2]);
 
             Random r = new Random();
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
