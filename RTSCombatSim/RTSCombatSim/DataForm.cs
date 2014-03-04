@@ -33,6 +33,9 @@ namespace RTSCS {
 
         // This Should Be Where You Figure Out Which Team You Are Operating On
         int selectedIndex;
+        int selectedIndex2;
+        int selectedIndex3;
+        int selectedIndex4;
 
         public DataForm(RTSUnit[] ud, RTSTeam[] t) {
             InitializeComponent();
@@ -47,6 +50,15 @@ namespace RTSCS {
             comboBox1.Items.Add("Unit Type 1");
             comboBox1.Items.Add("Unit Type 2");
             comboBox1.Items.Add("Unit Type 3");
+            comboBox2.Items.Add("Unit Type 1");
+            comboBox2.Items.Add("Unit Type 2");
+            comboBox2.Items.Add("Unit Type 3");
+            comboBox3.Items.Add("Unit Type 1");
+            comboBox3.Items.Add("Unit Type 2");
+            comboBox3.Items.Add("Unit Type 3");
+            comboBox4.Items.Add("Unit Type 1");
+            comboBox4.Items.Add("Unit Type 2");
+            comboBox4.Items.Add("Unit Type 3");
         }
 
         private void DataForm_Load(object sender, EventArgs e) {
@@ -159,7 +171,37 @@ namespace RTSCS {
                     if (j <= int.Parse(textBox11.Text))
                         teams[3].AddUnit(units[3], teamSpawnPositions[3]);
            }
-            
+     
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            selectedIndex2 = comboBox2.SelectedIndex;
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            selectedIndex3 = comboBox3.SelectedIndex;
+        }
+
+        private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            selectedIndex4 = comboBox4.SelectedIndex;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            teams[1].AddUnit(units[selectedIndex2], teamSpawnPositions[1]);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            teams[2].AddUnit(units[selectedIndex3], teamSpawnPositions[2]);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            teams[3].AddUnit(units[selectedIndex4], teamSpawnPositions[3]);
         }
 
         
