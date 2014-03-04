@@ -150,7 +150,7 @@ namespace RTSCS {
         protected override void LoadContent() {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            combAnimator = new CombatAnimator(GraphicsDevice, "Content\\Textures\\Unit2.png");
+            combAnimator = new CombatAnimator(GraphicsDevice, "Content\\Textures\\Laser.png");
 
             renderer = new Renderer(GraphicsDevice, XNAEffect.Compile(GraphicsDevice, "Content\\FX\\Unit.fx"));
             renderer.View = Matrix.CreateLookAt(new Vector3(0, 0, 1f), Vector3.Zero, Vector3.Up);
@@ -188,6 +188,7 @@ namespace RTSCS {
             GraphicsDevice.Clear(Color.Black);
 
             renderer.RenderMap(GraphicsDevice, map);
+            renderer.RenderCombat(GraphicsDevice, combAnimator);
             renderer.BeginUnitPass(GraphicsDevice);
             foreach(UnitGeometry ug in unitGeometry) {
                 ug.InstanceUnits();
@@ -323,7 +324,7 @@ namespace RTSCS {
                     u.OnDestruction += OnUnitDeath;
                     u.OnDamage += OnUnitDamage;
                     u.OnNewTarget += OnUnitNewTarget;
-
+                    u.OnAttackMade += OnUnitCombat;
                     foreach(var ug in unitGeometry) {
                         if(ug.UnitData == u.UnitData)
                             ug.AddUnit(u, sa.Color);
@@ -331,6 +332,8 @@ namespace RTSCS {
                 }
                 else i--;
             }
+
+            combAnimator.Update(dt);
         }
 
         public void AddNewUnit(RTSUISpawnArgs u) {
@@ -345,6 +348,14 @@ namespace RTSCS {
         }
         private static void OnUnitDamage(IDestructibleEntity e, int d) {
             Console.WriteLine("Entity [{0,12}] Was Damaged By {1,-5} - Health = {2}", e.GetHashCode(), d, e.Health);
+        }
+        private void OnUnitCombat(ICombatEntity s, IDestructibleEntity t) {
+            RTSUnitInstance rs = s as RTSUnitInstance;
+            RTSUnitInstance rt = t as RTSUnitInstance;
+            combAnimator.Add(new CombatAnimation(
+                rs.WorldPosition, rt.WorldPosition, rs.CollisionGeometry.InnerRadius * 0.9f,
+                new Color(1f, 0.4f, 0.1f), new Color(0.1f, 0.8f, 0.2f), rs.UnitData.BaseCombatData.AttackTimer
+                ));
         }
 
         #region Entry Point

@@ -44,8 +44,8 @@ namespace RTSCS {
         const float UNIT_SOLDIER_ATTACK_TIMER = 0.5f;
         const double UNIT_SOLDIER_CRITICAL_CHANCE = 0.05;
         const int UNIT_SOLDIER_CRITICAL_DAMAGE = 15;
-        const int UNIT_SOLDIER_MAX_RANGE = 30;
-        const int UNIT_SOLDIER_MIN_RNAGE = 0;
+        const int UNIT_SOLDIER_MAX_RANGE = 130;
+        const int UNIT_SOLDIER_MIN_RANGE = 60;
         const int UNIT_SOLDIER_HEALTH = 60;
         const int UNIT_SOLDIER_SPEED = 45;
 
@@ -55,17 +55,17 @@ namespace RTSCS {
         const double UNIT_HEAVY_SOLDIER_CRITICAL_CHANCE = 0.05;
         const int UNIT_HEAVY_SOLDIER_CRITICAL_DAMAGE = 30;
         const int UNIT_HEAVY_SOLDIER_MAX_RANGE = 30;
-        const int UNIT_HEAVY_SOLDIER_MIN_RNAGE = 0;
+        const int UNIT_HEAVY_SOLDIER_MIN_RANGE = 0;
         const int UNIT_HEAVY_SOLDIER_HEALTH = 80;
         const int UNIT_HEAVY_SOLDIER_SPEED = 30;
 
         const int UNIT_BRUISER_ARMOR = 0;
         const int UNIT_BRUISER_ATTACK_DAMAGE = 20;
-        const float UNIT_BRUISER_ATTACK_TIMER = 0.5f;
+        const float UNIT_BRUISER_ATTACK_TIMER = 1.5f;
         const double UNIT_BRUISER_CRITICAL_CHANCE = 0.05;
         const int UNIT_BRUISER_CRITICAL_DAMAGE = 30;
-        const int UNIT_BRUISER_MAX_RANGE = 10;
-        const int UNIT_BRUISER_MIN_RNAGE = 0;
+        const int UNIT_BRUISER_MAX_RANGE = 140;
+        const int UNIT_BRUISER_MIN_RANGE = 10;
         const int UNIT_BRUISER_HEALTH = 240;
         const int UNIT_BRUISER_SPEED = 15;
 
@@ -141,7 +141,7 @@ namespace RTSCS {
                     unit.BaseCombatData.CriticalChance = UNIT_SOLDIER_CRITICAL_CHANCE;
                     unit.BaseCombatData.CriticalDamage = UNIT_SOLDIER_CRITICAL_DAMAGE;
                     unit.BaseCombatData.MaxRange = UNIT_SOLDIER_MAX_RANGE;
-                    unit.BaseCombatData.MinRange = UNIT_SOLDIER_MIN_RNAGE;
+                    unit.BaseCombatData.MinRange = UNIT_SOLDIER_MIN_RANGE;
                     break;
                 case 1:
                     unit.Health = UNIT_HEAVY_SOLDIER_HEALTH;
@@ -152,7 +152,7 @@ namespace RTSCS {
                     unit.BaseCombatData.CriticalChance = UNIT_HEAVY_SOLDIER_CRITICAL_CHANCE;
                     unit.BaseCombatData.CriticalDamage = UNIT_HEAVY_SOLDIER_CRITICAL_DAMAGE;
                     unit.BaseCombatData.MaxRange = UNIT_HEAVY_SOLDIER_MAX_RANGE;
-                    unit.BaseCombatData.MinRange = UNIT_HEAVY_SOLDIER_MIN_RNAGE;
+                    unit.BaseCombatData.MinRange = UNIT_HEAVY_SOLDIER_MIN_RANGE;
                     break;
                 case 2:
                     unit.Health = UNIT_BRUISER_HEALTH;
@@ -163,7 +163,7 @@ namespace RTSCS {
                     unit.BaseCombatData.CriticalChance = UNIT_BRUISER_CRITICAL_CHANCE;
                     unit.BaseCombatData.CriticalDamage = UNIT_BRUISER_CRITICAL_DAMAGE;
                     unit.BaseCombatData.MaxRange = UNIT_BRUISER_MAX_RANGE;
-                    unit.BaseCombatData.MinRange = UNIT_BRUISER_MIN_RNAGE;
+                    unit.BaseCombatData.MinRange = UNIT_BRUISER_MIN_RANGE;
                     break;
             }
             unit.ICollidableShape = new CollisionCircle(10, Vector2.Zero);

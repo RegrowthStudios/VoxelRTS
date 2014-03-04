@@ -35,6 +35,7 @@ namespace RTSCS.Controllers {
                 if(team != Entity.Team) {
                     float minDist = float.MaxValue;
                     foreach(var unit in team.Units) {
+                        if(!unit.IsAlive) return;
                         float dist = (unit.GridPosition - Entity.GridPosition).LengthSquared();
                         if(dist < minDist) {
                             minDist = dist;

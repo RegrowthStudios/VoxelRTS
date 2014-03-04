@@ -72,11 +72,25 @@ namespace RTSCS.Graphics {
 
             fxBasic.Texture = map.Background;
             fxBasic.World = map.WorldTransform;
+            fxBasic.VertexColorEnabled = false;
+            fxBasic.TextureEnabled = true;
             fxBasic.CurrentTechnique.Passes[0].Apply();
 
             VertexPositionTexture[] verts = new VertexPositionTexture[4];
             map.CopyVertexTriangleStrip(ref verts, 0);
             g.DrawUserPrimitives(PrimitiveType.TriangleStrip, verts, 0, 2, VertexPositionTexture.VertexDeclaration);
+        }
+        public void RenderCombat(GraphicsDevice g, CombatAnimator a) {
+            g.DepthStencilState = DepthStencilState.None;
+            g.RasterizerState = RasterizerState.CullNone;
+            g.BlendState = BlendState.Additive;
+            fxBasic.VertexColorEnabled = true;
+            fxBasic.TextureEnabled = true;
+            fxBasic.Texture = a.Texture;
+            fxBasic.World = Matrix.Identity;
+            fxBasic.CurrentTechnique.Passes[0].Apply();
+            a.Render(g);
+            fxBasic.VertexColorEnabled = false;
         }
 
         public void BeginUnitPass(GraphicsDevice g) {

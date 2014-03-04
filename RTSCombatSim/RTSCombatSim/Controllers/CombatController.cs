@@ -44,14 +44,14 @@ namespace RTSCS.Controllers {
                         float maxDistSquared = unit.UnitData.BaseCombatData.MaxRange * unit.UnitData.BaseCombatData.MaxRange;
 
                         // Lose Pursuit If It Is Out Of Range
-                        if(distSquared > maxDistSquared) {
+                        if(distSquared > maxDistSquared || !target.IsAlive) {
                             entity.Target = null;
                             return;
                         }
 
                         if(minDistSquared <= distSquared) {
                             unit.DamageTarget(critRoller.NextDouble());
-                            if(target.Health <= 0) entity.Target = null;
+                            if(!target.IsAlive) entity.Target = null;
                         }
                     }
                 }

@@ -43,14 +43,14 @@ namespace RTSCS.Graphics {
             verts[0].TextureCoordinate = new Vector2(0, 0);
             verts[0].Color = sc;
             verts[1].Position = target + y;
-            verts[1].TextureCoordinate = new Vector2(dist, 0);
+            verts[1].TextureCoordinate = new Vector2(1, 0);
             verts[1].Color = tc;
-            verts[0].Position = source - y;
-            verts[0].TextureCoordinate = new Vector2(0, 1);
-            verts[0].Color = sc;
-            verts[1].Position = target - y;
-            verts[1].TextureCoordinate = new Vector2(dist, 1);
-            verts[1].Color = tc;
+            verts[2].Position = source - y;
+            verts[2].TextureCoordinate = new Vector2(0, 1);
+            verts[2].Color = sc;
+            verts[3].Position = target - y;
+            verts[3].TextureCoordinate = new Vector2(1, 1);
+            verts[3].Color = tc;
         }
 
         public void Update(float dt) {
@@ -65,20 +65,23 @@ namespace RTSCS.Graphics {
             i[ii++] = vi + 1;
             i[ii++] = vi + 3;
             v[vi] = verts[0];
-            v[vi++].Color.A = (byte)(TimeAvailable / startTime);
+            v[vi++].Color.A = (byte)(255 * TimeAvailable / startTime);
             v[vi] = verts[1];
-            v[vi++].Color.A = (byte)(TimeAvailable / startTime);
+            v[vi++].Color.A = (byte)(255 * TimeAvailable / startTime);
             v[vi] = verts[2];
-            v[vi++].Color.A = (byte)(TimeAvailable / startTime);
+            v[vi++].Color.A = (byte)(255 * TimeAvailable / startTime);
             v[vi] = verts[3];
-            v[vi++].Color.A = (byte)(TimeAvailable / startTime);
+            v[vi++].Color.A = (byte)(255 * TimeAvailable / startTime);
         }
     }
 
 
     public class CombatAnimator {
         // Texture To Be Drawn
-        private Texture2D texture;
+        public Texture2D Texture {
+            get;
+            private set;
+        }
 
         // Number Of Vertices And Indices To Render
         private int vc, ic;
@@ -98,7 +101,7 @@ namespace RTSCS.Graphics {
             vc = 0;
             ic = 0;
             using(var s = System.IO.File.OpenRead(texFile)) {
-                texture = Texture2D.FromStream(g, s);
+                Texture = Texture2D.FromStream(g, s);
             }
         }
 
@@ -144,9 +147,8 @@ namespace RTSCS.Graphics {
         }
 
         public void Render(GraphicsDevice g) {
-            g.Textures[0] = texture;
-            g.SamplerStates[0] = SamplerState.LinearWrap;
-            g.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, vc, inds, 0, ic / 3);
+            if(ic < 3) return;
+            g.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, vc, inds, 0, ic / 3, VertexPositionColorTexture.VertexDeclaration);
         }
     }
 }
