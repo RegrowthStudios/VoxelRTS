@@ -63,6 +63,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="ScriptControlForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ScriptControlForm.Designer.cs">
+      <DependentUpon>ScriptControlForm.cs</DependentUpon>
+    </Compile>
     <Content Include="Controllers\TargettingController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -99,6 +105,9 @@
   <ItemGroup>
     <EmbeddedResource Include="DataForm.resx">
       <DependentUpon>DataForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ScriptControlForm.resx">
+      <DependentUpon>ScriptControlForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
