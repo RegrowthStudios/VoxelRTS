@@ -232,6 +232,11 @@ namespace RTSCS {
             // Toggle Pausing
             if(ks.IsKeyDown(Keys.P) && !pks.IsKeyDown(Keys.P))
                 IsPaused = !IsPaused;
+            if(ks.IsKeyDown(Keys.W))
+                dt /= 14f;
+            else if(ks.IsKeyDown(Keys.Q))
+                dt /= 4f;
+
 
             // Don't Run When Paused
             if(IsPaused) return;

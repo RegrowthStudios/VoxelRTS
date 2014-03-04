@@ -48,9 +48,9 @@ namespace RTSEngine.Interfaces {
 
         // This Can Change During The Entity's Lifecycle But Will Always Be There
         IMovementController MovementController { get; set; }
-        
+
         // Changes The GridPosition Of The Entity
-        void Move (Vector2 change);
+        void Move(Vector2 change);
     }
 
     public interface IDestructibleEntity : IEntity {
@@ -79,4 +79,9 @@ namespace RTSEngine.Interfaces {
         ICombatController CombatController { get; set; }
     }
 
+    public interface ISquadEntity : IEntity {
+
+
+        void AddCombatant(ICombatEntity e);
+    }
 }

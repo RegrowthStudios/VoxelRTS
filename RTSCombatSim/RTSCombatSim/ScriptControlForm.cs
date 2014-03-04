@@ -235,7 +235,10 @@ namespace Script {
             }
             else {
                 foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers) {
-                    data.Add(kv.Key, kv.Value);
+                    if(data.ContainsKey(kv.Key))
+                        data[kv.Key] = kv.Value;
+                    else
+                        data.Add(kv.Key, kv.Value);
                     rtbCompile.AppendText("Found Controller: " + kv.Key + "\n");
                 }
             }

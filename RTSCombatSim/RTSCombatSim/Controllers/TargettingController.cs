@@ -7,6 +7,8 @@ using RTSEngine.Data;
 
 namespace RTSCS.Controllers {
     public class TargettingController : ITargettingController {
+        private static readonly Random rand = new Random();
+
         // The Entity That This TargettingController Is Controlling
         public IEntity Entity {
             get;
@@ -31,13 +33,13 @@ namespace RTSCS.Controllers {
 
         // Find The Closest Target On An Opposing Team
         public void FindTarget(GameState g, float dt) {
+            float minDist = float.MaxValue;
             foreach(var team in g.teams) {
                 if(team != Entity.Team) {
-                    float minDist = float.MaxValue;
                     foreach(var unit in team.Units) {
                         if(!unit.IsAlive) return;
                         float dist = (unit.GridPosition - Entity.GridPosition).LengthSquared();
-                        if(dist < minDist) {
+                        if(dist < minDist || (dist == minDist && rand.NextDouble() < 0.5)) {
                             minDist = dist;
                             target = unit;
                         }
