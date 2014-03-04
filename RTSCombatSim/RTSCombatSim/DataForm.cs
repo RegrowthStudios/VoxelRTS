@@ -126,22 +126,22 @@ namespace RTSCS {
         }
       
         private void spawnButton_Click(object sender, EventArgs e) {          
-            teamSpawnPositions[1] = stringtoVector3(team1SpawnPositionTextBox.Text);
-            teamSpawnPositions[2] = stringtoVector3(team2SpawnPositionTextBox.Text);
-            teamSpawnPositions[3] = stringtoVector3(team3SpawnPositionTextBox.Text);
-            teamWaypoints[1] = stringtoVector2(team1WaypointTextBox.Text);
-            teamWaypoints[2] = stringtoVector2(team2WaypointTextBox.Text);
-            teamWaypoints[3] = stringtoVector2(team3WaypointTextBox.Text);
+            teamSpawnPositions[0] = stringtoVector3(team1SpawnPositionTextBox.Text);
+            teamSpawnPositions[1] = stringtoVector3(team2SpawnPositionTextBox.Text);
+            teamSpawnPositions[2] = stringtoVector3(team3SpawnPositionTextBox.Text);
+            teamWaypoints[0] = stringtoVector2(team1WaypointTextBox.Text);
+            teamWaypoints[1] = stringtoVector2(team2WaypointTextBox.Text);
+            teamWaypoints[2] = stringtoVector2(team3WaypointTextBox.Text);
 
             System.Drawing.Color systemColor = System.Drawing.Color.FromName(team1ColorTextBox.Text);
             XColor color1 = new XColor(systemColor.R, systemColor.G, systemColor.B, systemColor.A); //Here Color is Microsoft.Xna.Framework.Graphics.Color
-            teamColors[1] = color1;
+            teamColors[0] = color1;
             System.Drawing.Color systemColor2 = System.Drawing.Color.FromName(team2ColorTextBox.Text);
             XColor color2 = new XColor(systemColor2.R, systemColor2.G, systemColor2.B, systemColor2.A); 
-            teamColors[2] = color2;
+            teamColors[1] = color2;
             System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(team3ColorTextBox.Text);
             XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
-            teamColors[3] = color3;
+            teamColors[2] = color3;
        
             int max1 = Math.Max(int.Parse(team1Unit1TextBox.Text),int.Parse(team2Unit1TextBox.Text));
             int max2 = Math.Max(int.Parse(team3Unit1TextBox.Text),int.Parse(team1Unit2TextBox.Text));
@@ -152,28 +152,28 @@ namespace RTSCS {
             int max7 = Math.Max(max6, max3);
             int max8 = Math.Max(max7, max4);
 
-           for (int j = 1; j <= max8; j++)
+           for (int j = 0; j < max8; j++)
            {
-                    if (j <= int.Parse(team1Unit1TextBox.Text))
+                    if (j < int.Parse(team1Unit1TextBox.Text))
+                        teams[0].AddUnit(units[0], teamSpawnPositions[0]);
+                    if (j < int.Parse(team2Unit1TextBox.Text))
+                        teams[1].AddUnit(units[0], teamSpawnPositions[1]);
+                    if (j < int.Parse(team3Unit1TextBox.Text))
+                        teams[2].AddUnit(units[0], teamSpawnPositions[2]);
+
+                    if (j < int.Parse(team1Unit2TextBox.Text))
+                        teams[0].AddUnit(units[1], teamSpawnPositions[0]);
+                    if (j < int.Parse(team2Unit2TextBox.Text))
                         teams[1].AddUnit(units[1], teamSpawnPositions[1]);
-                    if (j <= int.Parse(team2Unit1TextBox.Text))
+                    if (j < int.Parse(team3Unit2TextBox.Text))
                         teams[2].AddUnit(units[1], teamSpawnPositions[2]);
-                    if (j <= int.Parse(team3Unit1TextBox.Text))
-                        teams[3].AddUnit(units[1], teamSpawnPositions[3]);
 
-                    if (j <= int.Parse(team1Unit2TextBox.Text))
+                    if (j < int.Parse(team1Unit3TextBox.Text))
+                        teams[0].AddUnit(units[2], teamSpawnPositions[0]);
+                    if (j < int.Parse(team2Unit3TextBox.Text))
                         teams[1].AddUnit(units[2], teamSpawnPositions[1]);
-                    if (j <= int.Parse(team2Unit2TextBox.Text))
+                    if (j < int.Parse(team3Unit3TextBox.Text))
                         teams[2].AddUnit(units[2], teamSpawnPositions[2]);
-                    if (j <= int.Parse(team3Unit2TextBox.Text))
-                        teams[3].AddUnit(units[2], teamSpawnPositions[3]);
-
-                    if (j <= int.Parse(team1Unit3TextBox.Text))
-                        teams[1].AddUnit(units[3], teamSpawnPositions[1]);
-                    if (j <= int.Parse(team2Unit3TextBox.Text))
-                        teams[2].AddUnit(units[3], teamSpawnPositions[2]);
-                    if (j <= int.Parse(team3Unit3TextBox.Text))
-                        teams[3].AddUnit(units[3], teamSpawnPositions[3]);
            }
      
         }
@@ -195,17 +195,17 @@ namespace RTSCS {
 
         private void spawn1Button_Click(object sender, EventArgs e)
         {
-            teams[1].AddUnit(units[spawn1SelectedIndex], teamSpawnPositions[1]);
+            teams[0].AddUnit(units[spawn1SelectedIndex], teamSpawnPositions[0]);
         }
 
         private void spawn2Button_Click(object sender, EventArgs e)
         {
-            teams[2].AddUnit(units[spawn2SelectedIndex], teamSpawnPositions[2]);
+            teams[1].AddUnit(units[spawn2SelectedIndex], teamSpawnPositions[1]);
         }
 
         private void spawn3Button_Click(object sender, EventArgs e)
         {
-            teams[3].AddUnit(units[spawn3SelectedIndex], teamSpawnPositions[3]);
+            teams[2].AddUnit(units[spawn3SelectedIndex], teamSpawnPositions[2]);
         }
     }
 }
