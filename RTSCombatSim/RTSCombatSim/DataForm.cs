@@ -10,7 +10,8 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
 using XColor = Microsoft.Xna.Framework.Color;
-using RTSCS.Controllers;
+using RTSEngine.Interfaces;
+using RTSEngine.Data.Parsers;
 
 namespace RTSCS {
     public partial class DataForm : Form, IDataForm {
@@ -30,6 +31,7 @@ namespace RTSCS {
         private Vector3[] teamSpawnPositions;
         private Vector2[] teamWaypoints;
         private XColor[] teamColors;
+        private Dictionary<string, ReflectedEntityController> controllers;
 
         // This Should Be Where You Figure Out Which Team You Are Operating On
         int selectedIndex;
@@ -37,7 +39,7 @@ namespace RTSCS {
         int spawn2SelectedIndex;
         int spawn3SelectedIndex;
 
-        public DataForm(RTSUnit[] ud, RTSTeam[] t) {
+        public DataForm(RTSUnit[] ud, RTSTeam[] t, Dictionary<string, ReflectedEntityController> c) {
             InitializeComponent();
             Closer = () => { Close(); };
 
@@ -47,6 +49,7 @@ namespace RTSCS {
             teamSpawnPositions = new Vector3[teams.Length];
             teamWaypoints = new Vector2[teams.Length];
             teamColors = new XColor[teams.Length];
+            controllers = c;
 
             // Populate Combo Boxes
             unitTypeComboBox.Items.Add("Unit Type 1");
@@ -73,16 +76,29 @@ namespace RTSCS {
             if(!e.Cancel) Instance = null;
         }
 
+        private IActionController GetActionController(string name) {
+            return controllers[name] as IActionController;
+        }
+        private IMovementController GetMovementController(string name) {
+            return controllers[name] as IMovementController;
+        }
+        private ITargettingController GetTargettingController(string name) {
+            return controllers[name] as ITargettingController;
+        }
+        private ICombatController GetCombatController(string name) {
+            return controllers[name] as ICombatController;
+        }
         private void SpawnUnit(RTSUnit ud, int teamIndex) {
             RTSUnitInstance u = teams[teamIndex].AddUnit(ud, teamSpawnPositions[teamIndex]);
-            u.ActionController = new ActionController();
-            u.MovementController = new MovementController();
+            u.ActionController = GetActionController(App.DEFAULT_ACTION_CONTROLLER);
+            u.MovementController = GetMovementController(App.DEFAULT_MOVEMENT_CONTROLLER);
             u.MovementController.SetWaypoints(new Vector2[] { teamWaypoints[teamIndex] });
-            u.CombatController = new CombatController();
-            u.TargettingController = new TargettingController();
+            u.CombatController = GetCombatController(App.DEFAULT_COMBAT_CONTROLLER);
+            u.TargettingController = GetTargettingController(App.DEFAULT_TARGETTING_CONTROLLER);
             if(OnUnitSpawn != null)
                 OnUnitSpawn(u, teamColors[teamIndex]);
         }
+
 
         private void unitTypeComboBox_Change(object sender, EventArgs e) {
             selectedIndex = unitTypeComboBox.SelectedIndex;
