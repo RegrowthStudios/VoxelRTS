@@ -55,6 +55,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.unitMenuTabPage = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnRefreshScripts = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.btnScriptDialog = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
@@ -94,7 +95,6 @@
             this.team2ColorTextBox = new System.Windows.Forms.TextBox();
             this.teamColorLabel = new System.Windows.Forms.Label();
             this.team1ColorTextBox = new System.Windows.Forms.TextBox();
-            this.btnRefreshScripts = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.unitMenuTabPage.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -329,7 +329,7 @@
             // spawn3ComboBox
             // 
             this.spawn3ComboBox.FormattingEnabled = true;
-            this.spawn3ComboBox.Location = new System.Drawing.Point(321, 248);
+            this.spawn3ComboBox.Location = new System.Drawing.Point(321, 249);
             this.spawn3ComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.spawn3ComboBox.Name = "spawn3ComboBox";
             this.spawn3ComboBox.Size = new System.Drawing.Size(79, 21);
@@ -338,7 +338,7 @@
             // 
             // spawn3Button
             // 
-            this.spawn3Button.Location = new System.Drawing.Point(403, 248);
+            this.spawn3Button.Location = new System.Drawing.Point(404, 249);
             this.spawn3Button.Margin = new System.Windows.Forms.Padding(2);
             this.spawn3Button.Name = "spawn3Button";
             this.spawn3Button.Size = new System.Drawing.Size(20, 19);
@@ -428,6 +428,16 @@
             this.groupBox1.TabIndex = 77;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Controllers";
+            // 
+            // btnRefreshScripts
+            // 
+            this.btnRefreshScripts.Location = new System.Drawing.Point(9, 173);
+            this.btnRefreshScripts.Name = "btnRefreshScripts";
+            this.btnRefreshScripts.Size = new System.Drawing.Size(129, 32);
+            this.btnRefreshScripts.TabIndex = 83;
+            this.btnRefreshScripts.Text = "Refresh Scripts";
+            this.btnRefreshScripts.UseVisualStyleBackColor = true;
+            this.btnRefreshScripts.Click += new System.EventHandler(this.btnRefreshScripts_Click);
             // 
             // label4
             // 
@@ -822,16 +832,6 @@
             this.team1ColorTextBox.Name = "team1ColorTextBox";
             this.team1ColorTextBox.Size = new System.Drawing.Size(79, 20);
             this.team1ColorTextBox.TabIndex = 62;
-            // 
-            // btnRefreshScripts
-            // 
-            this.btnRefreshScripts.Location = new System.Drawing.Point(9, 173);
-            this.btnRefreshScripts.Name = "btnRefreshScripts";
-            this.btnRefreshScripts.Size = new System.Drawing.Size(129, 32);
-            this.btnRefreshScripts.TabIndex = 83;
-            this.btnRefreshScripts.Text = "Refresh Scripts";
-            this.btnRefreshScripts.UseVisualStyleBackColor = true;
-            this.btnRefreshScripts.Click += new System.EventHandler(this.btnRefreshScripts_Click);
             // 
             // DataForm
             // 

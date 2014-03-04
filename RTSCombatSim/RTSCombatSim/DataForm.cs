@@ -42,18 +42,38 @@ namespace RTSCS {
         int spawn3SelectedIndex;
 
         // Default Unit Parameters
-        const int UNIT_DEFAULT_ARMOR = 0;
-        const int UNIT_DEFAULT_ATTACK_DAMAGE = 10;
-        const float UNIT_DEFAULT_ATTACK_TIMER = 0.5f;
-        const double UNIT_DEFAULT_CRITICAL_CHANCE = 0.05;
-        const int UNIT_DEFAULT_CRITICAL_DAMAGE = 20;
-        const int UNIT_DEFAULT_MAX_RANGE = 28;
-        const int UNIT_DEFAULT_MIN_RNAGE = 0;
-        const int UNIT_DEFAULT_HEALTH = 100;
-        const int UNIT_DEFAULT_SPEED = 55;
+        const int UNIT_SOLDIER_ARMOR = 0;
+        const int UNIT_SOLDIER_ATTACK_DAMAGE = 10;
+        const float UNIT_SOLDIER_ATTACK_TIMER = 0.5f;
+        const double UNIT_SOLDIER_CRITICAL_CHANCE = 0.05;
+        const int UNIT_SOLDIER_CRITICAL_DAMAGE = 15;
+        const int UNIT_SOLDIER_MAX_RANGE = 30;
+        const int UNIT_SOLDIER_MIN_RNAGE = 0;
+        const int UNIT_SOLDIER_HEALTH = 60;
+        const int UNIT_SOLDIER_SPEED = 45;
+
+        const int UNIT_HEAVY_SOLDIER_ARMOR = 0;
+        const int UNIT_HEAVY_SOLDIER_ATTACK_DAMAGE = 20;
+        const float UNIT_HEAVY_SOLDIER_ATTACK_TIMER = 1f;
+        const double UNIT_HEAVY_SOLDIER_CRITICAL_CHANCE = 0.05;
+        const int UNIT_HEAVY_SOLDIER_CRITICAL_DAMAGE = 30;
+        const int UNIT_HEAVY_SOLDIER_MAX_RANGE = 30;
+        const int UNIT_HEAVY_SOLDIER_MIN_RNAGE = 0;
+        const int UNIT_HEAVY_SOLDIER_HEALTH = 80;
+        const int UNIT_HEAVY_SOLDIER_SPEED = 30;
+
+        const int UNIT_BRUISER_ARMOR = 0;
+        const int UNIT_BRUISER_ATTACK_DAMAGE = 20;
+        const float UNIT_BRUISER_ATTACK_TIMER = 0.5f;
+        const double UNIT_BRUISER_CRITICAL_CHANCE = 0.05;
+        const int UNIT_BRUISER_CRITICAL_DAMAGE = 30;
+        const int UNIT_BRUISER_MAX_RANGE = 10;
+        const int UNIT_BRUISER_MIN_RNAGE = 0;
+        const int UNIT_BRUISER_HEALTH = 240;
+        const int UNIT_BRUISER_SPEED = 15;
 
         // Default TextBox Parameters
-        const String DEFAULT_UNIT_COUNT_TEXT = "1";
+        const String DEFAULT_UNIT_COUNT_TEXT = "0";
         const String DEFAULT_TEAM1_COLOR_TEXT = "1,0,0";
         const String DEFAULT_TEAM2_COLOR_TEXT = "0,0,1";
         const String DEFAULT_TEAM3_COLOR_TEXT = "0,1,0";
@@ -68,8 +88,8 @@ namespace RTSCS {
 
             // Set Up Data
             units = ud;
-            foreach(RTSUnit unit in units) {
-                SetDefaultsForRTSUnit(unit);
+            for(int type = 0; type < units.Length; type++) {
+                SetDefaultsForRTSUnit(units[type], type);
             }
             unitControllers = new string[units.Length][];
             for(int i = 0; i < unitControllers.Length; i++) {
@@ -112,16 +132,42 @@ namespace RTSCS {
             SetDefaultsForSpawnPage();
         }
 
-        private void SetDefaultsForRTSUnit(RTSUnit unit) {
-            unit.Health = UNIT_DEFAULT_HEALTH;
-            unit.MovementSpeed = UNIT_DEFAULT_SPEED;
-            unit.BaseCombatData.Armor = UNIT_DEFAULT_ARMOR;
-            unit.BaseCombatData.AttackDamage = UNIT_DEFAULT_ATTACK_DAMAGE;
-            unit.BaseCombatData.AttackTimer = UNIT_DEFAULT_ATTACK_TIMER;
-            unit.BaseCombatData.CriticalChance = UNIT_DEFAULT_CRITICAL_CHANCE;
-            unit.BaseCombatData.CriticalDamage = UNIT_DEFAULT_CRITICAL_DAMAGE;
-            unit.BaseCombatData.MaxRange = UNIT_DEFAULT_MAX_RANGE;
-            unit.BaseCombatData.MinRange = UNIT_DEFAULT_MIN_RNAGE;
+        private void SetDefaultsForRTSUnit(RTSUnit unit, int type) {
+            switch(type) {
+                case 1:
+                    unit.Health = UNIT_SOLDIER_HEALTH;
+                    unit.MovementSpeed = UNIT_SOLDIER_SPEED;
+                    unit.BaseCombatData.Armor = UNIT_SOLDIER_ARMOR;
+                    unit.BaseCombatData.AttackDamage = UNIT_SOLDIER_ATTACK_DAMAGE;
+                    unit.BaseCombatData.AttackTimer = UNIT_SOLDIER_ATTACK_TIMER;
+                    unit.BaseCombatData.CriticalChance = UNIT_SOLDIER_CRITICAL_CHANCE;
+                    unit.BaseCombatData.CriticalDamage = UNIT_SOLDIER_CRITICAL_DAMAGE;
+                    unit.BaseCombatData.MaxRange = UNIT_SOLDIER_MAX_RANGE;
+                    unit.BaseCombatData.MinRange = UNIT_SOLDIER_MIN_RNAGE;
+                    break;
+                case 2:
+                    unit.Health = UNIT_HEAVY_SOLDIER_HEALTH;
+                    unit.MovementSpeed = UNIT_HEAVY_SOLDIER_SPEED;
+                    unit.BaseCombatData.Armor = UNIT_HEAVY_SOLDIER_ARMOR;
+                    unit.BaseCombatData.AttackDamage = UNIT_HEAVY_SOLDIER_ATTACK_DAMAGE;
+                    unit.BaseCombatData.AttackTimer = UNIT_HEAVY_SOLDIER_ATTACK_TIMER;
+                    unit.BaseCombatData.CriticalChance = UNIT_HEAVY_SOLDIER_CRITICAL_CHANCE;
+                    unit.BaseCombatData.CriticalDamage = UNIT_HEAVY_SOLDIER_CRITICAL_DAMAGE;
+                    unit.BaseCombatData.MaxRange = UNIT_HEAVY_SOLDIER_MAX_RANGE;
+                    unit.BaseCombatData.MinRange = UNIT_HEAVY_SOLDIER_MIN_RNAGE;
+                    break;
+                case 3:
+                    unit.Health = UNIT_BRUISER_HEALTH;
+                    unit.MovementSpeed = UNIT_BRUISER_SPEED;
+                    unit.BaseCombatData.Armor = UNIT_BRUISER_ARMOR;
+                    unit.BaseCombatData.AttackDamage = UNIT_BRUISER_ATTACK_DAMAGE;
+                    unit.BaseCombatData.AttackTimer = UNIT_BRUISER_ATTACK_TIMER;
+                    unit.BaseCombatData.CriticalChance = UNIT_BRUISER_CRITICAL_CHANCE;
+                    unit.BaseCombatData.CriticalDamage = UNIT_BRUISER_CRITICAL_DAMAGE;
+                    unit.BaseCombatData.MaxRange = UNIT_BRUISER_MAX_RANGE;
+                    unit.BaseCombatData.MinRange = UNIT_BRUISER_MIN_RNAGE;
+                    break;
+            }
             unit.ICollidableShape = new CollisionCircle(10, Vector2.Zero);
         }
 
