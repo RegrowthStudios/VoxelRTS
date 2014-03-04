@@ -86,7 +86,7 @@ namespace RTSCS {
             // Set Up Data
             units = ud;
             for(int type = 0; type < units.Length; type++) {
-                SetDefaultsForRTSUnit(units[type], type);
+                SetDefaultsForRTSUnit(type);
             }
             unitControllers = new string[units.Length][];
             for(int i = 0; i < unitControllers.Length; i++) {
@@ -129,9 +129,10 @@ namespace RTSCS {
             SetDefaultsForSpawnPage();
         }
 
-        private void SetDefaultsForRTSUnit(RTSUnit unit, int type) {
+        private void SetDefaultsForRTSUnit(int type) {
+            RTSUnit unit = units[type];
             switch(type) {
-                case 1:
+                case 0:
                     unit.Health = UNIT_SOLDIER_HEALTH;
                     unit.MovementSpeed = UNIT_SOLDIER_SPEED;
                     unit.BaseCombatData.Armor = UNIT_SOLDIER_ARMOR;
@@ -142,7 +143,7 @@ namespace RTSCS {
                     unit.BaseCombatData.MaxRange = UNIT_SOLDIER_MAX_RANGE;
                     unit.BaseCombatData.MinRange = UNIT_SOLDIER_MIN_RNAGE;
                     break;
-                case 2:
+                case 1:
                     unit.Health = UNIT_HEAVY_SOLDIER_HEALTH;
                     unit.MovementSpeed = UNIT_HEAVY_SOLDIER_SPEED;
                     unit.BaseCombatData.Armor = UNIT_HEAVY_SOLDIER_ARMOR;
@@ -153,7 +154,7 @@ namespace RTSCS {
                     unit.BaseCombatData.MaxRange = UNIT_HEAVY_SOLDIER_MAX_RANGE;
                     unit.BaseCombatData.MinRange = UNIT_HEAVY_SOLDIER_MIN_RNAGE;
                     break;
-                case 3:
+                case 2:
                     unit.Health = UNIT_BRUISER_HEALTH;
                     unit.MovementSpeed = UNIT_BRUISER_SPEED;
                     unit.BaseCombatData.Armor = UNIT_BRUISER_ARMOR;

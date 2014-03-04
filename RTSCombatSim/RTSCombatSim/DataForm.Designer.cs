@@ -488,12 +488,13 @@
             // 
             this.cbMC.FormattingEnabled = true;
             this.cbMC.Items.AddRange(new object[] {
+            "RTSCS.Controllers.NoMovementController",
             "RTSCS.Controllers.MovementController"});
             this.cbMC.Location = new System.Drawing.Point(87, 73);
             this.cbMC.Name = "cbMC";
             this.cbMC.Size = new System.Drawing.Size(194, 21);
             this.cbMC.TabIndex = 78;
-            this.cbMC.Text = "RTSCS.Controllers.MovementController";
+            this.cbMC.Text = "RTSCS.Controllers.NoMovementController";
             // 
             // cbCC
             // 

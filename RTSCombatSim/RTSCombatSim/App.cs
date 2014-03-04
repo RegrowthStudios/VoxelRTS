@@ -41,6 +41,7 @@ namespace RTSCS {
         public const int MAX_INSTANCES_PER_UNIT = 100;
         public const string DEFAULT_ACTION_CONTROLLER = "RTSCS.Controllers.ActionController";
         public const string DEFAULT_MOVEMENT_CONTROLLER = "RTSCS.Controllers.MovementController";
+        public const string DEFAULT_NO_MOVEMENT_CONTROLLER = "RTSCS.Controllers.NoMovementController";
         public const string DEFAULT_TARGETTING_CONTROLLER = "RTSCS.Controllers.TargettingController";
         public const string DEFAULT_COMBAT_CONTROLLER = "RTSCS.Controllers.CombatController";
 
@@ -103,16 +104,6 @@ namespace RTSCS {
             Units = new RTSUnit[MAX_UNITS];
             for(int i = 0; i < Units.Length; i++) {
                 Units[i] = new RTSUnit();
-                Units[i].BaseCombatData.Armor = 0;
-                Units[i].BaseCombatData.AttackDamage = 10;
-                Units[i].BaseCombatData.AttackTimer = 1f;
-                Units[i].BaseCombatData.CriticalChance = 0.5;
-                Units[i].BaseCombatData.CriticalDamage = 20;
-                Units[i].BaseCombatData.MaxRange = 28;
-                Units[i].BaseCombatData.MinRange = 0;
-                Units[i].Health = 100;
-                Units[i].ICollidableShape = new CollisionCircle(10, Vector2.Zero);
-                Units[i].MovementSpeed = 55f;
             }
 
             // Create Game State
@@ -138,6 +129,9 @@ namespace RTSCS {
                 Controllers.Add(kv.Key, kv.Value);
             cec = EntityControllerParser.Compile(@"Controllers\MovementController.cs", references, out error);
             foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\NoMovementController.cs", references, out error);
+            foreach (KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
                 Controllers.Add(kv.Key, kv.Value);
             cec = EntityControllerParser.Compile(@"Controllers\CombatController.cs", references, out error);
             foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
@@ -167,37 +161,7 @@ namespace RTSCS {
             unitGeometry = new UnitGeometry[Units.Length];
             unitGeometry[0] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit1.png", MAX_INSTANCES_PER_UNIT, Units[0]);
             unitGeometry[1] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit2.png", MAX_INSTANCES_PER_UNIT, Units[1]);
-            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit3.png", MAX_INSTANCES_PER_UNIT, Units[2]);
-
-            Random r = new Random();
-            for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
-                RTSUnitInstance u = Teams[0].AddUnit(Units[0],
-                    new Vector3(r.Next(-200, 201), r.Next(-200, 201), 0)
-                    );
-                u.ActionController = Controllers[DEFAULT_ACTION_CONTROLLER].CreateInstance() as IActionController;
-                u.MovementController = Controllers[DEFAULT_MOVEMENT_CONTROLLER].CreateInstance() as IMovementController;
-                u.MovementController.SetWaypoints(new Vector2[] { Vector2.One * 0 });
-                u.TargettingController = Controllers[DEFAULT_TARGETTING_CONTROLLER].CreateInstance() as ITargettingController;
-                u.CombatController = Controllers[DEFAULT_COMBAT_CONTROLLER].CreateInstance() as ICombatController;
-                foreach(var ug in unitGeometry) {
-                    if(ug.UnitData == u.UnitData)
-                        ug.AddUnit(u, Color.Red);
-                }
-            }
-            for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
-                RTSUnitInstance u = Teams[1].AddUnit(Units[1],
-                    new Vector3(r.Next(-200, 201), r.Next(-200, 201), 0)
-                    );
-                u.ActionController = Controllers[DEFAULT_ACTION_CONTROLLER].CreateInstance() as IActionController;
-                u.MovementController = Controllers[DEFAULT_MOVEMENT_CONTROLLER].CreateInstance() as IMovementController;
-                u.MovementController.SetWaypoints(new Vector2[] { Vector2.One * 0 });
-                u.TargettingController = Controllers[DEFAULT_TARGETTING_CONTROLLER].CreateInstance() as ITargettingController;
-                u.CombatController = Controllers[DEFAULT_COMBAT_CONTROLLER].CreateInstance() as ICombatController;
-                foreach(var ug in unitGeometry) {
-                    if(ug.UnitData == u.UnitData)
-                        ug.AddUnit(u, Color.Blue);
-                }
-            }
+            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit3.png", MAX_INSTANCES_PER_UNIT, Units[2]);   
         }
         protected override void UnloadContent() {
             renderer.Dispose();
@@ -280,6 +244,7 @@ namespace RTSCS {
                 foreach(var team in GameState.teams) {
                     if(selections[ti]) {
                         foreach(RTSUnitInstance unit in team.Units) {
+                            unit.MovementController = Controllers[DEFAULT_MOVEMENT_CONTROLLER].CreateInstance() as IMovementController;
                             unit.MovementController.SetWaypoints(new Vector2[] { new Vector2(loc.X, loc.Y) });
                         }
                     }
