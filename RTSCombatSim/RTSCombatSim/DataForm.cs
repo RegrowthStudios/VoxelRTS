@@ -162,7 +162,7 @@ namespace RTSCS {
                 for(int u = 0; u < units.Length; u++) {
                     int spawnCount = int.Parse(PickTextBox(t, u).Text);
                     for(int count = 0; count < spawnCount; count++) {
-                        teams[t].AddUnit(units[u], teamSpawnPositions[t]);
+                        SpawnUnit(units[u], t);
                     }
                 }
             }
@@ -198,17 +198,17 @@ namespace RTSCS {
 
         private void spawn1Button_Click(object sender, EventArgs e)
         {
-            teams[1].AddUnit(units[spawn1SelectedIndex], teamSpawnPositions[1]);
+            SpawnUnit(units[spawn1SelectedIndex], 0);
         }
 
         private void spawn2Button_Click(object sender, EventArgs e)
         {
-            teams[2].AddUnit(units[spawn2SelectedIndex], teamSpawnPositions[2]);
+            SpawnUnit(units[spawn2SelectedIndex], 1);
         }
 
         private void spawn3Button_Click(object sender, EventArgs e)
         {
-            teams[3].AddUnit(units[spawn3SelectedIndex], teamSpawnPositions[3]);
+            SpawnUnit(units[spawn3SelectedIndex], 2);
         }
     }
 }
