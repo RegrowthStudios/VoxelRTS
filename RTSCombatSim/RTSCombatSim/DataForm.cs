@@ -142,9 +142,7 @@ namespace RTSCS {
             System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(team3ColorTextBox.Text);
             XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
             teamColors[3] = color3;
-        }
-
-        private void Spawn1Clicked(object sender, EventArgs e) {
+       
             int max1 = Math.Max(int.Parse(team1Unit1TextBox.Text),int.Parse(team2Unit1TextBox.Text));
             int max2 = Math.Max(int.Parse(team3Unit1TextBox.Text),int.Parse(team1Unit2TextBox.Text));
             int max3 = Math.Max(int.Parse(team2Unit2TextBox.Text),int.Parse(team3Unit2TextBox.Text));
