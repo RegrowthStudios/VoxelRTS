@@ -322,6 +322,10 @@ namespace RTSCS {
 
         #region Entry Point
         private static void RunMainInstance(string[] args) {
+            using(var f = new ScriptControlForm(null)){
+                f.ShowDialog();
+            }
+
             using(app = new App()) {
                 form = null;
 

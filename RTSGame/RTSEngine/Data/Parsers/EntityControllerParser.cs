@@ -91,5 +91,40 @@ namespace RTSEngine.Data.Parsers {
             }
             return cec;
         }
+        public static CompiledEntityControllers CompileText(string text, string[] references, out string error) {
+            // No Error Default
+            error = null;
+
+            // Compile
+            CompilerParameters compParams = new CompilerParameters(references, null, false);
+            compParams.CompilerOptions = "/optimize";
+            compParams.GenerateExecutable = false;
+            compParams.GenerateInMemory = true;
+            compParams.TreatWarningsAsErrors = false;
+            CompilerResults cr = compiler.CompileAssemblyFromSource(compParams, text);
+
+            // Check For Errors
+            if(cr.Errors.Count > 0) {
+                error = "";
+                foreach(var e in cr.Errors)
+                    error += e + "\n";
+                return null;
+            }
+            CompiledEntityControllers cec = new CompiledEntityControllers();
+            Assembly a = cr.CompiledAssembly;
+            Type[] types = a.GetExportedTypes();
+            foreach(Type t in types) {
+                // We Don't Want Abstract Classes Or Interfaces
+                if(t.IsAbstract || t.IsInterface) continue;
+
+                Type[] interfaces = t.GetInterfaces();
+                foreach(Type ti in interfaces) {
+                    if(ti.Equals(typeof(IEntityController))) {
+                        cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
+                    }
+                }
+            }
+            return cec;
+        }
     }
 }
