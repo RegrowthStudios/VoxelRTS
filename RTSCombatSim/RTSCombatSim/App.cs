@@ -217,6 +217,18 @@ namespace RTSCS {
             ks = Keyboard.GetState();
             ms = Mouse.GetState();
 
+            if(ms.ScrollWheelValue != pms.ScrollWheelValue) {
+                if(ms.ScrollWheelValue > pms.ScrollWheelValue)
+                    renderer.Projection *= Matrix.CreateScale(1.1f, 1.1f, 1);
+                else
+                    renderer.Projection *= Matrix.CreateScale(1 / 1.1f, 1 / 1.1f, 1);
+            }
+            if(ks.IsKeyDown(Keys.LeftControl) && (pms.X != ms.X || pms.Y != ms.Y))
+                renderer.Projection *= Matrix.CreateTranslation(
+                    2f * (ms.X - pms.X) / (float)GraphicsDevice.Viewport.Width,
+                    2f * (pms.Y - ms.Y) / (float)GraphicsDevice.Viewport.Height,
+                    0);
+
             // Toggle Pausing
             if(ks.IsKeyDown(Keys.P) && !pks.IsKeyDown(Keys.P))
                 IsPaused = !IsPaused;
