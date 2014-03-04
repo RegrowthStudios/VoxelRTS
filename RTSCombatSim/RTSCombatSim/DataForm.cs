@@ -109,73 +109,60 @@ namespace RTSCS {
             units[selectedIndex].MovementSpeed = int.Parse(movementSpeedTextBox.Text);
         }
 
-        private Vector3 stringtoVector3(String s) {
-            //Assumes data is inputted in the form x,y,z
-            float x = float.Parse(s.Substring(0,1));
-            float y = float.Parse(s.Substring(2,3));
-            float z = float.Parse(s.Substring(4,5));
-            Vector3 posvec = new Vector3(x,y,z);
-            return posvec;
+        // Assumes Data Is Input As (x,y,z)
+        private Vector3 StringToVector3(String s) {
+            String[] splitString = s.Split(',');
+            if(splitString.Length != 3) return Vector3.Zero;
+            return new Vector3(float.Parse(splitString[0]), float.Parse(splitString[1]), float.Parse(splitString[2]));
         }
-        private Vector2 stringtoVector2(String s) {
-            //Assumes data is inputted in the form x,y
-            float x = float.Parse(s.Substring(0,1));
-            float y = float.Parse(s.Substring(2,3));
-            Vector2 posvec = new Vector2(x,y);
-            return posvec;
+
+        // Assumes Data Is Input As (x,y)
+        private Vector2 StringToVector2(String s) {
+            String[] splitString = s.Split(',');
+            if(splitString.Length != 2) return Vector2.Zero;
+            return new Vector2(float.Parse(splitString[0]), float.Parse(splitString[1]));
         }
       
         private void spawnButton_Click(object sender, EventArgs e) {          
-            teamSpawnPositions[1] = stringtoVector3(team1SpawnPositionTextBox.Text);
-            teamSpawnPositions[2] = stringtoVector3(team2SpawnPositionTextBox.Text);
-            teamSpawnPositions[3] = stringtoVector3(team3SpawnPositionTextBox.Text);
-            teamWaypoints[1] = stringtoVector2(team1WaypointTextBox.Text);
-            teamWaypoints[2] = stringtoVector2(team2WaypointTextBox.Text);
-            teamWaypoints[3] = stringtoVector2(team3WaypointTextBox.Text);
+            teamSpawnPositions[0] = StringToVector3(team1SpawnPositionTextBox.Text);
+            teamSpawnPositions[1] = StringToVector3(team2SpawnPositionTextBox.Text);
+            teamSpawnPositions[2] = StringToVector3(team3SpawnPositionTextBox.Text);
+
+            teamWaypoints[0] = StringToVector2(team1WaypointTextBox.Text);
+            teamWaypoints[1] = StringToVector2(team2WaypointTextBox.Text);
+            teamWaypoints[2] = StringToVector2(team3WaypointTextBox.Text);
 
             System.Drawing.Color systemColor = System.Drawing.Color.FromName(team1ColorTextBox.Text);
             XColor color1 = new XColor(systemColor.R, systemColor.G, systemColor.B, systemColor.A); //Here Color is Microsoft.Xna.Framework.Graphics.Color
-            teamColors[1] = color1;
+            teamColors[0] = color1;
             System.Drawing.Color systemColor2 = System.Drawing.Color.FromName(team2ColorTextBox.Text);
             XColor color2 = new XColor(systemColor2.R, systemColor2.G, systemColor2.B, systemColor2.A); 
-            teamColors[2] = color2;
+            teamColors[1] = color2;
             System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(team3ColorTextBox.Text);
             XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
-            teamColors[3] = color3;
-       
-            int max1 = Math.Max(int.Parse(team1Unit1TextBox.Text),int.Parse(team2Unit1TextBox.Text));
-            int max2 = Math.Max(int.Parse(team3Unit1TextBox.Text),int.Parse(team1Unit2TextBox.Text));
-            int max3 = Math.Max(int.Parse(team2Unit2TextBox.Text),int.Parse(team3Unit2TextBox.Text));
-            int max4 = Math.Max(int.Parse(team1Unit3TextBox.Text),int.Parse(team2Unit3TextBox.Text));
-            int max5 = Math.Max(max1,int.Parse(team3Unit3TextBox.Text));
-            int max6 = Math.Max(max5, max2);
-            int max7 = Math.Max(max6, max3);
-            int max8 = Math.Max(max7, max4);
+            teamColors[2] = color3;
 
-           for (int j = 1; j <= max8; j++)
-           {
-                    if (j <= int.Parse(team1Unit1TextBox.Text))
-                        teams[1].AddUnit(units[1], teamSpawnPositions[1]);
-                    if (j <= int.Parse(team2Unit1TextBox.Text))
-                        teams[2].AddUnit(units[1], teamSpawnPositions[2]);
-                    if (j <= int.Parse(team3Unit1TextBox.Text))
-                        teams[3].AddUnit(units[1], teamSpawnPositions[3]);
+            for(int t = 0; t < teams.Length; t++) {
+                for(int u = 0; u < units.Length; u++) {
+                    int spawnCount = int.Parse(PickTextBox(t, u).Text);
+                    for(int count = 0; count < spawnCount; count++) {
+                        teams[t].AddUnit(units[u], teamSpawnPositions[t]);
+                    }
+                }
+            }
+        }
 
-                    if (j <= int.Parse(team1Unit2TextBox.Text))
-                        teams[1].AddUnit(units[2], teamSpawnPositions[1]);
-                    if (j <= int.Parse(team2Unit2TextBox.Text))
-                        teams[2].AddUnit(units[2], teamSpawnPositions[2]);
-                    if (j <= int.Parse(team3Unit2TextBox.Text))
-                        teams[3].AddUnit(units[2], teamSpawnPositions[3]);
-
-                    if (j <= int.Parse(team1Unit3TextBox.Text))
-                        teams[1].AddUnit(units[3], teamSpawnPositions[1]);
-                    if (j <= int.Parse(team2Unit3TextBox.Text))
-                        teams[2].AddUnit(units[3], teamSpawnPositions[2]);
-                    if (j <= int.Parse(team3Unit3TextBox.Text))
-                        teams[3].AddUnit(units[3], teamSpawnPositions[3]);
-           }
-     
+        // There Has To Be A Cleaner Way To Do This... I Wish I Had OCaml's Match...
+        private TextBox PickTextBox(int team, int unit) {
+            if(team == 0 && unit == 0) return team1Unit1TextBox;
+            else if(team == 0 && unit == 1) return team1Unit2TextBox;
+            else if(team == 0 && unit == 2) return team1Unit3TextBox;
+            else if(team == 1 && unit == 0) return team2Unit1TextBox;
+            else if(team == 1 && unit == 1) return team2Unit2TextBox;
+            else if(team == 1 && unit == 2) return team2Unit3TextBox;
+            else if(team == 2 && unit == 0) return team3Unit1TextBox;
+            else if(team == 2 && unit == 1) return team3Unit2TextBox;
+            else return team3Unit3TextBox;
         }
 
         private void Spawn1ComboBox_SelectedIndexChanged(object sender, EventArgs e)
