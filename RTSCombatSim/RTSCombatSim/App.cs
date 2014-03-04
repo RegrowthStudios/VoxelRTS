@@ -54,6 +54,7 @@ namespace RTSCS {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Renderer renderer;
+        CombatAnimator combAnimator;
         CombatMap map;
 
         // For Pausing The Simulation
@@ -148,6 +149,8 @@ namespace RTSCS {
         }
         protected override void LoadContent() {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            combAnimator = new CombatAnimator(GraphicsDevice, "Content\\Textures\\Unit2.png");
 
             renderer = new Renderer(GraphicsDevice, XNAEffect.Compile(GraphicsDevice, "Content\\FX\\Unit.fx"));
             renderer.View = Matrix.CreateLookAt(new Vector3(0, 0, 1f), Vector3.Zero, Vector3.Up);

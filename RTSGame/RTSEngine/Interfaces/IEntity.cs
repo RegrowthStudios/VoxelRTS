@@ -67,8 +67,13 @@ namespace RTSEngine.Interfaces {
     public interface ICombatEntity : IDestructibleEntity, IMovingEntity {
 
         // Computes The Damage To Deal With Access To A Random Number
-        int DealDamage(double rand);
+        int ComputeDamage(double rand);
 
+        // Actually Damages A Target
+        void DamageTarget(double rand);
+
+        // Event From Combat
+        event Action<ICombatEntity, IDestructibleEntity> OnAttackMade;
 
         // This Can Change During The Entity's Lifecycle But Will Always Be There
         ICombatController CombatController { get; set; }

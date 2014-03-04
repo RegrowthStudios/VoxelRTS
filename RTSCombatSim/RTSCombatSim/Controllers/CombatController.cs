@@ -50,7 +50,7 @@ namespace RTSCS.Controllers {
                         }
 
                         if(minDistSquared <= distSquared) {
-                            target.Damage(unit.DealDamage(critRoller.NextDouble()));
+                            unit.DamageTarget(critRoller.NextDouble());
                             if(target.Health <= 0) entity.Target = null;
                         }
                     }

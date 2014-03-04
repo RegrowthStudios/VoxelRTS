@@ -124,6 +124,9 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // Combat Event
+        public event Action<ICombatEntity, IDestructibleEntity> OnAttackMade;
+
         // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
         public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector3 position) {
             Team = team;
@@ -135,8 +138,20 @@ namespace RTSEngine.Data.Team {
         }
 
         // Computes The Damage To Deal With Access To A Random Number
-        public int DealDamage(double rand) {
+        public int ComputeDamage(double rand) {
             return UnitData.BaseCombatData.ComputeDamageDealt(rand);
+        }
+
+        // Applies Damage
+        public void DamageTarget(double rand) {
+            if(Target == null) return;
+            IDestructibleEntity t = target as IDestructibleEntity;
+            if(t == null) return;
+
+            // Damage
+            t.Damage(ComputeDamage(rand));
+            if(OnAttackMade != null)
+                OnAttackMade(this, t);
         }
 
         // Applies Damage To Health
