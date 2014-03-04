@@ -21,11 +21,6 @@ using RTSEngine.Data.Team;
 using RTSCS.Controllers;
 
 namespace RTSCS {
-    public class GameRestartArgs {
-        public RTSTeam[] Teams;
-        public RTSUnit[] Units;
-    };
-
     public class App : Microsoft.Xna.Framework.Game {
         // Instancing And Data Counts
         public const int MAX_TEAMS = 3;
@@ -44,7 +39,6 @@ namespace RTSCS {
         CombatMap map;
 
         // For Pausing The Simulation
-        private bool keyToggle;
         public bool IsPaused {
             get;
             set;
@@ -76,7 +70,6 @@ namespace RTSCS {
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
             IsPaused = false;
-            keyToggle = false;
 
             // Setup Teams
             RTSTeam[] teams = new RTSTeam[MAX_TEAMS];
@@ -123,29 +116,31 @@ namespace RTSCS {
             map.Translation = Vector3.Zero;
 
             unitGeometry = new UnitGeometry[Units.Length];
-            unitGeometry[0] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", 4, MAX_INSTANCES_PER_UNIT, Units[0]);
-            unitGeometry[1] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", 4, MAX_INSTANCES_PER_UNIT, Units[1]);
-            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", 4, MAX_INSTANCES_PER_UNIT, Units[2]);
+            unitGeometry[0] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[0]);
+            unitGeometry[1] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[1]);
+            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[2]);
 
             Random r = new Random();
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
                 RTSUnitInstance u = Teams[0].AddUnit(Units[0],
                     new Vector3(r.Next(-200, 201), r.Next(-200, 201), 0)
                     );
-                u.ActionController = new ActionController(u);
-                u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 0 });
-                u.TargettingController = new TargettingController(u);
-                u.CombatController = new CombatController(u);
+                u.ActionController = new ActionController();
+                u.MovementController = new MovementController();
+                u.MovementController.SetWaypoints(new Vector2[] { Vector2.One * 0 });
+                u.TargettingController = new TargettingController();
+                u.CombatController = new CombatController();
                 AddNewUnit(u, Color.Red);
             }
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
                 RTSUnitInstance u = Teams[1].AddUnit(Units[1],
                     new Vector3(r.Next(-200, 201), r.Next(-200, 201), 0)
                     );
-                u.ActionController = new ActionController(u);
-                u.MovementController = new MovementController(u, new Vector2[] { Vector2.One * 0 });
-                u.TargettingController = new TargettingController(u);
-                u.CombatController = new CombatController(u);
+                u.ActionController = new ActionController();
+                u.MovementController = new MovementController();
+                u.MovementController.SetWaypoints(new Vector2[] { Vector2.One * 0 });
+                u.TargettingController = new TargettingController();
+                u.CombatController = new CombatController();
                 AddNewUnit(u, Color.Blue);
             }
         }
@@ -230,7 +225,7 @@ namespace RTSCS {
                 foreach(var team in GameState.teams) {
                     if(selections[ti]) {
                         foreach(RTSUnitInstance unit in team.Units) {
-                            unit.MovementController = new MovementController(unit, new Vector2[] { new Vector2(loc.X, loc.Y) });
+                            unit.MovementController.SetWaypoints(new Vector2[] { new Vector2(loc.X, loc.Y) });
                         }
                     }
                     ti++;
@@ -352,7 +347,6 @@ namespace RTSCS {
                 case "okay":
                 case "cool":
                     return true;
-                    break;
             }
             return false;
         }

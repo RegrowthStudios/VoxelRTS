@@ -8,21 +8,34 @@ using RTSEngine.Data;
 namespace RTSCS.Controllers {
     public class TargettingController : ITargettingController {
         // The Entity That This TargettingController Is Controlling
-        private IEntity entity;
         public IEntity Entity {
-            get { return entity; }
+            get;
+            private set;
         }
 
         // The Target Selected By Find Target
         private IEntity target;
 
+        // Constructors
+        public TargettingController() {
+            Entity = null;
+            target = null;
+        }
+
+        // Set Entity Only Once
+        public void SetEntity(IEntity e) {
+            if(Entity != null)
+                throw new InvalidOperationException("Controllers Can Only Have Entities Set Once");
+            Entity = e;
+        }
+
         // Find The Closest Target On An Opposing Team
         public void FindTarget(GameState g, float dt) {
             foreach(var team in g.teams) {
-                if(team != entity.Team) {
+                if(team != Entity.Team) {
                     float minDist = float.MaxValue;
                     foreach(var unit in team.Units) {
-                        float dist = (unit.GridPosition - entity.GridPosition).LengthSquared();
+                        float dist = (unit.GridPosition - Entity.GridPosition).LengthSquared();
                         if(dist < minDist) {
                             minDist = dist;
                             target = unit;
@@ -31,20 +44,8 @@ namespace RTSCS.Controllers {
                 }
             }
         }
-
         public void ChangeTarget(GameState g, float dt) {
-            entity.Target = target;
-        }
-
-        // Constructor
-        public TargettingController(IEntity entity, IEntity target) {
-            this.entity = entity;
-            this.target = target;
-        }
-
-        public TargettingController(IEntity entity) {
-            this.entity = entity;
-            this.target = null;
+            Entity.Target = target;
         }
     }
 }

@@ -33,6 +33,9 @@ namespace RTSCS {
 
         // This Should Be Where You Figure Out Which Team You Are Operating On
         int selectedIndex;
+        int spawn1SelectedIndex;
+        int spawn2SelectedIndex;
+        int spawn3SelectedIndex;
 
         public DataForm(RTSUnit[] ud, RTSTeam[] t) {
             InitializeComponent();
@@ -44,23 +47,23 @@ namespace RTSCS {
             teamSpawnPositions = new Vector3[teams.Length];
             teamWaypoints = new Vector2[teams.Length];
             teamColors = new XColor[teams.Length];
-            
+
             // Populate Combo Boxes
             unitTypeComboBox.Items.Add("Unit Type 1");
             unitTypeComboBox.Items.Add("Unit Type 2");
             unitTypeComboBox.Items.Add("Unit Type 3");
 
-            Spawn1ComboBox.Items.Add("Unit Type 1");
-            Spawn1ComboBox.Items.Add("Unit Type 2");
-            Spawn1ComboBox.Items.Add("Unit Type 3");
+            spawn1ComboBox.Items.Add("Unit Type 1");
+            spawn1ComboBox.Items.Add("Unit Type 2");
+            spawn1ComboBox.Items.Add("Unit Type 3");
 
-            Spawn2ComboBox.Items.Add("Unit Type 1");
-            Spawn2ComboBox.Items.Add("Unit Type 2");
-            Spawn2ComboBox.Items.Add("Unit Type 3");
+            spawn2ComboBox.Items.Add("Unit Type 1");
+            spawn2ComboBox.Items.Add("Unit Type 2");
+            spawn2ComboBox.Items.Add("Unit Type 3");
 
-            Spawn3ComboBox.Items.Add("Unit Type 1");
-            Spawn3ComboBox.Items.Add("Unit Type 2");
-            Spawn3ComboBox.Items.Add("Unit Type 3");
+            spawn3ComboBox.Items.Add("Unit Type 1");
+            spawn3ComboBox.Items.Add("Unit Type 2");
+            spawn3ComboBox.Items.Add("Unit Type 3");
         }
 
         private void DataForm_Load(object sender, EventArgs e) {
@@ -72,33 +75,34 @@ namespace RTSCS {
 
         private void SpawnUnit(RTSUnit ud, int teamIndex) {
             RTSUnitInstance u = teams[teamIndex].AddUnit(ud, teamSpawnPositions[teamIndex]);
-            u.ActionController = new ActionController(u);
-            u.MovementController = new MovementController(u, new Vector2[] { teamWaypoints[teamIndex] });
-            u.CombatController = new CombatController(u);
-            u.TargettingController = new TargettingController(u);
+            u.ActionController = new ActionController();
+            u.MovementController = new MovementController();
+            u.MovementController.SetWaypoints(new Vector2[] { teamWaypoints[teamIndex] });
+            u.CombatController = new CombatController();
+            u.TargettingController = new TargettingController();
             if(OnUnitSpawn != null)
                 OnUnitSpawn(u, teamColors[teamIndex]);
         }
 
-        private void UnitTypeComboBoxChanged(object sender, EventArgs e) {
+        private void unitTypeComboBox_Change(object sender, EventArgs e) {
             selectedIndex = unitTypeComboBox.SelectedIndex;
             minRangeTextBox.Text = units[selectedIndex].BaseCombatData.MinRange.ToString();
             maxRangeTextBox.Text = units[selectedIndex].BaseCombatData.MaxRange.ToString();
             attackDamageTextBox.Text = units[selectedIndex].BaseCombatData.AttackDamage.ToString();
             attackTimerTextBox.Text = units[selectedIndex].BaseCombatData.AttackTimer.ToString();
-            ArmorTextBox.Text = units[selectedIndex].BaseCombatData.Armor.ToString();
+            armorTextBox.Text = units[selectedIndex].BaseCombatData.Armor.ToString();
             criticalDamageTextBox.Text = units[selectedIndex].BaseCombatData.CriticalDamage.ToString();
             criticalChanceTextBox.Text = units[selectedIndex].BaseCombatData.CriticalChance.ToString();
             healthTextBox.Text = units[selectedIndex].Health.ToString();
             movementSpeedTextBox.Text = units[selectedIndex].MovementSpeed.ToString();
         }
 
-        private void SaveButtonClick(object sender, EventArgs e) {
+        private void saveButton_Click(object sender, EventArgs e) {
             units[selectedIndex].BaseCombatData.MinRange = int.Parse(minRangeTextBox.Text);
             units[selectedIndex].BaseCombatData.MaxRange = int.Parse(maxRangeTextBox.Text);
             units[selectedIndex].BaseCombatData.AttackTimer = int.Parse(attackTimerTextBox.Text);
             units[selectedIndex].BaseCombatData.AttackDamage = int.Parse(attackDamageTextBox.Text);
-            units[selectedIndex].BaseCombatData.Armor = int.Parse(ArmorTextBox.Text);
+            units[selectedIndex].BaseCombatData.Armor = int.Parse(armorTextBox.Text);
             units[selectedIndex].BaseCombatData.CriticalDamage = int.Parse(criticalDamageTextBox.Text);
             units[selectedIndex].BaseCombatData.CriticalChance = int.Parse(criticalChanceTextBox.Text);
             units[selectedIndex].Health = int.Parse(healthTextBox.Text);
@@ -121,35 +125,89 @@ namespace RTSCS {
             return posvec;
         }
       
-        private void SpawnButtonClick(object sender, EventArgs e) {          
-            teamSpawnPositions[1] = stringtoVector3(textBox19.Text);
-            teamSpawnPositions[2] = stringtoVector3(textBox18.Text);
-            teamSpawnPositions[3] = stringtoVector3(textBox17.Text);
-            teamWaypoints[1] = stringtoVector2(textBox22.Text);
-            teamWaypoints[2] = stringtoVector2(textBox21.Text);
-            teamWaypoints[3] = stringtoVector2(textBox20.Text);
+        private void spawnButton_Click(object sender, EventArgs e) {          
+            teamSpawnPositions[1] = stringtoVector3(team1SpawnPositionTextBox.Text);
+            teamSpawnPositions[2] = stringtoVector3(team2SpawnPositionTextBox.Text);
+            teamSpawnPositions[3] = stringtoVector3(team3SpawnPositionTextBox.Text);
+            teamWaypoints[1] = stringtoVector2(team1WaypointTextBox.Text);
+            teamWaypoints[2] = stringtoVector2(team2WaypointTextBox.Text);
+            teamWaypoints[3] = stringtoVector2(team3WaypointTextBox.Text);
 
-            System.Drawing.Color systemColor = System.Drawing.Color.FromName(textBox14.Text);
+            System.Drawing.Color systemColor = System.Drawing.Color.FromName(team1ColorTextBox.Text);
             XColor color1 = new XColor(systemColor.R, systemColor.G, systemColor.B, systemColor.A); //Here Color is Microsoft.Xna.Framework.Graphics.Color
             teamColors[1] = color1;
-            System.Drawing.Color systemColor2 = System.Drawing.Color.FromName(textBox15.Text);
+            System.Drawing.Color systemColor2 = System.Drawing.Color.FromName(team2ColorTextBox.Text);
             XColor color2 = new XColor(systemColor2.R, systemColor2.G, systemColor2.B, systemColor2.A); 
             teamColors[2] = color2;
-            System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(textBox16.Text);
+            System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(team3ColorTextBox.Text);
             XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
             teamColors[3] = color3;
         }
 
         private void Spawn1Clicked(object sender, EventArgs e) {
+            int max1 = Math.Max(int.Parse(team1Unit1TextBox.Text),int.Parse(team2Unit1TextBox.Text));
+            int max2 = Math.Max(int.Parse(team3Unit1TextBox.Text),int.Parse(team1Unit2TextBox.Text));
+            int max3 = Math.Max(int.Parse(team2Unit2TextBox.Text),int.Parse(team3Unit2TextBox.Text));
+            int max4 = Math.Max(int.Parse(team1Unit3TextBox.Text),int.Parse(team2Unit3TextBox.Text));
+            int max5 = Math.Max(max1,int.Parse(team3Unit3TextBox.Text));
+            int max6 = Math.Max(max5, max2);
+            int max7 = Math.Max(max6, max3);
+            int max8 = Math.Max(max7, max4);
 
+           for (int j = 1; j <= max8; j++)
+           {
+                    if (j <= int.Parse(team1Unit1TextBox.Text))
+                        teams[1].AddUnit(units[1], teamSpawnPositions[1]);
+                    if (j <= int.Parse(team2Unit1TextBox.Text))
+                        teams[2].AddUnit(units[1], teamSpawnPositions[2]);
+                    if (j <= int.Parse(team3Unit1TextBox.Text))
+                        teams[3].AddUnit(units[1], teamSpawnPositions[3]);
+
+                    if (j <= int.Parse(team1Unit2TextBox.Text))
+                        teams[1].AddUnit(units[2], teamSpawnPositions[1]);
+                    if (j <= int.Parse(team2Unit2TextBox.Text))
+                        teams[2].AddUnit(units[2], teamSpawnPositions[2]);
+                    if (j <= int.Parse(team3Unit2TextBox.Text))
+                        teams[3].AddUnit(units[2], teamSpawnPositions[3]);
+
+                    if (j <= int.Parse(team1Unit3TextBox.Text))
+                        teams[1].AddUnit(units[3], teamSpawnPositions[1]);
+                    if (j <= int.Parse(team2Unit3TextBox.Text))
+                        teams[2].AddUnit(units[3], teamSpawnPositions[2]);
+                    if (j <= int.Parse(team3Unit3TextBox.Text))
+                        teams[3].AddUnit(units[3], teamSpawnPositions[3]);
+           }
+     
         }
 
-        private void Spawn2Clicked(object sender, EventArgs e) {
-
+        private void Spawn1ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            spawn1SelectedIndex = spawn1ComboBox.SelectedIndex;
         }
 
-        private void Spawn3Clicked(object sender, EventArgs e) {
+        private void Spawn2ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            spawn2SelectedIndex = spawn2ComboBox.SelectedIndex;
+        }
 
+        private void Spawn3ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            spawn3SelectedIndex = spawn3ComboBox.SelectedIndex;
+        }
+
+        private void spawn1Button_Click(object sender, EventArgs e)
+        {
+            teams[1].AddUnit(units[spawn1SelectedIndex], teamSpawnPositions[1]);
+        }
+
+        private void spawn2Button_Click(object sender, EventArgs e)
+        {
+            teams[2].AddUnit(units[spawn2SelectedIndex], teamSpawnPositions[2]);
+        }
+
+        private void spawn3Button_Click(object sender, EventArgs e)
+        {
+            teams[3].AddUnit(units[spawn3SelectedIndex], teamSpawnPositions[3]);
         }
     }
 }

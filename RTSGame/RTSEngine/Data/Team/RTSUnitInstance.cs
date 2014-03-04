@@ -65,16 +65,48 @@ namespace RTSEngine.Data.Team {
         }
 
         // MovementController of The Unit
-        public IMovementController MovementController { get; set; }
+        private IMovementController mController;
+        public IMovementController MovementController {
+            get { return mController; }
+            set {
+                mController = value;
+                if(mController != null)
+                    mController.SetEntity(this);
+            }
+        }
 
         // ActionController of The Unit
-        public IActionController ActionController { get; set; }
+        private IActionController aController;
+        public IActionController ActionController {
+            get { return aController; }
+            set {
+                aController = value;
+                if(aController != null)
+                    aController.SetEntity(this);
+            }
+        }
 
         // TargettingController of The Unit
-        public ITargettingController TargettingController { get; set; }
+        private ITargettingController tController;
+        public ITargettingController TargettingController {
+            get { return tController; }
+            set {
+                tController = value;
+                if(tController != null)
+                    tController.SetEntity(this);
+            }
+        }
 
         // CombatController of The Unit
-        public ICombatController CombatController { get; set; }
+        private ICombatController cController;
+        public ICombatController CombatController {
+            get { return cController; }
+            set {
+                cController = value;
+                if(cController != null)
+                    cController.SetEntity(this);
+            }
+        }
 
         // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
         public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector3 position) {

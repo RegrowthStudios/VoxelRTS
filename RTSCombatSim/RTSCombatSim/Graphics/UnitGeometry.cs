@@ -73,7 +73,7 @@ namespace RTSCS.Graphics {
             get { return instances[i]; }
         }
 
-        public UnitGeometry(GraphicsDevice g, string texFile, float scale, int count, RTSUnit data) {
+        public UnitGeometry(GraphicsDevice g, string texFile, int count, RTSUnit data) {
             IsDisposed = false;
             UnitData = data;
             units = new List<UnitRenderData>();
@@ -85,10 +85,10 @@ namespace RTSCS.Graphics {
 
             // Create Model
             VertexPositionTexture[] verts = {
-                new VertexPositionTexture(new Vector3(-scale, scale, 0), Vector2.Zero),
-                new VertexPositionTexture(new Vector3(scale, scale, 0), Vector2.UnitX),
-                new VertexPositionTexture(new Vector3(-scale, -scale, 0), Vector2.UnitY),
-                new VertexPositionTexture(new Vector3(scale, -scale, 0), Vector2.One)
+                new VertexPositionTexture(new Vector3(-1, 1, 0), Vector2.Zero),
+                new VertexPositionTexture(new Vector3(1, 1, 0), Vector2.UnitX),
+                new VertexPositionTexture(new Vector3(-1, -1, 0), Vector2.UnitY),
+                new VertexPositionTexture(new Vector3(1, -1, 0), Vector2.One)
             };
             int[] inds = { 0, 1, 2, 2, 1, 3 };
 
@@ -165,12 +165,16 @@ namespace RTSCS.Graphics {
             for(int i = 0; i < units.Count; i++) {
                 float x = units[i].Unit.ViewDirection.X;
                 float y = units[i].Unit.ViewDirection.Y;
+                float s = units[i].Unit.CollisionGeometry.InnerRadius;
                 SetInstanceMatrix(i, new Matrix(
-                    x, y, 0, 0,
-                    y, -x, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 0, 1
-                    ) * Matrix.CreateTranslation(units[i].Unit.WorldPosition));
+                    x * s, y * s, 0, 0,
+                    y * s, -x * s, 0, 0,
+                    0, 0, s, 0,
+                    units[i].Unit.WorldPosition.X,
+                    units[i].Unit.WorldPosition.Y,
+                    units[i].Unit.WorldPosition.Z,
+                    1
+                    ));
                 SetInstanceColor(i, units[i].Color);
             }
             ApplyInstancing(units.Count);

@@ -8,81 +8,96 @@ using Microsoft.Xna.Framework;
 namespace RTSEngine.Data {
     #region CollisionCircle Class
     public class CollisionCircle : ICollidable {
-
-        protected CollisionType type;
-        public float radius;
-        private Vector2 center;
-        private bool isStatic;
-
+        // Collision Specifications
         public CollisionType CollisionType {
-            get { return type; }
+            get { return CollisionType.Circle; }
         }
-
-        public Vector2 Center {
-            get { return center; }
-            set { center = value; }
-        }
-
         public bool IsStatic {
-            get { return isStatic; }
+            get;
+            set;
+        }
+
+        // Location Parameter
+        public Vector2 Center {
+            get;
+            set;
+        }
+
+        // Size Parameters
+        public float Radius {
+            get;
+            set;
+        }
+        public float InnerRadius {
+            get { return Radius; }
+        }
+        public float BoundingRadius {
+            get { return Radius; }
         }
 
         // Constructor
-        public CollisionCircle(float radius, Vector2 center) {
-            type = CollisionType.Circle;
-            this.radius = radius;
-            this.center = center;
-            isStatic = false;
+        public CollisionCircle(float r, Vector2 c, bool isStatic = false) {
+            Radius = r;
+            Center = c;
+            IsStatic = IsStatic;
         }
 
         public object Clone() {
-            CollisionCircle c = new CollisionCircle(radius, center);
-            c.isStatic = isStatic;
-            return c;
+            return new CollisionCircle(Radius, Center, IsStatic);
         }
     }
     #endregion
 
     #region CollisionRect Class
     public class CollisionRect : ICollidable {
+        public const float SQRT_2 = 1.415f;
 
-        private CollisionType type;
-        public float width;
-        public float height;
-        private bool isStatic;
-        private Vector2 center;
-
+        // Collision Specifications
         public CollisionType CollisionType {
-            get { return type; }
+            get { return CollisionType.Rectangle; }
         }
-
-        public Vector2 Center {
-            get { return center; }
-            set { center = value; }
-        }
-
         public bool IsStatic {
-            get { return isStatic; }
+            get;
+            set;
+        }
+
+        // Location Parameter
+        public Vector2 Center {
+            get;
+            set;
+        }
+
+        // Size Parameters
+        private Vector2 size;
+        public float Width {
+            get { return size.X; }
+            set { size.X = value; }
+        }
+        public float Height {
+            get { return size.Y; }
+            set { size.Y = value; }
+        }
+        public float InnerRadius {
+            get { return Width < Height ? Width : Height; }
+        }
+        public float BoundingRadius {
+            get { return Width == Height ? Width * SQRT_2 : size.Length(); }
         }
 
         // Constructor
-        public CollisionRect(float width, float height, Vector2 center) {
-            type = CollisionType.Rectangle;
-            this.width = width;
-            this.height = height;
-            this.center = center;
-            isStatic = false;
+        public CollisionRect(float w, float h, Vector2 c, bool isStatic = false) {
+            Width = w;
+            Height = h;
+            Center = c;
+            IsStatic = IsStatic;
         }
 
         public object Clone() {
-            CollisionRect r = new CollisionRect(width, height, center);
-            r.isStatic = isStatic;
-            return r;
+            return new CollisionRect(Width, Height, Center, IsStatic);
         }
     }
     #endregion
 
-    #region CollisionController Class
     public static class CollisionController {
         private static readonly Random r = new Random();
         private const float OFFSET = 0.01f;
@@ -122,7 +137,7 @@ namespace RTSEngine.Data {
             float distance = d.Length();
 
             // If two circles collide
-            if(circle1.radius + circle2.radius > distance) {
+            if(circle1.Radius + circle2.Radius > distance) {
                 if(distance == 0) {
                     d.X = r.Next(-200, 201);
                     d.Y = r.Next(-200, 201);
@@ -136,17 +151,17 @@ namespace RTSEngine.Data {
                 // Static objects do not move, so only move back the non-static one
                 if(circle1.IsStatic) {
                     d *= -1;
-                    float distToPush = circle1.radius + circle2.radius - distance + OFFSET;
+                    float distToPush = circle1.Radius + circle2.Radius - distance + OFFSET;
                     circle2.Center += distToPush * d;
                 }
                 else if(circle2.IsStatic) {
                     Vector2 direction = d / distance;
-                    float distToPush = circle1.radius + circle2.radius - distance + OFFSET;
+                    float distToPush = circle1.Radius + circle2.Radius - distance + OFFSET;
                     circle1.Center += distToPush * d;
                 }
                 // If both objects are non-static, move them both back evenly
                 else {
-                    float distToPush = (circle1.radius + circle2.radius - distance) / 2 + OFFSET;
+                    float distToPush = (circle1.Radius + circle2.Radius - distance) / 2 + OFFSET;
                     circle1.Center += distToPush * d;
                     circle2.Center -= distToPush * d;
                 }
@@ -158,17 +173,17 @@ namespace RTSEngine.Data {
             // Reference: stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection/402010#402010
             float dx = circle.Center.X - rect.Center.X;
             float dy = circle.Center.Y - rect.Center.Y;
-            float cornerDistSqr = (float)(Math.Pow(dx - rect.width / 2, 2) + Math.Pow(dy - rect.height / 2, 2));
+            float cornerDistSqr = (float)(Math.Pow(dx - rect.Width / 2, 2) + Math.Pow(dy - rect.Height / 2, 2));
 
             // If circle and rectangle collide
-            if(dx <= rect.width / 2 ||
-                dy <= rect.height / 2 ||
-                cornerDistSqr <= circle.radius * circle.radius) {
+            if(dx <= rect.Width / 2 ||
+                dy <= rect.Height / 2 ||
+                cornerDistSqr <= circle.Radius * circle.Radius) {
                 // Create a collision boundary around the rectangle, in which collision occurs
-                float top = rect.Center.Y + rect.height / 2 + circle.radius;
-                float bottom = rect.Center.Y - rect.height / 2 - circle.radius;
-                float left = rect.Center.X - rect.width / 2 - circle.radius;
-                float right = rect.Center.X + rect.width / 2 + circle.radius;
+                float top = rect.Center.Y + rect.Height / 2 + circle.Radius;
+                float bottom = rect.Center.Y - rect.Height / 2 - circle.Radius;
+                float left = rect.Center.X - rect.Width / 2 - circle.Radius;
+                float right = rect.Center.X + rect.Width / 2 + circle.Radius;
                 float distToTop = Math.Abs(circle.Center.Y - top);
                 float distToBottom = Math.Abs(circle.Center.Y - bottom);
                 float distToLeft = Math.Abs(circle.Center.X - left);
@@ -198,14 +213,14 @@ namespace RTSEngine.Data {
         private static void HandleCollision(CollisionRect rect1, CollisionRect rect2) {
             // bottom1 means the bottom Y coordinate of rect1
             // left2 means the left X coordinate of rect2
-            float bottom1 = rect1.Center.Y - rect1.height / 2;
-            float bottom2 = rect2.Center.Y - rect2.height / 2;
-            float top1 = rect1.Center.Y + rect1.height / 2;
-            float top2 = rect2.Center.Y + rect2.height / 2;
-            float left1 = rect1.Center.X - rect1.width / 2;
-            float left2 = rect2.Center.X - rect2.width / 2;
-            float right1 = rect1.Center.X + rect1.width / 2;
-            float right2 = rect2.Center.X + rect2.width / 2;
+            float bottom1 = rect1.Center.Y - rect1.Height / 2;
+            float bottom2 = rect2.Center.Y - rect2.Height / 2;
+            float top1 = rect1.Center.Y + rect1.Height / 2;
+            float top2 = rect2.Center.Y + rect2.Height / 2;
+            float left1 = rect1.Center.X - rect1.Width / 2;
+            float left2 = rect2.Center.X - rect2.Width / 2;
+            float right1 = rect1.Center.X + rect1.Width / 2;
+            float right2 = rect2.Center.X + rect2.Width / 2;
 
             // If two rectangles collide
             if(top1 > bottom2 && top2 > bottom1 && left1 < right2 && left2 < right1) {
@@ -257,6 +272,4 @@ namespace RTSEngine.Data {
             }
         }
     }
-
-    #endregion
 }
