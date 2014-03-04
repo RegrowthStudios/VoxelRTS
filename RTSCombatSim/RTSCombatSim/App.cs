@@ -35,6 +35,7 @@ namespace RTSCS {
         // The Static Instances
         private static App app;
         private static DataForm form;
+        private static Exception formException;
 
         // Graphics Data
         GraphicsDeviceManager graphics;
@@ -154,6 +155,10 @@ namespace RTSCS {
         }
 
         protected override void Update(GameTime gameTime) {
+            // Check For Form Error
+            if(formException != null)
+                throw formException;
+
             // Kill When Form Is Closed
             if(DataForm.Instance == null) {
                 Exit();
@@ -292,9 +297,15 @@ namespace RTSCS {
 
                 // Create Form Thread
                 Thread t = new Thread(() => {
-                    using(form = new DataForm(app.Units, app.Teams)) {
-                        form.OnUnitSpawn += app.AddNewUnit;
-                        form.ShowDialog();
+                    try {
+                        formException = null;
+                        using(form = new DataForm(app.Units, app.Teams)) {
+                            form.OnUnitSpawn += app.AddNewUnit;
+                            form.ShowDialog();
+                        }
+                    }
+                    catch(Exception e) {
+                        formException = e;
                     }
                 });
                 t.SetApartmentState(ApartmentState.STA);
