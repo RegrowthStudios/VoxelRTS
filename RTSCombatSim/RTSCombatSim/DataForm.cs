@@ -50,6 +50,16 @@ namespace RTSCS {
         const int UNIT_DEFAULT_HEALTH = 100;
         const int UNIT_DEFAULT_SPEED = 55;
 
+        // Default TextBox Parameters
+        const String DEFAULT_UNIT_COUNT_TEXT = "1";
+        const String DEFAULT_TEAM1_COLOR_TEXT = "1,0,0";
+        const String DEFAULT_TEAM2_COLOR_TEXT = "0,1,0";
+        const String DEFAULT_TEAM3_COLOR_TEXT = "0,0,1";
+        const String DEFAULT_TEAM1_SPAWN_TEXT = "-20,-20,0";
+        const String DEFAULT_TEAM2_SPAWN_TEXT = "20,-20,0";
+        const String DEFAULT_TEAM3_SPAWN_TEXT = "20,20,0";
+        const String DEFAULT_WAYPOINT_TEXT = "0,0";
+
         public DataForm(RTSUnit[] ud, RTSTeam[] t, Dictionary<string, ReflectedEntityController> c) {
             InitializeComponent();
             Closer = () => { Close(); };
@@ -59,10 +69,11 @@ namespace RTSCS {
             foreach(RTSUnit unit in units) {
                 SetDefaultsForRTSUnit(unit);
             }
+            // Beware: Hardcoded To Expect 3 Teams Elsewhere
             teams = t;
-            teamSpawnPositions = new Vector3[3]{ new Vector3(-20, -20, 0), new Vector3(20, -20, 0),  new Vector3(20, 20, 0) };
-            teamWaypoints = new Vector2[3]{ Vector2.Zero, Vector2.Zero, Vector2.Zero };
-            teamColors = new XColor[3]{ XColor.Red, XColor.Blue, XColor.Green };
+            teamSpawnPositions = new Vector3[teams.Length];
+            teamWaypoints = new Vector2[teams.Length];
+            teamColors = new XColor[teams.Length];
             controllers = c;
 
             // Populate Combo Boxes
@@ -87,11 +98,12 @@ namespace RTSCS {
             spawn3ComboBox.SelectedIndex = 0;
 
             // Populate Spawn Page
-            SetDefaultCountsForSpawnPage();
+            SetDefaultsForSpawnPage();
         }
 
         private void SetDefaultsForRTSUnit(RTSUnit unit) {
             unit.Health = UNIT_DEFAULT_HEALTH;
+            unit.MovementSpeed = UNIT_DEFAULT_SPEED;
             unit.BaseCombatData.Armor = UNIT_DEFAULT_ARMOR;
             unit.BaseCombatData.AttackDamage = UNIT_DEFAULT_ATTACK_DAMAGE;
             unit.BaseCombatData.AttackTimer = UNIT_DEFAULT_ATTACK_TIMER;
@@ -99,18 +111,28 @@ namespace RTSCS {
             unit.BaseCombatData.CriticalDamage = UNIT_DEFAULT_CRITICAL_DAMAGE;
             unit.BaseCombatData.MaxRange = UNIT_DEFAULT_MAX_RANGE;
             unit.BaseCombatData.MinRange = UNIT_DEFAULT_MIN_RNAGE;
-            unit.BaseCombatData.MinRange = UNIT_DEFAULT_HEALTH;
-            unit.BaseCombatData.MinRange = UNIT_DEFAULT_SPEED;
         }
 
-        private void SetDefaultCountsForSpawnPage() {
+        private void SetDefaultsForSpawnPage() {
             for(int t = 0; t < teams.Length; t++) {
                 // Initialize Counts for Unit Types
                 for(int u = 0; u < teams.Length; u++) {
-                    TextBox tb = PickTextBox(t, u);
-                    tb.Text = "1";
+                    TextBox tb = PickUnitCountTextBox(t, u);
+                    tb.Text = DEFAULT_UNIT_COUNT_TEXT;
                 }
             }
+
+            team1ColorTextBox.Text = DEFAULT_TEAM1_COLOR_TEXT;
+            team2ColorTextBox.Text = DEFAULT_TEAM2_COLOR_TEXT;
+            team3ColorTextBox.Text = DEFAULT_TEAM3_COLOR_TEXT;
+
+            team1SpawnPositionTextBox.Text = DEFAULT_TEAM1_SPAWN_TEXT;
+            team2SpawnPositionTextBox.Text = DEFAULT_TEAM2_SPAWN_TEXT;
+            team3SpawnPositionTextBox.Text = DEFAULT_TEAM3_SPAWN_TEXT;
+
+            team1WaypointTextBox.Text = DEFAULT_WAYPOINT_TEXT;
+            team2WaypointTextBox.Text = DEFAULT_WAYPOINT_TEXT;
+            team3WaypointTextBox.Text = DEFAULT_WAYPOINT_TEXT;
 
         }
 
@@ -177,6 +199,13 @@ namespace RTSCS {
             return new Vector3(float.Parse(splitString[0]), float.Parse(splitString[1]), float.Parse(splitString[2]));
         }
 
+        // Assumes Data Is Input As (x,y,z)
+        private XColor StringToXColor(String s) {
+            String[] splitString = s.Split(',');
+            if(splitString.Length != 3) return XColor.Green;
+            return new XColor(float.Parse(splitString[0]), float.Parse(splitString[1]), float.Parse(splitString[2]));
+        }
+
         // Assumes Data Is Input As (x,y)
         private Vector2 StringToVector2(String s) {
             String[] splitString = s.Split(',');
@@ -193,19 +222,13 @@ namespace RTSCS {
             teamWaypoints[1] = StringToVector2(team2WaypointTextBox.Text);
             teamWaypoints[2] = StringToVector2(team3WaypointTextBox.Text);
 
-            System.Drawing.Color systemColor = System.Drawing.Color.FromName(team1ColorTextBox.Text);
-            XColor color1 = new XColor(systemColor.R, systemColor.G, systemColor.B, systemColor.A); //Here Color is Microsoft.Xna.Framework.Graphics.Color
-            teamColors[0] = color1;
-            System.Drawing.Color systemColor2 = System.Drawing.Color.FromName(team2ColorTextBox.Text);
-            XColor color2 = new XColor(systemColor2.R, systemColor2.G, systemColor2.B, systemColor2.A); 
-            teamColors[1] = color2;
-            System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(team3ColorTextBox.Text);
-            XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
-            teamColors[2] = color3;
+            teamColors[0] = StringToXColor(team1ColorTextBox.Text);
+            teamColors[1] = StringToXColor(team2ColorTextBox.Text);
+            teamColors[2] = StringToXColor(team3ColorTextBox.Text);
 
             for(int t = 0; t < teams.Length; t++) {
                 for(int u = 0; u < units.Length; u++) {
-                    int spawnCount = int.Parse(PickTextBox(t, u).Text);
+                    int spawnCount = int.Parse(PickUnitCountTextBox(t, u).Text);
                     for(int count = 0; count < spawnCount; count++) {
                         SpawnUnit(units[u], t);
                     }
@@ -214,7 +237,7 @@ namespace RTSCS {
         }
 
         // There Has To Be A Cleaner Way To Do This... I Wish I Had OCaml's Match...
-        private TextBox PickTextBox(int team, int unit) {
+        private TextBox PickUnitCountTextBox(int team, int unit) {
             if(team == 0 && unit == 0) return team1Unit1TextBox;
             else if(team == 0 && unit == 1) return team1Unit2TextBox;
             else if(team == 0 && unit == 2) return team1Unit3TextBox;
