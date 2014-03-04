@@ -38,20 +38,36 @@ namespace RTSEngine.Data.Team {
         public IEntity Target {
             get { return target; }
             set {
-                target = value;
-                if(OnNewAttackTarget != null)
-                    OnNewAttackTarget(this, (IDestructibleEntity)target);
+                if(target != value) {
+                    target = value;
+                    if(OnNewTarget != null)
+                        OnNewTarget(this, target);
+                }
             }
         }
 
         // Event Triggered When This Entity Find A New Attack Target (Null When Can't Find One)
-        public event Action<ICombatEntity, IDestructibleEntity> OnNewAttackTarget;
+        public event Action<IEntity, IEntity> OnNewTarget;
 
         // This Unit's Current Health
         public int Health { get; private set; }
+        public bool IsAlive {
+            get {
+                return Health > 0;
+            }
+            set {
+                if(!value)
+                    Destroy();
+                else if(!IsAlive)
+                    throw new InvalidOperationException("Cannot Bring Back Units From The Dead");
+            }
+        }
 
         // Event Triggered When This Entity Receives Damage
         public event Action<IDestructibleEntity, int> OnDamage;
+
+        // Destruction Event
+        public event Action<IEntity> OnDestruction;
 
         // Collision Geometry
         public ICollidable CollisionGeometry {
@@ -128,6 +144,13 @@ namespace RTSEngine.Data.Team {
             Health -= d;
             if(OnDamage != null)
                 OnDamage(this, d);
+        }
+
+        // Destroys This Entity
+        public void Destroy() {
+            Health = 0;
+            if(OnDestruction != null)
+                OnDestruction(this);
         }
 
         // Changes the Position of the Unit by Change

@@ -22,9 +22,21 @@ namespace RTSEngine.Interfaces {
         // Targetting Information
         IEntity Target { get; set; }
 
+        // Event Triggered When This Entity Finds A New Target (Null When Can't Find One)
+        event Action<IEntity, IEntity> OnNewTarget;
+
+        // Whether It Is Alive Or Not
+        bool IsAlive { get; set; }
+
+        // Event Triggered When Entity Is Destroyed
+        event Action<IEntity> OnDestruction;
+
         // These Can Change During The Entity's Lifecycle But Will Always Be There
         IActionController ActionController { get; set; }
         ITargettingController TargettingController { get; set; }
+
+        // Calls The Destruction Event
+        void Destroy();
     }
 
     public interface IMovingEntity : IEntity {
@@ -57,8 +69,6 @@ namespace RTSEngine.Interfaces {
         // Computes The Damage To Deal With Access To A Random Number
         int DealDamage(double rand);
 
-        // Event Triggered When This Entity Find A New Attack Target (Null When Can't Find One)
-        event Action<ICombatEntity, IDestructibleEntity> OnNewAttackTarget;
 
         // This Can Change During The Entity's Lifecycle But Will Always Be There
         ICombatController CombatController { get; set; }

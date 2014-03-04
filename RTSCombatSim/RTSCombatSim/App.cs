@@ -131,7 +131,7 @@ namespace RTSCS {
             foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
                 Controllers.Add(kv.Key, kv.Value);
             cec = EntityControllerParser.Compile(@"Controllers\NoMovementController.cs", references, out error);
-            foreach (KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
                 Controllers.Add(kv.Key, kv.Value);
             cec = EntityControllerParser.Compile(@"Controllers\CombatController.cs", references, out error);
             foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
@@ -161,7 +161,7 @@ namespace RTSCS {
             unitGeometry = new UnitGeometry[Units.Length];
             unitGeometry[0] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit1.png", MAX_INSTANCES_PER_UNIT, Units[0]);
             unitGeometry[1] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit2.png", MAX_INSTANCES_PER_UNIT, Units[1]);
-            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit3.png", MAX_INSTANCES_PER_UNIT, Units[2]);   
+            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit3.png", MAX_INSTANCES_PER_UNIT, Units[2]);
         }
         protected override void UnloadContent() {
             renderer.Dispose();
@@ -195,8 +195,15 @@ namespace RTSCS {
             base.Draw(gameTime);
         }
 
+        private static bool IsDeadApplier(RTSUnitInstance u) {
+            if(!u.IsAlive) {
+                u.Destroy();
+                return true;
+            }
+            return false;
+        }
         private static bool IsDead(RTSUnitInstance u) {
-            return u.Health < 0;
+            return !u.IsAlive;
         }
 
         // Game Controller
@@ -290,7 +297,7 @@ namespace RTSCS {
 
             // Kill Dead Units
             foreach(RTSTeam team in GameState.teams) {
-                team.RemoveAll(IsDead);
+                team.RemoveAll(IsDeadApplier);
             }
             foreach(var ug in unitGeometry) {
                 ug.RemoveAll(IsDead);
@@ -308,6 +315,12 @@ namespace RTSCS {
                     if(u.MovementController != null)
                         u.MovementController.SetWaypoints(sa.Waypoints);
                     u.TargettingController = sa.TC;
+
+                    // Add Events
+                    u.OnDestruction += OnUnitDeath;
+                    u.OnDamage += OnUnitDamage;
+                    u.OnNewTarget += OnUnitNewTarget;
+
                     foreach(var ug in unitGeometry) {
                         if(ug.UnitData == u.UnitData)
                             ug.AddUnit(u, sa.Color);
@@ -319,6 +332,16 @@ namespace RTSCS {
 
         public void AddNewUnit(RTSUISpawnArgs u) {
             toSpawn.Add(u);
+        }
+
+        private static void OnUnitDeath(IEntity e) {
+            Console.WriteLine("Entity [{0,12}] Was Killed", e.GetHashCode());
+        }
+        private static void OnUnitNewTarget(IEntity s, IEntity t) {
+            Console.WriteLine("Entity [{0,12}] Is Now Targeting [{1,12}]", s.GetHashCode(), t == null ? "NONE" : t.GetHashCode().ToString());
+        }
+        private static void OnUnitDamage(IDestructibleEntity e, int d) {
+            Console.WriteLine("Entity [{0,12}] Was Damaged By {1,-5} - Health = {2}", e.GetHashCode(), d, e.Health);
         }
 
         #region Entry Point
