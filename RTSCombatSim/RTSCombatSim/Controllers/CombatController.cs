@@ -35,19 +35,26 @@ namespace RTSCS.Controllers {
         public void Attack(GameState g, float dt) {
             if(attackCooldown <= 0) {
                 RTSUnitInstance unit = entity as RTSUnitInstance;
+                attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;
                 if(unit != null) {
                     RTSUnitInstance target = entity.Target as RTSUnitInstance;
                     if(target != null) {
                         float distSquared = (target.WorldPosition - unit.WorldPosition).LengthSquared();
                         float minDistSquared = unit.UnitData.BaseCombatData.MinRange * unit.UnitData.BaseCombatData.MinRange;
                         float maxDistSquared = unit.UnitData.BaseCombatData.MaxRange * unit.UnitData.BaseCombatData.MaxRange;
-                        if(minDistSquared <= distSquared && distSquared <= maxDistSquared) {
+
+                        // Lose Pursuit If It Is Out Of Range
+                        if(distSquared > maxDistSquared) {
+                            entity.Target = null;
+                            return;
+                        }
+
+                        if(minDistSquared <= distSquared) {
                             target.Damage(unit.DealDamage(critRoller.NextDouble()));
                             if(target.Health <= 0) entity.Target = null;
                         }
                     }
                 }
-                attackCooldown = unit.UnitData.BaseCombatData.AttackTimer; ;
             }
             else attackCooldown -= dt;
         }

@@ -79,7 +79,8 @@ namespace RTSCS.Graphics {
             g.DrawUserPrimitives(PrimitiveType.TriangleStrip, verts, 0, 2, VertexPositionTexture.VertexDeclaration);
         }
 
-        public void BeginUnitPass() {
+        public void BeginUnitPass(GraphicsDevice g) {
+            g.BlendState = BlendState.AlphaBlend;
             fxUnit.CurrentTechnique.Passes[0].Apply();
         }
     }
