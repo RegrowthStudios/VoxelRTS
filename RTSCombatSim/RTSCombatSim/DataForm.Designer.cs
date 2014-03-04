@@ -23,622 +23,661 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.label1 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.textBox5 = new System.Windows.Forms.TextBox();
-            this.textBox6 = new System.Windows.Forms.TextBox();
-            this.textBox7 = new System.Windows.Forms.TextBox();
-            this.textBox9 = new System.Windows.Forms.TextBox();
-            this.textBox10 = new System.Windows.Forms.TextBox();
-            this.textBox11 = new System.Windows.Forms.TextBox();
-            this.textBox12 = new System.Windows.Forms.TextBox();
-            this.textBox13 = new System.Windows.Forms.TextBox();
-            this.button2 = new System.Windows.Forms.Button();
-            this.label12 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
-            this.comboBox3 = new System.Windows.Forms.ComboBox();
-            this.button3 = new System.Windows.Forms.Button();
-            this.comboBox4 = new System.Windows.Forms.ComboBox();
-            this.button4 = new System.Windows.Forms.Button();
-            this.textBox8 = new System.Windows.Forms.TextBox();
-            this.label19 = new System.Windows.Forms.Label();
+            this.unitTypeLabel = new System.Windows.Forms.Label();
+            this.unitTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.minRangeTextBox = new System.Windows.Forms.TextBox();
+            this.minAttackRangeLabel = new System.Windows.Forms.Label();
+            this.spawn1Label = new System.Windows.Forms.Label();
+            this.spawn2Label = new System.Windows.Forms.Label();
+            this.spawn3Label = new System.Windows.Forms.Label();
+            this.unit1Label = new System.Windows.Forms.Label();
+            this.unit2Label = new System.Windows.Forms.Label();
+            this.unit3Label = new System.Windows.Forms.Label();
+            this.team1Unit1TextBox = new System.Windows.Forms.TextBox();
+            this.team1Unit3TextBox = new System.Windows.Forms.TextBox();
+            this.team2Unit3TextBox = new System.Windows.Forms.TextBox();
+            this.team2Unit2TextBox = new System.Windows.Forms.TextBox();
+            this.team2Unit1TextBox = new System.Windows.Forms.TextBox();
+            this.team3Unit3TextBox = new System.Windows.Forms.TextBox();
+            this.team3Unit2TextBox = new System.Windows.Forms.TextBox();
+            this.team3Unit1TextBox = new System.Windows.Forms.TextBox();
+            this.spawnButton = new System.Windows.Forms.Button();
+            this.addUnitLabel = new System.Windows.Forms.Label();
+            this.spawn1Button = new System.Windows.Forms.Button();
+            this.spawn1ComboBox = new System.Windows.Forms.ComboBox();
+            this.spawn2ComboBox = new System.Windows.Forms.ComboBox();
+            this.spawn2Button = new System.Windows.Forms.Button();
+            this.spawn3ComboBox = new System.Windows.Forms.ComboBox();
+            this.spawn3Button = new System.Windows.Forms.Button();
+            this.team1Unit2TextBox = new System.Windows.Forms.TextBox();
+            this.toSpawnLabel = new System.Windows.Forms.Label();
             this.helpProvider1 = new System.Windows.Forms.HelpProvider();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.button5 = new System.Windows.Forms.Button();
-            this.textBox28 = new System.Windows.Forms.TextBox();
-            this.label22 = new System.Windows.Forms.Label();
-            this.textBox26 = new System.Windows.Forms.TextBox();
-            this.label20 = new System.Windows.Forms.Label();
-            this.textBox25 = new System.Windows.Forms.TextBox();
-            this.label18 = new System.Windows.Forms.Label();
-            this.textBox24 = new System.Windows.Forms.TextBox();
-            this.label17 = new System.Windows.Forms.Label();
-            this.textBox23 = new System.Windows.Forms.TextBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.textBox20 = new System.Windows.Forms.TextBox();
-            this.textBox21 = new System.Windows.Forms.TextBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.textBox22 = new System.Windows.Forms.TextBox();
-            this.textBox17 = new System.Windows.Forms.TextBox();
-            this.textBox18 = new System.Windows.Forms.TextBox();
-            this.label14 = new System.Windows.Forms.Label();
-            this.textBox19 = new System.Windows.Forms.TextBox();
-            this.textBox16 = new System.Windows.Forms.TextBox();
-            this.textBox15 = new System.Windows.Forms.TextBox();
-            this.label13 = new System.Windows.Forms.Label();
-            this.textBox14 = new System.Windows.Forms.TextBox();
+            this.unitMenuTabPage = new System.Windows.Forms.TabPage();
+            this.saveUnitTypeButton = new System.Windows.Forms.Button();
+            this.movementSpeedTextBox = new System.Windows.Forms.TextBox();
+            this.movementSpeedLabel = new System.Windows.Forms.Label();
+            this.healthTextBox = new System.Windows.Forms.TextBox();
+            this.healthLabel = new System.Windows.Forms.Label();
+            this.criticalChanceTextBox = new System.Windows.Forms.TextBox();
+            this.criticalChanceLabel = new System.Windows.Forms.Label();
+            this.criticalDamageTextBox = new System.Windows.Forms.TextBox();
+            this.criticalDamageLabel = new System.Windows.Forms.Label();
+            this.attackTimerTextBox = new System.Windows.Forms.TextBox();
+            this.attackTimerLabel = new System.Windows.Forms.Label();
+            this.maxRangeTextBox = new System.Windows.Forms.TextBox();
+            this.maxAttackRangeLabel = new System.Windows.Forms.Label();
+            this.armorTextBox = new System.Windows.Forms.TextBox();
+            this.armorLabel = new System.Windows.Forms.Label();
+            this.attackDamageTextBox = new System.Windows.Forms.TextBox();
+            this.attackDamageLabel = new System.Windows.Forms.Label();
+            this.spawnMenuTabPage = new System.Windows.Forms.TabPage();
+            this.team3WaypointTextBox = new System.Windows.Forms.TextBox();
+            this.team2WaypointTextBox = new System.Windows.Forms.TextBox();
+            this.waypointLabel = new System.Windows.Forms.Label();
+            this.team1WaypointTextBox = new System.Windows.Forms.TextBox();
+            this.team3SpawnPositionTextBox = new System.Windows.Forms.TextBox();
+            this.team2SpawnPositionTextBox = new System.Windows.Forms.TextBox();
+            this.spawnPositionLabel = new System.Windows.Forms.Label();
+            this.team1SpawnPositionTextBox = new System.Windows.Forms.TextBox();
+            this.team3ColorTextBox = new System.Windows.Forms.TextBox();
+            this.team2ColorTextBox = new System.Windows.Forms.TextBox();
+            this.teamColorLabel = new System.Windows.Forms.Label();
+            this.team1ColorTextBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            this.tabPage2.SuspendLayout();
+            this.unitMenuTabPage.SuspendLayout();
+            this.spawnMenuTabPage.SuspendLayout();
             this.SuspendLayout();
             // 
-            // label1
+            // unitTypeLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(226, 42);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(69, 17);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Unit Type";
+            this.unitTypeLabel.AutoSize = true;
+            this.unitTypeLabel.Location = new System.Drawing.Point(227, 42);
+            this.unitTypeLabel.Name = "unitTypeLabel";
+            this.unitTypeLabel.Size = new System.Drawing.Size(69, 17);
+            this.unitTypeLabel.TabIndex = 0;
+            this.unitTypeLabel.Text = "Unit Type";
             // 
-            // comboBox1
+            // unitTypeComboBox
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(301, 42);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 24);
-            this.comboBox1.TabIndex = 1;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.unitTypeComboBox.FormattingEnabled = true;
+            this.unitTypeComboBox.Location = new System.Drawing.Point(301, 42);
+            this.unitTypeComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.unitTypeComboBox.Name = "unitTypeComboBox";
+            this.unitTypeComboBox.Size = new System.Drawing.Size(121, 24);
+            this.unitTypeComboBox.TabIndex = 1;
+            this.unitTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.unitTypeComboBox_Change);
             // 
-            // textBox1
+            // minRangeTextBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(196, 107);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(84, 22);
-            this.textBox1.TabIndex = 3;
+            this.minRangeTextBox.Location = new System.Drawing.Point(196, 107);
+            this.minRangeTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.minRangeTextBox.Name = "minRangeTextBox";
+            this.minRangeTextBox.Size = new System.Drawing.Size(84, 22);
+            this.minRangeTextBox.TabIndex = 3;
             // 
-            // label2
+            // minAttackRangeLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(60, 110);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(111, 17);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "minAttackRange";
+            this.minAttackRangeLabel.AutoSize = true;
+            this.minAttackRangeLabel.Location = new System.Drawing.Point(60, 110);
+            this.minAttackRangeLabel.Name = "minAttackRangeLabel";
+            this.minAttackRangeLabel.Size = new System.Drawing.Size(111, 17);
+            this.minAttackRangeLabel.TabIndex = 4;
+            this.minAttackRangeLabel.Text = "minAttackRange";
             // 
-            // label6
+            // spawn1Label
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(211, 57);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(102, 17);
-            this.label6.TabIndex = 11;
-            this.label6.Text = "Team/Spawn 1";
+            this.spawn1Label.AutoSize = true;
+            this.spawn1Label.Location = new System.Drawing.Point(211, 57);
+            this.spawn1Label.Name = "spawn1Label";
+            this.spawn1Label.Size = new System.Drawing.Size(102, 17);
+            this.spawn1Label.TabIndex = 11;
+            this.spawn1Label.Text = "Team/Spawn 1";
             // 
-            // label7
+            // spawn2Label
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(362, 57);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(102, 17);
-            this.label7.TabIndex = 12;
-            this.label7.Text = "Team/Spawn 2";
+            this.spawn2Label.AutoSize = true;
+            this.spawn2Label.Location = new System.Drawing.Point(363, 57);
+            this.spawn2Label.Name = "spawn2Label";
+            this.spawn2Label.Size = new System.Drawing.Size(102, 17);
+            this.spawn2Label.TabIndex = 12;
+            this.spawn2Label.Text = "Team/Spawn 2";
             // 
-            // label8
+            // spawn3Label
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(509, 57);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(102, 17);
-            this.label8.TabIndex = 13;
-            this.label8.Text = "Team/Spawn 3";
+            this.spawn3Label.AutoSize = true;
+            this.spawn3Label.Location = new System.Drawing.Point(509, 57);
+            this.spawn3Label.Name = "spawn3Label";
+            this.spawn3Label.Size = new System.Drawing.Size(102, 17);
+            this.spawn3Label.TabIndex = 13;
+            this.spawn3Label.Text = "Team/Spawn 3";
             // 
-            // label9
+            // unit1Label
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(89, 91);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(45, 17);
-            this.label9.TabIndex = 14;
-            this.label9.Text = "Unit 1";
+            this.unit1Label.AutoSize = true;
+            this.unit1Label.Location = new System.Drawing.Point(89, 91);
+            this.unit1Label.Name = "unit1Label";
+            this.unit1Label.Size = new System.Drawing.Size(45, 17);
+            this.unit1Label.TabIndex = 14;
+            this.unit1Label.Text = "Unit 1";
             // 
-            // label10
+            // unit2Label
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(89, 135);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(45, 17);
-            this.label10.TabIndex = 15;
-            this.label10.Text = "Unit 2";
+            this.unit2Label.AutoSize = true;
+            this.unit2Label.Location = new System.Drawing.Point(89, 135);
+            this.unit2Label.Name = "unit2Label";
+            this.unit2Label.Size = new System.Drawing.Size(45, 17);
+            this.unit2Label.TabIndex = 15;
+            this.unit2Label.Text = "Unit 2";
             // 
-            // label11
+            // unit3Label
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(89, 176);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(45, 17);
-            this.label11.TabIndex = 16;
-            this.label11.Text = "Unit 3";
+            this.unit3Label.AutoSize = true;
+            this.unit3Label.Location = new System.Drawing.Point(89, 176);
+            this.unit3Label.Name = "unit3Label";
+            this.unit3Label.Size = new System.Drawing.Size(45, 17);
+            this.unit3Label.TabIndex = 16;
+            this.unit3Label.Text = "Unit 3";
             // 
-            // textBox5
+            // team1Unit1TextBox
             // 
-            this.textBox5.Location = new System.Drawing.Point(214, 89);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(66, 22);
-            this.textBox5.TabIndex = 17;
+            this.team1Unit1TextBox.Location = new System.Drawing.Point(213, 89);
+            this.team1Unit1TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team1Unit1TextBox.Name = "team1Unit1TextBox";
+            this.team1Unit1TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team1Unit1TextBox.TabIndex = 17;
             // 
-            // textBox6
+            // team1Unit3TextBox
             // 
-            this.textBox6.Location = new System.Drawing.Point(214, 174);
-            this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(63, 22);
-            this.textBox6.TabIndex = 21;
+            this.team1Unit3TextBox.Location = new System.Drawing.Point(213, 174);
+            this.team1Unit3TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team1Unit3TextBox.Name = "team1Unit3TextBox";
+            this.team1Unit3TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team1Unit3TextBox.TabIndex = 21;
             // 
-            // textBox7
+            // team2Unit3TextBox
             // 
-            this.textBox7.Location = new System.Drawing.Point(365, 174);
-            this.textBox7.Name = "textBox7";
-            this.textBox7.Size = new System.Drawing.Size(67, 22);
-            this.textBox7.TabIndex = 27;
+            this.team2Unit3TextBox.Location = new System.Drawing.Point(365, 174);
+            this.team2Unit3TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team2Unit3TextBox.Name = "team2Unit3TextBox";
+            this.team2Unit3TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team2Unit3TextBox.TabIndex = 27;
             // 
-            // textBox9
+            // team2Unit2TextBox
             // 
-            this.textBox9.Location = new System.Drawing.Point(365, 131);
-            this.textBox9.Name = "textBox9";
-            this.textBox9.Size = new System.Drawing.Size(67, 22);
-            this.textBox9.TabIndex = 26;
+            this.team2Unit2TextBox.Location = new System.Drawing.Point(365, 130);
+            this.team2Unit2TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team2Unit2TextBox.Name = "team2Unit2TextBox";
+            this.team2Unit2TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team2Unit2TextBox.TabIndex = 26;
             // 
-            // textBox10
+            // team2Unit1TextBox
             // 
-            this.textBox10.Location = new System.Drawing.Point(366, 89);
-            this.textBox10.Name = "textBox10";
-            this.textBox10.Size = new System.Drawing.Size(66, 22);
-            this.textBox10.TabIndex = 25;
+            this.team2Unit1TextBox.Location = new System.Drawing.Point(365, 89);
+            this.team2Unit1TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team2Unit1TextBox.Name = "team2Unit1TextBox";
+            this.team2Unit1TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team2Unit1TextBox.TabIndex = 25;
             // 
-            // textBox11
+            // team3Unit3TextBox
             // 
-            this.textBox11.Location = new System.Drawing.Point(512, 174);
-            this.textBox11.Name = "textBox11";
-            this.textBox11.Size = new System.Drawing.Size(66, 22);
-            this.textBox11.TabIndex = 30;
+            this.team3Unit3TextBox.Location = new System.Drawing.Point(512, 174);
+            this.team3Unit3TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team3Unit3TextBox.Name = "team3Unit3TextBox";
+            this.team3Unit3TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team3Unit3TextBox.TabIndex = 30;
             // 
-            // textBox12
+            // team3Unit2TextBox
             // 
-            this.textBox12.Location = new System.Drawing.Point(512, 131);
-            this.textBox12.Name = "textBox12";
-            this.textBox12.Size = new System.Drawing.Size(66, 22);
-            this.textBox12.TabIndex = 29;
+            this.team3Unit2TextBox.Location = new System.Drawing.Point(512, 130);
+            this.team3Unit2TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team3Unit2TextBox.Name = "team3Unit2TextBox";
+            this.team3Unit2TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team3Unit2TextBox.TabIndex = 29;
             // 
-            // textBox13
+            // team3Unit1TextBox
             // 
-            this.textBox13.Location = new System.Drawing.Point(512, 89);
-            this.textBox13.Name = "textBox13";
-            this.textBox13.Size = new System.Drawing.Size(66, 22);
-            this.textBox13.TabIndex = 28;
+            this.team3Unit1TextBox.Location = new System.Drawing.Point(512, 89);
+            this.team3Unit1TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team3Unit1TextBox.Name = "team3Unit1TextBox";
+            this.team3Unit1TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team3Unit1TextBox.TabIndex = 28;
             // 
-            // button2
+            // spawnButton
             // 
-            this.button2.Location = new System.Drawing.Point(312, 418);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(120, 39);
-            this.button2.TabIndex = 31;
-            this.button2.Text = "Spawn";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.spawnButton.Location = new System.Drawing.Point(312, 418);
+            this.spawnButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawnButton.Name = "spawnButton";
+            this.spawnButton.Size = new System.Drawing.Size(120, 39);
+            this.spawnButton.TabIndex = 31;
+            this.spawnButton.Text = "Spawn";
+            this.spawnButton.UseVisualStyleBackColor = true;
+            this.spawnButton.Click += new System.EventHandler(this.spawnButton_Click);
             // 
-            // label12
+            // addUnitLabel
             // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(89, 344);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(62, 17);
-            this.label12.TabIndex = 32;
-            this.label12.Text = "Add Unit";
+            this.addUnitLabel.AutoSize = true;
+            this.addUnitLabel.Location = new System.Drawing.Point(89, 345);
+            this.addUnitLabel.Name = "addUnitLabel";
+            this.addUnitLabel.Size = new System.Drawing.Size(62, 17);
+            this.addUnitLabel.TabIndex = 32;
+            this.addUnitLabel.Text = "Add Unit";
             // 
-            // button1
+            // spawn1Button
             // 
-            this.button1.Location = new System.Drawing.Point(289, 354);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(26, 23);
-            this.button1.TabIndex = 33;
-            this.button1.Text = "+";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.spawn1Button.Location = new System.Drawing.Point(323, 354);
+            this.spawn1Button.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawn1Button.Name = "spawn1Button";
+            this.spawn1Button.Size = new System.Drawing.Size(27, 23);
+            this.spawn1Button.TabIndex = 33;
+            this.spawn1Button.Text = "+";
+            this.spawn1Button.UseVisualStyleBackColor = true;
+            this.spawn1Button.Click += new System.EventHandler(this.spawn3Button_Click);
             // 
-            // comboBox2
+            // spawn1ComboBox
             // 
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(214, 354);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(66, 24);
-            this.comboBox2.TabIndex = 34;
-            this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
+            this.spawn1ComboBox.FormattingEnabled = true;
+            this.spawn1ComboBox.Location = new System.Drawing.Point(213, 354);
+            this.spawn1ComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawn1ComboBox.Name = "spawn1ComboBox";
+            this.spawn1ComboBox.Size = new System.Drawing.Size(104, 24);
+            this.spawn1ComboBox.TabIndex = 34;
+            this.spawn1ComboBox.SelectedIndexChanged += new System.EventHandler(this.Spawn1ComboBox_SelectedIndexChanged);
             // 
-            // comboBox3
+            // spawn2ComboBox
             // 
-            this.comboBox3.FormattingEnabled = true;
-            this.comboBox3.Location = new System.Drawing.Point(365, 354);
-            this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(67, 24);
-            this.comboBox3.TabIndex = 36;
-            this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.comboBox3_SelectedIndexChanged);
+            this.spawn2ComboBox.FormattingEnabled = true;
+            this.spawn2ComboBox.Location = new System.Drawing.Point(365, 354);
+            this.spawn2ComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawn2ComboBox.Name = "spawn2ComboBox";
+            this.spawn2ComboBox.Size = new System.Drawing.Size(104, 24);
+            this.spawn2ComboBox.TabIndex = 36;
+            this.spawn2ComboBox.SelectedIndexChanged += new System.EventHandler(this.Spawn2ComboBox_SelectedIndexChanged);
             // 
-            // button3
+            // spawn2Button
             // 
-            this.button3.Location = new System.Drawing.Point(440, 354);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(26, 23);
-            this.button3.TabIndex = 35;
-            this.button3.Text = "+";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.spawn2Button.Location = new System.Drawing.Point(479, 354);
+            this.spawn2Button.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawn2Button.Name = "spawn2Button";
+            this.spawn2Button.Size = new System.Drawing.Size(27, 23);
+            this.spawn2Button.TabIndex = 35;
+            this.spawn2Button.Text = "+";
+            this.spawn2Button.UseVisualStyleBackColor = true;
+            this.spawn2Button.Click += new System.EventHandler(this.spawn2Button_Click);
             // 
-            // comboBox4
+            // spawn3ComboBox
             // 
-            this.comboBox4.FormattingEnabled = true;
-            this.comboBox4.Location = new System.Drawing.Point(512, 351);
-            this.comboBox4.Name = "comboBox4";
-            this.comboBox4.Size = new System.Drawing.Size(66, 24);
-            this.comboBox4.TabIndex = 38;
-            this.comboBox4.SelectedIndexChanged += new System.EventHandler(this.comboBox4_SelectedIndexChanged);
+            this.spawn3ComboBox.FormattingEnabled = true;
+            this.spawn3ComboBox.Location = new System.Drawing.Point(512, 353);
+            this.spawn3ComboBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawn3ComboBox.Name = "spawn3ComboBox";
+            this.spawn3ComboBox.Size = new System.Drawing.Size(104, 24);
+            this.spawn3ComboBox.TabIndex = 38;
+            this.spawn3ComboBox.SelectedIndexChanged += new System.EventHandler(this.Spawn3ComboBox_SelectedIndexChanged);
             // 
-            // button4
+            // spawn3Button
             // 
-            this.button4.Location = new System.Drawing.Point(586, 351);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(26, 23);
-            this.button4.TabIndex = 37;
-            this.button4.Text = "+";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.spawn3Button.Location = new System.Drawing.Point(622, 353);
+            this.spawn3Button.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawn3Button.Name = "spawn3Button";
+            this.spawn3Button.Size = new System.Drawing.Size(27, 23);
+            this.spawn3Button.TabIndex = 37;
+            this.spawn3Button.Text = "+";
+            this.spawn3Button.UseVisualStyleBackColor = true;
+            this.spawn3Button.Click += new System.EventHandler(this.spawn3Button_Click);
             // 
-            // textBox8
+            // team1Unit2TextBox
             // 
-            this.textBox8.Location = new System.Drawing.Point(214, 131);
-            this.textBox8.Name = "textBox8";
-            this.textBox8.Size = new System.Drawing.Size(63, 22);
-            this.textBox8.TabIndex = 20;
+            this.team1Unit2TextBox.Location = new System.Drawing.Point(213, 130);
+            this.team1Unit2TextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team1Unit2TextBox.Name = "team1Unit2TextBox";
+            this.team1Unit2TextBox.Size = new System.Drawing.Size(104, 22);
+            this.team1Unit2TextBox.TabIndex = 20;
             // 
-            // label19
+            // toSpawnLabel
             // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(89, 361);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(71, 17);
-            this.label19.TabIndex = 60;
-            this.label19.Text = "To Spawn";
+            this.toSpawnLabel.AutoSize = true;
+            this.toSpawnLabel.Location = new System.Drawing.Point(89, 361);
+            this.toSpawnLabel.Name = "toSpawnLabel";
+            this.toSpawnLabel.Size = new System.Drawing.Size(71, 17);
+            this.toSpawnLabel.TabIndex = 60;
+            this.toSpawnLabel.Text = "To Spawn";
             // 
             // tabControl1
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.unitMenuTabPage);
+            this.tabControl1.Controls.Add(this.spawnMenuTabPage);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(721, 532);
             this.tabControl1.TabIndex = 63;
             // 
-            // tabPage1
+            // unitMenuTabPage
             // 
-            this.tabPage1.Controls.Add(this.button5);
-            this.tabPage1.Controls.Add(this.textBox28);
-            this.tabPage1.Controls.Add(this.label22);
-            this.tabPage1.Controls.Add(this.textBox26);
-            this.tabPage1.Controls.Add(this.label20);
-            this.tabPage1.Controls.Add(this.textBox25);
-            this.tabPage1.Controls.Add(this.label18);
-            this.tabPage1.Controls.Add(this.textBox24);
-            this.tabPage1.Controls.Add(this.label17);
-            this.tabPage1.Controls.Add(this.textBox23);
-            this.tabPage1.Controls.Add(this.label16);
-            this.tabPage1.Controls.Add(this.textBox4);
-            this.tabPage1.Controls.Add(this.label5);
-            this.tabPage1.Controls.Add(this.textBox3);
-            this.tabPage1.Controls.Add(this.label4);
-            this.tabPage1.Controls.Add(this.textBox2);
-            this.tabPage1.Controls.Add(this.label3);
-            this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.comboBox1);
-            this.tabPage1.Controls.Add(this.textBox1);
-            this.tabPage1.Controls.Add(this.label2);
-            this.tabPage1.Location = new System.Drawing.Point(4, 25);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(713, 503);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            this.unitMenuTabPage.Controls.Add(this.saveUnitTypeButton);
+            this.unitMenuTabPage.Controls.Add(this.movementSpeedTextBox);
+            this.unitMenuTabPage.Controls.Add(this.movementSpeedLabel);
+            this.unitMenuTabPage.Controls.Add(this.healthTextBox);
+            this.unitMenuTabPage.Controls.Add(this.healthLabel);
+            this.unitMenuTabPage.Controls.Add(this.criticalChanceTextBox);
+            this.unitMenuTabPage.Controls.Add(this.criticalChanceLabel);
+            this.unitMenuTabPage.Controls.Add(this.criticalDamageTextBox);
+            this.unitMenuTabPage.Controls.Add(this.criticalDamageLabel);
+            this.unitMenuTabPage.Controls.Add(this.attackTimerTextBox);
+            this.unitMenuTabPage.Controls.Add(this.attackTimerLabel);
+            this.unitMenuTabPage.Controls.Add(this.maxRangeTextBox);
+            this.unitMenuTabPage.Controls.Add(this.maxAttackRangeLabel);
+            this.unitMenuTabPage.Controls.Add(this.armorTextBox);
+            this.unitMenuTabPage.Controls.Add(this.armorLabel);
+            this.unitMenuTabPage.Controls.Add(this.attackDamageTextBox);
+            this.unitMenuTabPage.Controls.Add(this.attackDamageLabel);
+            this.unitMenuTabPage.Controls.Add(this.unitTypeLabel);
+            this.unitMenuTabPage.Controls.Add(this.unitTypeComboBox);
+            this.unitMenuTabPage.Controls.Add(this.minRangeTextBox);
+            this.unitMenuTabPage.Controls.Add(this.minAttackRangeLabel);
+            this.unitMenuTabPage.Location = new System.Drawing.Point(4, 25);
+            this.unitMenuTabPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.unitMenuTabPage.Name = "unitMenuTabPage";
+            this.unitMenuTabPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.unitMenuTabPage.Size = new System.Drawing.Size(713, 503);
+            this.unitMenuTabPage.TabIndex = 0;
+            this.unitMenuTabPage.Text = "Unit Menu";
+            this.unitMenuTabPage.UseVisualStyleBackColor = true;
             // 
-            // button5
+            // saveUnitTypeButton
             // 
-            this.button5.Location = new System.Drawing.Point(229, 432);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(193, 23);
-            this.button5.TabIndex = 21;
-            this.button5.Text = "Save Unit Type";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
+            this.saveUnitTypeButton.Location = new System.Drawing.Point(229, 432);
+            this.saveUnitTypeButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.saveUnitTypeButton.Name = "saveUnitTypeButton";
+            this.saveUnitTypeButton.Size = new System.Drawing.Size(193, 23);
+            this.saveUnitTypeButton.TabIndex = 21;
+            this.saveUnitTypeButton.Text = "Save Unit Type";
+            this.saveUnitTypeButton.UseVisualStyleBackColor = true;
+            this.saveUnitTypeButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
-            // textBox28
+            // movementSpeedTextBox
             // 
-            this.textBox28.Location = new System.Drawing.Point(196, 361);
-            this.textBox28.Name = "textBox28";
-            this.textBox28.Size = new System.Drawing.Size(84, 22);
-            this.textBox28.TabIndex = 19;
+            this.movementSpeedTextBox.Location = new System.Drawing.Point(196, 361);
+            this.movementSpeedTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.movementSpeedTextBox.Name = "movementSpeedTextBox";
+            this.movementSpeedTextBox.Size = new System.Drawing.Size(84, 22);
+            this.movementSpeedTextBox.TabIndex = 19;
             // 
-            // label22
+            // movementSpeedLabel
             // 
-            this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(60, 364);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(118, 17);
-            this.label22.TabIndex = 20;
-            this.label22.Text = "Movement Speed";
+            this.movementSpeedLabel.AutoSize = true;
+            this.movementSpeedLabel.Location = new System.Drawing.Point(60, 364);
+            this.movementSpeedLabel.Name = "movementSpeedLabel";
+            this.movementSpeedLabel.Size = new System.Drawing.Size(118, 17);
+            this.movementSpeedLabel.TabIndex = 20;
+            this.movementSpeedLabel.Text = "Movement Speed";
             // 
-            // textBox26
+            // healthTextBox
             // 
-            this.textBox26.Location = new System.Drawing.Point(495, 292);
-            this.textBox26.Name = "textBox26";
-            this.textBox26.Size = new System.Drawing.Size(84, 22);
-            this.textBox26.TabIndex = 17;
+            this.healthTextBox.Location = new System.Drawing.Point(495, 292);
+            this.healthTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.healthTextBox.Name = "healthTextBox";
+            this.healthTextBox.Size = new System.Drawing.Size(84, 22);
+            this.healthTextBox.TabIndex = 17;
             // 
-            // label20
+            // healthLabel
             // 
-            this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(375, 295);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(49, 17);
-            this.label20.TabIndex = 18;
-            this.label20.Text = "Health";
+            this.healthLabel.AutoSize = true;
+            this.healthLabel.Location = new System.Drawing.Point(375, 295);
+            this.healthLabel.Name = "healthLabel";
+            this.healthLabel.Size = new System.Drawing.Size(49, 17);
+            this.healthLabel.TabIndex = 18;
+            this.healthLabel.Text = "Health";
             // 
-            // textBox25
+            // criticalChanceTextBox
             // 
-            this.textBox25.Location = new System.Drawing.Point(196, 292);
-            this.textBox25.Name = "textBox25";
-            this.textBox25.Size = new System.Drawing.Size(84, 22);
-            this.textBox25.TabIndex = 15;
+            this.criticalChanceTextBox.Location = new System.Drawing.Point(196, 292);
+            this.criticalChanceTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.criticalChanceTextBox.Name = "criticalChanceTextBox";
+            this.criticalChanceTextBox.Size = new System.Drawing.Size(84, 22);
+            this.criticalChanceTextBox.TabIndex = 15;
             // 
-            // label18
+            // criticalChanceLabel
             // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(60, 295);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(102, 17);
-            this.label18.TabIndex = 16;
-            this.label18.Text = "Critical Chance";
+            this.criticalChanceLabel.AutoSize = true;
+            this.criticalChanceLabel.Location = new System.Drawing.Point(60, 295);
+            this.criticalChanceLabel.Name = "criticalChanceLabel";
+            this.criticalChanceLabel.Size = new System.Drawing.Size(102, 17);
+            this.criticalChanceLabel.TabIndex = 16;
+            this.criticalChanceLabel.Text = "Critical Chance";
             // 
-            // textBox24
+            // criticalDamageTextBox
             // 
-            this.textBox24.Location = new System.Drawing.Point(495, 226);
-            this.textBox24.Name = "textBox24";
-            this.textBox24.Size = new System.Drawing.Size(84, 22);
-            this.textBox24.TabIndex = 13;
+            this.criticalDamageTextBox.Location = new System.Drawing.Point(495, 226);
+            this.criticalDamageTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.criticalDamageTextBox.Name = "criticalDamageTextBox";
+            this.criticalDamageTextBox.Size = new System.Drawing.Size(84, 22);
+            this.criticalDamageTextBox.TabIndex = 13;
             // 
-            // label17
+            // criticalDamageLabel
             // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(375, 229);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(107, 17);
-            this.label17.TabIndex = 14;
-            this.label17.Text = "Critical Damage";
+            this.criticalDamageLabel.AutoSize = true;
+            this.criticalDamageLabel.Location = new System.Drawing.Point(375, 229);
+            this.criticalDamageLabel.Name = "criticalDamageLabel";
+            this.criticalDamageLabel.Size = new System.Drawing.Size(107, 17);
+            this.criticalDamageLabel.TabIndex = 14;
+            this.criticalDamageLabel.Text = "Critical Damage";
             // 
-            // textBox23
+            // attackTimerTextBox
             // 
-            this.textBox23.Location = new System.Drawing.Point(495, 164);
-            this.textBox23.Name = "textBox23";
-            this.textBox23.Size = new System.Drawing.Size(84, 22);
-            this.textBox23.TabIndex = 11;
+            this.attackTimerTextBox.Location = new System.Drawing.Point(495, 164);
+            this.attackTimerTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.attackTimerTextBox.Name = "attackTimerTextBox";
+            this.attackTimerTextBox.Size = new System.Drawing.Size(84, 22);
+            this.attackTimerTextBox.TabIndex = 11;
             // 
-            // label16
+            // attackTimerLabel
             // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(375, 167);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(83, 17);
-            this.label16.TabIndex = 12;
-            this.label16.Text = "AttackTimer";
+            this.attackTimerLabel.AutoSize = true;
+            this.attackTimerLabel.Location = new System.Drawing.Point(375, 167);
+            this.attackTimerLabel.Name = "attackTimerLabel";
+            this.attackTimerLabel.Size = new System.Drawing.Size(83, 17);
+            this.attackTimerLabel.TabIndex = 12;
+            this.attackTimerLabel.Text = "AttackTimer";
             // 
-            // textBox4
+            // maxRangeTextBox
             // 
-            this.textBox4.Location = new System.Drawing.Point(495, 107);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(84, 22);
-            this.textBox4.TabIndex = 9;
+            this.maxRangeTextBox.Location = new System.Drawing.Point(495, 107);
+            this.maxRangeTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.maxRangeTextBox.Name = "maxRangeTextBox";
+            this.maxRangeTextBox.Size = new System.Drawing.Size(84, 22);
+            this.maxRangeTextBox.TabIndex = 9;
             // 
-            // label5
+            // maxAttackRangeLabel
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(375, 110);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(114, 17);
-            this.label5.TabIndex = 10;
-            this.label5.Text = "maxAttackRange";
+            this.maxAttackRangeLabel.AutoSize = true;
+            this.maxAttackRangeLabel.Location = new System.Drawing.Point(375, 110);
+            this.maxAttackRangeLabel.Name = "maxAttackRangeLabel";
+            this.maxAttackRangeLabel.Size = new System.Drawing.Size(114, 17);
+            this.maxAttackRangeLabel.TabIndex = 10;
+            this.maxAttackRangeLabel.Text = "maxAttackRange";
             // 
-            // textBox3
+            // armorTextBox
             // 
-            this.textBox3.Location = new System.Drawing.Point(196, 226);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(84, 22);
-            this.textBox3.TabIndex = 7;
+            this.armorTextBox.Location = new System.Drawing.Point(196, 226);
+            this.armorTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.armorTextBox.Name = "armorTextBox";
+            this.armorTextBox.Size = new System.Drawing.Size(84, 22);
+            this.armorTextBox.TabIndex = 7;
             // 
-            // label4
+            // armorLabel
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(60, 229);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(46, 17);
-            this.label4.TabIndex = 8;
-            this.label4.Text = "Armor";
+            this.armorLabel.AutoSize = true;
+            this.armorLabel.Location = new System.Drawing.Point(60, 229);
+            this.armorLabel.Name = "armorLabel";
+            this.armorLabel.Size = new System.Drawing.Size(46, 17);
+            this.armorLabel.TabIndex = 8;
+            this.armorLabel.Text = "Armor";
             // 
-            // textBox2
+            // attackDamageTextBox
             // 
-            this.textBox2.Location = new System.Drawing.Point(196, 164);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(84, 22);
-            this.textBox2.TabIndex = 5;
+            this.attackDamageTextBox.Location = new System.Drawing.Point(196, 164);
+            this.attackDamageTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.attackDamageTextBox.Name = "attackDamageTextBox";
+            this.attackDamageTextBox.Size = new System.Drawing.Size(84, 22);
+            this.attackDamageTextBox.TabIndex = 5;
             // 
-            // label3
+            // attackDamageLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(60, 167);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(100, 17);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "AttackDamage";
+            this.attackDamageLabel.AutoSize = true;
+            this.attackDamageLabel.Location = new System.Drawing.Point(60, 167);
+            this.attackDamageLabel.Name = "attackDamageLabel";
+            this.attackDamageLabel.Size = new System.Drawing.Size(100, 17);
+            this.attackDamageLabel.TabIndex = 6;
+            this.attackDamageLabel.Text = "AttackDamage";
             // 
-            // tabPage2
+            // spawnMenuTabPage
             // 
-            this.tabPage2.Controls.Add(this.textBox20);
-            this.tabPage2.Controls.Add(this.textBox21);
-            this.tabPage2.Controls.Add(this.label15);
-            this.tabPage2.Controls.Add(this.textBox22);
-            this.tabPage2.Controls.Add(this.textBox17);
-            this.tabPage2.Controls.Add(this.textBox18);
-            this.tabPage2.Controls.Add(this.label14);
-            this.tabPage2.Controls.Add(this.textBox19);
-            this.tabPage2.Controls.Add(this.textBox16);
-            this.tabPage2.Controls.Add(this.textBox15);
-            this.tabPage2.Controls.Add(this.label13);
-            this.tabPage2.Controls.Add(this.textBox14);
-            this.tabPage2.Controls.Add(this.button2);
-            this.tabPage2.Controls.Add(this.textBox5);
-            this.tabPage2.Controls.Add(this.label6);
-            this.tabPage2.Controls.Add(this.label7);
-            this.tabPage2.Controls.Add(this.label8);
-            this.tabPage2.Controls.Add(this.label19);
-            this.tabPage2.Controls.Add(this.label9);
-            this.tabPage2.Controls.Add(this.label10);
-            this.tabPage2.Controls.Add(this.label11);
-            this.tabPage2.Controls.Add(this.textBox8);
-            this.tabPage2.Controls.Add(this.textBox6);
-            this.tabPage2.Controls.Add(this.textBox10);
-            this.tabPage2.Controls.Add(this.textBox9);
-            this.tabPage2.Controls.Add(this.textBox7);
-            this.tabPage2.Controls.Add(this.textBox13);
-            this.tabPage2.Controls.Add(this.comboBox4);
-            this.tabPage2.Controls.Add(this.textBox12);
-            this.tabPage2.Controls.Add(this.button4);
-            this.tabPage2.Controls.Add(this.textBox11);
-            this.tabPage2.Controls.Add(this.comboBox3);
-            this.tabPage2.Controls.Add(this.label12);
-            this.tabPage2.Controls.Add(this.button3);
-            this.tabPage2.Controls.Add(this.button1);
-            this.tabPage2.Controls.Add(this.comboBox2);
-            this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(713, 503);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.spawnMenuTabPage.Controls.Add(this.team3WaypointTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team2WaypointTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.waypointLabel);
+            this.spawnMenuTabPage.Controls.Add(this.team1WaypointTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team3SpawnPositionTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team2SpawnPositionTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.spawnPositionLabel);
+            this.spawnMenuTabPage.Controls.Add(this.team1SpawnPositionTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team3ColorTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team2ColorTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.teamColorLabel);
+            this.spawnMenuTabPage.Controls.Add(this.team1ColorTextBox);
+            this.spawnMenuTabPage.Controls.Add(this.spawnButton);
+            this.spawnMenuTabPage.Controls.Add(this.team1Unit1TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.spawn1Label);
+            this.spawnMenuTabPage.Controls.Add(this.spawn2Label);
+            this.spawnMenuTabPage.Controls.Add(this.spawn3Label);
+            this.spawnMenuTabPage.Controls.Add(this.toSpawnLabel);
+            this.spawnMenuTabPage.Controls.Add(this.unit1Label);
+            this.spawnMenuTabPage.Controls.Add(this.unit2Label);
+            this.spawnMenuTabPage.Controls.Add(this.unit3Label);
+            this.spawnMenuTabPage.Controls.Add(this.team1Unit2TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team1Unit3TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team2Unit1TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team2Unit2TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team2Unit3TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.team3Unit1TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.spawn3ComboBox);
+            this.spawnMenuTabPage.Controls.Add(this.team3Unit2TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.spawn3Button);
+            this.spawnMenuTabPage.Controls.Add(this.team3Unit3TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.spawn2ComboBox);
+            this.spawnMenuTabPage.Controls.Add(this.addUnitLabel);
+            this.spawnMenuTabPage.Controls.Add(this.spawn2Button);
+            this.spawnMenuTabPage.Controls.Add(this.spawn1Button);
+            this.spawnMenuTabPage.Controls.Add(this.spawn1ComboBox);
+            this.spawnMenuTabPage.Location = new System.Drawing.Point(4, 25);
+            this.spawnMenuTabPage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawnMenuTabPage.Name = "spawnMenuTabPage";
+            this.spawnMenuTabPage.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.spawnMenuTabPage.Size = new System.Drawing.Size(713, 503);
+            this.spawnMenuTabPage.TabIndex = 1;
+            this.spawnMenuTabPage.Text = "Spawn Menu";
+            this.spawnMenuTabPage.UseVisualStyleBackColor = true;
             // 
-            // textBox20
+            // team3WaypointTextBox
             // 
-            this.textBox20.Location = new System.Drawing.Point(512, 304);
-            this.textBox20.Name = "textBox20";
-            this.textBox20.Size = new System.Drawing.Size(66, 22);
-            this.textBox20.TabIndex = 72;
+            this.team3WaypointTextBox.Location = new System.Drawing.Point(512, 304);
+            this.team3WaypointTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team3WaypointTextBox.Name = "team3WaypointTextBox";
+            this.team3WaypointTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team3WaypointTextBox.TabIndex = 72;
             // 
-            // textBox21
+            // team2WaypointTextBox
             // 
-            this.textBox21.Location = new System.Drawing.Point(366, 304);
-            this.textBox21.Name = "textBox21";
-            this.textBox21.Size = new System.Drawing.Size(66, 22);
-            this.textBox21.TabIndex = 71;
+            this.team2WaypointTextBox.Location = new System.Drawing.Point(365, 304);
+            this.team2WaypointTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team2WaypointTextBox.Name = "team2WaypointTextBox";
+            this.team2WaypointTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team2WaypointTextBox.TabIndex = 71;
             // 
-            // label15
+            // waypointLabel
             // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(89, 303);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(67, 17);
-            this.label15.TabIndex = 69;
-            this.label15.Text = "Waypoint";
+            this.waypointLabel.AutoSize = true;
+            this.waypointLabel.Location = new System.Drawing.Point(89, 303);
+            this.waypointLabel.Name = "waypointLabel";
+            this.waypointLabel.Size = new System.Drawing.Size(67, 17);
+            this.waypointLabel.TabIndex = 69;
+            this.waypointLabel.Text = "Waypoint";
             // 
-            // textBox22
+            // team1WaypointTextBox
             // 
-            this.textBox22.Location = new System.Drawing.Point(214, 304);
-            this.textBox22.Name = "textBox22";
-            this.textBox22.Size = new System.Drawing.Size(66, 22);
-            this.textBox22.TabIndex = 70;
+            this.team1WaypointTextBox.Location = new System.Drawing.Point(213, 304);
+            this.team1WaypointTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team1WaypointTextBox.Name = "team1WaypointTextBox";
+            this.team1WaypointTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team1WaypointTextBox.TabIndex = 70;
             // 
-            // textBox17
+            // team3SpawnPositionTextBox
             // 
-            this.textBox17.Location = new System.Drawing.Point(512, 262);
-            this.textBox17.Name = "textBox17";
-            this.textBox17.Size = new System.Drawing.Size(66, 22);
-            this.textBox17.TabIndex = 68;
+            this.team3SpawnPositionTextBox.Location = new System.Drawing.Point(512, 262);
+            this.team3SpawnPositionTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team3SpawnPositionTextBox.Name = "team3SpawnPositionTextBox";
+            this.team3SpawnPositionTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team3SpawnPositionTextBox.TabIndex = 68;
             // 
-            // textBox18
+            // team2SpawnPositionTextBox
             // 
-            this.textBox18.Location = new System.Drawing.Point(366, 262);
-            this.textBox18.Name = "textBox18";
-            this.textBox18.Size = new System.Drawing.Size(66, 22);
-            this.textBox18.TabIndex = 67;
+            this.team2SpawnPositionTextBox.Location = new System.Drawing.Point(365, 262);
+            this.team2SpawnPositionTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team2SpawnPositionTextBox.Name = "team2SpawnPositionTextBox";
+            this.team2SpawnPositionTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team2SpawnPositionTextBox.TabIndex = 67;
             // 
-            // label14
+            // spawnPositionLabel
             // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(89, 261);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(104, 17);
-            this.label14.TabIndex = 65;
-            this.label14.Text = "Spawn Position";
+            this.spawnPositionLabel.AutoSize = true;
+            this.spawnPositionLabel.Location = new System.Drawing.Point(89, 261);
+            this.spawnPositionLabel.Name = "spawnPositionLabel";
+            this.spawnPositionLabel.Size = new System.Drawing.Size(104, 17);
+            this.spawnPositionLabel.TabIndex = 65;
+            this.spawnPositionLabel.Text = "Spawn Position";
             // 
-            // textBox19
+            // team1SpawnPositionTextBox
             // 
-            this.textBox19.Location = new System.Drawing.Point(214, 262);
-            this.textBox19.Name = "textBox19";
-            this.textBox19.Size = new System.Drawing.Size(66, 22);
-            this.textBox19.TabIndex = 66;
+            this.team1SpawnPositionTextBox.Location = new System.Drawing.Point(213, 262);
+            this.team1SpawnPositionTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team1SpawnPositionTextBox.Name = "team1SpawnPositionTextBox";
+            this.team1SpawnPositionTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team1SpawnPositionTextBox.TabIndex = 66;
             // 
-            // textBox16
+            // team3ColorTextBox
             // 
-            this.textBox16.Location = new System.Drawing.Point(512, 219);
-            this.textBox16.Name = "textBox16";
-            this.textBox16.Size = new System.Drawing.Size(66, 22);
-            this.textBox16.TabIndex = 64;
+            this.team3ColorTextBox.Location = new System.Drawing.Point(512, 219);
+            this.team3ColorTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team3ColorTextBox.Name = "team3ColorTextBox";
+            this.team3ColorTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team3ColorTextBox.TabIndex = 64;
             // 
-            // textBox15
+            // team2ColorTextBox
             // 
-            this.textBox15.Location = new System.Drawing.Point(366, 219);
-            this.textBox15.Name = "textBox15";
-            this.textBox15.Size = new System.Drawing.Size(66, 22);
-            this.textBox15.TabIndex = 63;
+            this.team2ColorTextBox.Location = new System.Drawing.Point(365, 219);
+            this.team2ColorTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team2ColorTextBox.Name = "team2ColorTextBox";
+            this.team2ColorTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team2ColorTextBox.TabIndex = 63;
             // 
-            // label13
+            // teamColorLabel
             // 
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(89, 218);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(81, 17);
-            this.label13.TabIndex = 61;
-            this.label13.Text = "Team Color";
+            this.teamColorLabel.AutoSize = true;
+            this.teamColorLabel.Location = new System.Drawing.Point(89, 218);
+            this.teamColorLabel.Name = "teamColorLabel";
+            this.teamColorLabel.Size = new System.Drawing.Size(81, 17);
+            this.teamColorLabel.TabIndex = 61;
+            this.teamColorLabel.Text = "Team Color";
             // 
-            // textBox14
+            // team1ColorTextBox
             // 
-            this.textBox14.Location = new System.Drawing.Point(214, 219);
-            this.textBox14.Name = "textBox14";
-            this.textBox14.Size = new System.Drawing.Size(66, 22);
-            this.textBox14.TabIndex = 62;
+            this.team1ColorTextBox.Location = new System.Drawing.Point(213, 219);
+            this.team1ColorTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.team1ColorTextBox.Name = "team1ColorTextBox";
+            this.team1ColorTextBox.Size = new System.Drawing.Size(104, 22);
+            this.team1ColorTextBox.TabIndex = 62;
             // 
             // DataForm
             // 
@@ -646,82 +685,82 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(745, 556);
             this.Controls.Add(this.tabControl1);
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "DataForm";
             this.Text = " ";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.DataForm_FormClosing);
             this.Load += new System.EventHandler(this.DataForm_Load);
             this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
+            this.unitMenuTabPage.ResumeLayout(false);
+            this.unitMenuTabPage.PerformLayout();
+            this.spawnMenuTabPage.ResumeLayout(false);
+            this.spawnMenuTabPage.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox textBox5;
-        private System.Windows.Forms.TextBox textBox6;
-        private System.Windows.Forms.TextBox textBox7;
-        private System.Windows.Forms.TextBox textBox9;
-        private System.Windows.Forms.TextBox textBox10;
-        private System.Windows.Forms.TextBox textBox11;
-        private System.Windows.Forms.TextBox textBox12;
-        private System.Windows.Forms.TextBox textBox13;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.ComboBox comboBox2;
-        private System.Windows.Forms.ComboBox comboBox3;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.ComboBox comboBox4;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.TextBox textBox8;
-        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Label unitTypeLabel;
+        private System.Windows.Forms.ComboBox unitTypeComboBox;
+        private System.Windows.Forms.TextBox minRangeTextBox;
+        private System.Windows.Forms.Label minAttackRangeLabel;
+        private System.Windows.Forms.Label spawn1Label;
+        private System.Windows.Forms.Label spawn2Label;
+        private System.Windows.Forms.Label spawn3Label;
+        private System.Windows.Forms.Label unit1Label;
+        private System.Windows.Forms.Label unit2Label;
+        private System.Windows.Forms.Label unit3Label;
+        private System.Windows.Forms.TextBox team1Unit1TextBox;
+        private System.Windows.Forms.TextBox team1Unit3TextBox;
+        private System.Windows.Forms.TextBox team2Unit3TextBox;
+        private System.Windows.Forms.TextBox team2Unit2TextBox;
+        private System.Windows.Forms.TextBox team2Unit1TextBox;
+        private System.Windows.Forms.TextBox team3Unit3TextBox;
+        private System.Windows.Forms.TextBox team3Unit2TextBox;
+        private System.Windows.Forms.TextBox team3Unit1TextBox;
+        private System.Windows.Forms.Button spawnButton;
+        private System.Windows.Forms.Label addUnitLabel;
+        private System.Windows.Forms.Button spawn1Button;
+        private System.Windows.Forms.ComboBox spawn1ComboBox;
+        private System.Windows.Forms.ComboBox spawn2ComboBox;
+        private System.Windows.Forms.Button spawn2Button;
+        private System.Windows.Forms.ComboBox spawn3ComboBox;
+        private System.Windows.Forms.Button spawn3Button;
+        private System.Windows.Forms.TextBox team1Unit2TextBox;
+        private System.Windows.Forms.Label toSpawnLabel;
         private System.Windows.Forms.HelpProvider helpProvider1;
         private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.TextBox textBox20;
-        private System.Windows.Forms.TextBox textBox21;
-        private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.TextBox textBox22;
-        private System.Windows.Forms.TextBox textBox17;
-        private System.Windows.Forms.TextBox textBox18;
-        private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.TextBox textBox19;
-        private System.Windows.Forms.TextBox textBox16;
-        private System.Windows.Forms.TextBox textBox15;
-        private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.TextBox textBox14;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBox25;
-        private System.Windows.Forms.Label label18;
-        private System.Windows.Forms.TextBox textBox24;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.TextBox textBox23;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.TextBox textBox4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBox28;
-        private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.TextBox textBox26;
-        private System.Windows.Forms.Label label20;
-        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.TabPage unitMenuTabPage;
+        private System.Windows.Forms.TabPage spawnMenuTabPage;
+        private System.Windows.Forms.TextBox team3WaypointTextBox;
+        private System.Windows.Forms.TextBox team2WaypointTextBox;
+        private System.Windows.Forms.Label waypointLabel;
+        private System.Windows.Forms.TextBox team1WaypointTextBox;
+        private System.Windows.Forms.TextBox team3SpawnPositionTextBox;
+        private System.Windows.Forms.TextBox team2SpawnPositionTextBox;
+        private System.Windows.Forms.Label spawnPositionLabel;
+        private System.Windows.Forms.TextBox team1SpawnPositionTextBox;
+        private System.Windows.Forms.TextBox team3ColorTextBox;
+        private System.Windows.Forms.TextBox team2ColorTextBox;
+        private System.Windows.Forms.Label teamColorLabel;
+        private System.Windows.Forms.TextBox team1ColorTextBox;
+        private System.Windows.Forms.TextBox armorTextBox;
+        private System.Windows.Forms.Label armorLabel;
+        private System.Windows.Forms.TextBox attackDamageTextBox;
+        private System.Windows.Forms.Label attackDamageLabel;
+        private System.Windows.Forms.TextBox criticalChanceTextBox;
+        private System.Windows.Forms.Label criticalChanceLabel;
+        private System.Windows.Forms.TextBox criticalDamageTextBox;
+        private System.Windows.Forms.Label criticalDamageLabel;
+        private System.Windows.Forms.TextBox attackTimerTextBox;
+        private System.Windows.Forms.Label attackTimerLabel;
+        private System.Windows.Forms.TextBox maxRangeTextBox;
+        private System.Windows.Forms.Label maxAttackRangeLabel;
+        private System.Windows.Forms.TextBox movementSpeedTextBox;
+        private System.Windows.Forms.Label movementSpeedLabel;
+        private System.Windows.Forms.TextBox healthTextBox;
+        private System.Windows.Forms.Label healthLabel;
+        private System.Windows.Forms.Button saveUnitTypeButton;
     }
 }
