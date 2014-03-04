@@ -19,7 +19,7 @@ namespace Microsoft.Xna.Framework.Graphics {
             public override string OutputDirectory { get { return string.Empty; } }
 
             public override ContentBuildLogger Logger { get { return logger; } }
-            ContentBuildLogger logger = new MyLogger();
+            ContentBuildLogger logger =  new MyLogger();
 
             public override void AddDependency(string filename) { }
         }
