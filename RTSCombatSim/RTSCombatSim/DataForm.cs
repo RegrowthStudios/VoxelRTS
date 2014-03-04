@@ -299,5 +299,6 @@ namespace RTSCS {
         private void btnScriptDialog_Click(object sender, EventArgs e) {
             CreateScriptPage();
         }
+
     }
 }
