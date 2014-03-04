@@ -16,9 +16,10 @@ using RTSCS.Gameplay;
 using RTSCS.Graphics;
 using Microsoft.CSharp;
 using System.CodeDom.Compiler;
+using RTSEngine.Interfaces;
 using RTSEngine.Data;
+using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
-using RTSCS.Controllers;
 
 namespace RTSCS {
     public class App : Microsoft.Xna.Framework.Game {
@@ -26,6 +27,10 @@ namespace RTSCS {
         public const int MAX_TEAMS = 3;
         public const int MAX_UNITS = 3;
         public const int MAX_INSTANCES_PER_UNIT = 100;
+        public const string DEFAULT_ACTION_CONTROLLER = "RTSCS.Controllers.ActionController";
+        public const string DEFAULT_MOVEMENT_CONTROLLER = "RTSCS.Controllers.MovementController";
+        public const string DEFAULT_TARGETTING_CONTROLLER = "RTSCS.Controllers.TargettingController";
+        public const string DEFAULT_COMBAT_CONTROLLER = "RTSCS.Controllers.CombatController";
 
         // The Static Instances
         private static App app;
@@ -59,6 +64,10 @@ namespace RTSCS {
         }
         public RTSTeam[] Teams {
             get { return GameState.teams; }
+        }
+        public Dictionary<string, ReflectedEntityController> Controllers {
+            get;
+            private set;
         }
 
         // Used To Render Units
@@ -97,10 +106,36 @@ namespace RTSCS {
             foreach(var uD in Units)
                 GameState.AddRTSUnit(uD);
 
+            // Add Controllers
+            Controllers = new Dictionary<string, ReflectedEntityController>();
+            CompiledEntityControllers cec;
+            string error;
+            string[] references = {
+                "System.dll",
+                "System.Core.dll",
+                "System.Data.dll",
+                "System.Xml.dll",
+                "System.Xml.Linq.dll",
+                @"lib\Microsoft.Xna.Framework.dll",
+                "RTSEngine.dll"
+            };
+            cec = EntityControllerParser.Compile(@"Controllers\ActionController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\MovementController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\CombatController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\TargettingController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
         }
 
         protected override void Initialize() {
             IsMouseVisible = true;
+
             base.Initialize();
         }
         protected override void LoadContent() {
@@ -125,22 +160,22 @@ namespace RTSCS {
                 RTSUnitInstance u = Teams[0].AddUnit(Units[0],
                     new Vector3(r.Next(-200, 201), r.Next(-200, 201), 0)
                     );
-                u.ActionController = new ActionController();
-                u.MovementController = new MovementController();
+                u.ActionController = Controllers[DEFAULT_ACTION_CONTROLLER].CreateInstance() as IActionController;
+                u.MovementController = Controllers[DEFAULT_MOVEMENT_CONTROLLER].CreateInstance() as IMovementController;
                 u.MovementController.SetWaypoints(new Vector2[] { Vector2.One * 0 });
-                u.TargettingController = new TargettingController();
-                u.CombatController = new CombatController();
+                u.TargettingController = Controllers[DEFAULT_TARGETTING_CONTROLLER].CreateInstance() as ITargettingController;
+                u.CombatController = Controllers[DEFAULT_COMBAT_CONTROLLER].CreateInstance() as ICombatController;
                 AddNewUnit(u, Color.Red);
             }
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
                 RTSUnitInstance u = Teams[1].AddUnit(Units[1],
                     new Vector3(r.Next(-200, 201), r.Next(-200, 201), 0)
                     );
-                u.ActionController = new ActionController();
-                u.MovementController = new MovementController();
+                u.ActionController = Controllers[DEFAULT_ACTION_CONTROLLER].CreateInstance() as IActionController;
+                u.MovementController = Controllers[DEFAULT_MOVEMENT_CONTROLLER].CreateInstance() as IMovementController;
                 u.MovementController.SetWaypoints(new Vector2[] { Vector2.One * 0 });
-                u.TargettingController = new TargettingController();
-                u.CombatController = new CombatController();
+                u.TargettingController = Controllers[DEFAULT_TARGETTING_CONTROLLER].CreateInstance() as ITargettingController;
+                u.CombatController = Controllers[DEFAULT_COMBAT_CONTROLLER].CreateInstance() as ICombatController;
                 AddNewUnit(u, Color.Blue);
             }
         }
@@ -294,7 +329,7 @@ namespace RTSCS {
                 Thread t = new Thread(() => {
                     try {
                         formException = null;
-                        using(form = new DataForm(app.Units, app.Teams)) {
+                        using(form = new DataForm(app.Units, app.Teams, app.Controllers)) {
                             form.OnUnitSpawn += app.AddNewUnit;
                             form.ShowDialog();
                         }
