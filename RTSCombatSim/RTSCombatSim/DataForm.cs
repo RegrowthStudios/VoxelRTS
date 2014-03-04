@@ -228,21 +228,22 @@ namespace RTSCS {
             out IMovementController mc,
             out ITargettingController tc) {
             ac = null; cc = null; mc = null; tc = null;
-            IEnumerable<string> su = names.Distinct();
-            foreach(string name in su) {
+            int i = 0;
+            foreach(string name in names) {
                 if(!controllers.ContainsKey(name)) continue;
                 ReflectedEntityController rec = controllers[name];
                 if(rec.ControllerType != EntityControllerType.None) {
                     IEntityController ec = rec.CreateInstance();
-                    if(rec.ControllerType.HasFlag(EntityControllerType.Action))
+                    if(rec.ControllerType.HasFlag(EntityControllerType.Action) && i < 1)
                         ac = ec as IActionController;
-                    if(rec.ControllerType.HasFlag(EntityControllerType.Combat))
+                    if(rec.ControllerType.HasFlag(EntityControllerType.Combat) && i < 2)
                         cc = ec as ICombatController;
-                    if(rec.ControllerType.HasFlag(EntityControllerType.Movement))
+                    if(rec.ControllerType.HasFlag(EntityControllerType.Movement) && i < 3)
                         mc = ec as IMovementController;
                     if(rec.ControllerType.HasFlag(EntityControllerType.Targetting))
                         tc = ec as ITargettingController;
                 }
+                i++;
             }
         }
         private void SpawnUnit(int unitIndex, int teamIndex) {

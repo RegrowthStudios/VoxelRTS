@@ -38,7 +38,7 @@ namespace RTSCS {
         // Instancing And Data Counts
         public const int MAX_TEAMS = 3;
         public const int MAX_UNITS = 3;
-        public const int MAX_INSTANCES_PER_UNIT = 100;
+        public const int MAX_INSTANCES_PER_UNIT = 300;
         public const string DEFAULT_ACTION_CONTROLLER = "RTSCS.Controllers.ActionController";
         public const string DEFAULT_MOVEMENT_CONTROLLER = "RTSCS.Controllers.MovementController";
         public const string DEFAULT_NO_MOVEMENT_CONTROLLER = "RTSCS.Controllers.NoMovementController";
@@ -56,10 +56,6 @@ namespace RTSCS {
         Renderer renderer;
         CombatAnimator combAnimator;
         CombatMap map;
-        BasicEffect fxDeath;
-        RenderTarget2D deathScene;
-        List<VertexPositionTexture> deathVerts;
-        private Texture2D deathTexture;
 
         // For Pausing The Simulation
         public bool IsPaused {
@@ -344,7 +340,6 @@ namespace RTSCS {
             toSpawn.Add(u);
         }
 
-
         private static void OnUnitDeath(IEntity e) {
             Console.WriteLine("Entity [{0,12}] Was Killed", e.GetHashCode());
         }
@@ -362,17 +357,17 @@ namespace RTSCS {
                 new Color(1f, 0.4f, 0.1f), new Color(0.1f, 0.8f, 0.2f), rs.UnitData.BaseCombatData.AttackTimer
                 ));
         }
-        private void AddDeath(IEntity e) {
-            RTSUnitInstance u = e as RTSUnitInstance;
-            Vector3 x = Vector3.UnitX * u.CollisionGeometry.BoundingRadius * 0.7f;
-            Vector3 y = Vector3.UnitY * u.CollisionGeometry.BoundingRadius * 0.7f;
-            deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x + y, Vector2.Zero));
-            deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x + y, Vector2.UnitX));
-            deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x - y, Vector2.UnitY));
-            deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x - y, Vector2.UnitY));
-            deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x + y, Vector2.UnitX));
-            deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x - y, Vector2.One));
-        }
+        //private void AddDeath(IEntity e) {
+        //    RTSUnitInstance u = e as RTSUnitInstance;
+        //    Vector3 x = Vector3.UnitX * u.CollisionGeometry.BoundingRadius * 0.7f;
+        //    Vector3 y = Vector3.UnitY * u.CollisionGeometry.BoundingRadius * 0.7f;
+        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x + y, Vector2.Zero));
+        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x + y, Vector2.UnitX));
+        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x - y, Vector2.UnitY));
+        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x - y, Vector2.UnitY));
+        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x + y, Vector2.UnitX));
+        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x - y, Vector2.One));
+        //}
 
         #region Entry Point
         private static void RunMainInstance(string[] args) {
