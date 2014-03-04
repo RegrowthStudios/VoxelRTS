@@ -44,6 +44,9 @@ namespace RTSCS {
             teamSpawnPositions = new Vector3[teams.Length];
             teamWaypoints = new Vector2[teams.Length];
             teamColors = new XColor[teams.Length];
+            comboBox1.Items.Add("Unit Type 1");
+            comboBox1.Items.Add("Unit Type 2");
+            comboBox1.Items.Add("Unit Type 3");
         }
 
         private void DataForm_Load(object sender, EventArgs e) {
@@ -86,6 +89,46 @@ namespace RTSCS {
             units[selectedIndex].BaseCombatData.CriticalChance = int.Parse(textBox25.Text);
             units[selectedIndex].Health = int.Parse(textBox26.Text);
             units[selectedIndex].MovementSpeed = int.Parse(textBox28.Text);
+        }
+
+        private Vector3 stringtoVector3(String s)
+        {
+            //Assumes data is inputted in the form x,y,z
+            float x = float.Parse(s.Substring(0, 1));
+            float y = float.Parse(s.Substring(2,3));
+            float z = float.Parse(s.Substring(4,5));
+            Vector3 posvec = new Vector3(x, y, z);
+            return posvec;
+        }
+        private Vector2 stringtoVector2(String s)
+        {
+            //Assumes data is inputted in the form x,y
+            float x = float.Parse(s.Substring(0, 1));
+            float y = float.Parse(s.Substring(2,3));
+            Vector2 posvec = new Vector2(x, y);
+            return posvec;
+        }
+      
+        private void button2_Click(object sender, EventArgs e)
+        {          
+            teamSpawnPositions[1] = stringtoVector3(textBox19.Text);
+            teamSpawnPositions[2] = stringtoVector3(textBox18.Text);
+            teamSpawnPositions[3] = stringtoVector3(textBox17.Text);
+            teamWaypoints[1] = stringtoVector2(textBox22.Text);
+            teamWaypoints[2] = stringtoVector2(textBox21.Text);
+            teamWaypoints[3] = stringtoVector2(textBox20.Text);
+
+            System.Drawing.Color systemColor = System.Drawing.Color.FromName(textBox14.Text);
+            XColor color1 = new XColor(systemColor.R, systemColor.G, systemColor.B, systemColor.A); //Here Color is Microsoft.Xna.Framework.Graphics.Color
+            teamColors[1] = color1;
+            System.Drawing.Color systemColor2 = System.Drawing.Color.FromName(textBox15.Text);
+            XColor color2 = new XColor(systemColor2.R, systemColor2.G, systemColor2.B, systemColor2.A); 
+            teamColors[2] = color2;
+            System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(textBox16.Text);
+            XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
+            teamColors[3] = color3;
+
+
         }
 
         
