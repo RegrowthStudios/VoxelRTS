@@ -44,9 +44,23 @@ namespace RTSCS {
             teamSpawnPositions = new Vector3[teams.Length];
             teamWaypoints = new Vector2[teams.Length];
             teamColors = new XColor[teams.Length];
-            comboBox1.Items.Add("Unit Type 1");
-            comboBox1.Items.Add("Unit Type 2");
-            comboBox1.Items.Add("Unit Type 3");
+            
+            // Populate Combo Boxes
+            unitTypeComboBox.Items.Add("Unit Type 1");
+            unitTypeComboBox.Items.Add("Unit Type 2");
+            unitTypeComboBox.Items.Add("Unit Type 3");
+
+            Spawn1ComboBox.Items.Add("Unit Type 1");
+            Spawn1ComboBox.Items.Add("Unit Type 2");
+            Spawn1ComboBox.Items.Add("Unit Type 3");
+
+            Spawn2ComboBox.Items.Add("Unit Type 1");
+            Spawn2ComboBox.Items.Add("Unit Type 2");
+            Spawn2ComboBox.Items.Add("Unit Type 3");
+
+            Spawn3ComboBox.Items.Add("Unit Type 1");
+            Spawn3ComboBox.Items.Add("Unit Type 2");
+            Spawn3ComboBox.Items.Add("Unit Type 3");
         }
 
         private void DataForm_Load(object sender, EventArgs e) {
@@ -66,51 +80,48 @@ namespace RTSCS {
                 OnUnitSpawn(u, teamColors[teamIndex]);
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) {
-            selectedIndex = comboBox1.SelectedIndex;
-            textBox1.Text = units[selectedIndex].BaseCombatData.MinRange.ToString();
-            textBox4.Text = units[selectedIndex].BaseCombatData.MaxRange.ToString();
-            textBox23.Text = units[selectedIndex].BaseCombatData.AttackTimer.ToString();
-            textBox3.Text = units[selectedIndex].BaseCombatData.Armor.ToString();
-            textBox24.Text = units[selectedIndex].BaseCombatData.CriticalDamage.ToString();
-            textBox25.Text = units[selectedIndex].BaseCombatData.CriticalChance.ToString();
-            textBox26.Text = units[selectedIndex].Health.ToString();
-            textBox28.Text = units[selectedIndex].MovementSpeed.ToString();
-
+        private void UnitTypeComboBoxChanged(object sender, EventArgs e) {
+            selectedIndex = unitTypeComboBox.SelectedIndex;
+            minRangeTextBox.Text = units[selectedIndex].BaseCombatData.MinRange.ToString();
+            maxRangeTextBox.Text = units[selectedIndex].BaseCombatData.MaxRange.ToString();
+            attackDamageTextBox.Text = units[selectedIndex].BaseCombatData.AttackDamage.ToString();
+            attackTimerTextBox.Text = units[selectedIndex].BaseCombatData.AttackTimer.ToString();
+            ArmorTextBox.Text = units[selectedIndex].BaseCombatData.Armor.ToString();
+            criticalDamageTextBox.Text = units[selectedIndex].BaseCombatData.CriticalDamage.ToString();
+            criticalChanceTextBox.Text = units[selectedIndex].BaseCombatData.CriticalChance.ToString();
+            healthTextBox.Text = units[selectedIndex].Health.ToString();
+            movementSpeedTextBox.Text = units[selectedIndex].MovementSpeed.ToString();
         }
 
-        private void button5_Click(object sender, EventArgs e)
-        {
-            units[selectedIndex].BaseCombatData.MinRange = int.Parse(textBox1.Text);
-            units[selectedIndex].BaseCombatData.MaxRange = int.Parse(textBox4.Text);
-            units[selectedIndex].BaseCombatData.AttackTimer = int.Parse(textBox23.Text);
-            units[selectedIndex].BaseCombatData.Armor = int.Parse(textBox3.Text);
-            units[selectedIndex].BaseCombatData.CriticalDamage = int.Parse(textBox24.Text);
-            units[selectedIndex].BaseCombatData.CriticalChance = int.Parse(textBox25.Text);
-            units[selectedIndex].Health = int.Parse(textBox26.Text);
-            units[selectedIndex].MovementSpeed = int.Parse(textBox28.Text);
+        private void SaveButtonClick(object sender, EventArgs e) {
+            units[selectedIndex].BaseCombatData.MinRange = int.Parse(minRangeTextBox.Text);
+            units[selectedIndex].BaseCombatData.MaxRange = int.Parse(maxRangeTextBox.Text);
+            units[selectedIndex].BaseCombatData.AttackTimer = int.Parse(attackTimerTextBox.Text);
+            units[selectedIndex].BaseCombatData.AttackDamage = int.Parse(attackDamageTextBox.Text);
+            units[selectedIndex].BaseCombatData.Armor = int.Parse(ArmorTextBox.Text);
+            units[selectedIndex].BaseCombatData.CriticalDamage = int.Parse(criticalDamageTextBox.Text);
+            units[selectedIndex].BaseCombatData.CriticalChance = int.Parse(criticalChanceTextBox.Text);
+            units[selectedIndex].Health = int.Parse(healthTextBox.Text);
+            units[selectedIndex].MovementSpeed = int.Parse(movementSpeedTextBox.Text);
         }
 
-        private Vector3 stringtoVector3(String s)
-        {
+        private Vector3 stringtoVector3(String s) {
             //Assumes data is inputted in the form x,y,z
-            float x = float.Parse(s.Substring(0, 1));
+            float x = float.Parse(s.Substring(0,1));
             float y = float.Parse(s.Substring(2,3));
             float z = float.Parse(s.Substring(4,5));
-            Vector3 posvec = new Vector3(x, y, z);
+            Vector3 posvec = new Vector3(x,y,z);
             return posvec;
         }
-        private Vector2 stringtoVector2(String s)
-        {
+        private Vector2 stringtoVector2(String s) {
             //Assumes data is inputted in the form x,y
-            float x = float.Parse(s.Substring(0, 1));
+            float x = float.Parse(s.Substring(0,1));
             float y = float.Parse(s.Substring(2,3));
-            Vector2 posvec = new Vector2(x, y);
+            Vector2 posvec = new Vector2(x,y);
             return posvec;
         }
       
-        private void button2_Click(object sender, EventArgs e)
-        {          
+        private void SpawnButtonClick(object sender, EventArgs e) {          
             teamSpawnPositions[1] = stringtoVector3(textBox19.Text);
             teamSpawnPositions[2] = stringtoVector3(textBox18.Text);
             teamSpawnPositions[3] = stringtoVector3(textBox17.Text);
@@ -127,14 +138,18 @@ namespace RTSCS {
             System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(textBox16.Text);
             XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
             teamColors[3] = color3;
+        }
 
+        private void Spawn1Clicked(object sender, EventArgs e) {
 
         }
 
-        
+        private void Spawn2Clicked(object sender, EventArgs e) {
 
+        }
 
+        private void Spawn3Clicked(object sender, EventArgs e) {
 
-       
+        }
     }
 }
