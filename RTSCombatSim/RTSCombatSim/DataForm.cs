@@ -50,9 +50,6 @@ namespace RTSCS {
         const int UNIT_DEFAULT_HEALTH = 100;
         const int UNIT_DEFAULT_SPEED = 55;
 
-        // Default Spawn Location
-        const Vector2[] DEFAULT_TEAM_SPAWNS = { new Vector2(-20, -20), new Vector2(20, -20),  new Vector2(20, 20) };
-
         public DataForm(RTSUnit[] ud, RTSTeam[] t, Dictionary<string, ReflectedEntityController> c) {
             InitializeComponent();
             Closer = () => { Close(); };
@@ -63,9 +60,9 @@ namespace RTSCS {
                 SetDefaultsForRTSUnit(unit);
             }
             teams = t;
-            teamSpawnPositions = new Vector3[teams.Length];
-            teamWaypoints = new Vector2[teams.Length];
-            teamColors = new XColor[teams.Length];
+            teamSpawnPositions = new Vector3[3]{ new Vector3(-20, -20, 0), new Vector3(20, -20, 0),  new Vector3(20, 20, 0) };
+            teamWaypoints = new Vector2[3]{ Vector2.Zero, Vector2.Zero, Vector2.Zero };
+            teamColors = new XColor[3]{ XColor.Red, XColor.Blue, XColor.Green };
             controllers = c;
 
             // Populate Combo Boxes
@@ -90,7 +87,7 @@ namespace RTSCS {
             spawn3ComboBox.SelectedIndex = 0;
 
             // Populate Spawn Page
-
+            SetDefaultCountsForSpawnPage();
         }
 
         private void SetDefaultsForRTSUnit(RTSUnit unit) {
@@ -106,7 +103,14 @@ namespace RTSCS {
             unit.BaseCombatData.MinRange = UNIT_DEFAULT_SPEED;
         }
 
-        private void SetDefaultsForSpawnPage() {
+        private void SetDefaultCountsForSpawnPage() {
+            for(int t = 0; t < teams.Length; t++) {
+                // Initialize Counts for Unit Types
+                for(int u = 0; u < teams.Length; u++) {
+                    TextBox tb = PickTextBox(t, u);
+                    tb.Text = "1";
+                }
+            }
 
         }
 
