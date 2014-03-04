@@ -39,12 +39,29 @@ namespace RTSCS {
         int spawn2SelectedIndex;
         int spawn3SelectedIndex;
 
+        // Default Unit Parameters
+        const int UNIT_DEFAULT_ARMOR = 0;
+        const int UNIT_DEFAULT_ATTACK_DAMAGE = 10;
+        const float UNIT_DEFAULT_ATTACK_TIMER = 0.5f;
+        const double UNIT_DEFAULT_CRITICAL_CHANCE = 0.05;
+        const int UNIT_DEFAULT_CRITICAL_DAMAGE = 20;
+        const int UNIT_DEFAULT_MAX_RANGE = 28;
+        const int UNIT_DEFAULT_MIN_RNAGE = 0;
+        const int UNIT_DEFAULT_HEALTH = 100;
+        const int UNIT_DEFAULT_SPEED = 55;
+
+        // Default Spawn Location
+        const Vector2[] DEFAULT_TEAM_SPAWNS = { new Vector2(-20, -20), new Vector2(20, -20),  new Vector2(20, 20) };
+
         public DataForm(RTSUnit[] ud, RTSTeam[] t, Dictionary<string, ReflectedEntityController> c) {
             InitializeComponent();
             Closer = () => { Close(); };
 
             // Set Up Data
             units = ud;
+            foreach(RTSUnit unit in units) {
+                SetDefaultsForRTSUnit(unit);
+            }
             teams = t;
             teamSpawnPositions = new Vector3[teams.Length];
             teamWaypoints = new Vector2[teams.Length];
@@ -55,18 +72,42 @@ namespace RTSCS {
             unitTypeComboBox.Items.Add("Unit Type 1");
             unitTypeComboBox.Items.Add("Unit Type 2");
             unitTypeComboBox.Items.Add("Unit Type 3");
+            unitTypeComboBox.SelectedIndex = 0;
 
             spawn1ComboBox.Items.Add("Unit Type 1");
             spawn1ComboBox.Items.Add("Unit Type 2");
             spawn1ComboBox.Items.Add("Unit Type 3");
+            spawn1ComboBox.SelectedIndex = 0;
 
             spawn2ComboBox.Items.Add("Unit Type 1");
             spawn2ComboBox.Items.Add("Unit Type 2");
             spawn2ComboBox.Items.Add("Unit Type 3");
+            spawn2ComboBox.SelectedIndex = 0;
 
             spawn3ComboBox.Items.Add("Unit Type 1");
             spawn3ComboBox.Items.Add("Unit Type 2");
             spawn3ComboBox.Items.Add("Unit Type 3");
+            spawn3ComboBox.SelectedIndex = 0;
+
+            // Populate Spawn Page
+
+        }
+
+        private void SetDefaultsForRTSUnit(RTSUnit unit) {
+            unit.Health = UNIT_DEFAULT_HEALTH;
+            unit.BaseCombatData.Armor = UNIT_DEFAULT_ARMOR;
+            unit.BaseCombatData.AttackDamage = UNIT_DEFAULT_ATTACK_DAMAGE;
+            unit.BaseCombatData.AttackTimer = UNIT_DEFAULT_ATTACK_TIMER;
+            unit.BaseCombatData.CriticalChance = UNIT_DEFAULT_CRITICAL_CHANCE;
+            unit.BaseCombatData.CriticalDamage = UNIT_DEFAULT_CRITICAL_DAMAGE;
+            unit.BaseCombatData.MaxRange = UNIT_DEFAULT_MAX_RANGE;
+            unit.BaseCombatData.MinRange = UNIT_DEFAULT_MIN_RNAGE;
+            unit.BaseCombatData.MinRange = UNIT_DEFAULT_HEALTH;
+            unit.BaseCombatData.MinRange = UNIT_DEFAULT_SPEED;
+        }
+
+        private void SetDefaultsForSpawnPage() {
+
         }
 
         private void DataForm_Load(object sender, EventArgs e) {
@@ -116,11 +157,11 @@ namespace RTSCS {
         private void saveButton_Click(object sender, EventArgs e) {
             units[selectedIndex].BaseCombatData.MinRange = int.Parse(minRangeTextBox.Text);
             units[selectedIndex].BaseCombatData.MaxRange = int.Parse(maxRangeTextBox.Text);
-            units[selectedIndex].BaseCombatData.AttackTimer = int.Parse(attackTimerTextBox.Text);
+            units[selectedIndex].BaseCombatData.AttackTimer = float.Parse(attackTimerTextBox.Text);
             units[selectedIndex].BaseCombatData.AttackDamage = int.Parse(attackDamageTextBox.Text);
             units[selectedIndex].BaseCombatData.Armor = int.Parse(armorTextBox.Text);
             units[selectedIndex].BaseCombatData.CriticalDamage = int.Parse(criticalDamageTextBox.Text);
-            units[selectedIndex].BaseCombatData.CriticalChance = int.Parse(criticalChanceTextBox.Text);
+            units[selectedIndex].BaseCombatData.CriticalChance = double.Parse(criticalChanceTextBox.Text);
             units[selectedIndex].Health = int.Parse(healthTextBox.Text);
             units[selectedIndex].MovementSpeed = int.Parse(movementSpeedTextBox.Text);
         }
