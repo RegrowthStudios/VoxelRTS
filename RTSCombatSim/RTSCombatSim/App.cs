@@ -22,6 +22,18 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 
 namespace RTSCS {
+    public struct RTSUISpawnArgs {
+        public RTSUnit UnitData;
+        public RTSTeam Team;
+        public IActionController AC;
+        public ICombatController CC;
+        public IMovementController MC;
+        public ITargettingController TC;
+        public Vector3 SpawnPos;
+        public Vector2[] Waypoints;
+        public Color Color;
+    }
+
     public class App : Microsoft.Xna.Framework.Game {
         // Instancing And Data Counts
         public const int MAX_TEAMS = 3;
@@ -69,6 +81,7 @@ namespace RTSCS {
             get;
             private set;
         }
+        private System.Collections.Concurrent.ConcurrentBag<RTSUISpawnArgs> toSpawn;
 
         // Used To Render Units
         UnitGeometry[] unitGeometry;
@@ -79,6 +92,7 @@ namespace RTSCS {
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
             IsPaused = false;
+            toSpawn = new System.Collections.Concurrent.ConcurrentBag<RTSUISpawnArgs>();
 
             // Setup Teams
             RTSTeam[] teams = new RTSTeam[MAX_TEAMS];
@@ -165,7 +179,10 @@ namespace RTSCS {
                 u.MovementController.SetWaypoints(new Vector2[] { Vector2.One * 0 });
                 u.TargettingController = Controllers[DEFAULT_TARGETTING_CONTROLLER].CreateInstance() as ITargettingController;
                 u.CombatController = Controllers[DEFAULT_COMBAT_CONTROLLER].CreateInstance() as ICombatController;
-                AddNewUnit(u, Color.Red);
+                foreach(var ug in unitGeometry) {
+                    if(ug.UnitData == u.UnitData)
+                        ug.AddUnit(u, Color.Red);
+                }
             }
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
                 RTSUnitInstance u = Teams[1].AddUnit(Units[1],
@@ -176,7 +193,10 @@ namespace RTSCS {
                 u.MovementController.SetWaypoints(new Vector2[] { Vector2.One * 0 });
                 u.TargettingController = Controllers[DEFAULT_TARGETTING_CONTROLLER].CreateInstance() as ITargettingController;
                 u.CombatController = Controllers[DEFAULT_COMBAT_CONTROLLER].CreateInstance() as ICombatController;
-                AddNewUnit(u, Color.Blue);
+                foreach(var ug in unitGeometry) {
+                    if(ug.UnitData == u.UnitData)
+                        ug.AddUnit(u, Color.Blue);
+                }
             }
         }
         protected override void UnloadContent() {
@@ -311,13 +331,28 @@ namespace RTSCS {
                 ug.RemoveAll(IsDead);
             }
 
+            // Spawn New Units
+            int c = toSpawn.Count;
+            RTSUISpawnArgs sa;
+            for(int i = 0; i < c; i++) {
+                if(toSpawn.TryTake(out sa)) {
+                    var u = sa.Team.AddUnit(sa.UnitData, sa.SpawnPos);
+                    u.ActionController = sa.AC;
+                    u.CombatController = sa.CC;
+                    u.MovementController = sa.MC;
+                    u.MovementController.SetWaypoints(sa.Waypoints);
+                    u.TargettingController = sa.TC;
+                    foreach(var ug in unitGeometry) {
+                        if(ug.UnitData == u.UnitData)
+                            ug.AddUnit(u, sa.Color);
+                    }
+                }
+                else i--;
+            }
         }
 
-        public void AddNewUnit(RTSUnitInstance u, Color c) {
-            foreach(var ug in unitGeometry) {
-                if(ug.UnitData == u.UnitData)
-                    ug.AddUnit(u, c);
-            }
+        public void AddNewUnit(RTSUISpawnArgs u) {
+            toSpawn.Add(u);
         }
 
         #region Entry Point

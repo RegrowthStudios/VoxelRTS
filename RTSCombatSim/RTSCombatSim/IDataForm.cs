@@ -8,6 +8,6 @@ using Microsoft.Xna.Framework;
 
 namespace RTSCS {
     public interface IDataForm {
-        event Action<RTSUnitInstance, Color> OnUnitSpawn;
+        event Action<RTSUISpawnArgs> OnUnitSpawn;
     }
 }

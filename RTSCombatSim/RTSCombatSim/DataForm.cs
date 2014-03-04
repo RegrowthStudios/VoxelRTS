@@ -22,7 +22,7 @@ namespace RTSCS {
         public delegate void CloseDelegate();
         public CloseDelegate Closer;
 
-        public event Action<RTSUnitInstance, XColor> OnUnitSpawn;
+        public event Action<RTSUISpawnArgs> OnUnitSpawn;
 
         // This Is The Unit Data That Must Be Modified By The Form
         private RTSUnit[] units;
@@ -145,26 +145,30 @@ namespace RTSCS {
         }
 
         private IActionController GetActionController(string name) {
-            return controllers[name] as IActionController;
+            return controllers[name].CreateInstance() as IActionController;
         }
         private IMovementController GetMovementController(string name) {
-            return controllers[name] as IMovementController;
+            return controllers[name].CreateInstance() as IMovementController;
         }
         private ITargettingController GetTargettingController(string name) {
-            return controllers[name] as ITargettingController;
+            return controllers[name].CreateInstance() as ITargettingController;
         }
         private ICombatController GetCombatController(string name) {
-            return controllers[name] as ICombatController;
+            return controllers[name].CreateInstance() as ICombatController;
         }
         private void SpawnUnit(RTSUnit ud, int teamIndex) {
-            RTSUnitInstance u = teams[teamIndex].AddUnit(ud, teamSpawnPositions[teamIndex]);
-            u.ActionController = GetActionController(App.DEFAULT_ACTION_CONTROLLER);
-            u.MovementController = GetMovementController(App.DEFAULT_MOVEMENT_CONTROLLER);
-            u.MovementController.SetWaypoints(new Vector2[] { teamWaypoints[teamIndex] });
-            u.CombatController = GetCombatController(App.DEFAULT_COMBAT_CONTROLLER);
-            u.TargettingController = GetTargettingController(App.DEFAULT_TARGETTING_CONTROLLER);
-            if(OnUnitSpawn != null)
-                OnUnitSpawn(u, teamColors[teamIndex]);
+            RTSUISpawnArgs a = new RTSUISpawnArgs {
+                UnitData = ud,
+                Team = teams[teamIndex],
+                AC = GetActionController(App.DEFAULT_ACTION_CONTROLLER),
+                CC = GetCombatController(App.DEFAULT_COMBAT_CONTROLLER),
+                MC = GetMovementController(App.DEFAULT_MOVEMENT_CONTROLLER),
+                TC = GetTargettingController(App.DEFAULT_TARGETTING_CONTROLLER),
+                SpawnPos = teamSpawnPositions[teamIndex],
+                Waypoints = new Vector2[] { teamWaypoints[teamIndex] },
+                Color = teamColors[teamIndex]
+            };
+            OnUnitSpawn(a);
         }
 
         private void CreateScriptPage() {
