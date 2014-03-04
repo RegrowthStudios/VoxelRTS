@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
@@ -60,9 +61,9 @@ namespace RTSCS {
                 SetDefaultsForRTSUnit(unit);
             }
             teams = t;
-            teamSpawnPositions = new Vector3[3]{ new Vector3(-20, -20, 0), new Vector3(20, -20, 0),  new Vector3(20, 20, 0) };
-            teamWaypoints = new Vector2[3]{ Vector2.Zero, Vector2.Zero, Vector2.Zero };
-            teamColors = new XColor[3]{ XColor.Red, XColor.Blue, XColor.Green };
+            teamSpawnPositions = new Vector3[3] { new Vector3(-20, -20, 0), new Vector3(20, -20, 0), new Vector3(20, 20, 0) };
+            teamWaypoints = new Vector2[3] { Vector2.Zero, Vector2.Zero, Vector2.Zero };
+            teamColors = new XColor[3] { XColor.Red, XColor.Blue, XColor.Green };
             controllers = c;
 
             // Populate Combo Boxes
@@ -144,6 +145,24 @@ namespace RTSCS {
                 OnUnitSpawn(u, teamColors[teamIndex]);
         }
 
+        private void CreateScriptPage() {
+            Thread t = new Thread(() => {
+                using(var f = new ScriptControlForm(controllers)) {
+                    FormClosingEventHandler eh = (s, e) => {
+                        f.Invoke(f.Closer);
+                    };
+                    FormClosing += eh;
+                    f.FormClosing += (s, e) => {
+                        FormClosing -= eh;
+                    };
+                    f.ShowDialog();
+                }
+            });
+            t.SetApartmentState(ApartmentState.STA);
+            t.IsBackground = true;
+            t.Priority = ThreadPriority.BelowNormal;
+            t.Start();
+        }
 
         private void unitTypeComboBox_Change(object sender, EventArgs e) {
             selectedIndex = unitTypeComboBox.SelectedIndex;
@@ -183,8 +202,8 @@ namespace RTSCS {
             if(splitString.Length != 2) return Vector2.Zero;
             return new Vector2(float.Parse(splitString[0]), float.Parse(splitString[1]));
         }
-      
-        private void spawnButton_Click(object sender, EventArgs e) {          
+
+        private void spawnButton_Click(object sender, EventArgs e) {
             teamSpawnPositions[0] = StringToVector3(team1SpawnPositionTextBox.Text);
             teamSpawnPositions[1] = StringToVector3(team2SpawnPositionTextBox.Text);
             teamSpawnPositions[2] = StringToVector3(team3SpawnPositionTextBox.Text);
@@ -197,10 +216,10 @@ namespace RTSCS {
             XColor color1 = new XColor(systemColor.R, systemColor.G, systemColor.B, systemColor.A); //Here Color is Microsoft.Xna.Framework.Graphics.Color
             teamColors[0] = color1;
             System.Drawing.Color systemColor2 = System.Drawing.Color.FromName(team2ColorTextBox.Text);
-            XColor color2 = new XColor(systemColor2.R, systemColor2.G, systemColor2.B, systemColor2.A); 
+            XColor color2 = new XColor(systemColor2.R, systemColor2.G, systemColor2.B, systemColor2.A);
             teamColors[1] = color2;
             System.Drawing.Color systemColor3 = System.Drawing.Color.FromName(team3ColorTextBox.Text);
-            XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A); 
+            XColor color3 = new XColor(systemColor3.R, systemColor3.G, systemColor3.B, systemColor3.A);
             teamColors[2] = color3;
 
             for(int t = 0; t < teams.Length; t++) {
@@ -226,34 +245,32 @@ namespace RTSCS {
             else return team3Unit3TextBox;
         }
 
-        private void Spawn1ComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
+        private void Spawn1ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             spawn1SelectedIndex = spawn1ComboBox.SelectedIndex;
         }
 
-        private void Spawn2ComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
+        private void Spawn2ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             spawn2SelectedIndex = spawn2ComboBox.SelectedIndex;
         }
 
-        private void Spawn3ComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
+        private void Spawn3ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             spawn3SelectedIndex = spawn3ComboBox.SelectedIndex;
         }
 
-        private void spawn1Button_Click(object sender, EventArgs e)
-        {
+        private void spawn1Button_Click(object sender, EventArgs e) {
             SpawnUnit(units[spawn1SelectedIndex], 0);
         }
 
-        private void spawn2Button_Click(object sender, EventArgs e)
-        {
+        private void spawn2Button_Click(object sender, EventArgs e) {
             SpawnUnit(units[spawn2SelectedIndex], 1);
         }
 
-        private void spawn3Button_Click(object sender, EventArgs e)
-        {
+        private void spawn3Button_Click(object sender, EventArgs e) {
             SpawnUnit(units[spawn3SelectedIndex], 2);
+        }
+
+        private void btnScriptDialog_Click(object sender, EventArgs e) {
+            CreateScriptPage();
         }
     }
 }

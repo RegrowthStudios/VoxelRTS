@@ -179,10 +179,14 @@ namespace Script {
 ";
         #endregion
 
+        public delegate void CloseDelegate();
+        public CloseDelegate Closer;
+
         private Dictionary<string, ReflectedEntityController> data;
 
         public ScriptControlForm(Dictionary<string, ReflectedEntityController> d) {
             InitializeComponent();
+            Closer = () => { Close(); };
             data = d;
         }
 
