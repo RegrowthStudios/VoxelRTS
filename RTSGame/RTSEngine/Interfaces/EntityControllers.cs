@@ -6,6 +6,15 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Data;
 
 namespace RTSEngine.Interfaces {
+    // Bitfield Flags For Entity Controller Type
+    public enum EntityControllerType {
+        None = 0x00,
+        Action = 0x01,
+        Movement = 0x02,
+        Targetting = 0x04,
+        Combat = 0x08
+    }
+
     public interface IEntityController {
         // The Entity That This Controller is Controlling
         IEntity Entity { get; }

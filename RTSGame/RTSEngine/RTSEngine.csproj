@@ -57,6 +57,7 @@
     <Compile Include="Data\DataLibrary.cs" />
     <Compile Include="Data\DiscreteMap.cs" />
     <Compile Include="Data\GameState.cs" />
+    <Compile Include="Data\Parsers\EntityControllerParser.cs" />
     <Compile Include="Data\Team\RTSUnitInstance.cs" />
     <Compile Include="Data\Team\RTSTeam.cs" />
     <Compile Include="Data\Team\RTSUnit.cs" />

@@ -27,7 +27,7 @@ namespace RTSCS.Controllers {
 
         // Set Entity Only Once
         public void SetEntity(IEntity e) {
-            if(Entity != null)
+            if(Entity != null && Entity != e)
                 throw new InvalidOperationException("Controllers Can Only Have Entities Set Once");
             entity = e as ICombatEntity;
         }
