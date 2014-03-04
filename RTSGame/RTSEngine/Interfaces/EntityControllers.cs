@@ -9,6 +9,9 @@ namespace RTSEngine.Interfaces {
     public interface IEntityController {
         // The Entity That This Controller is Controlling
         IEntity Entity { get; }
+
+        // Will Set Once And Then Fail On Later Occurences
+        void SetEntity(IEntity e);
     }
 
     public interface IMovementController : IEntityController {

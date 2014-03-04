@@ -70,10 +70,11 @@ namespace RTSCS {
 
         private void SpawnUnit(RTSUnit ud, int teamIndex) {
             RTSUnitInstance u = teams[teamIndex].AddUnit(ud, teamSpawnPositions[teamIndex]);
-            u.ActionController = new ActionController(u);
-            u.MovementController = new MovementController(u, new Vector2[] { teamWaypoints[teamIndex] });
-            u.CombatController = new CombatController(u);
-            u.TargettingController = new TargettingController(u);
+            u.ActionController = new ActionController();
+            u.MovementController = new MovementController();
+            u.MovementController.SetWaypoints(new Vector2[] { teamWaypoints[teamIndex] });
+            u.CombatController = new CombatController();
+            u.TargettingController = new TargettingController();
             if(OnUnitSpawn != null)
                 OnUnitSpawn(u, teamColors[teamIndex]);
         }

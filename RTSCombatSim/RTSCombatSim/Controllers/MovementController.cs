@@ -8,7 +8,6 @@ using RTSEngine.Data;
 
 namespace RTSCS.Controllers {
     public class MovementController : IMovementController {
-
         // The Waypoint To Which This Controller Has Decided To Send Its Entity
         protected Vector2 waypoint;
 
@@ -24,15 +23,22 @@ namespace RTSCS.Controllers {
             get { return waypoints; }
         }
 
+        // Constructs a MovementController to Move the Given Entity to the Waypoints
+        public MovementController() {
+            entity = null;
+            waypoints = null;
+        }
+
+        // Set Entity Only Once
+        public void SetEntity(IEntity e) {
+            if(Entity != null)
+                throw new InvalidOperationException("Controllers Can Only Have Entities Set Once");
+            entity = e as IMovingEntity;
+        }
+
         // Provides Controller With A New Move List
         public void SetWaypoints(Vector2[] p) {
             waypoints = p;
-        }
-
-        // Constructs a MovementController to Move the Given Entity to the Waypoints
-        public MovementController(IMovingEntity entity, Vector2[] waypoints) {
-            this.entity = entity;
-            this.waypoints = waypoints;
         }
 
         // Performs The Critical Logic Of This Controller

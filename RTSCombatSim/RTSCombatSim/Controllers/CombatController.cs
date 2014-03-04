@@ -18,7 +18,19 @@ namespace RTSCS.Controllers {
         private static Random critRoller = new Random();
 
         // The Amount Of Time Remaining Before This Controller's Entity Can Attack Again
-        private float attackCooldown; 
+        private float attackCooldown;
+
+        // Constructor
+        public CombatController() {
+            entity = null;
+        }
+
+        // Set Entity Only Once
+        public void SetEntity(IEntity e) {
+            if(Entity != null)
+                throw new InvalidOperationException("Controllers Can Only Have Entities Set Once");
+            entity = e as ICombatEntity;
+        }
 
         public void Attack(GameState g, float dt) {
             if(attackCooldown <= 0) {
@@ -35,14 +47,9 @@ namespace RTSCS.Controllers {
                         }
                     }
                 }
-                attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;;
+                attackCooldown = unit.UnitData.BaseCombatData.AttackTimer; ;
             }
             else attackCooldown -= dt;
-        }
-
-        // Constructor
-        public CombatController(ICombatEntity entity) {
-            this.entity = entity;
         }
     }
 }
