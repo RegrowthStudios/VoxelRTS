@@ -54,11 +54,11 @@ namespace RTSCS {
         // Default TextBox Parameters
         const String DEFAULT_UNIT_COUNT_TEXT = "1";
         const String DEFAULT_TEAM1_COLOR_TEXT = "1,0,0";
-        const String DEFAULT_TEAM2_COLOR_TEXT = "0,1,0";
-        const String DEFAULT_TEAM3_COLOR_TEXT = "0,0,1";
-        const String DEFAULT_TEAM1_SPAWN_TEXT = "-20,-20,0";
-        const String DEFAULT_TEAM2_SPAWN_TEXT = "20,-20,0";
-        const String DEFAULT_TEAM3_SPAWN_TEXT = "20,20,0";
+        const String DEFAULT_TEAM2_COLOR_TEXT = "0,0,1";
+        const String DEFAULT_TEAM3_COLOR_TEXT = "0,1,0";
+        const String DEFAULT_TEAM1_SPAWN_TEXT = "-180,-180,0";
+        const String DEFAULT_TEAM2_SPAWN_TEXT = "180,-180,0";
+        const String DEFAULT_TEAM3_SPAWN_TEXT = "180,180,0";
         const String DEFAULT_WAYPOINT_TEXT = "0,0";
 
         public DataForm(RTSUnit[] ud, RTSTeam[] t, Dictionary<string, ReflectedEntityController> c) {
@@ -112,6 +112,7 @@ namespace RTSCS {
             unit.BaseCombatData.CriticalDamage = UNIT_DEFAULT_CRITICAL_DAMAGE;
             unit.BaseCombatData.MaxRange = UNIT_DEFAULT_MAX_RANGE;
             unit.BaseCombatData.MinRange = UNIT_DEFAULT_MIN_RNAGE;
+            unit.ICollidableShape = new CollisionCircle(10, Vector2.Zero);
         }
 
         private void SetDefaultsForSpawnPage() {
@@ -215,6 +216,13 @@ namespace RTSCS {
             units[selectedIndex].MovementSpeed = int.Parse(movementSpeedTextBox.Text);
         }
 
+        // Assumes Data Is Input As (x,y)
+        private Vector2 StringToVector2(String s) {
+            String[] splitString = s.Split(',');
+            if(splitString.Length != 2) return Vector2.Zero;
+            return new Vector2(float.Parse(splitString[0]), float.Parse(splitString[1]));
+        }
+
         // Assumes Data Is Input As (x,y,z)
         private Vector3 StringToVector3(String s) {
             String[] splitString = s.Split(',');
@@ -227,13 +235,6 @@ namespace RTSCS {
             String[] splitString = s.Split(',');
             if(splitString.Length != 3) return XColor.Green;
             return new XColor(float.Parse(splitString[0]), float.Parse(splitString[1]), float.Parse(splitString[2]));
-        }
-
-        // Assumes Data Is Input As (x,y)
-        private Vector2 StringToVector2(String s) {
-            String[] splitString = s.Split(',');
-            if(splitString.Length != 2) return Vector2.Zero;
-            return new Vector2(float.Parse(splitString[0]), float.Parse(splitString[1]));
         }
 
         private void spawnButton_Click(object sender, EventArgs e) {
@@ -272,15 +273,15 @@ namespace RTSCS {
             else return team3Unit3TextBox;
         }
 
-        private void Spawn1ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+        private void spawn1ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             spawn1SelectedIndex = spawn1ComboBox.SelectedIndex;
         }
 
-        private void Spawn2ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+        private void spawn2ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             spawn2SelectedIndex = spawn2ComboBox.SelectedIndex;
         }
 
-        private void Spawn3ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
+        private void spawn3ComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             spawn3SelectedIndex = spawn3ComboBox.SelectedIndex;
         }
 
