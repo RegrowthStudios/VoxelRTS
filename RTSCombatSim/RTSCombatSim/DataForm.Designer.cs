@@ -831,6 +831,7 @@
             this.btnRefreshScripts.TabIndex = 83;
             this.btnRefreshScripts.Text = "Refresh Scripts";
             this.btnRefreshScripts.UseVisualStyleBackColor = true;
+            this.btnRefreshScripts.Click += new System.EventHandler(this.btnRefreshScripts_Click);
             // 
             // DataForm
             // 
