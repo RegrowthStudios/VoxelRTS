@@ -36,6 +36,7 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.rtbReferences = new System.Windows.Forms.RichTextBox();
+            this.tbFile = new System.Windows.Forms.TextBox();
             this.gbCompiler.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -118,6 +119,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.tbFile);
             this.splitContainer1.Panel2.Controls.Add(this.btnGenerate);
             this.splitContainer1.Panel2.Controls.Add(this.cbTemplates);
             this.splitContainer1.Size = new System.Drawing.Size(498, 418);
@@ -150,10 +152,11 @@
             "Action",
             "Combat",
             "Movement",
-            "Targetting"});
+            "Targetting",
+            "File"});
             this.cbTemplates.Location = new System.Drawing.Point(86, 5);
             this.cbTemplates.Name = "cbTemplates";
-            this.cbTemplates.Size = new System.Drawing.Size(264, 21);
+            this.cbTemplates.Size = new System.Drawing.Size(163, 21);
             this.cbTemplates.TabIndex = 2;
             this.cbTemplates.Text = "Action";
             // 
@@ -207,6 +210,13 @@
             this.rtbReferences.Text = "System.dll\nSystem.Data.dll\nSystem.Core.dll\nSystem.Xml.dll\nSystem.Xml.Linq.dll\nlib" +
     "\\Microsoft.Xna.Framework.dll\nRTSEngine.dll";
             // 
+            // tbFile
+            // 
+            this.tbFile.Location = new System.Drawing.Point(255, 5);
+            this.tbFile.Name = "tbFile";
+            this.tbFile.Size = new System.Drawing.Size(238, 20);
+            this.tbFile.TabIndex = 3;
+            // 
             // ScriptControlForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -220,6 +230,7 @@
             this.tabPage1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
@@ -247,6 +258,7 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.TextBox tbFile;
 
     }
 }

@@ -204,6 +204,18 @@ namespace Script {
                 case "Targetting":
                     rtbScript.Text = TEMPLATE_TARGETTING;
                     break;
+                case "File":
+                    try {
+                        using(var fs = System.IO.File.OpenRead(tbFile.Text)) {
+                            using(var sw = new System.IO.StreamReader(fs)) {
+                                rtbScript.Text = sw.ReadToEnd();
+                            }
+                        }
+                    }
+                    catch(Exception) {
+                        return;
+                    }
+                    break;
             }
         }
         private void btnCompile_Click(object sender, EventArgs e) {

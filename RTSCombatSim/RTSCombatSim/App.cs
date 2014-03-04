@@ -56,6 +56,10 @@ namespace RTSCS {
         Renderer renderer;
         CombatAnimator combAnimator;
         CombatMap map;
+        BasicEffect fxDeath;
+        RenderTarget2D deathScene;
+        List<VertexPositionTexture> deathVerts;
+        private Texture2D deathTexture;
 
         // For Pausing The Simulation
         public bool IsPaused {
@@ -340,6 +344,7 @@ namespace RTSCS {
             toSpawn.Add(u);
         }
 
+
         private static void OnUnitDeath(IEntity e) {
             Console.WriteLine("Entity [{0,12}] Was Killed", e.GetHashCode());
         }
@@ -356,6 +361,17 @@ namespace RTSCS {
                 rs.WorldPosition, rt.WorldPosition, rs.CollisionGeometry.InnerRadius * 0.9f,
                 new Color(1f, 0.4f, 0.1f), new Color(0.1f, 0.8f, 0.2f), rs.UnitData.BaseCombatData.AttackTimer
                 ));
+        }
+        private void AddDeath(IEntity e) {
+            RTSUnitInstance u = e as RTSUnitInstance;
+            Vector3 x = Vector3.UnitX * u.CollisionGeometry.BoundingRadius * 0.7f;
+            Vector3 y = Vector3.UnitY * u.CollisionGeometry.BoundingRadius * 0.7f;
+            deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x + y, Vector2.Zero));
+            deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x + y, Vector2.UnitX));
+            deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x - y, Vector2.UnitY));
+            deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x - y, Vector2.UnitY));
+            deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x + y, Vector2.UnitX));
+            deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x - y, Vector2.One));
         }
 
         #region Entry Point
