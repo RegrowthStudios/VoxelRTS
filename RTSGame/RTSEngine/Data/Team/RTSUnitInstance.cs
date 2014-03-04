@@ -113,6 +113,7 @@ namespace RTSEngine.Data.Team {
             Team = team;
             UnitData = data;
             worldPosition = position;
+            ViewDirection = Vector2.UnitX;
             Health = UnitData.Health;
             CollisionGeometry = UnitData.ICollidableShape.Clone() as ICollidable;
         }

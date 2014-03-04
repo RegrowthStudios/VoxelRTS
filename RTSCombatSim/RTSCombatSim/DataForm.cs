@@ -26,6 +26,7 @@ namespace RTSCS {
 
         // This Is The Unit Data That Must Be Modified By The Form
         private RTSUnit[] units;
+        private string[][] unitControllers;
 
         // This Is Team Data That Must Be Modified In A Different Tab
         private RTSTeam[] teams;
@@ -70,6 +71,15 @@ namespace RTSCS {
             foreach(RTSUnit unit in units) {
                 SetDefaultsForRTSUnit(unit);
             }
+            unitControllers = new string[units.Length][];
+            for(int i = 0; i < unitControllers.Length; i++) {
+                unitControllers[i] = new string[4];
+                unitControllers[i][0] = cbAC.Text.Trim();
+                unitControllers[i][1] = cbCC.Text.Trim();
+                unitControllers[i][2] = cbMC.Text.Trim();
+                unitControllers[i][3] = cbTC.Text.Trim();
+            }
+
             // Beware: Hardcoded To Expect 3 Teams Elsewhere
             teams = t;
             teamSpawnPositions = new Vector3[teams.Length];
@@ -145,29 +155,54 @@ namespace RTSCS {
         }
 
         private IActionController GetActionController(string name) {
+            if(!controllers.ContainsKey(name)) return null;
             return controllers[name].CreateInstance() as IActionController;
         }
         private IMovementController GetMovementController(string name) {
+            if(!controllers.ContainsKey(name)) return null;
             return controllers[name].CreateInstance() as IMovementController;
         }
         private ITargettingController GetTargettingController(string name) {
+            if(!controllers.ContainsKey(name)) return null;
             return controllers[name].CreateInstance() as ITargettingController;
         }
         private ICombatController GetCombatController(string name) {
+            if(!controllers.ContainsKey(name)) return null;
             return controllers[name].CreateInstance() as ICombatController;
         }
-        private void SpawnUnit(RTSUnit ud, int teamIndex) {
+        private void GetControllers(
+            string[] names,
+            out IActionController ac,
+            out ICombatController cc,
+            out IMovementController mc,
+            out ITargettingController tc) {
+            ac = null; cc = null; mc = null; tc = null;
+            IEnumerable<string> su = names.Distinct();
+            foreach(string name in su) {
+                if(!controllers.ContainsKey(name)) continue;
+                ReflectedEntityController rec = controllers[name];
+                if(rec.ControllerType != EntityControllerType.None) {
+                    IEntityController ec = rec.CreateInstance();
+                    if(rec.ControllerType.HasFlag(EntityControllerType.Action))
+                        ac = ec as IActionController;
+                    if(rec.ControllerType.HasFlag(EntityControllerType.Combat))
+                        cc = ec as ICombatController;
+                    if(rec.ControllerType.HasFlag(EntityControllerType.Movement))
+                        mc = ec as IMovementController;
+                    if(rec.ControllerType.HasFlag(EntityControllerType.Targetting))
+                        tc = ec as ITargettingController;
+                }
+            }
+        }
+        private void SpawnUnit(int unitIndex, int teamIndex) {
             RTSUISpawnArgs a = new RTSUISpawnArgs {
-                UnitData = ud,
+                UnitData = units[unitIndex],
                 Team = teams[teamIndex],
-                AC = GetActionController(App.DEFAULT_ACTION_CONTROLLER),
-                CC = GetCombatController(App.DEFAULT_COMBAT_CONTROLLER),
-                MC = GetMovementController(App.DEFAULT_MOVEMENT_CONTROLLER),
-                TC = GetTargettingController(App.DEFAULT_TARGETTING_CONTROLLER),
                 SpawnPos = teamSpawnPositions[teamIndex],
                 Waypoints = new Vector2[] { teamWaypoints[teamIndex] },
                 Color = teamColors[teamIndex]
             };
+            GetControllers(unitControllers[unitIndex], out a.AC, out a.CC, out a.MC, out a.TC);
             OnUnitSpawn(a);
         }
 
@@ -213,6 +248,10 @@ namespace RTSCS {
             units[selectedIndex].BaseCombatData.CriticalChance = double.Parse(criticalChanceTextBox.Text);
             units[selectedIndex].Health = int.Parse(healthTextBox.Text);
             units[selectedIndex].MovementSpeed = int.Parse(movementSpeedTextBox.Text);
+            unitControllers[selectedIndex][0] = cbAC.Text.Trim();
+            unitControllers[selectedIndex][1] = cbCC.Text.Trim();
+            unitControllers[selectedIndex][2] = cbMC.Text.Trim();
+            unitControllers[selectedIndex][3] = cbTC.Text.Trim();
         }
 
         // Assumes Data Is Input As (x,y,z)
@@ -253,7 +292,7 @@ namespace RTSCS {
                 for(int u = 0; u < units.Length; u++) {
                     int spawnCount = int.Parse(PickUnitCountTextBox(t, u).Text);
                     for(int count = 0; count < spawnCount; count++) {
-                        SpawnUnit(units[u], t);
+                        SpawnUnit(u, t);
                     }
                 }
             }
@@ -285,20 +324,40 @@ namespace RTSCS {
         }
 
         private void spawn1Button_Click(object sender, EventArgs e) {
-            SpawnUnit(units[spawn1SelectedIndex], 0);
+            SpawnUnit(spawn1SelectedIndex, 0);
         }
 
         private void spawn2Button_Click(object sender, EventArgs e) {
-            SpawnUnit(units[spawn2SelectedIndex], 1);
+            SpawnUnit(spawn2SelectedIndex, 1);
         }
 
         private void spawn3Button_Click(object sender, EventArgs e) {
-            SpawnUnit(units[spawn3SelectedIndex], 2);
+            SpawnUnit(spawn3SelectedIndex, 2);
         }
 
         private void btnScriptDialog_Click(object sender, EventArgs e) {
             CreateScriptPage();
         }
 
+        private void btnRefreshScripts_Click(object sender, EventArgs e) {
+            cbAC.Items.Clear();
+            cbCC.Items.Clear();
+            cbMC.Items.Clear();
+            cbTC.Items.Clear();
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in controllers) {
+                if(kv.Value.ControllerType.HasFlag(EntityControllerType.Action))
+                    cbAC.Items.Add(kv.Key);
+                if(kv.Value.ControllerType.HasFlag(EntityControllerType.Combat))
+                    cbCC.Items.Add(kv.Key);
+                if(kv.Value.ControllerType.HasFlag(EntityControllerType.Movement))
+                    cbMC.Items.Add(kv.Key);
+                if(kv.Value.ControllerType.HasFlag(EntityControllerType.Targetting))
+                    cbTC.Items.Add(kv.Key);
+            }
+            if(cbAC.Items.Count > 0) cbAC.SelectedIndex = 0;
+            if(cbCC.Items.Count > 0) cbCC.SelectedIndex = 0;
+            if(cbMC.Items.Count > 0) cbMC.SelectedIndex = 0;
+            if(cbTC.Items.Count > 0) cbTC.SelectedIndex = 0;
+        }
     }
 }
