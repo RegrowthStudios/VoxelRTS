@@ -85,11 +85,11 @@ namespace RTSCS {
                 Units[i].BaseCombatData.AttackTimer = 1f;
                 Units[i].BaseCombatData.CriticalChance = 0.5;
                 Units[i].BaseCombatData.CriticalDamage = 20;
-                Units[i].BaseCombatData.MaxRange = 10;
+                Units[i].BaseCombatData.MaxRange = 28;
                 Units[i].BaseCombatData.MinRange = 0;
                 Units[i].Health = 100;
-                Units[i].ICollidableShape = new CollisionCircle(3, Vector2.Zero);
-                Units[i].MovementSpeed = 5f;
+                Units[i].ICollidableShape = new CollisionCircle(10, Vector2.Zero);
+                Units[i].MovementSpeed = 55f;
             }
 
             // Create Game State
@@ -116,9 +116,9 @@ namespace RTSCS {
             map.Translation = Vector3.Zero;
 
             unitGeometry = new UnitGeometry[Units.Length];
-            unitGeometry[0] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[0]);
-            unitGeometry[1] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[1]);
-            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit.png", MAX_INSTANCES_PER_UNIT, Units[2]);
+            unitGeometry[0] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit1.png", MAX_INSTANCES_PER_UNIT, Units[0]);
+            unitGeometry[1] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit2.png", MAX_INSTANCES_PER_UNIT, Units[1]);
+            unitGeometry[2] = new UnitGeometry(GraphicsDevice, "Content\\Textures\\Unit3.png", MAX_INSTANCES_PER_UNIT, Units[2]);
 
             Random r = new Random();
             for(int i = 0; i < MAX_INSTANCES_PER_UNIT; i++) {
@@ -166,7 +166,7 @@ namespace RTSCS {
             GraphicsDevice.Clear(Color.Black);
 
             renderer.RenderMap(GraphicsDevice, map);
-            renderer.BeginUnitPass();
+            renderer.BeginUnitPass(GraphicsDevice);
             foreach(UnitGeometry ug in unitGeometry) {
                 ug.InstanceUnits();
                 ug.SetBuffers(GraphicsDevice);
