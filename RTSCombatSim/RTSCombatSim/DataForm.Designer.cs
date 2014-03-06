@@ -95,6 +95,8 @@
             this.team2ColorTextBox = new System.Windows.Forms.TextBox();
             this.teamColorLabel = new System.Windows.Forms.Label();
             this.team1ColorTextBox = new System.Windows.Forms.TextBox();
+            this.capitalCostTextBox = new System.Windows.Forms.TextBox();
+            this.capitalCostLabel = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.unitMenuTabPage.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -371,11 +373,13 @@
             this.tabControl1.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(559, 320);
+            this.tabControl1.Size = new System.Drawing.Size(569, 350);
             this.tabControl1.TabIndex = 63;
             // 
             // unitMenuTabPage
             // 
+            this.unitMenuTabPage.Controls.Add(this.capitalCostTextBox);
+            this.unitMenuTabPage.Controls.Add(this.capitalCostLabel);
             this.unitMenuTabPage.Controls.Add(this.groupBox1);
             this.unitMenuTabPage.Controls.Add(this.saveUnitTypeButton);
             this.unitMenuTabPage.Controls.Add(this.movementSpeedTextBox);
@@ -402,7 +406,7 @@
             this.unitMenuTabPage.Margin = new System.Windows.Forms.Padding(2);
             this.unitMenuTabPage.Name = "unitMenuTabPage";
             this.unitMenuTabPage.Padding = new System.Windows.Forms.Padding(2);
-            this.unitMenuTabPage.Size = new System.Drawing.Size(551, 294);
+            this.unitMenuTabPage.Size = new System.Drawing.Size(561, 324);
             this.unitMenuTabPage.TabIndex = 0;
             this.unitMenuTabPage.Text = "Unit Menu";
             this.unitMenuTabPage.UseVisualStyleBackColor = true;
@@ -529,7 +533,7 @@
             // 
             // saveUnitTypeButton
             // 
-            this.saveUnitTypeButton.Location = new System.Drawing.Point(7, 251);
+            this.saveUnitTypeButton.Location = new System.Drawing.Point(7, 274);
             this.saveUnitTypeButton.Margin = new System.Windows.Forms.Padding(2);
             this.saveUnitTypeButton.Name = "saveUnitTypeButton";
             this.saveUnitTypeButton.Size = new System.Drawing.Size(521, 35);
@@ -831,11 +835,29 @@
             this.team1ColorTextBox.Size = new System.Drawing.Size(79, 20);
             this.team1ColorTextBox.TabIndex = 62;
             // 
+            // capitalCostTextBox
+            // 
+            this.capitalCostTextBox.Location = new System.Drawing.Point(172, 250);
+            this.capitalCostTextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.capitalCostTextBox.Name = "capitalCostTextBox";
+            this.capitalCostTextBox.Size = new System.Drawing.Size(64, 20);
+            this.capitalCostTextBox.TabIndex = 78;
+            // 
+            // capitalCostLabel
+            // 
+            this.capitalCostLabel.AutoSize = true;
+            this.capitalCostLabel.Location = new System.Drawing.Point(4, 253);
+            this.capitalCostLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.capitalCostLabel.Name = "capitalCostLabel";
+            this.capitalCostLabel.Size = new System.Drawing.Size(63, 13);
+            this.capitalCostLabel.TabIndex = 79;
+            this.capitalCostLabel.Text = "Capital Cost";
+            // 
             // DataForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(559, 320);
+            this.ClientSize = new System.Drawing.Size(569, 350);
             this.Controls.Add(this.tabControl1);
             this.Name = "DataForm";
             this.Text = " ";
@@ -926,5 +948,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox cbAC;
         private System.Windows.Forms.Button btnRefreshScripts;
+        private System.Windows.Forms.TextBox capitalCostTextBox;
+        private System.Windows.Forms.Label capitalCostLabel;
     }
 }

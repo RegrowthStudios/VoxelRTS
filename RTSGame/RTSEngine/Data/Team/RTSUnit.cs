@@ -9,6 +9,9 @@ namespace RTSEngine.Data.Team {
         // Health Of The Unit
         public int Health;
 
+        // The Capital Cost Of The Unit
+        public int CapitalCost;
+
         // Speed Of The Unit
         public float MovementSpeed;
 

@@ -39,18 +39,20 @@ namespace RTSCS {
         int selectedIndex;
 
         // Default Unit Parameters
+        const int UNIT_SOLDIER_COST = 5;
         const int UNIT_SOLDIER_ARMOR = 0;
         const int UNIT_SOLDIER_ATTACK_DAMAGE = 10;
-        const float UNIT_SOLDIER_ATTACK_TIMER = 0.5f;
+        const float UNIT_SOLDIER_ATTACK_TIMER = 0.33f;
         const double UNIT_SOLDIER_CRITICAL_CHANCE = 0.05;
         const int UNIT_SOLDIER_CRITICAL_DAMAGE = 15;
-        const int UNIT_SOLDIER_MAX_RANGE = 130;
+        const int UNIT_SOLDIER_MAX_RANGE = 90;
         const int UNIT_SOLDIER_MIN_RANGE = 0;
         const int UNIT_SOLDIER_HEALTH = 60;
         const int UNIT_SOLDIER_SPEED = 90;
 
+        const int UNIT_HEAVY_SOLDIER_COST = 6;
         const int UNIT_HEAVY_SOLDIER_ARMOR = 0;
-        const int UNIT_HEAVY_SOLDIER_ATTACK_DAMAGE = 20;
+        const int UNIT_HEAVY_SOLDIER_ATTACK_DAMAGE = 25;
         const float UNIT_HEAVY_SOLDIER_ATTACK_TIMER = 1f;
         const double UNIT_HEAVY_SOLDIER_CRITICAL_CHANCE = 0.05;
         const int UNIT_HEAVY_SOLDIER_CRITICAL_DAMAGE = 30;
@@ -59,15 +61,16 @@ namespace RTSCS {
         const int UNIT_HEAVY_SOLDIER_HEALTH = 80;
         const int UNIT_HEAVY_SOLDIER_SPEED = 60;
 
-        const int UNIT_BRUISER_ARMOR = 0;
-        const int UNIT_BRUISER_ATTACK_DAMAGE = 20;
-        const float UNIT_BRUISER_ATTACK_TIMER = 1f;
-        const double UNIT_BRUISER_CRITICAL_CHANCE = 0.05;
-        const int UNIT_BRUISER_CRITICAL_DAMAGE = 30;
-        const int UNIT_BRUISER_MAX_RANGE = 140;
-        const int UNIT_BRUISER_MIN_RANGE = 0;
-        const int UNIT_BRUISER_HEALTH = 240;
-        const int UNIT_BRUISER_SPEED = 30;
+        const int UNIT_ARMORED_COST = 50;
+        const int UNIT_ARMORED_ARMOR = 9;
+        const int UNIT_ARMORED_ATTACK_DAMAGE = 20;
+        const float UNIT_ARMORED_ATTACK_TIMER = 1f;
+        const double UNIT_ARMORED_CRITICAL_CHANCE = 0.05;
+        const int UNIT_ARMORED_CRITICAL_DAMAGE = 30;
+        const int UNIT_ARMORED_MAX_RANGE = 60;
+        const int UNIT_ARMORED_MIN_RANGE = 0;
+        const int UNIT_ARMORED_HEALTH = 120;
+        const int UNIT_ARMORED_SPEED = 100;
 
         // Default TextBox Parameters
         const String DEFAULT_UNIT_COUNT_TEXT = "0";
@@ -133,6 +136,7 @@ namespace RTSCS {
             RTSUnit unit = units[type];
             switch(type) {
                 case 0:
+                    unit.CapitalCost = UNIT_SOLDIER_COST;
                     unit.Health = UNIT_SOLDIER_HEALTH;
                     unit.MovementSpeed = UNIT_SOLDIER_SPEED;
                     unit.BaseCombatData.Armor = UNIT_SOLDIER_ARMOR;
@@ -144,6 +148,7 @@ namespace RTSCS {
                     unit.BaseCombatData.MinRange = UNIT_SOLDIER_MIN_RANGE;
                     break;
                 case 1:
+                    unit.CapitalCost = UNIT_HEAVY_SOLDIER_COST;
                     unit.Health = UNIT_HEAVY_SOLDIER_HEALTH;
                     unit.MovementSpeed = UNIT_HEAVY_SOLDIER_SPEED;
                     unit.BaseCombatData.Armor = UNIT_HEAVY_SOLDIER_ARMOR;
@@ -155,15 +160,16 @@ namespace RTSCS {
                     unit.BaseCombatData.MinRange = UNIT_HEAVY_SOLDIER_MIN_RANGE;
                     break;
                 case 2:
-                    unit.Health = UNIT_BRUISER_HEALTH;
-                    unit.MovementSpeed = UNIT_BRUISER_SPEED;
-                    unit.BaseCombatData.Armor = UNIT_BRUISER_ARMOR;
-                    unit.BaseCombatData.AttackDamage = UNIT_BRUISER_ATTACK_DAMAGE;
-                    unit.BaseCombatData.AttackTimer = UNIT_BRUISER_ATTACK_TIMER;
-                    unit.BaseCombatData.CriticalChance = UNIT_BRUISER_CRITICAL_CHANCE;
-                    unit.BaseCombatData.CriticalDamage = UNIT_BRUISER_CRITICAL_DAMAGE;
-                    unit.BaseCombatData.MaxRange = UNIT_BRUISER_MAX_RANGE;
-                    unit.BaseCombatData.MinRange = UNIT_BRUISER_MIN_RANGE;
+                    unit.CapitalCost = UNIT_ARMORED_COST;
+                    unit.Health = UNIT_ARMORED_HEALTH;
+                    unit.MovementSpeed = UNIT_ARMORED_SPEED;
+                    unit.BaseCombatData.Armor = UNIT_ARMORED_ARMOR;
+                    unit.BaseCombatData.AttackDamage = UNIT_ARMORED_ATTACK_DAMAGE;
+                    unit.BaseCombatData.AttackTimer = UNIT_ARMORED_ATTACK_TIMER;
+                    unit.BaseCombatData.CriticalChance = UNIT_ARMORED_CRITICAL_CHANCE;
+                    unit.BaseCombatData.CriticalDamage = UNIT_ARMORED_CRITICAL_DAMAGE;
+                    unit.BaseCombatData.MaxRange = UNIT_ARMORED_MAX_RANGE;
+                    unit.BaseCombatData.MinRange = UNIT_ARMORED_MIN_RANGE;
                     break;
             }
             unit.ICollidableShape = new CollisionCircle(10, Vector2.Zero);
@@ -288,6 +294,7 @@ namespace RTSCS {
             criticalChanceTextBox.Text = units[selectedIndex].BaseCombatData.CriticalChance.ToString();
             healthTextBox.Text = units[selectedIndex].Health.ToString();
             movementSpeedTextBox.Text = units[selectedIndex].MovementSpeed.ToString();
+            capitalCostTextBox.Text = units[selectedIndex].CapitalCost.ToString();
         }
 
         private void saveButton_Click(object sender, EventArgs e) {
@@ -300,6 +307,7 @@ namespace RTSCS {
             units[selectedIndex].BaseCombatData.CriticalChance = double.Parse(criticalChanceTextBox.Text);
             units[selectedIndex].Health = int.Parse(healthTextBox.Text);
             units[selectedIndex].MovementSpeed = int.Parse(movementSpeedTextBox.Text);
+            units[selectedIndex].CapitalCost = int.Parse(capitalCostTextBox.Text);
             unitControllers[selectedIndex][0] = cbAC.Text.Trim();
             unitControllers[selectedIndex][1] = cbCC.Text.Trim();
             unitControllers[selectedIndex][2] = cbMC.Text.Trim();

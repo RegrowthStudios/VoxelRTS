@@ -13,6 +13,9 @@ namespace RTSEngine.Data.Team {
         // RTSTeam Of The Unit
         public RTSTeam Team { get; private set; }
 
+        // This Unit's Cost In Capital
+        public int CapitalCost { get; private set; }
+
         // Unit's View Direction
         public Vector2 ViewDirection { get; private set; }
 
@@ -134,6 +137,7 @@ namespace RTSEngine.Data.Team {
             worldPosition = position;
             ViewDirection = Vector2.UnitX;
             Health = UnitData.Health;
+            CapitalCost = UnitData.CapitalCost;
             CollisionGeometry = UnitData.ICollidableShape.Clone() as ICollidable;
         }
 
