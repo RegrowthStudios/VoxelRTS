@@ -112,22 +112,22 @@ namespace RTSCS {
             // Populate Combo Boxes
             unitTypeComboBox.Items.Add("Soldier");
             unitTypeComboBox.Items.Add("Heavy Soldier");
-            unitTypeComboBox.Items.Add("Armored");
+            unitTypeComboBox.Items.Add("Armored Soldier");
             unitTypeComboBox.SelectedIndex = 0;
 
             spawn1ComboBox.Items.Add("Soldier");
             spawn1ComboBox.Items.Add("Heavy Soldier");
-            spawn1ComboBox.Items.Add("Armored");
+            spawn1ComboBox.Items.Add("Armored Soldier");
             spawn1ComboBox.SelectedIndex = 0;
 
             spawn2ComboBox.Items.Add("Soldier");
             spawn2ComboBox.Items.Add("Heavy Soldier");
-            spawn2ComboBox.Items.Add("Armored");
+            spawn2ComboBox.Items.Add("Armored Soldier");
             spawn2ComboBox.SelectedIndex = 0;
 
             spawn3ComboBox.Items.Add("Soldier");
             spawn3ComboBox.Items.Add("Heavy Soldier");
-            spawn3ComboBox.Items.Add("Armored");
+            spawn3ComboBox.Items.Add("Armored Soldier");
             spawn3ComboBox.SelectedIndex = 0;
 
             // Populate Spawn Page

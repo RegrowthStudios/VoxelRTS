@@ -181,9 +181,9 @@
             this.unit1Label.Location = new System.Drawing.Point(4, 35);
             this.unit1Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.unit1Label.Name = "unit1Label";
-            this.unit1Label.Size = new System.Drawing.Size(35, 13);
+            this.unit1Label.Size = new System.Drawing.Size(39, 13);
             this.unit1Label.TabIndex = 14;
-            this.unit1Label.Text = "Unit 1";
+            this.unit1Label.Text = "Soldier";
             // 
             // unit2Label
             // 
@@ -191,9 +191,9 @@
             this.unit2Label.Location = new System.Drawing.Point(4, 71);
             this.unit2Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.unit2Label.Name = "unit2Label";
-            this.unit2Label.Size = new System.Drawing.Size(35, 13);
+            this.unit2Label.Size = new System.Drawing.Size(73, 13);
             this.unit2Label.TabIndex = 15;
-            this.unit2Label.Text = "Unit 2";
+            this.unit2Label.Text = "Heavy Soldier";
             // 
             // unit3Label
             // 
@@ -201,9 +201,9 @@
             this.unit3Label.Location = new System.Drawing.Point(4, 104);
             this.unit3Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.unit3Label.Name = "unit3Label";
-            this.unit3Label.Size = new System.Drawing.Size(35, 13);
+            this.unit3Label.Size = new System.Drawing.Size(81, 13);
             this.unit3Label.TabIndex = 16;
-            this.unit3Label.Text = "Unit 3";
+            this.unit3Label.Text = "Armored Soldier";
             // 
             // team1Unit1TextBox
             // 
