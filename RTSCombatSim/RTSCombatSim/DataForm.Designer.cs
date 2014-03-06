@@ -54,6 +54,8 @@
             this.helpProvider1 = new System.Windows.Forms.HelpProvider();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.unitMenuTabPage = new System.Windows.Forms.TabPage();
+            this.capitalCostTextBox = new System.Windows.Forms.TextBox();
+            this.capitalCostLabel = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnRefreshScripts = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
@@ -83,6 +85,10 @@
             this.attackDamageTextBox = new System.Windows.Forms.TextBox();
             this.attackDamageLabel = new System.Windows.Forms.Label();
             this.spawnMenuTabPage = new System.Windows.Forms.TabPage();
+            this.capital3TextBox = new System.Windows.Forms.TextBox();
+            this.capital2TextBox = new System.Windows.Forms.TextBox();
+            this.capitalLabel = new System.Windows.Forms.Label();
+            this.capital1TextBox = new System.Windows.Forms.TextBox();
             this.team3WaypointTextBox = new System.Windows.Forms.TextBox();
             this.team2WaypointTextBox = new System.Windows.Forms.TextBox();
             this.waypointLabel = new System.Windows.Forms.Label();
@@ -95,8 +101,6 @@
             this.team2ColorTextBox = new System.Windows.Forms.TextBox();
             this.teamColorLabel = new System.Windows.Forms.Label();
             this.team1ColorTextBox = new System.Windows.Forms.TextBox();
-            this.capitalCostTextBox = new System.Windows.Forms.TextBox();
-            this.capitalCostLabel = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.unitMenuTabPage.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -208,6 +212,7 @@
             this.team1Unit1TextBox.Name = "team1Unit1TextBox";
             this.team1Unit1TextBox.Size = new System.Drawing.Size(79, 20);
             this.team1Unit1TextBox.TabIndex = 17;
+            this.team1Unit1TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // team1Unit3TextBox
             // 
@@ -216,6 +221,7 @@
             this.team1Unit3TextBox.Name = "team1Unit3TextBox";
             this.team1Unit3TextBox.Size = new System.Drawing.Size(79, 20);
             this.team1Unit3TextBox.TabIndex = 21;
+            this.team1Unit3TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // team2Unit3TextBox
             // 
@@ -224,6 +230,7 @@
             this.team2Unit3TextBox.Name = "team2Unit3TextBox";
             this.team2Unit3TextBox.Size = new System.Drawing.Size(79, 20);
             this.team2Unit3TextBox.TabIndex = 27;
+            this.team2Unit3TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // team2Unit2TextBox
             // 
@@ -232,6 +239,7 @@
             this.team2Unit2TextBox.Name = "team2Unit2TextBox";
             this.team2Unit2TextBox.Size = new System.Drawing.Size(79, 20);
             this.team2Unit2TextBox.TabIndex = 26;
+            this.team2Unit2TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // team2Unit1TextBox
             // 
@@ -240,6 +248,7 @@
             this.team2Unit1TextBox.Name = "team2Unit1TextBox";
             this.team2Unit1TextBox.Size = new System.Drawing.Size(79, 20);
             this.team2Unit1TextBox.TabIndex = 25;
+            this.team2Unit1TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // team3Unit3TextBox
             // 
@@ -248,6 +257,7 @@
             this.team3Unit3TextBox.Name = "team3Unit3TextBox";
             this.team3Unit3TextBox.Size = new System.Drawing.Size(79, 20);
             this.team3Unit3TextBox.TabIndex = 30;
+            this.team3Unit3TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // team3Unit2TextBox
             // 
@@ -256,6 +266,7 @@
             this.team3Unit2TextBox.Name = "team3Unit2TextBox";
             this.team3Unit2TextBox.Size = new System.Drawing.Size(79, 20);
             this.team3Unit2TextBox.TabIndex = 29;
+            this.team3Unit2TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // team3Unit1TextBox
             // 
@@ -264,10 +275,11 @@
             this.team3Unit1TextBox.Name = "team3Unit1TextBox";
             this.team3Unit1TextBox.Size = new System.Drawing.Size(79, 20);
             this.team3Unit1TextBox.TabIndex = 28;
+            this.team3Unit1TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // spawnButton
             // 
-            this.spawnButton.Location = new System.Drawing.Point(454, 242);
+            this.spawnButton.Location = new System.Drawing.Point(447, 276);
             this.spawnButton.Margin = new System.Windows.Forms.Padding(2);
             this.spawnButton.Name = "spawnButton";
             this.spawnButton.Size = new System.Drawing.Size(90, 32);
@@ -279,7 +291,7 @@
             // addUnitLabel
             // 
             this.addUnitLabel.AutoSize = true;
-            this.addUnitLabel.Location = new System.Drawing.Point(4, 241);
+            this.addUnitLabel.Location = new System.Drawing.Point(5, 268);
             this.addUnitLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.addUnitLabel.Name = "addUnitLabel";
             this.addUnitLabel.Size = new System.Drawing.Size(48, 13);
@@ -288,7 +300,7 @@
             // 
             // spawn1Button
             // 
-            this.spawn1Button.Location = new System.Drawing.Point(179, 249);
+            this.spawn1Button.Location = new System.Drawing.Point(180, 276);
             this.spawn1Button.Margin = new System.Windows.Forms.Padding(2);
             this.spawn1Button.Name = "spawn1Button";
             this.spawn1Button.Size = new System.Drawing.Size(20, 19);
@@ -300,7 +312,7 @@
             // spawn1ComboBox
             // 
             this.spawn1ComboBox.FormattingEnabled = true;
-            this.spawn1ComboBox.Location = new System.Drawing.Point(97, 249);
+            this.spawn1ComboBox.Location = new System.Drawing.Point(98, 276);
             this.spawn1ComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.spawn1ComboBox.Name = "spawn1ComboBox";
             this.spawn1ComboBox.Size = new System.Drawing.Size(79, 21);
@@ -309,7 +321,7 @@
             // spawn2ComboBox
             // 
             this.spawn2ComboBox.FormattingEnabled = true;
-            this.spawn2ComboBox.Location = new System.Drawing.Point(211, 249);
+            this.spawn2ComboBox.Location = new System.Drawing.Point(212, 276);
             this.spawn2ComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.spawn2ComboBox.Name = "spawn2ComboBox";
             this.spawn2ComboBox.Size = new System.Drawing.Size(79, 21);
@@ -317,7 +329,7 @@
             // 
             // spawn2Button
             // 
-            this.spawn2Button.Location = new System.Drawing.Point(296, 249);
+            this.spawn2Button.Location = new System.Drawing.Point(297, 276);
             this.spawn2Button.Margin = new System.Windows.Forms.Padding(2);
             this.spawn2Button.Name = "spawn2Button";
             this.spawn2Button.Size = new System.Drawing.Size(20, 19);
@@ -329,7 +341,7 @@
             // spawn3ComboBox
             // 
             this.spawn3ComboBox.FormattingEnabled = true;
-            this.spawn3ComboBox.Location = new System.Drawing.Point(321, 249);
+            this.spawn3ComboBox.Location = new System.Drawing.Point(322, 276);
             this.spawn3ComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.spawn3ComboBox.Name = "spawn3ComboBox";
             this.spawn3ComboBox.Size = new System.Drawing.Size(79, 21);
@@ -337,7 +349,7 @@
             // 
             // spawn3Button
             // 
-            this.spawn3Button.Location = new System.Drawing.Point(404, 249);
+            this.spawn3Button.Location = new System.Drawing.Point(405, 276);
             this.spawn3Button.Margin = new System.Windows.Forms.Padding(2);
             this.spawn3Button.Name = "spawn3Button";
             this.spawn3Button.Size = new System.Drawing.Size(20, 19);
@@ -353,11 +365,12 @@
             this.team1Unit2TextBox.Name = "team1Unit2TextBox";
             this.team1Unit2TextBox.Size = new System.Drawing.Size(79, 20);
             this.team1Unit2TextBox.TabIndex = 20;
+            this.team1Unit2TextBox.TextChanged += new System.EventHandler(this.ArmyComposition_Change);
             // 
             // toSpawnLabel
             // 
             this.toSpawnLabel.AutoSize = true;
-            this.toSpawnLabel.Location = new System.Drawing.Point(4, 254);
+            this.toSpawnLabel.Location = new System.Drawing.Point(5, 281);
             this.toSpawnLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.toSpawnLabel.Name = "toSpawnLabel";
             this.toSpawnLabel.Size = new System.Drawing.Size(56, 13);
@@ -410,6 +423,24 @@
             this.unitMenuTabPage.TabIndex = 0;
             this.unitMenuTabPage.Text = "Unit Menu";
             this.unitMenuTabPage.UseVisualStyleBackColor = true;
+            // 
+            // capitalCostTextBox
+            // 
+            this.capitalCostTextBox.Location = new System.Drawing.Point(172, 250);
+            this.capitalCostTextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.capitalCostTextBox.Name = "capitalCostTextBox";
+            this.capitalCostTextBox.Size = new System.Drawing.Size(64, 20);
+            this.capitalCostTextBox.TabIndex = 78;
+            // 
+            // capitalCostLabel
+            // 
+            this.capitalCostLabel.AutoSize = true;
+            this.capitalCostLabel.Location = new System.Drawing.Point(4, 253);
+            this.capitalCostLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.capitalCostLabel.Name = "capitalCostLabel";
+            this.capitalCostLabel.Size = new System.Drawing.Size(63, 13);
+            this.capitalCostLabel.TabIndex = 79;
+            this.capitalCostLabel.Text = "Capital Cost";
             // 
             // groupBox1
             // 
@@ -688,6 +719,10 @@
             // 
             // spawnMenuTabPage
             // 
+            this.spawnMenuTabPage.Controls.Add(this.capital3TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.capital2TextBox);
+            this.spawnMenuTabPage.Controls.Add(this.capitalLabel);
+            this.spawnMenuTabPage.Controls.Add(this.capital1TextBox);
             this.spawnMenuTabPage.Controls.Add(this.team3WaypointTextBox);
             this.spawnMenuTabPage.Controls.Add(this.team2WaypointTextBox);
             this.spawnMenuTabPage.Controls.Add(this.waypointLabel);
@@ -728,10 +763,44 @@
             this.spawnMenuTabPage.Margin = new System.Windows.Forms.Padding(2);
             this.spawnMenuTabPage.Name = "spawnMenuTabPage";
             this.spawnMenuTabPage.Padding = new System.Windows.Forms.Padding(2);
-            this.spawnMenuTabPage.Size = new System.Drawing.Size(551, 294);
+            this.spawnMenuTabPage.Size = new System.Drawing.Size(561, 324);
             this.spawnMenuTabPage.TabIndex = 1;
             this.spawnMenuTabPage.Text = "Spawn Menu";
             this.spawnMenuTabPage.UseVisualStyleBackColor = true;
+            // 
+            // capital3TextBox
+            // 
+            this.capital3TextBox.Location = new System.Drawing.Point(321, 242);
+            this.capital3TextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.capital3TextBox.Name = "capital3TextBox";
+            this.capital3TextBox.Size = new System.Drawing.Size(79, 20);
+            this.capital3TextBox.TabIndex = 76;
+            // 
+            // capital2TextBox
+            // 
+            this.capital2TextBox.Location = new System.Drawing.Point(211, 242);
+            this.capital2TextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.capital2TextBox.Name = "capital2TextBox";
+            this.capital2TextBox.Size = new System.Drawing.Size(79, 20);
+            this.capital2TextBox.TabIndex = 75;
+            // 
+            // capitalLabel
+            // 
+            this.capitalLabel.AutoSize = true;
+            this.capitalLabel.Location = new System.Drawing.Point(4, 241);
+            this.capitalLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.capitalLabel.Name = "capitalLabel";
+            this.capitalLabel.Size = new System.Drawing.Size(39, 13);
+            this.capitalLabel.TabIndex = 73;
+            this.capitalLabel.Text = "Capital";
+            // 
+            // capital1TextBox
+            // 
+            this.capital1TextBox.Location = new System.Drawing.Point(97, 242);
+            this.capital1TextBox.Margin = new System.Windows.Forms.Padding(2);
+            this.capital1TextBox.Name = "capital1TextBox";
+            this.capital1TextBox.Size = new System.Drawing.Size(79, 20);
+            this.capital1TextBox.TabIndex = 74;
             // 
             // team3WaypointTextBox
             // 
@@ -835,24 +904,6 @@
             this.team1ColorTextBox.Size = new System.Drawing.Size(79, 20);
             this.team1ColorTextBox.TabIndex = 62;
             // 
-            // capitalCostTextBox
-            // 
-            this.capitalCostTextBox.Location = new System.Drawing.Point(172, 250);
-            this.capitalCostTextBox.Margin = new System.Windows.Forms.Padding(2);
-            this.capitalCostTextBox.Name = "capitalCostTextBox";
-            this.capitalCostTextBox.Size = new System.Drawing.Size(64, 20);
-            this.capitalCostTextBox.TabIndex = 78;
-            // 
-            // capitalCostLabel
-            // 
-            this.capitalCostLabel.AutoSize = true;
-            this.capitalCostLabel.Location = new System.Drawing.Point(4, 253);
-            this.capitalCostLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.capitalCostLabel.Name = "capitalCostLabel";
-            this.capitalCostLabel.Size = new System.Drawing.Size(63, 13);
-            this.capitalCostLabel.TabIndex = 79;
-            this.capitalCostLabel.Text = "Capital Cost";
-            // 
             // DataForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -950,5 +1001,9 @@
         private System.Windows.Forms.Button btnRefreshScripts;
         private System.Windows.Forms.TextBox capitalCostTextBox;
         private System.Windows.Forms.Label capitalCostLabel;
+        private System.Windows.Forms.TextBox capital3TextBox;
+        private System.Windows.Forms.TextBox capital2TextBox;
+        private System.Windows.Forms.Label capitalLabel;
+        private System.Windows.Forms.TextBox capital1TextBox;
     }
 }

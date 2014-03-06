@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework;
 using XColor = Microsoft.Xna.Framework.Color;
 using RTSEngine.Interfaces;
 using RTSEngine.Data.Parsers;
+using System.Globalization;
 
 namespace RTSCS {
     public partial class DataForm : Form, IDataForm {
@@ -81,6 +82,7 @@ namespace RTSCS {
         const String DEFAULT_TEAM2_SPAWN_TEXT = "180,-180,0";
         const String DEFAULT_TEAM3_SPAWN_TEXT = "180,180,0";
         const String DEFAULT_WAYPOINT_TEXT = "0,0";
+        const String DEFAULT_CAPITAL = "600";
 
         public DataForm(RTSUnit[] ud, RTSTeam[] t, Dictionary<string, ReflectedEntityController> c) {
             InitializeComponent();
@@ -201,6 +203,10 @@ namespace RTSCS {
             team1WaypointTextBox.Text = DEFAULT_WAYPOINT_TEXT;
             team2WaypointTextBox.Text = DEFAULT_WAYPOINT_TEXT;
             team3WaypointTextBox.Text = DEFAULT_WAYPOINT_TEXT;
+
+            capital1TextBox.Text = DEFAULT_CAPITAL;
+            capital2TextBox.Text = DEFAULT_CAPITAL;
+            capital3TextBox.Text = DEFAULT_CAPITAL;
 
         }
 
@@ -354,7 +360,8 @@ namespace RTSCS {
                 for(int u = 0; u < units.Length; u++) {
                     int spawnCount = int.Parse(PickUnitCountTextBox(t, u).Text);
                     for(int count = 0; count < spawnCount; count++) {
-                        SpawnUnit(u, t);
+                        if(int.Parse(GetCapitalTextBox(t).Text) >= 0) SpawnUnit(u, t);
+                        else Console.WriteLine("Team {0} has overdrawn its balance and can't spawn any units!", t); 
                     }
                 }
             }
@@ -409,6 +416,44 @@ namespace RTSCS {
             if(cbCC.Items.Count > 0) cbCC.SelectedIndex = 0;
             if(cbMC.Items.Count > 0) cbMC.SelectedIndex = 0;
             if(cbTC.Items.Count > 0) cbTC.SelectedIndex = 0;
+        }
+
+        private int GetUnitCost(int type) {
+            switch(type) {
+                case 0:
+                    return UNIT_SOLDIER_COST;
+                case 1:
+                    return UNIT_HEAVY_SOLDIER_COST;
+                case 2:
+                    return UNIT_ARMORED_COST;
+            }
+            return 0;
+        }
+
+        private TextBox GetCapitalTextBox(int team) {
+            switch(team) {
+                case 0:
+                    return capital1TextBox;
+                case 1:
+                    return capital2TextBox;
+                case 2:
+                    return capital3TextBox;
+            }
+            return capital1TextBox;
+        }
+
+        // Called When Any Spawn Counts Change
+        private void ArmyComposition_Change(object sender, EventArgs e) {
+            for(int t = 0; t < teams.Length; t++) {
+                int totalCost = 0;
+                for(int u = 0; u < units.Length; u++) {
+                    String textCount = PickUnitCountTextBox(t, u).Text;
+                    int spawnCount = String.IsNullOrEmpty(textCount) ? 0 : int.Parse(textCount);
+                    totalCost += GetUnitCost(u) * spawnCount;
+                }
+                TextBox tb = GetCapitalTextBox(t);
+                tb.Text = (int.Parse(DEFAULT_CAPITAL) - totalCost).ToString();
+            }
         }
     }
 }
