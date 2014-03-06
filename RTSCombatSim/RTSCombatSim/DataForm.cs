@@ -48,7 +48,7 @@ namespace RTSCS {
         const int UNIT_SOLDIER_MAX_RANGE = 90;
         const int UNIT_SOLDIER_MIN_RANGE = 0;
         const int UNIT_SOLDIER_HEALTH = 60;
-        const int UNIT_SOLDIER_SPEED = 90;
+        const int UNIT_SOLDIER_SPEED = 100;
 
         const int UNIT_HEAVY_SOLDIER_COST = 6;
         const int UNIT_HEAVY_SOLDIER_ARMOR = 0;
@@ -59,18 +59,18 @@ namespace RTSCS {
         const int UNIT_HEAVY_SOLDIER_MAX_RANGE = 90;
         const int UNIT_HEAVY_SOLDIER_MIN_RANGE = 0;
         const int UNIT_HEAVY_SOLDIER_HEALTH = 80;
-        const int UNIT_HEAVY_SOLDIER_SPEED = 60;
+        const int UNIT_HEAVY_SOLDIER_SPEED = 80;
 
-        const int UNIT_ARMORED_COST = 50;
-        const int UNIT_ARMORED_ARMOR = 9;
-        const int UNIT_ARMORED_ATTACK_DAMAGE = 20;
-        const float UNIT_ARMORED_ATTACK_TIMER = 1f;
+        const int UNIT_ARMORED_COST = 20;
+        const int UNIT_ARMORED_ARMOR = 8;
+        const int UNIT_ARMORED_ATTACK_DAMAGE = 30;
+        const float UNIT_ARMORED_ATTACK_TIMER = 0.5f;
         const double UNIT_ARMORED_CRITICAL_CHANCE = 0.05;
         const int UNIT_ARMORED_CRITICAL_DAMAGE = 30;
         const int UNIT_ARMORED_MAX_RANGE = 60;
         const int UNIT_ARMORED_MIN_RANGE = 0;
         const int UNIT_ARMORED_HEALTH = 120;
-        const int UNIT_ARMORED_SPEED = 100;
+        const int UNIT_ARMORED_SPEED = 110;
 
         // Default TextBox Parameters
         const String DEFAULT_UNIT_COUNT_TEXT = "0";

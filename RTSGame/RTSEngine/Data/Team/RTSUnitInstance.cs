@@ -141,9 +141,12 @@ namespace RTSEngine.Data.Team {
             CollisionGeometry = UnitData.ICollidableShape.Clone() as ICollidable;
         }
 
-        // Computes The Damage To Deal With Access To A Random Number
+        // Computes The Damage To Deal With Access To A Random Number And A Target
         public int ComputeDamage(double rand) {
-            return UnitData.BaseCombatData.ComputeDamageDealt(rand);
+            RTSUnitInstance t = Target as RTSUnitInstance;
+            int dmg = UnitData.BaseCombatData.ComputeDamageDealt(rand);
+            if(t != null) dmg = t.UnitData.BaseCombatData.ComputeDamageReceived(dmg);
+            return dmg;
         }
 
         // Applies Damage
