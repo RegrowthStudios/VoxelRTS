@@ -76,8 +76,8 @@ namespace RTSCS {
         // Default TextBox Parameters
         const String DEFAULT_UNIT_COUNT_TEXT = "0";
         const String DEFAULT_TEAM1_COLOR_TEXT = "1,0,0";
-        const String DEFAULT_TEAM2_COLOR_TEXT = "0,0,1";
-        const String DEFAULT_TEAM3_COLOR_TEXT = "0,1,0";
+        const String DEFAULT_TEAM2_COLOR_TEXT = "0,1,0";
+        const String DEFAULT_TEAM3_COLOR_TEXT = "0,0,1";
         const String DEFAULT_TEAM1_SPAWN_TEXT = "-180,-180,0";
         const String DEFAULT_TEAM2_SPAWN_TEXT = "180,-180,0";
         const String DEFAULT_TEAM3_SPAWN_TEXT = "180,180,0";
@@ -233,41 +233,25 @@ namespace RTSCS {
             if(!controllers.ContainsKey(name)) return null;
             return controllers[name].CreateInstance() as ICombatController;
         }
-        private void GetControllers(
-            string[] names,
-            out IActionController ac,
-            out ICombatController cc,
-            out IMovementController mc,
-            out ITargettingController tc) {
-            ac = null; cc = null; mc = null; tc = null;
-            int i = 0;
-            foreach(string name in names) {
+        private List<ReflectedEntityController> GetControllers(string[] names) {
+            List<ReflectedEntityController> c = new List<ReflectedEntityController>(3);
+            foreach(string name in names.Distinct()) {
                 if(!controllers.ContainsKey(name)) continue;
                 ReflectedEntityController rec = controllers[name];
-                if(rec.ControllerType != EntityControllerType.None) {
-                    IEntityController ec = rec.CreateInstance();
-                    if(rec.ControllerType.HasFlag(EntityControllerType.Action) && i < 1)
-                        ac = ec as IActionController;
-                    if(rec.ControllerType.HasFlag(EntityControllerType.Combat) && i < 2)
-                        cc = ec as ICombatController;
-                    if(rec.ControllerType.HasFlag(EntityControllerType.Movement) && i < 3)
-                        mc = ec as IMovementController;
-                    if(rec.ControllerType.HasFlag(EntityControllerType.Targetting))
-                        tc = ec as ITargettingController;
-                }
-                i++;
+                c.Add(rec);
             }
+            return c;
         }
         private void SpawnUnit(int unitIndex, int teamIndex) {
-            RTSUISpawnArgs a = new RTSUISpawnArgs {
-                UnitData = units[unitIndex],
-                Team = teams[teamIndex],
-                SpawnPos = teamSpawnPositions[teamIndex],
-                Waypoints = new Vector2[] { teamWaypoints[teamIndex] },
-                Color = teamColors[teamIndex]
-            };
-            GetControllers(unitControllers[unitIndex], out a.AC, out a.CC, out a.MC, out a.TC);
-            OnUnitSpawn(a);
+            RTSUISpawnArgs a = new RTSUISpawnArgs();
+            a.UnitData = units[unitIndex];
+            a.Team = teams[teamIndex];
+            a.SpawnPos = new List<Vector3>();
+            a.SpawnPos.Add(teamSpawnPositions[teamIndex]);
+            a.Waypoints = new Vector2[] { teamWaypoints[teamIndex] };
+            a.Controllers = GetControllers(unitControllers[unitIndex]);
+            if(OnUnitSpawn != null)
+                OnUnitSpawn(a);
         }
 
         private void CreateScriptPage() {
@@ -353,6 +337,7 @@ namespace RTSCS {
             teamColors[0] = StringToXColor(team1ColorTextBox.Text);
             teamColors[1] = StringToXColor(team2ColorTextBox.Text);
             teamColors[2] = StringToXColor(team3ColorTextBox.Text);
+            for(int i = 0; i < 3; i++) teams[i].Color = teamColors[i];
         }
         private void spawnButton_Click(object sender, EventArgs e) {
             UpdateSpawnInfo();

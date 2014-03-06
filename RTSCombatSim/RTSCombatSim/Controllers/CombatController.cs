@@ -33,10 +33,26 @@ namespace RTSCS.Controllers {
         }
 
         public void Attack(GameState g, float dt) {
-            if(attackCooldown <= 0) {
+            IDestructibleEntity ttarget = null;
+            float minDist = float.MaxValue;
+            foreach(var team in g.teams) {
+                if(team != Entity.Team) {
+                    foreach(var unit in team.Units) {
+                        if(!unit.IsAlive) return;
+                        float dist = (unit.GridPosition - Entity.GridPosition).LengthSquared();
+                        if(dist < minDist) {
+                            minDist = dist;
+                            ttarget = unit;
+                        }
+                    }
+                }
+            }
+            entity.Target = ttarget;
+
+            if(attackCooldown <= 0 && entity.Target != null) {
                 RTSUnitInstance unit = entity as RTSUnitInstance;
-                attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;
                 if(unit != null) {
+                    attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;
                     RTSUnitInstance target = entity.Target as RTSUnitInstance;
                     if(target != null) {
                         float distSquared = (target.WorldPosition - unit.WorldPosition).LengthSquared();

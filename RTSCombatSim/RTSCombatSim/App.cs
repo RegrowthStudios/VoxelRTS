@@ -22,16 +22,17 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 
 namespace RTSCS {
-    public struct RTSUISpawnArgs {
+    public class RTSUISpawnArgs {
         public RTSUnit UnitData;
         public RTSTeam Team;
-        public IActionController AC;
-        public ICombatController CC;
-        public IMovementController MC;
-        public ITargettingController TC;
-        public Vector3 SpawnPos;
+        public List<ReflectedEntityController> Controllers;
+        public List<Vector3> SpawnPos;
         public Vector2[] Waypoints;
-        public Color Color;
+
+        public RTSUISpawnArgs() {
+            SpawnPos = new List<Vector3>();
+            Controllers = new List<ReflectedEntityController>();
+        }
     }
 
     public class App : Microsoft.Xna.Framework.Game {
@@ -217,6 +218,7 @@ namespace RTSCS {
             ks = Keyboard.GetState();
             ms = Mouse.GetState();
 
+            // Camera Functionality
             if(ms.ScrollWheelValue != pms.ScrollWheelValue) {
                 if(ms.ScrollWheelValue > pms.ScrollWheelValue)
                     renderer.Projection *= Matrix.CreateScale(1.1f, 1.1f, 1);
@@ -294,7 +296,7 @@ namespace RTSCS {
                 }
             }
 
-            // Collide
+            // Collision
             foreach(RTSTeam team in GameState.teams) {
                 foreach(RTSUnitInstance unit in team.Units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
@@ -329,13 +331,25 @@ namespace RTSCS {
             RTSUISpawnArgs sa;
             for(int i = 0; i < c; i++) {
                 if(toSpawn.TryTake(out sa)) {
-                    var u = sa.Team.AddUnit(sa.UnitData, sa.SpawnPos);
-                    u.ActionController = sa.AC;
-                    u.CombatController = sa.CC;
-                    u.MovementController = sa.MC;
+                    var squad = sa.Team.AddSquad();
+                    var u = sa.Team.AddUnit(sa.UnitData, sa.SpawnPos[0]);
+                    int ci = 0;
+                    foreach(var rec in sa.Controllers) {
+                        var reci = rec.CreateInstance();
+                        reci.SetEntity(u);
+                        if(rec.ControllerType.HasFlag(EntityControllerType.Action) && ci < 1) {
+                            u.ActionController = reci as IActionController;
+                        }
+                        if(rec.ControllerType.HasFlag(EntityControllerType.Combat) && ci < 2) {
+                            u.CombatController = reci as ICombatController;
+                        }
+                        if(rec.ControllerType.HasFlag(EntityControllerType.Movement) && ci < 3) {
+                            u.MovementController = reci as IMovementController;
+                        }
+                        ci++;
+                    }
                     if(u.MovementController != null)
                         u.MovementController.SetWaypoints(sa.Waypoints);
-                    u.TargettingController = sa.TC;
 
                     // Add Events
                     u.OnDestruction += OnUnitDeath;
@@ -344,7 +358,7 @@ namespace RTSCS {
                     u.OnAttackMade += OnUnitCombat;
                     foreach(var ug in unitGeometry) {
                         if(ug.UnitData == u.UnitData)
-                            ug.AddUnit(u, sa.Color);
+                            ug.AddUnit(u, u.Team.Color);
                     }
                 }
                 else i--;
@@ -374,17 +388,6 @@ namespace RTSCS {
                 new Color(1f, 0.4f, 0.1f), new Color(0.1f, 0.8f, 0.2f), rs.UnitData.BaseCombatData.AttackTimer
                 ));
         }
-        //private void AddDeath(IEntity e) {
-        //    RTSUnitInstance u = e as RTSUnitInstance;
-        //    Vector3 x = Vector3.UnitX * u.CollisionGeometry.BoundingRadius * 0.7f;
-        //    Vector3 y = Vector3.UnitY * u.CollisionGeometry.BoundingRadius * 0.7f;
-        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x + y, Vector2.Zero));
-        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x + y, Vector2.UnitX));
-        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x - y, Vector2.UnitY));
-        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition - x - y, Vector2.UnitY));
-        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x + y, Vector2.UnitX));
-        //    deathVerts.Add(new VertexPositionTexture(u.WorldPosition + x - y, Vector2.One));
-        //}
 
         #region Entry Point
         private static void RunMainInstance(string[] args) {

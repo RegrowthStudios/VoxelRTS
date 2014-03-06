@@ -44,14 +44,6 @@ namespace RTSEngine.Interfaces {
         void ApplyAction(GameState g, float dt);
     }
 
-    public interface ITargettingController : IEntityController { 
-        // Find A Target For This Controller's Entity
-        void FindTarget(GameState g, float dt);
-
-        // Set A Target For This Controller's Entity
-        void ChangeTarget(GameState g, float dt);
-    }
-
     public interface ICombatController : IEntityController {
         // Attack This Controller's Entity's Target, If Possible
         void Attack(GameState g, float dt);

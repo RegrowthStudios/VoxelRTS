@@ -72,6 +72,7 @@
     <Compile Include="Interfaces\IRTSCommunication.cs" />
     <Compile Include="Interfaces\Data.cs" />
     <Compile Include="Interfaces\GameplayControllers.cs" />
+    <Compile Include="Interfaces\SquadControllers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\RTSEffect.cs" />
   </ItemGroup>

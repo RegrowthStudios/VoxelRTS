@@ -66,12 +66,12 @@
     <None Include="Content\Textures\Laser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Controllers\NoMovementController.cs">
+    <Compile Include="Controllers\NoMovementController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Controllers\GodController.cs">
+    </Compile>
+    <Compile Include="Controllers\GodController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Compile Include="Graphics\CombatAnimator.cs" />
     <Compile Include="ScriptControlForm.cs">
       <SubType>Form</SubType>
@@ -79,18 +79,18 @@
     <Compile Include="ScriptControlForm.Designer.cs">
       <DependentUpon>ScriptControlForm.cs</DependentUpon>
     </Compile>
-    <Content Include="Controllers\TargettingController.cs">
+    <Compile Include="Controllers\TargettingController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Controllers\ActionController.cs">
+    </Compile>
+    <Compile Include="Controllers\ActionController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Controllers\MovementController.cs">
+    </Compile>
+    <Compile Include="Controllers\MovementController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Controllers\CombatController.cs">
+    </Compile>
+    <Compile Include="Controllers\CombatController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Compile Include="DataForm.cs">
       <SubType>Form</SubType>
     </Compile>

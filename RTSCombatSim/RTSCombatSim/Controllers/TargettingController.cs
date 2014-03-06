@@ -10,7 +10,7 @@ namespace RTSCS.Controllers {
         private static readonly Random rand = new Random();
 
         // The Entity That This TargettingController Is Controlling
-        public IEntity Entity {
+        public ISquad Squad {
             get;
             private set;
         }
@@ -20,25 +20,25 @@ namespace RTSCS.Controllers {
 
         // Constructors
         public TargettingController() {
-            Entity = null;
+            Squad = null;
             target = null;
         }
 
         // Set Entity Only Once
-        public void SetEntity(IEntity e) {
-            if(Entity != null && Entity != e)
-                throw new InvalidOperationException("Controllers Can Only Have Entities Set Once");
-            Entity = e;
+        public void SetSquad(ISquad e) {
+            if(Squad != null && Squad != e)
+                throw new InvalidOperationException("Controllers Can Only Have Squads Set Once");
+            Squad = e;
         }
 
         // Find The Closest Target On An Opposing Team
         public void FindTarget(GameState g, float dt) {
             float minDist = float.MaxValue;
             foreach(var team in g.teams) {
-                if(team != Entity.Team) {
+                if(team != Squad.Team) {
                     foreach(var unit in team.Units) {
                         if(!unit.IsAlive) return;
-                        float dist = (unit.GridPosition - Entity.GridPosition).LengthSquared();
+                        float dist = (unit.GridPosition - Squad.GridPosition).LengthSquared();
                         if(dist < minDist || (dist == minDist && rand.NextDouble() < 0.5)) {
                             minDist = dist;
                             target = unit;
@@ -48,7 +48,9 @@ namespace RTSCS.Controllers {
             }
         }
         public void ChangeTarget(GameState g, float dt) {
-            Entity.Target = target;
+            foreach(var u in Squad.Combatants) {
+                u.Target = target;
+            }
         }
     }
 }

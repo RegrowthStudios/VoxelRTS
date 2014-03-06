@@ -31,9 +31,8 @@ namespace RTSEngine.Interfaces {
         // Event Triggered When Entity Is Destroyed
         event Action<IEntity> OnDestruction;
 
-        // These Can Change During The Entity's Lifecycle But Will Always Be There
+        // This Entity's Controller Of Controllers
         IActionController ActionController { get; set; }
-        ITargettingController TargettingController { get; set; }
 
         // Calls The Destruction Event
         void Destroy();
@@ -65,7 +64,6 @@ namespace RTSEngine.Interfaces {
     }
 
     public interface ICombatEntity : IDestructibleEntity, IMovingEntity {
-
         // Computes The Damage To Deal With Access To A Random Number
         int ComputeDamage(double rand);
 
@@ -79,9 +77,31 @@ namespace RTSEngine.Interfaces {
         ICombatController CombatController { get; set; }
     }
 
-    public interface ISquadEntity : IEntity {
+    public interface ISquad {
+        // This Squad's Team
+        RTSTeam Team { get; }
 
+        // An Enumerator For This Squad's Combatants
+        IEnumerable<ICombatEntity> Combatants { get; }
+        int EntityCount { get; }
 
+        // The Average Position Of The Squad
+        Vector2 GridPosition { get; }
+
+        // Events When Squad Is Altered
+        event Action<ISquad, ICombatEntity> OnCombatantAddition;
+        event Action<ISquad, ICombatEntity> OnCombatantRemoval;
+
+        // The Targetting Controller For This Squad
+        ITargettingController TargettingController { get; set; }
+
+        // Adds A Combatant To This Squad
         void AddCombatant(ICombatEntity e);
+
+        // Removes All Combatants From This Squad That Match A Predicate
+        void RemoveAll(Predicate<ICombatEntity> f);
+
+        // Should Be Done At The Beginning Of Each Frame (Only Once)
+        void RecalculateGridPosition();
     }
 }

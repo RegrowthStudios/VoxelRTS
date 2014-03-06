@@ -8,7 +8,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 
 namespace RTSCS.Controllers {
-    public class GodController : IActionController, ICombatController, IMovementController, ITargettingController {
+    public class GodController : IActionController, ICombatController, IMovementController {
         RTSUnitInstance unit;
         public IEntity Entity {
             get { return unit; }

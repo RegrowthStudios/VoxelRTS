@@ -105,17 +105,6 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        // TargettingController of The Unit
-        private ITargettingController tController;
-        public ITargettingController TargettingController {
-            get { return tController; }
-            set {
-                tController = value;
-                if(tController != null)
-                    tController.SetEntity(this);
-            }
-        }
-
         // CombatController of The Unit
         private ICombatController cController;
         public ICombatController CombatController {
