@@ -110,24 +110,24 @@ namespace RTSCS {
             controllers = c;
 
             // Populate Combo Boxes
-            unitTypeComboBox.Items.Add("Unit Type 1");
-            unitTypeComboBox.Items.Add("Unit Type 2");
-            unitTypeComboBox.Items.Add("Unit Type 3");
+            unitTypeComboBox.Items.Add("Soldier");
+            unitTypeComboBox.Items.Add("Heavy Soldier");
+            unitTypeComboBox.Items.Add("Armored");
             unitTypeComboBox.SelectedIndex = 0;
 
-            spawn1ComboBox.Items.Add("Unit Type 1");
-            spawn1ComboBox.Items.Add("Unit Type 2");
-            spawn1ComboBox.Items.Add("Unit Type 3");
+            spawn1ComboBox.Items.Add("Soldier");
+            spawn1ComboBox.Items.Add("Heavy Soldier");
+            spawn1ComboBox.Items.Add("Armored");
             spawn1ComboBox.SelectedIndex = 0;
 
-            spawn2ComboBox.Items.Add("Unit Type 1");
-            spawn2ComboBox.Items.Add("Unit Type 2");
-            spawn2ComboBox.Items.Add("Unit Type 3");
+            spawn2ComboBox.Items.Add("Soldier");
+            spawn2ComboBox.Items.Add("Heavy Soldier");
+            spawn2ComboBox.Items.Add("Armored");
             spawn2ComboBox.SelectedIndex = 0;
 
-            spawn3ComboBox.Items.Add("Unit Type 1");
-            spawn3ComboBox.Items.Add("Unit Type 2");
-            spawn3ComboBox.Items.Add("Unit Type 3");
+            spawn3ComboBox.Items.Add("Soldier");
+            spawn3ComboBox.Items.Add("Heavy Soldier");
+            spawn3ComboBox.Items.Add("Armored");
             spawn3ComboBox.SelectedIndex = 0;
 
             // Populate Spawn Page
