@@ -242,7 +242,7 @@ namespace RTSEngine.Data {
             if(top1 > bottom2 && top2 > bottom1 && left1 < right2 && left2 < right1) {
                 // If two rectangle centers completely overlap,
                 // slightly move one of the object's center so they don't completely overlap
-                Vector2 d = rect1.Center - rect2.Center;
+                Vector2 d = rect2.Center - rect1.Center;
                 if (d.Length() == 0) {
                     d.X = r.Next(-200, 201);
                     d.Y = r.Next(-200, 201);
@@ -258,11 +258,10 @@ namespace RTSEngine.Data {
                 }
 
                 Vector2 pushAmount = new Vector2();
-                Vector2 dir = rect2.Center - rect1.Center;
                 // If rect2 is on the right of rect1
-                if(dir.X > 0) {
+                if(d.X > 0) {
                     // If rect2 is below rect1
-                    if(dir.Y < 0) {
+                    if(d.Y < 0) {
                         if(right1 - left2 > top2 - bottom1)
                             pushAmount.Y = top2 - bottom1 + OFFSET; // rect1 pushed up
                         else
@@ -279,7 +278,7 @@ namespace RTSEngine.Data {
                 // If rect2 is on the left of rect1
                 else {
                     // If rect2 is below rect1
-                    if(dir.Y < 0) {
+                    if(d.Y < 0) {
                         if(left1 - right2 > top2 - bottom1)
                             pushAmount.Y = top2 - bottom1 + OFFSET; // rect1 pushed up
                         else
