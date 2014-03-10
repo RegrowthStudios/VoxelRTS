@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Graphics;
 using BlisterUI;
+using BlisterUI.Input;
 
 namespace RTSEngine.Screens {
     public class InduZtryScreen : GameScreenIndexed {
@@ -15,7 +17,7 @@ namespace RTSEngine.Screens {
         // Lightning Arguments
         private const float BOLT_WIDTH = 4f, BOLT_JAG = 3f, BOLT_MIN = 1f, BOLT_MAX = 6f;
         private const float BRANCH_WIDTH = 2.66667f, BRANCH_JAG = 3f, BRANCH_MIN = 2f, BRANCH_MAX = 18f, BRANCH_SLOPE = 0.001f;
-        
+
         // Lightning Color Combinations
         private static readonly Color[] textColors = {
             new Color(0.2f, 0.7f, 0.06f),
@@ -89,6 +91,8 @@ namespace RTSEngine.Screens {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;
+
             t = LERP_TIME;
             r = new Random(343);
 
@@ -126,7 +130,10 @@ namespace RTSEngine.Screens {
             originLMid = new Vector2(0, rsLMid.Y + rsLMid.Height / 2f);
             originLEndR = new Vector2(0, rsLEndR.Y + rsLEndR.Height / 2f);
         }
-        public override void OnExit(GameTime gameTime) {
+        public override void OnExit(GameTime gameTime) { 
+            KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
+
+
             rtLightning.Dispose();
             rtLightningPrev.Dispose();
             tLightning.Dispose();
@@ -213,6 +220,7 @@ namespace RTSEngine.Screens {
             SB.Draw(rtLightningBr, G.Viewport.TitleSafeArea, Color.White);
             SB.End();
 
+
             // Swap Lightning Render Targets
             var b = rtLightning;
             rtLightning = rtLightningPrev;
@@ -220,6 +228,16 @@ namespace RTSEngine.Screens {
             b = rtLightningBr;
             rtLightningBr = rtLightningBrPrev;
             rtLightningBrPrev = b;
+
+
+        }
+
+        void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
+            switch(args.KeyCode) {
+                case Keys.Escape:
+                    State = ScreenState.ChangeNext;
+                    break;
+            }
         }
     }
 }

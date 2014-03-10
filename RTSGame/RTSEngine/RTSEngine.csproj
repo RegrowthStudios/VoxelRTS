@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\KMeans.cs" />
     <Compile Include="Data\Collision.cs" />
     <Compile Include="Data\Combat.cs" />
     <Compile Include="Data\DataLibrary.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Interfaces\SquadControllers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\RTSEffect.cs" />
+    <Compile Include="Screens\KMeansScreen.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlisterUI\BlisterUI.csproj">

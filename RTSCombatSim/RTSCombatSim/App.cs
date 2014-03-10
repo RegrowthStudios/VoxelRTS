@@ -38,18 +38,20 @@ namespace RTSCS {
 
         public App()
             : base() {
-            SimScreen = new SimScreen(2);
+            SimScreen = new SimScreen(3);
         }
 
         protected override void FullInitialize() {
+            BlisterUI.Input.WMHookInput.Initialize(Window);
         }
         protected override void FullLoad() {
         }
 
         protected override void BuildScreenList() {
             screenList = new BlisterUI.ScreenList(this, 0,
-                new BlisterUI.FalseFirstScreen(2),
+                new BlisterUI.FalseFirstScreen(1),
                 new RTSEngine.Screens.InduZtryScreen(1),
+                new RTSEngine.Screens.KMeansScreen(2),
                 SimScreen
                 );
         }
