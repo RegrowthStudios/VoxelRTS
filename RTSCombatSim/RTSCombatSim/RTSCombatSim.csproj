@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="SimScreen.cs" />
     <None Include="Content\Textures\Laser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -104,6 +105,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\RTSGame\BlisterUI\BlisterUI.csproj">
+      <Project>{28292778-5EDC-4898-8E0C-9E32412174CD}</Project>
+      <Name>BlisterUI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\RTSGame\RTSEngine\RTSEngine.csproj">
       <Project>{79AEFEF0-5165-4B43-BD2E-9F925A198C96}</Project>
       <Name>RTSEngine</Name>
@@ -122,6 +127,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\FX\Unit.fx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Content\Textures\Lightning.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="Content\Textures\INDUZTRY.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="lib\Microsoft.Xna.Framework.Content.Pipeline.dll">

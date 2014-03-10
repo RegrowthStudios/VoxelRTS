@@ -87,7 +87,7 @@ namespace BandWidthTest {
                     sock.Connect(rep);
                     Console.WriteLine("Socket connected");
                     ulong num = 0u;
-                    byte[] data = new byte[sizeof(ulong) * 1024 * 4], buffer;
+                    byte[] data = new byte[sizeof(ulong) * 1024 * 4];
                     while(true) {
                         BitConverter.GetBytes(num).CopyTo(data, 0);
                         num++;
@@ -239,7 +239,7 @@ System.Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
                 string ret = webClient.DownloadString(location);
                 return ret;//return services
             }
-            catch(System.Exception ex) {
+            catch(System.Exception) {
             }
             finally {
                 webClient.Dispose();

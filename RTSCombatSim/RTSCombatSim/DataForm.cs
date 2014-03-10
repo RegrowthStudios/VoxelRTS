@@ -86,7 +86,7 @@ namespace RTSCS {
 
         public DataForm(RTSUnit[] ud, RTSTeam[] t, Dictionary<string, ReflectedEntityController> c) {
             InitializeComponent();
-            Closer = () => { Close(); };
+            Closer = () => { Instance = null; Dispose(); };
 
             // Set Up Data
             units = ud;

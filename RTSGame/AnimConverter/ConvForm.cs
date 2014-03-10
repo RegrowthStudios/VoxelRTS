@@ -10,6 +10,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = System.Drawing.Color;
+
 namespace AnimConverter {
     public partial class ConvForm : Form {
         public ConvForm() {

@@ -20,7 +20,7 @@ namespace RTS {
         DynamicVertexBuffer dvbInst;
         IndexBuffer ib;
 
-        VertexRTSAnimInst[] instances = new VertexRTSAnimInst[9000];
+        VertexRTSAnimInst[] instances = new VertexRTSAnimInst[2000];
         Random r = new Random(676);
         int counterPause = 0;
 
@@ -38,8 +38,8 @@ namespace RTS {
             Content = new ContentManager(Services, @"Content");
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            font = Content.Load<SpriteFont>("Font");
-            fx = new RTSEffect(Content.Load<Effect>("FX/RTS"));
+            font = XNASpriteFont.Compile(GraphicsDevice, @"Content\Font.spritefont");
+            fx = new RTSEffect(XNAEffect.Compile(GraphicsDevice, @"Content\FX\RTS.fx"));
             using(FileStream fs = File.OpenRead("res/g/anim/Monkey.png")) {
                 t = Texture2D.FromStream(GraphicsDevice, fs);
             }

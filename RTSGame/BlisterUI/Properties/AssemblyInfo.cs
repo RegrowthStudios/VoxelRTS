@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Empty")]
-[assembly: AssemblyProduct("Empty")]
+[assembly: AssemblyTitle("BlisterUI")]
+[assembly: AssemblyProduct("BlisterUI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2014")]
+[assembly: AssemblyCopyright("Copyright © Microsoft 2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 // On Windows, the following GUID is for the ID of the typelib if this
 // project is exposed to COM. On other platforms, it unique identifies the
 // title storage container when deploying this assembly to the device.
-[assembly: Guid("323f3044-7c15-4568-92d1-9461be918bbf")]
+[assembly: Guid("3ae292a3-d52b-4e2b-b6a8-54a5e40bd2a2")]
 
 // Version information for an assembly consists of the following four values:
 //
