@@ -44,7 +44,7 @@ namespace Microsoft.Xna.Framework.Graphics {
         public override TOutput Convert<TInput, TOutput>(TInput input, string processorName, OpaqueDataDictionary processorParameters) { throw new NotImplementedException(); }
         public override TOutput BuildAndLoadAsset<TInput, TOutput>(ExternalReference<TInput> sourceAsset, string processorName, OpaqueDataDictionary processorParameters, string importerName) { throw new NotImplementedException(); }
         public override ExternalReference<TOutput> BuildAsset<TInput, TOutput>(ExternalReference<TInput> sourceAsset, string processorName, OpaqueDataDictionary processorParameters, string importerName, string assetName) { throw new NotImplementedException(); }
-    } 
+    }
     #endregion
 
     public static class XNAEffect {
@@ -102,15 +102,18 @@ namespace Microsoft.Xna.Framework.Graphics {
             FontDescription ec = ei.Import(file, new RTSImporterContext());
             FontDescriptionProcessor ep = new FontDescriptionProcessor();
             var cec = ep.Process(ec, new RTSProcessorContext());
-            
-            // Texture
+
+            // Get Private Texture
             Texture2DContent texC = sfcTexture.GetValue(cec) as Texture2DContent;
             MipmapChain o = txcMipmaps.GetValue(texC, null) as MipmapChain;
-            Dxt3BitmapContent texBMP = o[0] as Dxt3BitmapContent;
-            Texture2D texture = new Texture2D(g, texBMP.Width, texBMP.Height, false, SurfaceFormat.Dxt3);
+            BitmapContent texBMP = o[0];
+            SurfaceFormat sf;
+            if(!texBMP.TryGetFormat(out sf))
+                throw new InvalidContentException("Could Not Obtain The Surface Format Of The SpriteFont");
+            Texture2D texture = new Texture2D(g, texBMP.Width, texBMP.Height, false, sf);
             texture.SetData(texBMP.GetPixelData());
-            
-            // Glyph Data
+
+            // Get Private Glyph Data
             List<Rectangle> glyphs = sfcGlyphs.GetValue(cec) as List<Rectangle>;
             List<Rectangle> cropping = sfcCropping.GetValue(cec) as List<Rectangle>;
             List<char> charMap = sfcCharMap.GetValue(cec) as List<char>;

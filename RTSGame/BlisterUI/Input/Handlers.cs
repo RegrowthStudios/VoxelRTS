@@ -83,9 +83,13 @@ namespace BlisterUI.Input {
 
     public class MouseMotionEventArgs : EventArgs {
         private int x;
-        public int X { get { return x; } }
+        public int X {
+            get { return x; }
+        }
         private int y;
-        public int Y { get { return y; } }
+        public int Y {
+            get { return y; }
+        }
 
         public MouseMotionEventArgs(long lParam) {
             x = (int)lParam & 0x0000ffff;
@@ -101,12 +105,16 @@ namespace BlisterUI.Input {
     public delegate void MouseMotionHandler(object sender, MouseMotionEventArgs e);
 
     public class MouseButtonEventArgs : MouseMotionEventArgs {
-        private MOUSE_BUTTON button;
-        public MOUSE_BUTTON Button { get { return button; } }
+        private MouseButton button;
+        public MouseButton Button {
+            get { return button; }
+        }
         private ButtonState state;
-        public ButtonState State { get { return state; } }
+        public ButtonState State {
+            get { return state; }
+        }
 
-        public MouseButtonEventArgs(long lParam, MOUSE_BUTTON button, ButtonState state)
+        public MouseButtonEventArgs(long lParam, MouseButton button, ButtonState state)
             : base(lParam) {
             this.button = button;
             this.state = state;
@@ -116,9 +124,15 @@ namespace BlisterUI.Input {
 
     public class MouseWheelEventArgs : EventArgs {
         private int deltas;
-        public int Deltas { get { return deltas; } }
-        public bool ScrollUp { get { return deltas > 0; } }
-        public bool ScrollDown { get { return deltas < 0; } }
+        public int Deltas {
+            get { return deltas; }
+        }
+        public bool ScrollUp {
+            get { return deltas > 0; }
+        }
+        public bool ScrollDown {
+            get { return deltas < 0; }
+        }
 
         public MouseWheelEventArgs(int wParam) {
             unchecked {

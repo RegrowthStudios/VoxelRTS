@@ -6,37 +6,34 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace BlisterUI.Input {
-    public enum MOUSE_BUTTON {
-        LEFT_BUTTON,
-        RIGHT_BUTTON,
-        MIDDLE_BUTTON,
-        X_BUTTON_1,
-        X_BUTTON_2
+    public enum MouseButton {
+        Left,
+        Right,
+        Middle,
+        X1,
+        X2
     };
 
     public sealed class MouseManager {
-        private static MOUSE_BUTTON[] allButtons;
+        private static readonly MouseButton[] allButtons;
         static MouseManager() {
-            allButtons = new MOUSE_BUTTON[]
+            allButtons = new MouseButton[]
             {
-                MOUSE_BUTTON.LEFT_BUTTON,
-                MOUSE_BUTTON.RIGHT_BUTTON,
-                MOUSE_BUTTON.MIDDLE_BUTTON,
-                MOUSE_BUTTON.X_BUTTON_1,
-                MOUSE_BUTTON.X_BUTTON_2
+                MouseButton.Left,
+                MouseButton.Right,
+                MouseButton.Middle,
+                MouseButton.X1,
+                MouseButton.X2
             };
         }
 
-        private bool mouseBound;
         public bool IsBound {
-            get {
-                return mouseBound;
-            }
+            get;
+            private set;
         }
-        private int[] mouseBinding = new int[] { 400, 300 };
+        private Point mouseBinding;
 
-        private MouseState pMS;
-        private MouseState cMS;
+        private MouseState cMS, pMS;
         public MouseState Current {
             get { return cMS; }
         }
@@ -44,105 +41,106 @@ namespace BlisterUI.Input {
             get { return pMS; }
         }
 
+        // Mouse Displacements
+        public int XDisplacement {
+            get { return cMS.X - pMS.X; }
+        }
+        public int YDisplacement {
+            get { return cMS.Y - pMS.Y; }
+        }
+        public Point Displacement {
+            get { return new Point(XDisplacement, YDisplacement); }
+        }
+        public int ScrollDisplacement {
+            get { return cMS.ScrollWheelValue - pMS.ScrollWheelValue; }
+        }
+
+        public IEnumerable<MouseButton> AllButtonsJustPressed {
+            get {
+                foreach(MouseButton b in allButtons) {
+                    if(IsButtonJustPressed(b))
+                        yield return b;
+
+                }
+            }
+        }
+        public IEnumerable<MouseButton> AllButtonsJustReleased {
+            get {
+                foreach(MouseButton b in allButtons) {
+                    if(IsButtonJustReleased(b))
+                        yield return b;
+
+                }
+            }
+        }
+
         public MouseManager() {
-            refresh();
+            Refresh();
             pMS = cMS;
-            mouseBound = false;
+            IsBound = false;
+            mouseBinding.X = 400;
+            mouseBinding.Y = 300;
         }
 
-        public int getXDisplacement() {
-            return cMS.X - pMS.X;
-        }
-        public int getYDisplacement() {
-            return cMS.Y - pMS.Y;
-        }
-        public Vector2 getDisplacement() {
-            return new Vector2(
-                getXDisplacement(),
-                getYDisplacement()
-                );
-        }
-
-        public bool isButtonJustPressed(MOUSE_BUTTON button) {
+        public bool IsButtonJustPressed(MouseButton button) {
             switch(button) {
-                case MOUSE_BUTTON.LEFT_BUTTON:
+                case MouseButton.Left:
                     return cMS.LeftButton == ButtonState.Pressed && pMS.LeftButton == ButtonState.Released;
-                case MOUSE_BUTTON.MIDDLE_BUTTON:
+                case MouseButton.Middle:
                     return cMS.MiddleButton == ButtonState.Pressed && pMS.MiddleButton == ButtonState.Released;
-                case MOUSE_BUTTON.RIGHT_BUTTON:
+                case MouseButton.Right:
                     return cMS.RightButton == ButtonState.Pressed && pMS.RightButton == ButtonState.Released;
-                case MOUSE_BUTTON.X_BUTTON_1:
+                case MouseButton.X1:
                     return cMS.XButton1 == ButtonState.Pressed && pMS.XButton1 == ButtonState.Released;
-                case MOUSE_BUTTON.X_BUTTON_2:
+                case MouseButton.X2:
                     return cMS.XButton2 == ButtonState.Pressed && pMS.XButton2 == ButtonState.Released;
                 default:
                     return false;
             }
         }
-        public List<MOUSE_BUTTON> allButtonsJustPressed() {
-            List<MOUSE_BUTTON> l = new List<MOUSE_BUTTON>();
-            foreach(MOUSE_BUTTON b in allButtons) {
-                if(isButtonJustPressed(b)) {
-                    l.Add(b);
-                }
-            }
-            return l;
-        }
-        public bool isButtonJustReleased(MOUSE_BUTTON button) {
+        public bool IsButtonJustReleased(MouseButton button) {
             switch(button) {
-                case MOUSE_BUTTON.LEFT_BUTTON:
+                case MouseButton.Left:
                     return cMS.LeftButton == ButtonState.Released && pMS.LeftButton == ButtonState.Pressed;
-                case MOUSE_BUTTON.MIDDLE_BUTTON:
+                case MouseButton.Middle:
                     return cMS.MiddleButton == ButtonState.Released && pMS.MiddleButton == ButtonState.Pressed;
-                case MOUSE_BUTTON.RIGHT_BUTTON:
+                case MouseButton.Right:
                     return cMS.RightButton == ButtonState.Released && pMS.RightButton == ButtonState.Pressed;
-                case MOUSE_BUTTON.X_BUTTON_1:
+                case MouseButton.X1:
                     return cMS.XButton1 == ButtonState.Released && pMS.XButton1 == ButtonState.Pressed;
-                case MOUSE_BUTTON.X_BUTTON_2:
+                case MouseButton.X2:
                     return cMS.XButton2 == ButtonState.Released && pMS.XButton2 == ButtonState.Pressed;
                 default:
                     return false;
             }
         }
-        public List<MOUSE_BUTTON> allButtonsJustReleased() {
-            List<MOUSE_BUTTON> l = new List<MOUSE_BUTTON>();
-            foreach(MOUSE_BUTTON b in allButtons) {
-                if(isButtonJustReleased(b)) {
-                    l.Add(b);
-                }
-            }
-            return l;
+
+        public void Bind(Point binding) {
+            Bind(binding.X, binding.Y);
+        }
+        public void Bind(int x, int y) {
+            mouseBinding.X = x;
+            mouseBinding.Y = y;
+            IsBound = true;
+            Mouse.SetPosition(mouseBinding.X, mouseBinding.Y);
+            pMS = Mouse.GetState();
+        }
+        public void Unbind() {
+            IsBound = false;
         }
 
-        public int getScrollDisplacement() {
-            return cMS.ScrollWheelValue - pMS.ScrollWheelValue;
-        }
-
-        public void bind(Vector2 binding) {
-            bind((int)binding.X, (int)binding.Y);
-        }
-        public void bind(params int[] binding) {
-            mouseBinding = binding;
-            mouseBound = true;
-            Microsoft.Xna.Framework.Input.Mouse.SetPosition(mouseBinding[0], mouseBinding[1]);
-            pMS = Microsoft.Xna.Framework.Input.Mouse.GetState();
-        }
-        public void unbind() {
-            mouseBound = false;
-        }
-
-        public void refresh() {
-            if(mouseBound) {
-                cMS = Microsoft.Xna.Framework.Input.Mouse.GetState();
-                Microsoft.Xna.Framework.Input.Mouse.SetPosition(mouseBinding[0], mouseBinding[1]);
+        public void Refresh() {
+            if(IsBound) {
+                cMS = Mouse.GetState();
+                Mouse.SetPosition(mouseBinding.X, mouseBinding.Y);
             }
             else {
                 pMS = cMS;
-                cMS = Microsoft.Xna.Framework.Input.Mouse.GetState();
+                cMS = Mouse.GetState();
             }
         }
-        public void refreshPosition() {
-            MouseState nMS = Microsoft.Xna.Framework.Input.Mouse.GetState();
+        public void RefreshPosition() {
+            MouseState nMS = Mouse.GetState();
             pMS = new MouseState(
                 nMS.X, nMS.Y,
                 pMS.ScrollWheelValue,

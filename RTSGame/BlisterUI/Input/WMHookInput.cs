@@ -34,11 +34,16 @@ namespace BlisterUI.Input {
         KEY_CHAR = 0x102
     }
 
+    /// <summary>
+    /// Original Idea Obtained From:
+    /// http://stackoverflow.com/questions/10216757/adding-inputbox-like-control-to-xna-game
+    /// By: Niko Draskovic
+    /// </summary>
     public static class WMHookInput {
         // Mouse Handlers
-        public static event MouseMotionHandler MouseMotion;
-        public static event MouseButtonHandler MouseButton;
-        public static event MouseWheelHandler MouseWheel;
+        public static event MouseMotionHandler OnMouseMotion;
+        public static event MouseButtonHandler OnMouseButton;
+        public static event MouseWheelHandler OnMouseWheel;
 
         delegate IntPtr WndProc(IntPtr hWnd, WM_EVENT msg, IntPtr wParam, IntPtr lParam);
 
@@ -70,7 +75,7 @@ namespace BlisterUI.Input {
 
             hIMC = ImmGetContext(window.Handle);
 
-            MouseEventDispatcher.setToHook();
+            MouseEventDispatcher.SetToHook();
         }
 
         static IntPtr HookProc(IntPtr hWnd, WM_EVENT msg, IntPtr wParam, IntPtr lParam) {
@@ -100,31 +105,38 @@ namespace BlisterUI.Input {
 
                 // Mouse Events
                 case WM_EVENT.MOUSE_MOVE:
-                    if(MouseMotion != null) { MouseMotion(null, new MouseMotionEventArgs(lParam.ToInt64())); }
+                    if(OnMouseMotion != null)
+                        OnMouseMotion(null, new MouseMotionEventArgs(lParam.ToInt64()));
                     break;
                 case WM_EVENT.MOUSE_LBUTTONDOWN:
-                    if(MouseButton != null) { MouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MOUSE_BUTTON.LEFT_BUTTON, ButtonState.Pressed)); }
+                    if(OnMouseButton != null)
+                        OnMouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MouseButton.Left, ButtonState.Pressed));
                     break;
                 case WM_EVENT.MOUSE_LBUTTONUP:
-                    if(MouseButton != null) { MouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MOUSE_BUTTON.LEFT_BUTTON, ButtonState.Released)); }
+                    if(OnMouseButton != null)
+                        OnMouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MouseButton.Left, ButtonState.Released));
                     break;
                 case WM_EVENT.MOUSE_MBUTTONDOWN:
-                    if(MouseButton != null) { MouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MOUSE_BUTTON.MIDDLE_BUTTON, ButtonState.Pressed)); }
+                    if(OnMouseButton != null)
+                        OnMouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MouseButton.Middle, ButtonState.Pressed));
                     break;
                 case WM_EVENT.MOUSE_MBUTTONUP:
-                    if(MouseButton != null) { MouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MOUSE_BUTTON.MIDDLE_BUTTON, ButtonState.Released)); }
+                    if(OnMouseButton != null)
+                        OnMouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MouseButton.Middle, ButtonState.Released));
                     break;
                 case WM_EVENT.MOUSE_RBUTTONDOWN:
-                    if(MouseButton != null) { MouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MOUSE_BUTTON.RIGHT_BUTTON, ButtonState.Pressed)); }
+                    if(OnMouseButton != null)
+                        OnMouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MouseButton.Right, ButtonState.Pressed));
                     break;
                 case WM_EVENT.MOUSE_RBUTTONUP:
-                    if(MouseButton != null) { MouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MOUSE_BUTTON.RIGHT_BUTTON, ButtonState.Released)); }
+                    if(OnMouseButton != null)
+                        OnMouseButton(null, new MouseButtonEventArgs(lParam.ToInt64(), MouseButton.Right, ButtonState.Released));
                     break;
                 case WM_EVENT.MOUSE_WHEEL:
-                    if(MouseWheel != null) { MouseWheel(null, new MouseWheelEventArgs(wParam.ToInt32())); }
+                    if(OnMouseWheel != null)
+                        OnMouseWheel(null, new MouseWheelEventArgs(wParam.ToInt32()));
                     break;
             }
-
             return returnCode;
         }
     }

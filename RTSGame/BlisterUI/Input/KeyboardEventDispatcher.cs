@@ -50,20 +50,20 @@ namespace BlisterUI.Input {
         public const char CtrlEnter = CtrlJ;
     }
     public static class VirtualKeys {
-        public const int VK_LSHIFT = 0xa0;
-        public const int VK_RSHIFT = 0xa1;
-        public const int VK_LCONTROL = 0xa2;
-        public const int VK_RCONTROL = 0xa3;
-        public const int VK_LALT = 0xa4;
-        public const int VK_RALT = 0xa5;
+        public const int LShift = 0xa0;
+        public const int RShift = 0xa1;
+        public const int LControl = 0xa2;
+        public const int RControl = 0xa3;
+        public const int LAlt = 0xa4;
+        public const int RAlt = 0xa5;
     }
 
     public static class KeyboardEventDispatcher {
         private static ModifierList Modifiers;
-        public static ModifierList getCurrentModifiers() {
+        public static ModifierList GetCurrentModifiers() {
             return Modifiers;
         }
-        public static void refreshModfiers() {
+        public static void RefreshModfiers() {
             Modifiers.ShiftPressed = 0;
             if((GetKeyState(0xa0) & 0x8000) != 0) { Modifiers.ShiftPressed++; }
             if((GetKeyState(0xa1) & 0x8000) != 0) { Modifiers.ShiftPressed++; }
@@ -80,13 +80,25 @@ namespace BlisterUI.Input {
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         static extern short GetKeyState(int keyCode);
 
+        public static event ReceiveChar ReceiveChar;
+        public static event ReceiveCommand ReceiveCommand;
+        public static event OnKeyStateChange OnKeyPressed;
+        public static event OnKeyStateChange OnKeyReleased;
+
+        static string clipboard = "";
+        public static string Clipboard {
+            get {
+                return clipboard;
+            }
+        }
+
         static KeyboardEventDispatcher() {
             //Get All The Modifiers In The Beginning
             Modifiers = new ModifierList();
             Modifiers.CapsLockState = Control.IsKeyLocked(WinKeys.CapsLock);
             Modifiers.NumLockState = Control.IsKeyLocked(WinKeys.NumLock);
             Modifiers.ScrollLockState = Control.IsKeyLocked(WinKeys.Scroll);
-            refreshModfiers();
+            RefreshModfiers();
             OnKeyPressed +=
                 (sender, args) => {
                     switch(args.KeyCode) {
@@ -98,7 +110,7 @@ namespace BlisterUI.Input {
         }
 
         public static void EventInput_KeyDown(object sender, Keys key) {
-            refreshModfiers();
+            RefreshModfiers();
             if(OnKeyPressed != null) {
                 OnKeyPressed(sender, new KeyEventArgs(
                     key
@@ -106,7 +118,7 @@ namespace BlisterUI.Input {
             }
         }
         public static void EventInput_KeyUp(object sender, Keys key) {
-            refreshModfiers();
+            RefreshModfiers();
             if(OnKeyReleased != null) {
                 OnKeyReleased(sender, new KeyEventArgs(
                     key
@@ -127,40 +139,27 @@ namespace BlisterUI.Input {
             }
         }
 
-        public static event ReceiveChar ReceiveChar;
-        public static event ReceiveCommand ReceiveCommand;
-        public static event OnKeyStateChange OnKeyPressed;
-        public static event OnKeyStateChange OnKeyReleased;
-
-        //Thread has to be in Single Thread Apartment state in order to receive clipboard
-        static string clipboard = "";
-        public static string Clipboard {
-            get {
-                return clipboard;
-            }
-        }
-
-        public static void setToClipboard(string s) {
+        public static void SetToClipboard(string s) {
             clipboard = s;
-            Thread thread = new Thread(doCopyThread);
+            Thread thread = new Thread(DoCopyThread);
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             thread.Join();
         }
         [STAThread]
-        static void doCopyThread() {
+        static void DoCopyThread() {
             System.Windows.Forms.Clipboard.SetText(clipboard);
         }
 
-        public static string getNewClipboard() {
-            Thread thread = new Thread(doPasteThread);
+        public static string GetNewClipboard() {
+            Thread thread = new Thread(DoPasteThread);
             thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             thread.Join();
             return clipboard;
         }
         [STAThread]
-        static void doPasteThread() {
+        static void DoPasteThread() {
             if(System.Windows.Forms.Clipboard.ContainsText()) {
                 clipboard = System.Windows.Forms.Clipboard.GetText();
             }

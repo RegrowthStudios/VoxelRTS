@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlisterUI", "BlisterUI\Blis
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSEngine", "RTSEngine\RTSEngine.csproj", "{79AEFEF0-5165-4B43-BD2E-9F925A198C96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerrainConverter", "TerrainConverter\TerrainConverter.csproj", "{EE2B4F5E-61F2-4762-A470-450569D286FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSCombatSim", "RTSCombatSim\RTSCombatSim.csproj", "{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -45,6 +49,14 @@ Global
 		{79AEFEF0-5165-4B43-BD2E-9F925A198C96}.Debug|x86.Build.0 = Debug|x86
 		{79AEFEF0-5165-4B43-BD2E-9F925A198C96}.Release|x86.ActiveCfg = Release|x86
 		{79AEFEF0-5165-4B43-BD2E-9F925A198C96}.Release|x86.Build.0 = Release|x86
+		{EE2B4F5E-61F2-4762-A470-450569D286FF}.Debug|x86.ActiveCfg = Debug|x86
+		{EE2B4F5E-61F2-4762-A470-450569D286FF}.Debug|x86.Build.0 = Debug|x86
+		{EE2B4F5E-61F2-4762-A470-450569D286FF}.Release|x86.ActiveCfg = Release|x86
+		{EE2B4F5E-61F2-4762-A470-450569D286FF}.Release|x86.Build.0 = Release|x86
+		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Debug|x86.ActiveCfg = Debug|x86
+		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Debug|x86.Build.0 = Debug|x86
+		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Release|x86.ActiveCfg = Release|x86
+		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

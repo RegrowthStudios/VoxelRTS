@@ -30,7 +30,7 @@ namespace BlisterUI.Input {
             numPads = 0;
         }
 
-        public void addGamePad(PlayerIndex index) {
+        public void AddGamePad(PlayerIndex index) {
             if(numPads < 4) {
                 for(int i = 0; i < numPads; i++) {
                     if(gamePadManagers[i].Index == index) {
@@ -41,7 +41,7 @@ namespace BlisterUI.Input {
                 numPads++;
             }
         }
-        public void removeGamePad(PlayerIndex index) {
+        public void RemoveGamePad(PlayerIndex index) {
             for(int i = 0; i < numPads; i++) {
                 if(gamePadManagers[i].Index == index) {
                     gamePadManagers[i] = null;
@@ -54,11 +54,11 @@ namespace BlisterUI.Input {
             }
         }
 
-        public void refresh() {
-            keyManager.refresh();
-            mouseManager.refresh();
+        public void Refresh() {
+            keyManager.Refresh();
+            mouseManager.Refresh();
             for(int i = 0; i < numPads; i++) {
-                gamePadManagers[i].refresh();
+                gamePadManagers[i].Refresh();
             }
         }
     }
