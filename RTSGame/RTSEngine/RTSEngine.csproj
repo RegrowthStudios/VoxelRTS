@@ -64,6 +64,7 @@
     <Compile Include="Data\Team\RTSTeam.cs" />
     <Compile Include="Data\Team\RTSUnit.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Graphics\HeightmapModel.cs" />
     <Compile Include="Graphics\LightningGenerator.cs" />
     <Compile Include="Screens\InduZtryScreen.cs" />
     <Compile Include="Interfaces\EntityControllers.cs" />

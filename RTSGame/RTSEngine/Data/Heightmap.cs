@@ -8,6 +8,7 @@ namespace RTSEngine.Data {
     public class Heightmap {
         // Height Values
         private float[] heights;
+        private byte[] data;
 
         // Corresponds To Texture Size
         public int HValueWidth {
@@ -42,65 +43,76 @@ namespace RTSEngine.Data {
             private set;
         }
 
-
+        // Scaling Of Grid From Grid To Object Space
         public float ScaleX {
             get { return Width / GridWidth; }
             set { Width = GridWidth * value; }
         }
-        public float ScaleY {
+        public float ScaleZ {
             get { return Height / GridHeight; }
             set { Height = GridHeight * value; }
         }
         public Vector2 Scale {
-            get { return new Vector2(ScaleX, ScaleY); }
-            set { ScaleX = value.X; ScaleY = value.Y; }
+            get { return new Vector2(ScaleX, ScaleZ); }
+            set { ScaleX = value.X; ScaleZ = value.Y; }
         }
 
-        public Heightmap(float[] v, int w, int h) {
+        // Constructor With Heightmap Data Passed In
+        public Heightmap(float[] v, byte[] d, int w, int h) {
             HValueWidth = w;
             HValueHeight = h;
             heights = new float[HValueWidth * HValueHeight];
             v.CopyTo(heights, 0);
+            data = new byte[HValueWidth * HValueHeight];
+            d.CopyTo(data, 0);
             GridWidth = HValueWidth - 1;
             GridHeight = HValueHeight - 1;
 
         }
 
-        public Point Map(float x, float y) {
+        // Scale The Heights By A Certain Value
+        public void ScaleHeights(float s) {
+            for(int i = 0; i < heights.Length; i++)
+                heights[i] *= s;
+        }
+
+        // Find The Floored Location On The Heightmap
+        public Point Map(float x, float z) {
             // Convert To Grid Space
-            x /= ScaleX; y /= ScaleY;
+            x /= ScaleX; z /= ScaleZ;
 
             // Find The Floored Values
             return new Point(
-                x < 0 ? 0 : (x >= GridWidth - 1 ? GridWidth - 1 : (int)x),
-                y < 0 ? 0 : (y >= GridHeight - 1 ? GridHeight - 1 : (int)y)
+                x <= 0 ? 0 : (x >= GridWidth - 1 ? GridWidth - 1 : (int)x),
+                z <= 0 ? 0 : (z >= GridHeight - 1 ? GridHeight - 1 : (int)z)
                 );
         }
 
-        private float Bilerp(float v1, float v2, float v3, float v4, float rx, float ry) {
+        // Retrieve Interpolated Height From The Heightmap
+        private float Bilerp(float v1, float v2, float v3, float v4, float rx, float rz) {
             return MathHelper.Lerp(
                 MathHelper.Lerp(v1, v2, rx),
                 MathHelper.Lerp(v3, v4, rx),
-                ry
+                rz
                 );
         }
-        public float HeightAt(float x, float y) {
+        public float HeightAt(float x, float z) {
             // Convert To Grid Space
-            x /= ScaleX; y /= ScaleY;
+            x /= ScaleX; z /= ScaleZ;
 
             // Find The Floored Values And The Remainder
-            int fx = x < 0 ? 0 : (x >= GridWidth - 1 ? GridWidth - 1 : (int)x);
-            int fy = y < 0 ? 0 : (y >= GridHeight - 1 ? GridHeight - 1 : (int)y);
+            int fx = x <= 0 ? 0 : (x >= GridWidth - 1 ? GridWidth - 1 : (int)x);
+            int fz = z <= 0 ? 0 : (z >= GridHeight - 1 ? GridHeight - 1 : (int)z);
             float rx = x - fx;
-            float ry = y - fy;
+            float rz = z - fz;
 
             // Bilerp For Value
             return Bilerp(
-                heights[fy * HValueWidth + fx],
-                heights[fy * HValueWidth + fx + 1],
-                heights[(fy + 1) * HValueWidth + fx],
-                heights[(fy + 1) * HValueWidth + fx + 1],
-                rx, ry
+                heights[fz * HValueWidth + fx],
+                heights[fz * HValueWidth + fx + 1],
+                heights[(fz + 1) * HValueWidth + fx],
+                heights[(fz + 1) * HValueWidth + fx + 1],
+                rx, rz
                 );
         }
     }

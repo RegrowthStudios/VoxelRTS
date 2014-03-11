@@ -35,7 +35,7 @@ namespace AnimConverter {
             // Find The Width Of The Bitmap First
             int bmpWidth = 0;
             using(FileStream fs = File.OpenRead(files[0].FullName)) {
-                ObjParser.tryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
+                ObjParser.TryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
                 bmpWidth = verts.Length;
             }
             Bitmap bmp = new Bitmap(bmpWidth, files.Length * 3);
@@ -47,7 +47,7 @@ namespace AnimConverter {
             log.AppendText("Percent Complete: " + percent + "%\n");
             foreach(var fi in files) {
                 using(FileStream fs = File.OpenRead(fi.FullName)) {
-                    ObjParser.tryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
+                    ObjParser.TryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
                 }
                 for(int px = 0; px < bmp.Width || px < verts.Length; px++) {
                     bmp.SetPixel(px, py, Convert(verts[px].Position.X));
@@ -75,7 +75,7 @@ namespace AnimConverter {
             log.AppendText("Percent Complete: " + percent + "%\n");
             foreach(var fi in files) {
                 using(FileStream fs = File.OpenRead(fi.FullName)) {
-                    ObjParser.tryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
+                    ObjParser.TryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
                 }
                 for(int px = 0; px < bmp.Width || px < verts.Length; px++) {
                     Vector3 point = new Vector3(

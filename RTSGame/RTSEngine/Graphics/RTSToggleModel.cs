@@ -40,7 +40,7 @@ namespace RTSEngine.Graphics {
             VertexPositionNormalTexture[] verts;
             int[] inds;
             using(var fs = File.OpenRead(file)) {
-                ObjParser.tryParse(fs, out verts, out inds, ParseFlags);
+                ObjParser.TryParse(fs, out verts, out inds, ParseFlags);
             }
             if(inds == null || verts == null) throw new ArgumentException("Cannot Parse Model");
 

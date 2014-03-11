@@ -139,7 +139,7 @@ namespace Microsoft.Xna.Framework.Graphics {
                 Count = 0;
             }
 
-            public int get(VInds v) {
+            public int Get(VInds v) {
                 int h = v.GetHashCode() & 0xff;
                 for(int i = 0; i < verts[h].Count; i++) {
                     if(verts[h][i].Vertex.Equals(v)) return verts[h][i].Index;
@@ -162,7 +162,7 @@ namespace Microsoft.Xna.Framework.Graphics {
         }
         #endregion
 
-        public static bool tryParse(Stream s, out VertexPositionNormalTexture[] verts, out int[] inds, ParsingFlags ps = ParsingFlags.None) {
+        public static bool TryParse(Stream s, out VertexPositionNormalTexture[] verts, out int[] inds, ParsingFlags ps = ParsingFlags.None) {
             // Default Values
             verts = null; inds = null;
 
@@ -231,9 +231,9 @@ namespace Microsoft.Xna.Framework.Graphics {
             inds = new int[tris.Count * 3];
             int ii = 0;
             foreach(Tri tri in tris) {
-                inds[ii++] = vd.get(tri.V1);
-                inds[ii++] = vd.get(tri.V2);
-                inds[ii++] = vd.get(tri.V3);
+                inds[ii++] = vd.Get(tri.V1);
+                inds[ii++] = vd.Get(tri.V2);
+                inds[ii++] = vd.Get(tri.V3);
             }
 
             // Create Vertices
@@ -250,10 +250,10 @@ namespace Microsoft.Xna.Framework.Graphics {
 
             return true;
         }
-        public static bool tryParse(Stream s, out ObjTriangle[] tris, ParsingFlags ps = ParsingFlags.None) {
+        public static bool TryParse(Stream s, out ObjTriangle[] tris, ParsingFlags ps = ParsingFlags.None) {
             VertexPositionNormalTexture[] verts;
             int[] inds;
-            if(tryParse(s, out verts, out inds, ps)) {
+            if(TryParse(s, out verts, out inds, ps)) {
                 tris = new ObjTriangle[inds.Length / 3];
                 for(int ti = 0, i = 0; ti < tris.Length; ti++) {
                     tris[ti] = new ObjTriangle(
@@ -268,18 +268,7 @@ namespace Microsoft.Xna.Framework.Graphics {
             tris = null;
             return false;
         }
-        //public static bool tryParse(GraphicsDevice g, Stream s, out ModelBuffer mb, ParsingFlags ps = ParsingFlags.None, BufferUsage bu = BufferUsage.None) {
-        //    VertexPositionNormalTexture[] verts;
-        //    int[] inds;
-        //    mb = ModelBuffer.Null;
-        //    if(!tryParse(s, out verts, out inds, ps)) return false;
-        //    mb.Vertex = new VertexBuffer(g, VertexPositionNormalTexture.VertexDeclaration, verts.Length, bu);
-        //    mb.Vertex.SetData(verts);
-        //    mb.Index = new IndexBuffer(g, IndexElementSize.ThirtyTwoBits, inds.Length, bu);
-        //    mb.Index.SetData(inds);
-        //    return true;
-        //}
-        public static bool tryParse(Stream s, GraphicsDevice g, ContentManager c, out Effect fx, ref List<object> refs, ParsingFlags ps = ParsingFlags.None) {
+        public static bool TryParse(Stream s, GraphicsDevice g, ContentManager c, out Effect fx, ref List<object> refs, ParsingFlags ps = ParsingFlags.None) {
             fx = null;
             StreamReader f = new StreamReader(new BufferedStream(s));
 
@@ -465,14 +454,14 @@ namespace Microsoft.Xna.Framework.Graphics {
         }
         #endregion
 
-        public static void write(Model model, string name, ParsingFlags ps = ParsingFlags.WriteAll) {
+        public static void Write(Model model, string name, ParsingFlags ps = ParsingFlags.WriteAll) {
             int mi = 0, ei = 0;
             foreach(ModelMesh mesh in model.Meshes) {
                 // Get All The Distinct Meshes
                 foreach(ModelMeshPart mp in mesh.MeshParts.Distinct(new MMComp())) {
                     string nfObj = name + "." + mi + ".obj";
                     StreamWriter fObj = new StreamWriter(new BufferedStream(File.Create(nfObj)));
-                    writeObj(new MeshPart(mp), fObj, ps);
+                    WriteObj(new MeshPart(mp), fObj, ps);
                     fObj.Flush(); fObj.Close();
                     mi++;
                 }
@@ -480,13 +469,13 @@ namespace Microsoft.Xna.Framework.Graphics {
                 foreach(EffectMaterial e in mesh.Effects) {
                     string nfEff = name + "." + ei + ".fxc";
                     StreamWriter fEff = new StreamWriter(new BufferedStream(File.Create(nfEff)));
-                    writeEffect(e, fEff);
+                    WriteEffect(e, fEff);
                     fEff.Flush(); fEff.Close();
                     ei++;
                 }
             }
         }
-        public static void writeObj(MeshPart mp, StreamWriter writer, ParsingFlags ps = ParsingFlags.WriteAll) {
+        public static void WriteObj(MeshPart mp, StreamWriter writer, ParsingFlags ps = ParsingFlags.WriteAll) {
             ParsingFlags capable = ParsingFlags.None;
 
             // Loop Through All Vertex Elements
@@ -494,12 +483,12 @@ namespace Microsoft.Xna.Framework.Graphics {
             foreach(VertexElement ve in elements) {
                 // Choose Formatting Functions By Type
                 switch(ve.VertexElementFormat) {
-                    case VertexElementFormat.Vector2: writeElement<Vector2>(writer, ve, mp, format, ref capable); break;
-                    case VertexElementFormat.Vector3: writeElement<Vector3>(writer, ve, mp, format, ref capable); break;
-                    case VertexElementFormat.Vector4: writeElement<Vector4>(writer, ve, mp, format, ref capable); break;
-                    case VertexElementFormat.Single: writeElement<float>(writer, ve, mp, format, ref capable); break;
-                    case VertexElementFormat.Color: writeElement<Color>(writer, ve, mp, format, ref capable); break;
-                    case VertexElementFormat.Byte4: writeElement<Color>(writer, ve, mp, format, ref capable); break;
+                    case VertexElementFormat.Vector2: WriteElement<Vector2>(writer, ve, mp, Format, ref capable); break;
+                    case VertexElementFormat.Vector3: WriteElement<Vector3>(writer, ve, mp, Format, ref capable); break;
+                    case VertexElementFormat.Vector4: WriteElement<Vector4>(writer, ve, mp, Format, ref capable); break;
+                    case VertexElementFormat.Single: WriteElement<float>(writer, ve, mp, Format, ref capable); break;
+                    case VertexElementFormat.Color: WriteElement<Color>(writer, ve, mp, Format, ref capable); break;
+                    case VertexElementFormat.Byte4: WriteElement<Color>(writer, ve, mp, Format, ref capable); break;
                     default:
                         // Those Are The Basic Types
                         break;
@@ -510,51 +499,51 @@ namespace Microsoft.Xna.Framework.Graphics {
 
             // Write Indices
             switch(mp.IBuffer.IndexElementSize) {
-                case IndexElementSize.SixteenBits: writeIndices<short>(writer, mp, format, ps); break;
-                case IndexElementSize.ThirtyTwoBits: writeIndices<int>(writer, mp, format, ps); break;
+                case IndexElementSize.SixteenBits: WriteIndices<short>(writer, mp, Format, ps); break;
+                case IndexElementSize.ThirtyTwoBits: WriteIndices<int>(writer, mp, Format, ps); break;
             }
         }
         #region Formatting Functions
-        static int format(short i) {
+        static int Format(short i) {
             return i;
         }
-        static int format(int i) {
+        static int Format(int i) {
             return i;
         }
-        static string format(float f) {
+        static string Format(float f) {
             return f.ToString();
         }
-        static string format(Vector2 v) {
+        static string Format(Vector2 v) {
             return v.X + " " + v.Y;
         }
-        static string formatFV(Vector2 v) {
+        static string FormatFV(Vector2 v) {
             return v.X + " " + (1f - v.Y);
         }
-        static string format(Vector3 v) {
+        static string Format(Vector3 v) {
             return v.X + " " + v.Y + " " + v.Z;
         }
-        static string format(Vector4 v) {
+        static string Format(Vector4 v) {
             return v.X + " " + v.Y + " " + v.Z + " " + v.W;
         }
-        static string format(Color c) {
+        static string Format(Color c) {
             return c.R + " " + c.G + " " + c.B + " " + c.A;
         }
         #endregion
-        static void writeElement<T>(StreamWriter writer, VertexElement ve, MeshPart mp, Func<T, string> formatter, ref ParsingFlags ps) where T : struct {
+        static void WriteElement<T>(StreamWriter writer, VertexElement ve, MeshPart mp, Func<T, string> formatter, ref ParsingFlags ps) where T : struct {
             T[] data = new T[mp.NumVertices];
             mp.VBuffer.GetData(ve.Offset + mp.VertexOffset * mp.VertexStride, data, 0, data.Length, mp.VertexStride);
-            writeElementByUsage(writer, data, ve, formatter, ref ps);
+            WriteElementByUsage(writer, data, ve, formatter, ref ps);
         }
-        static void writeElementByUsage<T>(StreamWriter writer, T[] data, VertexElement ve, Func<T, string> formatter, ref ParsingFlags ps) {
+        static void WriteElementByUsage<T>(StreamWriter writer, T[] data, VertexElement ve, Func<T, string> formatter, ref ParsingFlags ps) {
             switch(ve.VertexElementUsage) {
                 case VertexElementUsage.Position:
-                    if(ve.UsageIndex == 0) writeAllElements(writer, data, "v", formatter);
-                    else writeAllElements(writer, data, "v" + ve.UsageIndex, formatter);
+                    if(ve.UsageIndex == 0) WriteAllElements(writer, data, "v", formatter);
+                    else WriteAllElements(writer, data, "v" + ve.UsageIndex, formatter);
                     break;
                 case VertexElementUsage.Normal:
                     ps |= ParsingFlags.WriteNorms;
-                    if(ve.UsageIndex == 0) writeAllElements(writer, data, "vn", formatter);
-                    else writeAllElements(writer, data, "vn" + ve.UsageIndex, formatter);
+                    if(ve.UsageIndex == 0) WriteAllElements(writer, data, "vn", formatter);
+                    else WriteAllElements(writer, data, "vn" + ve.UsageIndex, formatter);
                     break;
                 case VertexElementUsage.TextureCoordinate:
                     ps |= ParsingFlags.WriteUV;
@@ -565,23 +554,23 @@ namespace Microsoft.Xna.Framework.Graphics {
                             data = vt as T[];
                         }
                     }
-                    if(ve.UsageIndex == 0) writeAllElements(writer, data, "vt", formatter);
-                    else writeAllElements(writer, data, "vt" + ve.UsageIndex, formatter);
+                    if(ve.UsageIndex == 0) WriteAllElements(writer, data, "vt", formatter);
+                    else WriteAllElements(writer, data, "vt" + ve.UsageIndex, formatter);
                     break;
                 case VertexElementUsage.Color:
                     ps |= ParsingFlags.WriteColor;
-                    if(ve.UsageIndex == 0) writeAllElements(writer, data, "vc", formatter);
-                    else writeAllElements(writer, data, "vc" + ve.UsageIndex, formatter);
+                    if(ve.UsageIndex == 0) WriteAllElements(writer, data, "vc", formatter);
+                    else WriteAllElements(writer, data, "vc" + ve.UsageIndex, formatter);
                     break;
             }
         }
-        static void writeAllElements<T>(StreamWriter writer, T[] data, string identifier, Func<T, string> formatter) {
+        static void WriteAllElements<T>(StreamWriter writer, T[] data, string identifier, Func<T, string> formatter) {
             foreach(T o in data) {
                 writer.Write(identifier + " ");
                 writer.WriteLine(formatter(o));
             }
         }
-        static void writeIndices<T>(StreamWriter writer, MeshPart mp, Func<T, int> formatter, ParsingFlags ps) where T : struct {
+        static void WriteIndices<T>(StreamWriter writer, MeshPart mp, Func<T, int> formatter, ParsingFlags ps) where T : struct {
             IndexBuffer iBuffer = mp.IBuffer;
             T[] data = new T[mp.NumIndices];
             int iSize = mp.IBuffer.IndexElementSize == IndexElementSize.SixteenBits ? 2 : 4;
@@ -604,7 +593,7 @@ namespace Microsoft.Xna.Framework.Graphics {
                 writer.WriteLine("");
             }
         }
-        public static void writeEffect(EffectMaterial fx, StreamWriter writer) {
+        public static void WriteEffect(EffectMaterial fx, StreamWriter writer) {
             // Get Reference To Actual Effect
             WeakReference effectRef = fxRefField.GetValue(fx) as WeakReference;
 

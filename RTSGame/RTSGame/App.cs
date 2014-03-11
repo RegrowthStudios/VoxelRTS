@@ -63,7 +63,7 @@ namespace RTS {
             VertexPositionNormalTexture[] verts;
             int[] inds;
             using(FileStream fs = File.OpenRead("res/g/model/Monkey.obj")) {
-                ObjParser.tryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
+                ObjParser.TryParse(fs, out verts, out inds, ParsingFlags.ConversionOpenGL);
             }
             for(int i = 0; i < verts.Length; i++) {
                 verts[i].Position = new Vector3(((float)i / (float)t.Width), 0, 0);
