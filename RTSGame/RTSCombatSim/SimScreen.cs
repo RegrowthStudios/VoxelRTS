@@ -65,7 +65,7 @@ namespace RTSCS {
             private set;
         }
         public RTSTeam[] Teams {
-            get { return GameState.teams; }
+            get { return GameState.Teams; }
         }
         public Dictionary<string, ReflectedEntityController> Controllers {
             get;
@@ -259,7 +259,7 @@ namespace RTSCS {
                 float dist = distN.HasValue ? distN.Value : 0;
                 Vector3 loc = mouseRay.Position + mouseRay.Direction * dist;
                 int ti = 0;
-                foreach(var team in GameState.teams) {
+                foreach(var team in GameState.Teams) {
                     if(selections[ti]) {
                         foreach(RTSUnitInstance unit in team.Units) {
                             unit.MovementController = Controllers[DEFAULT_MOVEMENT_CONTROLLER].CreateInstance() as IMovementController;
@@ -271,28 +271,28 @@ namespace RTSCS {
             }
 
             // Find Decisions
-            foreach(RTSTeam team in GameState.teams) {
+            foreach(RTSTeam team in GameState.Teams) {
                 foreach(RTSUnitInstance unit in team.Units) {
                     unit.ActionController.DecideAction(GameState, dt);
                 }
             }
 
             // Apply Controllers
-            foreach(RTSTeam team in GameState.teams) {
+            foreach(RTSTeam team in GameState.Teams) {
                 foreach(RTSUnitInstance unit in team.Units) {
                     unit.ActionController.ApplyAction(GameState, dt);
                 }
             }
 
             // Collision
-            foreach(RTSTeam team in GameState.teams) {
+            foreach(RTSTeam team in GameState.Teams) {
                 foreach(RTSUnitInstance unit in team.Units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
                 }
             }
-            foreach(RTSTeam team1 in GameState.teams) {
+            foreach(RTSTeam team1 in GameState.Teams) {
                 foreach(RTSUnitInstance unit1 in team1.Units) {
-                    foreach(RTSTeam team2 in GameState.teams) {
+                    foreach(RTSTeam team2 in GameState.Teams) {
                         foreach(RTSUnitInstance unit2 in team2.Units) {
                             if(unit1 == unit2) continue;
                             CollisionController.ProcessCollision(unit1.CollisionGeometry, unit2.CollisionGeometry);
@@ -300,14 +300,14 @@ namespace RTSCS {
                     }
                 }
             }
-            foreach(RTSTeam team in GameState.teams) {
+            foreach(RTSTeam team in GameState.Teams) {
                 foreach(RTSUnitInstance unit in team.Units) {
                     unit.GridPosition = unit.CollisionGeometry.Center;
                 }
             }
 
             // Kill Dead Units
-            foreach(RTSTeam team in GameState.teams) {
+            foreach(RTSTeam team in GameState.Teams) {
                 team.RemoveAll(IsDeadApplier);
             }
             foreach(var ug in unitGeometry) {

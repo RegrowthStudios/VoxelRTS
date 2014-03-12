@@ -50,6 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\KMeans.cs" />
+    <Compile Include="Controllers\GameEngine.cs" />
+    <Compile Include="Controllers\GameplayController.cs" />
+    <Compile Include="Controllers\InputController.cs" />
+    <Compile Include="Controllers\PlayerInputController.cs" />
+    <Compile Include="Data\GameInputEvent.cs" />
     <Compile Include="Data\Heightmap.cs" />
     <Compile Include="Data\Collision.cs" />
     <Compile Include="Data\Combat.cs" />
@@ -66,6 +71,8 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Graphics\HeightmapModel.cs" />
     <Compile Include="Graphics\LightningGenerator.cs" />
+    <Compile Include="Graphics\RTSRenderer.cs" />
+    <Compile Include="Interfaces\IInputController.cs" />
     <Compile Include="Screens\InduZtryScreen.cs" />
     <Compile Include="Interfaces\EntityControllers.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />

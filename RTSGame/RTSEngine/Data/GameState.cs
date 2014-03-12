@@ -14,7 +14,10 @@ namespace RTSEngine.Data {
         public const int MAX_RTSBUILDING_ID = 255;
 
         // Constant List Of Teams
-        public readonly RTSTeam[] teams;
+        public RTSTeam[] Teams {
+            get;
+            private set;
+        }
 
         // List Of Unit Data
         private RTSUnit[] units;
@@ -25,8 +28,8 @@ namespace RTSEngine.Data {
         // Create With Premade Data
         public GameState(RTSTeam[] t) {
             // Copy Over Teams
-            teams = new RTSTeam[t.Length];
-            t.CopyTo(teams, 0);
+            Teams = new RTSTeam[t.Length];
+            t.CopyTo(Teams, 0);
 
             // No Unit Types Available
             units = new RTSUnit[MAX_RTSUNIT_ID + 1];

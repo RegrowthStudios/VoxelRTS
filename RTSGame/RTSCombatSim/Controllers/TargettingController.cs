@@ -34,7 +34,7 @@ namespace RTSCS.Controllers {
         // Find The Closest Target On An Opposing Team
         public void FindTarget(GameState g, float dt) {
             float minDist = float.MaxValue;
-            foreach(var team in g.teams) {
+            foreach(var team in g.Teams) {
                 if(team != Squad.Team) {
                     foreach(var unit in team.Units) {
                         if(!unit.IsAlive) return;

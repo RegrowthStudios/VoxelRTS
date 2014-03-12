@@ -12,7 +12,7 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
-        
+
         // This Is All The Units In The Team
         private List<RTSUnitInstance> units;
         public IEnumerable<RTSUnitInstance> Units {
@@ -31,10 +31,20 @@ namespace RTSEngine.Data.Team {
             get { return squads.Count; }
         }
 
+        public IInputController Input {
+            get;
+            set;
+        }
+
         public RTSTeam() {
             Color = Color.White;
+
+            // Teams Starts Out Empty
             units = new List<RTSUnitInstance>();
             squads = new List<RTSSquad>();
+
+            // No Input Is Available For The Team Yet
+            Input = null;
         }
 
         public RTSUnitInstance AddUnit(RTSUnit data, Vector3 pos) {

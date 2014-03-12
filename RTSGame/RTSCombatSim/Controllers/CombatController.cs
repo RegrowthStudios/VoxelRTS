@@ -35,7 +35,7 @@ namespace RTSCS.Controllers {
         public void Attack(GameState g, float dt) {
             IDestructibleEntity ttarget = null;
             float minDist = float.MaxValue;
-            foreach(var team in g.teams) {
+            foreach(var team in g.Teams) {
                 if(team != Entity.Team) {
                     foreach(var unit in team.Units) {
                         if(!unit.IsAlive) return;

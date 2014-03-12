@@ -35,7 +35,7 @@ namespace RTSCS.Controllers {
             unit = e as RTSUnitInstance;
         }
         public void Attack(GameState g, float dt) {
-            foreach(var t in g.teams) {
+            foreach(var t in g.Teams) {
                 if(t == unit.Team)
                     continue;
                 foreach(var u in t.Units) {
