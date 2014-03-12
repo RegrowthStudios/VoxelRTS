@@ -10,9 +10,9 @@ using BlisterUI;
 using BlisterUI.Input;
 
 namespace TerrainConverter {
-    public class TerrainScreen : GameScreenIndexed {
-        public TerrainScreen(int i) : base(i) { }
-        public TerrainScreen(int p, int n) : base(p, n) { }
+    public class ComputeScreen : GameScreenIndexed {
+        public ComputeScreen(int i) : base(i) { }
+        public ComputeScreen(int p, int n) : base(p, n) { }
 
         private string fIn, fOut;
         private bool ShouldRebuild {

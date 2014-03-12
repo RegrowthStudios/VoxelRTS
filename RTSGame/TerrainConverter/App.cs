@@ -13,7 +13,7 @@ namespace TerrainConverter {
         protected override void BuildScreenList() {
             screenList = new ScreenList(this, 0,
                 new FalseFirstScreen(1),
-                new TerrainScreen(1)
+                new ComputeScreen(1)
                 );
         }
 
