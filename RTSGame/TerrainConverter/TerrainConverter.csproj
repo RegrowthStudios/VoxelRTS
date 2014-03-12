@@ -54,7 +54,8 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TerrainScreen.cs" />
+    <Compile Include="ComputeScreen.cs" />
+    <Compile Include="ViewScreen.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BlisterUI\BlisterUI.csproj">
