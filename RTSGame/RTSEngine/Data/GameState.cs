@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 
 namespace RTSEngine.Data {
@@ -12,6 +16,12 @@ namespace RTSEngine.Data {
         public const int MAX_RTSUNIT_ID = 255;
         public const int MIN_RTSBUILDING_ID = 0;
         public const int MAX_RTSBUILDING_ID = 255;
+
+        // The Map For The Level
+        public Heightmap Map {
+            get;
+            set;
+        }
 
         // Constant List Of Teams
         public RTSTeam[] Teams {
@@ -31,8 +41,9 @@ namespace RTSEngine.Data {
             Teams = new RTSTeam[t.Length];
             t.CopyTo(Teams, 0);
 
-            // No Unit Types Available
+            // No Data Yet Available
             units = new RTSUnit[MAX_RTSUNIT_ID + 1];
+            Map = null;
         }
 
         // Need These Accessors For Unit Types
@@ -56,5 +67,6 @@ namespace RTSEngine.Data {
         public RTSUnit GetRTSUnit(int id) {
             return units[id];
         }
+
     }
 }

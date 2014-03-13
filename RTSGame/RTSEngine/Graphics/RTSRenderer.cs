@@ -9,6 +9,11 @@ using RTSEngine.Data;
 namespace RTSEngine.Graphics {
     public class RTSRenderer {
 
+        public HeightmapModel Map {
+            get;
+            set;
+        }
+
         public RTSRenderer(GraphicsDevice g) {
 
         }

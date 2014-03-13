@@ -1,0 +1,17 @@
+﻿// Pre-computed Height Data
+DAT         height.png
+
+// The Primary Model And Texture
+HMP         map.obj
+HTP         map.png
+
+// The Detail Model And Texture (May Be Omitted)
+[OMIT] HMS         detail.obj -> DNE
+[OMIT] HTS         detail.png -> DNE
+
+// Scaling Of The Width And Depth Of The Map (From It's Object Coordinates
+SCX         2.0
+SCZ         2.0
+
+// Scaling For The Height Of The Map
+SCY         10.0

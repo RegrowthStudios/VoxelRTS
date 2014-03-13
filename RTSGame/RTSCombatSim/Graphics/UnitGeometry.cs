@@ -153,10 +153,11 @@ namespace RTSCS.Graphics {
             ApplyInstancing(UnitCount);
         }
 
-        public void AddUnit(RTSUnitInstance u, Color c) {
-            units.Add(new UnitRenderData() { Unit = u, Color = c });
+        public void AddUnit(RTSUnitInstance u, RTSTeamColorScheme c) {
+            Color col = new Color(c.Primary);
+            units.Add(new UnitRenderData() { Unit = u, Color = col });
             SetInstanceMatrix(units.Count - 1, Matrix.CreateTranslation(u.WorldPosition));
-            SetInstanceColor(units.Count - 1, c);
+            SetInstanceColor(units.Count - 1, col);
         }
         public void RemoveAll(Predicate<RTSUnitInstance> f) {
             units.RemoveAll((d) => { return f(d.Unit); });

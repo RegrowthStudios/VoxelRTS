@@ -28,5 +28,9 @@ namespace RTSEngine.Controllers {
         private void ApplyLogic(GameState s, float dt) {
 
         }
+
+        public void AddInstantiatedData(GameState s) {
+
+        }
     }
 }

@@ -33,7 +33,7 @@ namespace RTSCS {
         private RTSTeam[] teams;
         private Vector3[] teamSpawnPositions;
         private Vector2[] teamWaypoints;
-        private XColor[] teamColors;
+        private RTSTeamColorScheme[] teamColors;
         private Dictionary<string, ReflectedEntityController> controllers;
 
         // This Should Be Where You Figure Out Which Team You Are Operating On
@@ -106,7 +106,7 @@ namespace RTSCS {
             teams = t;
             teamSpawnPositions = new Vector3[teams.Length];
             teamWaypoints = new Vector2[teams.Length];
-            teamColors = new XColor[teams.Length];
+            teamColors = new RTSTeamColorScheme[teams.Length];
             controllers = c;
 
             // Populate Combo Boxes
@@ -189,9 +189,18 @@ namespace RTSCS {
             team1ColorTextBox.Text = DEFAULT_TEAM1_COLOR_TEXT;
             team2ColorTextBox.Text = DEFAULT_TEAM2_COLOR_TEXT;
             team3ColorTextBox.Text = DEFAULT_TEAM3_COLOR_TEXT;
-            teamColors[0] = XColor.Red;
-            teamColors[1] = XColor.Blue;
-            teamColors[2] = XColor.Green;
+            teamColors[0] = RTSTeamColorScheme.Default;
+            teamColors[0].Primary *= Vector3.UnitX;
+            teamColors[0].Secondary *= Vector3.UnitX;
+            teamColors[0].Tertiary *= Vector3.UnitX;
+            teamColors[1] = RTSTeamColorScheme.Default;
+            teamColors[1].Primary *= Vector3.UnitY;
+            teamColors[1].Secondary *= Vector3.UnitY;
+            teamColors[1].Tertiary *= Vector3.UnitY;
+            teamColors[2] = RTSTeamColorScheme.Default;
+            teamColors[2].Primary *= Vector3.UnitZ;
+            teamColors[2].Secondary *= Vector3.UnitZ;
+            teamColors[2].Tertiary *= Vector3.UnitZ;
 
             team1SpawnPositionTextBox.Text = DEFAULT_TEAM1_SPAWN_TEXT;
             team2SpawnPositionTextBox.Text = DEFAULT_TEAM2_SPAWN_TEXT;
@@ -319,10 +328,10 @@ namespace RTSCS {
         }
 
         // Assumes Data Is Input As (x,y,z)
-        private XColor StringToXColor(String s) {
+        private Vector3 StringToXColor(String s) {
             String[] splitString = s.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            if(splitString.Length != 3) return XColor.Green;
-            return new XColor(float.Parse(splitString[0]), float.Parse(splitString[1]), float.Parse(splitString[2]));
+            if(splitString.Length != 3) return Vector3.One;
+            return new Vector3(float.Parse(splitString[0]), float.Parse(splitString[1]), float.Parse(splitString[2]));
         }
 
         private void UpdateSpawnInfo() {
@@ -334,10 +343,10 @@ namespace RTSCS {
             teamWaypoints[1] = StringToVector2(team2WaypointTextBox.Text);
             teamWaypoints[2] = StringToVector2(team3WaypointTextBox.Text);
 
-            teamColors[0] = StringToXColor(team1ColorTextBox.Text);
-            teamColors[1] = StringToXColor(team2ColorTextBox.Text);
-            teamColors[2] = StringToXColor(team3ColorTextBox.Text);
-            for(int i = 0; i < 3; i++) teams[i].Color = teamColors[i];
+            teamColors[0].Primary = StringToXColor(team1ColorTextBox.Text);
+            teamColors[1].Primary = StringToXColor(team2ColorTextBox.Text);
+            teamColors[2].Primary = StringToXColor(team3ColorTextBox.Text);
+            for(int i = 0; i < 3; i++) teams[i].ColorSheme = teamColors[i];
         }
         private void spawnButton_Click(object sender, EventArgs e) {
             UpdateSpawnInfo();
@@ -346,7 +355,7 @@ namespace RTSCS {
                     int spawnCount = int.Parse(PickUnitCountTextBox(t, u).Text);
                     for(int count = 0; count < spawnCount; count++) {
                         if(int.Parse(GetCapitalTextBox(t).Text) >= 0) SpawnUnit(u, t);
-                        else Console.WriteLine("Team {0} has overdrawn its balance and can't spawn any units!", t); 
+                        else Console.WriteLine("Team {0} has overdrawn its balance and can't spawn any units!", t);
                     }
                 }
             }

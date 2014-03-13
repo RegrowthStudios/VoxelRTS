@@ -346,7 +346,7 @@ namespace RTSCS {
                     u.OnAttackMade += OnUnitCombat;
                     foreach(var ug in unitGeometry) {
                         if(ug.UnitData == u.UnitData)
-                            ug.AddUnit(u, u.Team.Color);
+                            ug.AddUnit(u, u.Team.ColorSheme);
                     }
                 }
                 else i--;

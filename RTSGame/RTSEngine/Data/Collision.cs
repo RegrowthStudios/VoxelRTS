@@ -102,8 +102,7 @@ namespace RTSEngine.Data {
         private static readonly Random r = new Random();
         private const float OFFSET = 0.01f;
 
-        // Process collision between two objects
-        // Match the types of two objects before calling HandleCollision()
+        // Process Collision Between Two Objects
         public static void ProcessCollision(ICollidable o1, ICollidable o2) {
             switch(o1.CollisionType) {
                 case (CollisionType.Circle):
@@ -128,8 +127,6 @@ namespace RTSEngine.Data {
                     break;
             }
         }
-
-        // Detect circle-circle collision
         private static void HandleCollision(CollisionCircle circle1, CollisionCircle circle2) {
             if(circle1.IsStatic && circle2.IsStatic) return;
 
@@ -167,8 +164,6 @@ namespace RTSEngine.Data {
                 }
             }
         }
-
-        // Detect circle-rectangle collision
         private static void HandleCollision(CollisionCircle circle, CollisionRect rect) {
             // Reference: stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection/402010#402010
             Vector2 d = circle.Center - rect.Center;
@@ -224,8 +219,6 @@ namespace RTSEngine.Data {
 
             }
         }
-
-        // Detect rectangle-rectangle collision
         private static void HandleCollision(CollisionRect rect1, CollisionRect rect2) {
             // bottom1 means the bottom Y coordinate of rect1
             // left2 means the left X coordinate of rect2
@@ -302,6 +295,11 @@ namespace RTSEngine.Data {
                     rect2.Center -= pushAmount / 2;
                 }
             }
+        }
+
+        // Clamp The Geometry To The Heightmap
+        public static void CollideHeightmap(ICollidable o, Heightmap map) {
+            // TODO: Use The Map For Height Resolution (If Non-static)
         }
     }
 }

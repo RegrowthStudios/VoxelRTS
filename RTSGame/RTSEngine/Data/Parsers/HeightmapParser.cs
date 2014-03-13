@@ -19,6 +19,8 @@ namespace RTSEngine.Data.Parsers {
     }
 
     public static class HeightmapParser {
+        const string INFO_FILE_NAME = "info.dat";
+
         // Keys To Search For
         const string KEY_DATA = "dat";
         const string KEY_MODEL_P = "hmp";
@@ -121,13 +123,11 @@ namespace RTSEngine.Data.Parsers {
             }
         }
 
-        static Regex dataSplitRegex;
+        // How To Detect Data
+        const string DATA_REGEX = @"(\w{3})\s+(\w[\w|\s|.|\\|/]*)";
+        static readonly Regex dataSplitRegex = new Regex(DATA_REGEX, RegexOptions.None);
 
-        static HeightmapParser() {
-            dataSplitRegex = new Regex(@"(\w{3})\s+(\w+)", RegexOptions.None);
-        }
-
-        private static ReadData GetInfo(StreamReader s) {
+        private static ReadData GetInfo(StreamReader s, string rootDir) {
             ReadData rd = new ReadData();
             string line;
             while(!s.EndOfStream && !rd.IsAllRead) {
@@ -142,7 +142,7 @@ namespace RTSEngine.Data.Parsers {
                 Match m = dataSplitRegex.Match(line);
                 if(m.Success) {
                     // Get The File Value If Provided
-                    string file = m.Groups[1].Value;
+                    string file = m.Groups[2].Value.Trim();
                     switch(file.ToLower()) {
                         case "null":
                         case "none":
@@ -152,13 +152,13 @@ namespace RTSEngine.Data.Parsers {
                     float v;
 
                     // Set Read Data By Key
-                    string key = m.Groups[0].Value;
+                    string key = m.Groups[1].Value;
                     switch(key.ToLower()) {
-                        case KEY_DATA: rd.HMDataBmp = file; break;
-                        case KEY_MODEL_P: rd.HMModelPrimary = file; break;
-                        case KEY_MODEL_S: rd.HMModelSecondary = file; break;
-                        case KEY_TEX_P: rd.HMTexPrimary = file; break;
-                        case KEY_TEX_S: rd.HMTexSecondary = file; break;
+                        case KEY_DATA: rd.HMDataBmp = Path.Combine(rootDir, file); break;
+                        case KEY_MODEL_P: rd.HMModelPrimary = Path.Combine(rootDir, file); break;
+                        case KEY_MODEL_S: rd.HMModelSecondary = Path.Combine(rootDir, file); break;
+                        case KEY_TEX_P: rd.HMTexPrimary = Path.Combine(rootDir, file); break;
+                        case KEY_TEX_S: rd.HMTexSecondary = Path.Combine(rootDir, file); break;
                         case KEY_SCALE_X:
                             if(!float.TryParse(file, out v)) v = 1;
                             rd.ScaleX = v;
@@ -181,11 +181,11 @@ namespace RTSEngine.Data.Parsers {
             h[i] = 1f - (c.R / 255f);
             d[i] = c.G > 128 ? (byte)0x01u : (byte)0x00u;
         }
-        public static HeightMapResult Parse(GraphicsDevice g, Stream s) {
+        private static HeightMapResult ParseFromInfo(GraphicsDevice g, Stream s, string rootDir) {
             HeightMapResult res = new HeightMapResult();
 
             // Read All Data First
-            ReadData rd = GetInfo(new StreamReader(s));
+            ReadData rd = GetInfo(new StreamReader(s), rootDir);
 
             // Must Read Primary Model
             using(var fs = File.OpenRead(rd.HMModelPrimary)) {
@@ -233,5 +233,19 @@ namespace RTSEngine.Data.Parsers {
 
             return res;
         }
+        public static HeightMapResult Parse(GraphicsDevice g, DirectoryInfo dir) {
+            var files = dir.GetFiles();
+            foreach(var file in files) {
+                // Check For The Info File
+                if(file.Name.ToLower().Equals(INFO_FILE_NAME)) {
+                    Stream s = File.OpenRead(file.FullName);
+                    HeightMapResult res = ParseFromInfo(g, s, dir.FullName);
+                    s.Dispose();
+                    return res;
+                }
+            }
+            throw new ArgumentException("\"info.dat\" Could Be Found In The Directory");
+        }
+
     }
 }

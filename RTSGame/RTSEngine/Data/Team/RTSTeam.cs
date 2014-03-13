@@ -6,9 +6,26 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
+    // "Army Painter" Color Values
+    public struct RTSTeamColorScheme {
+        public static RTSTeamColorScheme Default {
+            get {
+                return new RTSTeamColorScheme() {
+                    Primary = Vector3.One,
+                    Secondary = Vector3.One * 0.8f,
+                    Tertiary = Vector3.One * 0.3f
+                };
+            }
+        }
+
+        public Vector3 Primary;
+        public Vector3 Secondary;
+        public Vector3 Tertiary;
+    }
+
     public class RTSTeam {
         // Team Color
-        public Color Color {
+        public RTSTeamColorScheme ColorSheme {
             get;
             set;
         }
@@ -37,7 +54,7 @@ namespace RTSEngine.Data.Team {
         }
 
         public RTSTeam() {
-            Color = Color.White;
+            ColorSheme = RTSTeamColorScheme.Default;
 
             // Teams Starts Out Empty
             units = new List<RTSUnitInstance>();
@@ -47,12 +64,12 @@ namespace RTSEngine.Data.Team {
             Input = null;
         }
 
+        // Unit Addition And Removal
         public RTSUnitInstance AddUnit(RTSUnit data, Vector3 pos) {
             RTSUnitInstance rui = new RTSUnitInstance(this, data, pos);
             units.Add(rui);
             return rui;
         }
-
         public void RemoveUnit(RTSUnitInstance u) {
             units.Remove(u);
         }
@@ -60,10 +77,17 @@ namespace RTSEngine.Data.Team {
             units.RemoveAll(f);
         }
 
+        // Squad Addition And Removal
         public RTSSquad AddSquad() {
             RTSSquad s = new RTSSquad();
             squads.Add(s);
             return s;
+        }
+        public void RemoveSquad(RTSSquad u) {
+            squads.Remove(u);
+        }
+        public void RemoveAll(Predicate<RTSSquad> f) {
+            squads.RemoveAll(f);
         }
     }
 }

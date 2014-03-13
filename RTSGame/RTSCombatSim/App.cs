@@ -134,6 +134,13 @@ namespace RTSCS {
         private static void Main(string[] args) {
             bool running = true;
             while(running) {
+                var matches = System.Text.RegularExpressions.Regex.Match("DAT         tex/height.png   ", @"(\w{3})\s+(\w[\w|\s|.|\\|/]*)");
+                Console.WriteLine(matches.Success);
+                if(matches.Success) {
+                    Console.WriteLine("[{0}]", matches.Groups[1].Value);
+                    Console.WriteLine("[{0}]", matches.Groups[2].Value.Trim());
+                }
+
                 Console.WriteLine("A New Instance Will Attempt To Be Run\n\n");
                 running = false;
                 try {

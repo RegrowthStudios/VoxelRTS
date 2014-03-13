@@ -103,6 +103,10 @@
     <Compile Include="Graphics\UnitGeometry.cs" />
     <Compile Include="IDataForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="dat\levels\0\info.dat" />
+    <None Include="dat\maps\0\info.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\RTSGame\BlisterUI\BlisterUI.csproj">
