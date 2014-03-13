@@ -8,13 +8,14 @@ namespace RTSEngine.Data {
     #region Detection Objects Generated From A Camera
     public struct Frustum {
 
-        public Frustum(Matrix mView, Matrix mProj) {
+        public Frustum(Matrix mView, Matrix mProj, Vector2 min, Vector2 max) {
             // TODO: From An PerspectiveProjection
+            BoundingFrustum f = new BoundingFrustum(mView * mProj);
         }
     }
     public struct OBB {
 
-        public OBB(Matrix mView, Matrix mProj) {
+        public OBB(Matrix mView, Matrix mProj, Vector2 min, Vector2 max) {
             // TODO: From An Orthographic Projection
         }
     }
