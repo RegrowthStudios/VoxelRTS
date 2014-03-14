@@ -103,8 +103,8 @@
     <Compile Include="Graphics\UnitGeometry.cs" />
     <Compile Include="IDataForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="dat\levels\0\info.dat" />
-    <None Include="dat\maps\0\info.dat">
+    <None Include="Packs\Default\levels\0.dat" />
+    <None Include="Packs\Default\maps\0\info.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -171,6 +171,12 @@
     <None Include="Content\Textures\Smoke.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Packs\Default\buildings\" />
+    <Folder Include="Packs\Default\scripts\" />
+    <Folder Include="Packs\Default\teams\" />
+    <Folder Include="Packs\Default\units\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

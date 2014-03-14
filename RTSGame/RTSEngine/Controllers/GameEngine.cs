@@ -50,61 +50,7 @@ namespace RTSEngine.Controllers {
 
         // Update Logic
         public void Update(float dt) {
-            ResolveInput(dt);
             playController.Update(state, dt);
-            ResolveInput(dt);
-        }
-        private void ResolveInput(float dt) {
-            // TODO: Use InputControllers From The Teams
-        }
-        private void ResolvePhysics(float dt) {
-            /* TODO: Collision
-             * Hash All Units To A Grid
-             * Apply Collisions To Entity Collision Geometries
-             * Clamp Geometry To Heightmap
-             * Update Entity To Geometry
-             */
-
-            // TODO: Hash The Units To The Grid
-
-
-            // Move Geometry To The Unit's Location
-            foreach(var team in state.Teams) {
-                foreach(var unit in team.Units) {
-                    unit.CollisionGeometry.Center = unit.GridPosition;
-                }
-            }
-
-            // TODO: Use Hash Grid For Better Collision Resolution
-
-
-
-            // Move Unit's Location To The Geometry After Heightmap Collision
-            foreach(var team in state.Teams) {
-                foreach(var unit in team.Units) {
-                    CollisionController.CollideHeightmap(unit.CollisionGeometry, state.Map);
-                    unit.CollisionGeometry.Center = unit.GridPosition;
-                }
-            }
-        }
-
-        // Cleanup Stage
-        private void Cleanup(float dt) {
-            // Remove All Dead Entities
-            foreach(var team in state.Teams) {
-                team.RemoveAll(IsEntityDead);
-                // TODO: Remove Empty Squads
-                // team.RemoveAll(IsSquadEmpty);
-            }
-
-            // Add Newly Created Instances
-            playController.AddInstantiatedData(state);
-        }
-        private static bool IsEntityDead(IEntity e) {
-            return !e.IsAlive;
-        }
-        private static bool IsSquadEmpty(ISquad s) {
-            return s.EntityCount < 1;
         }
 
         // Drawing

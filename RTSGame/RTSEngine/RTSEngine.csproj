@@ -64,6 +64,7 @@
     <Compile Include="Data\Parsers\EntityControllerParser.cs" />
     <Compile Include="Data\Parsers\HeightmapParser.cs" />
     <Compile Include="Data\Quadtree.cs" />
+    <Compile Include="Data\SelectionDetection.cs" />
     <Compile Include="Data\Team\RTSSquad.cs" />
     <Compile Include="Data\Team\RTSUnitInstance.cs" />
     <Compile Include="Data\Team\RTSTeam.cs" />
