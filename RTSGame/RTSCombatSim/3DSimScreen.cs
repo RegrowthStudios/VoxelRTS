@@ -24,14 +24,18 @@ namespace RTSCS {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            game.IsMouseVisible = true;
+
             EngineLoadData data = new EngineLoadData();
             data.MapDirectory = new DirectoryInfo(@"Packs\Default\maps\0");
             data.Teams = new RTSTeam[2];
             data.Teams[0] = new RTSTeam();
             data.Teams[1] = new RTSTeam();
-            engine = new GameEngine(G, data);
+            engine = new GameEngine(game.Graphics, game.Window, data);
         }
         public override void OnExit(GameTime gameTime) {
+            game.IsMouseVisible = false;
+
             engine.Dispose();
         }
 

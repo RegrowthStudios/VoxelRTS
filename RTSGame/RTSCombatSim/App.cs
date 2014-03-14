@@ -54,7 +54,7 @@ namespace RTSCS {
 
         protected override void BuildScreenList() {
             screenList = new BlisterUI.ScreenList(this, 0,
-                new BlisterUI.FalseFirstScreen(1),
+                new BlisterUI.FalseFirstScreen(3),
                 new RTSEngine.Screens.InduZtryScreen(1),
                 new RTSEngine.Screens.KMeansScreen(2),
                 Sim3D,

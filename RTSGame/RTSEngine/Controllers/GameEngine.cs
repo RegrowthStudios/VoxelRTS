@@ -27,9 +27,11 @@ namespace RTSEngine.Controllers {
         public readonly RTSRenderer renderer;
         private readonly GameplayController playController;
 
-        public GameEngine(GraphicsDevice g, EngineLoadData d) {
+        public GameEngine(GraphicsDeviceManager gdm, GameWindow w, EngineLoadData d) {
+            var g = gdm.GraphicsDevice;
+            
             state = new GameState(d.Teams);
-            renderer = new RTSRenderer(g);
+            renderer = new RTSRenderer(gdm, w);
             playController = new GameplayController();
 
             // Load The Map
@@ -56,11 +58,12 @@ namespace RTSEngine.Controllers {
         // Update Logic
         public void Update(float dt) {
             playController.Update(state, dt);
+            renderer.UpdateCamera(state.Map, dt);
         }
 
         // Drawing
         public void Draw(GraphicsDevice g, float dt) {
-            renderer.Draw(g, state, dt);
+            renderer.Draw(state, dt);
 
             // TODO: Draw UI
         }
