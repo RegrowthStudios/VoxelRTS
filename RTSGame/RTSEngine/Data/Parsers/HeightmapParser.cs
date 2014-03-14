@@ -11,9 +11,9 @@ using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Graphics;
 
 namespace RTSEngine.Data.Parsers {
-    public struct HeightMapResult {
-        public Heightmap HeightData;
-        public HeightmapModel Model;
+    public struct HeightmapResult {
+        public Heightmap Data;
+        public HeightmapModel View;
     }
 
     class HeightmapReadData {
@@ -108,79 +108,57 @@ namespace RTSEngine.Data.Parsers {
     }
 
     public static class HeightmapParser {
+        // Data Detection
         const string INFO_FILE_EXT = "map";
-
-        // Keys To Search For
-        const string KEY_DATA = "dat";
-        const string KEY_MODEL_P = "hmp";
-        const string KEY_TEX_P = "htp";
-        const string KEY_MODEL_S = "hms";
-        const string KEY_TEX_S = "hts";
-        const string KEY_SCALE_X = "szx";
-        const string KEY_SCALE_Z = "szz";
-        const string KEY_SCALE_Y = "szy";
-        const string KEY_END = "end";
-
-        // How To Detect Data
-        const string DATA_REGEX = @"(\w{3})\s+(\w[\w|\s|.|\\|/]*)";
-        static readonly Regex dataSplitRegex = new Regex(DATA_REGEX, RegexOptions.None);
+        static readonly Regex rgxDataFile = RegexHelper.GenerateFile(@"DAT");
+        static readonly Regex rgxHModelPFile = RegexHelper.GenerateFile(@"HMP");
+        static readonly Regex rgxHTexPFile = RegexHelper.GenerateFile(@"HTP");
+        static readonly Regex rgxHModelSFile = RegexHelper.GenerateFile(@"HMS");
+        static readonly Regex rgxHTexSFile = RegexHelper.GenerateFile(@"HTS");
+        static readonly Regex rgxSizeXFile = RegexHelper.GenerateNumber(@"SZX");
+        static readonly Regex rgxSizeZFile = RegexHelper.GenerateNumber(@"SZZ");
+        static readonly Regex rgxSizeYFile = RegexHelper.GenerateNumber(@"SZY");
 
         private static HeightmapReadData GetInfo(StreamReader s, string rootDir) {
-            HeightmapReadData rd = new HeightmapReadData();
-            string line;
-            while(!s.EndOfStream && !rd.IsAllRead) {
-                // Read The Next Line And Get Rid Of Surrounding Whitespace
-                line = s.ReadLine().Trim();
+            string ms = s.ReadToEnd();
+            Match[] mPrim = new Match[] {
+                rgxDataFile.Match(ms),
+                rgxHModelPFile.Match(ms),
+                rgxHTexPFile.Match(ms),
+                rgxSizeXFile.Match(ms),
+                rgxSizeZFile.Match(ms),
+                rgxSizeYFile.Match(ms)
+            };
+            Match[] mSec = new Match[] {
+                rgxHModelSFile.Match(ms),
+                rgxHTexSFile.Match(ms)
+            };
 
-                // Check To See If We Should Terminate Parsing
-                if(line.ToLower().Equals(KEY_END))
-                    break;
-
-                // Get A Proper Value
-                Match m = dataSplitRegex.Match(line);
-                if(m.Success) {
-                    // Get The File Value If Provided
-                    string file = m.Groups[2].Value.Trim();
-                    switch(file.ToLower()) {
-                        case "null":
-                        case "none":
-                            file = null;
-                            break;
-                    }
-                    float v;
-
-                    // Set Read Data By Key
-                    string key = m.Groups[1].Value;
-                    switch(key.ToLower()) {
-                        case KEY_DATA: rd.HMDataBmp = Path.Combine(rootDir, file); break;
-                        case KEY_MODEL_P: rd.HMModelPrimary = Path.Combine(rootDir, file); break;
-                        case KEY_MODEL_S: rd.HMModelSecondary = Path.Combine(rootDir, file); break;
-                        case KEY_TEX_P: rd.HMTexPrimary = Path.Combine(rootDir, file); break;
-                        case KEY_TEX_S: rd.HMTexSecondary = Path.Combine(rootDir, file); break;
-                        case KEY_SCALE_X:
-                            if(!float.TryParse(file, out v)) v = 1;
-                            rd.SizeX = v;
-                            break;
-                        case KEY_SCALE_Y:
-                            if(!float.TryParse(file, out v)) v = 1;
-                            rd.SizeY = v;
-                            break;
-                        case KEY_SCALE_Z:
-                            if(!float.TryParse(file, out v)) v = 1;
-                            rd.SizeZ = v;
-                            break;
-                        default: break;
-                    }
-                }
+            // Check For All Necessary Data
+            foreach(var m in mPrim) {
+                if(!m.Success) throw new ArgumentException("Primary Data Was Not Found");
             }
+            HeightmapReadData rd = new HeightmapReadData();
+            rd.HMDataBmp = Path.Combine(rootDir, mPrim[0].Groups[1].Value);
+            rd.HMModelPrimary = Path.Combine(rootDir, mPrim[1].Groups[1].Value);
+            rd.HMTexPrimary = Path.Combine(rootDir, mPrim[2].Groups[1].Value);
+            if(mSec[0].Success) rd.HMModelSecondary = Path.Combine(rootDir, mSec[0].Groups[1].Value);
+            if(mSec[1].Success) rd.HMTexSecondary = Path.Combine(rootDir, mSec[1].Groups[1].Value);
+            float v;
+            if(!float.TryParse(mPrim[3].Groups[1].Value, out v)) v = 1;
+            rd.SizeX = v;
+            if(!float.TryParse(mPrim[4].Groups[1].Value, out v)) v = 1;
+            rd.SizeZ = v;
+            if(!float.TryParse(mPrim[5].Groups[1].Value, out v)) v = 1;
+            rd.SizeY = v;
             return rd;
         }
         private static void ConvertPixel(BColor c, float[] h, byte[] d, int i) {
             h[i] = 1f - (c.R / 255f);
             d[i] = c.G > 128 ? (byte)0x01u : (byte)0x00u;
         }
-        private static HeightMapResult ParseFromInfo(GraphicsDevice g, Stream s, string rootDir) {
-            HeightMapResult res = new HeightMapResult();
+        private static HeightmapResult ParseFromInfo(GraphicsDevice g, Stream s, string rootDir) {
+            HeightmapResult res = new HeightmapResult();
 
             // Read All Data First
             HeightmapReadData rd = GetInfo(new StreamReader(s), rootDir);
@@ -192,20 +170,20 @@ namespace RTSEngine.Data.Parsers {
                 if(rd.HasSecondary) {
                     fss = File.OpenRead(rd.HMModelSecondary);
                 }
-                res.Model = new HeightmapModel(g, new Vector3(rd.SizeX, rd.SizeY, rd.SizeZ), fs, fss);
+                res.View = new HeightmapModel(g, new Vector3(rd.SizeX, rd.SizeY, rd.SizeZ), fs, fss);
                 if(fss != null)
                     fss.Dispose();
             }
 
             // Read Primary Texture
             using(var fs = File.OpenRead(rd.HMTexPrimary)) {
-                res.Model.PrimaryTexture = Texture2D.FromStream(g, fs);
+                res.View.PrimaryTexture = Texture2D.FromStream(g, fs);
             }
 
             // Try To Read Secondary Texture
             if(rd.HasSecondary) {
                 using(var fs = File.OpenRead(rd.HMTexSecondary)) {
-                    res.Model.SecondaryTexture = Texture2D.FromStream(g, fs);
+                    res.View.SecondaryTexture = Texture2D.FromStream(g, fs);
                 }
             }
 
@@ -222,17 +200,17 @@ namespace RTSEngine.Data.Parsers {
                     }
                 }
 
-                res.HeightData = new Heightmap(hd, cd, w, h);
+                res.Data = new Heightmap(hd, cd, w, h);
             }
 
             // Apply Heightmap Size
-            res.HeightData.Width = rd.SizeX;
-            res.HeightData.Depth = rd.SizeZ;
-            res.HeightData.ScaleHeights(rd.SizeY);
+            res.Data.Width = rd.SizeX;
+            res.Data.Depth = rd.SizeZ;
+            res.Data.ScaleHeights(rd.SizeY);
 
             return res;
         }
-        public static HeightMapResult Parse(GraphicsDevice g, DirectoryInfo dir) {
+        public static HeightmapResult Parse(GraphicsDevice g, DirectoryInfo dir) {
             // Find The Information File
             var files = dir.GetFiles();
             FileInfo infoFile = files.FirstOrDefault((f) => {
@@ -242,7 +220,7 @@ namespace RTSEngine.Data.Parsers {
                 throw new ArgumentException("Map Information File Could Not Be Found In The Directory");
 
             // Parse Data
-            HeightMapResult res;
+            HeightmapResult res;
             using(Stream s = File.OpenRead(infoFile.FullName)) {
                 res = ParseFromInfo(g, s, dir.FullName);
             }

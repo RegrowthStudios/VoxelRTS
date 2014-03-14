@@ -159,7 +159,7 @@ namespace RTSCS {
         public override void OnEntry(GameTime gameTime) {
             game.IsMouseVisible = true;
 
-            HeightMapResult res = HeightmapParser.Parse(G, new System.IO.DirectoryInfo(@"Packs\Default\maps\0"));
+            HeightmapResult res = HeightmapParser.Parse(G, new System.IO.DirectoryInfo(@"Packs\Default\maps\0"));
             return;
         }
         public override void OnExit(GameTime gameTime) {

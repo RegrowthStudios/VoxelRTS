@@ -65,6 +65,9 @@
     <Compile Include="3DSimScreen.cs" />
     <Compile Include="App.cs" />
     <Compile Include="SimScreen.cs" />
+    <Content Include="Content\FX\RTS.fx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\maps\0\height.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -117,6 +120,7 @@
     <None Include="Packs\Default\maps\0\test.map">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Packs\Default\units\0\info.unit" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\RTSGame\BlisterUI\BlisterUI.csproj">
@@ -186,7 +190,6 @@
     <Folder Include="Packs\Default\buildings\" />
     <Folder Include="Packs\Default\scripts\" />
     <Folder Include="Packs\Default\teams\" />
-    <Folder Include="Packs\Default\units\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

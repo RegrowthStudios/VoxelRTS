@@ -29,7 +29,7 @@ namespace RTSEngine.Controllers {
 
         public GameEngine(GraphicsDeviceManager gdm, GameWindow w, EngineLoadData d) {
             var g = gdm.GraphicsDevice;
-            
+
             state = new GameState(d.Teams);
             renderer = new RTSRenderer(gdm, w);
             playController = new GameplayController();
@@ -46,13 +46,13 @@ namespace RTSEngine.Controllers {
         // Data Parsing And Loading
         private void LoadMap(GraphicsDevice g, DirectoryInfo dir) {
             // Parse Map Data
-            HeightMapResult res = HeightmapParser.Parse(g, dir);
-            if(res.HeightData == null || res.Model == null)
+            HeightmapResult res = HeightmapParser.Parse(g, dir);
+            if(res.Data == null || res.View == null)
                 throw new ArgumentNullException("Could Not Load Heightmap");
 
             // Set Data
-            state.Map = res.HeightData;
-            renderer.Map = res.Model;
+            state.Map = res.Data;
+            renderer.Map = res.View;
         }
 
         // Update Logic

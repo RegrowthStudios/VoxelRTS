@@ -156,6 +156,7 @@ namespace RTSCS {
                 Console.WriteLine("Exception Type: {0}", e.GetType().Name);
                 Console.WriteLine("Exception Message:\n{0}\n\n", e.Message);
                 Console.WriteLine("Stack Trace:\n{0}", e.StackTrace);
+                Console.ReadLine();
             }
         }
         #endregion

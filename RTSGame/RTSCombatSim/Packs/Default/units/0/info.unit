@@ -1,0 +1,24 @@
+﻿// Friendly Unit Name
+NAME            [Soldier]
+
+// Unit Model
+MODEL           []
+TEXMAIN         []
+TEXCOLOR        []
+ANIMATION       []
+MAXCOUNT        []
+
+// Unit Data
+HEALTH          []
+SPEED           []
+COST            [ , ]
+
+// Collision Data
+RADIUS          []
+
+// Combat Data
+ARMOR           []
+RANGE           [ , ]
+TIMER           []
+DAMAGE          [ , ]
+CRITCHANCE      []
