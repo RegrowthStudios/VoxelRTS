@@ -104,7 +104,7 @@
     <Compile Include="IDataForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Packs\Default\levels\0.dat" />
-    <None Include="Packs\Default\maps\0\info.dat">
+    <None Include="Packs\Default\maps\0\test.map">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -12,6 +12,7 @@ using RTSEngine.Data.Team;
 namespace RTSEngine.Data {
     // Holds All The Data Necessary For A Game
     public class GameState {
+        public const int MAX_PLAYERS = 8;
         public const int MIN_RTSUNIT_ID = 0;
         public const int MAX_RTSUNIT_ID = 255;
         public const int MIN_RTSBUILDING_ID = 0;

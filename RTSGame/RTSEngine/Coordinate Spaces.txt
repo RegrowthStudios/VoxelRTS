@@ -1,0 +1,12 @@
+﻿===============
+// Game Grid //
+===============
+This Is A Discrete XZ Plane Coordinate System That Will Be
+Populated With Special Grid Information
+
+----> X
+|  __________
+|  |__|__|__|
+V  |__|__|__|
+Z  |__|__|__|
+

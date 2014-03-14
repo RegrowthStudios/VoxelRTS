@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\KMeans.cs" />
+    <Compile Include="Algorithms\Pathfinder.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Controllers\InputController.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Data\DataLibrary.cs" />
     <Compile Include="Data\DiscreteMap.cs" />
     <Compile Include="Data\GameState.cs" />
+    <Compile Include="Data\LevelGrid.cs" />
     <Compile Include="Data\Parsers\EntityControllerParser.cs" />
     <Compile Include="Data\Parsers\HeightmapParser.cs" />
     <Compile Include="Data\Quadtree.cs" />
@@ -94,6 +96,9 @@
       <Project>{28292778-5EDC-4898-8E0C-9E32412174CD}</Project>
       <Name>BlisterUI</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Coordinate Spaces.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

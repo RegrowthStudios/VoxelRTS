@@ -9,9 +9,9 @@ HTP         map.png
 [OMIT] HMS         detail.obj -> DNE
 [OMIT] HTS         detail.png -> DNE
 
-// Scaling Of The Width And Depth Of The Map (From It's Object Coordinates
-SCX         2.0
-SCZ         2.0
+// The Width And Depth Of The Map
+SZX         1024
+SZZ         1024
 
-// Scaling For The Height Of The Map
-SCY         10.0
+// The Height Of The Map From Its Lowest Point
+SZY         50
