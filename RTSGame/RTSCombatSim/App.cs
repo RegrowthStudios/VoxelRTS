@@ -35,10 +35,15 @@ namespace RTSCS {
             get;
             private set;
         }
+        public _3DSimScreen Sim3D {
+            get;
+            private set;
+        }
 
         public App()
             : base() {
-            SimScreen = new SimScreen(3);
+            SimScreen = new SimScreen(4);
+            Sim3D = new _3DSimScreen(3);
         }
 
         protected override void FullInitialize() {
@@ -52,6 +57,7 @@ namespace RTSCS {
                 new BlisterUI.FalseFirstScreen(1),
                 new RTSEngine.Screens.InduZtryScreen(1),
                 new RTSEngine.Screens.KMeansScreen(2),
+                Sim3D,
                 SimScreen
                 );
         }
@@ -132,37 +138,24 @@ namespace RTSCS {
             return false;
         }
         private static void Main(string[] args) {
-            bool running = true;
-            while(running) {
-                var matches = System.Text.RegularExpressions.Regex.Match("DAT         tex/height.png   ", @"(\w{3})\s+(\w[\w|\s|.|\\|/]*)");
-                Console.WriteLine(matches.Success);
-                if(matches.Success) {
-                    Console.WriteLine("[{0}]", matches.Groups[1].Value);
-                    Console.WriteLine("[{0}]", matches.Groups[2].Value.Trim());
-                }
+            Console.WriteLine("A New Instance Will Attempt To Be Run\n\n");
+            try {
+                // Close Out Of Any Previous Instances
+                try { app.Exit(); app.Dispose(); }
+                catch(Exception) { }
+                try { form.Invoke(form.Closer); form.Dispose(); }
+                catch(Exception) { }
 
-                Console.WriteLine("A New Instance Will Attempt To Be Run\n\n");
-                running = false;
-                try {
-                    // Close Out Of Any Previous Instances
-                    try { app.Exit(); app.Dispose(); }
-                    catch(Exception) { }
-                    try { form.Invoke(form.Closer); form.Dispose(); }
-                    catch(Exception) { }
+                RunMainInstance(args);
 
-                    RunMainInstance(args);
-
-                    Console.WriteLine("\n\nHooray, no errors appeared.");
-                    running = InputRunNew();
-                }
-                catch(Exception e) {
-                    Console.WriteLine(new string('\n', 10));
-                    Console.WriteLine("Oh man bro... looks like an exception was thrown:");
-                    Console.WriteLine("Exception Type: {0}", e.GetType().Name);
-                    Console.WriteLine("Exception Message:\n{0}\n\n", e.Message);
-                    Console.WriteLine("Stack Trace:\n{0}", e.StackTrace);
-                    running = InputRunNew();
-                }
+                Console.WriteLine("\n\nHooray, no errors appeared.");
+            }
+            catch(Exception e) {
+                Console.WriteLine(new string('\n', 10));
+                Console.WriteLine("Oh man bro... looks like an exception was thrown:");
+                Console.WriteLine("Exception Type: {0}", e.GetType().Name);
+                Console.WriteLine("Exception Message:\n{0}\n\n", e.Message);
+                Console.WriteLine("Stack Trace:\n{0}", e.StackTrace);
             }
         }
         #endregion

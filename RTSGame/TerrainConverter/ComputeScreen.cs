@@ -114,11 +114,11 @@ namespace TerrainConverter {
             Vector3 dif = aabb.Max - aabb.Min;
             Vector3 top = new Vector3(mid.X, aabb.Max.Y, mid.Z);
             mid *= 0.5f;
-            fx.FogStart = 0;
-            fx.FogEnd = aabb.Max.Y - aabb.Min.Y;
+            fx.FogStart = 1f;
+            fx.FogEnd = aabb.Max.Y - aabb.Min.Y + 1f;
             fx.World = Matrix.Identity;
-            fx.View = Matrix.CreateLookAt(top, mid, -Vector3.UnitZ);
-            fx.Projection = Matrix.CreateOrthographic(dif.X, dif.Z, 0, dif.Y + 1f);
+            fx.View = Matrix.CreateLookAt(top + Vector3.UnitY, mid, -Vector3.UnitZ);
+            fx.Projection = Matrix.CreateOrthographic(dif.X, dif.Z, 0, dif.Y + 2f);
 
             // Append A Plane At The Bottom
             int vc = verts.Length, ic = inds.Length;

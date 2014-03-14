@@ -21,7 +21,7 @@ namespace RTSEngine.Controllers {
         public DirectoryInfo MapDirectory;
     }
 
-    public class GameEngine {
+    public class GameEngine : IDisposable {
         // Data To Be Managed By The Engine
         public readonly GameState state;
         public readonly RTSRenderer renderer;
@@ -35,9 +35,14 @@ namespace RTSEngine.Controllers {
             // Load The Map
             LoadMap(g, d.MapDirectory);
         }
+        #region Disposal
+        public void Dispose() {
+            renderer.Dispose();
+        }
+        #endregion
 
         // Data Parsing And Loading
-        public void LoadMap(GraphicsDevice g, DirectoryInfo dir) {
+        private void LoadMap(GraphicsDevice g, DirectoryInfo dir) {
             // Parse Map Data
             HeightMapResult res = HeightmapParser.Parse(g, dir);
             if(res.HeightData == null || res.Model == null)
@@ -55,7 +60,7 @@ namespace RTSEngine.Controllers {
 
         // Drawing
         public void Draw(GraphicsDevice g, float dt) {
-            renderer.Draw(state, dt);
+            renderer.Draw(g, state, dt);
 
             // TODO: Draw UI
         }

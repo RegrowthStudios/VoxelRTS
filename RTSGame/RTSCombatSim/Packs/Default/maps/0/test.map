@@ -5,10 +5,6 @@ DAT         height.png
 HMP         map.obj
 HTP         map.png
 
-// The Detail Model And Texture (May Be Omitted)
-[OMIT] HMS         detail.obj -> DNE
-[OMIT] HTS         detail.png -> DNE
-
 // The Width And Depth Of The Map
 SZX         1024
 SZZ         1024
