@@ -40,13 +40,11 @@ sampler Model = sampler_state {
 // Always The Same Input
 struct VSI {
     float4 Position : POSITION0;
-    float3 Normal : NORMAL0;
     float2 UV : TEXCOORD0;
 };
 struct VSO {
     float4 Position : POSITION0;
     float2 UV : TEXCOORD0;
-    float3 Normal : TEXCOORD1;
 };
 
 VSO VS(VSI input) {
@@ -55,7 +53,6 @@ VSO VS(VSI input) {
     float4 worldPosition = mul(input.Position, World);
     output.Position = mul(worldPosition, VP);
     output.UV = input.UV;
-    output.Normal = input.Normal;
 
     return output;
 }
@@ -75,7 +72,6 @@ VSO VS_Anim(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD
     float4 worldPosition = mul(InstWorld, float4(x, y, z, 1));
     output.Position = mul(worldPosition, VP);
     output.UV = input.UV;
-    output.Normal = input.Normal;
 
     return output;
 }

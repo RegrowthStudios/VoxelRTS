@@ -10,6 +10,7 @@ using BlisterUI.Input;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
+using RTSEngine.Data.Parsers;
 
 namespace RTSCS {
     public class _3DSimScreen : GameScreenIndexed {
@@ -32,6 +33,9 @@ namespace RTSCS {
             data.Teams[0] = new RTSTeam();
             data.Teams[1] = new RTSTeam();
             engine = new GameEngine(game.Graphics, game.Window, data);
+            engine.LoadUnit(G, 0, new DirectoryInfo(@"Packs\Default\units\0"));
+            RTSTeam team0 = engine.state.Teams[0];
+            team0.AddUnit(0, new Vector3(200, 10, 200));
         }
         public override void OnExit(GameTime gameTime) {
             game.IsMouseVisible = false;

@@ -5,10 +5,14 @@ using System.Text;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RTSEngine.Data.Team;
 
 namespace RTSEngine.Graphics {
+
     public class RTSUnitModel : IDisposable {
         public const ParsingFlags MODEL_READ_FLAGS = ParsingFlags.ConversionOpenGL;
+
+
 
         // Visual Information
         public Texture2D ModelTexture {
@@ -41,17 +45,22 @@ namespace RTSEngine.Graphics {
         }
 
         // Instances That Will Be Animated
-        private DynamicVertexBuffer dvbInstances;
-        private VertexRTSAnimInst[] instVerts;
-        public int InstanceCount {
+        public RTSUnit Data {
             get;
             private set;
         }
+        private DynamicVertexBuffer dvbInstances;
+        private VertexRTSAnimInst[] instVerts;
+        private List<RTSUnitInstance> instances;
+        public int InstanceCount {
+            get { return instances.Count; }
+        }
 
-        public RTSUnitModel(GraphicsDevice g, Stream sModel, Texture2D tAnim, int maxInstanceCount) {
+        public RTSUnitModel(GraphicsDevice g, RTSUnit data, Stream sModel, Texture2D tAnim, int maxInstanceCount) {
             // Create With The Animation Texture
             AnimationTexture = tAnim;
             Vector2 texelSize = new Vector2(1f / (AnimationTexture.Width), 1f / (AnimationTexture.Height));
+            Data = data;
 
             // Parse The Model File
             VertexPositionNormalTexture[] pVerts;
@@ -75,11 +84,11 @@ namespace RTSEngine.Graphics {
 
             // Create Instance Buffer
             instVerts = new VertexRTSAnimInst[maxInstanceCount];
+            instances = new List<RTSUnitInstance>(maxInstanceCount);
             for(int i = 0; i < instVerts.Length; i++)
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
             dvbInstances.SetData(instVerts);
-            InstanceCount = 0;
         }
         public void Dispose() {
             if(vbModel != null) {
@@ -108,10 +117,15 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void UpdateInstances(IEnumerable<VertexRTSAnimInst> instances) {
-            InstanceCount = 0;
-            foreach(var inst in instances)
-                instVerts[InstanceCount++] = inst;
+        public void UpdateInstances() {
+            for(int i = 0; i < InstanceCount; i++) {
+                instVerts[i].World =
+                    Matrix.CreateRotationZ(
+                        (float)Math.Atan2(instances[i].ViewDirection.Y, instances[i].ViewDirection.X)
+                    ) *
+                    Matrix.CreateTranslation(instances[i].WorldPosition)
+                    ;
+            }
             dvbInstances.SetData(instVerts);
         }
         public void SetInstances(GraphicsDevice g) {
@@ -124,6 +138,11 @@ namespace RTSEngine.Graphics {
         public void DrawInstances(GraphicsDevice g) {
             if(InstanceCount > 0)
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, InstanceCount);
+        }
+
+        public void OnUnitSpawn(RTSUnitInstance u) {
+            if(u.UnitData == Data)
+                instances.Add(u);
         }
     }
 }

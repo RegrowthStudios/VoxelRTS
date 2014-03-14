@@ -59,6 +59,7 @@ namespace RTSEngine.Graphics {
             set {
                 mView = value;
                 fxMap.View = mView;
+                fxRTS.VP = mView * mProj;
             }
         }
         private Matrix Projection {
@@ -66,6 +67,7 @@ namespace RTSEngine.Graphics {
             set {
                 mProj = value;
                 fxMap.Projection = mProj;
+                fxRTS.VP = mView * mProj;
             }
         }
 
@@ -101,11 +103,19 @@ namespace RTSEngine.Graphics {
             set;
         }
 
+        // All The Unit Models To Render
+        public List<RTSUnitModel> UnitModels {
+            get;
+            private set;
+        }
+
         // Effects
         private BasicEffect fxMap;
+        private RTSEffect fxRTS;
 
-        public RTSRenderer(GraphicsDeviceManager gdm, GameWindow w) {
+        public RTSRenderer(GraphicsDeviceManager gdm, string rtsFXFile, GameWindow w) {
             gManager = gdm;
+            UnitModels = new List<RTSUnitModel>();
 
             fxMap = new BasicEffect(G);
             fxMap.LightingEnabled = false;
@@ -113,6 +123,12 @@ namespace RTSEngine.Graphics {
             fxMap.VertexColorEnabled = false;
             fxMap.TextureEnabled = true;
             fxMap.World = Matrix.Identity;
+
+            fxRTS = new RTSEffect(XNAEffect.Compile(G, rtsFXFile));
+            fxRTS.World = Matrix.Identity;
+            fxRTS.CPrimary = Vector3.UnitX;
+            fxRTS.CSecondary = Vector3.UnitY;
+            fxRTS.CTertiary = Vector3.UnitZ;
 
             camOrigin = INITIAL_CAMERA_ORIGIN;
             Yaw = INITIAL_CAMERA_YAW;
@@ -222,6 +238,17 @@ namespace RTSEngine.Graphics {
             Map.SetSecondaryModel(G);
             fxMap.CurrentTechnique.Passes[0].Apply();
             Map.DrawSecondary(G);
+
+            // Draw All Animated Entities
+            foreach(RTSUnitModel unitModel in UnitModels) {
+                fxRTS.TexModelMap = unitModel.AnimationTexture;
+                fxRTS.TexOverlay = unitModel.ModelTexture;
+                fxRTS.TexColor = unitModel.ColorCodeTexture;
+                fxRTS.ApplyPassAnimation();
+                unitModel.UpdateInstances();
+                unitModel.SetInstances(G);
+                unitModel.DrawInstances(G);
+            }
         }
     }
 }

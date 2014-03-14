@@ -82,13 +82,13 @@ namespace RTSEngine.Data.Parsers {
             int mc = RegexHelper.ExtractInt(rgxMaxCount.Match(ms));
             using(var sModel = File.OpenRead(fiModel.FullName)) {
                 Texture2D tAnim = AnimationFromBitmap(g, fiAnim);
-                res.View = new RTSUnitModel(g, sModel, tAnim, mc);
+                res.View = new RTSUnitModel(g, res.Data, sModel, tAnim, mc);
             }
-            FileInfo fiTex = RegexHelper.ExtractFile(rgxMainTex.Match(ms));
+            FileInfo fiTex = RegexHelper.ExtractFile(rgxMainTex.Match(ms), rootDir);
             using(var ts = File.OpenRead(fiTex.FullName)) {
                 res.View.ModelTexture = Texture2D.FromStream(g, ts);
             }
-            fiTex = RegexHelper.ExtractFile(rgxColorTex.Match(ms));
+            fiTex = RegexHelper.ExtractFile(rgxColorTex.Match(ms), rootDir);
             using(var ts = File.OpenRead(fiTex.FullName)) {
                 res.View.ColorCodeTexture = Texture2D.FromStream(g, ts);
             }

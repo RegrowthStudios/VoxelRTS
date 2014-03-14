@@ -79,14 +79,14 @@ namespace RTSEngine.Data.Parsers {
             return int.Parse(m.Groups[1].Value);
         }
         public static Vector2 ExtractVec2(Match m) {
-            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 1);
+            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 2);
             return new Vector2(
                 float.Parse(s[0]),
                 float.Parse(s[1])
                 );
         }
         public static Vector3 ExtractVec3(Match m) {
-            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 2);
+            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 3);
             return new Vector3(
                 float.Parse(s[0]),
                 float.Parse(s[1]),
@@ -94,7 +94,7 @@ namespace RTSEngine.Data.Parsers {
                 );
         }
         public static Vector4 ExtractVec4(Match m) {
-            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 3);
+            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 4);
             return new Vector4(
                 float.Parse(s[0]),
                 float.Parse(s[1]),
@@ -103,14 +103,14 @@ namespace RTSEngine.Data.Parsers {
                 );
         }
         public static int[] ExtractVec2I(Match m) {
-            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 1);
+            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 2);
             return new int[] {
                 int.Parse(s[0]),
                 int.Parse(s[1])
             };
         }
         public static int[] ExtractVec3I(Match m) {
-            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 2);
+            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 3);
             return new int[] {
                 int.Parse(s[0]),
                 int.Parse(s[1]),
@@ -118,7 +118,7 @@ namespace RTSEngine.Data.Parsers {
             };
         }
         public static int[] ExtractVec4I(Match m) {
-            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 3);
+            string[] s = RGX_VEC_SPLIT.Split(m.Groups[1].Value, 4);
             return new int[] {
                 int.Parse(s[0]),
                 int.Parse(s[1]),

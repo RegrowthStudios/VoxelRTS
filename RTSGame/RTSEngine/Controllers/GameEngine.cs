@@ -31,7 +31,7 @@ namespace RTSEngine.Controllers {
             var g = gdm.GraphicsDevice;
 
             state = new GameState(d.Teams);
-            renderer = new RTSRenderer(gdm, w);
+            renderer = new RTSRenderer(gdm, @"Content\FX\RTS.fx", w);
             playController = new GameplayController();
 
             // Load The Map
@@ -53,6 +53,12 @@ namespace RTSEngine.Controllers {
             // Set Data
             state.Map = res.Data;
             renderer.Map = res.View;
+        }
+        public void LoadUnit(GraphicsDevice g, int team, DirectoryInfo dir) {
+            RTSUnitResult res = RTSUnitParser.Parse(g, dir);
+            state.Teams[team].AddUnitType(res.Data);
+            state.Teams[team].OnNewUnitSpawn += res.View.OnUnitSpawn;
+            renderer.UnitModels.Add(res.View);
         }
 
         // Update Logic

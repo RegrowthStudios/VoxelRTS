@@ -17,7 +17,7 @@ using RTSEngine.Data.Team;
 
 namespace RTSCS {
     public class RTSUISpawnArgs {
-        public RTSUnit UnitData;
+        public int UnitData;
         public RTSTeam Team;
         public List<ReflectedEntityController> Controllers;
         public List<Vector3> SpawnPos;
