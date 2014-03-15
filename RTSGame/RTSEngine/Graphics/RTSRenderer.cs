@@ -15,12 +15,14 @@ namespace RTSEngine.Graphics {
             return new CameraMotionSettings() {
                 OrbitSpeed = MathHelper.Lerp(s1.OrbitSpeed, s2.OrbitSpeed, r),
                 ScrollSpeed = MathHelper.Lerp(s1.ScrollSpeed, s2.ScrollSpeed, r),
+                MinDistance = MathHelper.Lerp(s1.MinDistance, s2.MinDistance, r),
                 MaxDistance = MathHelper.Lerp(s1.MaxDistance, s2.MaxDistance, r)
             };
         }
 
         public float OrbitSpeed;
         public float ScrollSpeed;
+        public float MinDistance;
         public float MaxDistance;
     }
 
@@ -31,14 +33,18 @@ namespace RTSEngine.Graphics {
         public static readonly Vector3 INITIAL_CAMERA_ORIGIN = Vector3.Zero;
         public static readonly CameraMotionSettings INITIAL_LOW_SETTINGS = new CameraMotionSettings() {
             OrbitSpeed = 1f,
-            ScrollSpeed = 30f,
-            MaxDistance = 30f
+            ScrollSpeed = 10f,
+            MinDistance = 3f,
+            MaxDistance = 10f
         };
         public static readonly CameraMotionSettings INITIAL_HIGH_SETTINGS = new CameraMotionSettings() {
             OrbitSpeed = 2f,
-            ScrollSpeed = 500f,
-            MaxDistance = 800f
+            ScrollSpeed = 100f,
+            MinDistance = 10f,
+            MaxDistance = 50f
         };
+        public const float INITIAL_ZOOM_SPEED = 3f;
+        public const float ZOOM_OFFSET = 0.3f;
         public const float INITIAL_CAMERA_YAW = -0.7f;
         public const float INITIAL_CAMERA_PITCH = 0.8f;
         public const float MIN_PITCH = 0.1f;
@@ -93,6 +99,14 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        public float ZoomRatio {
+            get;
+            private set;
+        }
+        public float ZoomSpeed {
+            get;
+            set;
+        }
         public bool IsOrthographic {
             get;
             private set;
@@ -135,8 +149,10 @@ namespace RTSEngine.Graphics {
             camOrigin = INITIAL_CAMERA_ORIGIN;
             Yaw = INITIAL_CAMERA_YAW;
             Pitch = INITIAL_CAMERA_PITCH;
+            ZoomRatio = 0.5f;
             lowSettings = INITIAL_LOW_SETTINGS;
             highSettings = INITIAL_HIGH_SETTINGS;
+            ZoomSpeed = INITIAL_ZOOM_SPEED;
             RecalculateView(null, MovementSettings.MaxDistance);
 
             IsOrthographic = false;
@@ -181,10 +197,13 @@ namespace RTSEngine.Graphics {
 
             Scroll(camController.ScrollX, camController.ScrollY, cms, dt);
             Orbit(camController.Yaw, camController.Pitch, cms, dt);
+            int z;
+            camController.GetZoom(out z);
+            Zoom(z, dt);
             camOrigin.X = MathHelper.Clamp(camOrigin.X, 0, map.Width);
             camOrigin.Z = MathHelper.Clamp(camOrigin.Z, 0, map.Depth);
             camOrigin.Y = map.HeightAt(camOrigin.X, camOrigin.Z);
-            RecalculateView(map, cms.MaxDistance);
+            RecalculateView(map, MathHelper.Lerp(cms.MinDistance, cms.MaxDistance, ZoomRatio));
         }
         private void Scroll(int x, int y, CameraMotionSettings cms, float dt) {
             if(x == 0 && y == 0) return;
@@ -199,14 +218,18 @@ namespace RTSEngine.Graphics {
             right.Y = 0;
             right.Normalize();
 
-            camOrigin += forward * y * cms.ScrollSpeed * dt;
-            camOrigin += right * x * cms.ScrollSpeed * dt;
+            camOrigin += forward * y * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
+            camOrigin += right * x * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
         }
         private void Orbit(int x, int y, CameraMotionSettings cms, float dt) {
             Yaw += x * cms.OrbitSpeed * dt;
             Yaw = MathHelper.WrapAngle(Yaw);
             Pitch += y * cms.OrbitSpeed * dt;
             Pitch = MathHelper.Clamp(Pitch, MIN_PITCH, MAX_PITCH);
+        }
+        private void Zoom(int z, float dt) {
+            ZoomRatio += ZoomSpeed * z * dt;
+            ZoomRatio = MathHelper.Clamp(ZoomRatio, 0, 1);
         }
 
         // Hooks To Determine Fullscreen Toggling
@@ -261,6 +284,11 @@ namespace RTSEngine.Graphics {
                 unitModel.SetInstances(G);
                 unitModel.DrawInstances(G);
             }
+        }
+
+        public void GetSelectionBox(Vector2 screenMin, Vector2 screenMax, out OBB? obb, out Frustum? frustum) {
+            // TODO: Koshi
+            throw new NotImplementedException();
         }
     }
 }

@@ -57,6 +57,7 @@
     <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\PlayerInputController.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
+    <Compile Include="Data\HashGrid.cs" />
     <Compile Include="Data\Heightmap.cs" />
     <Compile Include="Data\Collision.cs" />
     <Compile Include="Data\Combat.cs" />
@@ -76,11 +77,14 @@
     <Compile Include="Data\Team\RTSTeam.cs" />
     <Compile Include="Data\Team\RTSUnit.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Graphics\BVH.cs" />
     <Compile Include="Graphics\HeightmapModel.cs" />
     <Compile Include="Graphics\LightningGenerator.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Interfaces\IInputController.cs" />
+    <Compile Include="Screens\Class1.cs" />
+    <Compile Include="Screens\SquadCommanderScreen.cs" />
     <Compile Include="Screens\InduZtryScreen.cs" />
     <Compile Include="Interfaces\EntityControllers.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />

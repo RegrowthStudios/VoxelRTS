@@ -56,6 +56,7 @@ namespace RTSEngine.Controllers {
             get;
             private set;
         }
+        private int zoom;
 
         // Input Context
         private bool useOrbit;
@@ -68,6 +69,7 @@ namespace RTSEngine.Controllers {
             ScrollY = 0;
             Yaw = 0;
             Pitch = 0;
+            zoom = 0;
             useOrbit = false;
         }
 
@@ -75,6 +77,7 @@ namespace RTSEngine.Controllers {
             if(IsHooked) return;
             IsHooked = true;
             MouseEventDispatcher.OnMouseMotion += OnMouseMovement;
+            MouseEventDispatcher.OnMouseScroll += OnMouseScroll;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
             KeyboardEventDispatcher.OnKeyReleased += OnKeyRelease;
         }
@@ -85,10 +88,17 @@ namespace RTSEngine.Controllers {
             ScrollY = 0;
             Pitch = 0;
             Yaw = 0;
+            zoom = 0;
             useOrbit = false;
             MouseEventDispatcher.OnMouseMotion -= OnMouseMovement;
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
             KeyboardEventDispatcher.OnKeyReleased -= OnKeyRelease;
+        }
+
+        public void GetZoom(out int z) {
+            z = zoom;
+            zoom = 0;
+            return;
         }
 
         // Event Hooks
@@ -111,6 +121,9 @@ namespace RTSEngine.Controllers {
                 else if(pos.Y > MaxY) ScrollY = -1;
                 else ScrollY = 0;
             }
+        }
+        public void OnMouseScroll(int v, int d) {
+            zoom = d > 0 ? -1 : 1;
         }
         public void OnKeyPress(object sender, KeyEventArgs args) {
             switch(args.KeyCode) {

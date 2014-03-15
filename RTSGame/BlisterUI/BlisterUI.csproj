@@ -88,9 +88,7 @@
     <Compile Include="Screens\MainGame.cs" />
     <Compile Include="Screens\ScreenList.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Widgets\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!--
       To modify your build process, add your task inside one of the targets below and uncomment it. 
