@@ -57,6 +57,7 @@
     <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\PlayerInputController.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
+    <Compile Include="Data\HashGrid.cs" />
     <Compile Include="Data\Heightmap.cs" />
     <Compile Include="Data\Collision.cs" />
     <Compile Include="Data\Combat.cs" />

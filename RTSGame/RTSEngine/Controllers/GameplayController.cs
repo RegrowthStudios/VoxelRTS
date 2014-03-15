@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using RTSEngine.Data;
 using RTSEngine.Interfaces;
+using RTSEngine.Data.Team;
 
 namespace RTSEngine.Controllers {
     public class GameplayController {
@@ -57,7 +58,10 @@ namespace RTSEngine.Controllers {
              */
 
             // TODO: Hash The Units To The Grid
+            
+            foreach (RTSUnit unit in s.Units) {
 
+            }
 
             // Move Geometry To The Unit's Location
             foreach(var team in s.Teams) {
