@@ -302,22 +302,18 @@ namespace RTSEngine.Graphics {
             int widestDim;
             Vector3 dim = maxB - minB;
 
-            if(dim.X >= dim.Y && dim.X >= dim.Z) {
-                widestDim = 0;
-            }
-            else if(dim.Y >= dim.Z) {
-                widestDim = 1;
-            }
-            else {
-                widestDim = 2;
-            }
-
             // ==== Step 4 ====
             // Sort surfaces according to the widest dimension.
             // You can also implement O(n) randomized splitting algorithm.
-
-            surfaces.Sort()
-            Array.Sort(surfaces, start, end, c);
+            if(dim.X >= dim.Y && dim.X >= dim.Z) {
+                surfaces.Sort(SurfComparisonX);
+            }
+            else if(dim.Y >= dim.Z) {
+                surfaces.Sort(SurfComparisonY);
+            }
+            else {
+                surfaces.Sort(SurfComparisonZ);
+            }
 
             // ==== Step 5 ====
             // Recursively create left and right children.
