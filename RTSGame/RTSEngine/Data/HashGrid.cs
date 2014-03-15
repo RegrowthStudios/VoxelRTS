@@ -8,13 +8,13 @@ using RTSEngine.Interfaces;
 namespace RTSEngine.Data
 {
     public class Grid {
-        private List<IEntity> list;
+        private List<ICollidable> list;
         
         public Grid() {
-            list = new List<IEntity>();
+            list = new List<ICollidable>();
         }
 
-        public void add(IEntity obj) {
+        public void Add(ICollidable obj) {
             list.Add(obj);
         }
     }
@@ -27,7 +27,7 @@ namespace RTSEngine.Data
         public float gridSize;
         private Grid[,] grids;
 
-        public Grid getGrid(int x, int y) {
+        public Grid GetGrid(int x, int y) {
             return grids[x, y];
         }
 
@@ -48,36 +48,16 @@ namespace RTSEngine.Data
         }
 
         // Add object to one of the grid
-        public void addObject(IEntity obj) {
+        public void AddObject(ICollidable obj) {
             // Canonical position of the object represented in 0~1
-            Vector2 pos = new Vector2(obj.GridPosition.X / width, obj.GridPosition.Y / height);
+            Vector2 pos = new Vector2(obj.Center.X / width, obj.Center.Y / height);
             // Add object to the corresponding grid
-            grids[(int)pos.X * gridCount.X, (int)pos.Y * gridCount.Y].add(obj);
+            grids[(int)pos.X * gridCount.X, (int)pos.Y * gridCount.Y].Add(obj);
         }
 
-        // Detect collision for each object using 3 by 3 grids around each object
-        public void detectCollision() {
-            for (int x = 0; x < gridCount.X; x++) {
-                for (int y = 0; y < gridCount.Y; y++) {
-                    // Handle corner cases where 3 by 3 grid is out of range
-                    if (x == 0 && y != 0) {
+        // Helper method
+        public void HandleGridCollision(Grid grid, int dx, int dy) {
 
-                    }
-                    else if (x != 0 && y == 0) {
-                    }
-                    else if (x == 0 && y == 0) {
-
-                    }
-                    // Regular handling
-                    else {
-
-                    }
-                }
-            }
-        }
-
-        private void performCollision() {
-            return;
         }
     }
 }

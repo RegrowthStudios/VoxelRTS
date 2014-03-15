@@ -57,26 +57,41 @@ namespace RTSEngine.Controllers {
              * Update Entity To Geometry
              */
 
-            // TODO: Hash The Units To The Grid
-            
-            foreach (RTSUnit unit in s.Units) {
+            // Initialize hash grid
+            float gridSize = 1;
+            HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, gridSize);
 
-            }
-
-            // Move Geometry To The Unit's Location
+            // Move Geometry To The Unit's Location and hash into the grid
             foreach(var team in s.Teams) {
                 foreach(var unit in team.Units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
+                    hashGrid.AddObject(unit.CollisionGeometry);
                 }
             }
 
-            // TODO: Use Hash Grid For Better Collision Resolution
+            // Use hash grid to perform collision using 3 by 3 grid around the geometry
+            for (int x = 0; x < hashGrid.gridCount.X; x++) {
+                for (int y = 0; y < hashGrid.gridCount.Y; y++) {
+                    // Handle corner cases
+                    if (x == 0 && y != 0) {
+                        
+                    }
+                    else if (x != 0 && y == 0) {
 
+                    }
+                    else if (x == 0 && y == 0) {
 
+                    }
+                    // Regular collision handling
+                    else {
+
+                    }
+                }
+            }
 
             // Move Unit's Location To The Geometry After Heightmap Collision
-            foreach(var team in s.Teams) {
-                foreach(var unit in team.Units) {
+            foreach (var team in s.Teams) {
+                foreach (var unit in team.Units) {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
                     unit.CollisionGeometry.Center = unit.GridPosition;
                 }
