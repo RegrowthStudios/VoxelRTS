@@ -12,9 +12,7 @@ namespace RTSEngine.Controllers {
     public class PlayerInputController : InputController {
 
         private Vector2 MousePressedPos;
-        private Vector2 MouseReleasedPos;
         private MouseButton MouseButtonPressed;
-        private MouseButton MouseButtonReleased;
         
         public PlayerInputController(GameState g, RTSTeam t)
             : base(g, t) {
@@ -24,17 +22,16 @@ namespace RTSEngine.Controllers {
         public void SetToHook() {
             MouseEventDispatcher.OnMouseRelease += new OnMouseRelease(OnMouseRelease);
             MouseEventDispatcher.OnMousePress += new OnMousePress(OnMousePress);
-            MouseEventDispatcher.OnMouseScroll += new OnMouseScroll(OnMouseScroll);
-            MouseEventDispatcher.OnMouseMotion += new OnMouseMotion(OnMouseMotion);
         }
 
         public void OnMouseRelease(Vector2 location, MouseButton b) {
-            MouseReleasedPos = location;
-            MouseButtonReleased = b;
-            if(MouseButtonPressed == MouseButtonReleased){
-                
+            if(b == MouseButtonPressed){
+                if(b == MouseButton.Left) {
 
-                
+                }
+                else if(b == MouseButton.Right) {
+                    
+                }     
             }
         }
 
@@ -42,15 +39,6 @@ namespace RTSEngine.Controllers {
             MousePressedPos = location;
             MouseButtonPressed = b; 
         }
-
-        public void OnMouseScroll(int value, int displacement) {
-
-        }
-
-        public void OnMouseMotion(Vector2 location, Vector2 movement) {
-
-        }
-
 
     }
 }

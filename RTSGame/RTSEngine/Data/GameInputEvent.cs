@@ -25,9 +25,9 @@ namespace RTSEngine.Data {
     }
 
     public class SetWayPoint : GameInputEvent {
-        public Vector2[] waypoints { get; private set; }
-        public SetWayPoint(Vector2[] w) {
-            waypoints = w;
+        public Vector2 waypoint { get; private set; }
+        public SetWayPoint(Vector2 w) {
+            waypoint = w;
             action = Action.SetWaypoint;
         }
     }
