@@ -46,9 +46,20 @@ namespace RTSCS {
             game.IsMouseVisible = true;
 
             engine = game.LoadScreen.LoadedEngine;
+<<<<<<< HEAD
             RTSTeam team0 = engine.state.Teams[0];
             for (int i = 0; i < 50; i++) {
                 team0.AddUnit(0, new Vector3(200, 10, 200));
+=======
+            foreach(var team in engine.state.Teams) {
+                int t = 0;
+                foreach(var unitType in team.UnitData) {
+                    for(int i = 0; i < unitType.MaxCount; i++) {
+                        team.AddUnit(t, new Vector3(200, 10, 200));
+                    }
+                    t++;
+                }
+>>>>>>> Spawn ALL The Units
             }
         }
         public override void OnExit(GameTime gameTime) {
