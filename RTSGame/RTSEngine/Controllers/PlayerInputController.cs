@@ -25,9 +25,14 @@ namespace RTSEngine.Controllers {
 
         //Appends All Events In Concurrent Queue To Given List
         void AppendEvents(LinkedList<GameInputEvent> l) {
+            int count = eventQueue.Count;
             GameInputEvent e;
-            while(eventQueue.TryDequeue(out e)) {
-                l.AddLast(e);
+
+            while(count > 0) {
+                while(eventQueue.TryDequeue(out e)) {
+                    l.AddLast(e);
+                }
+                count--;
             }
         }
     }
