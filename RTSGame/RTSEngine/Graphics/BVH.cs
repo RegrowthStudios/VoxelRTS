@@ -201,6 +201,9 @@ namespace RTSEngine.Graphics {
             get { return bounds.Max; }
         }
 
+        public bool Intersect(ref IntersectionRecord rec, Ray r) {
+            return false;
+        }
     }
     public struct IntersectionRecord {
         public float t;
@@ -224,14 +227,14 @@ namespace RTSEngine.Graphics {
                 outRecord.t = float.PositiveInfinity;
                 IntersectionRecord tempRec = new IntersectionRecord();
                 for(int i = node.surfaceIndexStart; i < node.surfaceIndexEnd; i++) {
-                    if(surfaces[i].intersect(tempRec, rayIn)) {
+                    if(surfaces[i].Intersect(ref tempRec, rayIn)) {
                         // check if current t value is smaller
                         if(tempRec.t < outRecord.t) {
                             outRecord = tempRec;
                         }
                     }
                 }
-                return !float.IsInfinite(outRecord.t);
+                return !float.IsPositiveInfinity(outRecord.t);
             }
             else {
 
@@ -299,21 +302,14 @@ namespace RTSEngine.Graphics {
             // Figure out the widest dimension (x or y or z).
             // If x is the widest, set widestDim = 0. If y, set widestDim = 1. If z, set widestDim = 2.
 
-            int widestDim;
-            Vector3 dim = maxB - minB;
 
             // ==== Step 4 ====
             // Sort surfaces according to the widest dimension.
             // You can also implement O(n) randomized splitting algorithm.
-            if(dim.X >= dim.Y && dim.X >= dim.Z) {
-                surfaces.Sort(SurfComparisonX);
-            }
-            else if(dim.Y >= dim.Z) {
-                surfaces.Sort(SurfComparisonY);
-            }
-            else {
-                surfaces.Sort(SurfComparisonZ);
-            }
+            Vector3 dim = maxB - minB;
+            if(dim.X >= dim.Y && dim.X >= dim.Z) surfaces.Sort(SurfComparisonX);
+            else if(dim.Y >= dim.Z) surfaces.Sort(SurfComparisonY);
+            else surfaces.Sort(SurfComparisonZ);
 
             // ==== Step 5 ====
             // Recursively create left and right children.
