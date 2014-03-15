@@ -1,0 +1,10 @@
+﻿// Friendly Team Name
+NAME            [Mechanica]
+
+// Team Colors
+PRIMARY         [1.0, 0.0, 0.0]
+SECONDARY       [0.8, 0.0, 0.0]
+TERTIARY        [0.7, 0.4, 0.0]
+
+// List Of All Unit Types Belonging To Team
+UNIT            [..\units\0]

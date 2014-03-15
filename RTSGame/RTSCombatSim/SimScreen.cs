@@ -17,7 +17,7 @@ using RTSEngine.Data.Team;
 
 namespace RTSCS {
     public class RTSUISpawnArgs {
-        public RTSUnit UnitData;
+        public int UnitData;
         public RTSTeam Team;
         public List<ReflectedEntityController> Controllers;
         public List<Vector3> SpawnPos;
@@ -158,6 +158,9 @@ namespace RTSCS {
 
         public override void OnEntry(GameTime gameTime) {
             game.IsMouseVisible = true;
+
+            HeightmapResult res = HeightmapParser.Parse(G, new System.IO.DirectoryInfo(@"Packs\Default\maps\0"));
+            return;
         }
         public override void OnExit(GameTime gameTime) {
             game.IsMouseVisible = false;

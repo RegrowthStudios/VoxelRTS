@@ -3,12 +3,12 @@ float4x4 World;
 float4x4 VP;
 texture TexColor;
 sampler2D Color = sampler_state {
-	Texture = <TexColor>;
-	Magfilter = LINEAR;
-	Minfilter = LINEAR;
-	Mipfilter = LINEAR;
-	AddressU = WRAP;
-	AddressV = WRAP;
+    Texture = <TexColor>;
+    Magfilter = LINEAR;
+    Minfilter = LINEAR;
+    Mipfilter = LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
 };
 
 // Used For RGB Palette Color Calculation
@@ -17,24 +17,24 @@ float3 CSecondary;
 float3 CTertiary;
 texture TexOverlay;
 sampler2D Overlay = sampler_state {
-	Texture = <TexOverlay>;
-	Magfilter = LINEAR;
-	Minfilter = LINEAR;
-	Mipfilter = LINEAR;
-	AddressU = WRAP;
-	AddressV = WRAP;
+    Texture = <TexOverlay>;
+    Magfilter = LINEAR;
+    Minfilter = LINEAR;
+    Mipfilter = LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
 };
 
 // Used For Animation To Figure Out The Actual Position And Normal
 float2 TexelSize;
 texture TexModelMap;
 sampler Model = sampler_state {
-	Texture = <TexModelMap>;
-	Magfilter = POINT;
-	Minfilter = POINT;
-	Mipfilter = POINT;
-	AddressU = CLAMP;
-	AddressV = CLAMP;
+    Texture = <TexModelMap>;
+    Magfilter = POINT;
+    Minfilter = POINT;
+    Mipfilter = POINT;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
 };
 
 // Always The Same Input
@@ -45,8 +45,8 @@ struct VSI {
 };
 struct VSO {
     float4 Position : POSITION0;
-	float2 UV : TEXCOORD0;
-	float3 Normal : TEXCOORD1;
+    float2 UV : TEXCOORD0;
+    float3 Normal : TEXCOORD1;
 };
 
 VSO VS(VSI input) {
@@ -54,8 +54,8 @@ VSO VS(VSI input) {
 
     float4 worldPosition = mul(input.Position, World);
     output.Position = mul(worldPosition, VP);
-	output.UV = input.UV;
-	output.Normal = input.Normal;
+    output.UV = input.UV;
+    output.Normal = input.Normal;
 
     return output;
 }
@@ -64,18 +64,18 @@ VSO VS(VSI input) {
 VSO VS_Anim(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD1) {
     VSO output;
 
-	// Get The UV Coordinates In The Model Texture
-	float2 animUV = float2(input.Position.x, input.Position.y + (InstAnim * TexelSize.y * 3.0)) + TexelSize * 0.5;
-	
-	// Sample The Model Position
-	float x = tex2Dlod(Model, float4(animUV.x, animUV.y, 0, 0)).x;
-	float y = tex2Dlod(Model, float4(animUV.x, animUV.y + TexelSize.y, 0, 0)).x;
-	float z = tex2Dlod(Model, float4(animUV.x, animUV.y + (TexelSize.y * 2.0), 0, 0)).x;
+    // Get The UV Coordinates In The Model Texture
+    float2 animUV = float2(input.Position.x, input.Position.y + (InstAnim * TexelSize.y * 3.0)) + TexelSize * 0.5;
+    
+    // Sample The Model Position
+    float x = tex2Dlod(Model, float4(animUV.x, animUV.y, 0, 0)).x;
+    float y = tex2Dlod(Model, float4(animUV.x, animUV.y + TexelSize.y, 0, 0)).x;
+    float z = tex2Dlod(Model, float4(animUV.x, animUV.y + (TexelSize.y * 2.0), 0, 0)).x;
 
     float4 worldPosition = mul(InstWorld, float4(x, y, z, 1));
     output.Position = mul(worldPosition, VP);
-	output.UV = input.UV;
-	output.Normal = input.Normal;
+    output.UV = input.UV;
+    output.Normal = input.Normal;
 
     return output;
 }
@@ -96,11 +96,11 @@ technique Default {
         VertexShader = compile vs_3_0 VS();
         PixelShader = compile ps_3_0 PS();
     }
-	pass Swatched {
-		VertexShader = compile vs_3_0 VS();
+    pass Swatched {
+        VertexShader = compile vs_3_0 VS();
         PixelShader = compile ps_3_0 PS_Swatch();
-	}
-	pass Animation {
+    }
+    pass Animation {
         VertexShader = compile vs_3_0 VS_Anim();
         PixelShader = compile ps_3_0 PS_Swatch();
     }

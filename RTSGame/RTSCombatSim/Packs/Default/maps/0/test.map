@@ -1,0 +1,13 @@
+﻿// Pre-computed Height Data
+DAT         [height.png]
+
+// The Primary Model And Texture
+HMP         [map.obj]
+HTP         [map.png]
+
+// The Width And Depth Of The Map
+SZX         [400]
+SZZ         [400]
+
+// The Height Of The Map From Its Lowest Point
+SZY         [10]

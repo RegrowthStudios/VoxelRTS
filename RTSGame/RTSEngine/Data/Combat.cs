@@ -10,15 +10,13 @@ namespace RTSEngine.Data {
 
         // Amount Of Damage Done Per Hit
         public int AttackDamage;
+        public int CriticalDamage;
 
         // Amount Of Time To Wait Before An Attack Can Be Utilized
         public float AttackTimer;
 
         // Subtracts Source Damage By Armor Amount
         public int Armor;
-
-        // Damage Done On When A Critical Hit Is Resolved
-        public int CriticalDamage;
 
         // [0 - 1] Ratio Of Critical Hits To Be Obtained
         public double CriticalChance;

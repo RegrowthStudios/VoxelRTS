@@ -253,7 +253,7 @@ namespace RTSCS {
         }
         private void SpawnUnit(int unitIndex, int teamIndex) {
             RTSUISpawnArgs a = new RTSUISpawnArgs();
-            a.UnitData = units[unitIndex];
+            a.UnitData = unitIndex;
             a.Team = teams[teamIndex];
             a.SpawnPos = new List<Vector3>();
             a.SpawnPos.Add(teamSpawnPositions[teamIndex]);

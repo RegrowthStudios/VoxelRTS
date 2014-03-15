@@ -46,9 +46,10 @@ namespace BlisterUI {
 
             BuildScreenList();
             screen = screenList.Current;
+            base.LoadContent();
         }
         protected override void UnloadContent() {
-
+            base.UnloadContent();
         }
 
         protected override void Update(GameTime gameTime) {
