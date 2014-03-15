@@ -285,5 +285,10 @@ namespace RTSEngine.Graphics {
                 unitModel.DrawInstances(G);
             }
         }
+
+        public void GetSelectionBox(Vector2 screenMin, Vector2 screenMax, out OBB? obb, out Frustum? frustum) {
+            // TODO: Koshi
+            throw new NotImplementedException();
+        }
     }
 }

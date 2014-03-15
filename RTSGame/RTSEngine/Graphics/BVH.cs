@@ -216,7 +216,7 @@ namespace RTSEngine.Graphics {
 
         public bool Intersect(ref IntersectionRecord outRecord, Ray rayIn) {
             if(!root.Intersects(rayIn)) return false;
-            return IntersectHelper(root, outRecord, rayIn);
+            return IntersectHelper(root, ref outRecord, rayIn);
         }
         private bool IntersectHelper(BVHNode node, ref IntersectionRecord outRecord, Ray rayIn) {
             // TODO 17
