@@ -17,6 +17,7 @@ namespace RTSEngine.Data {
 
         public OBB(Matrix mView, Matrix mProj, Vector2 min, Vector2 max) {
             // TODO: From An Orthographic Projection
+            BoundingBox b = new BoundingBox();
         }
     }
     #endregion
@@ -25,6 +26,7 @@ namespace RTSEngine.Data {
     public static class SelectionDetection {
         public static bool Intersects(ref Frustum f, ref BoundingBox box) {
             // TODO: Detect
+
             return false;
         }
         public static bool Intersects(ref OBB b, ref BoundingBox box) {
