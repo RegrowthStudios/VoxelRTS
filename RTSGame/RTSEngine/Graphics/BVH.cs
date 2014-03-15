@@ -224,14 +224,14 @@ namespace RTSEngine.Graphics {
                 outRecord.t = float.PositiveInfinity;
                 IntersectionRecord tempRec = new IntersectionRecord();
                 for(int i = node.surfaceIndexStart; i < node.surfaceIndexEnd; i++) {
-                    if(surfaces[i].intersect(tempRec, rayIn)) {
+                   /* if(surfaces[i].intersect(tempRec, rayIn)) {
                         // check if current t value is smaller
                         if(tempRec.t < outRecord.t) {
                             outRecord = tempRec;
                         }
-                    }
+                    }*/
                 }
-                return !float.IsInfinite(outRecord.t);
+                return false; /* !float.IsInfinite(outRecord.t); */
             }
             else {
 
