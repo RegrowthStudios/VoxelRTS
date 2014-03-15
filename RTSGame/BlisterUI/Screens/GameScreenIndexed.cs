@@ -21,8 +21,6 @@ namespace BlisterUI
         public GameScreenIndexed(int index)
             : this(index - 1, index + 1)
         {
-            Previous = index - 1;
-            Next = index + 1;
         }
     }
 }
