@@ -28,11 +28,11 @@ namespace RTSEngine.Data.Team {
         // 2-D Position Of The Unit
         public Vector2 GridPosition {
             get {
-                return new Vector2(worldPosition.X, worldPosition.Y);
+                return new Vector2(worldPosition.X, worldPosition.Z);
             }
             set {
                 worldPosition.X = value.X;
-                worldPosition.Y = value.Y;
+                worldPosition.Z = value.Y;
             }
         }
 

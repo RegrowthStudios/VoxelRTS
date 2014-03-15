@@ -39,7 +39,7 @@ namespace RTSEngine.Data {
         public CollisionCircle(float r, Vector2 c, bool isStatic = false) {
             Radius = r;
             Center = c;
-            IsStatic = IsStatic;
+            IsStatic = isStatic;
         }
 
         public object Clone() {
@@ -89,7 +89,7 @@ namespace RTSEngine.Data {
             Width = w;
             Height = h;
             Center = c;
-            IsStatic = IsStatic;
+            IsStatic = isStatic;
         }
 
         public object Clone() {
@@ -165,6 +165,9 @@ namespace RTSEngine.Data {
             }
         }
         private static void HandleCollision(CollisionCircle circle, CollisionRect rect) {
+            if (circle.IsStatic && rect.IsStatic)
+                return;
+
             // Reference: stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection/402010#402010
             Vector2 d = circle.Center - rect.Center;
             float cornerDistSqr = (float)(Math.Pow(d.X - rect.Width / 2, 2) + Math.Pow(d.Y - rect.Height / 2, 2));
@@ -220,6 +223,9 @@ namespace RTSEngine.Data {
             }
         }
         private static void HandleCollision(CollisionRect rect1, CollisionRect rect2) {
+            if (rect1.IsStatic && rect2.IsStatic)
+                return;
+
             // bottom1 means the bottom Y coordinate of rect1
             // left2 means the left X coordinate of rect2
             float bottom1 = rect1.Center.Y - rect1.Height / 2;

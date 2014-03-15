@@ -47,7 +47,9 @@ namespace RTSCS {
 
             engine = game.LoadScreen.LoadedEngine;
             RTSTeam team0 = engine.state.Teams[0];
-            team0.AddUnit(0, new Vector3(200, 10, 200));
+            /*for (int i = 0; i < 2; i++) {
+                team0.AddUnit(0, new Vector3(200, 10, 200));
+            }*/
         }
         public override void OnExit(GameTime gameTime) {
             game.IsMouseVisible = false;

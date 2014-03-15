@@ -51,15 +51,9 @@ namespace RTSEngine.Controllers {
         
         // Physics Stage
         private void ResolvePhysics(GameState s, float dt) {
-            /* TODO: Collision
-             * Hash All Units To A Grid
-             * Apply Collisions To Entity Collision Geometries
-             * Clamp Geometry To Heightmap
-             * Update Entity To Geometry
-             */
 
             // Initialize hash grid
-            float gridSize = 1;
+            float gridSize = 10;
             HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, gridSize);
 
             // Move Geometry To The Unit's Location and hash into the grid
@@ -74,6 +68,9 @@ namespace RTSEngine.Controllers {
             Point count = hashGrid.gridCount;
             for (int x = 0; x < count.X; x++) {
                 for (int y = 0; y < count.Y; y++) {
+                    if (hashGrid.IsEmpty(x, y))
+                        continue;
+
                     hashGrid.HandleGridCollision(x, y, 0, 0);
                     // Handle corner cases
                     if (x > 0) 
@@ -99,9 +96,10 @@ namespace RTSEngine.Controllers {
             foreach (RTSTeam team in s.Teams) {
                 foreach (RTSUnitInstance unit in team.Units) {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
-                    unit.CollisionGeometry.Center = unit.GridPosition;
+                    unit.GridPosition = unit.CollisionGeometry.Center;
                 }
             }
+
         }
 
         // Cleanup Stage

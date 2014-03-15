@@ -17,6 +17,10 @@ namespace RTSEngine.Data
         public void Add(ICollidable obj) {
             list.Add(obj);
         }
+
+        public bool IsEmpty(){
+            return list.Count == 0;
+        }
     }
 
     public class HashGrid
@@ -40,6 +44,7 @@ namespace RTSEngine.Data
             gridCount = new Point((int)Math.Ceiling(width/gridSize), (int)Math.Ceiling(height/gridSize));
             gridSize = width / gridCount.X;
 
+            grids = new Grid[gridCount.X, gridCount.Y];
             for (int x = 0; x < gridCount.X; x++) {
                 for (int y = 0; y < gridCount.Y; y++) {
                     grids[x,y] = new Grid();
@@ -56,7 +61,10 @@ namespace RTSEngine.Data
         }
 
         // Helper method for resolving collision between grid(x,y) and grid(x+dx,y+dy)
+        // Precondition: grid(x, y) is not empty
         public void HandleGridCollision(int x, int y, int dx, int dy) {
+            if (IsEmpty(x + dx, y + dy)) return;
+
             Grid grid1 = GetGrid(x, y);
             Grid grid2 = GetGrid(x+dx, y+dy);
             foreach (ICollidable o1 in grid1.list) {
@@ -65,6 +73,10 @@ namespace RTSEngine.Data
                         CollisionController.ProcessCollision(o1, o2);
                 }
             }
+        }
+
+        public bool IsEmpty(int x, int y) {
+            return grids[x, y].IsEmpty();
         }
     }
 }
