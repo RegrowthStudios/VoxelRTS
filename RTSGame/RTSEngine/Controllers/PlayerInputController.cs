@@ -11,11 +11,13 @@ namespace RTSEngine.Controllers {
 
         private ConcurrentQueue<GameInputEvent> eventQueue;
         public RTSTeam Team { get; private set;  }
+        public GameState GameState { get; private set; }
 
-        public PlayerInputController(GameState g)
+        public PlayerInputController(GameState g, RTSTeam t)
             : base(g) {
             eventQueue = new ConcurrentQueue<GameInputEvent>();
-            
+            Team = t;
+            GameState = g;
         }
 
         //Adds Event To Concurrent Queue
@@ -29,7 +31,7 @@ namespace RTSEngine.Controllers {
             GameInputEvent e;
 
             while(count > 0) {
-                while(eventQueue.TryDequeue(out e)) {
+                if(eventQueue.TryDequeue(out e)) {
                     l.AddLast(e);
                 }
                 count--;
