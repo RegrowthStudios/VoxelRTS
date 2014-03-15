@@ -8,11 +8,12 @@ namespace RTSEngine.Data {
     #region Detection Objects Generated From A Camera
     public struct Frustum {
         // 0=near, 1=far, 2=bottom, 3=top, 4=left, 5=right
-        public Plane[] planes = new Plane[6];
+        public Plane[] planes;
 
         public Frustum(Matrix mView, Matrix mProj, Vector2 min, Vector2 max) {
             // TODO: From An PerspectiveProjection
             BoundingFrustum f = new BoundingFrustum(mView * mProj);
+            planes = new Plane[6];
             planes[0] = f.Near;
             planes[1] = f.Far;
             planes[2] = f.Bottom;
