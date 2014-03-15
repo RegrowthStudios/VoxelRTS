@@ -13,11 +13,29 @@ using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 
 namespace RTSCS {
-    public class _3DSimScreen : GameScreenIndexed {
+    public class _3DSimScreen : GameScreen<App> {
         private GameEngine engine;
 
-        public _3DSimScreen(int i) : base(i) { }
-        public _3DSimScreen(int p, int n) : base(p, n) { }
+        public override int Next {
+            get {
+                return -1;
+            }
+            protected set {
+                throw new NotImplementedException();
+            }
+        }
+        public override int Previous {
+            get {
+                return game.LoadScreen.Index;
+            }
+            protected set {
+                throw new NotImplementedException();
+            }
+        }
+
+        public _3DSimScreen()
+            : base() {
+        }
 
         public override void Build() {
         }
@@ -27,13 +45,7 @@ namespace RTSCS {
         public override void OnEntry(GameTime gameTime) {
             game.IsMouseVisible = true;
 
-            EngineLoadData data = new EngineLoadData();
-            data.MapDirectory = new DirectoryInfo(@"Packs\Default\maps\0");
-            RTSTeamResult teamRes = RTSTeamParser.ParseAll(new DirectoryInfo("Packs"))[0];
-            data.Teams = new RTSTeamResult[2];
-            data.Teams[0] = teamRes;
-            data.Teams[1] = teamRes;
-            engine = new GameEngine(game.Graphics, game.Window, data);
+            engine = game.LoadScreen.LoadedEngine;
             RTSTeam team0 = engine.state.Teams[0];
             team0.AddUnit(0, new Vector3(200, 10, 200));
         }

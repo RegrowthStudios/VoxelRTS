@@ -26,6 +26,10 @@ namespace RTSCS {
         // The Static Instances
         private static App app;
 
+        public LoadScreen LoadScreen {
+            get;
+            private set;
+        }
         public _3DSimScreen Sim3D {
             get;
             private set;
@@ -33,11 +37,13 @@ namespace RTSCS {
 
         public App()
             : base() {
-            Sim3D = new _3DSimScreen(3);
+            LoadScreen = new RTSCS.LoadScreen(3);
+            Sim3D = new _3DSimScreen();
         }
 
         protected override void FullInitialize() {
             BlisterUI.Input.WMHookInput.Initialize(Window);
+            Graphics.IsFullScreen = true;
         }
         protected override void FullLoad() {
         }
@@ -47,6 +53,7 @@ namespace RTSCS {
                 new BlisterUI.FalseFirstScreen(3),
                 new RTSEngine.Screens.InduZtryScreen(1),
                 new RTSEngine.Screens.KMeansScreen(2),
+                LoadScreen,
                 Sim3D
                 );
         }

@@ -51,6 +51,7 @@ namespace RTSEngine.Graphics {
         private GraphicsDevice G {
             get { return gManager.GraphicsDevice; }
         }
+        private bool toggleFull;
 
         // Camera Matrices
         Matrix mView, mProj;
@@ -115,6 +116,7 @@ namespace RTSEngine.Graphics {
 
         public RTSRenderer(GraphicsDeviceManager gdm, string rtsFXFile, GameWindow w) {
             gManager = gdm;
+            toggleFull = false;
             UnitModels = new List<RTSUnitModel>();
 
             fxMap = new BasicEffect(G);
@@ -211,30 +213,40 @@ namespace RTSEngine.Graphics {
         private void OnKeyPress(object s, KeyEventArgs args) {
             switch(args.KeyCode) {
                 case KEY_FULLSCREEN:
-                    gManager.IsFullScreen = !gManager.IsFullScreen;
-                    gManager.ApplyChanges();
+                    toggleFull = true;
                     break;
             }
         }
         private void OnCtrlPress(object s, CharacterEventArgs args) {
             switch(args.Character) {
                 case CTRL_CHAR_FULLSCREEN:
-                    gManager.IsFullScreen = !gManager.IsFullScreen;
-                    gManager.ApplyChanges();
+                    toggleFull = true;
                     break;
             }
         }
 
         public void Draw(GameState s, float dt) {
+            if(toggleFull) {
+                toggleFull = false;
+                // TODO: This Has Problems
+                // gManager.ToggleFullScreen();
+                return;
+            }
+            if(G.GraphicsDeviceStatus != GraphicsDeviceStatus.Normal) return;
             G.Clear(Color.Black);
 
             // Draw The Map
+            G.DepthStencilState = DepthStencilState.Default;
+            G.RasterizerState = RasterizerState.CullCounterClockwise;
+            G.BlendState = BlendState.Opaque; Map.SetPrimaryModel(G);
+            // Primary Map Model
             fxMap.Texture = Map.PrimaryTexture;
-            Map.SetPrimaryModel(G);
+            G.SamplerStates[0] = SamplerState.LinearClamp;
             fxMap.CurrentTechnique.Passes[0].Apply();
             Map.DrawPrimary(G);
-
+            // Secondary Map Model
             fxMap.Texture = Map.SecondaryTexture;
+            G.SamplerStates[0] = SamplerState.LinearClamp;
             Map.SetSecondaryModel(G);
             fxMap.CurrentTechnique.Passes[0].Apply();
             Map.DrawSecondary(G);
@@ -245,7 +257,7 @@ namespace RTSEngine.Graphics {
                 fxRTS.TexOverlay = unitModel.ModelTexture;
                 fxRTS.TexColor = unitModel.ColorCodeTexture;
                 fxRTS.ApplyPassAnimation();
-                unitModel.UpdateInstances();
+                unitModel.UpdateInstances(G);
                 unitModel.SetInstances(G);
                 unitModel.DrawInstances(G);
             }

@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RTSCS</RootNamespace>
     <AssemblyName>RTSCombatSim</AssemblyName>
@@ -67,6 +67,9 @@
     <Content Include="Content\FX\RTS.fx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\LoadImages\Modern.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\maps\0\height.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -107,6 +110,7 @@
     <Compile Include="Gameplay\CombatMap.cs" />
     <Compile Include="Graphics\Renderer.cs" />
     <Compile Include="Graphics\UnitGeometry.cs" />
+    <Compile Include="LoadScreen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Packs\Default\levels\0.dat" />
     <None Include="Packs\Default\maps\0\map.obj">

@@ -12,8 +12,6 @@ namespace RTSEngine.Graphics {
     public class RTSUnitModel : IDisposable {
         public const ParsingFlags MODEL_READ_FLAGS = ParsingFlags.ConversionOpenGL;
 
-
-
         // Visual Information
         public Texture2D ModelTexture {
             get;
@@ -50,6 +48,7 @@ namespace RTSEngine.Graphics {
             private set;
         }
         private DynamicVertexBuffer dvbInstances;
+        private bool rebuildDVB;
         private VertexRTSAnimInst[] instVerts;
         private List<RTSUnitInstance> instances;
         public int InstanceCount {
@@ -89,6 +88,8 @@ namespace RTSEngine.Graphics {
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
             dvbInstances.SetData(instVerts);
+            dvbInstances.ContentLost += (s, a) => { rebuildDVB = true; };
+            rebuildDVB = false;
         }
         public void Dispose() {
             if(vbModel != null) {
@@ -117,7 +118,7 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void UpdateInstances() {
+        public void UpdateInstances(GraphicsDevice g) {
             for(int i = 0; i < InstanceCount; i++) {
                 instVerts[i].World =
                     Matrix.CreateRotationZ(
@@ -125,6 +126,10 @@ namespace RTSEngine.Graphics {
                     ) *
                     Matrix.CreateTranslation(instances[i].WorldPosition)
                     ;
+            }
+            if(rebuildDVB) {
+                dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
+                dvbInstances.ContentLost += (s, a) => { rebuildDVB = true; };
             }
             dvbInstances.SetData(instVerts);
         }

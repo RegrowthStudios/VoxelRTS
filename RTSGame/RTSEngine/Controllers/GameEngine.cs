@@ -14,7 +14,7 @@ using RTSEngine.Interfaces;
 namespace RTSEngine.Controllers {
     // The Data The Engine Needs To Know About To Properly Create A Game
     public struct EngineLoadData {
-        // Premade Teams
+        // Teams In The Battle
         public RTSTeamResult[] Teams;
 
         // Where To Load The Map
@@ -27,15 +27,29 @@ namespace RTSEngine.Controllers {
         public readonly RTSRenderer renderer;
         private readonly GameplayController playController;
 
-        public GameEngine(GraphicsDeviceManager gdm, GameWindow w, EngineLoadData d) {
-            var g = gdm.GraphicsDevice;
+        Action<string, float> fLoad;
 
+        public GameEngine(GraphicsDeviceManager gdm, GameWindow w, EngineLoadData d, Action<string, float> loadCallback) {
+            var g = gdm.GraphicsDevice;
+            fLoad = loadCallback;
+
+            // Create Simple Information
+            fLoad("Creating Renderer", 0.0f);
             renderer = new RTSRenderer(gdm, @"Content\FX\RTS.fx", w);
+            fLoad("Creating Renderer", 0.07f);
+
+            fLoad("Making Gameplay Controller", 0.1f);
             playController = new GameplayController();
+
+            // Load Teams
+            fLoad("Loading Teams", 0.2f);
             state = new GameState(LoadTeams(g, d.Teams));
+            fLoad("Teams Complete", 0.4f);
 
             // Load The Map
+            fLoad("Loading Map", 0.5f);
             LoadMap(g, d.MapDirectory);
+            fLoad("Map Complete", 1f);
         }
         #region Disposal
         public void Dispose() {
