@@ -81,6 +81,7 @@
     <Compile Include="Graphics\RTSRenderer.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Interfaces\IInputController.cs" />
+    <Compile Include="Screens\SquadCommanderScreen.cs" />
     <Compile Include="Screens\InduZtryScreen.cs" />
     <Compile Include="Interfaces\EntityControllers.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />
