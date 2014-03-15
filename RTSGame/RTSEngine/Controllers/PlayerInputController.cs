@@ -5,37 +5,52 @@ using System.Linq;
 using System.Text;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
+using Microsoft.Xna.Framework;
+using BlisterUI.Input;
 
 namespace RTSEngine.Controllers {
     public class PlayerInputController : InputController {
 
-        private ConcurrentQueue<GameInputEvent> eventQueue;
-        public RTSTeam Team { get; private set;  }
-        public GameState GameState { get; private set; }
-
+        private Vector2 MousePressedPos;
+        private Vector2 MouseReleasedPos;
+        private MouseButton MouseButtonPressed;
+        private MouseButton MouseButtonReleased;
+        
         public PlayerInputController(GameState g, RTSTeam t)
-            : base(g) {
-            eventQueue = new ConcurrentQueue<GameInputEvent>();
-            Team = t;
-            GameState = g;
+            : base(g, t) {
+            SetToHook();
         }
 
-        //Adds Event To Concurrent Queue
-        public void AddEvent(GameInputEvent e) {
-            eventQueue.Enqueue(e);
+        public void SetToHook() {
+            MouseEventDispatcher.OnMouseRelease += new OnMouseRelease(OnMouseRelease);
+            MouseEventDispatcher.OnMousePress += new OnMousePress(OnMousePress);
+            MouseEventDispatcher.OnMouseScroll += new OnMouseScroll(OnMouseScroll);
+            MouseEventDispatcher.OnMouseMotion += new OnMouseMotion(OnMouseMotion);
         }
 
-        //Appends All Events In Concurrent Queue To Given List
-        void AppendEvents(LinkedList<GameInputEvent> l) {
-            int count = eventQueue.Count;
-            GameInputEvent e;
+        public void OnMouseRelease(Vector2 location, MouseButton b) {
+            MouseReleasedPos = location;
+            MouseButtonReleased = b;
+            if(MouseButtonPressed == MouseButtonReleased){
+                
 
-            while(count > 0) {
-                if(eventQueue.TryDequeue(out e)) {
-                    l.AddLast(e);
-                }
-                count--;
+                
             }
         }
+
+        public void OnMousePress(Vector2 location, MouseButton b) {
+            MousePressedPos = location;
+            MouseButtonPressed = b; 
+        }
+
+        public void OnMouseScroll(int value, int displacement) {
+
+        }
+
+        public void OnMouseMotion(Vector2 location, Vector2 movement) {
+
+        }
+
+
     }
 }
