@@ -8,7 +8,7 @@ using RTSEngine.Interfaces;
 namespace RTSEngine.Data
 {
     public class Grid {
-        private List<ICollidable> list;
+        public List<ICollidable> list;
         
         public Grid() {
             list = new List<ICollidable>();
@@ -55,9 +55,16 @@ namespace RTSEngine.Data
             grids[(int)pos.X * gridCount.X, (int)pos.Y * gridCount.Y].Add(obj);
         }
 
-        // Helper method
-        public void HandleGridCollision(Grid grid, int dx, int dy) {
-
+        // Helper method for resolving collision between grid(x,y) and grid(x+dx,y+dy)
+        public void HandleGridCollision(int x, int y, int dx, int dy) {
+            Grid grid1 = GetGrid(x, y);
+            Grid grid2 = GetGrid(x+dx, y+dy);
+            foreach (ICollidable o1 in grid1.list) {
+                foreach (ICollidable o2 in grid2.list) {
+                    if (o1 != o2)
+                        CollisionController.ProcessCollision(o1, o2);
+                }
+            }
         }
     }
 }
