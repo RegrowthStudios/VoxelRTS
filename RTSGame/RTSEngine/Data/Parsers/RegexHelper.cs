@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace RTSEngine.Data.Parsers {
     public static class RegexHelper {
-        public const string DATA_FILE_REGEX = @"\w[\w|\s|.|\\|/]*";
+        public const string DATA_FILE_REGEX = @"[\w\.][\w|\s|.|\\|/]*";
         public const string DATA_NUM_REGEX = @"\d*\.*\d*";
         public const string DATA_INT_REGEX = @"\d+";
         const string NUM_SPLIT = @"\s*[\x7c/,]\s*";

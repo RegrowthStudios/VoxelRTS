@@ -29,11 +29,11 @@ namespace RTSCS {
 
             EngineLoadData data = new EngineLoadData();
             data.MapDirectory = new DirectoryInfo(@"Packs\Default\maps\0");
-            data.Teams = new RTSTeam[2];
-            data.Teams[0] = new RTSTeam();
-            data.Teams[1] = new RTSTeam();
+            RTSTeamResult teamRes = RTSTeamParser.ParseAll(new DirectoryInfo("Packs"))[0];
+            data.Teams = new RTSTeamResult[2];
+            data.Teams[0] = teamRes;
+            data.Teams[1] = teamRes;
             engine = new GameEngine(game.Graphics, game.Window, data);
-            engine.LoadUnit(G, 0, new DirectoryInfo(@"Packs\Default\units\0"));
             RTSTeam team0 = engine.state.Teams[0];
             team0.AddUnit(0, new Vector3(200, 10, 200));
         }

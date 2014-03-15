@@ -56,7 +56,7 @@ namespace RTSEngine.Graphics {
             get { return instances.Count; }
         }
 
-        public RTSUnitModel(GraphicsDevice g, RTSUnit data, Stream sModel, Texture2D tAnim, int maxInstanceCount) {
+        public RTSUnitModel(GraphicsDevice g, RTSUnit data, Stream sModel, Texture2D tAnim) {
             // Create With The Animation Texture
             AnimationTexture = tAnim;
             Vector2 texelSize = new Vector2(1f / (AnimationTexture.Width), 1f / (AnimationTexture.Height));
@@ -83,8 +83,8 @@ namespace RTSEngine.Graphics {
             ibModel.SetData(inds);
 
             // Create Instance Buffer
-            instVerts = new VertexRTSAnimInst[maxInstanceCount];
-            instances = new List<RTSUnitInstance>(maxInstanceCount);
+            instVerts = new VertexRTSAnimInst[Data.MaxCount];
+            instances = new List<RTSUnitInstance>(Data.MaxCount);
             for(int i = 0; i < instVerts.Length; i++)
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);

@@ -62,6 +62,7 @@ namespace RTSEngine.Data.Parsers {
             buf = RegexHelper.ExtractVec2I(rgxCost.Match(ms));
             res.Data.CapitalCost = buf[0];
             res.Data.PopulationCost = buf[1];
+            res.Data.MaxCount = RegexHelper.ExtractInt(rgxMaxCount.Match(ms));
             res.Data.MovementSpeed = RegexHelper.ExtractFloat(rgxSpeed.Match(ms));
             res.Data.ICollidableShape = new CollisionCircle(
                 RegexHelper.ExtractFloat(rgxRadius.Match(ms)),
@@ -79,10 +80,9 @@ namespace RTSEngine.Data.Parsers {
 
             FileInfo fiModel = RegexHelper.ExtractFile(rgxModel.Match(ms), rootDir);
             FileInfo fiAnim = RegexHelper.ExtractFile(rgxAnimation.Match(ms), rootDir);
-            int mc = RegexHelper.ExtractInt(rgxMaxCount.Match(ms));
             using(var sModel = File.OpenRead(fiModel.FullName)) {
                 Texture2D tAnim = AnimationFromBitmap(g, fiAnim);
-                res.View = new RTSUnitModel(g, res.Data, sModel, tAnim, mc);
+                res.View = new RTSUnitModel(g, res.Data, sModel, tAnim);
             }
             FileInfo fiTex = RegexHelper.ExtractFile(rgxMainTex.Match(ms), rootDir);
             using(var ts = File.OpenRead(fiTex.FullName)) {
