@@ -190,7 +190,7 @@ namespace RTSEngine.Algorithms {
 
             // Finished
             if(success) {
-                foreach(Point wp in ReconstructPath(cameFrom, gGridPoint) {
+                foreach(Point wp in ReconstructPath(cameFrom, gGridPoint)) {
                     q.waypoints.Add(world.UnMap(wp.X, wp.Y));
                 }
             }
