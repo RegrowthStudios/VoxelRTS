@@ -288,7 +288,17 @@ namespace RTSEngine.Graphics {
 
         public void GetSelectionBox(Vector2 screenMin, Vector2 screenMax, out OBB? obb, out Frustum? frustum) {
             // TODO: Koshi
-            throw new NotImplementedException();
+            Vector2 ss = new Vector2(G.Viewport.Width, G.Viewport.Height);
+            screenMin /= ss;
+            screenMax /= ss;
+            float miny = 1 - screenMax.Y;
+            float maxy = 1 - screenMin.Y;
+            screenMin.Y = miny;
+            screenMax.Y = maxy;
+            screenMin *= 2f; screenMin -= Vector2.One;
+            screenMax *= 2f; screenMax -= Vector2.One;
+            obb = null;
+            frustum = new Frustum(mView, mProj, screenMin, screenMax);
         }
         public Ray GetViewRay(Vector2 screenPos) {
             Ray r = new Ray();

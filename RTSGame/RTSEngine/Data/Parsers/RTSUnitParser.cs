@@ -28,6 +28,8 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxSpeed = RegexHelper.GenerateNumber("SPEED");
         private static readonly Regex rgxCost = RegexHelper.GenerateVec2Int("COST");
         private static readonly Regex rgxRadius = RegexHelper.GenerateNumber("RADIUS");
+        private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
+        private static readonly Regex rgxBBMax = RegexHelper.GenerateVec3("BBOXMAX");
         private static readonly Regex rgxArmor = RegexHelper.GenerateInteger("ARMOR");
         private static readonly Regex rgxDamage = RegexHelper.GenerateVec2Int("DAMAGE");
         private static readonly Regex rgxRange = RegexHelper.GenerateVec2Int("RANGE");
@@ -68,6 +70,8 @@ namespace RTSEngine.Data.Parsers {
                 RegexHelper.ExtractFloat(rgxRadius.Match(ms)),
                 Vector2.Zero, false
                 );
+            res.Data.BBox.Min = RegexHelper.ExtractVec3(rgxBBMin.Match(ms));
+            res.Data.BBox.Max = RegexHelper.ExtractVec3(rgxBBMax.Match(ms));
             res.Data.BaseCombatData.Armor = RegexHelper.ExtractInt(rgxArmor.Match(ms));
             buf = RegexHelper.ExtractVec2I(rgxDamage.Match(ms));
             res.Data.BaseCombatData.AttackDamage = buf[0];

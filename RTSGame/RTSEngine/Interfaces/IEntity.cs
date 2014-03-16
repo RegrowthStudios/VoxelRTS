@@ -19,6 +19,7 @@ namespace RTSEngine.Interfaces {
 
         // Collision Geometry
         ICollidable CollisionGeometry { get; }
+        BoundingBox BBox { get; }
 
         // Targetting Information
         IEntity Target { get; set; }

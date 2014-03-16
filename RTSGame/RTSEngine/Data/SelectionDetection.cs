@@ -7,26 +7,15 @@ using Microsoft.Xna.Framework;
 namespace RTSEngine.Data {
     #region Detection Objects Generated From A Camera
     public struct Frustum {
-        // 0=near, 1=far, 2=bottom, 3=top, 4=left, 5=right
-        public Plane[] planes;
+        public readonly BoundingFrustum frustum;
 
         public Frustum(Matrix mView, Matrix mProj, Vector2 min, Vector2 max) {
-            // TODO: From An PerspectiveProjection
-
-            // Construct matrix to transform screen to selection box
-            Vector2 selectCenter = (min + max) / 2;
-            Matrix translate = Matrix.CreateTranslation(selectCenter.X, selectCenter.Y, 0f);
-            Vector2 scaleAmount = (max - min) / new Vector2(2,2);
-            Matrix scale = Matrix.CreateScale(scaleAmount.X, scaleAmount.Y, 1);
-
-            BoundingFrustum f = new BoundingFrustum(mView * mProj);
-            planes = new Plane[6];
-            planes[0] = f.Near;
-            planes[1] = f.Far;
-            planes[2] = f.Bottom;
-            planes[3] = f.Top;
-            planes[4] = f.Left;
-            planes[5] = f.Right;
+            // Transform Projection Matrix
+            Vector2 s = (max - min) * 0.5f;
+            Matrix ms = Matrix.CreateScale(s.X, s.Y, 1);
+            Vector2 o = (max + min) * 0.5f;
+            Matrix mt = Matrix.CreateTranslation(o.X, o.Y, 0);
+            frustum = new BoundingFrustum(mView * mProj);
         }
     }
 
@@ -52,9 +41,9 @@ namespace RTSEngine.Data {
     // Has To Detect If The Camera View Intersects With A Box
     public static class SelectionDetection {
         public static bool Intersects(ref Frustum f, ref BoundingBox box) {
-            // TODO: Detect
-
-            return false;
+            ContainmentType ct;
+            f.frustum.Contains(ref box, out ct);
+            return ct != ContainmentType.Disjoint;
         }
         public static bool Intersects(ref OBB b, ref BoundingBox box) {
             // TODO: Detect

@@ -77,6 +77,14 @@ namespace RTSEngine.Data.Team {
             get;
             private set;
         }
+        public BoundingBox BBox {
+            get {
+                return new BoundingBox(
+                    UnitData.BBox.Min + WorldPosition,
+                    UnitData.BBox.Max + WorldPosition
+                    );
+            }
+        }
 
         // Speed Of Movement For The Entity
         public float MovementSpeed {

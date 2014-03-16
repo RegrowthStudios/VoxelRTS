@@ -46,7 +46,21 @@ namespace RTSEngine.Controllers {
 
         // Logic Stage
         private void ApplyLogic(GameState s, float dt) {
+            // Find Decisions
+            foreach(RTSTeam team in s.Teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
+                    if(unit.ActionController == null) continue;
+                    unit.ActionController.DecideAction(s, dt);
+                }
+            }
 
+            // Apply Controllers
+            foreach(RTSTeam team in s.Teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
+                    if(unit.ActionController == null) continue;
+                    unit.ActionController.ApplyAction(s, dt);
+                }
+            }
         }
 
         // Physics Stage

@@ -33,10 +33,6 @@ namespace RTSCS.Controllers {
 
         // Apply The Entity's Decision
         public void ApplyAction(GameState g, float dt) {
-            ICombatEntity cEntity = Entity as ICombatEntity;
-            if(cEntity != null) {
-                cEntity.CombatController.Attack(g, dt);
-            }
             IMovingEntity mEntity = Entity as IMovingEntity;
             if(mEntity != null) mEntity.MovementController.ApplyMove(g, dt);
         }
