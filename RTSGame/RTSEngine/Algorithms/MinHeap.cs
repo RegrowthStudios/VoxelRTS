@@ -24,7 +24,7 @@ namespace RTSEngine.Algorithms {
             }
             this[i] = o;
         }
-        public T Extract() {
+        public T Pop() {
             if(Count < 0) {
                 throw new ArgumentOutOfRangeException();
             }
@@ -37,7 +37,7 @@ namespace RTSEngine.Algorithms {
         }
 
         // TODO: Verify
-        public void Delete(T o) {
+        new public void Remove(T o) {
             int i = 0;
             bool done = false;
             while(!done) {
@@ -113,7 +113,7 @@ namespace RTSEngine.Algorithms {
                 int c = Count;
                 a = new T[c];
                 for(int i = 0; i < c; i++) {
-                    a[i] = Extract();
+                    a[i] = Pop();
                 }
             }
         }
