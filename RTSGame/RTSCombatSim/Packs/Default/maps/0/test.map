@@ -6,8 +6,8 @@ HMP         [map.obj]
 HTP         [map.png]
 
 // The Width And Depth Of The Map
-SZX         [400]
-SZZ         [400]
+SZX         [200]
+SZZ         [200]
 
 // The Height Of The Map From Its Lowest Point
-SZY         [10]
+SZY         [8]

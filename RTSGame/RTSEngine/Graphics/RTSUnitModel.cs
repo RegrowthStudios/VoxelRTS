@@ -123,8 +123,8 @@ namespace RTSEngine.Graphics {
         public void UpdateInstances(GraphicsDevice g) {
             for(int i = 0; i < InstanceCount; i++) {
                 instVerts[i].World =
-                    Matrix.CreateRotationZ(
-                        (float)Math.Atan2(instances[i].ViewDirection.Y, instances[i].ViewDirection.X)
+                    Matrix.CreateRotationY(
+                        (float)Math.Atan2(-instances[i].ViewDirection.Y, instances[i].ViewDirection.X)
                     ) *
                     Matrix.CreateTranslation(instances[i].WorldPosition)
                     ;

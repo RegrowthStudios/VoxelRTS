@@ -39,6 +39,10 @@ namespace RTSEngine.Controllers {
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
             // TODO: Use InputControllers From The Teams
+            foreach(var team in s.Teams) {
+                IInputController ic = team.Input;
+
+            }
         }
         private void ApplyInput(GameState s, float dt) {
 
@@ -46,15 +50,28 @@ namespace RTSEngine.Controllers {
 
         // Logic Stage
         private void ApplyLogic(GameState s, float dt) {
+            // Find Decisions
+            foreach(RTSTeam team in s.Teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
+                    if(unit.ActionController == null) continue;
+                    unit.ActionController.DecideAction(s, dt);
+                }
+            }
 
+            // Apply Controllers
+            foreach(RTSTeam team in s.Teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
+                    if(unit.ActionController == null) continue;
+                    unit.ActionController.ApplyAction(s, dt);
+                }
+            }
         }
 
         // Physics Stage
         private void ResolvePhysics(GameState s, float dt) {
 
             // Initialize hash grid
-            float gridSize = 2;
-            HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, gridSize);
+            HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, 2);
 
             // Move Geometry To The Unit's Location and hash into the grid
             foreach(RTSTeam team in s.Teams) {

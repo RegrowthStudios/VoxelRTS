@@ -15,6 +15,8 @@ COST            [10 , 10]
 
 // Collision Data
 RADIUS          [0.4]
+BBOXMIN         [-0.4 , 0.0 , -0.4]
+BBOXMAX         [0.4 , 1.0 , 0.4]
 
 // Combat Data
 ARMOR           [10]

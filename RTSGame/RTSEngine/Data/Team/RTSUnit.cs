@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
@@ -23,10 +24,11 @@ namespace RTSEngine.Data.Team {
         // Speed Of The Unit
         public float MovementSpeed;
 
-        //BaseCombatData of The Unit
+        // BaseCombatData of The Unit
         public BaseCombatData BaseCombatData;
 
-        //ICollidableShape of The Unit
+        // ICollidableShape of The Unit
         public ICollidable ICollidableShape;
+        public BoundingBox BBox;
     }
 }
