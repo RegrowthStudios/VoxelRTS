@@ -163,6 +163,21 @@ namespace RTSEngine.Data.Parsers {
             // Read All Data First
             HeightmapReadData rd = GetInfo(new StreamReader(s), rootDir);
 
+            // Read Height Data
+            using(var bmp = Bitmap.FromFile(rd.HMDataBmp) as Bitmap) {
+                int w = bmp.Width;
+                int h = bmp.Height;
+                float[] hd = new float[w * h];
+                byte[] cd = new byte[w * h];
+                int i = 0;
+                for(int y = 0; y < h; y++) {
+                    for(int x = 0; x < w; x++) {
+                        ConvertPixel(bmp.GetPixel(x, y), hd, cd, i++);
+                    }
+                }
+                res.Data = new Heightmap(hd, cd, w, h);
+            }
+
             // Must Read Primary Model
             using(var fs = File.OpenRead(rd.HMModelPrimary)) {
                 // Try To Read Secondary Data
@@ -170,7 +185,7 @@ namespace RTSEngine.Data.Parsers {
                 if(rd.HasSecondary) {
                     fss = File.OpenRead(rd.HMModelSecondary);
                 }
-                res.View = new HeightmapModel(g, new Vector3(rd.SizeX, rd.SizeY, rd.SizeZ), fs, fss);
+                res.View = new HeightmapModel(g, new Vector3(rd.SizeX, rd.SizeY, rd.SizeZ), res.Data.BuildBVH, fs, fss);
                 if(fss != null)
                     fss.Dispose();
             }
@@ -187,21 +202,8 @@ namespace RTSEngine.Data.Parsers {
                 }
             }
 
-            // Read Height Data
-            using(var bmp = Bitmap.FromFile(rd.HMDataBmp) as Bitmap) {
-                int w = bmp.Width;
-                int h = bmp.Height;
-                float[] hd = new float[w * h];
-                byte[] cd = new byte[w * h];
-                int i = 0;
-                for(int y = 0; y < h; y++) {
-                    for(int x = 0; x < w; x++) {
-                        ConvertPixel(bmp.GetPixel(x, y), hd, cd, i++);
-                    }
-                }
+            
 
-                res.Data = new Heightmap(hd, cd, w, h);
-            }
 
             // Apply Heightmap Size
             res.Data.Width = rd.SizeX;

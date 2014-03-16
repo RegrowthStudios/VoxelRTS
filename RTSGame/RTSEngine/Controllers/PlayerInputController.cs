@@ -4,11 +4,11 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using RTSEngine.Data;
-using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
 using BlisterUI.Input;
 using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
+using RTSEngine.Data.Team;
 
 namespace RTSEngine.Controllers {
     public class PlayerInputController : InputController {
@@ -27,38 +27,34 @@ namespace RTSEngine.Controllers {
         }
 
         public void OnMouseRelease(Vector2 location, MouseButton b) {
-
             if(b == MouseButton.Left) {
                 OBB? obb;
                 Frustum? frustum;
-                BoundingBox box = new BoundingBox();
+                BoundingBox box = new BoundingBox();   //delete and use actual bounding boxes
                 List<IEntity> selected = new List<IEntity>();
                 Renderer.GetSelectionBox(location, mousePressedPos, out obb, out frustum);
-                Frustum f = new Frustum();
-
 
                 if(obb != null) {
+                    OBB obb2 = (OBB) obb;
                     for(int i = 0; i < GameState.Teams.Length; i++){
                         foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
-                            //if(SelectionDetection.Intersects(f,box)){
-                            //    selected.Add(unit);
-                            //}
-                        }
-                    }
-
-                }
-                else {
-                    for(int i = 0; i < GameState.Teams.Length; i++){
-                        foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
-                            //if(SelectionDetection.Intersects(frustum,box)){
-                            //    selected.Add(unit);
-                            //}
+                            if(SelectionDetection.Intersects(ref obb2,ref box)){
+                                selected.Add(unit);
+                            }
                         }
                     }
                 }
-
-                //AddEvent.(new SelectEvent(selected));
-
+                else if(frustum != null) {
+                    Frustum frustum2 = (Frustum) frustum;
+                    for(int i = 0; i < GameState.Teams.Length; i++){
+                        foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
+                            if(SelectionDetection.Intersects(ref frustum2, ref box)){
+                                selected.Add(unit);
+                            }
+                        }
+                    }
+                }   
+                AddEvent(new SelectEvent(selected));
             }
    
             
@@ -67,22 +63,25 @@ namespace RTSEngine.Controllers {
         public void OnMousePress(Vector2 location, MouseButton b) {
         
             if(b == MouseButton.Right) {  
-                BoundingBox box;
-                IDestructibleEntity target;
+                BoundingBox box = new BoundingBox(); //delete and use actual bounding boxes
+                IDestructibleEntity target = null;
+                Ray clickedLocation = Renderer.GetViewRay(location);
+                float? dist;
                 for(int i = 0; i < GameState.Teams.Length; i++) {
                     foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
-                       // if(Ray.Intersects(box) != null) {
-                         //   target = unit;
-                       // }
+                       dist = clickedLocation.Intersects(box);
+                       if(dist != null) {
+                            target = unit;
+                       }
                     }
                 }
 
-                //if(target == null) {
-                //    AddEvent(new SetWayPoint(location));
-                //}
-                //else {
-                //    AddEvent(new SetTargetEvent(target);
-                //}
+                if(target == null) {
+                    AddEvent(new SetWayPointEvent(location));
+                }
+                else {
+                    AddEvent(new SetTargetEvent(target));
+                }
             }
             else if(b == MouseButton.Left) {
                 mousePressedPos = location;

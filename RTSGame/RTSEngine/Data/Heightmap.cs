@@ -3,12 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using RTSEngine.Graphics;
 
 namespace RTSEngine.Data {
     public class Heightmap {
+        // Bit Masks
+        private const int MASK_COLLISION = 0x01; 
+
         // Height Values
         private float[] heights;
         private byte[] data;
+
+        // The BVH (Yay)
+        public BVH BVH {
+            get;
+            private set;
+        }
 
         // Corresponds To Texture Size
         public int HValueWidth {
@@ -64,6 +75,12 @@ namespace RTSEngine.Data {
             d.CopyTo(data, 0);
             GridWidth = HValueWidth - 1;
             GridDepth = HValueDepth - 1;
+            BVH = new BVH();
+        }
+
+        // Build Directly From OBJ File
+        public void BuildBVH(VertexPositionTexture[] verts, int[] inds) {
+            BVH.Build(verts, inds);
         }
 
         // Scale The Heights By A Certain Value
@@ -82,6 +99,12 @@ namespace RTSEngine.Data {
                 x <= 0 ? 0 : (x >= GridWidth - 1 ? GridWidth - 1 : (int)x),
                 z <= 0 ? 0 : (z >= GridDepth - 1 ? GridDepth - 1 : (int)z)
                 );
+        }
+
+        // Find The Worldspace For the Grid Location (x,z)
+        // TODO: Verify
+        public Vector2 UnMap(int x, int z) {
+            return new Vector2(ScaleX * ((float)x), ScaleZ * ((float)z));
         }
 
         // Retrieve Interpolated Height From The Heightmap
@@ -110,6 +133,16 @@ namespace RTSEngine.Data {
                 heights[(fz + 1) * HValueWidth + fx + 1],
                 rx, rz
                 );
+        }
+
+        // Does The Datum At This (x,z) Grid Location Indicate Collidable (Non-Passable)?
+        public bool IsCollidable(int x, int z) {
+            return (data[HeightMapIndex(x,z)] & MASK_COLLISION) == 1; 
+        }
+
+        // Convert A 2D Index Into a 1D Index
+        private int HeightMapIndex(int x, int z) {
+            return z*HValueWidth + x;
         }
     }
 }
