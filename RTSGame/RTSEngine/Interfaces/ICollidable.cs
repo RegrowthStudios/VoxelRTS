@@ -15,6 +15,7 @@ namespace RTSEngine.Interfaces {
 
         // The Center Of The Geometry
         Vector2 Center { get; set; }
+        float Height { get; set; }
 
         // TODO: Add Height Parameter
 

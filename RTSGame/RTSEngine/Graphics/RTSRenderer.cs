@@ -285,5 +285,28 @@ namespace RTSEngine.Graphics {
                 unitModel.DrawInstances(G);
             }
         }
+
+        public void GetSelectionBox(Vector2 screenMin, Vector2 screenMax, out OBB? obb, out Frustum? frustum) {
+            // TODO: Koshi
+            Vector2 ss = new Vector2(G.Viewport.Width, G.Viewport.Height);
+            screenMin /= ss;
+            screenMax /= ss;
+            float miny = 1 - screenMax.Y;
+            float maxy = 1 - screenMin.Y;
+            screenMin.Y = miny;
+            screenMax.Y = maxy;
+            screenMin *= 2f; screenMin -= Vector2.One;
+            screenMax *= 2f; screenMax -= Vector2.One;
+            obb = null;
+            frustum = new Frustum(mView, mProj, Vector2.Min(screenMin, screenMax), Vector2.Max(screenMin, screenMax));
+        }
+        public Ray GetViewRay(Vector2 screenPos) {
+            Ray r = new Ray();
+            r.Position = G.Viewport.Unproject(new Vector3(screenPos, 0), mProj, mView, Matrix.Identity);
+            r.Direction = G.Viewport.Unproject(new Vector3(screenPos, 1), mProj, mView, Matrix.Identity);
+            r.Direction -= r.Position;
+            r.Direction.Normalize();
+            return r;
+        }
     }
 }

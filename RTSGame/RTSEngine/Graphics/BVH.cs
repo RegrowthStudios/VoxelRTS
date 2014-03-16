@@ -3,8 +3,70 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace RTSEngine.Graphics {
+    public struct Triangle {
+        public Vector3 MinBound {
+            get { return Vector3.Min(Vector3.Min(P1, P2), P3); }
+        }
+        public Vector3 MaxBound {
+            get { return Vector3.Max(Vector3.Max(P1, P2), P3); }
+        }
+
+        public Vector3 P1, P2, P3;
+        public Vector3 N;
+
+        public Triangle(Vector3 p1, Vector3 p2, Vector3 p3) {
+            P1 = p1;
+            P2 = p2;
+            P3 = p3;
+            N = Vector3.Normalize(Vector3.Cross(P3 - P1, P2 - P1));
+        }
+
+        public bool Intersect(ref IntersectionRecord rec, Ray r) {
+            Plane p = new Plane(P1, P2, P3);
+            float? v = r.Intersects(p);
+            if(!v.HasValue) return false;
+
+
+
+            //// Find Ray's Normal Distance From The Triangle
+            //Vector3 disp = r.Position - P1;
+            //float dotDisp = Vector3.Dot(N, disp);
+
+            //// Check If Ray Is Behind Triangle
+            //if(dotDisp < 0) return false;
+
+            //// Find Ray's Direction Relative To Normal
+            //float sp = -Vector3.Dot(r.Direction, N);
+            //if(sp <= 0) return false;
+
+            // Find Time And Intersection With Plane
+            //float t = dotDisp / sp;
+            float t = v.Value;
+            Vector3 hit = r.Position + r.Direction * t;
+            Vector3 relHit = hit - P1;
+
+            // Find UV In Triangle
+            Vector3 axU = P3 - P1;
+            Vector3 axV = P2 - P1;
+            float distU = axU.Length();
+            float distV = axV.Length();
+            float pU = Vector3.Dot(relHit, axU / distU);
+            if(pU < 0 || pU > distU) return false;
+            float pV = Vector3.Dot(relHit, axV / distV);
+            if(pV < 0 || pV > distV) return false;
+
+            rec.T = t;
+            return true;
+        }
+    }
+
+    public struct IntersectionRecord {
+        public float T;
+    }
+
     public class BVHNode {
         public BoundingBox bound;
         public Vector3 MinBound {
@@ -192,23 +254,13 @@ namespace RTSEngine.Graphics {
         }
     }
 
-    public class Surface {
-        public BoundingBox bounds;
-        public Vector3 MinBound {
-            get { return bounds.Min; }
-        }
-        public Vector3 MaxBound {
-            get { return bounds.Max; }
-        }
-
-    }
-    public struct IntersectionRecord {
-        public float t;
-    }
-
     public class BVH {
-        private List<Surface> surfaces;
-        BVHNode root;
+        private static readonly TriAxisSorterX F_SORT_X = new TriAxisSorterX();
+        private static readonly TriAxisSorterY F_SORT_Y = new TriAxisSorterY();
+        private static readonly TriAxisSorterZ F_SORT_Z = new TriAxisSorterZ();
+
+        private List<Triangle> tris;
+        private BVHNode root;
 
         public BVH() {
 
@@ -216,25 +268,23 @@ namespace RTSEngine.Graphics {
 
         public bool Intersect(ref IntersectionRecord outRecord, Ray rayIn) {
             if(!root.Intersects(rayIn)) return false;
-            return IntersectHelper(root, outRecord, rayIn);
+            return IntersectHelper(root, ref outRecord, rayIn);
         }
         private bool IntersectHelper(BVHNode node, ref IntersectionRecord outRecord, Ray rayIn) {
-            // TODO 17
             if(node.IsLeaf) {
-                outRecord.t = float.PositiveInfinity;
+                outRecord.T = float.PositiveInfinity;
                 IntersectionRecord tempRec = new IntersectionRecord();
                 for(int i = node.surfaceIndexStart; i < node.surfaceIndexEnd; i++) {
-                    if(surfaces[i].intersect(tempRec, rayIn)) {
+                    if(tris[i].Intersect(ref tempRec, rayIn)) {
                         // check if current t value is smaller
-                        if(tempRec.t < outRecord.t) {
+                        if(tempRec.T < outRecord.T) {
                             outRecord = tempRec;
                         }
                     }
                 }
-                return !float.IsInfinite(outRecord.t);
+                return !float.IsPositiveInfinity(outRecord.T);
             }
             else {
-
                 float t1 = node.lChild.IntersectTime(rayIn);
                 float t2 = node.rChild.IntersectTime(rayIn);
                 if(float.IsNaN(t1)) {
@@ -250,7 +300,7 @@ namespace RTSEngine.Graphics {
                 lHit = IntersectHelper(node.lChild, ref lRec, rayIn);
                 rHit = IntersectHelper(node.rChild, ref rRec, rayIn);
                 if(lHit && rHit)
-                    outRecord = lRec.t <= rRec.t ? lRec : rRec;
+                    outRecord = lRec.T <= rRec.T ? lRec : rRec;
                 else if(lHit)
                     outRecord = lRec;
                 else if(rHit)
@@ -261,87 +311,67 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void Build(List<Surface> s) {
-            surfaces = s;
-            root = CreateTree(0, surfaces.Count);
+        public void Build(VertexPositionTexture[] verts, int[] inds) {
+            tris = new List<Triangle>(inds.Length / 3);
+            for(int i = 0; i < inds.Length; ) {
+                int i1 = inds[i++];
+                int i2 = inds[i++];
+                int i3 = inds[i++];
+                tris.Add(new Triangle(
+                    verts[i1].Position,
+                    verts[i2].Position,
+                    verts[i3].Position
+                    ));
+            }
+            root = CreateTree(0, tris.Count);
         }
         private BVHNode CreateTree(int start, int end) {
             Vector3 minB = new Vector3(float.MaxValue);
             Vector3 maxB = new Vector3(-float.MaxValue);
-            Vector3 sMin, sMax;
             for(int i = start; i < end; i++) {
-                Surface s = surfaces[i];
-
-                sMin = s.MinBound;
-                sMax = s.MaxBound;
-
-                // compute min bound
-                minB.X = Math.Min(minB.X, sMin.X);
-                minB.Y = Math.Min(minB.Y, sMin.Y);
-                minB.Z = Math.Min(minB.Z, sMin.Z);
-
-                // compute max bound
-                maxB.X = Math.Max(maxB.X, sMax.X);
-                maxB.Y = Math.Max(maxB.Y, sMax.Y);
-                maxB.Z = Math.Max(maxB.Z, sMax.Z);
+                minB = Vector3.Min(tris[i].MinBound, minB);
+                maxB = Vector3.Max(tris[i].MaxBound, maxB);
             }
 
-            // ==== Step 2 ====
-            // Check for the base case. 
-            // If the range [start, end) is small enough, just return a new leaf node.
-
-            int maxNumSurfaces = 1;
-            if(end - start <= maxNumSurfaces) {
+            // Check For Leaf Node Condition
+            if(end - start <= 1) {
                 return new BVHNode(minB, maxB, null, null, start, end);
             }
 
-            // ==== Step 3 ====
-            // Figure out the widest dimension (x or y or z).
-            // If x is the widest, set widestDim = 0. If y, set widestDim = 1. If z, set widestDim = 2.
-
-            int widestDim;
+            // Sort On Widest Dimension
             Vector3 dim = maxB - minB;
+            if(dim.X >= dim.Y && dim.X >= dim.Z) tris.Sort(start, end - start, F_SORT_X);
+            else if(dim.Y >= dim.Z) tris.Sort(start, end - start, F_SORT_Y);
+            else tris.Sort(start, end - start, F_SORT_Z);
 
-            if(dim.X >= dim.Y && dim.X >= dim.Z) {
-                widestDim = 0;
-            }
-            else if(dim.Y >= dim.Z) {
-                widestDim = 1;
-            }
-            else {
-                widestDim = 2;
-            }
-
-            // ==== Step 4 ====
-            // Sort surfaces according to the widest dimension.
-            // You can also implement O(n) randomized splitting algorithm.
-
-            surfaces.Sort()
-            Array.Sort(surfaces, start, end, c);
-
-            // ==== Step 5 ====
-            // Recursively create left and right children.
-
+            // Create Children
             int e = (start + end) / 2;
             BVHNode leftChild = CreateTree(start, e);
             BVHNode rightChild = CreateTree(e, end);
 
             return new BVHNode(minB, maxB, leftChild, rightChild, start, end);
         }
-        static int SurfComparisonX(Surface s1, Surface s2) {
-            float v1 = (s1.MaxBound.X + s1.MinBound.X) * 0.5f;
-            float v2 = (s2.MaxBound.X + s2.MinBound.X) * 0.5f;
-            return v1.CompareTo(v2);
+
+        class TriAxisSorterX : IComparer<Triangle> {
+            public int Compare(Triangle x, Triangle y) {
+                float v1 = (x.MaxBound.X + x.MinBound.X) * 0.5f;
+                float v2 = (y.MaxBound.X + y.MinBound.X) * 0.5f;
+                return v1.CompareTo(v2);
+            }
         }
-        static int SurfComparisonY(Surface s1, Surface s2) {
-            float v1 = (s1.MaxBound.Y + s1.MinBound.Y) * 0.5f;
-            float v2 = (s2.MaxBound.Y + s2.MinBound.Y) * 0.5f;
-            return v1.CompareTo(v2);
+        class TriAxisSorterY : IComparer<Triangle> {
+            public int Compare(Triangle x, Triangle y) {
+                float v1 = (x.MaxBound.Y + x.MinBound.Y) * 0.5f;
+                float v2 = (y.MaxBound.Y + y.MinBound.Y) * 0.5f;
+                return v1.CompareTo(v2);
+            }
         }
-        static int SurfComparisonZ(Surface s1, Surface s2) {
-            float v1 = (s1.MaxBound.Z + s1.MinBound.Z) * 0.5f;
-            float v2 = (s2.MaxBound.Z + s2.MinBound.Z) * 0.5f;
-            return v1.CompareTo(v2);
+        class TriAxisSorterZ : IComparer<Triangle> {
+            public int Compare(Triangle x, Triangle y) {
+                float v1 = (x.MaxBound.Z + x.MinBound.Z) * 0.5f;
+                float v2 = (y.MaxBound.Z + y.MinBound.Z) * 0.5f;
+                return v1.CompareTo(v2);
+            }
         }
     }
 }

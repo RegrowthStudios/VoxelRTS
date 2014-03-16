@@ -31,7 +31,10 @@ namespace RTSEngine.Data.Team {
         }
 
         // Unit Data
-        private List<RTSUnit> unitData;
+        public List<RTSUnit> UnitData{
+            get;
+            private set;
+        }
 
         // This Is All The Units In The Team
         private List<RTSUnitInstance> units;
@@ -62,7 +65,7 @@ namespace RTSEngine.Data.Team {
             ColorSheme = RTSTeamColorScheme.Default;
 
             // Teams Starts Out Empty
-            unitData = new List<RTSUnit>();
+            UnitData = new List<RTSUnit>();
             units = new List<RTSUnitInstance>();
             squads = new List<RTSSquad>();
 
@@ -71,12 +74,13 @@ namespace RTSEngine.Data.Team {
         }
 
         public void AddUnitType(RTSUnit t) {
-            unitData.Add(t);
+            UnitData.Add(t);
         }
 
+
         // Unit Addition And Removal
-        public RTSUnitInstance AddUnit(int type, Vector3 pos) {
-            RTSUnitInstance rui = new RTSUnitInstance(this, unitData[type], pos);
+        public RTSUnitInstance AddUnit(int type, Vector2 pos) {
+            RTSUnitInstance rui = new RTSUnitInstance(this, UnitData[type], pos);
             units.Add(rui);
             if(OnNewUnitSpawn != null)
                 OnNewUnitSpawn(rui);

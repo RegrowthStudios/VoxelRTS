@@ -11,6 +11,7 @@ namespace RTSEngine.Interfaces {
         RTSTeam Team { get; }
 
         // Location In The World
+        float Height { get; }
         Vector3 WorldPosition { get; }
 
         // Height-Agnostic Grid Location
@@ -18,6 +19,7 @@ namespace RTSEngine.Interfaces {
 
         // Collision Geometry
         ICollidable CollisionGeometry { get; }
+        BoundingBox BBox { get; }
 
         // Targetting Information
         IEntity Target { get; set; }

@@ -9,7 +9,7 @@ namespace RTSCS.Controllers {
     public class TargettingController : ITargettingController {
         private static readonly Random rand = new Random();
 
-        // The Entity That This TargettingController Is Controlling
+        // The Squad That This TargettingController Is Controlling
         public ISquad Squad {
             get;
             private set;

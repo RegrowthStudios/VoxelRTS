@@ -39,28 +39,39 @@ namespace RTSEngine.Controllers {
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
             // TODO: Use InputControllers From The Teams
+            foreach(var team in s.Teams) {
+                IInputController ic = team.Input;
+
+            }
         }
         private void ApplyInput(GameState s, float dt) {
 
         }
-        
+
         // Logic Stage
         private void ApplyLogic(GameState s, float dt) {
+            // Find Decisions
+            foreach(RTSTeam team in s.Teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
+                    if(unit.ActionController == null) continue;
+                    unit.ActionController.DecideAction(s, dt);
+                }
+            }
 
+            // Apply Controllers
+            foreach(RTSTeam team in s.Teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
+                    if(unit.ActionController == null) continue;
+                    unit.ActionController.ApplyAction(s, dt);
+                }
+            }
         }
-        
+
         // Physics Stage
         private void ResolvePhysics(GameState s, float dt) {
-            /* TODO: Collision
-             * Hash All Units To A Grid
-             * Apply Collisions To Entity Collision Geometries
-             * Clamp Geometry To Heightmap
-             * Update Entity To Geometry
-             */
 
             // Initialize hash grid
-            float gridSize = 1;
-            HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, gridSize);
+            HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, 2);
 
             // Move Geometry To The Unit's Location and hash into the grid
             foreach(RTSTeam team in s.Teams) {
@@ -71,37 +82,27 @@ namespace RTSEngine.Controllers {
             }
 
             // Use hash grid to perform collision using 3 by 3 grid around the geometry
-            Point count = hashGrid.gridCount;
-            for (int x = 0; x < count.X; x++) {
-                for (int y = 0; y < count.Y; y++) {
-                    hashGrid.HandleGridCollision(x, y, 0, 0);
-                    // Handle corner cases
-                    if (x > 0) 
-                        hashGrid.HandleGridCollision(x, y, -1, 0);
-                    if (y > 0)
-                        hashGrid.HandleGridCollision(x, y, 0, -1);
-                    if (x < count.X - 1)
-                        hashGrid.HandleGridCollision(x, y, 1, 0);
-                    if (y < count.Y - 1)
-                        hashGrid.HandleGridCollision(x, y, 0, 1);
-                    if (x > 0 && y > 0)
-                        hashGrid.HandleGridCollision(x, y, -1, -1);
-                    if (x > 0 && y < count.Y - 1)
-                        hashGrid.HandleGridCollision(x, y, -1, 1);
-                    if (x < count.X - 1 && y > 0)
-                        hashGrid.HandleGridCollision(x, y, 1, -1);
-                    if (x < count.X - 1 && y < count.Y - 1)
-                        hashGrid.HandleGridCollision(x, y, 1, 1);
-                }
+            foreach(Point p in hashGrid.Active) {
+                hashGrid.HandleGridCollision(p.X, p.Y);
+                hashGrid.HandleGridCollision(p.X, p.Y, -1, -1);
+                hashGrid.HandleGridCollision(p.X, p.Y, -1, 0);
+                hashGrid.HandleGridCollision(p.X, p.Y, -1, 1);
+                hashGrid.HandleGridCollision(p.X, p.Y, 0, -1);
+                hashGrid.HandleGridCollision(p.X, p.Y, 0, 1);
+                hashGrid.HandleGridCollision(p.X, p.Y, 1, -1);
+                hashGrid.HandleGridCollision(p.X, p.Y, 1, 0);
+                hashGrid.HandleGridCollision(p.X, p.Y, 1, 1);
             }
 
             // Move Unit's Location To The Geometry After Heightmap Collision
-            foreach (RTSTeam team in s.Teams) {
-                foreach (RTSUnitInstance unit in team.Units) {
+            foreach(RTSTeam team in s.Teams) {
+                foreach(RTSUnitInstance unit in team.Units) {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
-                    unit.CollisionGeometry.Center = unit.GridPosition;
+                    unit.GridPosition = unit.CollisionGeometry.Center;
+                    unit.Height = unit.CollisionGeometry.Height;
                 }
             }
+
         }
 
         // Cleanup Stage

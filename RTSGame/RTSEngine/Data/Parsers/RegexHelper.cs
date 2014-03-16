@@ -8,8 +8,8 @@ using Microsoft.Xna.Framework;
 namespace RTSEngine.Data.Parsers {
     public static class RegexHelper {
         public const string DATA_FILE_REGEX = @"[\w\.][\w|\s|.|\\|/]*";
-        public const string DATA_NUM_REGEX = @"\d*\.*\d*";
-        public const string DATA_INT_REGEX = @"\d+";
+        public const string DATA_NUM_REGEX = @"[\d\x2d]*\.*\d*";
+        public const string DATA_INT_REGEX = @"[\d\x2d]+";
         const string NUM_SPLIT = @"\s*[\x7c/,]\s*";
         static readonly Regex RGX_VEC_SPLIT = new Regex(NUM_SPLIT);
         public const string DATA_VEC2_REGEX = DATA_NUM_REGEX + NUM_SPLIT + DATA_NUM_REGEX;

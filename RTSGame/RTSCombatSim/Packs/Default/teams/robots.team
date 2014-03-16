@@ -8,3 +8,5 @@ TERTIARY        [0.7, 0.4, 0.0]
 
 // List Of All Unit Types Belonging To Team
 UNIT            [..\units\0]
+UNIT            [..\units\1]
+UNIT            [..\units\2]

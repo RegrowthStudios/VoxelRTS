@@ -25,6 +25,7 @@ namespace RTSEngine.Screens
         }
         public override void OnExit(GameTime gameTime)
         {
+
         }
         public override void Update(GameTime gameTime)
         {
