@@ -39,6 +39,10 @@ namespace RTSEngine.Controllers {
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
             // TODO: Use InputControllers From The Teams
+            foreach(var team in s.Teams) {
+                IInputController ic = team.Input;
+
+            }
         }
         private void ApplyInput(GameState s, float dt) {
 
