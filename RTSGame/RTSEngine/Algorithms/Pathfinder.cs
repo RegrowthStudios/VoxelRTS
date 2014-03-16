@@ -45,8 +45,6 @@ namespace RTSEngine.Algorithms {
 
     public struct SearchLocation {
         public Point Loc;
-        public bool IsOpen;
-        public bool IsVisited;
         public float GScore;
         public float FScore;
         public static int Compare(SearchLocation x, SearchLocation y) {
@@ -55,8 +53,6 @@ namespace RTSEngine.Algorithms {
 
         public SearchLocation(Point p) {
             Loc = p;
-            IsOpen = true;
-            IsVisited = false;
             GScore = 0;
             FScore = 0;
         }

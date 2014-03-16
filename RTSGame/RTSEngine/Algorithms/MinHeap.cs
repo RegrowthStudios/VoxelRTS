@@ -38,13 +38,31 @@ namespace RTSEngine.Algorithms {
 
         // TODO: Verify
         public void Delete(T o) {
-            int i = this.IndexOf(o);
-            this.Remove(o);
-            this.Heapify(i);
+            int i = 0;
+            bool done = false;
+            while(!done) {
+                if(this[i].Equals(o)) {
+                    this.RemoveAt(i);
+                    this.Heapify(i);
+                    return;
+                }
+                else {
+                    int left = 2 * i + 1;
+                    // Look At Left Child Next
+                    if(f(o, this[i]) < 0) {
+                        i = left;
+                    }
+                    // Look At Right Child Next
+                    else {
+                        i = left + 1;
+                    }
+                    done = !(i < this.Count);
+                }
+            }
         }
 
         // TODO: Verify (=)
-        public bool Contains(T o) {
+        new public bool Contains(T o) {
             int i = 0;
             bool done = false;
             while(!done) {
