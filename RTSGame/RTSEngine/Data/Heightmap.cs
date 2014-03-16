@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using RTSEngine.Graphics;
 
 namespace RTSEngine.Data {
     public class Heightmap {
@@ -12,6 +14,12 @@ namespace RTSEngine.Data {
         // Height Values
         private float[] heights;
         private byte[] data;
+
+        // The BVH (Yay)
+        public BVH BVH {
+            get;
+            private set;
+        }
 
         // Corresponds To Texture Size
         public int HValueWidth {
@@ -67,6 +75,12 @@ namespace RTSEngine.Data {
             d.CopyTo(data, 0);
             GridWidth = HValueWidth - 1;
             GridDepth = HValueDepth - 1;
+            BVH = new BVH();
+        }
+
+        // Build Directly From OBJ File
+        public void BuildBVH(VertexPositionTexture[] verts, int[] inds) {
+            BVH.Build(verts, inds);
         }
 
         // Scale The Heights By A Certain Value

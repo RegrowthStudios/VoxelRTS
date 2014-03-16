@@ -5,30 +5,40 @@ using System.Linq;
 using System.Text;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
+using Microsoft.Xna.Framework;
+using BlisterUI.Input;
 
 namespace RTSEngine.Controllers {
     public class PlayerInputController : InputController {
 
-        private ConcurrentQueue<GameInputEvent> eventQueue;
-        public RTSTeam Team { get; private set;  }
-
-        public PlayerInputController(GameState g)
-            : base(g) {
-            eventQueue = new ConcurrentQueue<GameInputEvent>();
-            
+        private Vector2 MousePressedPos;
+        private MouseButton MouseButtonPressed;
+        
+        public PlayerInputController(GameState g, RTSTeam t)
+            : base(g, t) {
+            SetToHook();
         }
 
-        //Adds Event To Concurrent Queue
-        public void AddEvent(GameInputEvent e) {
-            eventQueue.Enqueue(e);
+        public void SetToHook() {
+            MouseEventDispatcher.OnMouseRelease += new OnMouseRelease(OnMouseRelease);
+            MouseEventDispatcher.OnMousePress += new OnMousePress(OnMousePress);
         }
 
-        //Appends All Events In Concurrent Queue To Given List
-        void AppendEvents(LinkedList<GameInputEvent> l) {
-            GameInputEvent e;
-            while(eventQueue.TryDequeue(out e)) {
-                l.AddLast(e);
+        public void OnMouseRelease(Vector2 location, MouseButton b) {
+            if(b == MouseButtonPressed){
+                if(b == MouseButton.Left) {
+
+                }
+                else if(b == MouseButton.Right) {
+                    
+                }     
             }
         }
+
+        public void OnMousePress(Vector2 location, MouseButton b) {
+            MousePressedPos = location;
+            MouseButtonPressed = b; 
+        }
+
     }
 }
