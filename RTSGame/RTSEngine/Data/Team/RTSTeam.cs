@@ -79,7 +79,7 @@ namespace RTSEngine.Data.Team {
 
 
         // Unit Addition And Removal
-        public RTSUnitInstance AddUnit(int type, Vector3 pos) {
+        public RTSUnitInstance AddUnit(int type, Vector2 pos) {
             RTSUnitInstance rui = new RTSUnitInstance(this, UnitData[type], pos);
             units.Add(rui);
             if(OnNewUnitSpawn != null)

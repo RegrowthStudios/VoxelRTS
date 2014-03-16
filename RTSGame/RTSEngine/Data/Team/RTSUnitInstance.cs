@@ -19,21 +19,21 @@ namespace RTSEngine.Data.Team {
         // Unit's View Direction
         public Vector2 ViewDirection { get; private set; }
 
-        // 3-D Position Of The Unit
-        protected Vector3 worldPosition;
-        public Vector3 WorldPosition {
-            get { return worldPosition; }
+        // 2-D Position Of The Unit
+        private Vector2 gridPos;
+        public Vector2 GridPosition {
+            get { return gridPos; }
+            set { gridPos = value; }
         }
 
-        // 2-D Position Of The Unit
-        public Vector2 GridPosition {
-            get {
-                return new Vector2(worldPosition.X, worldPosition.Z);
-            }
-            set {
-                worldPosition.X = value.X;
-                worldPosition.Z = value.Y;
-            }
+        // 3-D Position Of The Unit
+        private float height;
+        public float Height {
+            get { return height; }
+            set { height = value; }
+        }
+        public Vector3 WorldPosition {
+            get { return new Vector3(gridPos.X, height, gridPos.Y); }
         }
 
         // Target Of The Unit
@@ -120,10 +120,11 @@ namespace RTSEngine.Data.Team {
         public event Action<ICombatEntity, IDestructibleEntity> OnAttackMade;
 
         // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
-        public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector3 position) {
+        public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector2 position) {
             Team = team;
             UnitData = data;
-            worldPosition = position;
+            gridPos = position;
+            height = 0;
             ViewDirection = Vector2.UnitX;
             Health = UnitData.Health;
             CapitalCost = UnitData.CapitalCost;
@@ -166,10 +167,10 @@ namespace RTSEngine.Data.Team {
 
         // Changes the Position of the Unit by Change
         public void Move(Vector2 change) {
-            worldPosition.X += change.X;
-            worldPosition.Y += change.Y;
-            if(change.X != 0 || change.Y != 0)
+            if(change.X != 0 || change.Y != 0) {
+                gridPos += change;
                 ViewDirection = Vector2.Normalize(change);
+            }
         }
     }
 }

@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\KMeans.cs" />
+    <Compile Include="Algorithms\MinHeap.cs" />
     <Compile Include="Algorithms\Pathfinder.cs" />
     <Compile Include="Controllers\CameraController.cs" />
     <Compile Include="Controllers\GameEngine.cs" />

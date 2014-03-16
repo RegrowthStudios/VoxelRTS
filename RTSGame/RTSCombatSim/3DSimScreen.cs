@@ -18,7 +18,6 @@ namespace RTSCS {
     public class _3DSimScreen : GameScreen<App> {
         private GameEngine engine;
 
-
         public override int Next {
             get {
                 return -1;
@@ -53,7 +52,7 @@ namespace RTSCS {
                 int t = 0;
                 foreach(var unitType in team.UnitData) {
                     for(int i = 0; i < unitType.MaxCount; i++) {
-                        team.AddUnit(t, new Vector3(200, 10, 200));
+                        team.AddUnit(t, new Vector2(200, 200));
                     }
                     t++;
                 }
