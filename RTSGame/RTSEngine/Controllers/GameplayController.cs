@@ -82,6 +82,7 @@ namespace RTSEngine.Controllers {
                 foreach(RTSUnitInstance unit in team.Units) {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
                     unit.GridPosition = unit.CollisionGeometry.Center;
+                    unit.Height = unit.CollisionGeometry.Height;
                 }
             }
 

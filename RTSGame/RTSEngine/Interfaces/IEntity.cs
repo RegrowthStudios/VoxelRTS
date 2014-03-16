@@ -11,6 +11,7 @@ namespace RTSEngine.Interfaces {
         RTSTeam Team { get; }
 
         // Location In The World
+        float Height { get; }
         Vector3 WorldPosition { get; }
 
         // Height-Agnostic Grid Location

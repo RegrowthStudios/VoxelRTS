@@ -22,6 +22,10 @@ namespace RTSEngine.Data {
             get;
             set;
         }
+        public float Height {
+            get;
+            set;
+        }
 
         // Size Parameters
         public float Radius {
@@ -40,6 +44,7 @@ namespace RTSEngine.Data {
             Radius = r;
             Center = c;
             IsStatic = isStatic;
+            Height = 0;
         }
 
         public object Clone() {
@@ -66,6 +71,10 @@ namespace RTSEngine.Data {
             get;
             set;
         }
+        public float Height {
+            get;
+            set;
+        }
 
         // Size Parameters
         private Vector2 size;
@@ -73,27 +82,28 @@ namespace RTSEngine.Data {
             get { return size.X; }
             set { size.X = value; }
         }
-        public float Height {
+        public float Depth {
             get { return size.Y; }
             set { size.Y = value; }
         }
         public float InnerRadius {
-            get { return Width < Height ? Width : Height; }
+            get { return Width < Depth ? Width : Depth; }
         }
         public float BoundingRadius {
-            get { return Width == Height ? Width * SQRT_2 : size.Length(); }
+            get { return Width == Depth ? Width * SQRT_2 : size.Length(); }
         }
 
         // Constructor
         public CollisionRect(float w, float h, Vector2 c, bool isStatic = false) {
             Width = w;
-            Height = h;
+            Depth = h;
             Center = c;
             IsStatic = isStatic;
+            Height = 0;
         }
 
         public object Clone() {
-            return new CollisionRect(Width, Height, Center, IsStatic);
+            return new CollisionRect(Width, Depth, Center, IsStatic);
         }
     }
     #endregion
@@ -165,73 +175,73 @@ namespace RTSEngine.Data {
             }
         }
         private static void HandleCollision(CollisionCircle circle, CollisionRect rect) {
-            if (circle.IsStatic && rect.IsStatic)
+            if(circle.IsStatic && rect.IsStatic)
                 return;
 
             // Reference: stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection/402010#402010
             Vector2 d = circle.Center - rect.Center;
-            float cornerDistSqr = (float)(Math.Pow(d.X - rect.Width / 2, 2) + Math.Pow(d.Y - rect.Height / 2, 2));
+            float cornerDistSqr = (float)(Math.Pow(d.X - rect.Width / 2, 2) + Math.Pow(d.Y - rect.Depth / 2, 2));
 
             // If circle and rectangle collide
             if(d.X <= rect.Width / 2 ||
-                d.Y <= rect.Height / 2 ||
+                d.Y <= rect.Depth / 2 ||
                 cornerDistSqr <= circle.Radius * circle.Radius) {
-                    // If circle and rectangle centers completely overlap,
-                    // slightly move one of the object's center so they don't completely overlap
-                    if (d.Length() == 0) {
-                        d.X = r.Next(-200, 201);
-                        d.Y = r.Next(-200, 201);
-                        if (d != Vector2.Zero) {
-                            d.Normalize();
-                            d *= 0.1f;
-                        }
-                        if (circle.IsStatic)
-                            rect.Center += d;
-                        else
-                            circle.Center += d;
-                        HandleCollision(circle, rect);
+                // If circle and rectangle centers completely overlap,
+                // slightly move one of the object's center so they don't completely overlap
+                if(d.Length() == 0) {
+                    d.X = r.Next(-200, 201);
+                    d.Y = r.Next(-200, 201);
+                    if(d != Vector2.Zero) {
+                        d.Normalize();
+                        d *= 0.1f;
                     }
+                    if(circle.IsStatic)
+                        rect.Center += d;
+                    else
+                        circle.Center += d;
+                    HandleCollision(circle, rect);
+                }
 
-                    // Create a collision boundary around the rectangle, in which collision occurs
-                    float top = rect.Center.Y + rect.Height / 2 + circle.Radius;
-                    float bottom = rect.Center.Y - rect.Height / 2 - circle.Radius;
-                    float left = rect.Center.X - rect.Width / 2 - circle.Radius;
-                    float right = rect.Center.X + rect.Width / 2 + circle.Radius;
-                    float distToTop = Math.Abs(circle.Center.Y - top);
-                    float distToBottom = Math.Abs(circle.Center.Y - bottom);
-                    float distToLeft = Math.Abs(circle.Center.X - left);
-                    float distToRight = Math.Abs(circle.Center.X - right);
+                // Create a collision boundary around the rectangle, in which collision occurs
+                float top = rect.Center.Y + rect.Depth / 2 + circle.Radius;
+                float bottom = rect.Center.Y - rect.Depth / 2 - circle.Radius;
+                float left = rect.Center.X - rect.Width / 2 - circle.Radius;
+                float right = rect.Center.X + rect.Width / 2 + circle.Radius;
+                float distToTop = Math.Abs(circle.Center.Y - top);
+                float distToBottom = Math.Abs(circle.Center.Y - bottom);
+                float distToLeft = Math.Abs(circle.Center.X - left);
+                float distToRight = Math.Abs(circle.Center.X - right);
 
-                    // Choose the closest distance to the collision boundary as the pushing direction
-                    Vector2 pushAmount = new Vector2(); // How much should be pushed relative to circle
-                    float min = Math.Min(Math.Min(Math.Min(distToTop, distToBottom), distToLeft), distToRight);
-                    pushAmount.Y += min == distToTop ? distToTop + OFFSET : 0;
-                    pushAmount.Y += min == distToBottom ? -distToBottom - OFFSET : 0;
-                    pushAmount.X += min == distToLeft ? -distToLeft - OFFSET : 0;
-                    pushAmount.X += min == distToRight ? distToRight + OFFSET : 0;
+                // Choose the closest distance to the collision boundary as the pushing direction
+                Vector2 pushAmount = new Vector2(); // How much should be pushed relative to circle
+                float min = Math.Min(Math.Min(Math.Min(distToTop, distToBottom), distToLeft), distToRight);
+                pushAmount.Y += min == distToTop ? distToTop + OFFSET : 0;
+                pushAmount.Y += min == distToBottom ? -distToBottom - OFFSET : 0;
+                pushAmount.X += min == distToLeft ? -distToLeft - OFFSET : 0;
+                pushAmount.X += min == distToRight ? distToRight + OFFSET : 0;
 
-                    // Only move the non-static object
-                    if (rect.IsStatic)
-                        circle.Center += pushAmount;
-                    else if (circle.IsStatic)
-                        rect.Center -= pushAmount;
-                    else {
-                        circle.Center += pushAmount / 2;
-                        rect.Center -= pushAmount / 2;
-                    }
+                // Only move the non-static object
+                if(rect.IsStatic)
+                    circle.Center += pushAmount;
+                else if(circle.IsStatic)
+                    rect.Center -= pushAmount;
+                else {
+                    circle.Center += pushAmount / 2;
+                    rect.Center -= pushAmount / 2;
+                }
 
             }
         }
         private static void HandleCollision(CollisionRect rect1, CollisionRect rect2) {
-            if (rect1.IsStatic && rect2.IsStatic)
+            if(rect1.IsStatic && rect2.IsStatic)
                 return;
 
             // bottom1 means the bottom Y coordinate of rect1
             // left2 means the left X coordinate of rect2
-            float bottom1 = rect1.Center.Y - rect1.Height / 2;
-            float bottom2 = rect2.Center.Y - rect2.Height / 2;
-            float top1 = rect1.Center.Y + rect1.Height / 2;
-            float top2 = rect2.Center.Y + rect2.Height / 2;
+            float bottom1 = rect1.Center.Y - rect1.Depth / 2;
+            float bottom2 = rect2.Center.Y - rect2.Depth / 2;
+            float top1 = rect1.Center.Y + rect1.Depth / 2;
+            float top2 = rect2.Center.Y + rect2.Depth / 2;
             float left1 = rect1.Center.X - rect1.Width / 2;
             float left2 = rect2.Center.X - rect2.Width / 2;
             float right1 = rect1.Center.X + rect1.Width / 2;
@@ -242,14 +252,14 @@ namespace RTSEngine.Data {
                 // If two rectangle centers completely overlap,
                 // slightly move one of the object's center so they don't completely overlap
                 Vector2 d = rect2.Center - rect1.Center;
-                if (d.Length() == 0) {
+                if(d.Length() == 0) {
                     d.X = r.Next(-200, 201);
                     d.Y = r.Next(-200, 201);
-                    if (d != Vector2.Zero) {
+                    if(d != Vector2.Zero) {
                         d.Normalize();
                         d *= 0.1f;
                     }
-                    if (rect1.IsStatic)
+                    if(rect1.IsStatic)
                         rect2.Center += d;
                     else
                         rect1.Center += d;
@@ -305,7 +315,8 @@ namespace RTSEngine.Data {
 
         // Clamp The Geometry To The Heightmap
         public static void CollideHeightmap(ICollidable o, Heightmap map) {
-            // TODO: Use The Map For Height Resolution (If Non-static)
+            if(!o.IsStatic)
+                o.Height = map.HeightAt(o.Center.X, o.Center.Y);
         }
     }
 }
