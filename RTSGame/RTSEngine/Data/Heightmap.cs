@@ -6,6 +6,9 @@ using Microsoft.Xna.Framework;
 
 namespace RTSEngine.Data {
     public class Heightmap {
+        // Bit Masks
+        private const int MASK_COLLISION = 0x01; 
+
         // Height Values
         private float[] heights;
         private byte[] data;
@@ -84,6 +87,12 @@ namespace RTSEngine.Data {
                 );
         }
 
+        // Find The Worldspace For the Grid Location (x,z)
+        // TODO: Verify
+        public Vector2 UnMap(int x, int z) {
+            return new Vector2(ScaleX * ((float)x), ScaleZ * ((float)z));
+        }
+
         // Retrieve Interpolated Height From The Heightmap
         private float Bilerp(float v1, float v2, float v3, float v4, float rx, float rz) {
             return MathHelper.Lerp(
@@ -110,6 +119,16 @@ namespace RTSEngine.Data {
                 heights[(fz + 1) * HValueWidth + fx + 1],
                 rx, rz
                 );
+        }
+
+        // Does The Datum At This (x,z) Grid Location Indicate Collidable (Non-Passable)?
+        public bool IsCollidable(int x, int z) {
+            return (data[HeightMapIndex(x,z)] & MASK_COLLISION) == 1; 
+        }
+
+        // Convert A 2D Index Into a 1D Index
+        private int HeightMapIndex(int x, int z) {
+            return z*HValueWidth + x;
         }
     }
 }
