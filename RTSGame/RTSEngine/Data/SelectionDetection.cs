@@ -12,10 +12,10 @@ namespace RTSEngine.Data {
         public Frustum(Matrix mView, Matrix mProj, Vector2 min, Vector2 max) {
             // Transform Projection Matrix
             Vector2 s = (max - min) * 0.5f;
-            Matrix ms = Matrix.CreateScale(s.X, s.Y, 1);
+            Matrix ms = Matrix.CreateScale(1f / s.X, 1f / s.Y, 1);
             Vector2 o = (max + min) * 0.5f;
-            Matrix mt = Matrix.CreateTranslation(o.X, o.Y, 0);
-            frustum = new BoundingFrustum(mView * mProj);
+            Matrix mt = Matrix.CreateTranslation(-o.X, -o.Y, 0);
+            frustum = new BoundingFrustum(mView * mProj * mt * ms);
         }
     }
 

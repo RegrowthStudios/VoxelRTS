@@ -298,7 +298,7 @@ namespace RTSEngine.Graphics {
             screenMin *= 2f; screenMin -= Vector2.One;
             screenMax *= 2f; screenMax -= Vector2.One;
             obb = null;
-            frustum = new Frustum(mView, mProj, screenMin, screenMax);
+            frustum = new Frustum(mView, mProj, Vector2.Min(screenMin, screenMax), Vector2.Max(screenMin, screenMax));
         }
         public Ray GetViewRay(Vector2 screenPos) {
             Ray r = new Ray();
