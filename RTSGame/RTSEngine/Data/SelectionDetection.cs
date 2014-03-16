@@ -45,9 +45,14 @@ namespace RTSEngine.Data {
             f.frustum.Contains(ref box, out ct);
             return ct != ContainmentType.Disjoint;
         }
-        public static bool Intersects(ref OBB b, ref BoundingBox box) {
-            // TODO: Detect
-            return false;
+
+        public static bool Intersects(ref OBB obb, ref BoundingBox box) {
+            // Overlap detection
+            if (obb.max.X < box.Min.X) return false; // obb is left of box
+            if (obb.min.X > box.Max.X) return false; // obb is right of box
+            if (obb.max.Y < box.Min.Y) return false; // obb is above box
+            if (obb.min.Y > box.Max.Y) return false; // obb is below box
+            return true; // boxes overlap
         }
     }
 }
