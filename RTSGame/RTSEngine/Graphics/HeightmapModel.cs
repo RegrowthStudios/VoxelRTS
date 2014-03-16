@@ -34,7 +34,7 @@ namespace RTSEngine.Graphics {
             get { return TrianglesPrimary + TrianglesSecondary; }
         }
 
-        public HeightmapModel(GraphicsDevice g, Vector3 size, Stream sPrimary, Stream sSecondary = null) {
+        public HeightmapModel(GraphicsDevice g, Vector3 size, Action<VertexPositionTexture[], int[]> f, Stream sPrimary, Stream sSecondary = null) {
             IsDisposed = false;
             vbPrimary = null;
             ibPrimary = null;
@@ -82,6 +82,7 @@ namespace RTSEngine.Graphics {
             vbPrimary.SetData(verts);
             ibPrimary = new IndexBuffer(g, IndexElementSize.ThirtyTwoBits, inds.Length, BufferUsage.WriteOnly);
             ibPrimary.SetData(inds);
+            f(verts, inds);
 
             if(sSecondary != null) {
                 // Read The Detail Model

@@ -25,7 +25,6 @@ namespace RTSEngine.Data {
         private float width;
         private float height;
         private Point gridCount;
-        private float gridSize;
 
         private List<Point> activeGrids;
         public IEnumerable<Point> Active {
@@ -64,13 +63,17 @@ namespace RTSEngine.Data {
             pos.Y *= gridCount.Y / height;
             int px = (int)pos.X;
             int py = (int)pos.Y;
+            if(px < 0) px = 0;
+            else if(px >= gridCount.X) px = gridCount.X - 1;
+            if(py < 0) py = 0;
+            else if(py >= gridCount.Y) py = gridCount.Y - 1;
 
             // Check If Active
             if(!grids[px, py].IsActive && !obj.IsStatic)
                 activeGrids.Add(new Point(px, py));
 
             // Add To Grid
-            grids[(int)pos.X, (int)pos.Y].Add(obj);
+            grids[px, py].Add(obj);
         }
 
         // Precondition This[x,y] Must Be Active

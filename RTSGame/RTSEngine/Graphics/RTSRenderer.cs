@@ -290,5 +290,13 @@ namespace RTSEngine.Graphics {
             // TODO: Koshi
             throw new NotImplementedException();
         }
+        public Ray GetViewRay(Vector2 screenPos) {
+            Ray r = new Ray();
+            r.Position = G.Viewport.Unproject(new Vector3(screenPos, 0), mProj, mView, Matrix.Identity);
+            r.Direction = G.Viewport.Unproject(new Vector3(screenPos, 1), mProj, mView, Matrix.Identity);
+            r.Direction -= r.Position;
+            r.Direction.Normalize();
+            return r;
+        }
     }
 }
