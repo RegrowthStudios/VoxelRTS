@@ -17,9 +17,9 @@ namespace RTSEngine.Data {
     }
 
     public class SelectEvent : GameInputEvent {
-        public RTSSquad Selected { get; private set; }   
-        public SelectEvent(RTSSquad s){
-            Selected = s;
+        public List<IEntity> Selected { get; private set; }   
+        public SelectEvent(List<IEntity> l){
+            Selected = l;
             action = Action.Select;
         }
     }

@@ -7,12 +7,14 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
 using BlisterUI.Input;
+using RTSEngine.Graphics;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Controllers {
     public class PlayerInputController : InputController {
 
-        private Vector2 MousePressedPos;
-        private MouseButton MouseButtonPressed;
+        private Vector2 mousePressedPos;
+        public RTSRenderer Renderer { get; set; }
         
         public PlayerInputController(GameState g, RTSTeam t)
             : base(g, t) {
@@ -25,19 +27,67 @@ namespace RTSEngine.Controllers {
         }
 
         public void OnMouseRelease(Vector2 location, MouseButton b) {
-            if(b == MouseButtonPressed){
-                if(b == MouseButton.Left) {
+
+            if(b == MouseButton.Left) {
+                OBB? obb;
+                Frustum? frustum;
+                BoundingBox box = new BoundingBox();
+                List<IEntity> selected = new List<IEntity>();
+                Renderer.GetSelectionBox(location, mousePressedPos, out obb, out frustum);
+                Frustum f = new Frustum();
+
+
+                if(obb != null) {
+                    for(int i = 0; i < GameState.Teams.Length; i++){
+                        foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
+                            //if(SelectionDetection.Intersects(f,box)){
+                            //    selected.Add(unit);
+                            //}
+                        }
+                    }
 
                 }
-                else if(b == MouseButton.Right) {
-                    
-                }     
+                else {
+                    for(int i = 0; i < GameState.Teams.Length; i++){
+                        foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
+                            //if(SelectionDetection.Intersects(frustum,box)){
+                            //    selected.Add(unit);
+                            //}
+                        }
+                    }
+                }
+
+                //AddEvent.(new SelectEvent(selected));
+
             }
+   
+            
         }
 
         public void OnMousePress(Vector2 location, MouseButton b) {
-            MousePressedPos = location;
-            MouseButtonPressed = b; 
+        
+            if(b == MouseButton.Right) {  
+                BoundingBox box;
+                IDestructibleEntity target;
+                for(int i = 0; i < GameState.Teams.Length; i++) {
+                    foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
+                       // if(Ray.Intersects(box) != null) {
+                         //   target = unit;
+                       // }
+                    }
+                }
+
+                //if(target == null) {
+                //    AddEvent(new SetWayPoint(location));
+                //}
+                //else {
+                //    AddEvent(new SetTargetEvent(target);
+                //}
+            }
+            else if(b == MouseButton.Left) {
+                mousePressedPos = location;
+            }
+            
         }
 
     }

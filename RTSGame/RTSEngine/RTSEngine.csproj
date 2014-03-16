@@ -84,7 +84,6 @@
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Interfaces\IInputController.cs" />
     <Compile Include="Screens\GameSelectScreen.cs" />
-    <Compile Include="Screens\Class1.cs" />
     <Compile Include="Screens\SquadCommanderScreen.cs" />
     <Compile Include="Screens\InduZtryScreen.cs" />
     <Compile Include="Interfaces\EntityControllers.cs" />
