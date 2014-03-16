@@ -18,10 +18,10 @@ namespace RTSEngine.Controllers {
         
         public PlayerInputController(GameState g, RTSTeam t)
             : base(g, t) {
-            SetToHook();
+            RegisterWithEvents();
         }
 
-        public void SetToHook() {
+        public void RegisterWithEvents() {
             MouseEventDispatcher.OnMouseRelease += new OnMouseRelease(OnMouseRelease);
             MouseEventDispatcher.OnMousePress += new OnMousePress(OnMousePress);
         }
@@ -56,12 +56,9 @@ namespace RTSEngine.Controllers {
                 }   
                 AddEvent(new SelectEvent(selected));
             }
-   
-            
         }
 
-        public void OnMousePress(Vector2 location, MouseButton b) {
-        
+        public void OnMousePress(Vector2 location, MouseButton b) {  
             if(b == MouseButton.Right) {  
                 BoundingBox box = new BoundingBox(); //delete and use actual bounding boxes
                 IDestructibleEntity target = null;
@@ -75,7 +72,6 @@ namespace RTSEngine.Controllers {
                        }
                     }
                 }
-
                 if(target == null) {
                     AddEvent(new SetWayPointEvent(location));
                 }
@@ -85,8 +81,7 @@ namespace RTSEngine.Controllers {
             }
             else if(b == MouseButton.Left) {
                 mousePressedPos = location;
-            }
-            
+            }    
         }
 
     }
