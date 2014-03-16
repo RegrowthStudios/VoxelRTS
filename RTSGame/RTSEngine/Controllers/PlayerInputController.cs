@@ -32,7 +32,7 @@ namespace RTSEngine.Controllers {
                 Frustum? frustum;
                 BoundingBox box = new BoundingBox();   //delete and use actual bounding boxes
                 List<IEntity> selected = new List<IEntity>();
-                Renderer.GetSelectionBox(location, mousePressedPos, out obb, out frustum);
+                Renderer.GetSelectionBox(Vector2.Min(location, mousePressedPos), Vector2.Max(location, mousePressedPos), out obb, out frustum);
 
                 if(obb != null) {
                     OBB obb2 = (OBB) obb;
