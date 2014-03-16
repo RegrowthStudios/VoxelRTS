@@ -4,18 +4,21 @@ using System.Linq;
 using System.Text;
 
 namespace RTSEngine.Algorithms {
-    public class MinHeap<T> : List<T> where T : IComparable<T> {
-        public MinHeap(int capacity = 10)
-            : base(capacity) { }
-        public MinHeap(IEnumerable<T> collection, int collectionCount)
+    public class MinHeap<T> : List<T> {
+        Comparison<T> f;
+
+        public MinHeap(Comparison<T> _f, int capacity = 10)
+            : base(capacity) { f = _f; }
+        public MinHeap(Comparison<T> _f, IEnumerable<T> collection, int collectionCount)
             : base(collectionCount) {
+            f = _f;
             foreach(T o in collection) { Insert(o); }
         }
 
         public void Insert(T o) {
             Add(default(T));
             int i = Count - 1;
-            while(i > 0 && (this[i / 2].CompareTo(o) > 0)) {
+            while(i > 0 && f(this[i / 2], o) > 0) {
                 this[i] = this[i / 2];
                 i = i / 2;
             }
@@ -33,19 +36,31 @@ namespace RTSEngine.Algorithms {
             return min;
         }
 
+        // TODO: Verify
+        public void Delete(T o) {
+            int i = this.IndexOf(o);
+            this.Remove(o);
+            this.Heapify(i);
+        }
+
+        // TODO: Implement This In O(logn)
+        //public void Contains(T o) {
+
+        //}
+
         private void Heapify(int i) {
             int smallest;
             int l = 2 * i;
             int r = 2 * i + 1;
 
-            if(l < Count && (this[l].CompareTo(this[i]) < 0)) {
+            if(l < Count && f(this[l], this[i]) < 0) {
                 smallest = l;
             }
             else {
                 smallest = i;
             }
 
-            if(r < Count && (this[r].CompareTo(this[smallest]) < 0)) {
+            if(r < Count && f(this[r], this[smallest]) < 0) {
                 smallest = r;
             }
 
