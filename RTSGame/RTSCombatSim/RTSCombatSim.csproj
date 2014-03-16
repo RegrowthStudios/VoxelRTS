@@ -112,7 +112,9 @@
     <Content Include="Controllers\GodController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Controllers\SquadMovementController.cs" />
+    <Content Include="Controllers\SquadMovementController.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Graphics\CombatAnimator.cs" />
     <Content Include="Controllers\TargettingController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
