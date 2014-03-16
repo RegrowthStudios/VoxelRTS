@@ -124,7 +124,7 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < InstanceCount; i++) {
                 instVerts[i].World =
                     Matrix.CreateRotationY(
-                        (float)Math.Atan2(instances[i].ViewDirection.Y, instances[i].ViewDirection.X)
+                        (float)Math.Atan2(-instances[i].ViewDirection.Y, instances[i].ViewDirection.X)
                     ) *
                     Matrix.CreateTranslation(instances[i].WorldPosition)
                     ;

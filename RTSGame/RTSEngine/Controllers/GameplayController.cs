@@ -67,8 +67,7 @@ namespace RTSEngine.Controllers {
         private void ResolvePhysics(GameState s, float dt) {
 
             // Initialize hash grid
-            float gridSize = 2;
-            HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, gridSize);
+            HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, 2);
 
             // Move Geometry To The Unit's Location and hash into the grid
             foreach(RTSTeam team in s.Teams) {
