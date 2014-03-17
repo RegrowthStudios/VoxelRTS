@@ -18,6 +18,7 @@ using RTSEngine.Graphics;
 namespace RTSCS {
     public class _3DSimScreen : GameScreen<App> {
         private GameEngine engine;
+        private DevConsoleView dcv;
 
         public override int Next {
             get {
@@ -49,6 +50,7 @@ namespace RTSCS {
 
         public override void OnEntry(GameTime gameTime) {
             game.IsMouseVisible = true;
+            dcv = new DevConsoleView(G);
             MouseEventDispatcher.OnMousePress += OnMP;
             MouseEventDispatcher.OnMouseRelease += OnMR;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
@@ -84,15 +86,15 @@ namespace RTSCS {
                 }
             }
         }
-
-
         public override void OnExit(GameTime gameTime) {
             game.IsMouseVisible = false;
             MouseEventDispatcher.OnMousePress -= OnMP;
             MouseEventDispatcher.OnMouseRelease -= OnMR;
             KeyboardEventDispatcher.OnKeyPressed -= OnKP;
             KeyboardEventDispatcher.OnKeyReleased -= OnKR;
-
+            dcv.Dispose();
+            dcv = null;
+            DevConsole.Deactivate();
             engine.Dispose();
         }
 
@@ -137,6 +139,11 @@ namespace RTSCS {
         }
         public override void Draw(GameTime gameTime) {
             engine.Draw(G, 1f / 60f);
+            if(DevConsole.IsActivated) {
+                SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+                dcv.Draw(SB, Vector2.Zero);
+                SB.End();
+            }
         }
 
         Vector2 sStart, sEnd;
@@ -185,6 +192,12 @@ namespace RTSCS {
                     break;
                 case Keys.Q:
                     doAdd = true;
+                    break;
+                case DevConsole.ACTIVATION_KEY:
+                    if(DevConsole.IsActivated)
+                        DevConsole.Deactivate();
+                    else
+                        DevConsole.Activate();
                     break;
             }
         }
