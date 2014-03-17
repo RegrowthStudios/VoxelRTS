@@ -113,6 +113,7 @@ namespace RTSCS {
             loadData.Teams = new RTSTeamResult[2];
             loadData.Teams[0] = teamRes;
             loadData.Teams[1] = teamRes;
+           
             LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData, LoadCallback);
             isLoaded = true;
         }

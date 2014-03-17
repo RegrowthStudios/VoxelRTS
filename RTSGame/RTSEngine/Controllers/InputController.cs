@@ -13,6 +13,12 @@ namespace RTSEngine.Controllers {
         //Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
         
+        //Currently Selected Entities
+        public List<IEntity> Selected {
+            get;
+            set;
+        }
+
         //The RTSTeam of the InputController
         public RTSTeam Team { get; private set; }
 
@@ -35,7 +41,6 @@ namespace RTSEngine.Controllers {
         public void AppendEvents(LinkedList<GameInputEvent> l) {
             int count = eventQueue.Count;
             GameInputEvent e;
-
             while(count > 0) {
                 if(eventQueue.TryDequeue(out e)) {
                     l.AddLast(e);

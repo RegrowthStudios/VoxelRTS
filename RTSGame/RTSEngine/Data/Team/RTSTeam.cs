@@ -94,8 +94,7 @@ namespace RTSEngine.Data.Team {
         }
 
         // Squad Addition And Removal
-        public RTSSquad AddSquad() {
-            RTSSquad s = new RTSSquad();
+        public RTSSquad AddSquad(RTSSquad s) {
             squads.Add(s);
             return s;
         }

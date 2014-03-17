@@ -6,6 +6,7 @@ using RTSEngine.Data;
 using RTSEngine.Interfaces;
 using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
+using RTSEngine.Data.Parsers;
 
 namespace RTSEngine.Controllers {
     public class GameplayController {
@@ -14,8 +15,43 @@ namespace RTSEngine.Controllers {
             private set;
         }
 
+        private LinkedList<GameInputEvent> events;
+        private Dictionary<string, ReflectedEntityController> Controllers;
+
         public GameplayController() {
             TimePlayed = 0f;
+        }
+
+        private void PopulateControllers() {
+            // Add Controllers
+            Controllers = new Dictionary<string, ReflectedEntityController>();
+            CompiledEntityControllers cec;
+            string error;
+            string[] references = {
+               "System.dll",
+               "System.Core.dll",
+               "System.Data.dll",
+               "System.Xml.dll",
+               "System.Xml.Linq.dll",
+               @"lib\Microsoft.Xna.Framework.dll",
+               "RTSEngine.dll"
+           };
+            cec = EntityControllerParser.Compile(@"Controllers\ActionController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\MovementController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\NoMovementController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\CombatController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\TargettingController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                Controllers.Add(kv.Key, kv.Value);
+
         }
 
         // The Update Function
@@ -39,14 +75,65 @@ namespace RTSEngine.Controllers {
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
             // TODO: Use InputControllers From The Teams
+            events = new LinkedList<GameInputEvent>();
             foreach(var team in s.Teams) {
-                IInputController ic = team.Input;
-
+                if(team.Input != null) {
+                    team.Input.AppendEvents(events);
+                }
             }
+
         }
         private void ApplyInput(GameState s, float dt) {
 
+            GameInputEvent e;
+            GameEventType eType;
+                  
+            while(events.Count > 0) {
+                e = events.First();
+                eType = e.Action;
+
+                switch(eType) {
+                    case GameEventType.Select:
+                        SelectEvent selectEvent = e as SelectEvent;
+                        selectEvent.Team.Input.Selected = selectEvent.Selected;
+                        break;
+                    case GameEventType.SetWaypoint:
+                        SetWayPointEvent setWaypointEvent = e as SetWayPointEvent;
+                        List<IEntity> selected = setWaypointEvent.Team.Input.Selected;
+                        if(selected != null && selected.Count > 0) {
+                            foreach(var unit in selected) {
+                                RTSUnitInstance u = unit as RTSUnitInstance;
+                                if(u != null){
+                                    u.ActionController = Controllers["RTSCS.ActionController"].CreateInstance() as IActionController;
+                                    u.MovementController = Controllers["RTSCS.MovementController"].CreateInstance() as IMovementController;
+                                    u.MovementController.SetWaypoints(new Vector2[] { setWaypointEvent.Waypoint });
+                                 }
+                            }
+                        }
+                        break;
+                    case GameEventType.SetTarget:
+                        SetTargetEvent setTargetEvent = e as SetTargetEvent;
+                        selected = setTargetEvent.Team.Input.Selected;
+                        RTSSquad squad = new RTSSquad();
+                        if(selected != null && selected.Count > 0) {
+                            foreach(var unit in selected) {
+                                squad.AddCombatant((ICombatEntity)unit);
+                                RTSUnitInstance u = unit as RTSUnitInstance;
+                                u.Squad.RemoveAll(u2 => u2.Equals(u));
+                            }
+                        }
+                        setTargetEvent.Team.AddSquad(squad);
+                        squad.TargettingController = Controllers["RTSCS.TargettingController"].CreateInstance() as ITargettingController;
+                        squad.TargettingController.Target = setTargetEvent.Target;
+                        break;
+                    default:
+                        throw new Exception("Event does not exist.");
+                        break;
+                }
+                events.RemoveFirst();
+            }
         }
+
 
         // Logic Stage
         private void ApplyLogic(GameState s, float dt) {

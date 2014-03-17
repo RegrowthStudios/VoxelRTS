@@ -14,10 +14,14 @@ namespace RTSEngine.Interfaces {
     }
 
     public interface ITargettingController : ISquadController {
+        // Target Of The Squad
+        IDestructibleEntity Target { get; set; }
+
         // Find A Target For This Controller's Entity
         void FindTarget(GameState g, float dt);
 
         // Set A Target For This Controller's Entity
         void ChangeTarget(GameState g, float dt);
     }
+
 }

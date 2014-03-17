@@ -66,6 +66,11 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        public RTSSquad Squad {
+            get;
+            set;
+        }
+
         // Event Triggered When This Entity Receives Damage
         public event Action<IDestructibleEntity, int> OnDamage;
 

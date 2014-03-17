@@ -8,6 +8,9 @@ using RTSEngine.Data.Team;
 namespace RTSEngine.Interfaces {
     public interface IInputController {
 
+        // Currently Selected Entities
+        List<IEntity> Selected { get; set; }
+
         // Input Controllers Operate On A Team For Reference
         RTSTeam Team { get; }
 

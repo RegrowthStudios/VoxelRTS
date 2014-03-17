@@ -16,7 +16,11 @@ namespace RTSCS.Controllers {
         }
 
         // The Target Selected By Find Target
-        private IEntity target;
+        private IDestructibleEntity target;
+        public IDestructibleEntity Target {
+            get { return target; }
+            set { target = value; }
+        }
 
         // Constructors
         public TargettingController() {
