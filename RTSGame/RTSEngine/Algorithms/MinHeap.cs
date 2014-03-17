@@ -42,7 +42,8 @@ namespace RTSEngine.Algorithms {
             bool done = false;
             while(!done) {
                 if(this[i].Equals(o)) {
-                    this.RemoveAt(i);
+                    this[i] = this[Count - 1];
+                    RemoveAt(Count - 1);
                     this.Heapify(i);
                     return;
                 }
