@@ -24,6 +24,12 @@ namespace RTSEngine.Data {
             set;
         }
 
+        // Controller Dictionary
+        public Dictionary<string, ReflectedEntityController> Controllers {
+            get;
+            private set;
+        }
+
         // Constant List Of Teams
         public RTSTeam[] Teams {
             get;
@@ -43,6 +49,7 @@ namespace RTSEngine.Data {
             t.CopyTo(Teams, 0);
 
             // No Data Yet Available
+            Controllers = new Dictionary<string, ReflectedEntityController>();
             units = new RTSUnit[MAX_RTSUNIT_ID + 1];
             Map = null;
         }

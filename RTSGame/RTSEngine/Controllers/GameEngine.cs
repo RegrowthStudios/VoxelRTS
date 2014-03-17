@@ -53,6 +53,7 @@ namespace RTSEngine.Controllers {
             // Load Teams
             fLoad("Loading Teams", 0.2f);
             state = new GameState(LoadTeams(g, d.Teams));
+            PopulateControllers();
             for(int ti = 0; ti < state.Teams.Length; ti++) {
                 switch(t[ti]) {
                     case EngineLoadData.InputType.Player:
@@ -61,19 +62,17 @@ namespace RTSEngine.Controllers {
                         state.Teams[ti].Input = pic;
                         break;
                     case EngineLoadData.InputType.AI:
-                        //TODO: Make This Class
-                        //team.Input = new AIInputController(state, team);
+                        // TODO: Make This Class
+                        // team.Input = new AIInputController(state, team);
                         break;
                     case EngineLoadData.InputType.Environment:
 
                         break;
                     default:
                         throw new Exception("Type does not exist");
-                        break;
                 }
             }
-
-                fLoad("Teams Complete", 0.4f);
+            fLoad("Teams Complete", 0.4f);
 
             // Load The Map
             fLoad("Loading Map", 0.5f);
@@ -89,6 +88,35 @@ namespace RTSEngine.Controllers {
         #endregion
 
         // Data Parsing And Loading
+        private void PopulateControllers() {
+            // Add Controllers
+            CompiledEntityControllers cec;
+            string error;
+            string[] references = {
+               "System.dll",
+               "System.Core.dll",
+               "System.Data.dll",
+               "System.Xml.dll",
+               "System.Xml.Linq.dll",
+               @"lib\Microsoft.Xna.Framework.dll",
+               "RTSEngine.dll"
+           };
+            cec = EntityControllerParser.Compile(@"Controllers\ActionController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                state.Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\MovementController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                state.Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\NoMovementController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                state.Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\CombatController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                state.Controllers.Add(kv.Key, kv.Value);
+            cec = EntityControllerParser.Compile(@"Controllers\TargettingController.cs", references, out error);
+            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                state.Controllers.Add(kv.Key, kv.Value);
+        }
         private void LoadMap(GraphicsDevice g, DirectoryInfo dir) {
             // Parse Map Data
             HeightmapResult res = HeightmapParser.Parse(g, dir);

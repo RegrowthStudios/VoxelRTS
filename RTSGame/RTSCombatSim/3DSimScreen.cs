@@ -20,6 +20,10 @@ namespace RTSCS {
         private GameEngine engine;
         private DevConsoleView dcv;
 
+        Vector3 spawnLoc;
+        int team, unit;
+        bool doAdd, mPress;
+
         public override int Next {
             get {
                 return -1;
@@ -46,48 +50,21 @@ namespace RTSCS {
         public override void Destroy(GameTime gameTime) {
         }
 
-        ReflectedEntityController aC, mC;
-
         public override void OnEntry(GameTime gameTime) {
             game.IsMouseVisible = true;
             dcv = new DevConsoleView(G);
             MouseEventDispatcher.OnMousePress += OnMP;
-            MouseEventDispatcher.OnMouseRelease += OnMR;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
-            doAdd = false;
+            doAdd = mPress = false;
             team = 0;
             unit = 0;
 
             engine = game.LoadScreen.LoadedEngine;
-
-            string[] refs = new string[]  {
-                "System.dll",
-                "System.Data.dll",
-                "System.Core.dll",
-                "System.Xml.dll",
-                "System.Xml.Linq.dll",
-                "lib\\Microsoft.Xna.Framework.dll",
-                "RTSEngine.dll"
-            };
-            string err;
-            aC = EntityControllerParser.Compile(@"Controllers\ActionController.cs", refs, out err).Controllers["RTSCS.Controllers.ActionController"];
-            mC = EntityControllerParser.Compile(@"Controllers\MovementController.cs", refs, out err).Controllers["RTSCS.Controllers.MovementController"];
-
-            Vector2 p = new Vector2(engine.state.Map.Width, engine.state.Map.Depth) * 0.5f;
-            foreach(var t in engine.state.Teams) {
-                int ut = 0;
-                foreach(var ud in t.UnitData) {
-                    for(int i = 0; i < ud.MaxCount / 2; i++)
-                        t.AddUnit(ut, p);
-                    ut++;
-                }
-            }
         }
         public override void OnExit(GameTime gameTime) {
             game.IsMouseVisible = false;
             MouseEventDispatcher.OnMousePress -= OnMP;
-            MouseEventDispatcher.OnMouseRelease -= OnMR;
             KeyboardEventDispatcher.OnKeyPressed -= OnKP;
             KeyboardEventDispatcher.OnKeyReleased -= OnKR;
             dcv.Dispose();
@@ -96,43 +73,13 @@ namespace RTSCS {
             engine.Dispose();
         }
 
-        List<RTSUnitInstance> selected;
         public override void Update(GameTime gameTime) {
             engine.Update(1f / 60f);
 
-            //if(doSelect) {
-            //    selected = new List<RTSUnitInstance>();
-            //    OBB? obb;
-            //    Frustum? frustum;
-            //    engine.renderer.GetSelectionBox(sStart, sEnd, out obb, out frustum);
-            //    if(frustum.HasValue) {
-            //        Frustum f = frustum.Value;
-            //        foreach(var team in engine.state.Teams) {
-            //            foreach(var unit in team.Units) {
-            //                BoundingBox bb = unit.BBox;
-            //                if(SelectionDetection.Intersects(ref f, ref bb)) {
-            //                    selected.Add(unit);
-            //                }
-            //            }
-            //        }
-            //    }
-            //    doSelect = false;
-            //}
-
             // TODO: Omit Move All Units To The Mouse
-            if(doMove) {
-                if(doAdd) {
-                    engine.state.Teams[team].AddUnit(unit, new Vector2(move.X, move.Z));
-                }
-                //    else if(selected != null && selected.Count > 0) {
-                //        Vector2 gp = new Vector2(move.X, move.Z);
-                //        foreach(var unit in selected) {
-                //            unit.ActionController = aC.CreateInstance() as IActionController;
-                //            unit.MovementController = mC.CreateInstance() as IMovementController;
-                //            unit.MovementController.SetWaypoints(new Vector2[] { gp });
-                //        }
-                //    }
-                doMove = false;
+            if(doAdd && mPress) {
+                DevConsole.AddCommand(string.Format("spawn [{0},{1},{2},{3},{4}]", team, unit, 1, spawnLoc.X, spawnLoc.Z));
+                mPress = false;
             }
         }
         public override void Draw(GameTime gameTime) {
@@ -144,33 +91,15 @@ namespace RTSCS {
             }
         }
 
-        //Vector2 sStart, sEnd;
-        //bool doSelect;
-
-        Vector3 move;
-        bool doMove;
-
-        int team, unit;
-        bool doAdd;
         public void OnMP(Vector2 p, MouseButton b) {
-            /*if(b == MouseButton.Left) {
-                sStart = p;
-            }
-            else*/
             if(b == MouseButton.Right) {
                 Ray r = engine.renderer.GetViewRay(p);
                 IntersectionRecord rec = new IntersectionRecord();
                 if(engine.state.Map.BVH.Intersect(ref rec, r)) {
-                    move = r.Position + r.Direction * rec.T;
-                    doMove = true;
+                    spawnLoc = r.Position + r.Direction * rec.T;
+                    mPress = true;
                 }
             }
-        }
-        public void OnMR(Vector2 p, MouseButton b) {
-            //if(b == MouseButton.Left) {
-            //    sEnd = p;
-            //    doSelect = true;
-            //}
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
