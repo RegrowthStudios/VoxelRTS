@@ -15,7 +15,7 @@ namespace RTSEngine.Controllers {
 
         private Vector2 mousePressedPos;
         public RTSRenderer Renderer { get; set; }
-        
+
         public PlayerInputController(GameState g, RTSTeam t)
             : base(g, t) {
             RegisterWithEvents();
@@ -36,10 +36,10 @@ namespace RTSEngine.Controllers {
 
                 if(frustum.HasValue) {
                     Frustum f = frustum.Value;
-                    for(int i = 0; i < GameState.Teams.Length; i++){
+                    for(int i = 0; i < GameState.Teams.Length; i++) {
                         foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
                             box = unit.BBox;
-                            if(SelectionDetection.Intersects(ref f,ref box)){
+                            if(SelectionDetection.Intersects(ref f, ref box)) {
                                 selected.Add(unit);
                             }
                         }
@@ -47,45 +47,45 @@ namespace RTSEngine.Controllers {
                 }
                 else if(obb.HasValue) {
                     OBB o = obb.Value;
-                    for(int i = 0; i < GameState.Teams.Length; i++){
+                    for(int i = 0; i < GameState.Teams.Length; i++) {
                         foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
                             box = unit.BBox;
-                            if(SelectionDetection.Intersects(ref o, ref box)){
+                            if(SelectionDetection.Intersects(ref o, ref box)) {
                                 selected.Add(unit);
                             }
                         }
                     }
-                }   
+                }
                 AddEvent(new SelectEvent(selected, Team));
             }
         }
 
-        public void OnMousePress(Vector2 location, MouseButton b) {  
+        public void OnMousePress(Vector2 location, MouseButton b) {
             if(b == MouseButton.Right) {
                 BoundingBox box;
                 IDestructibleEntity target = null;
-                Ray clickedLocation = Renderer.GetViewRay(location);
+                Ray viewRay = Renderer.GetViewRay(location);
                 float? dist;
                 for(int i = 0; i < GameState.Teams.Length; i++) {
                     foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
-                       box = unit.BBox;
-                       dist = clickedLocation.Intersects(box);
-                       if(dist != null) {
+                        box = unit.BBox;
+                        dist = viewRay.Intersects(box);
+                        if(dist != null) {
                             target = unit;
-                       }
+                        }
                     }
                 }
                 if(target == null) {
-                    AddEvent(new SetWayPointEvent(location, Team));
-                }
-                else {
-                    AddEvent(new SetTargetEvent(target, Team));
+                    IntersectionRecord rec = new IntersectionRecord();
+                    if(GameState.Map.BVH.Intersect(ref rec, viewRay)) {
+                        Vector3 rh = viewRay.Position + viewRay.Direction * rec.T;
+                        AddEvent(new SetWayPointEvent(new Vector2(rh.X, rh.Z), Team));
+                    }
                 }
             }
             else if(b == MouseButton.Left) {
                 mousePressedPos = location;
-            }    
+            }
         }
-
     }
 }

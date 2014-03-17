@@ -20,11 +20,12 @@ namespace RTSEngine.Controllers {
 
         public GameplayController() {
             TimePlayed = 0f;
+            Controllers = new Dictionary<string, ReflectedEntityController>();
+            PopulateControllers();
         }
 
         private void PopulateControllers() {
             // Add Controllers
-            Controllers = new Dictionary<string, ReflectedEntityController>();
             CompiledEntityControllers cec;
             string error;
             string[] references = {
@@ -87,7 +88,7 @@ namespace RTSEngine.Controllers {
 
             GameInputEvent e;
             GameEventType eType;
-                  
+
             while(events.Count > 0) {
                 e = events.First();
                 eType = e.Action;
@@ -103,11 +104,11 @@ namespace RTSEngine.Controllers {
                         if(selected != null && selected.Count > 0) {
                             foreach(var unit in selected) {
                                 RTSUnitInstance u = unit as RTSUnitInstance;
-                                if(u != null){
-                                    u.ActionController = Controllers["RTSCS.ActionController"].CreateInstance() as IActionController;
-                                    u.MovementController = Controllers["RTSCS.MovementController"].CreateInstance() as IMovementController;
+                                if(u != null) {
+                                    u.ActionController = Controllers["RTSCS.Controllers.ActionController"].CreateInstance() as IActionController;
+                                    u.MovementController = Controllers["RTSCS.Controllers.MovementController"].CreateInstance() as IMovementController;
                                     u.MovementController.SetWaypoints(new Vector2[] { setWaypointEvent.Waypoint });
-                                 }
+                                }
                             }
                         }
                         break;

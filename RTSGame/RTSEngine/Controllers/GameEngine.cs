@@ -52,8 +52,28 @@ namespace RTSEngine.Controllers {
 
             // Load Teams
             fLoad("Loading Teams", 0.2f);
-            state = new GameState(LoadTeams(g, d.Teams, t));
-            fLoad("Teams Complete", 0.4f);
+            state = new GameState(LoadTeams(g, d.Teams));
+            for(int ti = 0; ti < state.Teams.Length; ti++) {
+                switch(t[ti]) {
+                    case EngineLoadData.InputType.Player:
+                        var pic = new PlayerInputController(state, state.Teams[ti]);
+                        pic.Renderer = renderer;
+                        state.Teams[ti].Input = pic;
+                        break;
+                    case EngineLoadData.InputType.AI:
+                        //TODO: Make This Class
+                        //team.Input = new AIInputController(state, team);
+                        break;
+                    case EngineLoadData.InputType.Environment:
+
+                        break;
+                    default:
+                        throw new Exception("Type does not exist");
+                        break;
+                }
+            }
+
+                fLoad("Teams Complete", 0.4f);
 
             // Load The Map
             fLoad("Loading Map", 0.5f);
@@ -79,7 +99,7 @@ namespace RTSEngine.Controllers {
             state.Map = res.Data;
             renderer.Map = res.View;
         }
-        private RTSTeam[] LoadTeams(GraphicsDevice g, RTSTeamResult[] teamResults, EngineLoadData.InputType[] types) {
+        private RTSTeam[] LoadTeams(GraphicsDevice g, RTSTeamResult[] teamResults) {
             RTSTeam[] t = new RTSTeam[teamResults.Length];
             RTSTeam team;
             int i = 0;
@@ -89,22 +109,6 @@ namespace RTSEngine.Controllers {
                 foreach(DirectoryInfo unitDataDir in res.UnitTypes)
                     LoadUnit(g, team, unitDataDir);
                 t[i++] = team;
-
-                switch(types[i]) {
-                    case EngineLoadData.InputType.Player:
-                        team.Input = new PlayerInputController(state,team);
-                        break;
-                    case EngineLoadData.InputType.AI:
-                        //TODO: Make This Class
-                        //team.Input = new AIInputController(state, team);
-                        break;
-                    case EngineLoadData.InputType.Environment:
-
-                        break;
-                    default:
-                        throw new Exception("Type does not exist");
-                        break;
-                }
             }
             return t;
         }

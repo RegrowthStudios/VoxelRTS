@@ -100,38 +100,38 @@ namespace RTSCS {
         public override void Update(GameTime gameTime) {
             engine.Update(1f / 60f);
 
-            if(doSelect) {
-                selected = new List<RTSUnitInstance>();
-                OBB? obb;
-                Frustum? frustum;
-                engine.renderer.GetSelectionBox(sStart, sEnd, out obb, out frustum);
-                if(frustum.HasValue) {
-                    Frustum f = frustum.Value;
-                    foreach(var team in engine.state.Teams) {
-                        foreach(var unit in team.Units) {
-                            BoundingBox bb = unit.BBox;
-                            if(SelectionDetection.Intersects(ref f, ref bb)) {
-                                selected.Add(unit);
-                            }
-                        }
-                    }
-                }
-                doSelect = false;
-            }
+            //if(doSelect) {
+            //    selected = new List<RTSUnitInstance>();
+            //    OBB? obb;
+            //    Frustum? frustum;
+            //    engine.renderer.GetSelectionBox(sStart, sEnd, out obb, out frustum);
+            //    if(frustum.HasValue) {
+            //        Frustum f = frustum.Value;
+            //        foreach(var team in engine.state.Teams) {
+            //            foreach(var unit in team.Units) {
+            //                BoundingBox bb = unit.BBox;
+            //                if(SelectionDetection.Intersects(ref f, ref bb)) {
+            //                    selected.Add(unit);
+            //                }
+            //            }
+            //        }
+            //    }
+            //    doSelect = false;
+            //}
 
             // TODO: Omit Move All Units To The Mouse
             if(doMove) {
                 if(doAdd) {
                     engine.state.Teams[team].AddUnit(unit, new Vector2(move.X, move.Z));
                 }
-                else if(selected != null && selected.Count > 0) {
-                    Vector2 gp = new Vector2(move.X, move.Z);
-                    foreach(var unit in selected) {
-                        unit.ActionController = aC.CreateInstance() as IActionController;
-                        unit.MovementController = mC.CreateInstance() as IMovementController;
-                        unit.MovementController.SetWaypoints(new Vector2[] { gp });
-                    }
-                }
+                //    else if(selected != null && selected.Count > 0) {
+                //        Vector2 gp = new Vector2(move.X, move.Z);
+                //        foreach(var unit in selected) {
+                //            unit.ActionController = aC.CreateInstance() as IActionController;
+                //            unit.MovementController = mC.CreateInstance() as IMovementController;
+                //            unit.MovementController.SetWaypoints(new Vector2[] { gp });
+                //        }
+                //    }
                 doMove = false;
             }
         }
@@ -144,8 +144,8 @@ namespace RTSCS {
             }
         }
 
-        Vector2 sStart, sEnd;
-        bool doSelect;
+        //Vector2 sStart, sEnd;
+        //bool doSelect;
 
         Vector3 move;
         bool doMove;
@@ -153,10 +153,11 @@ namespace RTSCS {
         int team, unit;
         bool doAdd;
         public void OnMP(Vector2 p, MouseButton b) {
-            if(b == MouseButton.Left) {
+            /*if(b == MouseButton.Left) {
                 sStart = p;
             }
-            else if(b == MouseButton.Right) {
+            else*/
+            if(b == MouseButton.Right) {
                 Ray r = engine.renderer.GetViewRay(p);
                 IntersectionRecord rec = new IntersectionRecord();
                 if(engine.state.Map.BVH.Intersect(ref rec, r)) {
@@ -166,10 +167,10 @@ namespace RTSCS {
             }
         }
         public void OnMR(Vector2 p, MouseButton b) {
-            if(b == MouseButton.Left) {
-                sEnd = p;
-                doSelect = true;
-            }
+            //if(b == MouseButton.Left) {
+            //    sEnd = p;
+            //    doSelect = true;
+            //}
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
