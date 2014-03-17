@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using System.IO;
 
 namespace Microsoft.Xna.Framework.Graphics {
     #region Content Pipeline Context Data
@@ -58,6 +59,26 @@ namespace Microsoft.Xna.Framework.Graphics {
     }
 
     public static class XNASpriteFont {
+        private const string SF_XML_FORMAT =
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<XnaContent xmlns:Graphics=""Microsoft.Xna.Framework.Content.Pipeline.Graphics"">
+  <Asset Type=""Graphics:FontDescription"">
+    <FontName>{0}</FontName>
+    <Size>{1}</Size>
+    <Spacing>{2}</Spacing>
+    <UseKerning>{3}</UseKerning>
+    <Style>{4}</Style>
+    <!-- <DefaultCharacter>{5}</DefaultCharacter> -->
+    <CharacterRegions>
+      <CharacterRegion>
+        <Start>&#{6};</Start>
+        <End>&#{7};</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>
+";
+
         // Reflection Information For Private Fields
         static FieldInfo sfcTexture;
         static FieldInfo sfcGlyphs;
@@ -97,6 +118,7 @@ namespace Microsoft.Xna.Framework.Graphics {
             txcMipmaps = props.First((mi) => { return mi.Name.Equals("Mipmaps"); });
         }
 
+
         public static SpriteFont Compile(GraphicsDevice g, string file) {
             FontDescriptionImporter ei = new FontDescriptionImporter();
             FontDescription ec = ei.Import(file, new RTSImporterContext());
@@ -124,6 +146,33 @@ namespace Microsoft.Xna.Framework.Graphics {
 
             // Invoke Private SpriteFont Constructor
             return sfConstructor.Invoke(new object[] { texture, glyphs, cropping, charMap, lineSpacing, spacing, kerning, defaultChar }) as SpriteFont;
+        }
+        public static SpriteFont Compile(GraphicsDevice g,
+            string fontName,
+            int size,
+            int spacing = 0,
+            bool useKerning = true,
+            string style = "Regular",
+            char defaultChar = '*',
+            int cStart = 32,
+            int cEnd = 126
+            ) {
+            Random r = new Random();
+            string ufid = "";
+            ufid += (((ulong)r.Next() << 32) | (ulong)r.Next()).ToString();
+            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+            ufid += ".xml";
+            using(var s = File.Create(ufid)) {
+                StreamWriter sw = new StreamWriter(s);
+                sw.Write(SF_XML_FORMAT, fontName, size, spacing, useKerning ? "true" : "false", style, defaultChar, cStart, cEnd);
+                sw.Flush();
+            }
+            SpriteFont sf = Compile(g, ufid);
+            File.Delete(ufid);
+            return sf;
         }
     }
 }

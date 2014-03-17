@@ -53,6 +53,7 @@
     <Compile Include="Algorithms\MinHeap.cs" />
     <Compile Include="Algorithms\Pathfinder.cs" />
     <Compile Include="Controllers\CameraController.cs" />
+    <Compile Include="Controllers\DevConsole.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Controllers\InputController.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Data\UUIDGenerator.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Graphics\BVH.cs" />
+    <Compile Include="Graphics\DevConsoleView.cs" />
     <Compile Include="Graphics\HeightmapModel.cs" />
     <Compile Include="Graphics\LightningGenerator.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
