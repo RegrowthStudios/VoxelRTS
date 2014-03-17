@@ -52,7 +52,7 @@ namespace RTSCS.Controllers {
                 switch(anim) {
                     case AnimationType.Walking:
                         alCurrent = alWalk;
-                        alCurrent.Restart(false);
+                        alCurrent.Restart(true);
                         break;
                     default:
                         alCurrent = alRest;
