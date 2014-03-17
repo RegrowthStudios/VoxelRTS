@@ -43,12 +43,18 @@ namespace RTSCS.Controllers {
 
         // Performs The Critical Logic Of This Controller
         public void DecideMove(GameState g, float dt) {
+            if(waypoints == null) return;
             waypoint = waypoints[waypoints.Length - 1];
         }
 
         public void ApplyMove(GameState g, float dt) {
+            if(waypoints == null) return;
+
             Vector2 change = waypoint - entity.GridPosition;
             if(change != Vector2.Zero) {
+                if(Entity.AnimationController.Animation != AnimationType.Walking) {
+                    Entity.AnimationController.Animation = AnimationType.Walking;
+                }
                 float magnitude = change.Length();
                 Vector2 scaledChange = (change / magnitude) * entity.MovementSpeed * dt;
                 // This Logic Prevents The Unit From Hovering Around Its Goal
@@ -56,6 +62,9 @@ namespace RTSCS.Controllers {
                     entity.Move(change);
                 else
                     entity.Move(scaledChange);
+            }
+            else {
+                Entity.AnimationController.Animation = AnimationType.Rest;
             }
         }
     }

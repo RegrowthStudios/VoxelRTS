@@ -135,6 +135,16 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        private IAnimationController anController;
+        public IAnimationController AnimationController {
+            get { return anController; }
+            set {
+                anController = value;
+                if(anController != null)
+                    anController.SetEntity(this);
+            }
+        }
+
         // Combat Event
         public event Action<ICombatEntity, IDestructibleEntity> OnAttackMade;
 
@@ -192,5 +202,6 @@ namespace RTSEngine.Data.Team {
                 ViewDirection = Vector2.Normalize(change);
             }
         }
+
     }
 }

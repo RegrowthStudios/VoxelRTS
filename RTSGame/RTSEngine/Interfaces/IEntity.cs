@@ -39,6 +39,9 @@ namespace RTSEngine.Interfaces {
         // This Entity's Controller Of Controllers
         IActionController ActionController { get; set; }
 
+        // Entity's Animation Controller
+        IAnimationController AnimationController { get; set; }
+
         // Calls The Destruction Event
         void Destroy();
     }

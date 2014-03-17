@@ -35,7 +35,8 @@ namespace RTSCS.Controllers {
         public void ApplyAction(GameState g, float dt) {
             IMovingEntity mEntity = Entity as IMovingEntity;
             if(mEntity != null) mEntity.MovementController.ApplyMove(g, dt);
-        }
 
+            Entity.AnimationController.Update(g, dt);
+        }
     }
 }

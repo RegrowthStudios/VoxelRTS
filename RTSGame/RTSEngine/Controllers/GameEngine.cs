@@ -101,21 +101,15 @@ namespace RTSEngine.Controllers {
                @"lib\Microsoft.Xna.Framework.dll",
                "RTSEngine.dll"
            };
-            cec = EntityControllerParser.Compile(@"Controllers\ActionController.cs", references, out error);
-            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
-                state.Controllers.Add(kv.Key, kv.Value);
-            cec = EntityControllerParser.Compile(@"Controllers\MovementController.cs", references, out error);
-            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
-                state.Controllers.Add(kv.Key, kv.Value);
-            cec = EntityControllerParser.Compile(@"Controllers\NoMovementController.cs", references, out error);
-            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
-                state.Controllers.Add(kv.Key, kv.Value);
-            cec = EntityControllerParser.Compile(@"Controllers\CombatController.cs", references, out error);
-            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
-                state.Controllers.Add(kv.Key, kv.Value);
-            cec = EntityControllerParser.Compile(@"Controllers\TargettingController.cs", references, out error);
-            foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
-                state.Controllers.Add(kv.Key, kv.Value);
+            DirectoryInfo dir = new DirectoryInfo(@"Packs\Default\scripts");
+            var files = dir.GetFiles();
+            foreach(var fi in files) {
+                if(fi.Extension.EndsWith("cs")) {
+                    cec = EntityControllerParser.Compile(fi.FullName, references, out error);
+                    foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
+                        state.Controllers.Add(kv.Key, kv.Value);
+                }
+            }
         }
         private void LoadMap(GraphicsDevice g, DirectoryInfo dir) {
             // Parse Map Data

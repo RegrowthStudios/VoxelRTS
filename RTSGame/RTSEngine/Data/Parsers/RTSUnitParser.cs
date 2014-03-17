@@ -35,6 +35,9 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxRange = RegexHelper.GenerateVec2Int("RANGE");
         private static readonly Regex rgxTimer = RegexHelper.GenerateNumber("TIMER");
         private static readonly Regex rgxCritChance = RegexHelper.GenerateNumber("CRITCHANCE");
+        private static readonly Regex rgxCtrlMove = RegexHelper.Generate("CTRLMOVE", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlAnimation = RegexHelper.Generate("CTRLANIM", @"[\w\s\.]+");
 
         public static RTSUnitResult Parse(GraphicsDevice g, DirectoryInfo dir) {
             // Find The Information File
@@ -81,6 +84,9 @@ namespace RTSEngine.Data.Parsers {
             res.Data.BaseCombatData.MaxRange = buf[1];
             res.Data.BaseCombatData.CriticalChance = RegexHelper.ExtractDouble(rgxCritChance.Match(ms));
             res.Data.BaseCombatData.AttackTimer = RegexHelper.ExtractFloat(rgxTimer.Match(ms));
+            res.Data.DefaultActionController = RegexHelper.Extract(rgxCtrlAction.Match(ms));
+            res.Data.DefaultAnimationController = RegexHelper.Extract(rgxCtrlAnimation.Match(ms));
+            res.Data.DefaultMoveController = RegexHelper.Extract(rgxCtrlMove.Match(ms));
 
             FileInfo fiModel = RegexHelper.ExtractFile(rgxModel.Match(ms), rootDir);
             FileInfo fiAnim = RegexHelper.ExtractFile(rgxAnimation.Match(ms), rootDir);

@@ -128,6 +128,7 @@ namespace RTSEngine.Graphics {
                     ) *
                     Matrix.CreateTranslation(instances[i].WorldPosition)
                     ;
+                instVerts[i].AnimationFrame = instances[i].AnimationController.AnimationFrame;
             }
             if(rebuildDVB) {
                 dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);

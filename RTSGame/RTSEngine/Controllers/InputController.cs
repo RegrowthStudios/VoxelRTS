@@ -8,11 +8,11 @@ using System.Collections.Concurrent;
 using RTSEngine.Data.Team;
 
 namespace RTSEngine.Controllers {
-    public class InputController : IInputController{
+    public class InputController : IInputController {
 
         //Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
-        
+
         //Currently Selected Entities
         public List<IEntity> Selected {
             get;

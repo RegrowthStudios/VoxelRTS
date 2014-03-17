@@ -30,5 +30,9 @@ namespace RTSEngine.Data.Team {
         // ICollidableShape of The Unit
         public ICollidable ICollidableShape;
         public BoundingBox BBox;
+
+        public string DefaultMoveController;
+        public string DefaultActionController;
+        public string DefaultAnimationController;
     }
 }

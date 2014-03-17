@@ -78,8 +78,6 @@ namespace RTSEngine.Controllers {
                             foreach(var unit in selected) {
                                 RTSUnitInstance u = unit as RTSUnitInstance;
                                 if(u != null) {
-                                    u.ActionController = s.Controllers["RTSCS.Controllers.ActionController"].CreateInstance() as IActionController;
-                                    u.MovementController = s.Controllers["RTSCS.Controllers.MovementController"].CreateInstance() as IMovementController;
                                     u.MovementController.SetWaypoints(new Vector2[] { setWaypointEvent.Waypoint });
                                 }
                             }
@@ -116,8 +114,12 @@ namespace RTSEngine.Controllers {
                 switch(comm.Type) {
                     case DevCommandType.Spawn:
                         var dcs = comm as DevCommandSpawn;
-                        for(int ci = 0; ci < dcs.Count; ci++)
-                            s.Teams[dcs.TeamIndex].AddUnit(dcs.UnitIndex, new Vector2(dcs.X, dcs.Z));
+                        for(int ci = 0; ci < dcs.Count; ci++) {
+                            var unit = s.Teams[dcs.TeamIndex].AddUnit(dcs.UnitIndex, new Vector2(dcs.X, dcs.Z));
+                            unit.ActionController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultActionController].CreateInstance() as IActionController;
+                            unit.AnimationController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultAnimationController].CreateInstance() as IAnimationController;
+                            unit.MovementController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultMoveController].CreateInstance() as IMovementController;
+                        }
                         break;
                 }
             }

@@ -58,6 +58,7 @@
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\PlayerInputController.cs" />
+    <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\DevCommands.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
     <Compile Include="Data\HashGrid.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Graphics\LightningGenerator.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
+    <Compile Include="Interfaces\IAnimationController.cs" />
     <Compile Include="Interfaces\IInputController.cs" />
     <Compile Include="Interfaces\IWorkLoader.cs" />
     <Compile Include="Screens\GameSelectScreen.cs" />

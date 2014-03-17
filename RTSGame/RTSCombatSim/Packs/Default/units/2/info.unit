@@ -24,3 +24,7 @@ RANGE           [0 , 60]
 TIMER           [0.5]
 DAMAGE          [30 , 45]
 CRITCHANCE      [0.05]
+
+CTRLACTION        [RTSCS.Controllers.ActionController]
+CTRLMOVE        [RTSCS.Controllers.MovementController]
+CTRLANIM        [RTSCS.Controllers.AnimationController]
