@@ -14,8 +14,6 @@ using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
-using Microsoft.Xna.Framework.Input;
-using BlisterUI.Input;
 
 namespace RTSCS {
     public class _3DSimScreen : GameScreen<App> {
@@ -75,7 +73,19 @@ namespace RTSCS {
             mC = EntityControllerParser.Compile(@"Controllers\MovementController.cs", refs, out err).Controllers["RTSCS.Controllers.MovementController"];
             //cC = EntityControllerParser.Compile(@"Controllers\CombatController.cs", refs, out err).Controllers["RTSCS.Controllers.CombatController"];
             //tC = EntityControllerParser.Compile(@"Controllers\TargettingController.cs", refs, out err).Controllers["RTSCS.Controllers.TargettingController"];
+
+            Vector2 p = new Vector2(engine.state.Map.Width, engine.state.Map.Depth) * 0.5f;
+            foreach(var t in engine.state.Teams) {
+                int ut = 0;
+                foreach(var ud in t.UnitData) {
+                    for(int i = 0; i < ud.MaxCount / 2; i++)
+                        t.AddUnit(ut, p);
+                    ut++;
+                }
+            }
         }
+
+
         public override void OnExit(GameTime gameTime) {
             game.IsMouseVisible = false;
             MouseEventDispatcher.OnMousePress -= OnMP;

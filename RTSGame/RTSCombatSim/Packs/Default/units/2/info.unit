@@ -6,11 +6,11 @@ MODEL           [Robot.obj]
 TEXMAIN         [Model.png]
 TEXCOLOR        [Color.png]
 ANIMATION       [Robot.png]
-MAXCOUNT        [100]
+MAXCOUNT        [200]
 
 // Unit Data
 HEALTH          [120]
-SPEED           [110]
+SPEED           [3.3]
 COST            [20 , 2]
 
 // Collision Data

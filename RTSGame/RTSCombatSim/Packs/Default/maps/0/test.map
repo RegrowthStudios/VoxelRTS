@@ -5,9 +5,5 @@ DAT         [height.png]
 HMP         [map.obj]
 HTP         [map.png]
 
-// The Width And Depth Of The Map
-SZX         [200]
-SZZ         [200]
-
-// The Height Of The Map From Its Lowest Point
-SZY         [8]
+// The Size Of The Map
+SIZE        [200, 8, 200]
