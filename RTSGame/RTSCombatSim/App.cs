@@ -37,6 +37,7 @@ namespace RTSCS {
 
         public App()
             : base() {
+            graphics.IsFullScreen = UserConfig.UseFullscreen;
             LoadScreen = new RTSCS.LoadScreen(3);
             Sim3D = new _3DSimScreen();
         }
@@ -67,10 +68,11 @@ namespace RTSCS {
 
         #region Entry Point
         private static void Main(string[] args) {
-            Console.WriteLine("A New Instance Will Attempt To Be Run\n\n");
+            UserConfig.Load("user.config");
             using(app = new App()) {
                 app.Run();
             }
+            UserConfig.Save("user.config");
         }
         #endregion
     }

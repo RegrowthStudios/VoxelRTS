@@ -77,6 +77,7 @@
     <Compile Include="Data\Team\RTSUnitInstance.cs" />
     <Compile Include="Data\Team\RTSTeam.cs" />
     <Compile Include="Data\Team\RTSUnit.cs" />
+    <Compile Include="Data\UserConfig.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Graphics\BVH.cs" />
     <Compile Include="Graphics\HeightmapModel.cs" />
