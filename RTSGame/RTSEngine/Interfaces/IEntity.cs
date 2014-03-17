@@ -10,6 +10,9 @@ namespace RTSEngine.Interfaces {
         // The Entity's Team
         RTSTeam Team { get; }
 
+        // Entity's Unique ID
+        int UUID { get; }
+
         // Location In The World
         float Height { get; }
         Vector3 WorldPosition { get; }

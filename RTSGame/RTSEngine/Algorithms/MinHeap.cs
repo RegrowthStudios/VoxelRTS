@@ -24,7 +24,7 @@ namespace RTSEngine.Algorithms {
             }
             this[i] = o;
         }
-        public T Extract() {
+        public T Pop() {
             if(Count < 0) {
                 throw new ArgumentOutOfRangeException();
             }
@@ -37,14 +37,33 @@ namespace RTSEngine.Algorithms {
         }
 
         // TODO: Verify
-        public void Delete(T o) {
-            int i = this.IndexOf(o);
-            this.Remove(o);
-            this.Heapify(i);
+        new public void Remove(T o) {
+            int i = 0;
+            bool done = false;
+            while(!done) {
+                if(this[i].Equals(o)) {
+                    this[i] = this[Count - 1];
+                    RemoveAt(Count - 1);
+                    this.Heapify(i);
+                    return;
+                }
+                else {
+                    int left = 2 * i + 1;
+                    // Look At Left Child Next
+                    if(f(o, this[i]) < 0) {
+                        i = left;
+                    }
+                    // Look At Right Child Next
+                    else {
+                        i = left + 1;
+                    }
+                    done = !(i < this.Count);
+                }
+            }
         }
 
         // TODO: Verify (=)
-        public bool Contains(T o) {
+        new public bool Contains(T o) {
             int i = 0;
             bool done = false;
             while(!done) {
@@ -95,7 +114,7 @@ namespace RTSEngine.Algorithms {
                 int c = Count;
                 a = new T[c];
                 for(int i = 0; i < c; i++) {
-                    a[i] = Extract();
+                    a[i] = Pop();
                 }
             }
         }

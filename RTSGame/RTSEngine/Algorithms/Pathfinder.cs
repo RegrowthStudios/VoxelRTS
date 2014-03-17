@@ -45,8 +45,6 @@ namespace RTSEngine.Algorithms {
 
     public struct SearchLocation {
         public Point Loc;
-        public bool IsOpen;
-        public bool IsVisited;
         public float GScore;
         public float FScore;
         public static int Compare(SearchLocation x, SearchLocation y) {
@@ -55,8 +53,6 @@ namespace RTSEngine.Algorithms {
 
         public SearchLocation(Point p) {
             Loc = p;
-            IsOpen = true;
-            IsVisited = false;
             GScore = 0;
             FScore = 0;
         }
@@ -167,13 +163,13 @@ namespace RTSEngine.Algorithms {
             // TODO: Verify
             bool success = false;
             while(openSet.Count > 0) {
-                current = openSet.Extract();
+                current = openSet.Pop();
                 if(current.Loc == gGridPoint) {
                     success = true;
                     break;
                 }
 
-                openSet.Delete(current);
+                openSet.Remove(current);
                 closedSet.Add(current.Loc);
                 foreach(SearchLocation neighbor in Neighborhood(current)) {
                     if(closedSet.Contains(neighbor.Loc) || world.IsCollidable(neighbor.Loc.X,neighbor.Loc.Y)) continue;

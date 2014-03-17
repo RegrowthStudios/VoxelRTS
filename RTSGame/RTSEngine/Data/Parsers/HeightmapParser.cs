@@ -8,208 +8,275 @@ using System.Drawing;
 using BColor = System.Drawing.Color;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RTSEngine.Interfaces;
 using RTSEngine.Graphics;
+using System.Collections.Concurrent;
 
 namespace RTSEngine.Data.Parsers {
-    public struct HeightmapResult {
+    public class HeightmapResult {
         public Heightmap Data;
         public HeightmapModel View;
     }
 
-    class HeightmapReadData {
-        public const int DATA_COUNT = 8;
-
-        // Private Data
-        private string dat, hmp, htp, hms, hts;
-        private Vector3 size;
-
-        // Logical Accessors
-        public string HMDataBmp {
-            get { return dat; }
-            set {
-                dat = value;
-                isSet[0] = true;
-            }
-        }
-        public string HMModelPrimary {
-            get { return hmp; }
-            set {
-                hmp = value;
-                isSet[1] = true;
-            }
-        }
-        public string HMTexPrimary {
-            get { return htp; }
-            set {
-                htp = value;
-                isSet[2] = true;
-            }
-        }
-        public string HMModelSecondary {
-            get { return hms; }
-            set {
-                hms = value;
-                isSet[3] = true;
-            }
-        }
-        public string HMTexSecondary {
-            get { return hts; }
-            set {
-                hts = value;
-                isSet[4] = true;
-            }
-        }
-        public float SizeX {
-            get { return size.X; }
-            set {
-                size.X = value;
-                isSet[5] = true;
-            }
-        }
-        public float SizeZ {
-            get { return size.Z; }
-            set {
-                size.Z = value;
-                isSet[6] = true;
-            }
-        }
-        public float SizeY {
-            get { return size.Y; }
-            set {
-                size.Y = value;
-                isSet[7] = true;
-            }
+    public class HeightMapLoader : IWorkLoader {
+        // Data Detection
+        const string INFO_FILE_EXT = "map";
+        static readonly Regex rgxDataFile = RegexHelper.GenerateFile("DAT");
+        static readonly Regex rgxHModelPFile = RegexHelper.GenerateFile("HMP");
+        static readonly Regex rgxHTexPFile = RegexHelper.GenerateFile("HTP");
+        static readonly Regex rgxHModelSFile = RegexHelper.GenerateFile("HMS");
+        static readonly Regex rgxHTexSFile = RegexHelper.GenerateFile("HTS");
+        static readonly Regex rgxSize = RegexHelper.GenerateVec3("SIZE");
+        private static void ConvertPixel(BColor c, float[] h, byte[] d, int i) {
+            h[i] = 1f - (c.R / 255f);
+            d[i] = c.G > 128 ? (byte)0x01u : (byte)0x00u;
         }
 
-        public bool HasSecondary {
-            get { return HMModelSecondary != null && HMTexSecondary != null; }
+        // Load Arguments
+        private GraphicsDevice g;
+        private DirectoryInfo dir;
+        private HeightmapResult res;
+
+        // Work Data
+        public int WorkAmount {
+            get;
+            private set;
+        }
+        public int WorkComplete {
+            get;
+            private set;
+        }
+        public bool IsFinishedWorking {
+            get;
+            private set;
+        }
+        public bool IsLoadSuccessful {
+            get;
+            private set;
+        }
+        public ConcurrentQueue<string> Messages {
+            get;
+            private set;
         }
 
-        // How Much Data Has Been Set Already
-        private bool[] isSet;
-        public int ReadCount {
-            get {
-                return isSet.Aggregate(0, (i, b) => { return b ? (i + 1) : i; });
+        public HeightMapLoader(GraphicsDevice _g, DirectoryInfo _dir, HeightmapResult _res) {
+            g = _g;
+            dir = _dir;
+            res = _res;
+            WorkAmount = 1;
+            WorkComplete = 0;
+            IsFinishedWorking = false;
+            IsLoadSuccessful = false;
+            Messages = new ConcurrentQueue<string>();
+        }
+
+        public void Load() {
+            Messages.Enqueue("Loading Heightmap");
+
+            // Find The Information File
+            if(!dir.Exists) {
+                Messages.Enqueue("Directory " + dir + " Does Not Exist");
+                IsFinishedWorking = true;
+                return;
             }
-        }
-        public bool IsAllRead {
-            get { return ReadCount >= isSet.Length; }
-        }
 
-        public HeightmapReadData() {
-            isSet = new bool[DATA_COUNT];
-            dat = null;
-            hmp = null;
-            htp = null;
-            hms = null;
-            hts = null;
-            size = Vector3.One;
+            Messages.Enqueue("Trying To Find Info File");
+            var files = dir.GetFiles();
+            FileInfo infoFile = files.FirstOrDefault((f) => {
+                return f.Extension.ToLower().EndsWith(INFO_FILE_EXT);
+            });
+            if(infoFile == null) {
+                Messages.Enqueue("No Info File Present");
+                IsFinishedWorking = true;
+                return;
+            }
+            Messages.Enqueue("Found: " + infoFile.FullName);
+            WorkComplete++;
+
+            // Parse Data
+            string rootDir = dir.FullName;
+            using(Stream s = File.OpenRead(infoFile.FullName)) {
+                StreamReader sr = new StreamReader(s);
+                string ms = sr.ReadToEnd();
+
+                // Read All Data First
+                WorkAmount += 6;
+                Match[] matches = {
+                    rgxSize.Match(ms),
+                    rgxDataFile.Match(ms),
+                    rgxHModelPFile.Match(ms),
+                    rgxHTexPFile.Match(ms),
+                    rgxHModelSFile.Match(ms),
+                    rgxHTexSFile.Match(ms)
+                };
+                for(int i = 0; i < 4; i++) {
+                    WorkComplete++;
+                    if(!matches[i].Success) {
+                        Messages.Enqueue("Could Not Find Primary Data");
+                        IsFinishedWorking = true;
+                    }
+                }
+
+                Vector3 sz = RegexHelper.ExtractVec3(matches[0]);
+                FileInfo hfi = RegexHelper.ExtractFile(matches[1], rootDir);
+                FileInfo mpfi = RegexHelper.ExtractFile(matches[2], rootDir);
+                FileInfo tpfi = RegexHelper.ExtractFile(matches[3], rootDir);
+                if(!hfi.Exists || !mpfi.Exists || !tpfi.Exists ||
+                    !hfi.Extension.EndsWith("png") ||
+                    !mpfi.Extension.EndsWith("obj") ||
+                    !tpfi.Extension.EndsWith("png")
+                    ) {
+                    Messages.Enqueue("Primary Data Files Not In Correct Format");
+                }
+
+
+                // Check For Secondary Info
+                FileInfo msfi = null, tsfi = null;
+                if(matches[4].Success && matches[5].Success) {
+                    msfi = RegexHelper.ExtractFile(matches[4], rootDir);
+                    tsfi = RegexHelper.ExtractFile(matches[5], rootDir);
+                    if(msfi.Exists && tsfi.Exists)
+                        Messages.Enqueue("Detail Model Found");
+                    else {
+                        msfi = tsfi = null;
+                        Messages.Enqueue("No Detail Model Found");
+                    }
+                }
+                else {
+                    Messages.Enqueue("No Detail Model Found");
+                }
+                WorkComplete += 2;
+
+                // Read Height Data
+                Messages.Enqueue("Reading Height Data");
+                using(var bmp = Bitmap.FromFile(hfi.FullName) as Bitmap) {
+                    int w = bmp.Width;
+                    int h = bmp.Height;
+                    float[] hd = new float[w * h];
+                    byte[] cd = new byte[w * h];
+                    int i = 0;
+
+                    // Convert Bitmap
+                    WorkAmount += w * h;
+                    for(int y = 0; y < h; y++) {
+                        for(int x = 0; x < w; x++) {
+                            ConvertPixel(bmp.GetPixel(x, y), hd, cd, i++);
+                            WorkComplete++;
+                        }
+                    }
+                    res.Data = new Heightmap(hd, cd, w, h);
+
+                    // Apply Heightmap Size
+                    res.Data.Width = sz.X;
+                    res.Data.Depth = sz.Z;
+                    res.Data.ScaleHeights(sz.Y);
+                }
+
+                // Must Read Primary Model
+                using(var fs = File.OpenRead(mpfi.FullName)) {
+                    // Try To Read Secondary Data
+                    Stream fss = null;
+                    if(msfi != null) {
+                        fss = File.OpenRead(msfi.FullName);
+                    }
+                    res.View = new HeightmapModel(g, sz, res.Data.BuildBVH, fs, fss);
+                    if(fss != null)
+                        fss.Dispose();
+                }
+
+                // Read Primary Texture
+                using(var fs = File.OpenRead(tpfi.FullName)) {
+                    res.View.PrimaryTexture = Texture2D.FromStream(g, fs);
+                }
+
+                // Try To Read Secondary Texture
+                if(tsfi != null) {
+                    using(var fs = File.OpenRead(tsfi.FullName)) {
+                        res.View.SecondaryTexture = Texture2D.FromStream(g, fs);
+                    }
+                }
+            }
         }
     }
 
     public static class HeightmapParser {
         // Data Detection
         const string INFO_FILE_EXT = "map";
-        static readonly Regex rgxDataFile = RegexHelper.GenerateFile(@"DAT");
-        static readonly Regex rgxHModelPFile = RegexHelper.GenerateFile(@"HMP");
-        static readonly Regex rgxHTexPFile = RegexHelper.GenerateFile(@"HTP");
-        static readonly Regex rgxHModelSFile = RegexHelper.GenerateFile(@"HMS");
-        static readonly Regex rgxHTexSFile = RegexHelper.GenerateFile(@"HTS");
-        static readonly Regex rgxSizeXFile = RegexHelper.GenerateNumber(@"SZX");
-        static readonly Regex rgxSizeZFile = RegexHelper.GenerateNumber(@"SZZ");
-        static readonly Regex rgxSizeYFile = RegexHelper.GenerateNumber(@"SZY");
+        static readonly Regex rgxDataFile = RegexHelper.GenerateFile("DAT");
+        static readonly Regex rgxHModelPFile = RegexHelper.GenerateFile("HMP");
+        static readonly Regex rgxHTexPFile = RegexHelper.GenerateFile("HTP");
+        static readonly Regex rgxHModelSFile = RegexHelper.GenerateFile("HMS");
+        static readonly Regex rgxHTexSFile = RegexHelper.GenerateFile("HTS");
+        static readonly Regex rgxSize = RegexHelper.GenerateVec3("SIZE");
 
-        private static HeightmapReadData GetInfo(StreamReader s, string rootDir) {
-            string ms = s.ReadToEnd();
-            Match[] mPrim = new Match[] {
-                rgxDataFile.Match(ms),
-                rgxHModelPFile.Match(ms),
-                rgxHTexPFile.Match(ms),
-                rgxSizeXFile.Match(ms),
-                rgxSizeZFile.Match(ms),
-                rgxSizeYFile.Match(ms)
-            };
-            Match[] mSec = new Match[] {
-                rgxHModelSFile.Match(ms),
-                rgxHTexSFile.Match(ms)
-            };
-
-            // Check For All Necessary Data
-            foreach(var m in mPrim) {
-                if(!m.Success) throw new ArgumentException("Primary Data Was Not Found");
-            }
-            HeightmapReadData rd = new HeightmapReadData();
-            rd.HMDataBmp = Path.Combine(rootDir, mPrim[0].Groups[1].Value);
-            rd.HMModelPrimary = Path.Combine(rootDir, mPrim[1].Groups[1].Value);
-            rd.HMTexPrimary = Path.Combine(rootDir, mPrim[2].Groups[1].Value);
-            if(mSec[0].Success) rd.HMModelSecondary = Path.Combine(rootDir, mSec[0].Groups[1].Value);
-            if(mSec[1].Success) rd.HMTexSecondary = Path.Combine(rootDir, mSec[1].Groups[1].Value);
-            float v;
-            if(!float.TryParse(mPrim[3].Groups[1].Value, out v)) v = 1;
-            rd.SizeX = v;
-            if(!float.TryParse(mPrim[4].Groups[1].Value, out v)) v = 1;
-            rd.SizeZ = v;
-            if(!float.TryParse(mPrim[5].Groups[1].Value, out v)) v = 1;
-            rd.SizeY = v;
-            return rd;
-        }
         private static void ConvertPixel(BColor c, float[] h, byte[] d, int i) {
             h[i] = 1f - (c.R / 255f);
             d[i] = c.G > 128 ? (byte)0x01u : (byte)0x00u;
         }
         private static HeightmapResult ParseFromInfo(GraphicsDevice g, Stream s, string rootDir) {
             HeightmapResult res = new HeightmapResult();
+            StreamReader sr = new StreamReader(s);
+            string ms = sr.ReadToEnd();
 
             // Read All Data First
-            HeightmapReadData rd = GetInfo(new StreamReader(s), rootDir);
+            Vector3 sz = RegexHelper.ExtractVec3(rgxSize.Match(ms));
+            FileInfo hfi = RegexHelper.ExtractFile(rgxDataFile.Match(ms), rootDir);
+            FileInfo mpfi = RegexHelper.ExtractFile(rgxHModelPFile.Match(ms), rootDir);
+            FileInfo tpfi = RegexHelper.ExtractFile(rgxHTexPFile.Match(ms), rootDir);
+
+            FileInfo msfi = null, tsfi = null;
+            Match s1 = rgxHModelSFile.Match(ms);
+            Match s2 = rgxHTexSFile.Match(ms);
+            if(s1.Success && s2.Success) {
+                msfi = RegexHelper.ExtractFile(s1, rootDir);
+                tsfi = RegexHelper.ExtractFile(s2, rootDir);
+            }
 
             // Read Height Data
-            using(var bmp = Bitmap.FromFile(rd.HMDataBmp) as Bitmap) {
+            using(var bmp = Bitmap.FromFile(hfi.FullName) as Bitmap) {
                 int w = bmp.Width;
                 int h = bmp.Height;
                 float[] hd = new float[w * h];
                 byte[] cd = new byte[w * h];
                 int i = 0;
+
+                // Convert Bitmap
                 for(int y = 0; y < h; y++) {
                     for(int x = 0; x < w; x++) {
                         ConvertPixel(bmp.GetPixel(x, y), hd, cd, i++);
                     }
                 }
                 res.Data = new Heightmap(hd, cd, w, h);
+
+                // Apply Heightmap Size
+                res.Data.Width = sz.X;
+                res.Data.Depth = sz.Z;
+                res.Data.ScaleHeights(sz.Y);
             }
 
             // Must Read Primary Model
-            using(var fs = File.OpenRead(rd.HMModelPrimary)) {
+            using(var fs = File.OpenRead(mpfi.FullName)) {
                 // Try To Read Secondary Data
                 Stream fss = null;
-                if(rd.HasSecondary) {
-                    fss = File.OpenRead(rd.HMModelSecondary);
+                if(msfi != null) {
+                    fss = File.OpenRead(msfi.FullName);
                 }
-                res.View = new HeightmapModel(g, new Vector3(rd.SizeX, rd.SizeY, rd.SizeZ), res.Data.BuildBVH, fs, fss);
+                res.View = new HeightmapModel(g, sz, res.Data.BuildBVH, fs, fss);
                 if(fss != null)
                     fss.Dispose();
             }
 
             // Read Primary Texture
-            using(var fs = File.OpenRead(rd.HMTexPrimary)) {
+            using(var fs = File.OpenRead(tpfi.FullName)) {
                 res.View.PrimaryTexture = Texture2D.FromStream(g, fs);
             }
 
             // Try To Read Secondary Texture
-            if(rd.HasSecondary) {
-                using(var fs = File.OpenRead(rd.HMTexSecondary)) {
+            if(tsfi != null) {
+                using(var fs = File.OpenRead(tsfi.FullName)) {
                     res.View.SecondaryTexture = Texture2D.FromStream(g, fs);
                 }
             }
-
-            
-
-
-            // Apply Heightmap Size
-            res.Data.Width = rd.SizeX;
-            res.Data.Depth = rd.SizeZ;
-            res.Data.ScaleHeights(rd.SizeY);
-
             return res;
         }
         public static HeightmapResult Parse(GraphicsDevice g, DirectoryInfo dir) {

@@ -10,6 +10,12 @@ namespace RTSEngine.Data.Team {
         // RTSUnit Data Of The Unit
         public RTSUnit UnitData { get; private set; }
 
+        // Unique ID
+        public int UUID {
+            get;
+            private set;
+        }
+
         // RTSTeam Of The Unit
         public RTSTeam Team { get; private set; }
 
@@ -134,6 +140,7 @@ namespace RTSEngine.Data.Team {
 
         // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
         public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector2 position) {
+            UUID = UUIDGenerator.GetUUID();
             Team = team;
             UnitData = data;
             gridPos = position;

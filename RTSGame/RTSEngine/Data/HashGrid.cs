@@ -7,16 +7,16 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data {
     public struct Grid {
-        public List<ICollidable> NonStatic;
-        public List<ICollidable> Static;
+        public List<IEntity> NonStatic;
+        public List<IEntity> Static;
         public bool IsActive {
             get {
                 return NonStatic.Count > 0;
             }
         }
 
-        public void Add(ICollidable o) {
-            if(o.IsStatic) Static.Add(o);
+        public void Add(IEntity o) {
+            if(o.CollisionGeometry.IsStatic) Static.Add(o);
             else NonStatic.Add(o);
         }
     }
@@ -48,17 +48,17 @@ namespace RTSEngine.Data {
             grids = new Grid[gridCount.X, gridCount.Y];
             for(int x = 0; x < gridCount.X; x++) {
                 for(int y = 0; y < gridCount.Y; y++) {
-                    grids[x, y].Static = new List<ICollidable>();
-                    grids[x, y].NonStatic = new List<ICollidable>();
+                    grids[x, y].Static = new List<IEntity>();
+                    grids[x, y].NonStatic = new List<IEntity>();
                 }
             }
             activeGrids = new List<Point>();
         }
 
         // Add Object To One Of The Grids
-        public void AddObject(ICollidable obj) {
+        public void AddObject(IEntity obj) {
             // Canonical position of the object represented in 0~1
-            Vector2 pos = obj.Center;
+            Vector2 pos = obj.CollisionGeometry.Center;
             pos.X *= gridCount.X / width;
             pos.Y *= gridCount.Y / height;
             int px = (int)pos.X;
@@ -69,7 +69,7 @@ namespace RTSEngine.Data {
             else if(py >= gridCount.Y) py = gridCount.Y - 1;
 
             // Check If Active
-            if(!grids[px, py].IsActive && !obj.IsStatic)
+            if(!grids[px, py].IsActive && !obj.CollisionGeometry.IsStatic)
                 activeGrids.Add(new Point(px, py));
 
             // Add To Grid
@@ -91,25 +91,29 @@ namespace RTSEngine.Data {
             // Empty Check
             if(al2.Count + sl2.Count < 1) return;
 
-            // Active To All In Second Grid
-            foreach(ICollidable o1 in al1) {
-                foreach(ICollidable o2 in al2) CollisionController.ProcessCollision(o1, o2);
-                foreach(ICollidable o2 in sl2) CollisionController.ProcessCollision(o1, o2);
+            for(int i1 = 0; i1 < al1.Count; i1++) {
+                // Dynamic-Dynamic
+                for(int i2 = 0; i2 < al2.Count; i2++)
+                    // Get Rid Of Doubles
+                    if(al1[i1].UUID > al2[i2].UUID)
+                        CollisionController.ProcessCollision(al1[i1].CollisionGeometry, al2[i2].CollisionGeometry);
+                // Dynamic-Static
+                for(int i2 = 0; i2 < sl2.Count; i2++)
+                    CollisionController.ProcessCollision(al1[i1].CollisionGeometry, sl2[i2].CollisionGeometry);
             }
         }
         public void HandleGridCollision(int x, int y) {
             var al = grids[x, y].NonStatic;
             var sl = grids[x, y].Static;
 
-            // Active To All In Grid
-            foreach(ICollidable o1 in al) {
-                foreach(ICollidable o2 in al) {
-                    // Non-self Check
-                    if(o1 != o2)
-                        CollisionController.ProcessCollision(o1, o2);
-                }
-                foreach(ICollidable o2 in sl) CollisionController.ProcessCollision(o1, o2);
-            }
+            // Dynamic-Dynamic
+            for(int i1 = 0; i1 < al.Count - 1; i1++)
+                for(int i2 = i1 + 1; i2 < al.Count; i2++)
+                    CollisionController.ProcessCollision(al[i1].CollisionGeometry, al[i2].CollisionGeometry);
+            // Dynamic-Static
+            for(int i1 = 0; i1 < al.Count; i1++)
+                for(int i2 = 0; i2 < sl.Count; i2++)
+                    CollisionController.ProcessCollision(al[i1].CollisionGeometry, sl[i2].CollisionGeometry);
         }
     }
 }

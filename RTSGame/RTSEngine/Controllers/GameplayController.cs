@@ -164,7 +164,7 @@ namespace RTSEngine.Controllers {
             foreach(RTSTeam team in s.Teams) {
                 foreach(RTSUnitInstance unit in team.Units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
-                    hashGrid.AddObject(unit.CollisionGeometry);
+                    hashGrid.AddObject(unit);
                 }
             }
 

@@ -77,6 +77,8 @@
     <Compile Include="Data\Team\RTSUnitInstance.cs" />
     <Compile Include="Data\Team\RTSTeam.cs" />
     <Compile Include="Data\Team\RTSUnit.cs" />
+    <Compile Include="Data\UserConfig.cs" />
+    <Compile Include="Data\UUIDGenerator.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Graphics\BVH.cs" />
     <Compile Include="Graphics\HeightmapModel.cs" />
@@ -84,6 +86,7 @@
     <Compile Include="Graphics\RTSRenderer.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Interfaces\IInputController.cs" />
+    <Compile Include="Interfaces\IWorkLoader.cs" />
     <Compile Include="Screens\GameSelectScreen.cs" />
     <Compile Include="Screens\SquadCommanderScreen.cs" />
     <Compile Include="Screens\InduZtryScreen.cs" />
