@@ -106,19 +106,19 @@
     <None Include="Content\Textures\Laser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Compile Include="Packs\Default\scripts\AnimationController.cs">
+    <Content Include="Packs\Default\scripts\AnimationController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
     <Compile Include="Graphics\CombatAnimator.cs" />
-    <Compile Include="Packs\Default\scripts\TargettingController.cs">
+    <Content Include="Packs\Default\scripts\TargettingController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Packs\Default\scripts\ActionController.cs">
+    </Content>
+    <Content Include="Packs\Default\scripts\ActionController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Packs\Default\scripts\MovementController.cs">
+    </Content>
+    <Content Include="Packs\Default\scripts\MovementController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
     <Compile Include="Gameplay\CombatMap.cs" />
     <Compile Include="Graphics\Renderer.cs" />
     <Compile Include="Graphics\UnitGeometry.cs" />
@@ -210,7 +210,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="Packs\Default\buildings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

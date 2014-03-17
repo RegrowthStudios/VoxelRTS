@@ -59,6 +59,10 @@ namespace RTSEngine.Graphics {
         }
         private bool toggleFull;
 
+        private Texture2D tPixel;
+        private bool drawBox;
+        private Vector2 start, end;
+
         // Camera Matrices
         Matrix mView, mProj;
         private Matrix View {
@@ -162,12 +166,24 @@ namespace RTSEngine.Graphics {
             w.ClientSizeChanged += camController.OnWindowResize;
             camController.Hook();
 
+            tPixel = new Texture2D(G, 1, 1);
+            tPixel.SetData(new Color[] { Color.White });
+
+
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
             KeyboardEventDispatcher.ReceiveCommand += OnCtrlPress;
+            drawBox = false;
+            MouseEventDispatcher.OnMousePress += OnMousePress;
+            MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
+            MouseEventDispatcher.OnMouseMotion += OnMouseMove;
         }
         public void Dispose() {
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
             KeyboardEventDispatcher.ReceiveCommand -= OnCtrlPress;
+            MouseEventDispatcher.OnMousePress -= OnMousePress;
+            MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
+            MouseEventDispatcher.OnMouseMotion -= OnMouseMove;
+            tPixel.Dispose();
 
             camController.Unhook();
             Map.Dispose();
@@ -247,6 +263,20 @@ namespace RTSEngine.Graphics {
                     break;
             }
         }
+        private void OnMousePress(Vector2 p, MouseButton b) {
+            if(b == MouseButton.Left) {
+                drawBox = true;
+                start = p;
+            }
+        }
+        private void OnMouseRelease(Vector2 p, MouseButton b) {
+            if(b == MouseButton.Left) {
+                drawBox = false;
+            }
+        }
+        private void OnMouseMove(Vector2 p, Vector2 d) {
+            end = p;
+        }
 
         public void Draw(GameState s, float dt) {
             if(toggleFull) {
@@ -274,6 +304,7 @@ namespace RTSEngine.Graphics {
             fxMap.CurrentTechnique.Passes[0].Apply();
             Map.DrawSecondary(G);
 
+
             // Draw All Animated Entities
             foreach(RTSUnitModel unitModel in UnitModels) {
                 fxRTS.TexModelMap = unitModel.AnimationTexture;
@@ -283,6 +314,32 @@ namespace RTSEngine.Graphics {
                 unitModel.UpdateInstances(G);
                 unitModel.SetInstances(G);
                 unitModel.DrawInstances(G);
+            }
+
+            if(drawBox) {
+                fxMap.VertexColorEnabled = true;
+                fxMap.TextureEnabled = false;
+                fxMap.Texture = tPixel;
+                Vector2 ss = new Vector2(G.Viewport.Width, G.Viewport.Height);
+                fxMap.View = Matrix.CreateLookAt(new Vector3(ss / 2, -1), new Vector3(ss / 2, 0), Vector3.Down);
+                fxMap.Projection = Matrix.CreateOrthographic(ss.X, ss.Y, 0, 2);
+                G.DepthStencilState = DepthStencilState.None;
+                G.BlendState = BlendState.NonPremultiplied;
+                G.RasterizerState = RasterizerState.CullNone;
+                Vector3 min = new Vector3(Vector2.Min(start, end), 0);
+                Vector3 max = new Vector3(Vector2.Max(start, end), 0);
+                fxMap.CurrentTechnique.Passes[0].Apply();
+                G.DrawUserPrimitives(PrimitiveType.TriangleStrip, new VertexPositionColor[] {
+                    new VertexPositionColor(min, new Color(0f, 0, 1f, 0.3f)),
+                    new VertexPositionColor(new Vector3(max.X, min.Y, 0), new Color(1f, 0, 1f, 0.3f)),
+                    new VertexPositionColor(new Vector3(min.X, max.Y, 0), new Color(1f, 0, 1f, 0.3f)),
+                    new VertexPositionColor(max, new Color(1f, 0, 0f, 0.3f)),
+                }, 0, 2, VertexPositionColor.VertexDeclaration);
+
+                fxMap.View = mView;
+                fxMap.Projection = mProj;
+                fxMap.VertexColorEnabled = false;
+                fxMap.TextureEnabled = true;
             }
         }
 

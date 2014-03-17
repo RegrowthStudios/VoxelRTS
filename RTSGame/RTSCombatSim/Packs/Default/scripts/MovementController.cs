@@ -8,8 +8,13 @@ using RTSEngine.Data;
 
 namespace RTSCS.Controllers {
     public class MovementController : IMovementController {
+        const float DECIDE_DIST = 1f;
+        const float STOP_DIST = 0.5f;
+
         // The Waypoint To Which This Controller Has Decided To Send Its Entity
+        bool doMove;
         protected Vector2 waypoint;
+
 
         // The Entity That This MovementController Is Moving
         protected IMovingEntity entity;
@@ -27,6 +32,7 @@ namespace RTSCS.Controllers {
         public MovementController() {
             entity = null;
             waypoints = null;
+            doMove = false;
         }
 
         // Set Entity Only Once
@@ -45,19 +51,33 @@ namespace RTSCS.Controllers {
         public void DecideMove(GameState g, float dt) {
             if(waypoints == null) return;
             waypoint = waypoints[waypoints.Length - 1];
+            Vector2 disp = waypoint - Entity.GridPosition;
+            doMove = disp.LengthSquared() > (DECIDE_DIST * DECIDE_DIST);
         }
 
         public void ApplyMove(GameState g, float dt) {
             if(waypoints == null) return;
+            if(!doMove) {
+                if(Entity.AnimationController.Animation != AnimationType.Rest) {
+                    Entity.AnimationController.Animation = AnimationType.Rest;
+                }
+                return;
+            }
 
             Vector2 change = waypoint - entity.GridPosition;
             if(change != Vector2.Zero) {
-                if(Entity.AnimationController.Animation != AnimationType.Walking) {
-                    Entity.AnimationController.Animation = AnimationType.Walking;
-                }
                 float magnitude = change.Length();
                 Vector2 scaledChange = (change / magnitude) * entity.MovementSpeed * dt;
                 // This Logic Prevents The Unit From Hovering Around Its Goal
+                if(magnitude < STOP_DIST) {
+                    if(Entity.AnimationController.Animation != AnimationType.Rest) {
+                        Entity.AnimationController.Animation = AnimationType.Rest;
+                    }
+                    return;
+                }
+                if(Entity.AnimationController.Animation != AnimationType.Walking) {
+                    Entity.AnimationController.Animation = AnimationType.Walking;
+                }
                 if(scaledChange.LengthSquared() > magnitude * magnitude)
                     entity.Move(change);
                 else
