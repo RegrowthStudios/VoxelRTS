@@ -134,7 +134,6 @@ namespace RTSEngine.Controllers {
             }
         }
 
-
         // Logic Stage
         private void ApplyLogic(GameState s, float dt) {
             // Find Decisions
@@ -212,6 +211,10 @@ namespace RTSEngine.Controllers {
         }
         public void AddInstantiatedData(GameState s) {
 
+        }
+
+        public void OnDevCommand(string s) {
+            // TODO: Dev Commands
         }
     }
 }

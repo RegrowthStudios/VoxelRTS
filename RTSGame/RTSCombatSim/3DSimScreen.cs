@@ -46,7 +46,7 @@ namespace RTSCS {
         public override void Destroy(GameTime gameTime) {
         }
 
-        ReflectedEntityController aC, mC; //, cC, tC;
+        ReflectedEntityController aC, mC;
 
         public override void OnEntry(GameTime gameTime) {
             game.IsMouseVisible = true;
@@ -73,8 +73,6 @@ namespace RTSCS {
             string err;
             aC = EntityControllerParser.Compile(@"Controllers\ActionController.cs", refs, out err).Controllers["RTSCS.Controllers.ActionController"];
             mC = EntityControllerParser.Compile(@"Controllers\MovementController.cs", refs, out err).Controllers["RTSCS.Controllers.MovementController"];
-            //cC = EntityControllerParser.Compile(@"Controllers\CombatController.cs", refs, out err).Controllers["RTSCS.Controllers.CombatController"];
-            //tC = EntityControllerParser.Compile(@"Controllers\TargettingController.cs", refs, out err).Controllers["RTSCS.Controllers.TargettingController"];
 
             Vector2 p = new Vector2(engine.state.Map.Width, engine.state.Map.Depth) * 0.5f;
             foreach(var t in engine.state.Teams) {

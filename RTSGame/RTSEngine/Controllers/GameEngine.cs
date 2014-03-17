@@ -48,6 +48,7 @@ namespace RTSEngine.Controllers {
 
             fLoad("Making Gameplay Controller", 0.1f);
             playController = new GameplayController();
+            DevConsole.OnNewCommand += playController.OnDevCommand;
 
             // Load Teams
             fLoad("Loading Teams", 0.2f);
@@ -62,6 +63,7 @@ namespace RTSEngine.Controllers {
         }
         #region Disposal
         public void Dispose() {
+            DevConsole.OnNewCommand -= playController.OnDevCommand;
             renderer.Dispose();
         }
         #endregion
