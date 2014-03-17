@@ -121,6 +121,20 @@ namespace RTSEngine.Controllers {
                             unit.MovementController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultMoveController].CreateInstance() as IMovementController;
                         }
                         break;
+                    case DevCommandType.StopMotion:
+                        foreach(var team in s.Teams) {
+                            foreach(var unit in team.Units) {
+                                unit.MovementController.SetWaypoints(null);
+                            }
+                        }
+                        break;
+                    case DevCommandType.Kill:
+                        foreach(var team in s.Teams) {
+                            foreach(var unit in team.Units) {
+                                unit.Damage(9001);
+                            }
+                        }
+                        break;
                 }
             }
 
@@ -191,7 +205,7 @@ namespace RTSEngine.Controllers {
             // Add Newly Created Instances
             AddInstantiatedData(s);
         }
-        private static bool IsEntityDead(IEntity e) {
+        public static bool IsEntityDead(IEntity e) {
             return !e.IsAlive;
         }
         private static bool IsSquadEmpty(ISquad s) {
@@ -205,6 +219,14 @@ namespace RTSEngine.Controllers {
         public void OnDevCommand(string s) {
             DevCommand c;
             if(DevCommandSpawn.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandStopMotion.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandKill.TryParse(s, out c)) {
                 commands.Enqueue(c);
                 return;
             }

@@ -6,7 +6,7 @@ MODEL           [Robot.obj]
 TEXMAIN         [Model.png]
 TEXCOLOR        [Color.png]
 ANIMATION       [Robot.png]
-MAXCOUNT        [200]
+MAXCOUNT        [1000]
 
 // Unit Data
 HEALTH          [80]

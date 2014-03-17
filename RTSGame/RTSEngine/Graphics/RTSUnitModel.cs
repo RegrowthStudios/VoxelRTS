@@ -121,6 +121,8 @@ namespace RTSEngine.Graphics {
         }
 
         public void UpdateInstances(GraphicsDevice g) {
+            instances.RemoveAll(RTSEngine.Controllers.GameplayController.IsEntityDead);
+
             for(int i = 0; i < InstanceCount; i++) {
                 instVerts[i].World =
                     Matrix.CreateRotationY(

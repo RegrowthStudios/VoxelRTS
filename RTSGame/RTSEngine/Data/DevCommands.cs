@@ -7,7 +7,9 @@ using RTSEngine.Data.Parsers;
 
 namespace RTSEngine.Data {
     public enum DevCommandType {
-        Spawn
+        Spawn,
+        StopMotion,
+        Kill
     }
     public class DevCommand {
         public DevCommandType Type {
@@ -54,6 +56,42 @@ namespace RTSEngine.Data {
 
         public DevCommandSpawn()
             : base(DevCommandType.Spawn) {
+        }
+    }
+    // Stop Command
+    public class DevCommandStopMotion : DevCommand {
+        public static readonly Regex REGEX = new Regex(@"stop\s+motion");
+
+        public DevCommandStopMotion()
+            : base(DevCommandType.StopMotion) {
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m = REGEX.Match(c);
+            if(m.Success) {
+                command = new DevCommandStopMotion();
+                return true;
+            }
+            command = null;
+            return false;
+        }
+    }
+    // Kill Command
+    public class DevCommandKill : DevCommand {
+        public static readonly Regex REGEX = new Regex(@"avada\s+kedavra");
+
+        public DevCommandKill()
+            : base(DevCommandType.Kill) {
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m = REGEX.Match(c);
+            if(m.Success) {
+                command = new DevCommandKill();
+                return true;
+            }
+            command = null;
+            return false;
         }
     }
 }
