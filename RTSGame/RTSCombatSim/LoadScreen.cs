@@ -113,8 +113,8 @@ namespace RTSCS {
             loadData.Teams = new RTSTeamResult[2];
             loadData.Teams[0] = teamRes;
             loadData.Teams[1] = teamRes;
-           
-            LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData, LoadCallback);
+            EngineLoadData.InputType[] types = { EngineLoadData.InputType.Player, EngineLoadData.InputType.AI, EngineLoadData.InputType.Environment};
+            LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData, LoadCallback, types);
             isLoaded = true;
         }
         private void LoadCallback(string m, float p) {
