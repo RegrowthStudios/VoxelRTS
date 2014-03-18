@@ -23,7 +23,7 @@ namespace RTSEngine.Data {
         public BoundingBox Obb;
 
         public OBB(Matrix mView, Matrix mProj, Vector2 min, Vector2 max) {
-            // TODO: Implemented. Check if OBB works.
+            // TODO: Verify.
 
             // Construct matrix to transform screen to selection box
             Vector2 selectCenter = (min + max) / 2;
