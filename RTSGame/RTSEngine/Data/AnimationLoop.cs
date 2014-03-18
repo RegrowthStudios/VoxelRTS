@@ -23,7 +23,10 @@ namespace RTSEngine.Data {
             set;
         }
         public int CurrentFrame {
-            get { return (int)curFrame + StartFrame; }
+            get {
+                int nextFrame = (int)curFrame + StartFrame;
+                return nextFrame > EndFrame ? EndFrame : nextFrame;
+            }
         }
 
         public AnimationLoop(int s, int e) {
