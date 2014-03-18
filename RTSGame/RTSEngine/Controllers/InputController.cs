@@ -8,6 +8,13 @@ using System.Collections.Concurrent;
 using RTSEngine.Data.Team;
 
 namespace RTSEngine.Controllers {
+    // Types Of Teams
+    public enum InputType {
+        Player,
+        AI,
+        Environment
+    }
+
     public class InputController : IInputController {
 
         //Stores The Team's Events

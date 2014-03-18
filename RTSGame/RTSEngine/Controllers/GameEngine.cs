@@ -14,16 +14,8 @@ using RTSEngine.Interfaces;
 namespace RTSEngine.Controllers {
     // The Data The Engine Needs To Know About To Properly Create A Game
     public struct EngineLoadData {
-
-        // Types Of Teams
-        public enum InputType {
-            Player,
-            AI,
-            Environment
-        }
-
         // Teams In The Battle
-        public RTSTeamResult[] Teams;
+        public RTSTeamPlayResult[] Teams;
 
         // Where To Load The Map
         public DirectoryInfo MapDirectory;
@@ -37,7 +29,7 @@ namespace RTSEngine.Controllers {
 
         Action<string, float> fLoad;
 
-        public GameEngine(GraphicsDeviceManager gdm, GameWindow w, EngineLoadData d, Action<string, float> loadCallback, EngineLoadData.InputType[] t) {
+        public GameEngine(GraphicsDeviceManager gdm, GameWindow w, EngineLoadData d, Action<string, float> loadCallback) {
             var g = gdm.GraphicsDevice;
             fLoad = loadCallback;
 
@@ -55,17 +47,17 @@ namespace RTSEngine.Controllers {
             state = new GameState(LoadTeams(g, d.Teams));
             PopulateControllers();
             for(int ti = 0; ti < state.Teams.Length; ti++) {
-                switch(t[ti]) {
-                    case EngineLoadData.InputType.Player:
+                switch(d.Teams[ti].InputType) {
+                    case InputType.Player:
                         var pic = new PlayerInputController(state, state.Teams[ti]);
                         pic.Renderer = renderer;
                         state.Teams[ti].Input = pic;
                         break;
-                    case EngineLoadData.InputType.AI:
+                    case InputType.AI:
                         // TODO: Make This Class
                         // team.Input = new AIInputController(state, team);
                         break;
-                    case EngineLoadData.InputType.Environment:
+                    case InputType.Environment:
 
                         break;
                     default:
@@ -121,14 +113,14 @@ namespace RTSEngine.Controllers {
             state.Map = res.Data;
             renderer.Map = res.View;
         }
-        private RTSTeam[] LoadTeams(GraphicsDevice g, RTSTeamResult[] teamResults) {
+        private RTSTeam[] LoadTeams(GraphicsDevice g, RTSTeamPlayResult[] teamResults) {
             RTSTeam[] t = new RTSTeam[teamResults.Length];
             RTSTeam team;
             int i = 0;
             foreach(var res in teamResults) {
                 team = new RTSTeam();
                 team.ColorSheme = res.Colors;
-                foreach(DirectoryInfo unitDataDir in res.UnitTypes)
+                foreach(DirectoryInfo unitDataDir in res.TeamType.UnitTypes)
                     LoadUnit(g, team, unitDataDir);
                 t[i++] = team;
             }

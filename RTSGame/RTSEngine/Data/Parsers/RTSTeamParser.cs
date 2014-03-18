@@ -6,17 +6,22 @@ using System.Text.RegularExpressions;
 using System.IO;
 using Microsoft.Xna.Framework;
 using RTSEngine.Data.Team;
+using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Parsers {
+    public struct RTSTeamPlayResult {
+        public RTSTeamResult TeamType;
+        public RTSTeamColorScheme Colors;
+        public InputType InputType;
+    }
+
     public class RTSTeamResult {
         public string Name;
-        public RTSTeamColorScheme Colors;
         public List<DirectoryInfo> UnitTypes;
 
         public RTSTeamResult() {
             Name = null;
             UnitTypes = new List<DirectoryInfo>();
-            Colors = RTSTeamColorScheme.Default;
         }
     }
 
@@ -57,9 +62,9 @@ namespace RTSEngine.Data.Parsers {
                 res.Name = RegexHelper.Extract(rgxName.Match(ms));
 
                 // Read Color Scheme
-                res.Colors.Primary = RegexHelper.ExtractVec3(rgxCP.Match(ms));
-                res.Colors.Secondary = RegexHelper.ExtractVec3(rgxCS.Match(ms));
-                res.Colors.Tertiary = RegexHelper.ExtractVec3(rgxCT.Match(ms));
+                //res.Colors.Primary = RegexHelper.ExtractVec3(rgxCP.Match(ms));
+                //res.Colors.Secondary = RegexHelper.ExtractVec3(rgxCS.Match(ms));
+                //res.Colors.Tertiary = RegexHelper.ExtractVec3(rgxCT.Match(ms));
 
                 // Read All Units
                 Match m = rgxUnit.Match(ms);

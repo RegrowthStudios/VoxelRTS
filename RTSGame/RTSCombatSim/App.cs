@@ -38,7 +38,7 @@ namespace RTSCS {
         public App()
             : base() {
             graphics.IsFullScreen = UserConfig.UseFullscreen;
-            LoadScreen = new RTSCS.LoadScreen(3);
+            LoadScreen = new RTSCS.LoadScreen(2);
             Sim3D = new _3DSimScreen();
         }
 
@@ -51,9 +51,8 @@ namespace RTSCS {
 
         protected override void BuildScreenList() {
             screenList = new BlisterUI.ScreenList(this, 0,
-                new BlisterUI.FalseFirstScreen(3),
+                new BlisterUI.FalseFirstScreen(2),
                 new RTSEngine.Screens.InduZtryScreen(1),
-                new RTSEngine.Screens.KMeansScreen(2),
                 LoadScreen,
                 Sim3D
                 );

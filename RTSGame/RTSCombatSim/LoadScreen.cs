@@ -110,11 +110,16 @@ namespace RTSCS {
             loadData = new EngineLoadData();
             loadData.MapDirectory = new DirectoryInfo(@"Packs\Default\maps\0");
             RTSTeamResult teamRes = RTSTeamParser.ParseAll(new DirectoryInfo("Packs"))[0];
-            loadData.Teams = new RTSTeamResult[2];
-            loadData.Teams[0] = teamRes;
-            loadData.Teams[1] = teamRes;
-            EngineLoadData.InputType[] types = { EngineLoadData.InputType.Player, EngineLoadData.InputType.AI, EngineLoadData.InputType.Environment};
-            LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData, LoadCallback, types);
+
+            loadData.Teams = new RTSTeamPlayResult[2];
+            loadData.Teams[0].TeamType = teamRes;
+            loadData.Teams[0].InputType = InputType.Player;
+            loadData.Teams[0].Colors = RTSTeamColorScheme.Default;
+            loadData.Teams[1].TeamType = teamRes;
+            loadData.Teams[1].InputType = InputType.AI;
+            loadData.Teams[1].Colors = RTSTeamColorScheme.Default;
+
+            LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData, LoadCallback);
             isLoaded = true;
         }
         private void LoadCallback(string m, float p) {
