@@ -20,20 +20,23 @@ namespace RTSEngine.Data {
     }
 
     public struct OBB {
-        public Vector3 min;
-        public Vector3 max;
+        public BoundingBox Obb;
+
         public OBB(Matrix mView, Matrix mProj, Vector2 min, Vector2 max) {
-            // TODO: From An Orthographic Projection
+            // TODO: Implemented. Check if OBB works.
 
             // Construct matrix to transform screen to selection box
             Vector2 selectCenter = (min + max) / 2;
             Matrix translate = Matrix.CreateTranslation(selectCenter.X, selectCenter.Y, 0f);
-            Vector2 scaleAmount = (max - min) / new Vector2(2, 2);
+            Vector2 scaleAmount = (max - min) / 2;
             Matrix scale = Matrix.CreateScale(scaleAmount.X, scaleAmount.Y, 1);
 
-            BoundingBox b = new BoundingBox();
-            this.min = b.Min;
-            this.max = b.Max;
+            // Calculate depth of OBB and create it
+            BoundingFrustum f = new BoundingFrustum(mView * mProj * translate * scale);
+            float depth = f.Far.D - f.Near.D;
+            Vector3 min3 = new Vector3(min.X, min.Y, 0);
+            Vector3 max3 = new Vector3(max.X, max.Y, depth);
+            Obb = new BoundingBox(min3, max3);
         }
     }
     #endregion
@@ -48,10 +51,10 @@ namespace RTSEngine.Data {
 
         public static bool Intersects(ref OBB obb, ref BoundingBox box) {
             // Overlap detection
-            if (obb.max.X < box.Min.X) return false; // obb is left of box
-            if (obb.min.X > box.Max.X) return false; // obb is right of box
-            if (obb.max.Y < box.Min.Y) return false; // obb is above box
-            if (obb.min.Y > box.Max.Y) return false; // obb is below box
+            if (obb.Obb.Max.X < box.Min.X) return false; // obb is left of box
+            if (obb.Obb.Min.X > box.Max.X) return false; // obb is right of box
+            if (obb.Obb.Max.Y < box.Min.Y) return false; // obb is above box
+            if (obb.Obb.Min.Y > box.Max.Y) return false; // obb is below box
             return true; // boxes overlap
         }
     }
