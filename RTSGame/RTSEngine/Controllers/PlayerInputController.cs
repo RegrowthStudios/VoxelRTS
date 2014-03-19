@@ -28,33 +28,16 @@ namespace RTSEngine.Controllers {
 
         public void OnMouseRelease(Vector2 location, MouseButton b) {
             if(b == MouseButton.Left) {
-                OBB? obb;
-                Frustum? frustum;
+                // Get Selection Frustum
+                BoundingFrustum frustum = Renderer.GetSelectionBox(Vector2.Min(location, mousePressedPos), Vector2.Max(location, mousePressedPos));
+
+                // Check For All E
                 BoundingBox box;
                 List<IEntity> selected = new List<IEntity>();
-                Renderer.GetSelectionBox(Vector2.Min(location, mousePressedPos), Vector2.Max(location, mousePressedPos), out obb, out frustum);
-
-                if(frustum.HasValue) {
-                    Frustum f = frustum.Value;
-                    for(int i = 0; i < GameState.Teams.Length; i++) {
-                        foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
-                            box = unit.BBox;
-                            if(SelectionDetection.Intersects(ref f, ref box)) {
-                                selected.Add(unit);
-                            }
-                        }
-                    }
-                }
-                else if(obb.HasValue) {
-                    OBB o = obb.Value;
-                    for(int i = 0; i < GameState.Teams.Length; i++) {
-                        foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {
-                            box = unit.BBox;
-                            if(SelectionDetection.Intersects(ref o, ref box)) {
-                                selected.Add(unit);
-                            }
-                        }
-                    }
+                for(int i = 0; i < Team.Units.Count; i++) {
+                    box = Team.Units[i].BBox;
+                    if(SelectionDetection.Intersects(frustum, ref box))
+                        selected.Add(Team.Units[i]);
                 }
                 AddEvent(new SelectEvent(selected, Team));
             }

@@ -343,7 +343,7 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void GetSelectionBox(Vector2 screenMin, Vector2 screenMax, out OBB? obb, out Frustum? frustum) {
+        public BoundingFrustum GetSelectionBox(Vector2 screenMin, Vector2 screenMax) {
             // TODO: Verify.
             Vector2 ss = new Vector2(G.Viewport.Width, G.Viewport.Height);
             screenMin /= ss;
@@ -355,8 +355,7 @@ namespace RTSEngine.Graphics {
             screenMin *= 2f; screenMin -= Vector2.One;
             screenMax *= 2f; screenMax -= Vector2.One;
 
-            obb = new OBB(mView, mProj, Vector2.Min(screenMin, screenMax), Vector2.Max(screenMin, screenMax));
-            frustum = new Frustum(mView, mProj, Vector2.Min(screenMin, screenMax), Vector2.Max(screenMin, screenMax));
+            return SelectionDetection.FromSelectionRect(mView, mProj, Vector2.Min(screenMin, screenMax), Vector2.Max(screenMin, screenMax));
         }
         public Ray GetViewRay(Vector2 screenPos) {
             Ray r = new Ray();

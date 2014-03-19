@@ -31,27 +31,21 @@ namespace RTSEngine.Data.Team {
         }
 
         // Unit Data
-        public List<RTSUnit> UnitData{
+        public List<RTSUnit> UnitData {
             get;
             private set;
         }
 
         // This Is All The Units In The Team
         private List<RTSUnitInstance> units;
-        public IEnumerable<RTSUnitInstance> Units {
+        public List<RTSUnitInstance> Units {
             get { return units; }
-        }
-        public int UnitCount {
-            get { return units.Count; }
         }
 
         // This Is All The Squads In The Team
         private List<RTSSquad> squads;
-        public IEnumerable<RTSSquad> Squads {
+        public List<RTSSquad> Squads {
             get { return squads; }
-        }
-        public int SquadCount {
-            get { return squads.Count; }
         }
 
         public IInputController Input {

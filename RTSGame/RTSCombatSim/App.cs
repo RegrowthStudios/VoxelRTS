@@ -12,8 +12,6 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using RTSCS.Gameplay;
-using RTSCS.Graphics;
 using Microsoft.CSharp;
 using System.CodeDom.Compiler;
 using RTSEngine.Interfaces;
