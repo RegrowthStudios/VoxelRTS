@@ -74,12 +74,12 @@
     <Compile Include="Data\Parsers\RegexHelper.cs" />
     <Compile Include="Data\Parsers\RTSTeamParser.cs" />
     <Compile Include="Data\Parsers\RTSUnitParser.cs" />
-    <Compile Include="Data\Quadtree.cs" />
     <Compile Include="Data\SelectionDetection.cs" />
+    <Compile Include="Data\Team\RTSRaceData.cs" />
     <Compile Include="Data\Team\RTSSquad.cs" />
-    <Compile Include="Data\Team\RTSUnitInstance.cs" />
-    <Compile Include="Data\Team\RTSTeam.cs" />
     <Compile Include="Data\Team\RTSUnit.cs" />
+    <Compile Include="Data\Team\RTSTeam.cs" />
+    <Compile Include="Data\Team\RTSUnitData.cs" />
     <Compile Include="Data\UserConfig.cs" />
     <Compile Include="Data\UUIDGenerator.cs" />
     <Compile Include="Extensions.cs" />

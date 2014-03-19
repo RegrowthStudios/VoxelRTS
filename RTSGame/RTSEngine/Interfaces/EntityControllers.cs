@@ -21,19 +21,19 @@ namespace RTSEngine.Interfaces {
     // Base Controller Functionality
     public abstract class ACUnitController {
         // The Unit That Is Being Controlled
-        protected RTSUnitInstance unit;
-        public RTSUnitInstance Unit {
+        protected RTSUnit unit;
+        public RTSUnit Unit {
             get { return Unit; }
         }
 
-        public void SetUnit(RTSUnitInstance u) {
+        public void SetUnit(RTSUnit u) {
             if(u == null) return;
             if(unit != null)
                 throw new ArgumentException("Cannot Rebind This Controller To Another Unit");
             unit = u;
             return;
         }
-        public T SetUnit<T>(RTSUnitInstance u) where T : ACUnitController {
+        public T SetUnit<T>(RTSUnit u) where T : ACUnitController {
             SetUnit(u);
             return this as T;
         }

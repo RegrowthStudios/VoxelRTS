@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace RTSEngine.Data.Parsers {
     public struct RTSUnitResult {
-        public RTSUnit Data;
+        public RTSUnitData Data;
         public RTSUnitModel View;
     }
 
@@ -61,7 +61,7 @@ namespace RTSEngine.Data.Parsers {
             int[] buf;
 
             // Read Data
-            res.Data = new RTSUnit();
+            res.Data = new RTSUnitData();
             res.Data.FriendlyName = RegexHelper.Extract(rgxName.Match(ms));
             res.Data.Health = RegexHelper.ExtractInt(rgxHealth.Match(ms));
             buf = RegexHelper.ExtractVec2I(rgxCost.Match(ms));

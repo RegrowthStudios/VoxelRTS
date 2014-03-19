@@ -78,7 +78,7 @@ namespace RTSEngine.Controllers {
                         List<IEntity> selected = setWaypointEvent.Team.Input.Selected;
                         if(selected != null && selected.Count > 0) {
                             foreach(var unit in selected) {
-                                RTSUnitInstance u = unit as RTSUnitInstance;
+                                RTSUnit u = unit as RTSUnit;
                                 if(u != null)
                                     u.MovementController.SetWaypoints(wp);
                             }
@@ -91,7 +91,7 @@ namespace RTSEngine.Controllers {
                         if(selected != null && selected.Count > 0) {
                             foreach(var unit in selected) {
                                 squad.AddCombatant((ICombatEntity)unit);
-                                RTSUnitInstance u = unit as RTSUnitInstance;
+                                RTSUnit u = unit as RTSUnit;
                                 u.Squad.RemoveAll(u2 => u2.Equals(u));
                             }
                         }
@@ -141,7 +141,7 @@ namespace RTSEngine.Controllers {
 
             // Find Decisions
             foreach(RTSTeam team in s.Teams) {
-                foreach(RTSUnitInstance unit in team.Units) {
+                foreach(RTSUnit unit in team.Units) {
                     if(unit.ActionController == null) continue;
                     unit.ActionController.DecideAction(s, dt);
                 }
@@ -149,7 +149,7 @@ namespace RTSEngine.Controllers {
 
             // Apply Controllers
             foreach(RTSTeam team in s.Teams) {
-                foreach(RTSUnitInstance unit in team.Units) {
+                foreach(RTSUnit unit in team.Units) {
                     if(unit.ActionController == null) continue;
                     unit.ActionController.ApplyAction(s, dt);
                 }
@@ -164,7 +164,7 @@ namespace RTSEngine.Controllers {
 
             // Move Geometry To The Unit's Location and hash into the grid
             foreach(RTSTeam team in s.Teams) {
-                foreach(RTSUnitInstance unit in team.Units) {
+                foreach(RTSUnit unit in team.Units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
                     hashGrid.AddObject(unit);
                 }
@@ -185,7 +185,7 @@ namespace RTSEngine.Controllers {
 
             // Move Unit's Location To The Geometry After Heightmap Collision
             foreach(RTSTeam team in s.Teams) {
-                foreach(RTSUnitInstance unit in team.Units) {
+                foreach(RTSUnit unit in team.Units) {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
                     unit.GridPosition = unit.CollisionGeometry.Center;
                     unit.Height = unit.CollisionGeometry.Height;

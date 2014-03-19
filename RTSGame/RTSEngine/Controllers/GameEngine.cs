@@ -15,7 +15,7 @@ namespace RTSEngine.Controllers {
     // The Data The Engine Needs To Know About To Properly Create A Game
     public struct EngineLoadData {
         // Teams In The Battle
-        public RTSTeamPlayResult[] Teams;
+        public RTSTeamResult[] Teams;
 
         // Where To Load The Map
         public DirectoryInfo MapDirectory;
@@ -113,7 +113,7 @@ namespace RTSEngine.Controllers {
             state.Map = res.Data;
             renderer.Map = res.View;
         }
-        private RTSTeam[] LoadTeams(GraphicsDevice g, RTSTeamPlayResult[] teamResults) {
+        private RTSTeam[] LoadTeams(GraphicsDevice g, RTSTeamResult[] teamResults) {
             RTSTeam[] t = new RTSTeam[teamResults.Length];
             RTSTeam team;
             int i = 0;

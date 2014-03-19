@@ -109,9 +109,9 @@ namespace RTSCS {
         private void WorkThread() {
             loadData = new EngineLoadData();
             loadData.MapDirectory = new DirectoryInfo(@"Packs\Default\maps\0");
-            RTSTeamResult teamRes = RTSTeamParser.ParseAll(new DirectoryInfo("Packs"))[0];
+            RTSRaceData teamRes = RTSTeamParser.ParseAll(new DirectoryInfo("Packs"))[0];
 
-            loadData.Teams = new RTSTeamPlayResult[2];
+            loadData.Teams = new RTSTeamResult[2];
             loadData.Teams[0].TeamType = teamRes;
             loadData.Teams[0].InputType = InputType.Player;
             loadData.Teams[0].Colors = RTSTeamColorScheme.Default;

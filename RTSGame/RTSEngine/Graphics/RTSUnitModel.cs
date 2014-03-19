@@ -45,19 +45,19 @@ namespace RTSEngine.Graphics {
         }
 
         // Instances That Will Be Animated
-        public RTSUnit Data {
+        public RTSUnitData Data {
             get;
             private set;
         }
         private DynamicVertexBuffer dvbInstances;
         private bool rebuildDVB;
         private VertexRTSAnimInst[] instVerts;
-        private List<RTSUnitInstance> instances;
+        private List<RTSUnit> instances;
         public int InstanceCount {
             get { return instances.Count; }
         }
 
-        public RTSUnitModel(GraphicsDevice g, RTSUnit data, Stream sModel, Texture2D tAnim) {
+        public RTSUnitModel(GraphicsDevice g, RTSUnitData data, Stream sModel, Texture2D tAnim) {
             // Create With The Animation Texture
             AnimationTexture = tAnim;
             Vector2 texelSize = new Vector2(1f / (AnimationTexture.Width), 1f / (AnimationTexture.Height));
@@ -85,7 +85,7 @@ namespace RTSEngine.Graphics {
 
             // Create Instance Buffer
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
-            instances = new List<RTSUnitInstance>(Data.MaxCount);
+            instances = new List<RTSUnit>(Data.MaxCount);
             for(int i = 0; i < instVerts.Length; i++)
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
@@ -150,7 +150,7 @@ namespace RTSEngine.Graphics {
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, InstanceCount);
         }
 
-        public void OnUnitSpawn(RTSUnitInstance u) {
+        public void OnUnitSpawn(RTSUnit u) {
             if(u.UnitData == Data)
                 instances.Add(u);
         }

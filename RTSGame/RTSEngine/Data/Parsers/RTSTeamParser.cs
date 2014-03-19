@@ -9,20 +9,10 @@ using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Parsers {
-    public struct RTSTeamPlayResult {
-        public RTSTeamResult TeamType;
+    public struct RTSTeamResult {
+        public RTSRaceData TeamType;
         public RTSTeamColorScheme Colors;
         public InputType InputType;
-    }
-
-    public class RTSTeamResult {
-        public string Name;
-        public List<DirectoryInfo> UnitTypes;
-
-        public RTSTeamResult() {
-            Name = null;
-            UnitTypes = new List<DirectoryInfo>();
-        }
     }
 
     public static class RTSTeamParser {
@@ -34,26 +24,26 @@ namespace RTSEngine.Data.Parsers {
         static readonly Regex rgxCT = RegexHelper.GenerateVec3("TERTIARY");
         static readonly Regex rgxUnit = RegexHelper.GenerateFile("UNIT");
 
-        public static List<RTSTeamResult> ParseAll(DirectoryInfo dirPacks) {
-            var res = new List<RTSTeamResult>();
+        public static List<RTSRaceData> ParseAll(DirectoryInfo dirPacks) {
+            var res = new List<RTSRaceData>();
             foreach(var dir in dirPacks.GetDirectories()) {
                 DirectoryInfo dt = new DirectoryInfo(Path.Combine(dir.FullName, TEAM_DIR));
                 if(!dt.Exists) continue;
-                List<RTSTeamResult> l = Parse(dt);
+                List<RTSRaceData> l = Parse(dt);
                 res.AddRange(l);
             }
             return res;
         }
-        private static List<RTSTeamResult> Parse(DirectoryInfo dir) {
-            var results = new List<RTSTeamResult>();
+        private static List<RTSRaceData> Parse(DirectoryInfo dir) {
+            var results = new List<RTSRaceData>();
             foreach(FileInfo file in dir.GetFiles()) {
                 if(file.Extension.EndsWith(INFO_FILE_EXT))
                     results.Add(ParseInfo(file, dir.FullName));
             }
             return results;
         }
-        private static RTSTeamResult ParseInfo(FileInfo file, string rootDir) {
-            RTSTeamResult res = new RTSTeamResult();
+        private static RTSRaceData ParseInfo(FileInfo file, string rootDir) {
+            RTSRaceData res = new RTSRaceData();
             using(var fs = File.OpenRead(file.FullName)) {
                 StreamReader s = new StreamReader(fs);
                 string ms = s.ReadToEnd();

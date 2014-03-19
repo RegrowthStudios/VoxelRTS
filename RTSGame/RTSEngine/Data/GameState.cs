@@ -37,8 +37,8 @@ namespace RTSEngine.Data {
         }
 
         // List Of Unit Data
-        private RTSUnit[] units;
-        public IEnumerable<RTSUnit> Units {
+        private RTSUnitData[] units;
+        public IEnumerable<RTSUnitData> Units {
             get { return units; }
         }
 
@@ -50,12 +50,12 @@ namespace RTSEngine.Data {
 
             // No Data Yet Available
             Controllers = new Dictionary<string, ReflectedEntityController>();
-            units = new RTSUnit[MAX_RTSUNIT_ID + 1];
+            units = new RTSUnitData[MAX_RTSUNIT_ID + 1];
             Map = null;
         }
 
         // Need These Accessors For Unit Types
-        public void AddRTSUnit(int id, RTSUnit u) {
+        public void AddRTSUnit(int id, RTSUnitData u) {
             // Check If Previous Slot Is Filled
             if(units[id] != null)
                 throw new ArgumentException("ID Is Already Taken");
@@ -63,7 +63,7 @@ namespace RTSEngine.Data {
             // TODO: Maybe Add Event
             units[id] = u;
         }
-        public void AddRTSUnit(RTSUnit u) {
+        public void AddRTSUnit(RTSUnitData u) {
             // Try To Find An Empty Slot
             for(int i = MIN_RTSUNIT_ID; i <= MAX_RTSUNIT_ID; i++) {
                 if(units[i] == null) {
@@ -72,7 +72,7 @@ namespace RTSEngine.Data {
                 }
             }
         }
-        public RTSUnit GetRTSUnit(int id) {
+        public RTSUnitData GetRTSUnit(int id) {
             return units[id];
         }
 
