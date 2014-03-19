@@ -17,11 +17,12 @@ namespace RTSCS {
     public class LoadScreen : GameScreenIndexed {
         const string IMAGE_DIR = @"Content\LoadImages";
         const int BOUNDS_OFFSET = 20;
-        const int BAR_HEIGHT = 30;
+        const int BAR_HEIGHT = 10;
+        const int BAR_WIDTH = 180;
         const int BACK_SIZE = 3;
         static readonly Color COLOR_LOW = Color.Maroon;
         static readonly Color COLOR_HIGH = Color.Teal;
-        static readonly Color COLOR_BACK = Color.DarkGray;
+        static readonly Color COLOR_BACK = new Color(8, 8, 8);
 
         public LoadScreen(int i) : base(i) { }
         public LoadScreen(int p, int n) : base(p, n) { }
@@ -79,23 +80,35 @@ namespace RTSCS {
         }
 
         public override void Update(GameTime gameTime) {
+            percent += 0.01f;
+            while(percent > 1) percent -= 1;
+
             if(isLoaded) State = ScreenState.ChangeNext;
         }
         public override void Draw(GameTime gameTime) {
             G.Clear(Color.Transparent);
 
+            int minX = BOUNDS_OFFSET - BAR_WIDTH;
+            int maxX = G.Viewport.Bounds.Width - BOUNDS_OFFSET;
+
             // Calculate Progress Bar
             Rectangle rBar = G.Viewport.Bounds;
-            rBar.Width -= BOUNDS_OFFSET * 2;
-            rBar.X = BOUNDS_OFFSET;
-            rBar.Y = rBar.Height - BOUNDS_OFFSET - BAR_HEIGHT;
+            rBar.X = (int)(percent * (maxX - minX)) + minX;
+            rBar.Y = G.Viewport.Height - BOUNDS_OFFSET - BAR_HEIGHT;
             rBar.Height = BAR_HEIGHT;
-            Rectangle rBack = rBar;
-            rBack.X -= BACK_SIZE;
-            rBack.Y -= BACK_SIZE;
-            rBack.Width += BACK_SIZE * 2;
-            rBack.Height += BACK_SIZE * 2;
-            rBar.Width = (int)(rBar.Width * percent);
+            rBar.Width = BAR_WIDTH;
+            if(rBar.Width + rBar.X > maxX)
+                rBar.Width = maxX - rBar.X;
+            else if(rBar.X < BOUNDS_OFFSET) {
+                rBar.Width = rBar.X + rBar.Width - BOUNDS_OFFSET;
+                rBar.X = BOUNDS_OFFSET;
+            }
+
+            Rectangle rBack = G.Viewport.Bounds;
+            rBack.X = BOUNDS_OFFSET - BACK_SIZE;
+            rBack.Y = G.Viewport.Bounds.Height - BOUNDS_OFFSET - BAR_HEIGHT - BACK_SIZE;
+            rBack.Width -= (BOUNDS_OFFSET - BACK_SIZE) * 2;
+            rBack.Height = BAR_HEIGHT + BACK_SIZE * 2;
 
             SB.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
             // Draw A Background Image
@@ -109,21 +122,21 @@ namespace RTSCS {
         private void WorkThread() {
             loadData = new EngineLoadData();
             loadData.MapDirectory = new DirectoryInfo(@"Packs\Default\maps\0");
-            RTSRaceData teamRes = RTSTeamParser.ParseAll(new DirectoryInfo("Packs"))[0];
+            RTSRaceData teamRes = RTSRaceParser.ParseAll(new DirectoryInfo("Packs"))[0];
 
             loadData.Teams = new RTSTeamResult[2];
             loadData.Teams[0].TeamType = teamRes;
             loadData.Teams[0].InputType = InputType.Player;
-            loadData.Teams[0].Colors = RTSTeamColorScheme.Default;
+            loadData.Teams[0].Colors = RTSColorScheme.Default;
             loadData.Teams[1].TeamType = teamRes;
             loadData.Teams[1].InputType = InputType.AI;
-            loadData.Teams[1].Colors = RTSTeamColorScheme.Default;
+            loadData.Teams[1].Colors = RTSColorScheme.Default;
 
-            LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData, LoadCallback);
+            LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData);
             isLoaded = true;
         }
         private void LoadCallback(string m, float p) {
-            percent = p;
+            // percent = p;
         }
     }
 }

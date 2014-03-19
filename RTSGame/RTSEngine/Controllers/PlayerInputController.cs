@@ -34,10 +34,10 @@ namespace RTSEngine.Controllers {
                 // Check For All E
                 BoundingBox box;
                 List<IEntity> selected = new List<IEntity>();
-                for(int i = 0; i < Team.Units.Count; i++) {
-                    box = Team.Units[i].BBox;
+                for(int i = 0; i < Team.units.Count; i++) {
+                    box = Team.units[i].BBox;
                     if(SelectionDetection.Intersects(frustum, ref box))
-                        selected.Add(Team.Units[i]);
+                        selected.Add(Team.units[i]);
                 }
                 AddEvent(new SelectEvent(selected, Team));
             }
@@ -50,7 +50,7 @@ namespace RTSEngine.Controllers {
                 Ray viewRay = Camera.GetViewRay(location);
                 float? dist;
                 for(int i = 0; i < GameState.Teams.Length; i++) {
-                    foreach(RTSUnit unit in GameState.Teams[i].Units) {
+                    foreach(RTSUnit unit in GameState.Teams[i].units) {
                         box = unit.BBox;
                         dist = viewRay.Intersects(box);
                         if(dist != null) {

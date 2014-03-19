@@ -15,7 +15,7 @@ namespace RTSEngine.Data.Parsers {
         public RTSUnitModel View;
     }
 
-    public static class RTSUnitParser {
+    public static class RTSUnitDataParser {
         // Data Detection
         public const string INFO_FILE_EXT = "unit";
         private static readonly Regex rgxName = RegexHelper.Generate("NAME", @"[\w\s]+");

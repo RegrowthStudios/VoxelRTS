@@ -117,21 +117,21 @@ namespace RTSEngine.Controllers {
                         var dcs = comm as DevCommandSpawn;
                         for(int ci = 0; ci < dcs.Count; ci++) {
                             var unit = s.Teams[dcs.TeamIndex].AddUnit(dcs.UnitIndex, new Vector2(dcs.X, dcs.Z));
-                            unit.ActionController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultActionController].CreateInstance<ACUnitActionController>();
-                            unit.AnimationController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultAnimationController].CreateInstance<ACUnitAnimationController>();
-                            unit.MovementController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultMoveController].CreateInstance<ACUnitMovementController>();
+                            unit.ActionController = s.Controllers[s.Teams[dcs.TeamIndex].unitData[dcs.UnitIndex].DefaultActionController].CreateInstance<ACUnitActionController>();
+                            unit.AnimationController = s.Controllers[s.Teams[dcs.TeamIndex].unitData[dcs.UnitIndex].DefaultAnimationController].CreateInstance<ACUnitAnimationController>();
+                            unit.MovementController = s.Controllers[s.Teams[dcs.TeamIndex].unitData[dcs.UnitIndex].DefaultMoveController].CreateInstance<ACUnitMovementController>();
                         }
                         break;
                     case DevCommandType.StopMotion:
                         foreach(var team in s.Teams) {
-                            foreach(var unit in team.Units) {
+                            foreach(var unit in team.units) {
                                 unit.MovementController.SetWaypoints(null);
                             }
                         }
                         break;
                     case DevCommandType.Kill:
                         foreach(var team in s.Teams) {
-                            foreach(var unit in team.Units) {
+                            foreach(var unit in team.units) {
                                 unit.Damage(9001);
                             }
                         }
@@ -141,7 +141,7 @@ namespace RTSEngine.Controllers {
 
             // Find Decisions
             foreach(RTSTeam team in s.Teams) {
-                foreach(RTSUnit unit in team.Units) {
+                foreach(RTSUnit unit in team.units) {
                     if(unit.ActionController == null) continue;
                     unit.ActionController.DecideAction(s, dt);
                 }
@@ -149,7 +149,7 @@ namespace RTSEngine.Controllers {
 
             // Apply Controllers
             foreach(RTSTeam team in s.Teams) {
-                foreach(RTSUnit unit in team.Units) {
+                foreach(RTSUnit unit in team.units) {
                     if(unit.ActionController == null) continue;
                     unit.ActionController.ApplyAction(s, dt);
                 }
@@ -164,7 +164,7 @@ namespace RTSEngine.Controllers {
 
             // Move Geometry To The Unit's Location and hash into the grid
             foreach(RTSTeam team in s.Teams) {
-                foreach(RTSUnit unit in team.Units) {
+                foreach(RTSUnit unit in team.units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
                     hashGrid.AddObject(unit);
                 }
@@ -185,7 +185,7 @@ namespace RTSEngine.Controllers {
 
             // Move Unit's Location To The Geometry After Heightmap Collision
             foreach(RTSTeam team in s.Teams) {
-                foreach(RTSUnit unit in team.Units) {
+                foreach(RTSUnit unit in team.units) {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
                     unit.GridPosition = unit.CollisionGeometry.Center;
                     unit.Height = unit.CollisionGeometry.Height;

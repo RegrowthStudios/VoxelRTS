@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace RTSEngine.Data.Parsers {
     public static class RegexHelper {
+        public const string DATA_STRING_REGEX = @"[\w\s]+";
         public const string DATA_FILE_REGEX = @"[\w\.][\w|\s|.|\\|/]*";
         public const string DATA_NUM_REGEX = @"[\d\x2d]*\.*\d*";
         public const string DATA_INT_REGEX = @"[\d\x2d]+";
@@ -22,6 +23,9 @@ namespace RTSEngine.Data.Parsers {
         public static Regex Generate(string key, string data) {
             string rs = string.Format(@"{0}\s+\x5b({1})\x5d\s*", key, data);
             return new Regex(rs);
+        }
+        public static Regex GenerateString(string key) {
+            return Generate(key, DATA_STRING_REGEX);
         }
         public static Regex GenerateFile(string key) {
             return Generate(key, DATA_FILE_REGEX);

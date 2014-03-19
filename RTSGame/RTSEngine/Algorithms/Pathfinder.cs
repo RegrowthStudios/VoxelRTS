@@ -45,8 +45,8 @@ namespace RTSEngine.Algorithms {
 
     public struct SearchLocation {
         public Point Loc;
-        public float GScore;
-        public float FScore;
+        public int GScore;
+        public int FScore;
         public static int Compare(SearchLocation x, SearchLocation y) {
             return x.FScore.CompareTo(y.FScore);
         }
@@ -101,6 +101,36 @@ namespace RTSEngine.Algorithms {
         }
 
         // Get The Search Grid Locations Adjacent To The Input
+        private bool PointPossible(Point p) {
+            return p.X >= 0 && p.X < searchGrid.GetLength(0) && p.Y >= 0 && p.Y < searchGrid.GetLength(1);
+        }
+        private IEnumerable<SearchLocation> NeighborhoodDiag(SearchLocation loc) {
+            foreach(Point p in NeighborhoodDiag(loc.Loc).Where(PointPossible)) {
+                yield return searchGrid[p.X, p.Y];
+            }
+        }
+        private IEnumerable<SearchLocation> NeighborhoodAlign(SearchLocation loc) {
+            foreach(Point p in NeighborhoodAlign(loc.Loc).Where(PointPossible)) {
+                yield return searchGrid[p.X, p.Y];
+            }
+        }
+
+        // Return An Array Of The 8 Cardinal & Ordinal Points Adacent To P
+        private IEnumerable<Point> NeighborhoodDiag(Point p) {
+            yield return new Point(p.X + 1, p.Y + 1);
+            yield return new Point(p.X + 1, p.Y - 1);
+            yield return new Point(p.X - 1, p.Y + 1);
+            yield return new Point(p.X - 1, p.Y - 1);
+        }
+        private IEnumerable<Point> NeighborhoodAlign(Point p) {
+            yield return new Point(p.X + 1, p.Y);
+            yield return new Point(p.X - 1, p.Y);
+            yield return new Point(p.X, p.Y + 1);
+            yield return new Point(p.X, p.Y - 1);
+        }
+
+
+#if REMOVE
         private SearchLocation[] Neighborhood(SearchLocation loc) {
             Point[] candidates = Neighborhood(loc.Loc);
             candidates = candidates.Where(p => p.X >= 0 && p.X < searchGrid.GetLength(0)
@@ -111,8 +141,6 @@ namespace RTSEngine.Algorithms {
             }
             return locs;
         }
-
-        // Return An Array Of The 8 Cardinal & Ordinal Points Adacent To P
         private Point[] Neighborhood(Point p) {
             Point[] points = {  new Point(p.X-1,p.Y),
                                 new Point(p.X-1,p.Y-1),
@@ -124,19 +152,22 @@ namespace RTSEngine.Algorithms {
                                 new Point(p.X-1,p.Y+1)  };
             return points;
         }
-
         // Euclidean Distance
         private float EucDist(Point start, Point end) {
             float xDist = (float)(end.X - start.X);
             float yDist = (float)(end.Y - start.Y);
             return (float)Math.Sqrt(xDist * xDist + yDist * yDist);
         }
+#endif
 
         // Manhattan Distance
-        private float ManhatDist(Point start, Point end) {
-            float xDist = Math.Abs(end.X - start.X);
-            float yDist = Math.Abs(end.Y - start.Y);
-            return xDist + yDist;
+        private int ManhatDist(Point start, Point end) {
+            int xDist = Math.Abs(end.X - start.X);
+            int yDist = Math.Abs(end.Y - start.Y);
+            if(xDist < yDist)
+                return xDist * 14 + (yDist - xDist) * 10;
+            else
+                return yDist * 14 + (xDist - yDist) * 10;
         }
 
         private LinkedList<Point> ReconstructPath(Dictionary<Point, Point?> cameFrom, Point current) {
@@ -158,7 +189,7 @@ namespace RTSEngine.Algorithms {
             var openSet = new MinHeap<SearchLocation>(SearchLocation.Compare);
             var cameFrom = new Dictionary<Point, Point?>();
             SearchLocation current = new SearchLocation(cGridPoint);
-            current.FScore = EucDist(cGridPoint,gGridPoint);
+            current.FScore = ManhatDist(cGridPoint,gGridPoint);
             openSet.Insert(current);
             // TODO: Verify
             bool success = false;
@@ -171,14 +202,25 @@ namespace RTSEngine.Algorithms {
 
                 openSet.Remove(current);
                 closedSet.Add(current.Loc);
-                foreach(SearchLocation neighbor in Neighborhood(current)) {
+                foreach(SearchLocation neighbor in NeighborhoodDiag(current)) {
                     if(closedSet.Contains(neighbor.Loc) || world.IsCollidable(neighbor.Loc.X,neighbor.Loc.Y)) continue;
-                    float gScoreNew = current.GScore + 1;
+                    int gScoreNew = current.GScore + 14;
                     if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
                         cameFrom[neighbor.Loc] = current.Loc;
                         SearchLocation _neighbor = neighbor; // Can't Change Iteration Var
                         _neighbor.GScore = gScoreNew;
-                        _neighbor.FScore = gScoreNew + EucDist(_neighbor.Loc, gGridPoint);
+                        _neighbor.FScore = gScoreNew + ManhatDist(_neighbor.Loc, gGridPoint);
+                        if(!openSet.Contains(_neighbor)) openSet.Insert(_neighbor);
+                    }
+                }
+                foreach(SearchLocation neighbor in NeighborhoodAlign(current)) {
+                    if(closedSet.Contains(neighbor.Loc) || world.IsCollidable(neighbor.Loc.X, neighbor.Loc.Y)) continue;
+                    int gScoreNew = current.GScore + 10;
+                    if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
+                        cameFrom[neighbor.Loc] = current.Loc;
+                        SearchLocation _neighbor = neighbor; // Can't Change Iteration Var
+                        _neighbor.GScore = gScoreNew;
+                        _neighbor.FScore = gScoreNew + ManhatDist(_neighbor.Loc, gGridPoint);
                         if(!openSet.Contains(_neighbor)) openSet.Insert(_neighbor);
                     }
                 }

@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.Input;
 using RTSEngine.Data;
 using RTSEngine.Controllers;
 using BlisterUI.Input;
-using RTSEngine.Data;
 
 namespace RTSEngine.Graphics {
     public class RTSRenderer : IDisposable {

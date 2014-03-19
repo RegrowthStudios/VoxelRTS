@@ -12,6 +12,13 @@ using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Controllers {
+    // A Playable Team
+    public struct RTSTeamResult {
+        public RTSRaceData TeamType;
+        public RTSColorScheme Colors;
+        public InputType InputType;
+    }
+
     // The Data The Engine Needs To Know About To Properly Create A Game
     public struct EngineLoadData {
         // Teams In The Battle
@@ -27,23 +34,16 @@ namespace RTSEngine.Controllers {
         public readonly RTSRenderer renderer;
         private readonly GameplayController playController;
 
-        Action<string, float> fLoad;
-
-        public GameEngine(GraphicsDeviceManager gdm, GameWindow w, EngineLoadData d, Action<string, float> loadCallback) {
+        public GameEngine(GraphicsDeviceManager gdm, GameWindow w, EngineLoadData d) {
             var g = gdm.GraphicsDevice;
-            fLoad = loadCallback;
 
             // Create Simple Information
-            fLoad("Creating Renderer", 0.0f);
             renderer = new RTSRenderer(gdm, @"Content\FX\RTS.fx", w);
-            fLoad("Creating Renderer", 0.07f);
 
-            fLoad("Making Gameplay Controller", 0.1f);
             playController = new GameplayController();
             DevConsole.OnNewCommand += playController.OnDevCommand;
 
             // Load Teams
-            fLoad("Loading Teams", 0.2f);
             state = new GameState(LoadTeams(g, d.Teams));
             PopulateControllers();
             for(int ti = 0; ti < state.Teams.Length; ti++) {
@@ -64,13 +64,9 @@ namespace RTSEngine.Controllers {
                         throw new Exception("Type does not exist");
                 }
             }
-            fLoad("Teams Complete", 0.4f);
 
             // Load The Map
-            fLoad("Loading Map", 0.5f);
             LoadMap(g, d.MapDirectory);
-            fLoad("Map Complete", 1f);
-
         }
         #region Disposal
         public void Dispose() {
@@ -119,7 +115,7 @@ namespace RTSEngine.Controllers {
             int i = 0;
             foreach(var res in teamResults) {
                 team = new RTSTeam();
-                team.ColorSheme = res.Colors;
+                team.ColorScheme = res.Colors;
                 foreach(DirectoryInfo unitDataDir in res.TeamType.UnitTypes)
                     LoadUnit(g, team, unitDataDir);
                 t[i++] = team;
@@ -127,8 +123,8 @@ namespace RTSEngine.Controllers {
             return t;
         }
         public void LoadUnit(GraphicsDevice g, RTSTeam t, DirectoryInfo dir) {
-            RTSUnitResult res = RTSUnitParser.Parse(g, dir);
-            t.AddUnitType(res.Data);
+            RTSUnitResult res = RTSUnitDataParser.Parse(g, dir);
+            t.AddUnitData(res.Data);
             t.OnNewUnitSpawn += res.View.OnUnitSpawn;
             renderer.UnitModels.Add(res.View);
         }
