@@ -55,12 +55,12 @@ namespace RTSEngine.Data {
     }
 
     public class SetTargetEvent : GameInputEvent {
-        public IDestructibleEntity Target {
+        public IEntity Target {
             get;
             private set;
         }
 
-        public SetTargetEvent(IDestructibleEntity target, RTSTeam t)
+        public SetTargetEvent(IEntity target, RTSTeam t)
             : base(GameEventType.SetTarget, t) {
             Target = target;
         }

@@ -9,13 +9,13 @@ namespace RTSEngine.Interfaces {
         // The Entity That This Controller is Controlling
         ISquad Squad { get; }
 
-        // Will Set Once And Then Fail On Later Occurences
+        // Will Set Once And Then Fail On Later Occurrences
         void SetSquad(ISquad s);
     }
 
     public interface ITargettingController : ISquadController {
         // Target Of The Squad
-        IDestructibleEntity Target { get; set; }
+        IEntity Target { get; set; }
 
         // Find A Target For This Controller's Entity
         void FindTarget(GameState g, float dt);

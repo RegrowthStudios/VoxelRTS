@@ -9,9 +9,15 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Parsers {
     #region Compiled Arguments
+    public enum UnitControllerType {
+        Action,
+        Animation,
+        Combat,
+        Movement
+    }
     public class ReflectedEntityController {
         // The Types Of Controller That This Is
-        public EntityControllerType ControllerType {
+        public UnitControllerType ControllerType {
             get;
             private set;
         }
@@ -22,24 +28,20 @@ namespace RTSEngine.Data.Parsers {
         public ReflectedEntityController(Type t) {
             // Get Constructor
             constructor = t.GetConstructor(new Type[0]);
-
-            // Find Controller Types
-            ControllerType = EntityControllerType.None;
-            Type[] interfaces = t.GetInterfaces();
-            foreach(var ti in interfaces) {
-                if(ti.IsEquivalentTo(typeof(IActionController)))
-                    ControllerType |= EntityControllerType.Action;
-                else if(ti.IsEquivalentTo(typeof(IMovementController)))
-                    ControllerType |= EntityControllerType.Movement;
-                else if(ti.IsEquivalentTo(typeof(ITargettingController)))
-                    ControllerType |= EntityControllerType.Targetting;
-                else if(ti.IsEquivalentTo(typeof(ICombatController)))
-                    ControllerType |= EntityControllerType.Combat;
-            }
+            if(t.IsSubclassOf(typeof(ACUnitActionController)))
+                ControllerType = UnitControllerType.Action;
+            else if(t.IsSubclassOf(typeof(ACUnitAnimationController)))
+                ControllerType = UnitControllerType.Animation;
+            else if(t.IsSubclassOf(typeof(ACUnitCombatController)))
+                ControllerType = UnitControllerType.Combat;
+            else if(t.IsSubclassOf(typeof(ACUnitMovementController)))
+                ControllerType = UnitControllerType.Movement;
+            else
+                throw new ArgumentException("This Script Is Not Subclassing A Unit Controller");
         }
 
-        public IEntityController CreateInstance() {
-            return constructor.Invoke(null) as IEntityController;
+        public T CreateInstance<T>() where T : ACUnitController {
+            return constructor.Invoke(null) as T;
         }
     }
     public class CompiledEntityControllers {
@@ -75,6 +77,8 @@ namespace RTSEngine.Data.Parsers {
                     error += e + "\n";
                 return null;
             }
+
+            // Loop Through All Visible Types
             CompiledEntityControllers cec = new CompiledEntityControllers();
             Assembly a = cr.CompiledAssembly;
             Type[] types = a.GetExportedTypes();
@@ -82,15 +86,13 @@ namespace RTSEngine.Data.Parsers {
                 // We Don't Want Abstract Classes Or Interfaces
                 if(t.IsAbstract || t.IsInterface) continue;
 
-                Type[] interfaces = t.GetInterfaces();
-                foreach(Type ti in interfaces) {
-                    if(ti.Equals(typeof(IEntityController))) {
-                        cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
-                    }
-                }
+                // Check For The Superclass Of ACUnitController
+                if(t.IsSubclassOf(typeof(ACUnitController)))
+                    cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
             }
             return cec;
         }
+
         public static CompiledEntityControllers CompileText(string text, string[] references, out string error) {
             // No Error Default
             error = null;
@@ -110,6 +112,8 @@ namespace RTSEngine.Data.Parsers {
                     error += e + "\n";
                 return null;
             }
+
+            // Loop Through All Visible Types
             CompiledEntityControllers cec = new CompiledEntityControllers();
             Assembly a = cr.CompiledAssembly;
             Type[] types = a.GetExportedTypes();
@@ -117,12 +121,9 @@ namespace RTSEngine.Data.Parsers {
                 // We Don't Want Abstract Classes Or Interfaces
                 if(t.IsAbstract || t.IsInterface) continue;
 
-                Type[] interfaces = t.GetInterfaces();
-                foreach(Type ti in interfaces) {
-                    if(ti.Equals(typeof(IEntityController))) {
-                        cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
-                    }
-                }
+                // Check For The Superclass Of ACUnitController
+                if(t.IsSubclassOf(typeof(ACUnitController)))
+                    cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
             }
             return cec;
         }

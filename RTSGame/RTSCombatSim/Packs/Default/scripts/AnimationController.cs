@@ -6,62 +6,37 @@ using RTSEngine.Data;
 using RTSEngine.Interfaces;
 
 namespace RTSCS.Controllers {
-    public class AnimationController : IAnimationController {
-        bool restart;
-
-        public AnimationType anim;
-        public AnimationType Animation {
-            get {
-                return anim;
-            }
-            set {
-                anim = value;
-                restart = true;
-            }
-        }
-
-        public IEntity Entity {
-            get;
-            private set;
-        }
-
-        public float AnimationFrame {
-            get { return alCurrent.CurrentFrame; }
-        }
-
+    public class AnimationController : ACUnitAnimationController {
         private AnimationLoop alRest, alWalk;
         private AnimationLoop alCurrent;
 
         public AnimationController() {
-            Entity = null;
-            anim = AnimationType.Rest;
+            animation = AnimationType.Rest;
             alRest = new AnimationLoop(0, 59);
             alWalk = new AnimationLoop(60, 119);
             alCurrent = alRest;
             alCurrent.Restart();
         }
 
-        public void SetEntity(IEntity e) {
-            if(Entity != null && Entity != e)
-                throw new InvalidOperationException("Controllers Can Only Have Entities Set Once");
-            Entity = e;
+        public override void SetAnimation(AnimationType t) {
+            switch(t) {
+                case AnimationType.Walking:
+                    alCurrent = alWalk;
+                    alCurrent.Restart(true);
+                    break;
+                case AnimationType.Rest:
+                    alCurrent = alRest;
+                    alCurrent.Restart(true);
+                    break;
+                default:
+                    return;
+            }
+            animation = t;
         }
 
-        public void Update(GameState s, float dt) {
-            if(restart) {
-                switch(anim) {
-                    case AnimationType.Walking:
-                        alCurrent = alWalk;
-                        alCurrent.Restart(true);
-                        break;
-                    default:
-                        alCurrent = alRest;
-                        alCurrent.Restart(true);
-                        break;
-                }
-                restart = false;
-            }
+        public override void Update(GameState s, float dt) {
             alCurrent.Step(dt);
+            AnimationFrame = alCurrent.CurrentFrame;
         }
     }
 }

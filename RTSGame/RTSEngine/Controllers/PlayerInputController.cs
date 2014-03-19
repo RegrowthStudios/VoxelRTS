@@ -63,7 +63,7 @@ namespace RTSEngine.Controllers {
         public void OnMousePress(Vector2 location, MouseButton b) {
             if(b == MouseButton.Right) {
                 BoundingBox box;
-                IDestructibleEntity target = null;
+                IEntity target = null;
                 Ray viewRay = Renderer.GetViewRay(location);
                 float? dist;
                 for(int i = 0; i < GameState.Teams.Length; i++) {

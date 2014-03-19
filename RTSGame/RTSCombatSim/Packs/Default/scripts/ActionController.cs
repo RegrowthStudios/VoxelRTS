@@ -6,37 +6,18 @@ using RTSEngine.Interfaces;
 using RTSEngine.Data;
 
 namespace RTSCS.Controllers {
-    public class ActionController : IActionController {
-        // The Entity That This ActionController Is Controlling
-        public IEntity Entity {
-            get;
-            private set;
-        }
-
-        // Constructor
-        public ActionController() {
-            Entity = null;
-        }
-
-        // Set Entity Only Once
-        public void SetEntity(IEntity e) {
-            if(Entity != null && Entity != e)
-                throw new InvalidOperationException("Controllers Can Only Have Entities Set Once");
-            Entity = e;
-        }
-
+    public class ActionController : ACUnitActionController {
         // Performs Decision Logic For The Entity
-        public void DecideAction(GameState g, float dt) {
-            IMovingEntity mEntity = Entity as IMovingEntity;
-            if(mEntity != null) mEntity.MovementController.DecideMove(g, dt);
+        public override void DecideAction(GameState g, float dt) {
+            if(unit.MovementController != null)
+                unit.MovementController.DecideMove(g, dt);
         }
 
         // Apply The Entity's Decision
-        public void ApplyAction(GameState g, float dt) {
-            IMovingEntity mEntity = Entity as IMovingEntity;
-            if(mEntity != null) mEntity.MovementController.ApplyMove(g, dt);
-
-            Entity.AnimationController.Update(g, dt);
+        public override void ApplyAction(GameState g, float dt) {
+            if(unit.MovementController != null)
+                unit.MovementController.ApplyMove(g, dt);
+            unit.AnimationController.Update(g, dt);
         }
     }
 }

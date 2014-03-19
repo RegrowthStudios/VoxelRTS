@@ -73,13 +73,14 @@ namespace RTSEngine.Controllers {
                         break;
                     case GameEventType.SetWaypoint:
                         SetWayPointEvent setWaypointEvent = e as SetWayPointEvent;
+                        List<Vector2> wp = new List<Vector2>(2);
+                        wp.Add(setWaypointEvent.Waypoint);
                         List<IEntity> selected = setWaypointEvent.Team.Input.Selected;
                         if(selected != null && selected.Count > 0) {
                             foreach(var unit in selected) {
                                 RTSUnitInstance u = unit as RTSUnitInstance;
-                                if(u != null) {
-                                    u.MovementController.SetWaypoints(new Vector2[] { setWaypointEvent.Waypoint });
-                                }
+                                if(u != null)
+                                    u.MovementController.SetWaypoints(wp);
                             }
                         }
                         break;
@@ -95,8 +96,8 @@ namespace RTSEngine.Controllers {
                             }
                         }
                         setTargetEvent.Team.AddSquad(squad);
-                        squad.TargettingController = s.Controllers["RTSCS.TargettingController"].CreateInstance() as ITargettingController;
-                        squad.TargettingController.Target = setTargetEvent.Target;
+                        //squad.TargettingController = s.Controllers["RTSCS.TargettingController"].CreateInstance() as ITargettingController;
+                        //squad.TargettingController.Target = setTargetEvent.Target;
                         break;
                     default:
                         throw new Exception("Event does not exist.");
@@ -116,9 +117,9 @@ namespace RTSEngine.Controllers {
                         var dcs = comm as DevCommandSpawn;
                         for(int ci = 0; ci < dcs.Count; ci++) {
                             var unit = s.Teams[dcs.TeamIndex].AddUnit(dcs.UnitIndex, new Vector2(dcs.X, dcs.Z));
-                            unit.ActionController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultActionController].CreateInstance() as IActionController;
-                            unit.AnimationController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultAnimationController].CreateInstance() as IAnimationController;
-                            unit.MovementController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultMoveController].CreateInstance() as IMovementController;
+                            unit.ActionController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultActionController].CreateInstance<ACUnitActionController>();
+                            unit.AnimationController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultAnimationController].CreateInstance<ACUnitAnimationController>();
+                            unit.MovementController = s.Controllers[s.Teams[dcs.TeamIndex].UnitData[dcs.UnitIndex].DefaultMoveController].CreateInstance<ACUnitMovementController>();
                         }
                         break;
                     case DevCommandType.StopMotion:

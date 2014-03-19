@@ -78,7 +78,7 @@ namespace RTSEngine.Data.Team {
         }
 
         // Event Triggered When This Entity Receives Damage
-        public event Action<IDestructibleEntity, int> OnDamage;
+        public event Action<IEntity, int> OnDamage;
 
         // Destruction Event
         public event Action<IEntity> OnDestruction;
@@ -103,50 +103,50 @@ namespace RTSEngine.Data.Team {
         }
 
         // MovementController of The Unit
-        private IMovementController mController;
-        public IMovementController MovementController {
+        private ACUnitMovementController mController;
+        public ACUnitMovementController MovementController {
             get { return mController; }
             set {
                 mController = value;
                 if(mController != null)
-                    mController.SetEntity(this);
+                    mController.SetUnit(this);
             }
         }
 
         // ActionController of The Unit
-        private IActionController aController;
-        public IActionController ActionController {
+        private ACUnitActionController aController;
+        public ACUnitActionController ActionController {
             get { return aController; }
             set {
                 aController = value;
                 if(aController != null)
-                    aController.SetEntity(this);
+                    aController.SetUnit(this);
             }
         }
 
         // CombatController of The Unit
-        private ICombatController cController;
-        public ICombatController CombatController {
+        private ACUnitCombatController cController;
+        public ACUnitCombatController CombatController {
             get { return cController; }
             set {
                 cController = value;
                 if(cController != null)
-                    cController.SetEntity(this);
+                    cController.SetUnit(this);
             }
         }
 
-        private IAnimationController anController;
-        public IAnimationController AnimationController {
+        private ACUnitAnimationController anController;
+        public ACUnitAnimationController AnimationController {
             get { return anController; }
             set {
                 anController = value;
                 if(anController != null)
-                    anController.SetEntity(this);
+                    anController.SetUnit(this);
             }
         }
 
         // Combat Event
-        public event Action<ICombatEntity, IDestructibleEntity> OnAttackMade;
+        public event Action<ICombatEntity, IEntity> OnAttackMade;
 
         // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
         public RTSUnitInstance(RTSTeam team, RTSUnit data, Vector2 position) {
@@ -172,7 +172,7 @@ namespace RTSEngine.Data.Team {
         // Applies Damage
         public void DamageTarget(double rand) {
             if(Target == null) return;
-            IDestructibleEntity t = target as IDestructibleEntity;
+            IEntity t = target as IEntity;
             if(t == null) return;
 
             // Damage
