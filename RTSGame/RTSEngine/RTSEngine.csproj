@@ -59,6 +59,7 @@
     <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\PlayerInputController.cs" />
     <Compile Include="Data\AnimationLoop.cs" />
+    <Compile Include="Data\Camera.cs" />
     <Compile Include="Data\DevCommands.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
     <Compile Include="Data\HashGrid.cs" />

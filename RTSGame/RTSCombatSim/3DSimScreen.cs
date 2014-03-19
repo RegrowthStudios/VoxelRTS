@@ -93,7 +93,7 @@ namespace RTSCS {
 
         public void OnMP(Vector2 p, MouseButton b) {
             if(b == MouseButton.Right) {
-                Ray r = engine.renderer.GetViewRay(p);
+                Ray r = engine.renderer.Camera.GetViewRay(p);
                 IntersectionRecord rec = new IntersectionRecord();
                 if(engine.state.Map.BVH.Intersect(ref rec, r)) {
                     spawnLoc = r.Position + r.Direction * rec.T;

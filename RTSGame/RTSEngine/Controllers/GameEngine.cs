@@ -50,7 +50,7 @@ namespace RTSEngine.Controllers {
                 switch(d.Teams[ti].InputType) {
                     case InputType.Player:
                         var pic = new PlayerInputController(state, state.Teams[ti]);
-                        pic.Renderer = renderer;
+                        pic.Camera = renderer.Camera;
                         state.Teams[ti].Input = pic;
                         break;
                     case InputType.AI:
@@ -136,7 +136,7 @@ namespace RTSEngine.Controllers {
         // Update Logic
         public void Update(float dt) {
             playController.Update(state, dt);
-            renderer.UpdateCamera(state.Map, dt);
+            renderer.Camera.Update(state.Map, dt);
         }
 
         // Drawing

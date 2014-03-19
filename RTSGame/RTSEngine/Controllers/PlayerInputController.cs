@@ -14,7 +14,7 @@ namespace RTSEngine.Controllers {
     public class PlayerInputController : InputController {
 
         private Vector2 mousePressedPos;
-        public RTSRenderer Renderer { get; set; }
+        public Camera Camera { get; set; }
 
         public PlayerInputController(GameState g, RTSTeam t)
             : base(g, t) {
@@ -29,7 +29,7 @@ namespace RTSEngine.Controllers {
         public void OnMouseRelease(Vector2 location, MouseButton b) {
             if(b == MouseButton.Left) {
                 // Get Selection Frustum
-                BoundingFrustum frustum = Renderer.GetSelectionBox(Vector2.Min(location, mousePressedPos), Vector2.Max(location, mousePressedPos));
+                BoundingFrustum frustum = Camera.GetSelectionBox(Vector2.Min(location, mousePressedPos), Vector2.Max(location, mousePressedPos));
 
                 // Check For All E
                 BoundingBox box;
@@ -47,7 +47,7 @@ namespace RTSEngine.Controllers {
             if(b == MouseButton.Right) {
                 BoundingBox box;
                 IEntity target = null;
-                Ray viewRay = Renderer.GetViewRay(location);
+                Ray viewRay = Camera.GetViewRay(location);
                 float? dist;
                 for(int i = 0; i < GameState.Teams.Length; i++) {
                     foreach(RTSUnitInstance unit in GameState.Teams[i].Units) {

@@ -34,6 +34,7 @@ namespace RTSEngine.Controllers {
             get { return WindowHeight - SCROLL_PANE_WIDTH; }
         }
 
+        // For Checking If OS Events Are Tied In
         public bool IsHooked {
             get;
             private set;
@@ -73,15 +74,16 @@ namespace RTSEngine.Controllers {
             useOrbit = false;
         }
 
-        public void Hook() {
+        public void Hook(GameWindow w) {
             if(IsHooked) return;
             IsHooked = true;
             MouseEventDispatcher.OnMouseMotion += OnMouseMovement;
             MouseEventDispatcher.OnMouseScroll += OnMouseScroll;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
             KeyboardEventDispatcher.OnKeyReleased += OnKeyRelease;
+            w.ClientSizeChanged += OnWindowResize;
         }
-        public void Unhook() {
+        public void Unhook(GameWindow w) {
             if(!IsHooked) return;
             IsHooked = false;
             ScrollX = 0;
@@ -93,6 +95,7 @@ namespace RTSEngine.Controllers {
             MouseEventDispatcher.OnMouseMotion -= OnMouseMovement;
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
             KeyboardEventDispatcher.OnKeyReleased -= OnKeyRelease;
+            w.ClientSizeChanged -= OnWindowResize;
         }
 
         public void GetZoom(out int z) {
