@@ -15,7 +15,7 @@ namespace RTSEngine.Controllers {
         Environment
     }
 
-    public class InputController {
+    public abstract class InputController : IDisposable {
 
         //Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
@@ -36,6 +36,7 @@ namespace RTSEngine.Controllers {
             eventQueue = new ConcurrentQueue<GameInputEvent>();
             selected = new List<IEntity>();
         }
+        public abstract void Dispose();
 
         //Adds Event To Concurrent Queue
         public void AddEvent(GameInputEvent e) {

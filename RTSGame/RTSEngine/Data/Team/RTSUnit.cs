@@ -186,6 +186,8 @@ namespace RTSEngine.Data.Team {
             Health -= d;
             if(OnDamage != null)
                 OnDamage(this, d);
+            if(!IsAlive)
+                Destroy();
         }
 
         // Destroys This Entity
@@ -202,6 +204,5 @@ namespace RTSEngine.Data.Team {
                 ViewDirection = Vector2.Normalize(change);
             }
         }
-
     }
 }

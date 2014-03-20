@@ -51,7 +51,8 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        public RTSSquad() {
+        public RTSSquad(RTSTeam team) {
+            Team = team;
             units = new List<RTSUnit>();
         }
 
@@ -60,12 +61,14 @@ namespace RTSEngine.Data.Team {
             // Squad Invariant Performed Here
             if(u.Squad != null) {
                 u.Squad.units.Remove(u);
+                u.OnDestruction -= u.Squad.OnUnitDestruction;
                 if(u.Squad.OnCombatantRemoval != null)
                     u.Squad.OnCombatantRemoval(u.Squad, u);
             }
 
             u.Squad = this;
             units.Add(u);
+            u.OnDestruction += OnUnitDestruction;
             if(OnCombatantAddition != null)
                 OnCombatantAddition(this, u);
         }
@@ -81,6 +84,7 @@ namespace RTSEngine.Data.Team {
                 else
                     nUnits.Add(units[i]);
             }
+            units = nUnits;
         }
 
         // Should Be Done At The Beginning Of Each Frame (Only Once)
@@ -91,6 +95,12 @@ namespace RTSEngine.Data.Team {
                     gridPos += u.GridPosition;
                 gridPos /= units.Count;
             }
+        }
+
+        private void OnUnitDestruction(IEntity u) {
+            units.Remove(u as RTSUnit);
+            if(OnCombatantRemoval != null)
+                OnCombatantRemoval(this, u as RTSUnit);
         }
     }
 }

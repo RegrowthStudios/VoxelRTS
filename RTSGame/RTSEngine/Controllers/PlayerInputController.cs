@@ -18,12 +18,12 @@ namespace RTSEngine.Controllers {
 
         public PlayerInputController(GameState g, RTSTeam t)
             : base(g, t) {
-            RegisterWithEvents();
-        }
-
-        public void RegisterWithEvents() {
             MouseEventDispatcher.OnMouseRelease += new OnMouseRelease(OnMouseRelease);
             MouseEventDispatcher.OnMousePress += new OnMousePress(OnMousePress);
+        }
+        public override void Dispose() {
+            MouseEventDispatcher.OnMouseRelease -= new OnMouseRelease(OnMouseRelease);
+            MouseEventDispatcher.OnMousePress -= new OnMousePress(OnMousePress);
         }
 
         public void OnMouseRelease(Vector2 location, MouseButton b) {
@@ -42,7 +42,6 @@ namespace RTSEngine.Controllers {
                 AddEvent(new SelectEvent(selected, Team));
             }
         }
-
         public void OnMousePress(Vector2 location, MouseButton b) {
             if(b == MouseButton.Right) {
                 BoundingBox box;

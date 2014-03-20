@@ -87,30 +87,32 @@ namespace RTSEngine.Controllers {
             List<Vector2> wp = new List<Vector2>(2);
             wp.Add(e.Waypoint);
             List<IEntity> selected = e.Team.Input.selected;
-            RTSSquad blankSquad = new RTSSquad();
+            RTSSquad squad = null;
             if(selected != null && selected.Count > 0) {
                 foreach(var unit in selected) {
                     RTSUnit u = unit as RTSUnit;
                     if(u != null) {
+                        if(squad == null) squad = u.Team.AddSquad();
                         u.MovementController.SetWaypoints(wp);
-                        blankSquad.AddUnit(u);
+                        u.Target = null;
+                        squad.AddUnit(u);
                     }
                 }
             }
-            e.Team.AddSquad(blankSquad);
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
             List<IEntity> selected = e.Team.Input.selected;
-            RTSSquad squad = new RTSSquad();
+            RTSSquad squad = null;
 
             if(selected != null && selected.Count > 0) {
                 foreach(var unit in selected) {
                     RTSUnit u = unit as RTSUnit;
-                    if(u != null)
+                    if(u != null) {
+                        if(squad == null) squad = u.Team.AddSquad();
                         squad.AddUnit(u);
+                    }
                 }
             }
-            e.Team.AddSquad(squad);
 
             squad.ActionController = s.SquadControllers[e.Team.DSAC].CreateInstance<ACSquadActionController>();
             squad.TargettingController = s.SquadControllers[e.Team.DSTC].CreateInstance<ACSquadTargettingController>();
@@ -139,11 +141,13 @@ namespace RTSEngine.Controllers {
             }
 
             // Recalculate Squad Grid Positions
+            int si = 0;
             for(int ti = 0; ti < s.Teams.Length; ti++) {
                 team = s.Teams[ti];
-                for(int i = 0; i < team.squads.Count; i++)
+                for(int i = 0; i < team.squads.Count; si++, i++)
                     team.squads[i].RecalculateGridPosition();
             }
+            DevConsole.AddCommand(string.Format("SC: {0}", si));
 
             // Find Decisions
             for(int ti = 0; ti < s.Teams.Length; ti++) {
@@ -174,7 +178,7 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSpawn c) {
-            RTSSquad squad = new RTSSquad();
+            RTSSquad squad = s.Teams[c.TeamIndex].AddSquad();
             for(int ci = 0; ci < c.Count; ci++) {
                 RTSUnit unit = s.Teams[c.TeamIndex].AddUnit(c.UnitIndex, new Vector2(c.X, c.Z));
                 unit.ActionController = s.UnitControllers[s.Teams[c.TeamIndex].unitData[c.UnitIndex].DefaultActionController].CreateInstance<ACUnitActionController>();
@@ -183,7 +187,6 @@ namespace RTSEngine.Controllers {
                 unit.CombatController = s.UnitControllers[s.Teams[c.TeamIndex].unitData[c.UnitIndex].DefaultCombatController].CreateInstance<ACUnitCombatController>();
                 squad.AddUnit(unit);
             }
-            s.Teams[c.TeamIndex].AddSquad(squad);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
             RTSTeam team;
