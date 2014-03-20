@@ -22,43 +22,29 @@ namespace RTS.Mech.Squad {
 
     public class Target : ACSquadTargettingController {
         public override void DecideTarget(GameState g, float dt) {
-            float minDist = float.MaxValue;
-            if(targetSquad != null) {
-                // Check For Squad Pursuance
-                if(targetSquad.Units.Count < 1 || (targetSquad.GridPosition - squad.GridPosition).LengthSquared() > 1600) {
-                    DevConsole.AddCommand(string.Format("{0} -> {1} = {2}",
-                        targetSquad.GridPosition,
-                        squad.GridPosition,
-                        (targetSquad.GridPosition - squad.GridPosition).LengthSquared()));
+            if(targetSquad == null) {
+                FindTargetSquad(g);
+                return;
+            }
+            else {
+                if(targetSquad.Units.Count < 1) {
                     targetSquad = null;
                     return;
                 }
-                else if(targetUnit == null || !targetUnit.IsAlive) {
-                    // Find Closest Enemy Target
-                    targetUnit = null;
-                    minDist = float.MaxValue;
-                    foreach(var unit in targetSquad.Units) {
-                        float d = (unit.GridPosition - squad.GridPosition).LengthSquared();
-                        if(d < minDist) {
-                            targetUnit = unit;
-                            minDist = d;
-                        }
-                    }
-                    if(targetUnit != null)
-                        DevConsole.AddCommand("Has Target");
-                    return;
+                else if(targetUnit == null) {
+                    FindTargetUnit(g);
                 }
-                DevConsole.AddCommand("How End Up Here");
-                return;
+                else if(!targetUnit.IsAlive) {
+                    targetUnit = null;
+                }
             }
-
-            RTSSquad st = null;
+        }
+        private void FindTargetSquad(GameState g) {
             targetSquad = null;
-            foreach(var team in g.Teams) {
-                // Find Closest Enemy Squad
-                if(team == squad.Team) continue;
-
-                foreach(var sq in team.squads) {
+            float minDist = float.MaxValue;
+            for(int i = 0; i < g.Teams.Length; i++) {
+                if(g.Teams[i] == squad.Team) continue;
+                foreach(var sq in g.Teams[i].squads) {
                     float d = (sq.GridPosition - squad.GridPosition).LengthSquared();
                     if(d < minDist) {
                         targetSquad = sq;
@@ -66,9 +52,17 @@ namespace RTS.Mech.Squad {
                     }
                 }
             }
-            if(targetSquad != null)
-                DevConsole.AddCommand("Has Target Squad");
+        }
+        private void FindTargetUnit(GameState g) {
             targetUnit = null;
+            float minDist = float.MaxValue;
+            for(int i = 0; i < targetSquad.Units.Count; i++) {
+                float d = (targetSquad.Units[i].GridPosition - squad.GridPosition).LengthSquared();
+                if(d < minDist) {
+                    targetUnit = targetSquad.Units[i];
+                    minDist = d;
+                }
+            }
         }
         public override void ApplyTarget(GameState g, float dt) {
             foreach(var unit in squad.Units) {
