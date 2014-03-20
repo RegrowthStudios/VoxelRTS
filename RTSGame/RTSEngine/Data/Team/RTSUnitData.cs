@@ -34,5 +34,6 @@ namespace RTSEngine.Data.Team {
         public string DefaultMoveController;
         public string DefaultActionController;
         public string DefaultAnimationController;
+        public string DefaultCombatController;
     }
 }

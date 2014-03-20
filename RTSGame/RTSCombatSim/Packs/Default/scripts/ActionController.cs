@@ -17,6 +17,8 @@ namespace RTSCS.Controllers {
         public override void ApplyAction(GameState g, float dt) {
             if(unit.MovementController != null)
                 unit.MovementController.ApplyMove(g, dt);
+            if(unit.CombatController != null)
+                unit.CombatController.Attack(g, dt);
             unit.AnimationController.Update(g, dt);
         }
     }

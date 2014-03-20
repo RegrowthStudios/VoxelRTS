@@ -25,7 +25,11 @@ namespace RTSEngine.Data {
         }
 
         // Controller Dictionary
-        public Dictionary<string, ReflectedEntityController> Controllers {
+        public Dictionary<string, ReflectedUnitController> UnitControllers {
+            get;
+            private set;
+        }
+        public Dictionary<string, ReflectedSquadController> SquadControllers {
             get;
             private set;
         }
@@ -49,7 +53,8 @@ namespace RTSEngine.Data {
             t.CopyTo(Teams, 0);
 
             // No Data Yet Available
-            Controllers = new Dictionary<string, ReflectedEntityController>();
+            UnitControllers = new Dictionary<string, ReflectedUnitController>();
+            SquadControllers = new Dictionary<string, ReflectedSquadController>();
             units = new RTSUnitData[MAX_RTSUNIT_ID + 1];
             Map = null;
         }

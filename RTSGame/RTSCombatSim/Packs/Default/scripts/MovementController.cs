@@ -17,7 +17,12 @@ namespace RTSCS.Controllers {
 
         // Performs The Critical Logic Of This Controller
         public override void DecideMove(GameState g, float dt) {
-            if(waypoints.Count < 1) return;
+            if(unit.Target != null) {
+                waypoint = unit.Target.GridPosition;
+                doMove = true;
+            }
+            else if(waypoints.Count < 1) return;
+
             waypoint = waypoints[waypoints.Count - 1];
             Vector2 disp = waypoint - unit.GridPosition;
             doMove = disp.LengthSquared() > (DECIDE_DIST * DECIDE_DIST);

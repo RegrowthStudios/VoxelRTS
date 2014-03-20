@@ -65,6 +65,9 @@ namespace RTSEngine.Controllers {
                         AddEvent(new SetWayPointEvent(new Vector2(rh.X, rh.Z), Team));
                     }
                 }
+                else {
+                    AddEvent(new SetTargetEvent(target, Team));
+                }
             }
             else if(b == MouseButton.Left) {
                 mousePressedPos = location;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Controllers;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
@@ -38,8 +39,9 @@ namespace RTSEngine.Data.Team {
         // Entity Data
         public readonly List<RTSUnit> units;
         public readonly List<RTSSquad> squads;
+        public string DSAC, DSTC;
 
-        public IInputController Input {
+        public InputController Input {
             get;
             set;
         }

@@ -15,16 +15,13 @@ namespace RTSEngine.Controllers {
         Environment
     }
 
-    public class InputController : IInputController {
+    public class InputController {
 
         //Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
 
         //Currently Selected Entities
-        public List<IEntity> Selected {
-            get;
-            set;
-        }
+        public readonly List<IEntity> selected;
 
         //The RTSTeam of the InputController
         public RTSTeam Team { get; private set; }
@@ -37,6 +34,7 @@ namespace RTSEngine.Controllers {
             GameState = g;
             Team = t;
             eventQueue = new ConcurrentQueue<GameInputEvent>();
+            selected = new List<IEntity>();
         }
 
         //Adds Event To Concurrent Queue

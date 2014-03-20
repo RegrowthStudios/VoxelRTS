@@ -6,23 +6,17 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
-    public class RTSSquad : ISquad {
-
+    public class RTSSquad {
         // This Squad's Team
         public RTSTeam Team {
             get;
             private set;
         }
 
-        //List of Combatants In The Squad
-        private List<ICombatEntity> combatants;
-        public IEnumerable<ICombatEntity> Combatants {
-            get { return combatants; }
-        }
-
-        //Number of Combatants In The Squad
-        public int EntityCount {
-            get { return combatants.Count; }
+        // Units In The Squad
+        private List<RTSUnit> units;
+        public List<RTSUnit> Units {
+            get { return units; }
         }
 
         // The Average Position Of The Squad
@@ -32,13 +26,23 @@ namespace RTSEngine.Data.Team {
         }
 
         // Events When Squad Is Altered
-        public event Action<ISquad, ICombatEntity> OnCombatantAddition;
+        public event Action<RTSSquad, RTSUnit> OnCombatantAddition;
+        public event Action<RTSSquad, RTSUnit> OnCombatantRemoval;
 
-        public event Action<ISquad, ICombatEntity> OnCombatantRemoval;
+        // The Action Controller For This Squad
+        private ACSquadActionController aController;
+        public ACSquadActionController ActionController {
+            get { return aController; }
+            set {
+                aController = value;
+                if(aController != null)
+                    aController.SetSquad(this);
+            }
+        }
 
         // The Targetting Controller For This Squad
-        private ITargettingController tController;
-        public ITargettingController TargettingController {
+        private ACSquadTargettingController tController;
+        public ACSquadTargettingController TargettingController {
             get { return tController; }
             set {
                 tController = value;
@@ -47,35 +51,46 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        public RTSSquad() {
+            units = new List<RTSUnit>();
+        }
+
         // Adds A Combatant To This Squad
-        public void AddCombatant(ICombatEntity e) {
-            combatants.Add(e);
+        public void AddUnit(RTSUnit u) {
+            // Squad Invariant Performed Here
+            if(u.Squad != null) {
+                u.Squad.units.Remove(u);
+                if(u.Squad.OnCombatantRemoval != null)
+                    u.Squad.OnCombatantRemoval(u.Squad, u);
+            }
+
+            u.Squad = this;
+            units.Add(u);
             if(OnCombatantAddition != null)
-                OnCombatantAddition(this,e);
+                OnCombatantAddition(this, u);
         }
 
         // Removes All Combatants From This Squad That Match A Predicate
-        public void RemoveAll(Predicate<ICombatEntity> f) {
-            foreach(var c in combatants) {
-                if(f(c)) {
-                    combatants.Remove(c);
+        public void RemoveAll(Predicate<RTSUnit> f) {
+            List<RTSUnit> nUnits = new List<RTSUnit>(units.Count);
+            for(int i = 0; i < units.Count; i++) {
+                if(f(units[i])) {
                     if(OnCombatantRemoval != null)
-                        OnCombatantRemoval(this, c);
+                        OnCombatantRemoval(this, units[i]);
                 }
+                else
+                    nUnits.Add(units[i]);
             }
         }
 
         // Should Be Done At The Beginning Of Each Frame (Only Once)
         public void RecalculateGridPosition() {
-            float sumX = 0;
-            float sumY = 0;
-            foreach(var c in Combatants){
-                sumX += c.GridPosition.X;
-                sumY += c.GridPosition.Y;
+            if(units.Count > 0) {
+                gridPos = Vector2.Zero;
+                foreach(var u in units)
+                    gridPos += u.GridPosition;
+                gridPos /= units.Count;
             }
-            gridPos.X = sumX / EntityCount;
-            gridPos.Y = sumY / EntityCount;
         }
     }
-
 }

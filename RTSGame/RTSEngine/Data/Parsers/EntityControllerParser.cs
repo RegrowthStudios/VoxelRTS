@@ -15,7 +15,7 @@ namespace RTSEngine.Data.Parsers {
         Combat,
         Movement
     }
-    public class ReflectedEntityController {
+    public class ReflectedUnitController {
         // The Types Of Controller That This Is
         public UnitControllerType ControllerType {
             get;
@@ -25,7 +25,7 @@ namespace RTSEngine.Data.Parsers {
         // The Constructor Of This Controller
         private ConstructorInfo constructor;
 
-        public ReflectedEntityController(Type t) {
+        public ReflectedUnitController(Type t) {
             // Get Constructor
             constructor = t.GetConstructor(new Type[0]);
             if(t.IsSubclassOf(typeof(ACUnitActionController)))
@@ -44,21 +44,48 @@ namespace RTSEngine.Data.Parsers {
             return constructor.Invoke(null) as T;
         }
     }
-    public class CompiledEntityControllers {
-        // The Dictionary Of Controllers
-        public readonly Dictionary<string, ReflectedEntityController> Controllers;
 
-        public CompiledEntityControllers() {
-            Controllers = new Dictionary<string, ReflectedEntityController>();
+    public enum SquadControllerType {
+        Action,
+        Targetting
+    }
+    public class ReflectedSquadController {
+        // The Types Of Controller That This Is
+        public SquadControllerType ControllerType {
+            get;
+            private set;
         }
+
+        // The Constructor Of This Controller
+        private ConstructorInfo constructor;
+
+        public ReflectedSquadController(Type t) {
+            // Get Constructor
+            constructor = t.GetConstructor(new Type[0]);
+            if(t.IsSubclassOf(typeof(ACSquadActionController)))
+                ControllerType = SquadControllerType.Action;
+            else if(t.IsSubclassOf(typeof(ACSquadTargettingController)))
+                ControllerType = SquadControllerType.Targetting;
+            else
+                throw new ArgumentException("This Script Is Not Subclassing A Squad Controller");
+        }
+
+        public T CreateInstance<T>() where T : ACSquadController {
+            return constructor.Invoke(null) as T;
+        }
+    }
+
+    public struct DynCompiledResults {
+        public Dictionary<string, ReflectedUnitController> UnitControllers;
+        public Dictionary<string, ReflectedSquadController> SquadControllers;
     }
     #endregion
 
-    public static class EntityControllerParser {
+    public static class DynControllerParser {
         // Create The Compiler
         private static readonly CSharpCodeProvider compiler = new CSharpCodeProvider();
 
-        public static CompiledEntityControllers Compile(string file, string[] references, out string error) {
+        public static DynCompiledResults Compile(string[] files, string[] references, out string error) {
             // No Error Default
             error = null;
 
@@ -68,64 +95,33 @@ namespace RTSEngine.Data.Parsers {
             compParams.GenerateExecutable = false;
             compParams.GenerateInMemory = true;
             compParams.TreatWarningsAsErrors = false;
-            CompilerResults cr = compiler.CompileAssemblyFromFile(compParams, file);
+            CompilerResults cr = compiler.CompileAssemblyFromFile(compParams, files);
 
             // Check For Errors
             if(cr.Errors.Count > 0) {
                 error = "";
                 foreach(var e in cr.Errors)
                     error += e + "\n";
-                return null;
+                return new DynCompiledResults();
             }
 
             // Loop Through All Visible Types
-            CompiledEntityControllers cec = new CompiledEntityControllers();
+            DynCompiledResults res = new DynCompiledResults();
+            res.UnitControllers = new Dictionary<string, ReflectedUnitController>();
+            res.SquadControllers = new Dictionary<string, ReflectedSquadController>();
             Assembly a = cr.CompiledAssembly;
             Type[] types = a.GetExportedTypes();
             foreach(Type t in types) {
                 // We Don't Want Abstract Classes Or Interfaces
                 if(t.IsAbstract || t.IsInterface) continue;
 
-                // Check For The Superclass Of ACUnitController
+                // Check For The Superclass
                 if(t.IsSubclassOf(typeof(ACUnitController)))
-                    cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
+                    res.UnitControllers.Add(t.FullName, new ReflectedUnitController(t));
+                else if(t.IsSubclassOf(typeof(ACSquadController)))
+                    res.SquadControllers.Add(t.FullName, new ReflectedSquadController(t));
             }
-            return cec;
-        }
-
-        public static CompiledEntityControllers CompileText(string text, string[] references, out string error) {
-            // No Error Default
-            error = null;
-
-            // Compile
-            CompilerParameters compParams = new CompilerParameters(references, null, false);
-            compParams.CompilerOptions = "/optimize";
-            compParams.GenerateExecutable = false;
-            compParams.GenerateInMemory = true;
-            compParams.TreatWarningsAsErrors = false;
-            CompilerResults cr = compiler.CompileAssemblyFromSource(compParams, text);
-
-            // Check For Errors
-            if(cr.Errors.Count > 0) {
-                error = "";
-                foreach(var e in cr.Errors)
-                    error += e + "\n";
-                return null;
-            }
-
-            // Loop Through All Visible Types
-            CompiledEntityControllers cec = new CompiledEntityControllers();
-            Assembly a = cr.CompiledAssembly;
-            Type[] types = a.GetExportedTypes();
-            foreach(Type t in types) {
-                // We Don't Want Abstract Classes Or Interfaces
-                if(t.IsAbstract || t.IsInterface) continue;
-
-                // Check For The Superclass Of ACUnitController
-                if(t.IsSubclassOf(typeof(ACUnitController)))
-                    cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
-            }
-            return cec;
+            return res;
         }
     }
 }

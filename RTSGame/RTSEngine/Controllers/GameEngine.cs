@@ -45,7 +45,7 @@ namespace RTSEngine.Controllers {
 
             // Load Teams
             state = new GameState(LoadTeams(g, d.Teams));
-            PopulateControllers();
+            LoadControllers();
             for(int ti = 0; ti < state.Teams.Length; ti++) {
                 switch(d.Teams[ti].InputType) {
                     case InputType.Player:
@@ -76,9 +76,8 @@ namespace RTSEngine.Controllers {
         #endregion
 
         // Data Parsing And Loading
-        private void PopulateControllers() {
+        private void LoadControllers() {
             // Add Controllers
-            CompiledEntityControllers cec;
             string error;
             string[] references = {
                "System.dll",
@@ -91,13 +90,12 @@ namespace RTSEngine.Controllers {
            };
             DirectoryInfo dir = new DirectoryInfo(@"Packs\Default\scripts");
             var files = dir.GetFiles();
-            foreach(var fi in files) {
-                if(fi.Extension.EndsWith("cs")) {
-                    cec = EntityControllerParser.Compile(fi.FullName, references, out error);
-                    foreach(KeyValuePair<string, ReflectedEntityController> kv in cec.Controllers)
-                        state.Controllers.Add(kv.Key, kv.Value);
-                }
-            }
+            string[] toCompile = (from fi in files where fi.Extension.EndsWith("cs") select fi.FullName).ToArray();
+            DynCompiledResults res = DynControllerParser.Compile(toCompile, references, out error);
+            foreach(KeyValuePair<string, ReflectedUnitController> kv in res.UnitControllers)
+                state.UnitControllers.Add(kv.Key, kv.Value);
+            foreach(KeyValuePair<string, ReflectedSquadController> kv in res.SquadControllers)
+                state.SquadControllers.Add(kv.Key, kv.Value);
         }
         private void LoadMap(GraphicsDevice g, DirectoryInfo dir) {
             // Parse Map Data
@@ -116,6 +114,8 @@ namespace RTSEngine.Controllers {
             foreach(var res in teamResults) {
                 team = new RTSTeam();
                 team.ColorScheme = res.Colors;
+                team.DSAC = res.TeamType.DefaultSquadActionController;
+                team.DSTC = res.TeamType.DefaultSquadTargettingController;
                 foreach(DirectoryInfo unitDataDir in res.TeamType.UnitTypes)
                     LoadUnit(g, team, unitDataDir);
                 t[i++] = team;
