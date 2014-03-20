@@ -6,28 +6,44 @@ using System.Threading;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
+using Microsoft.Xna.Framework;
 
 namespace RTSEngine.Controllers {
     public class AIInputController : InputController {
         Thread t;
-        bool running;
+        bool running, paused;
         int teamIndex;
 
-
-        public AIInputController(GameState g, RTSTeam t, int ti)
-            : base(g, t) {
+        public AIInputController(GameState g, RTSTeam _t, int ti)
+            : base(g, _t) {
             teamIndex = ti;
+            t = new Thread(WorkThread);
+            t.IsBackground = true;
+            running = true;
+            paused = true;
+            t.Start();
         }
-
+        public void Start() {
+            paused = false;
+        }
         public override void Dispose() {
+            running = false;
         }
 
         private void WorkThread() {
             Random r = new Random();
             while(running) {
-                switch(r.Next(2)) {
-                    case 0: SpawnUnits(r); break;
-                    case 1: MoveUnits(r); break;
+                if(paused) {
+                    Thread.Sleep(1000);
+                    continue;
+                }
+                switch(r.Next(12)) {
+                    case 0:
+                        SpawnUnits(r);
+                        break;
+                    case 1:
+                        MoveUnits(r);
+                        break;
                 }
                 Thread.Sleep(1000);
             }
@@ -56,7 +72,13 @@ namespace RTSEngine.Controllers {
                     toMove.Add(unit);
             }
             if(toMove.Count < 1) return;
-            //AddEvent(new SelectEvent(toMove));
+            AddEvent(new SelectEvent(toMove, Team));
+            AddEvent(new SetWayPointEvent(
+                new Vector2(
+                    r.Next((int)GameState.Map.Width - 20) + 10,
+                    r.Next((int)GameState.Map.Depth - 20) + 10),
+                Team
+                ));
         }
     }
 }

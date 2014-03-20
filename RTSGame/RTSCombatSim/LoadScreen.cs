@@ -122,13 +122,13 @@ namespace RTSCS {
         private void WorkThread() {
             loadData = new EngineLoadData();
             loadData.MapDirectory = new DirectoryInfo(@"Packs\Default\maps\0");
-            RTSRaceData teamRes = RTSRaceParser.ParseAll(new DirectoryInfo("Packs"))[0];
+            var teamRes = RTSRaceParser.ParseAll(new DirectoryInfo("Packs"));
 
             loadData.Teams = new RTSTeamResult[2];
-            loadData.Teams[0].TeamType = teamRes;
+            loadData.Teams[0].TeamType = (from res in teamRes where res.Name.StartsWith("P") select res).First((o) => { return true; }); ;
             loadData.Teams[0].InputType = InputType.Player;
             loadData.Teams[0].Colors = RTSColorScheme.Default;
-            loadData.Teams[1].TeamType = teamRes;
+            loadData.Teams[1].TeamType = (from res in teamRes where res.Name.StartsWith("M") select res).First((o) => { return true; }); ;
             loadData.Teams[1].InputType = InputType.AI;
             loadData.Teams[1].Colors = RTSColorScheme.Default;
 

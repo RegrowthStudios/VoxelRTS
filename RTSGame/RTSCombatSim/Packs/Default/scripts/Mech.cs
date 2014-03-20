@@ -162,7 +162,6 @@ namespace RTS.Mech.Unit {
             if(unit.Target != null) {
                 waypoint = unit.Target.GridPosition;
                 doMove = true;
-                DevConsole.AddCommand("Moving To Target");
                 return;
             }
             else if(waypoints.Count < 1) return;

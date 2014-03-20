@@ -102,9 +102,9 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
             List<IEntity> selected = e.Team.Input.selected;
-            RTSSquad squad = null;
 
             if(selected != null && selected.Count > 0) {
+                RTSSquad squad = null;
                 foreach(var unit in selected) {
                     RTSUnit u = unit as RTSUnit;
                     if(u != null) {
@@ -112,11 +112,11 @@ namespace RTSEngine.Controllers {
                         squad.AddUnit(u);
                     }
                 }
+                if(squad == null) return;
+                squad.ActionController = s.SquadControllers[e.Team.DSAC].CreateInstance<ACSquadActionController>();
+                squad.TargettingController = s.SquadControllers[e.Team.DSTC].CreateInstance<ACSquadTargettingController>();
+                squad.TargettingController.Target = e.Target as RTSUnit;
             }
-
-            squad.ActionController = s.SquadControllers[e.Team.DSAC].CreateInstance<ACSquadActionController>();
-            squad.TargettingController = s.SquadControllers[e.Team.DSTC].CreateInstance<ACSquadTargettingController>();
-            squad.TargettingController.Target = e.Target as RTSUnit;
         }
 
         // Logic Stage

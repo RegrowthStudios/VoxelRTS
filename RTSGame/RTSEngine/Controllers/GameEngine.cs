@@ -55,7 +55,7 @@ namespace RTSEngine.Controllers {
                         break;
                     case InputType.AI:
                         // TODO: Make This Class
-                        // team.Input = new AIInputController(state, team);
+                        state.Teams[ti].Input = new AIInputController(state, state.Teams[ti], ti);
                         break;
                     case InputType.Environment:
 
@@ -67,9 +67,20 @@ namespace RTSEngine.Controllers {
 
             // Load The Map
             LoadMap(g, d.MapDirectory);
+
+            for(int ti = 0; ti < state.Teams.Length; ti++) {
+                switch(d.Teams[ti].InputType) {
+                    case InputType.AI:
+                        (state.Teams[ti].Input as AIInputController).Start();
+                        break;
+                }
+            }
         }
         #region Disposal
         public void Dispose() {
+            for(int ti = 0; ti < state.Teams.Length; ti++) {
+                state.Teams[ti].Input.Dispose();
+            }
             DevConsole.OnNewCommand -= playController.OnDevCommand;
             renderer.Dispose();
         }
