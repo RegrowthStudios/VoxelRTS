@@ -128,9 +128,15 @@ namespace RTSCS {
             loadData.Teams[0].TeamType = (from res in teamRes where res.Name.StartsWith("P") select res).First((o) => { return true; }); ;
             loadData.Teams[0].InputType = InputType.Player;
             loadData.Teams[0].Colors = RTSColorScheme.Default;
+            loadData.Teams[0].Colors.Primary *= Vector3.UnitX;
+            loadData.Teams[0].Colors.Secondary *= Vector3.UnitX;
+            loadData.Teams[0].Colors.Tertiary *= Vector3.UnitX;
             loadData.Teams[1].TeamType = (from res in teamRes where res.Name.StartsWith("M") select res).First((o) => { return true; }); ;
             loadData.Teams[1].InputType = InputType.AI;
             loadData.Teams[1].Colors = RTSColorScheme.Default;
+            loadData.Teams[1].Colors.Primary *= Vector3.UnitZ;
+            loadData.Teams[1].Colors.Secondary *= Vector3.UnitZ;
+            loadData.Teams[1].Colors.Tertiary *= Vector3.UnitZ;
 
             LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData);
             isLoaded = true;

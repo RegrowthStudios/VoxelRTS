@@ -134,10 +134,16 @@ namespace RTSEngine.Graphics {
             fxRTS.VP = camera.View * camera.Projection;
 
             // Loop Through Models
+            G.SamplerStates[0] = SamplerState.PointClamp;
+            G.SamplerStates[1] = SamplerState.LinearClamp;
+            G.SamplerStates[2] = SamplerState.LinearClamp;
             foreach(RTSUnitModel unitModel in UnitModels) {
                 fxRTS.TexModelMap = unitModel.AnimationTexture;
-                fxRTS.TexOverlay = unitModel.ModelTexture;
-                fxRTS.TexColor = unitModel.ColorCodeTexture;
+                fxRTS.TexOverlay = unitModel.ColorCodeTexture;
+                fxRTS.TexColor = unitModel.ModelTexture;
+                fxRTS.CPrimary = unitModel.ColorPrimary;
+                fxRTS.CSecondary = unitModel.ColorSecondary;
+                fxRTS.CTertiary = unitModel.ColorTertiary;
                 fxRTS.ApplyPassAnimation();
                 unitModel.UpdateInstances(G);
                 unitModel.SetInstances(G);

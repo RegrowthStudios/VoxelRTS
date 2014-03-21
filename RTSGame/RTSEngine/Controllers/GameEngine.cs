@@ -136,6 +136,9 @@ namespace RTSEngine.Controllers {
         public void LoadUnit(GraphicsDevice g, RTSTeam t, DirectoryInfo dir) {
             RTSUnitResult res = RTSUnitDataParser.Parse(g, dir);
             t.AddUnitData(res.Data);
+            res.View.ColorPrimary = t.ColorScheme.Primary;
+            res.View.ColorSecondary = t.ColorScheme.Secondary;
+            res.View.ColorTertiary = t.ColorScheme.Tertiary;
             t.OnNewUnitSpawn += res.View.OnUnitSpawn;
             renderer.UnitModels.Add(res.View);
         }

@@ -88,25 +88,43 @@ namespace RTS.Mech.Unit {
     }
 
     public class Animation : ACUnitAnimationController {
-        private AnimationLoop alRest, alWalk;
+        private static Random r = new Random();
+
+        private AnimationLoop alRest, alWalk, alCombat;
         private AnimationLoop alCurrent;
 
+        private float rt;
+
         public Animation() {
-            animation = AnimationType.Rest;
             alRest = new AnimationLoop(0, 59);
+            alRest.FrameSpeed = 30;
             alWalk = new AnimationLoop(60, 119);
-            alCurrent = alRest;
-            alCurrent.Restart();
+            alWalk.FrameSpeed = 50;
+            alCombat = new AnimationLoop(120, 149);
+            alCombat.FrameSpeed = 30;
+
+            animation = AnimationType.Rest;
+            SetAnimation(AnimationType.None);
         }
 
         public override void SetAnimation(AnimationType t) {
+            if(animation == t) return;
             switch(t) {
+                case AnimationType.None:
+                    alCurrent = null;
+                    AnimationFrame = 0;
+                    rt = r.Next(120, 350) / 10f;
+                    break;
                 case AnimationType.Walking:
                     alCurrent = alWalk;
                     alCurrent.Restart(true);
                     break;
                 case AnimationType.Rest:
                     alCurrent = alRest;
+                    alCurrent.Restart(false);
+                    break;
+                case AnimationType.CombatMelee:
+                    alCurrent = alCombat;
                     alCurrent.Restart(true);
                     break;
                 default:
@@ -115,8 +133,25 @@ namespace RTS.Mech.Unit {
             animation = t;
         }
         public override void Update(GameState s, float dt) {
-            alCurrent.Step(dt);
-            AnimationFrame = alCurrent.CurrentFrame;
+            if(alCurrent != null) {
+                alCurrent.Step(dt);
+                AnimationFrame = alCurrent.CurrentFrame;
+
+                if(animation == AnimationType.CombatMelee || animation == AnimationType.Rest) {
+                    if(alCurrent.EndFrame == alCurrent.CurrentFrame) {
+                        SetAnimation(AnimationType.None);
+                        DevConsole.AddCommand("Here");
+                        return;
+                    }
+                }
+            }
+            else {
+                rt -= dt;
+                if(rt < 0) {
+                    DevConsole.AddCommand("Here 2");
+                    SetAnimation(AnimationType.Rest);
+                }
+            }
         }
     }
 
@@ -128,24 +163,28 @@ namespace RTS.Mech.Unit {
         private float attackCooldown;
 
         public override void Attack(GameState g, float dt) {
+            if(attackCooldown > 0)
+                attackCooldown -= dt;
+            if(unit.AnimationController.Animation != AnimationType.None)
+                return;
             if(unit.Target != null) {
                 if(!unit.Target.IsAlive) {
                     unit.Target = null;
                     return;
                 }
+                float minDistSquared = unit.UnitData.BaseCombatData.MinRange * unit.UnitData.BaseCombatData.MinRange;
+                float distSquared = (unit.Target.WorldPosition - unit.WorldPosition).LengthSquared();
+                float maxDistSquared = unit.UnitData.BaseCombatData.MaxRange * unit.UnitData.BaseCombatData.MaxRange;
+                if(distSquared > maxDistSquared) return;
+
                 if(attackCooldown <= 0) {
                     attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;
-                    float distSquared = (unit.Target.WorldPosition - unit.WorldPosition).LengthSquared();
-                    float minDistSquared = unit.UnitData.BaseCombatData.MinRange * unit.UnitData.BaseCombatData.MinRange;
-                    float maxDistSquared = unit.UnitData.BaseCombatData.MaxRange * unit.UnitData.BaseCombatData.MaxRange;
-                    if(distSquared > maxDistSquared) return;
-
+                    unit.AnimationController.SetAnimation(AnimationType.CombatMelee);
                     if(minDistSquared <= distSquared) {
                         unit.DamageTarget(critRoller.NextDouble());
                         if(!unit.Target.IsAlive) unit.Target = null;
                     }
                 }
-                else attackCooldown -= dt;
             }
         }
     }
@@ -161,7 +200,12 @@ namespace RTS.Mech.Unit {
         public override void DecideMove(GameState g, float dt) {
             if(unit.Target != null) {
                 waypoint = unit.Target.GridPosition;
-                doMove = true;
+                Vector2 udisp = waypoint - unit.GridPosition;
+                float ur = unit.CollisionGeometry.BoundingRadius + unit.Target.CollisionGeometry.BoundingRadius;
+                ur *= 1.3f;
+                doMove = udisp.LengthSquared() > (ur * ur);
+                if(!doMove && unit.AnimationController.Animation == AnimationType.Walking)
+                    unit.AnimationController.SetAnimation(AnimationType.None);
                 return;
             }
             else if(waypoints.Count < 1) return;
@@ -169,13 +213,12 @@ namespace RTS.Mech.Unit {
             waypoint = waypoints[waypoints.Count - 1];
             Vector2 disp = waypoint - unit.GridPosition;
             doMove = disp.LengthSquared() > (DECIDE_DIST * DECIDE_DIST);
+
+            if(!doMove && unit.AnimationController.Animation == AnimationType.Walking)
+                unit.AnimationController.SetAnimation(AnimationType.None);
         }
         public override void ApplyMove(GameState g, float dt) {
-            if(!doMove) {
-                if(unit.AnimationController.Animation != AnimationType.Rest)
-                    unit.AnimationController.SetAnimation(AnimationType.Rest);
-                return;
-            }
+            if(!doMove) return;
 
             Vector2 change = waypoint - unit.GridPosition;
             if(change != Vector2.Zero) {
@@ -184,20 +227,19 @@ namespace RTS.Mech.Unit {
 
                 // This Logic Prevents The Unit From Hovering Around Its Goal
                 if(magnitude < STOP_DIST) {
-                    if(unit.AnimationController.Animation != AnimationType.Rest)
-                        unit.AnimationController.SetAnimation(AnimationType.Rest);
+                    if(unit.AnimationController.Animation == AnimationType.Walking)
+                        unit.AnimationController.SetAnimation(AnimationType.None);
                     return;
                 }
-                if(unit.AnimationController.Animation != AnimationType.Walking)
-                    unit.AnimationController.SetAnimation(AnimationType.Walking);
+                unit.AnimationController.SetAnimation(AnimationType.Walking);
 
                 if(scaledChange.LengthSquared() > magnitude * magnitude)
                     unit.Move(change);
                 else
                     unit.Move(scaledChange);
             }
-            else
-                unit.AnimationController.SetAnimation(AnimationType.Rest);
+            else if(unit.AnimationController.Animation == AnimationType.Walking)
+                unit.AnimationController.SetAnimation(AnimationType.None);
         }
     }
 }

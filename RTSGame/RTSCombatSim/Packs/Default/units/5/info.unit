@@ -2,10 +2,10 @@
 NAME            [Armored Soldier]
 
 // Unit Model
-MODEL           [Robot.obj]
-TEXMAIN         [Model.png]
-TEXCOLOR        [Color.png]
-ANIMATION       [Robot.png]
+MODEL           [MechBase.obj]
+TEXMAIN         [Main.png]
+TEXCOLOR        [Key.png]
+ANIMATION       [MechBase.png]
 MAXCOUNT        [1000]
 
 // Unit Data

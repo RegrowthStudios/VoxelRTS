@@ -76,58 +76,58 @@
     <Content Include="Packs\Default\maps\0\map.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\0\Color.png">
+    <Content Include="Packs\Default\units\0\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\0\Model.png">
+    <Content Include="Packs\Default\units\0\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\0\Robot.png">
+    <Content Include="Packs\Default\units\0\MechBase.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\1\Color.png">
+    <Content Include="Packs\Default\units\1\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\1\Model.png">
+    <Content Include="Packs\Default\units\1\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\1\Robot.png">
+    <Content Include="Packs\Default\units\1\MechBase.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\2\Color.png">
+    <Content Include="Packs\Default\units\2\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\2\Model.png">
+    <Content Include="Packs\Default\units\2\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\2\Robot.png">
+    <Content Include="Packs\Default\units\2\MechBase.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\3\Color.png">
+    <Content Include="Packs\Default\units\3\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\3\Model.png">
+    <Content Include="Packs\Default\units\3\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\3\Robot.png">
+    <Content Include="Packs\Default\units\3\MechBase.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\4\Color.png">
+    <Content Include="Packs\Default\units\4\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\4\Model.png">
+    <Content Include="Packs\Default\units\4\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\4\Robot.png">
+    <Content Include="Packs\Default\units\4\MechBase.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\5\Color.png">
+    <Content Include="Packs\Default\units\5\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\5\Model.png">
+    <Content Include="Packs\Default\units\5\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\units\5\Robot.png">
+    <Content Include="Packs\Default\units\5\MechBase.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Content\Textures\Laser.png">
@@ -154,39 +154,39 @@
     <None Include="Packs\Default\units\0\info.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\units\0\Robot.obj">
+    <Content Include="Packs\Default\units\0\MechBase.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="Packs\Default\units\1\info.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\units\1\Robot.obj">
+    <Content Include="Packs\Default\units\1\MechBase.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="Packs\Default\units\2\info.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\units\2\Robot.obj">
+    <Content Include="Packs\Default\units\2\MechBase.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="Packs\Default\units\3\info.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\units\3\Robot.obj">
+    <Content Include="Packs\Default\units\3\MechBase.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="Packs\Default\units\4\info.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\units\4\Robot.obj">
+    <Content Include="Packs\Default\units\4\MechBase.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="Packs\Default\units\5\info.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\units\5\Robot.obj">
+    <Content Include="Packs\Default\units\5\MechBase.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="User\schemes\red.scheme" />
     <None Include="User\schemes\blue.scheme" />
     <None Include="User\schemes\default.scheme" />

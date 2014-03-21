@@ -8,6 +8,7 @@ using RTSEngine.Data.Team;
 
 namespace RTSEngine.Interfaces {
     public enum AnimationType {
+        None,
         Rest,
         Walking,
         PrepareCombatRanged,

@@ -73,7 +73,7 @@ namespace RTSEngine.Graphics {
             // Reformat Vertices
             verts = new VertexPositionTexture[pVerts.Length];
             for(int i = 0; i < verts.Length; i++) {
-                verts[i].Position = new Vector3((i + 0.5f) * texelSize.X, 0, 0);
+                verts[i].Position = new Vector3((i + 0.5f) / AnimationTexture.Width, 0, 0);
                 verts[i].TextureCoordinate = pVerts[i].TextureCoordinate;
             }
 
@@ -130,7 +130,7 @@ namespace RTSEngine.Graphics {
                     ) *
                     Matrix.CreateTranslation(instances[i].WorldPosition)
                     ;
-                instVerts[i].AnimationFrame = instances[i].AnimationController.AnimationFrame;
+                instVerts[i].AnimationFrame = instances[i].AnimationController == null ? 0 : instances[i].AnimationController.AnimationFrame;
             }
             if(rebuildDVB) {
                 dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);

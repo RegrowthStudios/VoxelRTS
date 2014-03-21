@@ -119,7 +119,8 @@ namespace RTSEngine.Controllers {
             }
         }
 
-        // Logic Stage
+        // Logic Stage 
+        // TODO: Add Work TimeTable
         private void ApplyLogic(GameState s, float dt) {
             RTSTeam team = null;
 
