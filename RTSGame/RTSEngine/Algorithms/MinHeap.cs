@@ -36,7 +36,6 @@ namespace RTSEngine.Algorithms {
             return min;
         }
 
-        // TODO: Verify
         new public void Remove(T o) {
             int i = 0;
             bool done = false;
@@ -62,7 +61,6 @@ namespace RTSEngine.Algorithms {
             }
         }
 
-        // TODO: Verify (=)
         new public bool Contains(T o) {
             int i = 0;
             bool done = false;

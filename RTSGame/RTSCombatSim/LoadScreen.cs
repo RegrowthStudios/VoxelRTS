@@ -15,6 +15,7 @@ using RTSEngine.Data.Team;
 
 namespace RTSCS {
     public class LoadScreen : GameScreenIndexed {
+        // Constants For Loading Bar
         const string IMAGE_DIR = @"Content\LoadImages";
         const int BOUNDS_OFFSET = 20;
         const int BAR_HEIGHT = 10;
@@ -30,6 +31,7 @@ namespace RTSCS {
         // View Info
         private Texture2D tLoad, tPixel;
         private List<FileInfo> imageList;
+        private float percent;
 
         // Engine Data
         private EngineLoadData loadData;
@@ -43,7 +45,6 @@ namespace RTSCS {
         }
 
         // Loading Information
-        private float percent;
         private bool isLoaded;
 
         public override void Build() {
