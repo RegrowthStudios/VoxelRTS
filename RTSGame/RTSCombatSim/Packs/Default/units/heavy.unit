@@ -1,16 +1,16 @@
 ﻿// Friendly Unit Name
-NAME            [Heavy Solider]
+NAME            [Heavy Soldier]
 
 // Unit Model
-MODEL           [MechBase.obj]
-TEXMAIN         [Main.png]
-TEXCOLOR        [Key.png]
-ANIMATION       [MechBase.png]
+MODEL           [..\models\MechBase.obj]
+TEXMAIN         [..\textures\Main.png]
+TEXCOLOR        [..\textures\Key.png]
+ANIMATION       [..\animations\MechBase.png]
 MAXCOUNT        [1000]
 
 // Unit Data
 HEALTH          [80]
-SPEED           [4.4]
+SPEED           [2.4]
 COST            [6 , 1]
 
 // Collision Data

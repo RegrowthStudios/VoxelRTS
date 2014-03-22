@@ -40,19 +40,11 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxCtrlAnimation = RegexHelper.Generate("CTRLANIM", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlCombat = RegexHelper.Generate("CTRLCOMBAT", @"[\w\s\.]+");
 
-        public static RTSUnitResult Parse(GraphicsDevice g, DirectoryInfo dir) {
-            // Find The Information File
-            var files = dir.GetFiles();
-            FileInfo infoFile = files.FirstOrDefault((f) => {
-                return f.Extension.ToLower().EndsWith(INFO_FILE_EXT);
-            });
-            if(infoFile == null)
-                throw new ArgumentException("Map Information File Could Not Be Found In The Directory");
-
+        public static RTSUnitResult Parse(GraphicsDevice g, FileInfo infoFile) {
             // Parse Data
             RTSUnitResult res;
             using(Stream s = File.OpenRead(infoFile.FullName)) {
-                res = ParseFromInfo(g, new StreamReader(s), dir.FullName);
+                res = ParseFromInfo(g, new StreamReader(s), infoFile.Directory.FullName);
             }
             return res;
         }

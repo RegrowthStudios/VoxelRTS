@@ -16,7 +16,7 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
 
 namespace RTSCS {
-    public class _3DSimScreen : GameScreen<App> {
+    public class RTSScreen : GameScreen<App> {
         private GameEngine engine;
         private DevConsoleView dcv;
 
@@ -41,7 +41,7 @@ namespace RTSCS {
             }
         }
 
-        public _3DSimScreen()
+        public RTSScreen()
             : base() {
         }
 

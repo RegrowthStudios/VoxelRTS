@@ -48,26 +48,26 @@ namespace AnimViewer {
             fx = XNAEffect.Compile(G, @"RTS.fx");
             fx.CurrentTechnique = fx.Techniques[0];
 
-            using(var fs = File.OpenRead(@"3\MechBase.obj")) {
-                ObjParser.TryParse(fs, G, out vb, out ib, ParsingFlags.ConversionOpenGL);
-            }
-            using(var fs = File.OpenRead(@"3\Main.png")) {
-                tMain = Texture2D.FromStream(G, fs);
-            }
-            using(var fs = File.OpenRead(@"3\Key.png")) {
-                tKey = Texture2D.FromStream(G, fs);
-            }
-            using(var fs = File.OpenRead(@"3\MechBase.png")) {
-                tAnim = Texture2D.FromStream(G, fs);
-            }
-            var res = RTSUnitDataParser.Parse(G, new DirectoryInfo("3"));
-            m = res.View;
-            d = res.Data;
-            RTSTeam t = new RTSTeam();
-            RTSUnit unit = new RTSUnit(t, d, Vector2.Zero);
-            unit.Move(-Vector2.UnitX);
-            unit.Move(Vector2.UnitX);
-            m.OnUnitSpawn(unit);
+            //using(var fs = File.OpenRead(@"3\MechBase.obj")) {
+            //    ObjParser.TryParse(fs, G, out vb, out ib, ParsingFlags.ConversionOpenGL);
+            //}
+            //using(var fs = File.OpenRead(@"3\Main.png")) {
+            //    tMain = Texture2D.FromStream(G, fs);
+            //}
+            //using(var fs = File.OpenRead(@"3\Key.png")) {
+            //    tKey = Texture2D.FromStream(G, fs);
+            //}
+            //using(var fs = File.OpenRead(@"3\MechBase.png")) {
+            //    tAnim = Texture2D.FromStream(G, fs);
+            //}
+            //var res = RTSUnitDataParser.Parse(G, new DirectoryInfo("3"));
+            //m = res.View;
+            //d = res.Data;
+            //RTSTeam t = new RTSTeam();
+            //RTSUnit unit = new RTSUnit(t, d, Vector2.Zero);
+            //unit.Move(-Vector2.UnitX);
+            //unit.Move(Vector2.UnitX);
+            //m.OnUnitSpawn(unit);
 
             mView = Matrix.CreateLookAt(Vector3.UnitX * 3 + Vector3.Up, Vector3.Up, Vector3.Up);
             mProj = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, G.Viewport.AspectRatio, 0.01f, 100f);
@@ -88,21 +88,18 @@ namespace AnimViewer {
         }
         public override void Draw(GameTime gameTime) {
             G.Clear(Color.White);
-            fx.Parameters["VP"].SetValue(mView * mProj);
-            fx.Parameters["World"].SetValue(Matrix.Identity);
-            fx.Parameters["TexColor"].SetValue(tMain);
-            fx.Parameters["TexOverlay"].SetValue(tKey);
-            fx.Parameters["TexModelMap"].SetValue(m.AnimationTexture);
-            fx.Parameters["TexelSize"].SetValue(new Vector2(1f / m.AnimationTexture.Width, 1f / m.AnimationTexture.Height));
-            fx.Parameters["CPrimary"].SetValue(Vector3.UnitZ);
-            fx.Parameters["CSecondary"].SetValue(Vector3.UnitZ * 0.8f);
-            fx.Parameters["CTertiary"].SetValue(Vector3.UnitZ * 0.3f);
-            fx.CurrentTechnique.Passes["Animation"].Apply();
-            m.SetInstances(G);
-            m.DrawInstances(G);
-            //G.SetVertexBuffer(vb);
-            //G.Indices = ib;
-            //G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vb.VertexCount, 0, ib.IndexCount / 3);
+            //fx.Parameters["VP"].SetValue(mView * mProj);
+            //fx.Parameters["World"].SetValue(Matrix.Identity);
+            //fx.Parameters["TexColor"].SetValue(tMain);
+            //fx.Parameters["TexOverlay"].SetValue(tKey);
+            //fx.Parameters["TexModelMap"].SetValue(m.AnimationTexture);
+            //fx.Parameters["TexelSize"].SetValue(new Vector2(1f / m.AnimationTexture.Width, 1f / m.AnimationTexture.Height));
+            //fx.Parameters["CPrimary"].SetValue(Vector3.UnitZ);
+            //fx.Parameters["CSecondary"].SetValue(Vector3.UnitZ * 0.8f);
+            //fx.Parameters["CTertiary"].SetValue(Vector3.UnitZ * 0.3f);
+            //fx.CurrentTechnique.Passes["Animation"].Apply();
+            //m.SetInstances(G);
+            //m.DrawInstances(G);
         }
     }
 }

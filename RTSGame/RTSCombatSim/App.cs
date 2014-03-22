@@ -28,7 +28,7 @@ namespace RTSCS {
             get;
             private set;
         }
-        public _3DSimScreen Sim3D {
+        public RTSScreen Sim3D {
             get;
             private set;
         }
@@ -37,7 +37,7 @@ namespace RTSCS {
             : base() {
             graphics.IsFullScreen = UserConfig.UseFullscreen;
             LoadScreen = new RTSCS.LoadScreen(2);
-            Sim3D = new _3DSimScreen();
+            Sim3D = new RTSScreen();
         }
 
         protected override void FullInitialize() {

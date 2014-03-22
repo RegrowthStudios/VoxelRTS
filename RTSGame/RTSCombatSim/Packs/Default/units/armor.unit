@@ -1,17 +1,17 @@
 ﻿// Friendly Unit Name
-NAME            [Heavy Solider]
+NAME            [Armored Soldier]
 
 // Unit Model
-MODEL           [MechBase.obj]
-TEXMAIN         [Main.png]
-TEXCOLOR        [Key.png]
-ANIMATION       [MechBase.png]
+MODEL           [..\models\MechBase.obj]
+TEXMAIN         [..\textures\Main.png]
+TEXCOLOR        [..\textures\Key.png]
+ANIMATION       [..\animations\MechBase.png]
 MAXCOUNT        [1000]
 
 // Unit Data
-HEALTH          [80]
-SPEED           [2.4]
-COST            [6 , 1]
+HEALTH          [120]
+SPEED           [3.3]
+COST            [20 , 2]
 
 // Collision Data
 RADIUS          [0.4]
@@ -19,10 +19,10 @@ BBOXMIN         [-0.4 , 0.0 , -0.4]
 BBOXMAX         [0.4 , 1.0 , 0.4]
 
 // Combat Data
-ARMOR           [0]
+ARMOR           [8]
 RANGE           [0 , 1]
-TIMER           [1]
-DAMAGE          [25 , 35]
+TIMER           [0.5]
+DAMAGE          [30 , 45]
 CRITCHANCE      [0.05]
 
 CTRLACTION      [RTS.Mech.Unit.Action]

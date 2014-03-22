@@ -2,15 +2,15 @@
 NAME            [Soldier]
 
 // Unit Model
-MODEL           [MechBase.obj]
-TEXMAIN         [Main.png]
-TEXCOLOR        [Key.png]
-ANIMATION       [MechBase.png]
+MODEL           [..\models\MechBase.obj]
+TEXMAIN         [..\textures\Main.png]
+TEXCOLOR        [..\textures\Key.png]
+ANIMATION       [..\animations\MechBase.png]
 MAXCOUNT        [1000]
 
 // Unit Data
 HEALTH          [60]
-SPEED           [4]
+SPEED           [3]
 COST            [5 , 1]
 
 // Collision Data
@@ -21,7 +21,7 @@ BBOXMAX         [0.4 , 1.0 , 0.4]
 // Combat Data
 ARMOR           [0]
 RANGE           [0 , 1]
-TIMER           [1]
+TIMER           [0.33]
 DAMAGE          [10 , 15]
 CRITCHANCE      [0.05]
 

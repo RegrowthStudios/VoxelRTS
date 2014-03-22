@@ -127,14 +127,14 @@ namespace RTSEngine.Controllers {
                 team.ColorScheme = res.Colors;
                 team.DSAC = res.TeamType.DefaultSquadActionController;
                 team.DSTC = res.TeamType.DefaultSquadTargettingController;
-                foreach(DirectoryInfo unitDataDir in res.TeamType.UnitTypes)
-                    LoadUnit(g, team, unitDataDir);
+                foreach(FileInfo unitDataFile in res.TeamType.UnitTypes)
+                    LoadUnit(g, team, unitDataFile);
                 t[i++] = team;
             }
             return t;
         }
-        public void LoadUnit(GraphicsDevice g, RTSTeam t, DirectoryInfo dir) {
-            RTSUnitResult res = RTSUnitDataParser.Parse(g, dir);
+        public void LoadUnit(GraphicsDevice g, RTSTeam t, FileInfo fi) {
+            RTSUnitResult res = RTSUnitDataParser.Parse(g, fi);
             t.AddUnitData(res.Data);
             res.View.ColorPrimary = t.ColorScheme.Primary;
             res.View.ColorSecondary = t.ColorScheme.Secondary;
