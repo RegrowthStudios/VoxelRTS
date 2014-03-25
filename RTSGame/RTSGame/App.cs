@@ -102,9 +102,9 @@ namespace RTS {
             fx.CPrimary = Vector3.UnitX;
             fx.CSecondary = Vector3.UnitY;
             fx.CTertiary = Vector3.UnitZ;
-            fx.TexColor = tColor;
-            fx.TexModelMap = tModel;
-            fx.TexOverlay = tColor;
+            fx.TexMain = tColor;
+            fx.TexAnimation = tModel;
+            fx.TexKey = tColor;
             fx.World = Matrix.Identity;
             fx.VP = Matrix.CreateLookAt(Vector3.Backward * 12.4f, Vector3.Zero, Vector3.Up) *
                 Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.01f, 1000f);

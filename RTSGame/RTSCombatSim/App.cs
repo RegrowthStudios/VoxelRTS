@@ -20,15 +20,29 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 
 namespace RTSCS {
+    public static class AppSettings {
+        public const string PACKS_DIR = @"Packs";
+        public const string CONTENT_DIR = @"Content";
+    }
+
     public class App : BlisterUI.MainGame {
         // The Static Instances
         private static App app;
 
+        // Screens
+        public MenuScreen MenuScreen {
+            get;
+            private set;
+        }
         public LoadScreen LoadScreen {
             get;
             private set;
         }
-        public RTSScreen Sim3D {
+        public RTSScreen RTSScreen {
+            get;
+            private set;
+        }
+        public ColorSchemeScreen ColorSchemeScreen {
             get;
             private set;
         }
@@ -36,10 +50,13 @@ namespace RTSCS {
         public App()
             : base() {
             graphics.IsFullScreen = UserConfig.UseFullscreen;
-            LoadScreen = new RTSCS.LoadScreen(2);
-            Sim3D = new RTSScreen();
+            IsMouseVisible = true;
+            MenuScreen = new RTSCS.MenuScreen();
+            LoadScreen = new RTSCS.LoadScreen();
+            RTSScreen = new RTSCS.RTSScreen();
+            ColorSchemeScreen = new RTSCS.ColorSchemeScreen();
         }
-
+        
         protected override void FullInitialize() {
             BlisterUI.Input.WMHookInput.Initialize(Window);
             Graphics.IsFullScreen = true;
@@ -51,8 +68,10 @@ namespace RTSCS {
             screenList = new BlisterUI.ScreenList(this, 0,
                 new BlisterUI.FalseFirstScreen(2),
                 new RTSEngine.Screens.InduZtryScreen(1),
+                MenuScreen,
                 LoadScreen,
-                Sim3D
+                RTSScreen,
+                ColorSchemeScreen
                 );
         }
 

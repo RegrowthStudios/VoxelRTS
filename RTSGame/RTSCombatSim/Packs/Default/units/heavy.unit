@@ -5,7 +5,7 @@ NAME            [Heavy Soldier]
 MODEL           [..\models\MechBase.obj]
 TEXMAIN         [..\textures\Main.png]
 TEXCOLOR        [..\textures\Key.png]
-ANIMATION       [..\animations\MechBase.png]
+ANIMATION       [..\animations\Mech2.png]
 MAXCOUNT        [1000]
 
 // Unit Data

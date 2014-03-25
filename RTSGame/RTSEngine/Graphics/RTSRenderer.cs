@@ -138,9 +138,9 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
             foreach(RTSUnitModel unitModel in UnitModels) {
-                fxRTS.TexModelMap = unitModel.AnimationTexture;
-                fxRTS.TexOverlay = unitModel.ColorCodeTexture;
-                fxRTS.TexColor = unitModel.ModelTexture;
+                fxRTS.TexAnimation = unitModel.AnimationTexture;
+                fxRTS.TexKey = unitModel.ColorCodeTexture;
+                fxRTS.TexMain = unitModel.ModelTexture;
                 fxRTS.CPrimary = unitModel.ColorPrimary;
                 fxRTS.CSecondary = unitModel.ColorSecondary;
                 fxRTS.CTertiary = unitModel.ColorTertiary;

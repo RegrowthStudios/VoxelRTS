@@ -87,6 +87,7 @@
     <Compile Include="Screens\GameScreenIndexed.cs" />
     <Compile Include="Screens\MainGame.cs" />
     <Compile Include="Screens\ScreenList.cs" />
+    <Compile Include="Widgets\BaseWidget.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -14,7 +14,7 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 
 namespace RTSCS {
-    public class LoadScreen : GameScreenIndexed {
+    public class LoadScreen : GameScreen<App> {
         // Constants For Loading Bar
         const string IMAGE_DIR = @"Content\LoadImages";
         const int BOUNDS_OFFSET = 20;
@@ -25,8 +25,14 @@ namespace RTSCS {
         static readonly Color COLOR_HIGH = Color.Teal;
         static readonly Color COLOR_BACK = new Color(8, 8, 8);
 
-        public LoadScreen(int i) : base(i) { }
-        public LoadScreen(int p, int n) : base(p, n) { }
+        public override int Next {
+            get { return game.RTSScreen.Index; }
+            protected set { }
+        }
+        public override int Previous {
+            get { return game.MenuScreen.Index; }
+            protected set { }
+        }
 
         // View Info
         private Texture2D tLoad, tPixel;
@@ -145,5 +151,6 @@ namespace RTSCS {
         private void LoadCallback(string m, float p) {
             // percent = p;
         }
+
     }
 }

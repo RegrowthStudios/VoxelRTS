@@ -33,7 +33,7 @@ namespace RTSEngine.Graphics {
         }
     }
 
-    public class RTSEffect {
+    public class RTSEffect : IDisposable {
         // Effect Pass Keys
         public const string PASS_KEY_SIMPLE = "Simple";
         public const string PASS_KEY_SWATCHED = "Swatched";
@@ -54,19 +54,19 @@ namespace RTSEngine.Graphics {
         private EffectPass fxPassSimple, fxPassSwatched, fxPassAnimation;
 
         // Used For Simple Pass
-        private EffectParameter fxpWorld, fxpVP, fxpTexColor;
+        private EffectParameter fxpWorld, fxpVP, fxpTexMain;
         public Matrix World {
             set { fxpWorld.SetValue(value); }
         }
         public Matrix VP {
             set { fxpVP.SetValue(value); }
         }
-        public Texture2D TexColor {
-            set { fxpTexColor.SetValue(value); }
+        public Texture2D TexMain {
+            set { fxpTexMain.SetValue(value); }
         }
 
         // Used For Swatched Pass
-        private EffectParameter fxpColP, fxpColS, fxpColT, fxpTexOverlay;
+        private EffectParameter fxpColP, fxpColS, fxpColT, fxpTexKey;
         public Vector3 CPrimary {
             set { fxpColP.SetValue(value); }
         }
@@ -76,15 +76,15 @@ namespace RTSEngine.Graphics {
         public Vector3 CTertiary {
             set { fxpColT.SetValue(value); }
         }
-        public Texture2D TexOverlay {
-            set { fxpTexOverlay.SetValue(value); }
+        public Texture2D TexKey {
+            set { fxpTexKey.SetValue(value); }
         }
 
         // Used For Animation Pass
-        private EffectParameter fxpTexModel, fxpTexelSize;
-        public Texture2D TexModelMap {
+        private EffectParameter fxpTexAnimation, fxpTexelSize;
+        public Texture2D TexAnimation {
             set {
-                fxpTexModel.SetValue(value);
+                fxpTexAnimation.SetValue(value);
                 fxpTexelSize.SetValue(new Vector2(1f / value.Width, 1f / value.Height));
             }
         }
@@ -104,13 +104,17 @@ namespace RTSEngine.Graphics {
             // Get The Parameters
             fxpWorld = fx.Parameters[PARAM_KEY_WORLD];
             fxpVP = fx.Parameters[PARAM_KEY_VP];
-            fxpTexColor = fx.Parameters[PARAM_KEY_TEX_COLOR_MAP];
+            fxpTexMain = fx.Parameters[PARAM_KEY_TEX_COLOR_MAP];
             fxpColP = fx.Parameters[PARAM_KEY_COLOR_PRIMARY];
             fxpColS = fx.Parameters[PARAM_KEY_COLOR_SECONDARY];
             fxpColT = fx.Parameters[PARAM_KEY_COLOR_TERTIARY];
-            fxpTexOverlay = fx.Parameters[PARAM_KEY_TEX_OVERLAY];
-            fxpTexModel = fx.Parameters[PARAM_KEY_TEX_MODEL_MAP];
+            fxpTexKey = fx.Parameters[PARAM_KEY_TEX_OVERLAY];
+            fxpTexAnimation = fx.Parameters[PARAM_KEY_TEX_MODEL_MAP];
             fxpTexelSize = fx.Parameters[PARAM_KEY_TEXEL_SIZE];
+        }
+        public void Dispose() {
+            fx.Dispose();
+            fx = null;
         }
 
         public void ApplyPassSimple() {

@@ -25,24 +25,12 @@ namespace RTSCS {
         bool doAdd, mPress;
 
         public override int Next {
-            get {
-                return -1;
-            }
-            protected set {
-                throw new NotImplementedException();
-            }
+            get { return -1; }
+            protected set { }
         }
         public override int Previous {
-            get {
-                return game.LoadScreen.Index;
-            }
-            protected set {
-                throw new NotImplementedException();
-            }
-        }
-
-        public RTSScreen()
-            : base() {
+            get { return game.MenuScreen.Index; }
+            protected set { }
         }
 
         public override void Build() {

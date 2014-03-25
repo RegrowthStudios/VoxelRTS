@@ -62,13 +62,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="3DSimScreen.cs" />
+    <Compile Include="Addition\OrbitingCamera.cs" />
     <Compile Include="App.cs" />
+    <Compile Include="ColorSchemeScreen.cs" />
+    <Compile Include="MenuScreen.cs" />
+    <Compile Include="RTSScreen.cs" />
     <Content Include="Content\FX\RTS.fx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\LoadImages\Modern.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\animations\Mech2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\animations\Mech3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\maps\0\height.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -82,8 +91,8 @@
     <Content Include="Packs\Default\textures\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\animations\MechBase.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="Packs\Default\animations\Mech1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Content\Textures\Laser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -136,9 +145,6 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\FX\Unit.fx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="Content\Textures\Lightning.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
