@@ -343,6 +343,7 @@ namespace RTSCS {
             wBorder.Width = w + border * 2;
             wBorder.Height = hPart * 3 + hFull + border * 2;
             wBorder.LayerDepth = lD;
+            wBorder.Color = bColor;
             lD -= 0.001f;
             x += border;
             y += border;
