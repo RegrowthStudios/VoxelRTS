@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace BlisterUI.Widgets {
     public static class Alignment {
@@ -86,40 +87,51 @@ namespace BlisterUI.Widgets {
         }
 
         // Where To Draw To Screen
-        protected Rectangle drawRect;
+        protected DrawableRect drawRect;
         public Rectangle DrawRectangle {
-            get { return drawRect; }
+            get { return drawRect.location; }
         }
         public int X {
-            get { return drawRect.X; }
+            get { return drawRect.location.X; }
         }
         public int Y {
-            get { return drawRect.Y; }
+            get { return drawRect.location.Y; }
         }
         public int Width {
-            get { return drawRect.Width; }
+            get { return drawRect.location.Width; }
             set {
-                drawRect.Width = value;
+                drawRect.location.Width = value;
                 Recompute();
             }
         }
         public int Height {
-            get { return drawRect.Height; }
+            get { return drawRect.location.Height; }
             set {
-                drawRect.Height = value;
+                drawRect.location.Height = value;
                 Recompute();
             }
+        }
+
+        public Texture2D Texture {
+            get { return drawRect.texture; }
+            set { drawRect.texture = value; }
+        }
+        public Color Color {
+            get { return drawRect.color; }
+            set { drawRect.color = value; }
         }
 
         public BaseWidget() {
             anchor = new Point(0, 0);
             align = new Point(Alignment.LEFT, Alignment.TOP);
-            drawRect.Width = 1;
-            drawRect.Height = 1;
+            drawRect = new DrawableRect();
+            Width = 1;
+            Height = 1;
             Recompute();
         }
 
         protected virtual void Recompute() {
+            Microsoft.Xna.Framework.Graphics.SpriteBatch sb;
             if(parent != null) {
                 // Get Anchor Via The Parent
                 anchor.X = parent.X + ((offAlign.X * parent.Width) / 2) + offset.X;
@@ -127,8 +139,8 @@ namespace BlisterUI.Widgets {
             }
 
             // Use Alignment For Computation
-            drawRect.X = anchor.X - ((align.X * Width) / 2);
-            drawRect.Y = anchor.Y - ((align.Y * Height) / 2);
+            drawRect.location.X = anchor.X - ((align.X * Width) / 2);
+            drawRect.location.Y = anchor.Y - ((align.Y * Height) / 2);
 
             if(OnRecompute != null)
                 OnRecompute(this);

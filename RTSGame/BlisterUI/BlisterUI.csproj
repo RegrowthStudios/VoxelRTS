@@ -88,6 +88,8 @@
     <Compile Include="Screens\MainGame.cs" />
     <Compile Include="Screens\ScreenList.cs" />
     <Compile Include="Widgets\BaseWidget.cs" />
+    <Compile Include="Widgets\Drawables.cs" />
+    <Compile Include="Widgets\WidgetRenderer.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
