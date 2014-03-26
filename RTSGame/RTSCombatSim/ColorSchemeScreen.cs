@@ -90,9 +90,15 @@ namespace RTSCS {
 
         public override void OnEntry(GameTime gameTime) {
             input.Refresh();
-            //MouseEventDispatcher.OnMousePress += sP.OnMousePress;
-            //MouseEventDispatcher.OnMousePress += sS.OnMousePress;
-            //MouseEventDispatcher.OnMousePress += sT.OnMousePress;
+            MouseEventDispatcher.OnMousePress += sP.OnMousePress;
+            MouseEventDispatcher.OnMouseMotion += sP.OnMouseMovement;
+            MouseEventDispatcher.OnMouseRelease += sP.OnMouseRelease;
+            MouseEventDispatcher.OnMousePress += sS.OnMousePress;
+            MouseEventDispatcher.OnMouseMotion += sS.OnMouseMovement;
+            MouseEventDispatcher.OnMouseRelease += sS.OnMouseRelease;
+            MouseEventDispatcher.OnMousePress += sT.OnMousePress;
+            MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
+            MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
 
             // Rendering Effect
             fx = new RTSEffect(XNAEffect.Compile(G, FX_FILE_PATH));
@@ -120,9 +126,15 @@ namespace RTSCS {
             if(unitModel != null) DisposeUnit();
             fx.Dispose();
             camera = null;
-            //MouseEventDispatcher.OnMousePress -= sP.OnMousePress;
-            //MouseEventDispatcher.OnMousePress -= sS.OnMousePress;
-            //MouseEventDispatcher.OnMousePress -= sT.OnMousePress;
+            MouseEventDispatcher.OnMousePress -= sP.OnMousePress;
+            MouseEventDispatcher.OnMouseMotion -= sP.OnMouseMovement;
+            MouseEventDispatcher.OnMouseRelease -= sP.OnMouseRelease;
+            MouseEventDispatcher.OnMousePress -= sS.OnMousePress;
+            MouseEventDispatcher.OnMouseMotion -= sS.OnMouseMovement;
+            MouseEventDispatcher.OnMouseRelease -= sS.OnMouseRelease;
+            MouseEventDispatcher.OnMousePress -= sT.OnMousePress;
+            MouseEventDispatcher.OnMouseMotion -= sT.OnMouseMovement;
+            MouseEventDispatcher.OnMouseRelease -= sT.OnMouseRelease;
         }
 
         public override void Update(GameTime gameTime) {
@@ -135,16 +147,6 @@ namespace RTSCS {
 
             if(searchDone) {
                 tSearch = null;
-            }
-
-            if(input.Mouse.Current.LeftButton == ButtonState.Pressed) {
-                Vector2 r;
-                Vector2 m = new Vector2(input.Mouse.Current.X, input.Mouse.Current.Y);
-                if(wBackPanel.Inside(input.Mouse.Current.X, input.Mouse.Current.Y, out r)) {
-                    sP.OnMousePress(m, MouseButton.Left);
-                    sS.OnMousePress(m, MouseButton.Left);
-                    sT.OnMousePress(m, MouseButton.Left);
-                }
             }
 
             if(tSearch == null) {
@@ -315,7 +317,9 @@ namespace RTSCS {
         }
     }
 
+    #region Color Swatch Widget
     class ColorSwatch : IDisposable {
+        private int active;
         private Vector3 col;
         public Vector3 Color {
             get { return col; }
@@ -371,6 +375,7 @@ namespace RTSCS {
             wCol.LayerDepth = lD;
 
             Color = Vector3.One;
+            active = -1;
         }
         public void Dispose() {
             wBorder.Dispose();
@@ -385,16 +390,51 @@ namespace RTSCS {
             int y = (int)pos.Y;
             Vector2 ratio;
             if(wBorder.Inside(x, y, out ratio)) {
-                if(wR.Inside(x, y, out ratio))
+                if(wR.Inside(x, y, out ratio)) {
                     Color = new Vector3(ratio.X, col.Y, col.Z);
-                else if(wG.Inside(x, y, out ratio))
+                    active = 0;
+                }
+                else if(wG.Inside(x, y, out ratio)) {
                     Color = new Vector3(col.X, ratio.X, col.Z);
-                else if(wB.Inside(x, y, out ratio))
+                    active = 1;
+                }
+                else if(wB.Inside(x, y, out ratio)) {
                     Color = new Vector3(col.X, col.Y, ratio.X);
+                    active = 2;
+                }
             }
         }
-    }
+        public void OnMouseMovement(Vector2 pos, Vector2 d) {
+            if(active < 0) return;
+            Vector2 r;
+            int x = (int)pos.X;
+            int y = (int)pos.Y;
+            float v;
+            switch(active) {
+                case 0:
+                    wR.Inside(x, y, out r);
+                    v = MathHelper.Clamp(r.X, 0, 1);
+                    Color = new Vector3(v, col.Y, col.Z);
+                    break;
+                case 1:
+                    wG.Inside(x, y, out r);
+                    v = MathHelper.Clamp(r.X, 0, 1);
+                    Color = new Vector3(col.X, v, col.Z);
+                    break;
+                case 2:
+                    wB.Inside(x, y, out r);
+                    v = MathHelper.Clamp(r.X, 0, 1);
+                    Color = new Vector3(col.X, col.Y, v);
+                    break;
+            }
+        }
+        public void OnMouseRelease(Vector2 pos, MouseButton b) {
+            if(b == MouseButton.Left && active >= 0) active = -1;
+        }
+    } 
+    #endregion
 
+    #region Full Animation Loop Controller
     class BlankAnimController : ACUnitAnimationController {
         private AnimationLoop animLoop;
         public float FrameSpeed {
@@ -413,5 +453,6 @@ namespace RTSCS {
             animLoop.Step(dt);
             AnimationFrame = animLoop.CurrentFrame;
         }
-    }
+    } 
+    #endregion
 }
