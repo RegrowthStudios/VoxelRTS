@@ -17,7 +17,7 @@ namespace BlisterUI.Widgets {
         public const int BOTTOM = MAX;
     }
 
-    public abstract class BaseWidget {
+    public abstract class BaseWidget : IDisposable {
         // Parent Hierarchy (Should Not Have Cycles)
         private BaseWidget parent;
         public BaseWidget Parent {
@@ -87,47 +87,52 @@ namespace BlisterUI.Widgets {
         }
 
         // Where To Draw To Screen
-        protected DrawableRect drawRect;
-        public Rectangle DrawRectangle {
-            get { return drawRect.location; }
+        private WidgetRenderer renderer;
+        public abstract int X {
+            get;
+            protected set;
         }
-        public int X {
-            get { return drawRect.location.X; }
+        public abstract int Y {
+            get;
+            protected set;
         }
-        public int Y {
-            get { return drawRect.location.Y; }
+        public abstract int Width {
+            get;
+            set;
         }
-        public int Width {
-            get { return drawRect.location.Width; }
-            set {
-                drawRect.location.Width = value;
-                Recompute();
-            }
+        public abstract int Height {
+            get;
+            set;
         }
-        public int Height {
-            get { return drawRect.location.Height; }
-            set {
-                drawRect.location.Height = value;
-                Recompute();
-            }
+        public abstract float LayerDepth {
+            get;
+            set;
         }
 
-        public Texture2D Texture {
-            get { return drawRect.texture; }
-            set { drawRect.texture = value; }
-        }
-        public Color Color {
-            get { return drawRect.color; }
-            set { drawRect.color = value; }
-        }
-
-        public BaseWidget() {
+        public BaseWidget(WidgetRenderer r) {
+            renderer = r;
             anchor = new Point(0, 0);
             align = new Point(Alignment.LEFT, Alignment.TOP);
-            drawRect = new DrawableRect();
-            Width = 1;
-            Height = 1;
+            PreInit();
             Recompute();
+            AddAllDrawables(renderer);
+        }
+        public void Dispose() {
+            RemoveAllDrawables(renderer);
+        }
+
+        public abstract void PreInit();
+        
+        public abstract void AddAllDrawables(WidgetRenderer r);
+        public abstract void RemoveAllDrawables(WidgetRenderer r);
+
+        public Point GetOffset(int x, int y) {
+            return new Point(x - X, y - Y);
+        }
+        public bool Inside(int x, int y, out Vector2 ratio) {
+            Point p = GetOffset(x, y);
+            ratio = new Vector2((float)p.X / (float)Width, (float)p.Y / (float)Height);
+            return p.X >= 0 && p.X < Width && p.Y >= 0 && p.Y < Height;
         }
 
         protected virtual void Recompute() {
@@ -139,8 +144,8 @@ namespace BlisterUI.Widgets {
             }
 
             // Use Alignment For Computation
-            drawRect.location.X = anchor.X - ((align.X * Width) / 2);
-            drawRect.location.Y = anchor.Y - ((align.Y * Height) / 2);
+            X = anchor.X - ((align.X * Width) / 2);
+            Y = anchor.Y - ((align.Y * Height) / 2);
 
             if(OnRecompute != null)
                 OnRecompute(this);

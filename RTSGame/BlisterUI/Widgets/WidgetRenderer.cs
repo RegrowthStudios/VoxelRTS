@@ -39,7 +39,7 @@ namespace BlisterUI.Widgets {
         }
 
         public void Draw(SpriteBatch batch) {
-            batch.Begin(SpriteSortMode.BackToFront, BlendState.NonPremultiplied, SamplerState.LinearClamp, DepthStencilState.Default, RasterizerState.CullNone);
+            batch.Begin(SpriteSortMode.BackToFront, BlendState.NonPremultiplied, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
             for(int i = 0; i < rects.Count; i++) {
                 // Draw Rectangle
                 batch.Draw(

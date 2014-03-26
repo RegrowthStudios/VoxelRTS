@@ -7,6 +7,7 @@ using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BlisterUI;
+using BlisterUI.Widgets;
 using BlisterUI.Input;
 using RTSEngine.Graphics;
 using RTSEngine.Data;
@@ -55,22 +56,53 @@ namespace RTSCS {
 
         // Renderer
         private RTSEffect fx;
+        private WidgetRenderer wr;
+
+        // Widgets
+        RectWidget wBackPanel;
+        ColorSwatch sP, sS, sT;
 
         public override void Build() {
             input = new InputManager();
+            wr = new WidgetRenderer(G, XNASpriteFont.Compile(G, "Arial", 16));
+
+            wBackPanel = new RectWidget(wr);
+            wBackPanel.Anchor = new Point(0, 0);
+            wBackPanel.Width = 200;
+            wBackPanel.Height = G.Viewport.Height;
+            wBackPanel.LayerDepth = 1f;
+            wBackPanel.Color = new Color(14, 14, 14, 230);
+
+            sP = new ColorSwatch(10, 30, 170, 15, 35, 5, Color.Black, 0.9f, wr);
+            sS = new ColorSwatch(10, 120, 170, 15, 35, 5, Color.Black, 0.9f, wr);
+            sT = new ColorSwatch(10, 210, 170, 15, 35, 5, Color.Black, 0.9f, wr);
+            sP.OnColorChange += (c) => { colorScheme.Primary = c; };
+            sS.OnColorChange += (c) => { colorScheme.Secondary = c; };
+            sT.OnColorChange += (c) => { colorScheme.Tertiary = c; };
         }
         public override void Destroy(GameTime gameTime) {
+            wBackPanel.Dispose();
+            sP.Dispose();
+            sS.Dispose();
+            sT.Dispose();
+            wr.Dispose();
         }
 
         public override void OnEntry(GameTime gameTime) {
             input.Refresh();
+            //MouseEventDispatcher.OnMousePress += sP.OnMousePress;
+            //MouseEventDispatcher.OnMousePress += sS.OnMousePress;
+            //MouseEventDispatcher.OnMousePress += sT.OnMousePress;
 
             // Rendering Effect
             fx = new RTSEffect(XNAEffect.Compile(G, FX_FILE_PATH));
 
             // Default Team
             team = new RTSTeam();
-            colorScheme = RTSColorScheme.Default;
+            sP.Color = RTSColorScheme.Default.Primary;
+            sS.Color = RTSColorScheme.Default.Secondary;
+            sT.Color = RTSColorScheme.Default.Tertiary;
+            colorScheme.Name = RTSColorScheme.Default.Name;
 
             // Create Camera
             camera = new OrbitingCamera(Vector3.Zero, 4f, G.Viewport.AspectRatio);
@@ -88,6 +120,9 @@ namespace RTSCS {
             if(unitModel != null) DisposeUnit();
             fx.Dispose();
             camera = null;
+            //MouseEventDispatcher.OnMousePress -= sP.OnMousePress;
+            //MouseEventDispatcher.OnMousePress -= sS.OnMousePress;
+            //MouseEventDispatcher.OnMousePress -= sT.OnMousePress;
         }
 
         public override void Update(GameTime gameTime) {
@@ -100,6 +135,16 @@ namespace RTSCS {
 
             if(searchDone) {
                 tSearch = null;
+            }
+
+            if(input.Mouse.Current.LeftButton == ButtonState.Pressed) {
+                Vector2 r;
+                Vector2 m = new Vector2(input.Mouse.Current.X, input.Mouse.Current.Y);
+                if(wBackPanel.Inside(input.Mouse.Current.X, input.Mouse.Current.Y, out r)) {
+                    sP.OnMousePress(m, MouseButton.Left);
+                    sS.OnMousePress(m, MouseButton.Left);
+                    sT.OnMousePress(m, MouseButton.Left);
+                }
             }
 
             if(tSearch == null) {
@@ -182,6 +227,9 @@ namespace RTSCS {
             fx.CTertiary = colorScheme.Tertiary;
 
             // Try To Draw The Model
+            G.DepthStencilState = DepthStencilState.Default;
+            G.RasterizerState = RasterizerState.CullCounterClockwise;
+            G.BlendState = BlendState.Opaque;
             lock(drawLock) {
                 if(unitModel != null) {
                     unitModel.UpdateInstances(G);
@@ -194,6 +242,8 @@ namespace RTSCS {
             // Unset Buffers
             G.SetVertexBuffers(null);
             G.Indices = null;
+
+            wr.Draw(SB);
         }
 
         private void LoadUnit(FileInfo fi) {
@@ -262,6 +312,86 @@ namespace RTSCS {
                 }
             }
             searchDone = true;
+        }
+    }
+
+    class ColorSwatch : IDisposable {
+        private Vector3 col;
+        public Vector3 Color {
+            get { return col; }
+            set {
+                col = value;
+                wR.Color = new Color(col.X, 0f, 0f);
+                wG.Color = new Color(0f, col.Y, 0f);
+                wB.Color = new Color(0f, 0f, col.Z);
+                wCol.Color = new Color(col.X, col.Y, col.Z);
+                if(OnColorChange != null)
+                    OnColorChange(col);
+            }
+        }
+        public event Action<Vector3> OnColorChange;
+
+        RectWidget wBorder, wR, wG, wB, wCol;
+
+        public ColorSwatch(int x, int y, int w, int hPart, int hFull, int border, Color bColor, float lD, WidgetRenderer r) {
+            wBorder = new RectWidget(r);
+            wBorder.Anchor = new Point(x, y);
+            wBorder.Width = w + border * 2;
+            wBorder.Height = hPart * 3 + hFull + border * 2;
+            wBorder.LayerDepth = lD;
+            lD -= 0.001f;
+            x += border;
+            y += border;
+
+            wR = new RectWidget(r);
+            wR.Anchor = new Point(x, y);
+            wR.Width = w;
+            wR.Height = hPart;
+            wR.LayerDepth = lD;
+            y += hPart;
+
+            wG = new RectWidget(r);
+            wG.Anchor = new Point(x, y);
+            wG.Width = w;
+            wG.Height = hPart;
+            wG.LayerDepth = lD;
+            y += hPart;
+
+            wB = new RectWidget(r);
+            wB.Anchor = new Point(x, y);
+            wB.Width = w;
+            wB.Height = hPart;
+            wB.LayerDepth = lD;
+            y += hPart;
+
+            wCol = new RectWidget(r);
+            wCol.Anchor = new Point(x, y);
+            wCol.Width = w;
+            wCol.Height = hFull;
+            wCol.LayerDepth = lD;
+
+            Color = Vector3.One;
+        }
+        public void Dispose() {
+            wBorder.Dispose();
+            wR.Dispose();
+            wG.Dispose();
+            wB.Dispose();
+            wCol.Dispose();
+        }
+
+        public void OnMousePress(Vector2 pos, MouseButton b) {
+            int x = (int)pos.X;
+            int y = (int)pos.Y;
+            Vector2 ratio;
+            if(wBorder.Inside(x, y, out ratio)) {
+                if(wR.Inside(x, y, out ratio))
+                    Color = new Vector3(ratio.X, col.Y, col.Z);
+                else if(wG.Inside(x, y, out ratio))
+                    Color = new Vector3(col.X, ratio.X, col.Z);
+                else if(wB.Inside(x, y, out ratio))
+                    Color = new Vector3(col.X, col.Y, ratio.X);
+            }
         }
     }
 
