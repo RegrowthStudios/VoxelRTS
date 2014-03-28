@@ -52,6 +52,8 @@ namespace BlisterUI.Widgets {
         public override void PreInit() {
             drawRect = new DrawableRect();
         }
+        protected override void DisposeOther() {
+        }
 
         public override void AddAllDrawables(WidgetRenderer r) {
             r.Add(drawRect);

@@ -89,7 +89,9 @@
     <Compile Include="Screens\ScreenList.cs" />
     <Compile Include="Widgets\BaseWidget.cs" />
     <Compile Include="Widgets\Drawables.cs" />
+    <Compile Include="Widgets\RectButton.cs" />
     <Compile Include="Widgets\RectWidget.cs" />
+    <Compile Include="Widgets\TextWidget.cs" />
     <Compile Include="Widgets\WidgetRenderer.cs" />
   </ItemGroup>
   <ItemGroup />

@@ -64,7 +64,7 @@ namespace BlisterUI.Widgets {
 
             // Find Sizes
             Vector2 s = font.MeasureString(text);
-            TextScale = s.Y / TextHeight;
+            TextScale = TextHeight / s.Y;
             TextWidth = s.X * TextScale;
         }
     }

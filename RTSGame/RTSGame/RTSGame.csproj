@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}</ProjectGuid>
+    <ProjectGuid>{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RTS</RootNamespace>
@@ -35,80 +35,149 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>RTS.Program</StartupObject>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.AudioImporters, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.EffectImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.TextureImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.VideoImporters, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Net, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Xna.Framework.Storage, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Xna.Framework.Video, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Xna.Framework.Xact, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Net" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Presentation" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <NestedContentProject Include="..\RTSContent\RTSContent.contentproj">
-      <Project>085e6ea9-3176-407a-83d5-3726c17ddeb6</Project>
-      <Visible>False</Visible>
-    </NestedContentProject>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="Addition\OrbitingCamera.cs" />
     <Compile Include="App.cs" />
-    <Compile Include="Program.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <Content Include="Content\Font.spritefont">
+    <Compile Include="ColorSchemeScreen.cs" />
+    <Compile Include="MenuScreen.cs" />
+    <Compile Include="RTSScreen.cs" />
+    <Content Include="Content\Audio\btnClick.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="res\g\model\Monkey.obj">
+    <Content Include="Content\Audio\btnHover.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="res\g\model\Unit.obj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
+    </Content>
     <Content Include="Content\FX\RTS.fx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\LoadImages\Modern.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="res\g\anim\Monkey.png">
+    <Content Include="Packs\Default\animations\Mech2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\animations\Mech3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\0\height.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="res\g\anim\Unit.bmp">
+    <Content Include="Packs\Default\maps\0\map.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="res\g\anim\Unit.png">
+    <Content Include="Packs\Default\textures\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="res\g\anim\Unit1.png">
+    <Content Include="Packs\Default\textures\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="res\g\tex\Monkey.png">
+    <Content Include="Packs\Default\animations\Mech1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Content\Textures\Laser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="res\g\tex\Unit.png">
+    <Compile Include="LoadScreen.cs" />
+    <Content Include="Packs\Default\scripts\Mech.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="Packs\Default\levels\0.dat" />
+    <None Include="Packs\Default\maps\0\map.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Packs\Default\maps\0\test.map">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\player.race">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\robots.race">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\units\soldier.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="Packs\Default\models\MechBase.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Packs\Default\units\heavy.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\units\armor.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="User\schemes\red.scheme" />
+    <None Include="User\schemes\blue.scheme" />
+    <None Include="User\schemes\default.scheme" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BlisterUI\BlisterUI.csproj">
+    <ProjectReference Include="..\..\RTSGame\BlisterUI\BlisterUI.csproj">
       <Project>{28292778-5EDC-4898-8E0C-9E32412174CD}</Project>
       <Name>BlisterUI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RTSEngine\RTSEngine.csproj">
+    <ProjectReference Include="..\..\RTSGame\RTSEngine\RTSEngine.csproj">
       <Project>{79AEFEF0-5165-4B43-BD2E-9F925A198C96}</Project>
       <Name>RTSEngine</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Content\Textures\Lightning.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="Content\Textures\INDUZTRY.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\Microsoft.Xna.Framework.Content.Pipeline.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\Microsoft.Xna.Framework.Content.Pipeline.EffectImporter.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\Microsoft.Xna.Framework.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\Microsoft.Xna.Framework.Game.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\Microsoft.Xna.Framework.Graphics.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib\Microsoft.Xna.Framework.Net.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Packs\Default\buildings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

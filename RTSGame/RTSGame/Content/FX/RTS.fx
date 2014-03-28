@@ -40,13 +40,11 @@ sampler Model = sampler_state {
 // Always The Same Input
 struct VSI {
     float4 Position : POSITION0;
-    float3 Normal : NORMAL0;
     float2 UV : TEXCOORD0;
 };
 struct VSO {
     float4 Position : POSITION0;
     float2 UV : TEXCOORD0;
-    float3 Normal : TEXCOORD1;
 };
 
 VSO VS(VSI input) {
@@ -55,7 +53,6 @@ VSO VS(VSI input) {
     float4 worldPosition = mul(input.Position, World);
     output.Position = mul(worldPosition, VP);
     output.UV = input.UV;
-    output.Normal = input.Normal;
 
     return output;
 }
@@ -75,7 +72,6 @@ VSO VS_Anim(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD
     float4 worldPosition = mul(InstWorld, float4(x, y, z, 1));
     output.Position = mul(worldPosition, VP);
     output.UV = input.UV;
-    output.Normal = input.Normal;
 
     return output;
 }
@@ -84,8 +80,11 @@ float4 PS(VSO input) : COLOR0 {
     return tex2D(Color, input.UV);
 }
 float4 PS_Swatch(VSO input) : COLOR0 {
-    float4 over = tex2D(Overlay, input.UV);
-    return over.a < 0.5 ? tex2D(Color, input.UV) : over;
+    float4 swatch = tex2D(Overlay, input.UV);
+    float4 color = tex2D(Color, input.UV);
+    float3 sv = swatch.r * CPrimary + swatch.g * CSecondary + swatch.b * CTertiary;
+    return swatch.a > 0.5 ? float4(sv, 1) : color;
+    //return float4(color.rgb * CPrimary, 1);
 }
 float4 PS_Debug(VSO input) : COLOR0 {
     return float4(1, 1, 1, 1);

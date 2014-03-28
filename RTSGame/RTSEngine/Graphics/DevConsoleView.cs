@@ -21,10 +21,11 @@ namespace RTSEngine.Graphics {
             set;
         }
         private SpriteFont font;
+        private IDisposable fontDisp;
         private Texture2D tPixel;
 
         public DevConsoleView(GraphicsDevice g) {
-            font = XNASpriteFont.Compile(g, "Courier New", 16);
+            font = XNASpriteFont.Compile(g, "Courier New", 16, out fontDisp);
             tPixel = new Texture2D(g, 1, 1);
             tPixel.SetData(new Color[] { Color.White });
             BackColor = DEFAULT_BACK_COLOR;
@@ -33,6 +34,8 @@ namespace RTSEngine.Graphics {
         public void Dispose() {
             if(font != null) {
                 font = null;
+                fontDisp.Dispose();
+                fontDisp = null;
             }
             if(tPixel != null) {
                 tPixel.Dispose();

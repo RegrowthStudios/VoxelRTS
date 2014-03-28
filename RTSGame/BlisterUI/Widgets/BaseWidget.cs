@@ -23,11 +23,14 @@ namespace BlisterUI.Widgets {
         public BaseWidget Parent {
             get { return parent; }
             set {
+                if(parent == value)
+                    return;
                 if(parent != null)
                     parent.OnRecompute -= OnParentRecompute;
                 parent = value;
                 if(parent != null)
                     parent.OnRecompute += OnParentRecompute;
+                Recompute();
             }
         }
         public event Action<BaseWidget> OnRecompute;
@@ -120,6 +123,7 @@ namespace BlisterUI.Widgets {
         public void Dispose() {
             RemoveAllDrawables(renderer);
         }
+        protected abstract void DisposeOther();
 
         public abstract void PreInit();
         
@@ -136,7 +140,6 @@ namespace BlisterUI.Widgets {
         }
 
         protected virtual void Recompute() {
-            Microsoft.Xna.Framework.Graphics.SpriteBatch sb;
             if(parent != null) {
                 // Get Anchor Via The Parent
                 anchor.X = parent.X + ((offAlign.X * parent.Width) / 2) + offset.X;

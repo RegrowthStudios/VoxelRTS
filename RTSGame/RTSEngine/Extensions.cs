@@ -119,7 +119,7 @@ namespace Microsoft.Xna.Framework.Graphics {
         }
 
 
-        public static SpriteFont Compile(GraphicsDevice g, string file) {
+        public static SpriteFont Compile(GraphicsDevice g, string file, out IDisposable gR) {
             FontDescriptionImporter ei = new FontDescriptionImporter();
             FontDescription ec = ei.Import(file, new RTSImporterContext());
             FontDescriptionProcessor ep = new FontDescriptionProcessor();
@@ -145,11 +145,13 @@ namespace Microsoft.Xna.Framework.Graphics {
             char? defaultChar = sfcDefaultChar.GetValue(cec) as char?;
 
             // Invoke Private SpriteFont Constructor
+            gR = texture;
             return sfConstructor.Invoke(new object[] { texture, glyphs, cropping, charMap, lineSpacing, spacing, kerning, defaultChar }) as SpriteFont;
         }
         public static SpriteFont Compile(GraphicsDevice g,
             string fontName,
             int size,
+            out IDisposable gR,
             int spacing = 0,
             bool useKerning = true,
             string style = "Regular",
@@ -159,18 +161,20 @@ namespace Microsoft.Xna.Framework.Graphics {
             ) {
             Random r = new Random();
             string ufid = "";
-            ufid += (((ulong)r.Next() << 32) | (ulong)r.Next()).ToString();
-            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+            unchecked {
+                ufid += (((ulong)r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+                ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+                ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+                ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+            }
             ufid += ".xml";
             using(var s = File.Create(ufid)) {
                 StreamWriter sw = new StreamWriter(s);
                 sw.Write(SF_XML_FORMAT, fontName, size, spacing, useKerning ? "true" : "false", style, defaultChar, cStart, cEnd);
                 sw.Flush();
             }
-            SpriteFont sf = Compile(g, ufid);
+            SpriteFont sf = Compile(g, ufid, out gR);
             File.Delete(ufid);
             return sf;
         }

@@ -8,7 +8,13 @@ using Microsoft.Xna.Framework.Graphics;
 namespace BlisterUI.Widgets {
     public class WidgetRenderer : IDisposable {
         private Texture2D tPixel;
+        public Texture2D DefaultTexture {
+            get { return tPixel; }
+        }
         private SpriteFont fDefault;
+        public SpriteFont DefaultFont {
+            get { return fDefault; }
+        }
 
         private readonly List<DrawableRect> rects;
         private readonly List<DrawableText> texts;
@@ -66,7 +72,7 @@ namespace BlisterUI.Widgets {
                     Vector2.Zero,
                     texts[i].TextScale,
                     SpriteEffects.None,
-                    rects[i].layerDepth
+                    texts[i].layerDepth
                     );
             }
             batch.End();

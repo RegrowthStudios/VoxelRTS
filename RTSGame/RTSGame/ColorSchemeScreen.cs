@@ -57,6 +57,7 @@ namespace RTSCS {
         // Renderer
         private RTSEffect fx;
         private WidgetRenderer wr;
+        private IDisposable fontDisp;
 
         // Widgets
         RectWidget wBackPanel;
@@ -64,7 +65,7 @@ namespace RTSCS {
 
         public override void Build() {
             input = new InputManager();
-            wr = new WidgetRenderer(G, XNASpriteFont.Compile(G, "Arial", 16));
+            wr = new WidgetRenderer(G, XNASpriteFont.Compile(G, "Arial", 16, out fontDisp));
 
             wBackPanel = new RectWidget(wr);
             wBackPanel.Anchor = new Point(0, 0);
@@ -86,6 +87,7 @@ namespace RTSCS {
             sS.Dispose();
             sT.Dispose();
             wr.Dispose();
+            fontDisp.Dispose();
         }
 
         public override void OnEntry(GameTime gameTime) {
