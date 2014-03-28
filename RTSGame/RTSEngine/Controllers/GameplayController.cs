@@ -148,7 +148,6 @@ namespace RTSEngine.Controllers {
                 for(int i = 0; i < team.squads.Count; si++, i++)
                     team.squads[i].RecalculateGridPosition();
             }
-            DevConsole.AddCommand(string.Format("SC: {0}", si));
 
             // Find Decisions
             for(int ti = 0; ti < s.Teams.Length; ti++) {
@@ -210,20 +209,21 @@ namespace RTSEngine.Controllers {
 
         // Physics Stage
         private void ResolvePhysics(GameState s, float dt) {
-
             // Initialize hash grid
-            HashGrid hashGrid = new HashGrid(s.Map.Width, s.Map.Depth, 2);
+            var hashGrid = s.CGrid;
+            hashGrid.ClearDynamic();
 
             // Move Geometry To The Unit's Location and hash into the grid
             foreach(RTSTeam team in s.Teams) {
                 foreach(RTSUnit unit in team.units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
-                    hashGrid.AddObject(unit);
+                    hashGrid.Add(unit);
                 }
             }
 
             // Use hash grid to perform collision using 3 by 3 grid around the geometry
-            foreach(Point p in hashGrid.Active) {
+            for(int i = 0; i < hashGrid.ActiveGrids.Count; i++) {
+                Point p = hashGrid.ActiveGrids[i];
                 hashGrid.HandleGridCollision(p.X, p.Y);
                 hashGrid.HandleGridCollision(p.X, p.Y, -1, -1);
                 hashGrid.HandleGridCollision(p.X, p.Y, -1, 0);
@@ -243,7 +243,6 @@ namespace RTSEngine.Controllers {
                     unit.Height = unit.CollisionGeometry.Height;
                 }
             }
-
         }
 
         // Cleanup Stage

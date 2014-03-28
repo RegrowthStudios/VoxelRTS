@@ -24,6 +24,12 @@ namespace RTSEngine.Data {
             set;
         }
 
+        // The Grids For The Level
+        public CollisionGrid CGrid {
+            get;
+            set;
+        }
+
         // Controller Dictionary
         public Dictionary<string, ReflectedUnitController> UnitControllers {
             get;

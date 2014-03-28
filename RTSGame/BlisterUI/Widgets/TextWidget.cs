@@ -56,8 +56,9 @@ namespace BlisterUI.Widgets {
             }
         }
 
-        public TextWidget(WidgetRenderer r)
+        public TextWidget(WidgetRenderer r, SpriteFont f = null)
             : base(r) {
+            Font = f == null ? r.DefaultFont : f;
         }
 
         public override void PreInit() {

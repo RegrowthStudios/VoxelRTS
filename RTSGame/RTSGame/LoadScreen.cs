@@ -13,7 +13,7 @@ using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 
-namespace RTSCS {
+namespace RTS {
     public class LoadScreen : GameScreen<App> {
         // Constants For Loading Bar
         const string IMAGE_DIR = @"Content\LoadImages";
@@ -145,7 +145,8 @@ namespace RTSCS {
             loadData.Teams[1].Colors.Secondary *= Vector3.UnitZ;
             loadData.Teams[1].Colors.Tertiary *= Vector3.UnitZ;
 
-            LoadedEngine = new GameEngine(game.Graphics, game.Window, loadData);
+            LoadedEngine = new GameEngine(game.Graphics, game.Window);
+            LoadedEngine.Load(LoadData);
             isLoaded = true;
         }
         private void LoadCallback(string m, float p) {

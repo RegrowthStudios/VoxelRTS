@@ -6,10 +6,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace RTSEngine.Graphics {
-    /// <summary>
-    /// For Animation: Position = U, DV / Frame, 0
-    /// </summary>
-
     public struct VertexRTSAnimInst : IVertexType {
         #region Declaration
         public static readonly VertexDeclaration Declaration = new VertexDeclaration(
@@ -33,10 +29,9 @@ namespace RTSEngine.Graphics {
         }
     }
 
-    public class RTSEffect : IDisposable {
+    public class RTSEffect {
         // Effect Pass Keys
         public const string PASS_KEY_SIMPLE = "Simple";
-        public const string PASS_KEY_SWATCHED = "Swatched";
         public const string PASS_KEY_ANIMATION = "Animation";
         // Effect Parameter Keys
         public const string PARAM_KEY_WORLD = "World";
@@ -51,7 +46,7 @@ namespace RTSEngine.Graphics {
 
         // The Effect And Its Passes
         private Effect fx;
-        private EffectPass fxPassSimple, fxPassSwatched, fxPassAnimation;
+        private EffectPass fxPassSimple, fxPassAnimation;
 
         // Used For Simple Pass
         private EffectParameter fxpWorld, fxpVP, fxpTexMain;
@@ -98,7 +93,6 @@ namespace RTSEngine.Graphics {
 
             // Get The Passes
             fxPassSimple = fx.CurrentTechnique.Passes[PASS_KEY_SIMPLE];
-            fxPassSwatched = fx.CurrentTechnique.Passes[PASS_KEY_SWATCHED];
             fxPassAnimation = fx.CurrentTechnique.Passes[PASS_KEY_ANIMATION];
 
             // Get The Parameters
@@ -112,27 +106,15 @@ namespace RTSEngine.Graphics {
             fxpTexAnimation = fx.Parameters[PARAM_KEY_TEX_MODEL_MAP];
             fxpTexelSize = fx.Parameters[PARAM_KEY_TEXEL_SIZE];
         }
-        public void Dispose() {
-            fx.Dispose();
-            fx = null;
-        }
 
         public void ApplyPassSimple() {
             fxPassSimple.Apply();
-        }
-        public void ApplyPassSwatched() {
-            fxPassSwatched.Apply();
         }
         public void ApplyPassAnimation() {
             fxPassAnimation.Apply();
         }
 
         public void DrawPassSimple(GraphicsDevice g, VertexBuffer model, IndexBuffer indices) {
-            g.SetVertexBuffer(model);
-            g.Indices = indices;
-            g.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, model.VertexCount, 0, indices.IndexCount / 3);
-        }
-        public void DrawPassSwatched(GraphicsDevice g, VertexBuffer model, IndexBuffer indices) {
             g.SetVertexBuffer(model);
             g.Indices = indices;
             g.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, model.VertexCount, 0, indices.IndexCount / 3);

@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using System.IO;
+using RTSEngine.Controllers;
 
 namespace Microsoft.Xna.Framework.Graphics {
     #region Content Pipeline Context Data
@@ -177,6 +178,33 @@ namespace Microsoft.Xna.Framework.Graphics {
             SpriteFont sf = Compile(g, ufid, out gR);
             File.Delete(ufid);
             return sf;
+        }
+    }
+
+    public static class ModelHelper {
+        public static void CreateBuffers<T>(GraphicsDevice g, T[] verts, VertexDeclaration vd, int[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = new VertexBuffer(g, vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = new IndexBuffer(g, IndexElementSize.ThirtyTwoBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(GameEngine ge, T[] verts, VertexDeclaration vd, int[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = ge.CreateVertexBuffer(vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = ge.CreateIndexBuffer(IndexElementSize.ThirtyTwoBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(GraphicsDevice g, T[] verts, VertexDeclaration vd, short[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = new VertexBuffer(g, vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = new IndexBuffer(g, IndexElementSize.SixteenBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(GameEngine ge, T[] verts, VertexDeclaration vd, short[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = ge.CreateVertexBuffer(vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = ge.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, bu);
+            ib.SetData(inds);
         }
     }
 }

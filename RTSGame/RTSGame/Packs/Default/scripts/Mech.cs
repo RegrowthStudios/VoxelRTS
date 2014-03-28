@@ -140,7 +140,6 @@ namespace RTS.Mech.Unit {
                 if(animation == AnimationType.CombatMelee || animation == AnimationType.Rest) {
                     if(alCurrent.EndFrame == alCurrent.CurrentFrame) {
                         SetAnimation(AnimationType.None);
-                        DevConsole.AddCommand("Here");
                         return;
                     }
                 }
@@ -148,7 +147,6 @@ namespace RTS.Mech.Unit {
             else {
                 rt -= dt;
                 if(rt < 0) {
-                    DevConsole.AddCommand("Here 2");
                     SetAnimation(AnimationType.Rest);
                 }
             }

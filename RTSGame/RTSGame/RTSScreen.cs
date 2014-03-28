@@ -15,7 +15,7 @@ using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
 
-namespace RTSCS {
+namespace RTS {
     public class RTSScreen : GameScreen<App> {
         private GameEngine engine;
         private DevConsoleView dcv;
@@ -39,7 +39,6 @@ namespace RTSCS {
         }
 
         public override void OnEntry(GameTime gameTime) {
-            game.IsMouseVisible = true;
             dcv = new DevConsoleView(G);
             MouseEventDispatcher.OnMousePress += OnMP;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
@@ -51,7 +50,6 @@ namespace RTSCS {
             engine = game.LoadScreen.LoadedEngine;
         }
         public override void OnExit(GameTime gameTime) {
-            game.IsMouseVisible = false;
             MouseEventDispatcher.OnMousePress -= OnMP;
             KeyboardEventDispatcher.OnKeyPressed -= OnKP;
             KeyboardEventDispatcher.OnKeyReleased -= OnKR;
@@ -71,7 +69,8 @@ namespace RTSCS {
             }
         }
         public override void Draw(GameTime gameTime) {
-            engine.Draw(G, 1f / 60f);
+            engine.Draw(1f / 60f);
+
             if(DevConsole.IsActivated) {
                 SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
                 dcv.Draw(SB, Vector2.Zero);
@@ -81,9 +80,9 @@ namespace RTSCS {
 
         public void OnMP(Vector2 p, MouseButton b) {
             if(b == MouseButton.Right) {
-                Ray r = engine.renderer.Camera.GetViewRay(p);
+                Ray r = engine.Renderer.Camera.GetViewRay(p);
                 IntersectionRecord rec = new IntersectionRecord();
-                if(engine.state.Map.BVH.Intersect(ref rec, r)) {
+                if(engine.State.Map.BVH.Intersect(ref rec, r)) {
                     spawnLoc = r.Position + r.Direction * rec.T;
                     mPress = true;
                 }
@@ -114,6 +113,9 @@ namespace RTSCS {
                         DevConsole.Deactivate();
                     else
                         DevConsole.Activate();
+                    break;
+                case Keys.Escape:
+                    State = ScreenState.ChangePrevious;
                     break;
             }
         }

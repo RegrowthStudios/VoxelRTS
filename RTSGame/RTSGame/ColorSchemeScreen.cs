@@ -15,8 +15,9 @@ using RTSEngine.Data.Team;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework.Input;
+using RTSEngine.Controllers;
 
-namespace RTSCS {
+namespace RTS {
     public class ColorSchemeScreen : GameScreen<App> {
         private const string FX_FILE_PATH = @"Content\FX\RTS.fx";
         private static readonly Color BACK_COLOR = new Color(10, 10, 10, 255);
@@ -55,6 +56,7 @@ namespace RTSCS {
         private int curUnit;
 
         // Renderer
+        private GameEngine engine;
         private RTSEffect fx;
         private WidgetRenderer wr;
         private IDisposable fontDisp;
@@ -102,8 +104,10 @@ namespace RTSCS {
             MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
             MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
 
+            engine = new GameEngine(game.Graphics, game.Window);
+
             // Rendering Effect
-            fx = new RTSEffect(XNAEffect.Compile(G, FX_FILE_PATH));
+            fx = new RTSEffect(engine.LoadEffect(FX_FILE_PATH));
 
             // Default Team
             team = new RTSTeam();
@@ -126,7 +130,7 @@ namespace RTSCS {
         }
         public override void OnExit(GameTime gameTime) {
             if(unitModel != null) DisposeUnit();
-            fx.Dispose();
+            engine.Dispose();
             camera = null;
             MouseEventDispatcher.OnMousePress -= sP.OnMousePress;
             MouseEventDispatcher.OnMouseMotion -= sP.OnMouseMovement;
@@ -157,6 +161,11 @@ namespace RTSCS {
                     curUnit = (curUnit + 1) % unitDataFiles.Count;
                 }
             }
+
+            if(input.Keyboard.IsKeyJustPressed(Keys.P))
+                State = ScreenState.ChangePrevious;
+            if(input.Keyboard.IsKeyJustPressed(Keys.Escape))
+                State = ScreenState.ExitApplication;
 
             input.Refresh();
         }
@@ -259,7 +268,7 @@ namespace RTSCS {
         private void UnitLoader(object _fi) {
             FileInfo fi = _fi as FileInfo;
 
-            RTSUnitResult res = RTSUnitDataParser.Parse(G, fi);
+            RTSUnitResult res = RTSUnitDataParser.Parse(engine, fi);
             RTSUnitData _unitData = res.Data;
             RTSUnitModel _unitModel = res.View;
             RTSUnit _unit = new RTSUnit(team, _unitData, Vector2.Zero);
@@ -288,8 +297,6 @@ namespace RTSCS {
         private void DisposeUnit() {
             unit = null;
             unitData = null;
-
-            unitModel.Dispose();
             unitModel = null;
         }
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace RTSCS {
+namespace RTS {
     public class OrbitingCamera {
         public const float MIN_FOV = 0.001f;
         public const float MAX_FOV = MathHelper.PiOver2;

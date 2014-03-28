@@ -45,22 +45,22 @@ namespace RTSEngine.Graphics {
         private BasicEffect fxMap, fxSelection;
         private RTSEffect fxRTS;
 
-        public RTSRenderer(GraphicsDeviceManager gdm, string rtsFXFile, GameWindow w) {
+        public RTSRenderer(GameEngine ge, GraphicsDeviceManager gdm, string rtsFXFile, GameWindow w) {
             window = w;
             gManager = gdm;
             UnitModels = new List<RTSUnitModel>();
 
-            tPixel = new Texture2D(G, 1, 1);
+            tPixel = ge.CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
 
-            fxMap = new BasicEffect(G);
+            fxMap = ge.CreateEffect();
             fxMap.LightingEnabled = false;
             fxMap.FogEnabled = false;
             fxMap.VertexColorEnabled = false;
             fxMap.TextureEnabled = true;
             fxMap.World = Matrix.Identity;
 
-            fxSelection = new BasicEffect(G);
+            fxSelection = ge.CreateEffect();
             fxSelection.LightingEnabled = false;
             fxSelection.FogEnabled = false;
             fxSelection.TextureEnabled = false;
@@ -68,7 +68,7 @@ namespace RTSEngine.Graphics {
             fxSelection.World = Matrix.Identity;
             fxSelection.Texture = tPixel;
 
-            fxRTS = new RTSEffect(XNAEffect.Compile(G, rtsFXFile));
+            fxRTS = new RTSEffect(ge.LoadEffect(rtsFXFile));
             fxRTS.World = Matrix.Identity;
             fxRTS.CPrimary = Vector3.UnitX;
             fxRTS.CSecondary = Vector3.UnitY;
@@ -87,13 +87,6 @@ namespace RTSEngine.Graphics {
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
             MouseEventDispatcher.OnMouseMotion -= OnMouseMove;
             camera.Controller.Unhook(window);
-
-            tPixel.Dispose();
-
-            Map.Dispose();
-
-            fxMap.Dispose();
-            fxSelection.Dispose();
         }
 
         // Rendering Passes
@@ -118,16 +111,21 @@ namespace RTSEngine.Graphics {
             fxMap.Projection = camera.Projection;
 
             // Primary Map Model
-            Map.SetPrimaryModel(G);
-            fxMap.Texture = Map.PrimaryTexture;
-            fxMap.CurrentTechnique.Passes[0].Apply();
-            Map.DrawPrimary(G);
-
+            if(Map.TrianglesPrimary > 0) {
+                G.SetVertexBuffer(Map.VBPrimary);
+                G.Indices = Map.IBPrimary;
+                fxMap.Texture = Map.PrimaryTexture;
+                fxMap.CurrentTechnique.Passes[0].Apply();
+                G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBPrimary.VertexCount, 0, Map.TrianglesPrimary);
+            }
             // Secondary Map Model
-            Map.SetSecondaryModel(G);
-            fxMap.Texture = Map.SecondaryTexture;
-            fxMap.CurrentTechnique.Passes[0].Apply();
-            Map.DrawSecondary(G);
+            if(Map.TrianglesSecondary > 0) {
+                G.SetVertexBuffer(Map.VBSecondary);
+                G.Indices = Map.IBSecondary;
+                fxMap.Texture = Map.SecondaryTexture;
+                fxMap.CurrentTechnique.Passes[0].Apply();
+                G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBSecondary.VertexCount, 0, Map.TrianglesSecondary);
+            }
         }
         private void DrawAnimated() {
             // Set Camera

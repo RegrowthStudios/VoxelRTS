@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using BlisterUI.Input;
 
 namespace BlisterUI.Widgets {
@@ -51,8 +52,8 @@ namespace BlisterUI.Widgets {
 
         private bool isHooked;
 
-        public RectButton(WidgetRenderer r, ButtonHighlightOptions inactive, ButtonHighlightOptions active)
-            : base(r) {
+        public RectButton(WidgetRenderer r, ButtonHighlightOptions inactive, ButtonHighlightOptions active, Texture2D t = null)
+            : base(r, t) {
             optDefault = inactive;
             optHighlight = active;
 

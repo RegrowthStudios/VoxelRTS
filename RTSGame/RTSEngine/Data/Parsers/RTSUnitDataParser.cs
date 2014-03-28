@@ -8,6 +8,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Parsers {
     public struct RTSUnitResult {
@@ -40,15 +41,15 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxCtrlAnimation = RegexHelper.Generate("CTRLANIM", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlCombat = RegexHelper.Generate("CTRLCOMBAT", @"[\w\s\.]+");
 
-        public static RTSUnitResult Parse(GraphicsDevice g, FileInfo infoFile) {
+        public static RTSUnitResult Parse(GameEngine ge, FileInfo infoFile) {
             // Parse Data
             RTSUnitResult res;
             using(Stream s = File.OpenRead(infoFile.FullName)) {
-                res = ParseFromInfo(g, new StreamReader(s), infoFile.Directory.FullName);
+                res = ParseFromInfo(ge, new StreamReader(s), infoFile.Directory.FullName);
             }
             return res;
         }
-        private static RTSUnitResult ParseFromInfo(GraphicsDevice g, StreamReader s, string rootDir) {
+        private static RTSUnitResult ParseFromInfo(GameEngine ge, StreamReader s, string rootDir) {
             RTSUnitResult res = new RTSUnitResult();
             string ms = s.ReadToEnd();
             int[] buf;
@@ -85,36 +86,31 @@ namespace RTSEngine.Data.Parsers {
             FileInfo fiModel = RegexHelper.ExtractFile(rgxModel.Match(ms), rootDir);
             FileInfo fiAnim = RegexHelper.ExtractFile(rgxAnimation.Match(ms), rootDir);
             using(var sModel = File.OpenRead(fiModel.FullName)) {
-                Texture2D tAnim = AnimationFromBitmap(g, fiAnim);
-                res.View = new RTSUnitModel(g, res.Data, sModel, tAnim);
+                Texture2D tAnim = AnimationFromBitmap(ge, fiAnim);
+                res.View = new RTSUnitModel(ge, res.Data, sModel, tAnim);
             }
+
             FileInfo fiTex = RegexHelper.ExtractFile(rgxMainTex.Match(ms), rootDir);
-            using(var ts = File.OpenRead(fiTex.FullName)) {
-                res.View.ModelTexture = Texture2D.FromStream(g, ts);
-            }
+            res.View.ModelTexture = ge.LoadTexture2D(fiTex.FullName);
             fiTex = RegexHelper.ExtractFile(rgxColorTex.Match(ms), rootDir);
-            using(var ts = File.OpenRead(fiTex.FullName)) {
-                res.View.ColorCodeTexture = Texture2D.FromStream(g, ts);
-            }
+            res.View.ColorCodeTexture = ge.LoadTexture2D(fiTex.FullName);
             return res;
         }
 
-        private static Texture2D AnimationFromBitmap(GraphicsDevice g, FileInfo fi) {
+        private static Texture2D AnimationFromBitmap(GameEngine ge, FileInfo fi) {
             Texture2D t;
+            float[] sData = null;
+            int w, h;
             using(var bmp = System.Drawing.Bitmap.FromFile(fi.FullName) as System.Drawing.Bitmap) {
-                t = new Texture2D(g, bmp.Width, bmp.Height, false, SurfaceFormat.Single);
-                float[] sData = new float[bmp.Width * bmp.Height];
-                byte[] datac = new byte[4];
-                for(int i = 0; i < sData.Length; i++) {
-                    var col = bmp.GetPixel(i % bmp.Width, i / bmp.Width);
-                    datac[0] = col.B;
-                    datac[1] = col.G;
-                    datac[2] = col.R;
-                    datac[3] = col.A;
-                    sData[i] = BitConverter.ToSingle(datac, 0);
-                }
-                t.SetData(sData);
+                w = bmp.Width;
+                h = bmp.Height;
+                sData = new float[w * h];
+                System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
+                System.Runtime.InteropServices.Marshal.Copy(data.Scan0, sData, 0, (data.Stride * data.Height) >> 2);
+                bmp.UnlockBits(data);
             }
+            t = ge.CreateTexture2D(w, h, SurfaceFormat.Single);
+            t.SetData(sData);
             return t;
         }
     }

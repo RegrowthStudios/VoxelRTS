@@ -19,7 +19,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 
-namespace RTSCS {
+namespace RTS {
     public static class AppSettings {
         public const string PACKS_DIR = @"Packs";
         public const string CONTENT_DIR = @"Content";
@@ -51,10 +51,10 @@ namespace RTSCS {
             : base() {
             graphics.IsFullScreen = UserConfig.UseFullscreen;
             IsMouseVisible = true;
-            MenuScreen = new RTSCS.MenuScreen();
-            LoadScreen = new RTSCS.LoadScreen();
-            RTSScreen = new RTSCS.RTSScreen();
-            ColorSchemeScreen = new RTSCS.ColorSchemeScreen();
+            MenuScreen = new RTS.MenuScreen();
+            LoadScreen = new RTS.LoadScreen();
+            RTSScreen = new RTS.RTSScreen();
+            ColorSchemeScreen = new RTS.ColorSchemeScreen();
         }
         
         protected override void FullInitialize() {

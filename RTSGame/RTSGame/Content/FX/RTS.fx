@@ -56,8 +56,6 @@ VSO VS(VSI input) {
 
     return output;
 }
-
-// Animation Instanced Vertex Shader
 VSO VS_Anim(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD1) {
     VSO output;
 
@@ -84,20 +82,12 @@ float4 PS_Swatch(VSO input) : COLOR0 {
     float4 color = tex2D(Color, input.UV);
     float3 sv = swatch.r * CPrimary + swatch.g * CSecondary + swatch.b * CTertiary;
     return swatch.a > 0.5 ? float4(sv, 1) : color;
-    //return float4(color.rgb * CPrimary, 1);
-}
-float4 PS_Debug(VSO input) : COLOR0 {
-    return float4(1, 1, 1, 1);
 }
 
 technique Default {
     pass Simple {
         VertexShader = compile vs_3_0 VS();
         PixelShader = compile ps_3_0 PS();
-    }
-    pass Swatched {
-        VertexShader = compile vs_3_0 VS();
-        PixelShader = compile ps_3_0 PS_Swatch();
     }
     pass Animation {
         VertexShader = compile vs_3_0 VS_Anim();

@@ -45,8 +45,9 @@ namespace BlisterUI.Widgets {
             set { drawRect.color = value; }
         }
 
-        public RectWidget(WidgetRenderer r)
+        public RectWidget(WidgetRenderer r, Texture2D t = null)
             : base(r) {
+            Texture = t == null ? r.DefaultTexture : t;
         }
 
         public override void PreInit() {
