@@ -78,10 +78,14 @@ namespace RTSEngine.Data.Parsers {
             res.Data.BaseCombatData.MaxRange = buf[1];
             res.Data.BaseCombatData.CriticalChance = RegexHelper.ExtractDouble(rgxCritChance.Match(ms));
             res.Data.BaseCombatData.AttackTimer = RegexHelper.ExtractFloat(rgxTimer.Match(ms));
-            res.Data.DefaultActionController = RegexHelper.Extract(rgxCtrlAction.Match(ms));
-            res.Data.DefaultAnimationController = RegexHelper.Extract(rgxCtrlAnimation.Match(ms));
-            res.Data.DefaultCombatController = RegexHelper.Extract(rgxCtrlCombat.Match(ms));
-            res.Data.DefaultMoveController = RegexHelper.Extract(rgxCtrlMove.Match(ms));
+
+            // Get The Controllers From The Controller Dictionary
+            if(ge.State != null) {
+                res.Data.DefaultActionController = ge.State.UnitControllers[RegexHelper.Extract(rgxCtrlAction.Match(ms))];
+                res.Data.DefaultAnimationController = ge.State.UnitControllers[RegexHelper.Extract(rgxCtrlAnimation.Match(ms))];
+                res.Data.DefaultCombatController = ge.State.UnitControllers[RegexHelper.Extract(rgxCtrlCombat.Match(ms))];
+                res.Data.DefaultMoveController = ge.State.UnitControllers[RegexHelper.Extract(rgxCtrlMove.Match(ms))];
+            }
 
             FileInfo fiModel = RegexHelper.ExtractFile(rgxModel.Match(ms), rootDir);
             FileInfo fiAnim = RegexHelper.ExtractFile(rgxAnimation.Match(ms), rootDir);

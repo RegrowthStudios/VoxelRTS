@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BlisterUI;
 using BlisterUI.Input;
 using BlisterUI.Widgets;
+using System.Diagnostics;
 
 namespace RTS {
     public class MenuScreen : GameScreen<App> {
@@ -113,7 +114,15 @@ namespace RTS {
                 button.OnMouseEntry -= MenuScreen_OnMouseEntry;
                 button.Dispose();
             }
-            foreach(var text in buttonsText) text.Dispose();
+            buttons = null;
+            foreach(var bt in buttonsText) {
+                bt.Dispose();
+            }
+            buttonsText = null;
+            foreach(var t in tPanels) {
+                t.Dispose();
+            }
+            tPanels = null;
             wr.Dispose();
 
             seHover.Dispose();
@@ -129,14 +138,6 @@ namespace RTS {
 
         private void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
             switch(args.KeyCode) {
-                case Keys.D1:
-                    Next = game.LoadScreen.Index;
-                    State = ScreenState.ChangeNext;
-                    break;
-                case Keys.D2:
-                    Next = game.ColorSchemeScreen.Index;
-                    State = ScreenState.ChangeNext;
-                    break;
                 case Keys.Escape:
                     State = ScreenState.ExitApplication;
                     break;
@@ -154,6 +155,10 @@ namespace RTS {
             }
             else if(obj == buttons[2]) {
                 RTSEngine.Data.UserConfig.UseFullscreen = !RTSEngine.Data.UserConfig.UseFullscreen;
+                RTSEngine.Data.UserConfig.Save(App.USER_CONFIG_FILE_PATH);
+                ProcessStartInfo psi = new ProcessStartInfo("RTS.exe");
+                psi.WorkingDirectory = Process.GetCurrentProcess().StartInfo.WorkingDirectory;
+                Process.Start(psi);
                 State = ScreenState.ExitApplication;
             }
             else if(obj == buttons[3]) {

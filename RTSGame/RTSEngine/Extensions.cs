@@ -163,11 +163,11 @@ namespace Microsoft.Xna.Framework.Graphics {
             Random r = new Random();
             string ufid = "";
             unchecked {
-                ufid += (((ulong)r.Next() << 32) | (ulong)r.Next()).ToString();
-                ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-                ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-                ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-                ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
             }
             ufid += ".xml";
             using(var s = File.Create(ufid)) {

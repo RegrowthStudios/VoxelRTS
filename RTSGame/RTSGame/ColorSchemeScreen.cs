@@ -245,10 +245,20 @@ namespace RTS {
             G.BlendState = BlendState.Opaque;
             lock(drawLock) {
                 if(unitModel != null) {
+                    // Set Up The Textures
+                    G.VertexSamplerStates[0] = SamplerState.PointClamp;
+                    G.SamplerStates[1] = SamplerState.LinearClamp;
+                    G.SamplerStates[2] = SamplerState.LinearClamp;
+                    fx.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
+
                     unitModel.UpdateInstances(G);
                     unitModel.SetInstances(G);
                     fx.ApplyPassAnimation();
                     unitModel.DrawInstances(G);
+
+                    // Cause XNA Is Retarded Like That
+                    G.VertexTextures[0] = null;
+                    G.VertexSamplerStates[0] = SamplerState.LinearClamp;
                 }
             }
 
@@ -287,11 +297,6 @@ namespace RTS {
                 unitData = _unitData;
                 unit = _unit;
                 unitModel = _unitModel;
-
-                // Set Up The Textures
-                fx.TexMain = unitModel.ModelTexture;
-                fx.TexKey = unitModel.ColorCodeTexture;
-                fx.TexAnimation = unitModel.AnimationTexture;
             }
         }
         private void DisposeUnit() {

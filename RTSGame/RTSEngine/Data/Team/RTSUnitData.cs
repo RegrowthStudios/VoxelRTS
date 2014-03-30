@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
+using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Team {
     public class RTSUnitData {
@@ -31,9 +32,9 @@ namespace RTSEngine.Data.Team {
         public ICollidable ICollidableShape;
         public BoundingBox BBox;
 
-        public string DefaultMoveController;
-        public string DefaultActionController;
-        public string DefaultAnimationController;
-        public string DefaultCombatController;
+        public ReflectedUnitController DefaultMoveController;
+        public ReflectedUnitController DefaultActionController;
+        public ReflectedUnitController DefaultAnimationController;
+        public ReflectedUnitController DefaultCombatController;
     }
 }

@@ -14,6 +14,7 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Controllers {
     public static class RTSConstants {
+        public const float GAME_DELTA_TIME = 1f / 60f;
         public const float CGRID_SIZE = 2f;
     }
 
@@ -84,7 +85,7 @@ namespace RTSEngine.Controllers {
         }
         #endregion
 
-        // Graphics Data Creation That Will Be Ready For Disposal At The End Of The Game
+        #region Graphics Data Creation That Will Be Ready For Disposal At The End Of The Game
         public VertexBuffer CreateVertexBuffer(VertexDeclaration vd, int s, BufferUsage usage = BufferUsage.WriteOnly) {
             VertexBuffer vb = new VertexBuffer(G, vd, s, usage);
             toDispose.Add(vb);
@@ -154,6 +155,7 @@ namespace RTSEngine.Controllers {
             toDispose.Add(disp);
             return f;
         }
+        #endregion
 
         public void Load(EngineLoadData d) {
             PlayController = new GameplayController();
@@ -162,9 +164,10 @@ namespace RTSEngine.Controllers {
             // Create Simple Information
             Renderer = new RTSRenderer(this, gdm, @"Content\FX\RTS.fx", window);
 
-            // Load Teams
-            State = new GameState(LoadTeams(d.Teams));
+            // Create Game State
+            State = new GameState();
             LoadControllers();
+            State.SetTeams(LoadTeams(d.Teams));
             for(int ti = 0; ti < State.Teams.Length; ti++) {
                 switch(d.Teams[ti].InputType) {
                     case InputType.Player:
@@ -228,6 +231,9 @@ namespace RTSEngine.Controllers {
             State.Map = res.Data;
             State.CGrid = new CollisionGrid(State.Map.Width, State.Map.Depth, RTSConstants.CGRID_SIZE);
             Renderer.Map = res.View;
+
+            // Move Camera To Center
+            Renderer.Camera.MoveTo(State.Map.Width * 0.5f, State.Map.Depth * 0.5f);
         }
         private RTSTeam[] LoadTeams(RTSTeamResult[] teamResults) {
             RTSTeam[] t = new RTSTeam[teamResults.Length];
@@ -236,8 +242,8 @@ namespace RTSEngine.Controllers {
             foreach(var res in teamResults) {
                 team = new RTSTeam();
                 team.ColorScheme = res.Colors;
-                team.DSAC = res.TeamType.DefaultSquadActionController;
-                team.DSTC = res.TeamType.DefaultSquadTargettingController;
+                team.scDefaultAction = State.SquadControllers[res.TeamType.DefaultSquadActionController];
+                team.scDefaultTargetting = State.SquadControllers[res.TeamType.DefaultSquadTargettingController];
                 foreach(FileInfo unitDataFile in res.TeamType.UnitTypes)
                     LoadUnit(team, unitDataFile);
                 t[i++] = team;
@@ -250,19 +256,19 @@ namespace RTSEngine.Controllers {
             res.View.ColorPrimary = t.ColorScheme.Primary;
             res.View.ColorSecondary = t.ColorScheme.Secondary;
             res.View.ColorTertiary = t.ColorScheme.Tertiary;
-            t.OnNewUnitSpawn += res.View.OnUnitSpawn;
+            t.OnUnitSpawn += res.View.OnUnitSpawn;
             Renderer.UnitModels.Add(res.View);
         }
 
         // Update Logic
-        public void Update(float dt) {
-            PlayController.Update(State, dt);
-            Renderer.Camera.Update(State.Map, dt);
+        public void Update() {
+            PlayController.Update(State, RTSConstants.GAME_DELTA_TIME);
         }
 
         // Drawing
-        public void Draw(float dt) {
-            Renderer.Draw(State, dt);
+        public void Draw() {
+            Renderer.Camera.Update(State.Map, RTSConstants.GAME_DELTA_TIME);
+            Renderer.Draw(State, RTSConstants.GAME_DELTA_TIME);
 
             // TODO: Draw UI
         }

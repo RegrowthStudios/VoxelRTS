@@ -170,6 +170,11 @@ namespace RTSEngine.Data {
             ZoomRatio += ZoomSpeed * z * dt;
             ZoomRatio = MathHelper.Clamp(ZoomRatio, 0, 1);
         }
+        
+        public void MoveTo(float x, float z) {
+            camOrigin.X = x;
+            camOrigin.Z = z;
+        }
 
         public BoundingFrustum GetSelectionBox(Vector2 screenMin, Vector2 screenMax) {
             // TODO: Verify.

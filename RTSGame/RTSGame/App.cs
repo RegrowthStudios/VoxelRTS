@@ -26,6 +26,8 @@ namespace RTS {
     }
 
     public class App : BlisterUI.MainGame {
+        public const string USER_CONFIG_FILE_PATH = "user.config";
+
         // The Static Instances
         private static App app;
 
@@ -49,6 +51,7 @@ namespace RTS {
 
         public App()
             : base() {
+            graphics.GraphicsProfile = GraphicsProfile.HiDef;
             graphics.IsFullScreen = UserConfig.UseFullscreen;
             IsMouseVisible = true;
             MenuScreen = new RTS.MenuScreen();
@@ -56,10 +59,9 @@ namespace RTS {
             RTSScreen = new RTS.RTSScreen();
             ColorSchemeScreen = new RTS.ColorSchemeScreen();
         }
-        
+
         protected override void FullInitialize() {
             BlisterUI.Input.WMHookInput.Initialize(Window);
-            Graphics.IsFullScreen = true;
         }
         protected override void FullLoad() {
         }
@@ -83,12 +85,13 @@ namespace RTS {
         }
 
         #region Entry Point
+        [MTAThread]
         private static void Main(string[] args) {
-            UserConfig.Load("user.config");
+            UserConfig.Load(USER_CONFIG_FILE_PATH);
             using(app = new App()) {
                 app.Run();
             }
-            UserConfig.Save("user.config");
+            UserConfig.Save(USER_CONFIG_FILE_PATH);
         }
         #endregion
     }

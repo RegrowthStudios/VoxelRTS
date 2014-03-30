@@ -36,12 +36,9 @@ namespace RTSEngine.Graphics {
         // Effect Parameter Keys
         public const string PARAM_KEY_WORLD = "World";
         public const string PARAM_KEY_VP = "VP";
-        public const string PARAM_KEY_TEX_COLOR_MAP = "TexColor";
         public const string PARAM_KEY_COLOR_PRIMARY = "CPrimary";
         public const string PARAM_KEY_COLOR_SECONDARY = "CSecondary";
         public const string PARAM_KEY_COLOR_TERTIARY = "CTertiary";
-        public const string PARAM_KEY_TEX_OVERLAY = "TexOverlay";
-        public const string PARAM_KEY_TEX_MODEL_MAP = "TexModelMap";
         public const string PARAM_KEY_TEXEL_SIZE = "TexelSize";
 
         // The Effect And Its Passes
@@ -49,19 +46,16 @@ namespace RTSEngine.Graphics {
         private EffectPass fxPassSimple, fxPassAnimation;
 
         // Used For Simple Pass
-        private EffectParameter fxpWorld, fxpVP, fxpTexMain;
+        private EffectParameter fxpWorld, fxpVP;
         public Matrix World {
             set { fxpWorld.SetValue(value); }
         }
         public Matrix VP {
             set { fxpVP.SetValue(value); }
         }
-        public Texture2D TexMain {
-            set { fxpTexMain.SetValue(value); }
-        }
 
         // Used For Swatched Pass
-        private EffectParameter fxpColP, fxpColS, fxpColT, fxpTexKey;
+        private EffectParameter fxpColP, fxpColS, fxpColT;
         public Vector3 CPrimary {
             set { fxpColP.SetValue(value); }
         }
@@ -71,18 +65,9 @@ namespace RTSEngine.Graphics {
         public Vector3 CTertiary {
             set { fxpColT.SetValue(value); }
         }
-        public Texture2D TexKey {
-            set { fxpTexKey.SetValue(value); }
-        }
 
         // Used For Animation Pass
-        private EffectParameter fxpTexAnimation, fxpTexelSize;
-        public Texture2D TexAnimation {
-            set {
-                fxpTexAnimation.SetValue(value);
-                fxpTexelSize.SetValue(new Vector2(1f / value.Width, 1f / value.Height));
-            }
-        }
+        private EffectParameter fxpTexelSize;
 
         public RTSEffect(Effect _fx) {
             if(_fx == null) throw new ArgumentNullException("A Null Effect Was Used");
@@ -98,12 +83,9 @@ namespace RTSEngine.Graphics {
             // Get The Parameters
             fxpWorld = fx.Parameters[PARAM_KEY_WORLD];
             fxpVP = fx.Parameters[PARAM_KEY_VP];
-            fxpTexMain = fx.Parameters[PARAM_KEY_TEX_COLOR_MAP];
             fxpColP = fx.Parameters[PARAM_KEY_COLOR_PRIMARY];
             fxpColS = fx.Parameters[PARAM_KEY_COLOR_SECONDARY];
             fxpColT = fx.Parameters[PARAM_KEY_COLOR_TERTIARY];
-            fxpTexKey = fx.Parameters[PARAM_KEY_TEX_OVERLAY];
-            fxpTexAnimation = fx.Parameters[PARAM_KEY_TEX_MODEL_MAP];
             fxpTexelSize = fx.Parameters[PARAM_KEY_TEXEL_SIZE];
         }
 
@@ -126,6 +108,13 @@ namespace RTSEngine.Graphics {
                 );
             g.Indices = indices;
             g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, model.VertexCount, 0, indices.IndexCount / 3, instances.VertexCount);
+        }
+
+        public void SetTextures(GraphicsDevice g, Texture2D tAnim, Texture2D tMain, Texture2D tKey) {
+            g.VertexTextures[0] = tAnim;
+            g.Textures[1] = tMain;
+            g.Textures[2] = tKey;
+            fxpTexelSize.SetValue(new Vector2(1f / tAnim.Width, 1f / tAnim.Height));
         }
     }
 }

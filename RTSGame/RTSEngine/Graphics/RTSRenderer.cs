@@ -132,13 +132,11 @@ namespace RTSEngine.Graphics {
             fxRTS.VP = camera.View * camera.Projection;
 
             // Loop Through Models
-            G.SamplerStates[0] = SamplerState.PointClamp;
+            G.VertexSamplerStates[0] = SamplerState.PointClamp;
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
             foreach(RTSUnitModel unitModel in UnitModels) {
-                fxRTS.TexAnimation = unitModel.AnimationTexture;
-                fxRTS.TexKey = unitModel.ColorCodeTexture;
-                fxRTS.TexMain = unitModel.ModelTexture;
+                fxRTS.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
                 fxRTS.CPrimary = unitModel.ColorPrimary;
                 fxRTS.CSecondary = unitModel.ColorSecondary;
                 fxRTS.CTertiary = unitModel.ColorTertiary;
@@ -147,6 +145,10 @@ namespace RTSEngine.Graphics {
                 unitModel.SetInstances(G);
                 unitModel.DrawInstances(G);
             }
+
+            // Cause XNA Is Retarded Like That
+            G.VertexTextures[0] = null;
+            G.VertexSamplerStates[0] = SamplerState.LinearClamp;
         }
         private void DrawSelectionBox() {
             Vector2 ss = new Vector2(G.Viewport.TitleSafeArea.Width, G.Viewport.TitleSafeArea.Height);

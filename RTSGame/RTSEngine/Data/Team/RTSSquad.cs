@@ -19,6 +19,12 @@ namespace RTSEngine.Data.Team {
             get { return units; }
         }
 
+        // Death Condition
+        public bool IsDead {
+            get { return units.Count < 1; }
+        }
+        public event Action<RTSSquad> OnDeath;
+
         // The Average Position Of The Squad
         private Vector2 gridPos;
         public Vector2 GridPosition {
@@ -26,8 +32,8 @@ namespace RTSEngine.Data.Team {
         }
 
         // Events When Squad Is Altered
-        public event Action<RTSSquad, RTSUnit> OnCombatantAddition;
-        public event Action<RTSSquad, RTSUnit> OnCombatantRemoval;
+        public event Action<RTSSquad, RTSUnit> OnUnitAddition;
+        public event Action<RTSSquad, RTSUnit> OnUnitRemoval;
 
         // The Action Controller For This Squad
         private ACSquadActionController aController;
@@ -57,20 +63,34 @@ namespace RTSEngine.Data.Team {
         }
 
         // Adds A Combatant To This Squad
-        public void AddUnit(RTSUnit u) {
+        public void Add(RTSUnit u) {
+            // Units Cannot Be Added Twice
+            if(u.Squad == this) return;
+
             // Squad Invariant Performed Here
-            if(u.Squad != null) {
-                u.Squad.units.Remove(u);
-                u.OnDestruction -= u.Squad.OnUnitDestruction;
-                if(u.Squad.OnCombatantRemoval != null)
-                    u.Squad.OnCombatantRemoval(u.Squad, u);
-            }
+            if(u.Squad != null) u.Squad.Remove(u);
 
             u.Squad = this;
             units.Add(u);
             u.OnDestruction += OnUnitDestruction;
-            if(OnCombatantAddition != null)
-                OnCombatantAddition(this, u);
+            if(OnUnitAddition != null)
+                OnUnitAddition(this, u);
+        }
+        public void Remove(RTSUnit u) {
+            // Make Sure Unit Is In The Squad
+            if(u.Squad == this) {
+                // Remove All References
+                units.Remove(u);
+                u.OnDestruction -= OnUnitDestruction;
+
+                // Send Update Event
+                if(OnUnitRemoval != null)
+                    OnUnitRemoval(this, u);
+
+                // Check Death Condition
+                if(IsDead && OnDeath != null)
+                    OnDeath(this);
+            }
         }
 
         // Removes All Combatants From This Squad That Match A Predicate
@@ -78,13 +98,18 @@ namespace RTSEngine.Data.Team {
             List<RTSUnit> nUnits = new List<RTSUnit>(units.Count);
             for(int i = 0; i < units.Count; i++) {
                 if(f(units[i])) {
-                    if(OnCombatantRemoval != null)
-                        OnCombatantRemoval(this, units[i]);
+                    if(OnUnitRemoval != null)
+                        OnUnitRemoval(this, units[i]);
                 }
-                else
-                    nUnits.Add(units[i]);
+                else nUnits.Add(units[i]);
             }
+
+            // Set The New List Of Units
             units = nUnits;
+
+            // Check Death Condition
+            if(IsDead && OnDeath != null) 
+                OnDeath(this);
         }
 
         // Should Be Done At The Beginning Of Each Frame (Only Once)
@@ -97,10 +122,9 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // When A Unit Dies, It Must Be Removed From Here
         private void OnUnitDestruction(IEntity u) {
-            units.Remove(u as RTSUnit);
-            if(OnCombatantRemoval != null)
-                OnCombatantRemoval(this, u as RTSUnit);
+            Remove(u as RTSUnit);
         }
     }
 }

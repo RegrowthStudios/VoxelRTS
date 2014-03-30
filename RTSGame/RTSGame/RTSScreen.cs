@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
+using System.Threading;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Net;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BlisterUI;
@@ -14,6 +17,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
+using System.Threading.Tasks;
 
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
@@ -22,7 +26,9 @@ namespace RTS {
 
         Vector3 spawnLoc;
         int team, unit;
-        bool doAdd, mPress;
+        bool doAdd, playing, pauseEngine, pauseRender;
+        Thread tEngine;
+        SpriteFont sfDebug;
 
         public override int Next {
             get { return -1; }
@@ -43,39 +49,60 @@ namespace RTS {
             MouseEventDispatcher.OnMousePress += OnMP;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
-            doAdd = mPress = false;
+            doAdd = false;
             team = 0;
             unit = 0;
 
             engine = game.LoadScreen.LoadedEngine;
+            sfDebug = engine.CreateFont("Courier New", 32);
+            tEngine = new Thread(EngineThread);
+            tEngine.Priority = ThreadPriority.Highest;
+            tEngine.TrySetApartmentState(ApartmentState.MTA);
+            tEngine.IsBackground = true;
+            playing = true;
+            pauseEngine = false;
+            pauseRender = false;
+            tEngine.Start();
         }
         public override void OnExit(GameTime gameTime) {
+            game.Graphics.SynchronizeWithVerticalRetrace = true;
+            game.IsFixedTimeStep = true;
+            game.Graphics.ApplyChanges();
+
             MouseEventDispatcher.OnMousePress -= OnMP;
             KeyboardEventDispatcher.OnKeyPressed -= OnKP;
             KeyboardEventDispatcher.OnKeyReleased -= OnKR;
             dcv.Dispose();
             dcv = null;
             DevConsole.Deactivate();
+
+            playing = false;
+            tEngine.Join();
+            //while(!isTDead)
+            //    Thread.Sleep(1);
             engine.Dispose();
         }
 
         public override void Update(GameTime gameTime) {
-            engine.Update(1f / 60f);
-
-            // TODO: Omit Move All Units To The Mouse
-            if(doAdd && mPress) {
-                DevConsole.AddCommand(string.Format("spawn [{0},{1},{2},{3},{4}]", team, unit, 1, spawnLoc.X, spawnLoc.Z));
-                mPress = false;
-            }
+            // This Tells Us We Are GPU-Bound
+            //Thread.Sleep(10);
         }
         public override void Draw(GameTime gameTime) {
-            engine.Draw(1f / 60f);
+            if(!pauseRender)
+                engine.Draw();
 
             if(DevConsole.IsActivated) {
                 SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
                 dcv.Draw(SB, Vector2.Zero);
                 SB.End();
             }
+
+            // Show FPS
+            double fps = gameTime.ElapsedGameTime.TotalSeconds;
+            fps = Math.Round(1000.0 / fps) / 1000.0;
+            SB.Begin();
+            SB.DrawString(sfDebug, fps.ToString(), Vector2.One * 10, Color.White);
+            SB.End();
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
@@ -84,7 +111,8 @@ namespace RTS {
                 IntersectionRecord rec = new IntersectionRecord();
                 if(engine.State.Map.BVH.Intersect(ref rec, r)) {
                     spawnLoc = r.Position + r.Direction * rec.T;
-                    mPress = true;
+                    if(doAdd)
+                        DevConsole.AddCommand(string.Format("spawn [{0},{1},{2},{3},{4}]", team, unit, 1, spawnLoc.X, spawnLoc.Z));
                 }
             }
         }
@@ -105,8 +133,16 @@ namespace RTS {
                 case Keys.D0:
                     unit = 2;
                     break;
-                case Keys.Q:
+                case Keys.E:
                     doAdd = true;
+                    break;
+                case Keys.P:
+                    if(!DevConsole.IsActivated)
+                        pauseEngine = !pauseEngine;
+                    break;
+                case Keys.O:
+                    if(!DevConsole.IsActivated)
+                        pauseRender = !pauseRender;
                     break;
                 case DevConsole.ACTIVATION_KEY:
                     if(DevConsole.IsActivated)
@@ -121,9 +157,28 @@ namespace RTS {
         }
         public void OnKR(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
-                case Keys.Q:
+                case Keys.E:
                     doAdd = false;
                     break;
+            }
+        }
+
+        void EngineThread() {
+            TimeSpan tCur;
+            TimeSpan tPrev = DateTime.Now.TimeOfDay;
+            int milliRun = (int)(RTSConstants.GAME_DELTA_TIME * 1000);
+            while(playing) {
+                if(pauseEngine) {
+                    Thread.Sleep(milliRun);
+                    continue;
+                }
+                engine.Update();
+
+                // Sleep For A While
+                tCur = DateTime.Now.TimeOfDay;
+                int dt = (int)(tCur.TotalMilliseconds - tPrev.TotalMilliseconds);
+                if(dt < milliRun) Thread.Sleep(milliRun - dt);
+                tPrev = tCur;
             }
         }
     }

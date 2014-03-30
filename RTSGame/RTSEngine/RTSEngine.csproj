@@ -56,9 +56,11 @@
     <Compile Include="Algorithms\KMeans.cs" />
     <Compile Include="Algorithms\MinHeap.cs" />
     <Compile Include="Algorithms\Pathfinder.cs" />
+    <Compile Include="Algorithms\TimeBudgeting.cs" />
     <Compile Include="Controllers\AIInputController.cs" />
     <Compile Include="Controllers\CameraController.cs" />
     <Compile Include="Controllers\DevConsole.cs" />
+    <Compile Include="Controllers\DynControllers.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Controllers\InputController.cs" />

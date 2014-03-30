@@ -1,41 +1,19 @@
 // The Necessary Parameters To Draw A Model
 float4x4 World;
 float4x4 VP;
-texture TexColor;
-sampler2D Color = sampler_state {
-    Texture = <TexColor>;
-    Magfilter = LINEAR;
-    Minfilter = LINEAR;
-    Mipfilter = LINEAR;
-    AddressU = WRAP;
-    AddressV = WRAP;
-};
+
+// Textures
+sampler2D Model : register(s0);
+sampler2D Color : register(s1);
+sampler2D Overlay : register(s2);
 
 // Used For RGB Palette Color Calculation
 float3 CPrimary;
 float3 CSecondary;
 float3 CTertiary;
-texture TexOverlay;
-sampler2D Overlay = sampler_state {
-    Texture = <TexOverlay>;
-    Magfilter = LINEAR;
-    Minfilter = LINEAR;
-    Mipfilter = LINEAR;
-    AddressU = WRAP;
-    AddressV = WRAP;
-};
 
 // Used For Animation To Figure Out The Actual Position And Normal
 float2 TexelSize;
-texture TexModelMap;
-sampler Model = sampler_state {
-    Texture = <TexModelMap>;
-    Magfilter = POINT;
-    Minfilter = POINT;
-    Mipfilter = POINT;
-    AddressU = CLAMP;
-    AddressV = CLAMP;
-};
 
 // Always The Same Input
 struct VSI {
