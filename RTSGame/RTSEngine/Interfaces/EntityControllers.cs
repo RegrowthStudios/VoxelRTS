@@ -92,15 +92,18 @@ namespace RTSEngine.Interfaces {
     }
 
     public abstract class ACBuildingController {
-
-    }
-
-    public abstract class ACBuildingCombatController : ACBuildingController {
-
+        protected RTSBuilding building;
+        public RTSBuilding Building {
+            get { return building; }
+            set { building = value; }
+        }
+        public void setBuilding(RTSBuilding building) {
+            this.building = building;
+        }
     }
 
     public abstract class ACBuildingActionController : ACBuildingController {
-
-
+        public abstract void ApplyEnvImpact(GameState g);
+        public abstract void SpawnUnit(GameState g);
     }
 }

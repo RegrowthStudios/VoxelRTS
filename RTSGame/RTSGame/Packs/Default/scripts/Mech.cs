@@ -240,3 +240,32 @@ namespace RTS.Mech.Unit {
         }
     }
 }
+
+//namespace RTS.Mech.Building {
+//    public class Action : ACBuildingActionController {
+//        public int time = -1;
+//        // Update Unit Build Time
+//        public void Update(GameState g) {
+//            if (Building.UnitQueue.Count > 0) {
+//                // Initialize Timer If Building Is Just Starting To Produce
+//                if (time == -1)
+//                    time = Building.UnitQueue.Peek().UnitData.BuildTime;
+//                else if (time == 0) {
+//                    SpawnUnit(g);
+//                    ApplyEnvImpact(g);
+//                }
+//                time--;
+//            }
+//        }
+
+//        // Produce Unit
+//        public void SpawnUnit (GameState g){
+            
+//        }
+
+//        // Apply Environmental Impact
+//        public void  ApplyEnvImpact(GameState g){
+         
+//        }
+//    }
+//}

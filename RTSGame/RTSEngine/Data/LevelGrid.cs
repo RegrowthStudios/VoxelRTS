@@ -26,7 +26,7 @@ namespace RTSEngine.Data {
 
     public class CollisionGrid {
         public readonly Vector2 size;
-        public readonly Point grids;
+        public readonly Point numCells;
         public readonly float cellSize;
 
         public List<IEntity>[,] EDynamic {
@@ -51,28 +51,28 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public CollisionGrid(float w, float h, float gridSize) {
+        public CollisionGrid(float w, float h, float cs) {
             // Round down the grid size so they all fit into the map
             size = new Vector2(w, h);
-            grids = new Point((int)Math.Ceiling(size.X / gridSize), (int)Math.Ceiling(size.Y / gridSize));
-            cellSize = size.X / grids.X;
+            numCells = new Point((int)Math.Ceiling(size.X / cs), (int)Math.Ceiling(size.Y / cs));
+            cellSize = size.X / numCells.X;
 
-            EDynamic = new List<IEntity>[grids.X, grids.Y];
-            EStatic = new List<IEntity>[grids.X, grids.Y];
-            for(int x = 0; x < grids.X; x++) {
-                for(int y = 0; y < grids.Y; y++) {
+            EDynamic = new List<IEntity>[numCells.X, numCells.Y];
+            EStatic = new List<IEntity>[numCells.X, numCells.Y];
+            for(int x = 0; x < numCells.X; x++) {
+                for(int y = 0; y < numCells.Y; y++) {
                     EDynamic[x, y] = new List<IEntity>();
                     EStatic[x, y] = new List<IEntity>();
                 }
             }
             ActiveGrids = new List<Point>();
-            Fog = new uint[grids.X, grids.Y];
-            Collision = new bool[grids.X, grids.Y];
+            Fog = new uint[numCells.X, numCells.Y];
+            Collision = new bool[numCells.X, numCells.Y];
         }
 
         public void Add(IEntity o) {
             // Canonical position of the object represented in 0~1
-            Point p = HashHelper.Hash(o.CollisionGeometry.Center, grids, size);
+            Point p = HashHelper.Hash(o.CollisionGeometry.Center, numCells, size);
 
             // Move To Correct List
             if(!o.CollisionGeometry.IsStatic) {
@@ -94,9 +94,9 @@ namespace RTSEngine.Data {
         public void HandleGridCollision(int x, int y, int dx, int dy) {
             // Check Bounds
             int ox = x + dx;
-            if(ox < 0 || ox >= grids.X) return;
+            if(ox < 0 || ox >= numCells.X) return;
             int oy = y + dy;
-            if(oy < 0 || oy >= grids.Y) return;
+            if(oy < 0 || oy >= numCells.Y) return;
 
             var al1 = EDynamic[x, y];
             var al2 = EDynamic[ox, oy];
@@ -149,7 +149,7 @@ namespace RTSEngine.Data {
 
         private float cellSize;
         private Point numCells;
-        private Vector2 gridSize;
+        private Vector2 size;
         private ImpactCell[,] grid;
 
         public ImpactGrid(CollisionGrid cg) {
@@ -157,17 +157,17 @@ namespace RTSEngine.Data {
             numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
             cellSize = cg.size.X / numCells.X;
             grid = new ImpactCell[numCells.X, numCells.Y];
-            gridSize = cg.size;
+            size = cg.size;
 
-            for (int x = 0; x < gridSize.X; x++) {
-                for (int y = 0; y < gridSize.Y; y++) {
+            for (int x = 0; x < numCells.X; x++) {
+                for (int y = 0; y < numCells.Y; y++) {
                     grid[x, y] = new ImpactCell();
                 }
             }
         }
 
         public void AddImpactGenerator(ImpactGenerator g) {
-            Point p = HashHelper.Hash(g.Position, numCells, gridSize);
+            Point p = HashHelper.Hash(g.Position, numCells, size);
             grid[p.X, p.Y].AddImpactGenerator(g);
         }
     }

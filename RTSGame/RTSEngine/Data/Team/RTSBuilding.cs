@@ -12,16 +12,18 @@ namespace RTSEngine.Data.Team
         # region Properties
         public RTSBuildingData BuildingData { get; private set;}
         // Unique ID
-        public int ID {
+        public int UUID {
             get;
             private set;
         }
-        public int CapitalCost { get; private set; }
 
         // This Unit's Current Health
         public int Health { get; private set; }
 
         public RTSTeam Team { get; private set; }
+
+        // Activity Of This Building
+        public Queue<RTSUnit> UnitQueue { get; private set; }
 
         // Event Triggered When This Entity Receives Damage
         public event Action<IEntity, int> OnDamage;
@@ -29,15 +31,22 @@ namespace RTSEngine.Data.Team
         // Destruction Event
         public event Action<IEntity> OnDestruction;
 
-        public bool IsAlive
-        {
+        public bool IsAlive {
             get { return Health > 0; }
-            set
-            {
+            set {
                 if (!value)
                     Destroy();
                 else if (!IsAlive)
                     throw new InvalidOperationException("Cannot Bring Back Units From The Dead");
+            }
+        }
+        
+        private ACBuildingActionController aController;
+        public ACBuildingActionController ActionController {
+            get { return aController; }
+            set {
+                aController = value;
+                if (aController != null) aController.setBuilding(this);
             }
         }
         #endregion
@@ -90,14 +99,12 @@ namespace RTSEngine.Data.Team
             gridPos = position;
             height = 0;
             Health = BuildingData.Health;
-            CapitalCost = BuildingData.CapitalCost;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
-
+            UnitQueue = new Queue<RTSUnit>();
         }
 
         // Applies Damage To Health
-        public void Damage(int d)
-        {
+        public void Damage(int d) {
             Health -= d;
             if (OnDamage != null)
                 OnDamage(this, d);
@@ -113,12 +120,24 @@ namespace RTSEngine.Data.Team
                 OnDestruction(this);
         }
 
+        // Enqueue New Unit
+        public void EnqueueUnit(RTSUnit unit) {
+            UnitQueue.Enqueue(unit);
+        }
 
-        public int UUID {
+        RTSTeam IEntity.Team {
             get { throw new NotImplementedException(); }
         }
 
-        public IEntity Target {
+        int IEntity.UUID {
+            get { throw new NotImplementedException(); }
+        }
+
+        int IEntity.Health {
+            get { throw new NotImplementedException(); }
+        }
+
+        bool IEntity.IsAlive {
             get {
                 throw new NotImplementedException();
             }
@@ -127,9 +146,7 @@ namespace RTSEngine.Data.Team
             }
         }
 
-        public event Action<IEntity, IEntity> OnNewTarget;
-
-        public ACUnitActionController ActionController {
+        Vector2 IEntity.GridPosition {
             get {
                 throw new NotImplementedException();
             }
@@ -138,13 +155,70 @@ namespace RTSEngine.Data.Team
             }
         }
 
-        public ACUnitAnimationController AnimationController {
+        float IEntity.Height {
+            get { throw new NotImplementedException(); }
+        }
+
+        Vector3 IEntity.WorldPosition {
+            get { throw new NotImplementedException(); }
+        }
+
+        ICollidable IEntity.CollisionGeometry {
+            get { throw new NotImplementedException(); }
+        }
+
+        BoundingBox IEntity.BBox {
+            get { throw new NotImplementedException(); }
+        }
+
+        IEntity IEntity.Target {
             get {
                 throw new NotImplementedException();
             }
             set {
                 throw new NotImplementedException();
             }
+        }
+
+        event Action<IEntity, IEntity> IEntity.OnNewTarget {
+            add { throw new NotImplementedException(); }
+            remove { throw new NotImplementedException(); }
+        }
+
+        event Action<IEntity, int> IEntity.OnDamage {
+            add { throw new NotImplementedException(); }
+            remove { throw new NotImplementedException(); }
+        }
+
+        event Action<IEntity> IEntity.OnDestruction {
+            add { throw new NotImplementedException(); }
+            remove { throw new NotImplementedException(); }
+        }
+
+        ACUnitActionController IEntity.ActionController {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        ACUnitAnimationController IEntity.AnimationController {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        void IEntity.Destroy() {
+            throw new NotImplementedException();
+        }
+
+        void IEntity.Damage(int d) {
+            throw new NotImplementedException();
         }
     }
 }

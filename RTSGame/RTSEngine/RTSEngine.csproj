@@ -62,6 +62,7 @@
     <Compile Include="Controllers\DevConsole.cs" />
     <Compile Include="Controllers\DynControllers.cs" />
     <Compile Include="Controllers\EnvironmentInputController.cs" />
+    <Compile Include="Controllers\FOWResolver.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Controllers\InputController.cs" />
