@@ -27,6 +27,7 @@ namespace RTSEngine.Data {
     public class CollisionGrid {
         public readonly Vector2 size;
         public readonly Point grids;
+        public readonly float cellSize;
 
         public List<IEntity>[,] EDynamic {
             get;
@@ -50,7 +51,7 @@ namespace RTSEngine.Data {
             // Round down the grid size so they all fit into the map
             size = new Vector2(w, h);
             grids = new Point((int)Math.Ceiling(size.X / gridSize), (int)Math.Ceiling(size.Y / gridSize));
-            gridSize = size.X / grids.X;
+            cellSize = size.X / grids.X;
 
             EDynamic = new List<IEntity>[grids.X, grids.Y];
             EStatic = new List<IEntity>[grids.X, grids.Y];
@@ -121,6 +122,44 @@ namespace RTSEngine.Data {
             for(int i1 = 0; i1 < al.Count; i1++)
                 for(int i2 = 0; i2 < sl.Count; i2++)
                     CollisionController.ProcessCollision(al[i1].CollisionGeometry, sl[i2].CollisionGeometry);
+        }
+    }
+
+    public class ImpactGrid {
+
+        private float cellSize;
+        private Point gridSize;
+        private ImpactCell[,] grid;
+
+        public ImpactGrid(CollisionGrid cg) {
+            cellSize = 2 * cg.cellSize;
+            gridSize = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
+            cellSize = cg.size.X / gridSize.X;
+            grid = new ImpactCell[gridSize.X, gridSize.Y];
+
+            for (int x = 0; x < gridSize.X; x++) {
+                for (int y = 0; y < gridSize.Y; y++) {
+                    grid[x, y] = new ImpactCell();
+                }
+            }
+            //each cell should send events to the region its in when impact should go up
+            //environmentinputcontroller should call thread.sleep and check game state time 
+        }
+
+    }
+
+    public class ImpactCell {
+
+        public Region Region { get; set; }
+        public List<IEntity> ImpactGenerators { get; set; }  //change type
+
+        public ImpactCell() {
+            Region = null;
+            ImpactGenerators = new List<IEntity>(); 
+        }
+
+        public void AddImpactGenerator(IEntity e) {
+            
         }
     }
 

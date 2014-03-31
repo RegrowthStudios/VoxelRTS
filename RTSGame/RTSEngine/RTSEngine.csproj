@@ -61,6 +61,7 @@
     <Compile Include="Controllers\CameraController.cs" />
     <Compile Include="Controllers\DevConsole.cs" />
     <Compile Include="Controllers\DynControllers.cs" />
+    <Compile Include="Controllers\EnvironmentInputController.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Controllers\InputController.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
     <Compile Include="Data\DevCommands.cs" />
+    <Compile Include="Data\Environment.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
     <Compile Include="Data\HashGrid.cs" />
     <Compile Include="Data\Heightmap.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="Data\Parsers\RTSColorSchemeParser.cs" />
     <Compile Include="Data\Parsers\RTSRaceParser.cs" />
     <Compile Include="Data\Parsers\RTSUnitDataParser.cs" />
+    <Compile Include="Data\Region.cs" />
     <Compile Include="Data\SelectionDetection.cs" />
     <Compile Include="Data\Team\RTSRaceData.cs" />
     <Compile Include="Data\Team\RTSSquad.cs" />
@@ -98,6 +101,7 @@
     <Compile Include="Graphics\MouseRenderer.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
+    <Compile Include="Interfaces\ImpactGenerator.cs" />
     <Compile Include="Screens\GameSelectScreen.cs" />
     <Compile Include="Screens\InduZtryScreen.cs" />
     <Compile Include="Interfaces\EntityControllers.cs" />
