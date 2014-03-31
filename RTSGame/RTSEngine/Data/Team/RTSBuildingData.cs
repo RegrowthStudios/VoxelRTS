@@ -18,6 +18,9 @@ namespace RTSEngine.Data.Team
         // The Capital Cost Of The Building
         public int CapitalCost;
 
+        // Environment Impact
+        public int Impact;
+
         // ICollidableShape of The Building
         public ICollidable ICollidableShape;
         public BoundingBox BBox;

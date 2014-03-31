@@ -240,3 +240,12 @@ namespace RTS.Mech.Unit {
         }
     }
 }
+
+namespace RTS.Mech.Building {
+    public class Action : ACBuildingActionController {
+        // Apply environmental impact
+        public void ApplyEnvImpact {
+
+        }
+    }
+}

@@ -12,16 +12,18 @@ namespace RTSEngine.Data.Team
         # region Properties
         public RTSBuildingData BuildingData { get; private set;}
         // Unique ID
-        public int ID {
+        public int UUID {
             get;
             private set;
         }
-        public int CapitalCost { get; private set; }
 
         // This Unit's Current Health
         public int Health { get; private set; }
 
         public RTSTeam Team { get; private set; }
+
+        // Activity Of This Building
+        public bool Active { get; private set; }
 
         // Event Triggered When This Entity Receives Damage
         public event Action<IEntity, int> OnDamage;
@@ -29,15 +31,22 @@ namespace RTSEngine.Data.Team
         // Destruction Event
         public event Action<IEntity> OnDestruction;
 
-        public bool IsAlive
-        {
+        public bool IsAlive {
             get { return Health > 0; }
-            set
-            {
+            set {
                 if (!value)
                     Destroy();
                 else if (!IsAlive)
                     throw new InvalidOperationException("Cannot Bring Back Units From The Dead");
+            }
+        }
+        
+        private ACBuildingActionController aController;
+        public ACBuildingActionController ActionController {
+            get { return aController; }
+            set {
+                aController = value;
+                if (aController != null) aController.setBuilding(this);
             }
         }
         #endregion
@@ -90,14 +99,11 @@ namespace RTSEngine.Data.Team
             gridPos = position;
             height = 0;
             Health = BuildingData.Health;
-            CapitalCost = BuildingData.CapitalCost;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
-
         }
 
         // Applies Damage To Health
-        public void Damage(int d)
-        {
+        public void Damage(int d) {
             Health -= d;
             if (OnDamage != null)
                 OnDamage(this, d);
@@ -113,38 +119,9 @@ namespace RTSEngine.Data.Team
                 OnDestruction(this);
         }
 
-
-        public int UUID {
-            get { throw new NotImplementedException(); }
-        }
-
-        public IEntity Target {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
-        }
-
-        public event Action<IEntity, IEntity> OnNewTarget;
-
-        public ACUnitActionController ActionController {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
-        }
-
-        public ACUnitAnimationController AnimationController {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
+        // Interchange Activity
+        public void ToggleActivity() {
+            Active = !Active;
         }
     }
 }
