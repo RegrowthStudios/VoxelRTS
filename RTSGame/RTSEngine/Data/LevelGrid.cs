@@ -155,7 +155,7 @@ namespace RTSEngine.Data {
         public ImpactGrid(CollisionGrid cg) {
             cellSize = 2 * cg.cellSize;
             numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
-            cellSize = cg.size.X / gridSize.X;
+            cellSize = cg.size.X / numCells.X;
             grid = new ImpactCell[numCells.X, numCells.Y];
             gridSize = cg.size;
 
@@ -194,7 +194,6 @@ namespace RTSEngine.Data {
             CellImpact += amount;
             IncreaseImpact(amount);
         }
-
     }
 
     public static class HashHelper {
