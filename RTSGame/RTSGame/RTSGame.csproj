@@ -94,6 +94,9 @@
     <Content Include="Content\UI\MainP3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\UI\Mouse\Main.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\animations\Mech2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

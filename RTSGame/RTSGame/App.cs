@@ -18,6 +18,7 @@ using RTSEngine.Interfaces;
 using RTSEngine.Data;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
+using RTSEngine.Graphics;
 
 namespace RTS {
     public static class AppSettings {
@@ -48,12 +49,17 @@ namespace RTS {
             get;
             private set;
         }
+        public MouseRenderer mRenderer;
+        public Texture2D tMouseMain;
 
         public App()
             : base() {
+            // Make Sure We Are Using The Most Recent Graphics Version
             graphics.GraphicsProfile = GraphicsProfile.HiDef;
+
+            // Get User Config Parameter For Fullscreen
             graphics.IsFullScreen = UserConfig.UseFullscreen;
-            IsMouseVisible = true;
+
             MenuScreen = new RTS.MenuScreen();
             LoadScreen = new RTS.LoadScreen();
             RTSScreen = new RTS.RTSScreen();
@@ -64,6 +70,12 @@ namespace RTS {
             BlisterUI.Input.WMHookInput.Initialize(Window);
         }
         protected override void FullLoad() {
+            using(var s = System.IO.File.OpenRead(@"Content\UI\Mouse\Main.png")) {
+                tMouseMain = Texture2D.FromStream(GraphicsDevice, s);
+            }
+            mRenderer = new MouseRenderer(GraphicsDevice, Window);
+            mRenderer.Texture = tMouseMain;
+            mRenderer.InnerRadius = 28f;
         }
 
         protected override void BuildScreenList() {
@@ -82,6 +94,12 @@ namespace RTS {
         }
         protected override void Draw(GameTime gameTime) {
             base.Draw(gameTime);
+        }
+
+        protected override void FullQuit(GameTime gameTime) {
+            tMouseMain.Dispose();
+            mRenderer.Dispose();
+            base.FullQuit(gameTime);
         }
 
         #region Entry Point

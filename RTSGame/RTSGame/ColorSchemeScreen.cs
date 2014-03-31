@@ -267,6 +267,9 @@ namespace RTS {
             G.Indices = null;
 
             wr.Draw(SB);
+
+            game.mRenderer.BeginPass(G);
+            game.mRenderer.Draw(G);
         }
 
         private void LoadUnit(FileInfo fi) {
@@ -278,9 +281,8 @@ namespace RTS {
         private void UnitLoader(object _fi) {
             FileInfo fi = _fi as FileInfo;
 
-            RTSUnitResult res = RTSUnitDataParser.Parse(engine, fi);
-            RTSUnitData _unitData = res.Data;
-            RTSUnitModel _unitModel = res.View;
+            RTSUnitData _unitData = RTSUnitDataParser.ParseData(null, fi);
+            RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(engine, _unitData, fi);
             RTSUnit _unit = new RTSUnit(team, _unitData, Vector2.Zero);
             _unit.Height = 0;
             _unitModel.OnUnitSpawn(_unit);

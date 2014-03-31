@@ -8,6 +8,9 @@ using Microsoft.Xna.Framework.Input;
 using RTSEngine.Data;
 using RTSEngine.Controllers;
 using BlisterUI.Input;
+using RTSEngine.Data.Parsers;
+using System.IO;
+using RTSEngine.Data.Team;
 
 namespace RTSEngine.Graphics {
     public class RTSRenderer : IDisposable {
@@ -24,9 +27,9 @@ namespace RTSEngine.Graphics {
         private Vector2 start, end;
 
         // The Camera
-        private Camera camera;
         public Camera Camera {
-            get { return camera; }
+            get;
+            set;
         }
 
         // Map To Render
@@ -78,15 +81,36 @@ namespace RTSEngine.Graphics {
             MouseEventDispatcher.OnMousePress += OnMousePress;
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMouseMotion += OnMouseMove;
-
-            camera = new Camera(G.Viewport);
-            camera.Controller.Hook(window);
         }
         public void Dispose() {
             MouseEventDispatcher.OnMousePress -= OnMousePress;
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
             MouseEventDispatcher.OnMouseMotion -= OnMouseMove;
-            camera.Controller.Unhook(window);
+            Camera.Controller.Unhook(window);
+        }
+
+        public void HookToGame(GameEngine ge, Camera camera, EngineLoadData geLoad) {
+            // Get The Camera
+            Camera = camera;
+
+            // Create The Map
+            Heightmap map = ge.State.Map;
+            Map = HeightmapParser.ParseModel(ge, new Vector3(map.Width, map.ScaleY, map.Depth), geLoad.MapFile);
+            Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
+
+            // Get Unit Models
+            for(int ti = 0; ti < geLoad.Teams.Length; ti++) {
+                RTSTeamResult res = geLoad.Teams[ti];
+                RTSTeam team = ge.State.Teams[ti];
+                for(int ui = 0; ui < team.unitData.Count; ui++) {
+                    RTSUnitModel uModel = RTSUnitDataParser.ParseModel(ge, team.unitData[ui], res.TeamType.UnitTypes[ui]);
+                    uModel.ColorPrimary = team.ColorScheme.Primary;
+                    uModel.ColorSecondary = team.ColorScheme.Secondary;
+                    uModel.ColorTertiary = team.ColorScheme.Tertiary;
+                    team.OnUnitSpawn += uModel.OnUnitSpawn;
+                    UnitModels.Add(uModel);
+                }
+            }
         }
 
         // Rendering Passes
@@ -107,8 +131,8 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[0] = SamplerState.LinearClamp;
 
             // Set Camera
-            fxMap.View = camera.View;
-            fxMap.Projection = camera.Projection;
+            fxMap.View = Camera.View;
+            fxMap.Projection = Camera.Projection;
 
             // Primary Map Model
             if(Map.TrianglesPrimary > 0) {
@@ -129,7 +153,7 @@ namespace RTSEngine.Graphics {
         }
         private void DrawAnimated() {
             // Set Camera
-            fxRTS.VP = camera.View * camera.Projection;
+            fxRTS.VP = Camera.View * Camera.Projection;
 
             // Loop Through Models
             G.VertexSamplerStates[0] = SamplerState.PointClamp;

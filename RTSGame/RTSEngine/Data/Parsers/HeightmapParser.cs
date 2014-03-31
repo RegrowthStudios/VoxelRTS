@@ -14,11 +14,6 @@ using System.Collections.Concurrent;
 using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Parsers {
-    public class HeightmapResult {
-        public Heightmap Data;
-        public HeightmapModel View;
-    }
-
     public static class HeightmapParser {
         // Data Detection
         const string EXTENSION = "map";
@@ -35,134 +30,58 @@ namespace RTSEngine.Data.Parsers {
             d[i] = cols[ci + 1] > 128 ? (byte)0x01u : (byte)0x00u;
         }
 
-        private static HeightmapResult ParseFromInfo(GameEngine ge, Stream s, string rootDir) {
-            HeightmapResult res = new HeightmapResult();
-            res.View = new HeightmapModel();
-            StreamReader sr = new StreamReader(s);
-            string ms = sr.ReadToEnd();
+        public static HeightmapModel ParseModel(GameEngine ge, Vector3 size, FileInfo infoFile) {
+            // Check File Existence
+            if(infoFile == null || !infoFile.Exists) return null;
 
-            // Read All Data First
-            Vector3 size = RegexHelper.ExtractVec3(rgxSize.Match(ms));
-            FileInfo hfi = RegexHelper.ExtractFile(rgxDataFile.Match(ms), rootDir);
-            FileInfo mpfi = RegexHelper.ExtractFile(rgxHModelPFile.Match(ms), rootDir);
-            FileInfo tpfi = RegexHelper.ExtractFile(rgxHTexPFile.Match(ms), rootDir);
-
-            FileInfo msfi = null, tsfi = null;
-            Match s1 = rgxHModelSFile.Match(ms);
-            Match s2 = rgxHTexSFile.Match(ms);
-            if(s1.Success && s2.Success) {
-                msfi = RegexHelper.ExtractFile(s1, rootDir);
-                tsfi = RegexHelper.ExtractFile(s2, rootDir);
+            // Read The Entire File
+            string mStr;
+            using(FileStream fs = File.OpenRead(infoFile.FullName)) {
+                StreamReader s = new StreamReader(fs);
+                mStr = s.ReadToEnd();
             }
 
-            // Read Height Data
-            using(var bmp = Bitmap.FromFile(hfi.FullName) as Bitmap) {
-                int w = bmp.Width;
-                int h = bmp.Height;
-                float[] hd = new float[w * h];
-                byte[] cd = new byte[w * h];
-                byte[] col = new byte[w * h * 4];
-                int i = 0, ci = 0;
+            // Match Tokens
+            Match[] mp = {
+                rgxHModelPFile.Match(mStr),
+                rgxHTexPFile.Match(mStr),
+                rgxHModelSFile.Match(mStr),
+                rgxHTexSFile.Match(mStr)
+            };
 
-                // Convert Bitmap
-                System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
-                System.Runtime.InteropServices.Marshal.Copy(data.Scan0, col, 0, data.Stride * data.Height);
-                for(int y = 0; y < h; y++) {
-                    for(int x = 0; x < w; x++) {
-                        ConvertPixel(col, ci, hd, cd, i++);
-                        ci += 4;
-                    }
-                }
-                bmp.UnlockBits(data);
-                res.Data = new Heightmap(hd, cd, w, h);
+            #region Create Primary
+            // Try To Find The First Model
+            if(!mp[0].Success || !mp[1].Success) return null;
+            FileInfo mpfi = RegexHelper.ExtractFile(mp[0], infoFile.Directory.FullName);
+            FileInfo tpfi = RegexHelper.ExtractFile(mp[1], infoFile.Directory.FullName);
+            if(!mpfi.Exists || !tpfi.Exists) return null;
+
+            // Try To Get The First Texture
+            Texture2D t;
+            FileStream ts = null;
+            try {
+                ts = File.OpenRead(tpfi.FullName);
+                t = ge.LoadTexture2D(ts);
+                ts.Dispose();
             }
-                // Apply Heightmap Size
-                res.Data.Width = size.X;
-                res.Data.Depth = size.Z;
-                res.Data.ScaleHeights(size.Y);
-            
+            catch(Exception) {
+                if(ts != null) ts.Dispose();
+                t = null;
+            }
+            if(t == null) return null;
 
-            // Must Read Primary Model
-            BoundingBox aabb = new BoundingBox(new Vector3(float.MaxValue), new Vector3(-float.MaxValue));
-            Vector3 scaling = size;
+            // Try To Parse The Primary Model
             VertexPositionNormalTexture[] vertsPNT;
+            VertexPositionTexture[] verts;
             int[] inds;
-
-            // Read The Map Model
-            using(var sPrimary = File.OpenRead(mpfi.FullName)) {
-                ObjParser.TryParse(sPrimary, out vertsPNT, out inds, READ_FLAGS);
+            bool error;
+            using(var ms = File.OpenRead(mpfi.FullName)) {
+                error = !ObjParser.TryParse(ms, out vertsPNT, out inds, READ_FLAGS);
             }
-            VertexPositionTexture[] verts = new VertexPositionTexture[vertsPNT.Length];
-            for(int i = 0; i < vertsPNT.Length; i++) {
-                // Copy Over Information
-                verts[i].Position = vertsPNT[i].Position;
-                verts[i].TextureCoordinate = vertsPNT[i].TextureCoordinate;
-
-                // Calculate Bounding Box
-                if(verts[i].Position.X > aabb.Max.X) aabb.Max.X = verts[i].Position.X;
-                if(verts[i].Position.X < aabb.Min.X) aabb.Min.X = verts[i].Position.X;
-                if(verts[i].Position.Y > aabb.Max.Y) aabb.Max.Y = verts[i].Position.Y;
-                if(verts[i].Position.Y < aabb.Min.Y) aabb.Min.Y = verts[i].Position.Y;
-                if(verts[i].Position.Z > aabb.Max.Z) aabb.Max.Z = verts[i].Position.Z;
-                if(verts[i].Position.Z < aabb.Min.Z) aabb.Min.Z = verts[i].Position.Z;
-            }
-            // Find Scaling
-            scaling /= aabb.Max - aabb.Min;
+            if(error) return null;
 
             // Reposition Model
-            for(int i = 0; i < verts.Length; i++) {
-                // Move Model Minimum To Origin
-                verts[i].Position -= aabb.Min;
-                // Scale Heights To [0,1]
-                verts[i].Position *= scaling;
-            }
-
-            // Create Primary Geometry
-            ModelHelper.CreateBuffers(ge, verts, VertexPositionTexture.VertexDeclaration, inds, out res.View.VBPrimary, out res.View.IBPrimary, BufferUsage.WriteOnly);
-            res.Data.BVH.Build(verts, inds);
-
-            if(msfi != null && msfi.Exists) {
-                // Read The Detail Model
-                using(var sSecondary = File.OpenRead(msfi.FullName)) {
-                    ObjParser.TryParse(sSecondary, out vertsPNT, out inds, READ_FLAGS);
-                }
-                for(int i = 0; i < vertsPNT.Length; i++) {
-                    verts[i].Position = vertsPNT[i].Position;
-                    verts[i].TextureCoordinate = vertsPNT[i].TextureCoordinate;
-                }
-
-
-                // Reposition Detail Model To Match The Primary Model
-                for(int i = 0; i < verts.Length; i++) {
-                    // Move Model Minimum To Origin
-                    verts[i].Position -= aabb.Min;
-                    // Scale Heights To [0,1]
-                    verts[i].Position *= scaling;
-                }
-
-                // Create Graphics Geometry
-                ModelHelper.CreateBuffers(ge, verts, VertexPositionTexture.VertexDeclaration, inds, out res.View.VBSecondary, out res.View.IBSecondary, BufferUsage.WriteOnly);
-            }
-
-            // Read Primary Texture
-            res.View.PrimaryTexture = ge.LoadTexture2D(tpfi.FullName);
-            // Try To Read Secondary Texture
-            if(tsfi != null)
-                res.View.SecondaryTexture = ge.LoadTexture2D(tsfi.FullName);
-            return res;
-        }
-        private static HeightmapModel CreateHeightmapModel(GameEngine ge, Vector3 size, out VertexPositionTexture[] verts, out int[] inds, FileInfo mpfi, FileInfo msfi = null) {
-            HeightmapModel view = new HeightmapModel();
-            
-            // Parsing Information
             BoundingBox aabb = new BoundingBox(new Vector3(float.MaxValue), new Vector3(-float.MaxValue));
-            Vector3 scaling = size;
-            VertexPositionNormalTexture[] vertsPNT;
-
-            // Read The Map Model
-            using(var sPrimary = File.OpenRead(mpfi.FullName)) {
-                ObjParser.TryParse(sPrimary, out vertsPNT, out inds, READ_FLAGS);
-            }
             verts = new VertexPositionTexture[vertsPNT.Length];
             for(int i = 0; i < vertsPNT.Length; i++) {
                 // Copy Over Information
@@ -178,60 +97,142 @@ namespace RTSEngine.Data.Parsers {
                 if(verts[i].Position.Z < aabb.Min.Z) aabb.Min.Z = verts[i].Position.Z;
             }
             // Find Scaling
-            scaling /= aabb.Max - aabb.Min;
-
-            // Reposition Model
+            size /= aabb.Max - aabb.Min;
             for(int i = 0; i < verts.Length; i++) {
                 // Move Model Minimum To Origin
                 verts[i].Position -= aabb.Min;
-                // Scale Heights To [0,1]
-                verts[i].Position *= scaling;
+                // Scale Heights To [0,size.Y]
+                verts[i].Position *= size;
             }
 
-            // Create Primary Geometry
-            ModelHelper.CreateBuffers(ge.G, verts, VertexPositionTexture.VertexDeclaration, inds, out view.VBPrimary, out view.IBPrimary, BufferUsage.WriteOnly);
+            // Create The Primary Model
+            HeightmapModel view = new HeightmapModel();
+            ModelHelper.CreateBuffers(ge, verts, VertexPositionTexture.VertexDeclaration, inds, out view.VBPrimary, out view.IBPrimary, BufferUsage.WriteOnly);
+            view.PrimaryTexture = t;
+            #endregion
 
-            if(msfi != null && msfi.Exists) {
-                // Read The Detail Model
-                int[] sInds;
-                using(var sSecondary = File.OpenRead(msfi.FullName)) {
-                    ObjParser.TryParse(sSecondary, out vertsPNT, out sInds, READ_FLAGS);
-                }
-                VertexPositionTexture[] sVerts = new VertexPositionTexture[vertsPNT.Length];
-                for(int i = 0; i < vertsPNT.Length; i++) {
-                    sVerts[i].Position = vertsPNT[i].Position;
-                    sVerts[i].TextureCoordinate = vertsPNT[i].TextureCoordinate;
-                }
+            #region Create Secondary
+            // Try To Find The Second Model
+            if(!mp[2].Success || !mp[3].Success) return view;
+            mpfi = RegexHelper.ExtractFile(mp[2], infoFile.Directory.FullName);
+            tpfi = RegexHelper.ExtractFile(mp[3], infoFile.Directory.FullName);
+            if(!mpfi.Exists || !tpfi.Exists) return view;
 
-
-                // Reposition Detail Model To Match The Primary Model
-                for(int i = 0; i < sVerts.Length; i++) {
-                    // Move Model Minimum To Origin
-                    sVerts[i].Position -= aabb.Min;
-                    // Scale Heights To [0,1]
-                    sVerts[i].Position *= scaling;
-                }
-
-                // Create Graphics Geometry
-                ModelHelper.CreateBuffers(ge.G, sVerts, VertexPositionTexture.VertexDeclaration, sInds, out view.VBSecondary, out view.IBSecondary, BufferUsage.WriteOnly);
+            // Try To Get The Second Texture
+            try {
+                ts = null;
+                ts = File.OpenRead(tpfi.FullName);
+                t = ge.LoadTexture2D(ts);
+                ts.Dispose();
             }
+            catch(Exception) {
+                if(ts != null) ts.Dispose();
+                t = null;
+            }
+            if(t == null) return view;
+
+            // Try To Parse The Secondary Model
+            using(var ms = File.OpenRead(mpfi.FullName)) {
+                error = !ObjParser.TryParse(ms, out vertsPNT, out inds, READ_FLAGS);
+            }
+            if(error) return view;
+            // Reposition Secondary To Coincide With The First
+            for(int i = 0; i < verts.Length; i++) {
+                verts[i].Position -= aabb.Min;
+                verts[i].Position *= size;
+            }
+
+            // Create The Secondary Model
+            ModelHelper.CreateBuffers(ge, verts, VertexPositionTexture.VertexDeclaration, inds, out view.VBSecondary, out view.IBSecondary, BufferUsage.WriteOnly);
+            view.SecondaryTexture = t;
+            #endregion
+
             return view;
         }
-        public static HeightmapResult Parse(GameEngine ge, DirectoryInfo dir) {
-            // Find The Information File
-            var files = dir.GetFiles();
-            FileInfo infoFile = files.FirstOrDefault((f) => {
-                return f.Extension.ToLower().EndsWith(EXTENSION);
-            });
-            if(infoFile == null)
-                throw new ArgumentException("Map Information File Could Not Be Found In The Directory");
+        public static Heightmap ParseData(FileInfo data) {
+            // Check File Existence
+            if(data == null || !data.Exists) return null;
 
-            // Parse Data
-            HeightmapResult res;
-            using(Stream s = File.OpenRead(infoFile.FullName)) {
-                res = ParseFromInfo(ge, s, dir.FullName);
+            // Read The Entire File
+            string mStr;
+            using(FileStream fs = File.OpenRead(data.FullName)) {
+                StreamReader s = new StreamReader(fs);
+                mStr = s.ReadToEnd();
             }
-            return res;
+
+            // Match Tokens
+            Match[] mp = {
+                rgxDataFile.Match(mStr),
+                rgxSize.Match(mStr),
+                rgxHModelPFile.Match(mStr)
+            };
+
+            if(!mp[0].Success || !mp[1].Success || !mp[2].Success) return null;
+            FileInfo hfi = RegexHelper.ExtractFile(mp[0], data.Directory.FullName);
+            Vector3 size = RegexHelper.ExtractVec3(mp[1]);
+            FileInfo mfi = RegexHelper.ExtractFile(mp[2], data.Directory.FullName);
+            if(!hfi.Exists || !mfi.Exists) return null;
+
+            // Read Height Data
+            Heightmap map = null;
+            using(var bmp = Bitmap.FromFile(hfi.FullName) as Bitmap) {
+                int w = bmp.Width;
+                int h = bmp.Height;
+                float[] hd = new float[w * h];
+                byte[] cd = new byte[w * h];
+                byte[] col = new byte[w * h * 4];
+                int i = 0, ci = 0;
+
+                // Convert Bitmap
+                System.Drawing.Imaging.BitmapData bd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
+                System.Runtime.InteropServices.Marshal.Copy(bd.Scan0, col, 0, bd.Stride * bd.Height);
+                for(int y = 0; y < h; y++) {
+                    for(int x = 0; x < w; x++) {
+                        ConvertPixel(col, ci, hd, cd, i++);
+                        ci += 4;
+                    }
+                }
+                bmp.UnlockBits(bd);
+                map = new Heightmap(hd, cd, w, h);
+            }
+
+            // Apply Heightmap Size
+            map.Width = size.X;
+            map.Depth = size.Z;
+            map.ScaleHeights(size.Y);
+
+            // Try To Parse The Primary Model For BVH
+            VertexPositionNormalTexture[] vertsPNT;
+            VertexPositionTexture[] verts;
+            int[] inds;
+            bool error;
+            using(var ms = File.OpenRead(mfi.FullName)) {
+                error = !ObjParser.TryParse(ms, out vertsPNT, out inds, READ_FLAGS);
+            }
+            if(error) return null;
+            BoundingBox aabb = new BoundingBox(new Vector3(float.MaxValue), new Vector3(-float.MaxValue));
+            verts = new VertexPositionTexture[vertsPNT.Length];
+            for(int i = 0; i < vertsPNT.Length; i++) {
+                // Copy Over Information
+                verts[i].Position = vertsPNT[i].Position;
+                verts[i].TextureCoordinate = vertsPNT[i].TextureCoordinate;
+
+                // Calculate Bounding Box
+                if(verts[i].Position.X > aabb.Max.X) aabb.Max.X = verts[i].Position.X;
+                if(verts[i].Position.X < aabb.Min.X) aabb.Min.X = verts[i].Position.X;
+                if(verts[i].Position.Y > aabb.Max.Y) aabb.Max.Y = verts[i].Position.Y;
+                if(verts[i].Position.Y < aabb.Min.Y) aabb.Min.Y = verts[i].Position.Y;
+                if(verts[i].Position.Z > aabb.Max.Z) aabb.Max.Z = verts[i].Position.Z;
+                if(verts[i].Position.Z < aabb.Min.Z) aabb.Min.Z = verts[i].Position.Z;
+            }
+            size /= aabb.Max - aabb.Min;
+            for(int i = 0; i < verts.Length; i++) {
+                verts[i].Position -= aabb.Min;
+                verts[i].Position *= size;
+            }
+            map.BVH.Build(verts, inds);
+
+            return map;
         }
     }
 }

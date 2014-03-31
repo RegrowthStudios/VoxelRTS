@@ -132,8 +132,9 @@ namespace RTS {
         }
         public override void Draw(GameTime gameTime) {
             G.Clear(Color.Black);
-
             wr.Draw(SB);
+            game.mRenderer.BeginPass(G);
+            game.mRenderer.Draw(G);
         }
 
         private void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {

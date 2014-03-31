@@ -11,6 +11,7 @@ using RTSEngine.Algorithms;
 using RTSEngine.Data.Parsers;
 
 namespace RTSEngine.Controllers {
+    #region Time Budgeting
     class BTaskSquadDecision : ACBudgetedTask {
         private GameState state;
         private RTSSquad squad;
@@ -42,6 +43,7 @@ namespace RTSEngine.Controllers {
                 unit.ActionController.DecideAction(state, dt);
         }
     }
+    #endregion
 
     public class GameplayController {
         public const int SQUAD_BUDGET_BINS = 10;

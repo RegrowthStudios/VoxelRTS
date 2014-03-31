@@ -22,7 +22,10 @@ using System.Threading.Tasks;
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
         private GameEngine engine;
+        private RTSRenderer renderer;
+        private Camera camera;
         private DevConsoleView dcv;
+        private PlayerInputController gameInput;
 
         Vector3 spawnLoc;
         int team, unit;
@@ -45,15 +48,22 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
-            dcv = new DevConsoleView(G);
             MouseEventDispatcher.OnMousePress += OnMP;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
+
+            dcv = new DevConsoleView(G);
             doAdd = false;
             team = 0;
             unit = 0;
 
             engine = game.LoadScreen.LoadedEngine;
+            camera = game.LoadScreen.LoadedCamera;
+            renderer = game.LoadScreen.LoadedRenderer;
+            gameInput = engine.State.Teams[0].Input as PlayerInputController;
+            gameInput.Camera = camera;
+
+
             sfDebug = engine.CreateFont("Courier New", 32);
             tEngine = new Thread(EngineThread);
             tEngine.Priority = ThreadPriority.Highest;
@@ -65,10 +75,6 @@ namespace RTS {
             tEngine.Start();
         }
         public override void OnExit(GameTime gameTime) {
-            game.Graphics.SynchronizeWithVerticalRetrace = true;
-            game.IsFixedTimeStep = true;
-            game.Graphics.ApplyChanges();
-
             MouseEventDispatcher.OnMousePress -= OnMP;
             KeyboardEventDispatcher.OnKeyPressed -= OnKP;
             KeyboardEventDispatcher.OnKeyReleased -= OnKR;
@@ -76,10 +82,11 @@ namespace RTS {
             dcv = null;
             DevConsole.Deactivate();
 
+            camera.Controller.Unhook(game.Window);
+            renderer.Dispose();
+
             playing = false;
             tEngine.Join();
-            //while(!isTDead)
-            //    Thread.Sleep(1);
             engine.Dispose();
         }
 
@@ -88,8 +95,12 @@ namespace RTS {
             //Thread.Sleep(10);
         }
         public override void Draw(GameTime gameTime) {
-            if(!pauseRender)
-                engine.Draw();
+            if(!pauseRender) {
+                camera.Update(engine.State.Map, RTSConstants.GAME_DELTA_TIME);
+                renderer.Draw(engine.State, RTSConstants.GAME_DELTA_TIME);
+
+                // TODO: Draw UI
+            }
 
             if(DevConsole.IsActivated) {
                 SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
@@ -103,11 +114,14 @@ namespace RTS {
             SB.Begin();
             SB.DrawString(sfDebug, fps.ToString(), Vector2.One * 10, Color.White);
             SB.End();
+
+            game.mRenderer.BeginPass(G);
+            game.mRenderer.Draw(G);
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
             if(b == MouseButton.Right) {
-                Ray r = engine.Renderer.Camera.GetViewRay(p);
+                Ray r = renderer.Camera.GetViewRay(p);
                 IntersectionRecord rec = new IntersectionRecord();
                 if(engine.State.Map.BVH.Intersect(ref rec, r)) {
                     spawnLoc = r.Position + r.Direction * rec.T;

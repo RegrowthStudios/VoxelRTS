@@ -31,7 +31,7 @@ namespace RTSEngine.Controllers {
         public RTSTeamResult[] Teams;
 
         // Where To Load The Map
-        public DirectoryInfo MapDirectory;
+        public FileInfo MapFile;
     }
 
     public class GameEngine : IDisposable {
@@ -47,10 +47,6 @@ namespace RTSEngine.Controllers {
             get;
             private set;
         }
-        public RTSRenderer Renderer {
-            get;
-            private set;
-        }
         public GameplayController PlayController {
             get;
             private set;
@@ -62,13 +58,10 @@ namespace RTSEngine.Controllers {
             gdm = _gdm;
             toDispose = new ConcurrentBag<IDisposable>();
             window = w;
-
         }
-        #region Disposal
         public void Dispose() {
             if(State != null) {
                 DevConsole.OnNewCommand -= PlayController.OnDevCommand;
-                Renderer.Dispose();
 
                 for(int ti = 0; ti < State.Teams.Length; ti++) {
                     State.Teams[ti].Input.Dispose();
@@ -83,7 +76,6 @@ namespace RTSEngine.Controllers {
                 td[i] = null;
             }
         }
-        #endregion
 
         #region Graphics Data Creation That Will Be Ready For Disposal At The End Of The Game
         public VertexBuffer CreateVertexBuffer(VertexDeclaration vd, int s, BufferUsage usage = BufferUsage.WriteOnly) {
@@ -161,18 +153,15 @@ namespace RTSEngine.Controllers {
             PlayController = new GameplayController();
             DevConsole.OnNewCommand += PlayController.OnDevCommand;
 
-            // Create Simple Information
-            Renderer = new RTSRenderer(this, gdm, @"Content\FX\RTS.fx", window);
-
             // Create Game State
             State = new GameState();
             LoadControllers();
             State.SetTeams(LoadTeams(d.Teams));
+
             for(int ti = 0; ti < State.Teams.Length; ti++) {
                 switch(d.Teams[ti].InputType) {
                     case InputType.Player:
                         var pic = new PlayerInputController(State, State.Teams[ti]);
-                        pic.Camera = Renderer.Camera;
                         State.Teams[ti].Input = pic;
                         break;
                     case InputType.AI:
@@ -180,7 +169,7 @@ namespace RTSEngine.Controllers {
                         State.Teams[ti].Input = new AIInputController(State, State.Teams[ti], ti);
                         break;
                     case InputType.Environment:
-
+                        // TODO: Make This Class
                         break;
                     default:
                         throw new Exception("Type does not exist");
@@ -188,7 +177,7 @@ namespace RTSEngine.Controllers {
             }
 
             // Load The Map
-            LoadMap(d.MapDirectory);
+            LoadMap(d.MapFile);
 
             for(int ti = 0; ti < State.Teams.Length; ti++) {
                 switch(d.Teams[ti].InputType) {
@@ -221,19 +210,14 @@ namespace RTSEngine.Controllers {
             foreach(KeyValuePair<string, ReflectedSquadController> kv in res.SquadControllers)
                 State.SquadControllers.Add(kv.Key, kv.Value);
         }
-        private void LoadMap(DirectoryInfo dir) {
+        private void LoadMap(FileInfo infoFile) {
             // Parse Map Data
-            HeightmapResult res = HeightmapParser.Parse(this, dir);
-            if(res.Data == null || res.View == null)
+            State.Map = HeightmapParser.ParseData(infoFile);
+            if(State.Map == null)
                 throw new ArgumentNullException("Could Not Load Heightmap");
 
-            // Set Data
-            State.Map = res.Data;
+            // Create Grid
             State.CGrid = new CollisionGrid(State.Map.Width, State.Map.Depth, RTSConstants.CGRID_SIZE);
-            Renderer.Map = res.View;
-
-            // Move Camera To Center
-            Renderer.Camera.MoveTo(State.Map.Width * 0.5f, State.Map.Depth * 0.5f);
         }
         private RTSTeam[] LoadTeams(RTSTeamResult[] teamResults) {
             RTSTeam[] t = new RTSTeam[teamResults.Length];
@@ -244,33 +228,18 @@ namespace RTSEngine.Controllers {
                 team.ColorScheme = res.Colors;
                 team.scDefaultAction = State.SquadControllers[res.TeamType.DefaultSquadActionController];
                 team.scDefaultTargetting = State.SquadControllers[res.TeamType.DefaultSquadTargettingController];
-                foreach(FileInfo unitDataFile in res.TeamType.UnitTypes)
-                    LoadUnit(team, unitDataFile);
+                foreach(FileInfo unitDataFile in res.TeamType.UnitTypes) {
+                    RTSUnitData data = RTSUnitDataParser.ParseData(State.UnitControllers, unitDataFile);
+                    team.AddUnitData(data);
+                }
                 t[i++] = team;
             }
             return t;
-        }
-        public void LoadUnit(RTSTeam t, FileInfo fi) {
-            RTSUnitResult res = RTSUnitDataParser.Parse(this, fi);
-            t.AddUnitData(res.Data);
-            res.View.ColorPrimary = t.ColorScheme.Primary;
-            res.View.ColorSecondary = t.ColorScheme.Secondary;
-            res.View.ColorTertiary = t.ColorScheme.Tertiary;
-            t.OnUnitSpawn += res.View.OnUnitSpawn;
-            Renderer.UnitModels.Add(res.View);
         }
 
         // Update Logic
         public void Update() {
             PlayController.Update(State, RTSConstants.GAME_DELTA_TIME);
-        }
-
-        // Drawing
-        public void Draw() {
-            Renderer.Camera.Update(State.Map, RTSConstants.GAME_DELTA_TIME);
-            Renderer.Draw(State, RTSConstants.GAME_DELTA_TIME);
-
-            // TODO: Draw UI
         }
     }
 }

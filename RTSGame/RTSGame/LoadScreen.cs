@@ -12,6 +12,8 @@ using BlisterUI.Input;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
+using RTSEngine.Data;
+using RTSEngine.Graphics;
 
 namespace RTS {
     public class LoadScreen : GameScreen<App> {
@@ -46,6 +48,14 @@ namespace RTS {
             set { loadData = value; }
         }
         public GameEngine LoadedEngine {
+            get;
+            private set;
+        }
+        public Camera LoadedCamera {
+            get;
+            private set;
+        }
+        public RTSRenderer LoadedRenderer {
             get;
             private set;
         }
@@ -128,7 +138,7 @@ namespace RTS {
 
         private void WorkThread() {
             loadData = new EngineLoadData();
-            loadData.MapDirectory = new DirectoryInfo(@"Packs\Default\maps\0");
+            loadData.MapFile = new FileInfo(@"Packs\Default\maps\0\test.map");
             var teamRes = RTSRaceParser.ParseAll(new DirectoryInfo("Packs"));
 
             loadData.Teams = new RTSTeamResult[2];
@@ -147,11 +157,17 @@ namespace RTS {
 
             LoadedEngine = new GameEngine(game.Graphics, game.Window);
             LoadedEngine.Load(LoadData);
+
+            // Create Camera And Graphics
+            LoadedCamera = new Camera(G.Viewport);
+            LoadedCamera.Controller.Hook(game.Window);
+            LoadedRenderer = new RTSRenderer(LoadedEngine, game.Graphics, @"Content\FX\RTS.fx", game.Window);
+            LoadedRenderer.HookToGame(LoadedEngine, LoadedCamera, game.LoadScreen.LoadData);
+
             isLoaded = true;
         }
         private void LoadCallback(string m, float p) {
             // percent = p;
         }
-
     }
 }

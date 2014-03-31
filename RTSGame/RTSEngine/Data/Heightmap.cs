@@ -64,6 +64,10 @@ namespace RTSEngine.Data {
         public Vector2 Scale {
             get { return new Vector2(ScaleX, ScaleZ); }
         }
+        public float ScaleY {
+            get;
+            private set;
+        }
 
         // Constructor With Heightmap Data Passed In
         public Heightmap(float[] v, byte[] d, int w, int h) {
@@ -76,10 +80,12 @@ namespace RTSEngine.Data {
             GridWidth = HValueWidth - 1;
             GridDepth = HValueDepth - 1;
             BVH = new BVH();
+            ScaleY = 1f;
         }
 
         // Scale The Heights By A Certain Value
         public void ScaleHeights(float s) {
+            ScaleY *= s;
             for(int i = 0; i < heights.Length; i++)
                 heights[i] *= s;
         }
