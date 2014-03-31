@@ -14,18 +14,19 @@ namespace RTSEngine.Algorithms {
             get;
             set;
         }
-
+        
         // Flag If The Query Is Old And Shouldn't Be Completed
         public bool IsOld {
             get;
             set;
         }
-
+        
         // The Start And End For Pathfinding
         public Vector2 Start {
             get;
             private set;
         }
+
         public Vector2 End {
             get;
             private set;
@@ -42,7 +43,7 @@ namespace RTSEngine.Algorithms {
             waypoints = new List<Vector2>();
         }
     }
-
+    
     public struct SearchLocation {
         public Point Loc;
         public int GScore;
@@ -50,7 +51,6 @@ namespace RTSEngine.Algorithms {
         public static int Compare(SearchLocation x, SearchLocation y) {
             return x.FScore.CompareTo(y.FScore);
         }
-
         public SearchLocation(Point p) {
             Loc = p;
             GScore = 0;
@@ -58,29 +58,29 @@ namespace RTSEngine.Algorithms {
         }
     }
 
-    // TODO: Implement Pathfinder
     public class Pathfinder : IDisposable {
-
+        private bool running;
         private ConcurrentQueue<PathQuery> queries; 
         private Thread thread;
-        private Heightmap world;
+        private CollisionGrid world;
         private SearchLocation[,] searchGrid;
 
-        public Pathfinder(Heightmap map) {
-            world = map;
-            searchGrid = new SearchLocation[world.HValueWidth, world.HValueDepth];
+        public Pathfinder(CollisionGrid cg) {
+            world = cg;
+            searchGrid = new SearchLocation[cg.grids.X, cg.grids.Y];
             queries = new ConcurrentQueue<PathQuery>();
+            running = true;
             thread = new Thread(WorkThread);
             thread.Priority = ThreadPriority.Normal;
             thread.Start();
         }
-
+     
         public void Add(PathQuery q) {
             queries.Enqueue(q);
         }
-
+        
         public void WorkThread() {
-            while(true) {
+            while(running) {
                 while(HasQuery()) {
                     PathQuery q;
                     if(queries.TryDequeue(out q)) {
@@ -91,74 +91,48 @@ namespace RTSEngine.Algorithms {
                 Thread.Sleep(100);
             }
         }
-
+        
         public void Dispose() {
-            thread.Abort();
+            running = false;
+            thread.Join();
         }
-
+        
         private bool HasQuery() {
             return queries.Count > 0;
         }
-
+        
         // Get The Search Grid Locations Adjacent To The Input
         private bool PointPossible(Point p) {
             return p.X >= 0 && p.X < searchGrid.GetLength(0) && p.Y >= 0 && p.Y < searchGrid.GetLength(1);
         }
+        
         private IEnumerable<SearchLocation> NeighborhoodDiag(SearchLocation loc) {
             foreach(Point p in NeighborhoodDiag(loc.Loc).Where(PointPossible)) {
                 yield return searchGrid[p.X, p.Y];
             }
         }
+        
         private IEnumerable<SearchLocation> NeighborhoodAlign(SearchLocation loc) {
             foreach(Point p in NeighborhoodAlign(loc.Loc).Where(PointPossible)) {
                 yield return searchGrid[p.X, p.Y];
             }
         }
-
-        // Return An Array Of The 8 Cardinal & Ordinal Points Adacent To P
+        
+        // Return An Array Of The Ordinal Points Adjacent To P
         private IEnumerable<Point> NeighborhoodDiag(Point p) {
             yield return new Point(p.X + 1, p.Y + 1);
             yield return new Point(p.X + 1, p.Y - 1);
             yield return new Point(p.X - 1, p.Y + 1);
             yield return new Point(p.X - 1, p.Y - 1);
         }
+
+        // Return An Array Of The Cardinal Points Adjacent To P
         private IEnumerable<Point> NeighborhoodAlign(Point p) {
             yield return new Point(p.X + 1, p.Y);
             yield return new Point(p.X - 1, p.Y);
             yield return new Point(p.X, p.Y + 1);
             yield return new Point(p.X, p.Y - 1);
         }
-
-
-#if REMOVE
-        private SearchLocation[] Neighborhood(SearchLocation loc) {
-            Point[] candidates = Neighborhood(loc.Loc);
-            candidates = candidates.Where(p => p.X >= 0 && p.X < searchGrid.GetLength(0)
-                                            && p.Y >= 0 && p.Y < searchGrid.GetLength(1)).ToArray();
-            SearchLocation[] locs = new SearchLocation[candidates.Length];
-            for(int i = 0; i < candidates.Length; i++) {
-                locs[i] = searchGrid[candidates[i].X, candidates[i].Y];
-            }
-            return locs;
-        }
-        private Point[] Neighborhood(Point p) {
-            Point[] points = {  new Point(p.X-1,p.Y),
-                                new Point(p.X-1,p.Y-1),
-                                new Point(p.X,p.Y-1),
-                                new Point(p.X+1,p.Y-1),
-                                new Point(p.X+1,p.Y),
-                                new Point(p.X+1,p.Y+1),
-                                new Point(p.X,p.Y+1),
-                                new Point(p.X-1,p.Y+1)  };
-            return points;
-        }
-        // Euclidean Distance
-        private float EucDist(Point start, Point end) {
-            float xDist = (float)(end.X - start.X);
-            float yDist = (float)(end.Y - start.Y);
-            return (float)Math.Sqrt(xDist * xDist + yDist * yDist);
-        }
-#endif
 
         // Manhattan Distance
         private int ManhatDist(Point start, Point end) {
@@ -183,8 +157,8 @@ namespace RTSEngine.Algorithms {
 
         // Run A* Search, Given This Pathfinder's World And A Query
         private void Pathfind(PathQuery q) {
-            Point cGridPoint = world.Map(q.Start.X, q.Start.Y);
-            Point gGridPoint = world.Map(q.End.X, q.End.Y);
+            Point cGridPoint = HashHelper.Hash(q.Start, world.grids, world.size);
+            Point gGridPoint = HashHelper.Hash(q.End, world.grids, world.size); ;
             var closedSet = new HashSet<Point>();
             var openSet = new MinHeap<SearchLocation>(SearchLocation.Compare);
             var cameFrom = new Dictionary<Point, Point?>();
@@ -199,11 +173,10 @@ namespace RTSEngine.Algorithms {
                     success = true;
                     break;
                 }
-
                 openSet.Remove(current);
                 closedSet.Add(current.Loc);
                 foreach(SearchLocation neighbor in NeighborhoodDiag(current)) {
-                    if(closedSet.Contains(neighbor.Loc) || world.IsCollidable(neighbor.Loc.X,neighbor.Loc.Y)) continue;
+                    if(closedSet.Contains(neighbor.Loc) || world.GetCollision(neighbor.Loc.X, neighbor.Loc.Y)) continue;
                     int gScoreNew = current.GScore + 14;
                     if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
                         cameFrom[neighbor.Loc] = current.Loc;
@@ -214,7 +187,7 @@ namespace RTSEngine.Algorithms {
                     }
                 }
                 foreach(SearchLocation neighbor in NeighborhoodAlign(current)) {
-                    if(closedSet.Contains(neighbor.Loc) || world.IsCollidable(neighbor.Loc.X, neighbor.Loc.Y)) continue;
+                    if(closedSet.Contains(neighbor.Loc) || world.GetCollision(neighbor.Loc.X, neighbor.Loc.Y)) continue;
                     int gScoreNew = current.GScore + 10;
                     if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
                         cameFrom[neighbor.Loc] = current.Loc;
@@ -225,11 +198,10 @@ namespace RTSEngine.Algorithms {
                     }
                 }
             }
-
             // Finished
             if(success) {
                 foreach(Point wp in ReconstructPath(cameFrom, gGridPoint)) {
-                    q.waypoints.Add(world.UnMap(wp.X, wp.Y));
+                    q.waypoints.Add(new Vector2(wp.X*world.cellSize, wp.Y*world.cellSize));
                 }
             }
             q.IsComplete = true;
