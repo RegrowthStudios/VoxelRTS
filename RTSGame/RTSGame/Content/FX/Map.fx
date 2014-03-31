@@ -1,6 +1,5 @@
 // Translation And Then Scaling Of A Map
-float3 Translation;
-float3 Scaling;
+float2 TexelSize;
 float2 MapSize;
 
 // Camera
@@ -30,7 +29,7 @@ VSO VS(VSI input) {
     VSO output;
 
 	// Transform World Position
-    float3 worldPosition = (input.Position + Translation) * Scaling;
+    float3 worldPosition = input.Position;
     
 	// Project	
 	output.Position = mul(float4(worldPosition, 1), VP);
@@ -44,7 +43,7 @@ VSO_M VSMap(VSI input) {
     VSO_M output;
 
 	// Transform World Position
-    float3 worldPosition = (input.Position + Translation) * Scaling;
+    float3 worldPosition = input.Position;
     
 	// Project	
 	output.Position = mul(float4(worldPosition, 1), VP);
@@ -56,9 +55,22 @@ VSO_M VSMap(VSI input) {
     return output;
 }
 
+float SampleFOW(float2 uv) {
+	float2 rt = uv / TexelSize;
+	float mx = fmod(rt.x, 1) - 0.5;
+	mx = trunc(mx * 3);
+	float my = fmod(rt.y, 1) - 0.5;
+	my = trunc(my * 3);
+	float fow = tex2D(FOW, uv) + 
+		tex2D(FOW, uv + float2(mx * TexelSize.x, 0)) +
+		tex2D(FOW, uv + float2(0, my * TexelSize.y)) +
+		tex2D(FOW, uv + float2(mx * TexelSize.x, my * TexelSize.y));
+	return fow * 0.25;
+}
+
 float4 PS(VSO input) : COLOR0 {
 	// Get Fog Of War
-	float fow = tex2D(FOW, input.UV);
+	float fow = SampleFOW(input.UV);
 	
 	// Don't Draw If It Is Less Than 0.1 (Black)
 	clip(fow - 0.1);
@@ -68,7 +80,7 @@ float4 PS(VSO input) : COLOR0 {
 }
 float4 PSMap(VSO_M input) : COLOR0 {
 	// Get Fog Of War
-	float fow = tex2D(FOW, input.FOWUV).x;
+	float fow = SampleFOW(input.FOWUV);
 	
 	// Don't Draw If It Is Less Than 0.1 (Black)
 	clip(fow - 0.1);

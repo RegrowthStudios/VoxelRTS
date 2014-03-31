@@ -65,6 +65,8 @@ namespace RTSEngine.Data {
                 }
             }
             ActiveGrids = new List<Point>();
+            Fog = new uint[grids.X, grids.Y];
+            Collision = new bool[grids.X, grids.Y];
         }
 
         public void Add(IEntity o) {

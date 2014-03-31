@@ -27,10 +27,10 @@ namespace RTSEngine.Graphics {
             FH = fh;
             FogOfWar = new float[FW * FH];
             Array.Clear(FogOfWar, 0, FogOfWar.Length);
-            Random r = new Random();
-            for(int i = 0; i < FW * FH; i++) {
-                FogOfWar[i] = r.Next(3) / 2f;
-            }
+            //Random r = new Random();
+            //for(int i = 0; i < FW * FH; i++) {
+            //    FogOfWar[i] = r.Next(3) / 2f;
+            //}
             Reset = false;
             FogOfWarTexture = ge.CreateTexture2D(fw, fh, SurfaceFormat.Single, false);
             FogOfWarTexture.SetData(FogOfWar);
