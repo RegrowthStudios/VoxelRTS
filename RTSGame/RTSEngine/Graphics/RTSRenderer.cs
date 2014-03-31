@@ -45,10 +45,11 @@ namespace RTSEngine.Graphics {
         }
 
         // Effects
-        private BasicEffect fxMap, fxSelection;
-        private RTSEffect fxRTS;
+        private BasicEffect fxSelection;
+        private RTSFXEntity fxAnim;
+        private RTSFXMap fxMap;
 
-        public RTSRenderer(GameEngine ge, GraphicsDeviceManager gdm, string rtsFXFile, GameWindow w) {
+        public RTSRenderer(GameEngine ge, GraphicsDeviceManager gdm, string fxAnimFile, string fxMapFile, GameWindow w) {
             window = w;
             gManager = gdm;
             UnitModels = new List<RTSUnitModel>();
@@ -56,12 +57,7 @@ namespace RTSEngine.Graphics {
             tPixel = ge.CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
 
-            fxMap = ge.CreateEffect();
-            fxMap.LightingEnabled = false;
-            fxMap.FogEnabled = false;
-            fxMap.VertexColorEnabled = false;
-            fxMap.TextureEnabled = true;
-            fxMap.World = Matrix.Identity;
+            fxMap = new RTSFXMap(ge.LoadEffect(fxMapFile));
 
             fxSelection = ge.CreateEffect();
             fxSelection.LightingEnabled = false;
@@ -71,11 +67,11 @@ namespace RTSEngine.Graphics {
             fxSelection.World = Matrix.Identity;
             fxSelection.Texture = tPixel;
 
-            fxRTS = new RTSEffect(ge.LoadEffect(rtsFXFile));
-            fxRTS.World = Matrix.Identity;
-            fxRTS.CPrimary = Vector3.UnitX;
-            fxRTS.CSecondary = Vector3.UnitY;
-            fxRTS.CTertiary = Vector3.UnitZ;
+            fxAnim = new RTSFXEntity(ge.LoadEffect(fxAnimFile));
+            fxAnim.World = Matrix.Identity;
+            fxAnim.CPrimary = Vector3.UnitX;
+            fxAnim.CSecondary = Vector3.UnitY;
+            fxAnim.CTertiary = Vector3.UnitZ;
 
             drawBox = false;
             MouseEventDispatcher.OnMousePress += OnMousePress;
@@ -95,8 +91,11 @@ namespace RTSEngine.Graphics {
 
             // Create The Map
             Heightmap map = ge.State.Map;
-            Map = HeightmapParser.ParseModel(ge, new Vector3(map.Width, map.ScaleY, map.Depth), geLoad.MapFile);
+            Map = HeightmapParser.ParseModel(ge, new Vector3(map.Width, map.ScaleY, map.Depth), ge.State.CGrid.grids.X, ge.State.CGrid.grids.Y, geLoad.MapFile);
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
+            fxMap.MapSize = new Vector2(map.Width, map.Depth);
+            fxMap.Scaling = Vector3.One;
+            fxMap.Translation = Vector3.Zero;
 
             // Get Unit Models
             for(int ti = 0; ti < geLoad.Teams.Length; ti++) {
@@ -131,40 +130,39 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[0] = SamplerState.LinearClamp;
 
             // Set Camera
-            fxMap.View = Camera.View;
-            fxMap.Projection = Camera.Projection;
+            fxMap.VP = Camera.View * Camera.Projection;
 
             // Primary Map Model
             if(Map.TrianglesPrimary > 0) {
+                fxMap.SetTextures(G, Map.PrimaryTexture, Map.FogOfWarTexture);
                 G.SetVertexBuffer(Map.VBPrimary);
                 G.Indices = Map.IBPrimary;
-                fxMap.Texture = Map.PrimaryTexture;
-                fxMap.CurrentTechnique.Passes[0].Apply();
+                fxMap.ApplyPassPrimary();
                 G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBPrimary.VertexCount, 0, Map.TrianglesPrimary);
             }
             // Secondary Map Model
             if(Map.TrianglesSecondary > 0) {
+                fxMap.SetTextures(G, Map.SecondaryTexture, Map.FogOfWarTexture);
                 G.SetVertexBuffer(Map.VBSecondary);
                 G.Indices = Map.IBSecondary;
-                fxMap.Texture = Map.SecondaryTexture;
-                fxMap.CurrentTechnique.Passes[0].Apply();
+                fxMap.ApplyPassSecondary();
                 G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBSecondary.VertexCount, 0, Map.TrianglesSecondary);
             }
         }
         private void DrawAnimated() {
             // Set Camera
-            fxRTS.VP = Camera.View * Camera.Projection;
+            fxAnim.VP = Camera.View * Camera.Projection;
 
             // Loop Through Models
             G.VertexSamplerStates[0] = SamplerState.PointClamp;
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
             foreach(RTSUnitModel unitModel in UnitModels) {
-                fxRTS.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
-                fxRTS.CPrimary = unitModel.ColorPrimary;
-                fxRTS.CSecondary = unitModel.ColorSecondary;
-                fxRTS.CTertiary = unitModel.ColorTertiary;
-                fxRTS.ApplyPassAnimation();
+                fxAnim.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
+                fxAnim.CPrimary = unitModel.ColorPrimary;
+                fxAnim.CSecondary = unitModel.ColorSecondary;
+                fxAnim.CTertiary = unitModel.ColorTertiary;
+                fxAnim.ApplyPassAnimation();
                 unitModel.UpdateInstances(G);
                 unitModel.SetInstances(G);
                 unitModel.DrawInstances(G);

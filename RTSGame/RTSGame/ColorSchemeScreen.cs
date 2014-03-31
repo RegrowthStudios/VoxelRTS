@@ -57,7 +57,7 @@ namespace RTS {
 
         // Renderer
         private GameEngine engine;
-        private RTSEffect fx;
+        private RTSFXEntity fx;
         private WidgetRenderer wr;
         private IDisposable fontDisp;
 
@@ -107,7 +107,7 @@ namespace RTS {
             engine = new GameEngine(game.Graphics, game.Window);
 
             // Rendering Effect
-            fx = new RTSEffect(engine.LoadEffect(FX_FILE_PATH));
+            fx = new RTSFXEntity(engine.LoadEffect(FX_FILE_PATH));
 
             // Default Team
             team = new RTSTeam();

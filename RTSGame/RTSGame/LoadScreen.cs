@@ -161,7 +161,7 @@ namespace RTS {
             // Create Camera And Graphics
             LoadedCamera = new Camera(G.Viewport);
             LoadedCamera.Controller.Hook(game.Window);
-            LoadedRenderer = new RTSRenderer(LoadedEngine, game.Graphics, @"Content\FX\RTS.fx", game.Window);
+            LoadedRenderer = new RTSRenderer(LoadedEngine, game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
             LoadedRenderer.HookToGame(LoadedEngine, LoadedCamera, game.LoadScreen.LoadData);
 
             isLoaded = true;
