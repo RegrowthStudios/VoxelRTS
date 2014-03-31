@@ -12,6 +12,7 @@ MAXCOUNT        [1000]
 HEALTH          [120]
 SPEED           [3.3]
 COST            [20 , 2]
+BUILDTIME       [20]
 
 // Collision Data
 RADIUS          [0.4]

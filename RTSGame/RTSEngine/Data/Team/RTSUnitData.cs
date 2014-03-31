@@ -14,6 +14,9 @@ namespace RTSEngine.Data.Team {
         // Health Of The Unit
         public int Health;
 
+        // The Time In Seconds It Takes To Produce The Unit
+        public int BuildTime;
+
         // The Capital Cost Of The Unit
         public int CapitalCost;
         // The Population Cost Of The Unit

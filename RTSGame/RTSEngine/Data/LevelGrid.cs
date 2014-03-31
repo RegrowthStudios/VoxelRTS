@@ -26,7 +26,7 @@ namespace RTSEngine.Data {
 
     public class CollisionGrid {
         public readonly Vector2 size;
-        public readonly Point grids;
+        public readonly Point gridSize;
         public readonly float cellSize;
 
         public List<IEntity>[,] EDynamic {
@@ -54,25 +54,25 @@ namespace RTSEngine.Data {
         public CollisionGrid(float w, float h, float gridSize) {
             // Round down the grid size so they all fit into the map
             size = new Vector2(w, h);
-            grids = new Point((int)Math.Ceiling(size.X / gridSize), (int)Math.Ceiling(size.Y / gridSize));
-            cellSize = size.X / grids.X;
+            gridSize = new Point((int)Math.Ceiling(size.X / gridSize), (int)Math.Ceiling(size.Y / gridSize));
+            cellSize = size.X / gridSize.X;
 
-            EDynamic = new List<IEntity>[grids.X, grids.Y];
-            EStatic = new List<IEntity>[grids.X, grids.Y];
-            for(int x = 0; x < grids.X; x++) {
-                for(int y = 0; y < grids.Y; y++) {
+            EDynamic = new List<IEntity>[gridSize.X, gridSize.Y];
+            EStatic = new List<IEntity>[gridSize.X, gridSize.Y];
+            for(int x = 0; x < gridSize.X; x++) {
+                for(int y = 0; y < gridSize.Y; y++) {
                     EDynamic[x, y] = new List<IEntity>();
                     EStatic[x, y] = new List<IEntity>();
                 }
             }
             ActiveGrids = new List<Point>();
-            Fog = new uint[grids.X, grids.Y];
-            Collision = new bool[grids.X, grids.Y];
+            Fog = new uint[gridSize.X, gridSize.Y];
+            Collision = new bool[gridSize.X, gridSize.Y];
         }
 
         public void Add(IEntity o) {
             // Canonical position of the object represented in 0~1
-            Point p = HashHelper.Hash(o.CollisionGeometry.Center, grids, size);
+            Point p = HashHelper.Hash(o.CollisionGeometry.Center, gridSize, size);
 
             // Move To Correct List
             if(!o.CollisionGeometry.IsStatic) {
@@ -94,9 +94,9 @@ namespace RTSEngine.Data {
         public void HandleGridCollision(int x, int y, int dx, int dy) {
             // Check Bounds
             int ox = x + dx;
-            if(ox < 0 || ox >= grids.X) return;
+            if(ox < 0 || ox >= gridSize.X) return;
             int oy = y + dy;
-            if(oy < 0 || oy >= grids.Y) return;
+            if(oy < 0 || oy >= gridSize.Y) return;
 
             var al1 = EDynamic[x, y];
             var al2 = EDynamic[ox, oy];
