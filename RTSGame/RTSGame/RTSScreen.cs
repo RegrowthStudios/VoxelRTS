@@ -93,6 +93,7 @@ namespace RTS {
         public override void Update(GameTime gameTime) {
             // This Tells Us We Are GPU-Bound
             //Thread.Sleep(10);
+            renderer.UpdateAnimations(engine.State, (float)game.TargetElapsedTime.TotalSeconds);
         }
         public override void Draw(GameTime gameTime) {
             if(!pauseRender) {

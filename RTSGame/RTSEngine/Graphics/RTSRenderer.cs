@@ -147,6 +147,16 @@ namespace RTSEngine.Graphics {
             }
         }
 
+        public void UpdateAnimations(GameState s, float dt) {
+            RTSTeam team;
+            for(int ti = 0; ti < s.Teams.Length; ti++) {
+                team = s.Teams[ti];
+                for(int i = 0; i < team.units.Count; i++)
+                    if(team.units[i].AnimationController != null)
+                        team.units[i].AnimationController.Update(s, dt);
+            }
+        }
+
         // Rendering Passes
         public void Draw(GameState s, float dt) {
             G.Clear(Color.Black);
