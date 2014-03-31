@@ -34,8 +34,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.EffectImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <HintPath>..\RTSCombatSim\lib\Microsoft.Xna.Framework.Content.Pipeline.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.EffectImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL">
+      <HintPath>..\RTSCombatSim\lib\Microsoft.Xna.Framework.Content.Pipeline.EffectImporter.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.TextureImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
@@ -52,9 +56,11 @@
     <Compile Include="Algorithms\KMeans.cs" />
     <Compile Include="Algorithms\MinHeap.cs" />
     <Compile Include="Algorithms\Pathfinder.cs" />
+    <Compile Include="Algorithms\TimeBudgeting.cs" />
     <Compile Include="Controllers\AIInputController.cs" />
     <Compile Include="Controllers\CameraController.cs" />
     <Compile Include="Controllers\DevConsole.cs" />
+    <Compile Include="Controllers\DynControllers.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Controllers\InputController.cs" />
@@ -90,6 +96,7 @@
     <Compile Include="Graphics\DevConsoleView.cs" />
     <Compile Include="Graphics\HeightmapModel.cs" />
     <Compile Include="Graphics\LightningGenerator.cs" />
+    <Compile Include="Graphics\MouseRenderer.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Screens\GameSelectScreen.cs" />

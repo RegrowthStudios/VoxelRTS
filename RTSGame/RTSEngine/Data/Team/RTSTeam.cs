@@ -27,7 +27,7 @@ namespace RTSEngine.Data.Team {
     }
 
     public class RTSTeam {
-        // Team Color
+        // Team Colors
         public RTSColorScheme ColorScheme {
             get;
             set;
@@ -39,7 +39,8 @@ namespace RTSEngine.Data.Team {
         // Entity Data
         public readonly List<RTSUnit> units;
         public readonly List<RTSSquad> squads;
-        public string DSAC, DSTC;
+        public ReflectedSquadController scDefaultAction;
+        public ReflectedSquadController scDefaultTargetting;
 
         public InputController Input {
             get;
@@ -47,7 +48,8 @@ namespace RTSEngine.Data.Team {
         }
 
         // Events
-        public event Action<RTSUnit> OnNewUnitSpawn;
+        public event Action<RTSUnit> OnUnitSpawn;
+        public event Action<RTSSquad> OnSquadCreation;
 
         public RTSTeam() {
             ColorScheme = RTSColorScheme.Default;
@@ -70,8 +72,8 @@ namespace RTSEngine.Data.Team {
         public RTSUnit AddUnit(int type, Vector2 pos) {
             RTSUnit rui = new RTSUnit(this, unitData[type], pos);
             units.Add(rui);
-            if(OnNewUnitSpawn != null)
-                OnNewUnitSpawn(rui);
+            if(OnUnitSpawn != null)
+                OnUnitSpawn(rui);
             return rui;
         }
         public void RemoveUnit(RTSUnit u) {
@@ -85,6 +87,8 @@ namespace RTSEngine.Data.Team {
         public RTSSquad AddSquad() {
             RTSSquad squad = new RTSSquad(this);
             squads.Add(squad);
+            if(OnSquadCreation != null)
+                OnSquadCreation(squad);
             return squad;
         }
         public void RemoveSquad(RTSSquad u) {

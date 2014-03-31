@@ -6,80 +6,13 @@ using System.Reflection;
 using System.CodeDom.Compiler;
 using Microsoft.CSharp;
 using RTSEngine.Interfaces;
+using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Parsers {
-    #region Compiled Arguments
-    public enum UnitControllerType {
-        Action,
-        Animation,
-        Combat,
-        Movement
-    }
-    public class ReflectedUnitController {
-        // The Types Of Controller That This Is
-        public UnitControllerType ControllerType {
-            get;
-            private set;
-        }
-
-        // The Constructor Of This Controller
-        private ConstructorInfo constructor;
-
-        public ReflectedUnitController(Type t) {
-            // Get Constructor
-            constructor = t.GetConstructor(new Type[0]);
-            if(t.IsSubclassOf(typeof(ACUnitActionController)))
-                ControllerType = UnitControllerType.Action;
-            else if(t.IsSubclassOf(typeof(ACUnitAnimationController)))
-                ControllerType = UnitControllerType.Animation;
-            else if(t.IsSubclassOf(typeof(ACUnitCombatController)))
-                ControllerType = UnitControllerType.Combat;
-            else if(t.IsSubclassOf(typeof(ACUnitMovementController)))
-                ControllerType = UnitControllerType.Movement;
-            else
-                throw new ArgumentException("This Script Is Not Subclassing A Unit Controller");
-        }
-
-        public T CreateInstance<T>() where T : ACUnitController {
-            return constructor.Invoke(null) as T;
-        }
-    }
-
-    public enum SquadControllerType {
-        Action,
-        Targetting
-    }
-    public class ReflectedSquadController {
-        // The Types Of Controller That This Is
-        public SquadControllerType ControllerType {
-            get;
-            private set;
-        }
-
-        // The Constructor Of This Controller
-        private ConstructorInfo constructor;
-
-        public ReflectedSquadController(Type t) {
-            // Get Constructor
-            constructor = t.GetConstructor(new Type[0]);
-            if(t.IsSubclassOf(typeof(ACSquadActionController)))
-                ControllerType = SquadControllerType.Action;
-            else if(t.IsSubclassOf(typeof(ACSquadTargettingController)))
-                ControllerType = SquadControllerType.Targetting;
-            else
-                throw new ArgumentException("This Script Is Not Subclassing A Squad Controller");
-        }
-
-        public T CreateInstance<T>() where T : ACSquadController {
-            return constructor.Invoke(null) as T;
-        }
-    }
-
     public struct DynCompiledResults {
         public Dictionary<string, ReflectedUnitController> UnitControllers;
         public Dictionary<string, ReflectedSquadController> SquadControllers;
     }
-    #endregion
 
     public static class DynControllerParser {
         // Create The Compiler

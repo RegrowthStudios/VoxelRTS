@@ -7,13 +7,13 @@ using System.IO;
 namespace RTSEngine.Data.Team {
     public class RTSRaceData {
         public string Name;
-        public List<DirectoryInfo> UnitTypes;
+        public List<FileInfo> UnitTypes;
         public string DefaultSquadActionController;
         public string DefaultSquadTargettingController;
 
         public RTSRaceData() {
             Name = null;
-            UnitTypes = new List<DirectoryInfo>();
+            UnitTypes = new List<FileInfo>();
         }
     }
 }

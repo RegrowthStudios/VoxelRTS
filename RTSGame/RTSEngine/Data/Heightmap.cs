@@ -64,6 +64,10 @@ namespace RTSEngine.Data {
         public Vector2 Scale {
             get { return new Vector2(ScaleX, ScaleZ); }
         }
+        public float ScaleY {
+            get;
+            private set;
+        }
 
         // Constructor With Heightmap Data Passed In
         public Heightmap(float[] v, byte[] d, int w, int h) {
@@ -76,15 +80,12 @@ namespace RTSEngine.Data {
             GridWidth = HValueWidth - 1;
             GridDepth = HValueDepth - 1;
             BVH = new BVH();
-        }
-
-        // Build Directly From OBJ File
-        public void BuildBVH(VertexPositionTexture[] verts, int[] inds) {
-            BVH.Build(verts, inds);
+            ScaleY = 1f;
         }
 
         // Scale The Heights By A Certain Value
         public void ScaleHeights(float s) {
+            ScaleY *= s;
             for(int i = 0; i < heights.Length; i++)
                 heights[i] *= s;
         }
@@ -102,8 +103,8 @@ namespace RTSEngine.Data {
         }
 
         // Find The Worldspace For the Grid Location (x,z)
-        // TODO: Verify
         public Vector2 UnMap(int x, int z) {
+            // TODO: Verify
             return new Vector2(ScaleX * ((float)x), ScaleZ * ((float)z));
         }
 
@@ -135,7 +136,7 @@ namespace RTSEngine.Data {
                 );
         }
 
-        // Does The Datum At This (x,z) Grid Location Indicate Collidable (Non-Passable)?
+        // Does The Datum At This (x,z) Grid Location Indicate Collideable (Non-Passable)?
         public bool IsCollidable(int x, int z) {
             return (data[HeightMapIndex(x,z)] & MASK_COLLISION) == 1; 
         }

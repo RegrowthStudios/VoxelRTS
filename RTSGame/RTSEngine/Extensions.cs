@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using System.IO;
+using RTSEngine.Controllers;
 
 namespace Microsoft.Xna.Framework.Graphics {
     #region Content Pipeline Context Data
@@ -119,7 +120,7 @@ namespace Microsoft.Xna.Framework.Graphics {
         }
 
 
-        public static SpriteFont Compile(GraphicsDevice g, string file) {
+        public static SpriteFont Compile(GraphicsDevice g, string file, out IDisposable gR) {
             FontDescriptionImporter ei = new FontDescriptionImporter();
             FontDescription ec = ei.Import(file, new RTSImporterContext());
             FontDescriptionProcessor ep = new FontDescriptionProcessor();
@@ -145,11 +146,13 @@ namespace Microsoft.Xna.Framework.Graphics {
             char? defaultChar = sfcDefaultChar.GetValue(cec) as char?;
 
             // Invoke Private SpriteFont Constructor
+            gR = texture;
             return sfConstructor.Invoke(new object[] { texture, glyphs, cropping, charMap, lineSpacing, spacing, kerning, defaultChar }) as SpriteFont;
         }
         public static SpriteFont Compile(GraphicsDevice g,
             string fontName,
             int size,
+            out IDisposable gR,
             int spacing = 0,
             bool useKerning = true,
             string style = "Regular",
@@ -159,20 +162,49 @@ namespace Microsoft.Xna.Framework.Graphics {
             ) {
             Random r = new Random();
             string ufid = "";
-            ufid += (((ulong)r.Next() << 32) | (ulong)r.Next()).ToString();
-            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
-            ufid += ((ulong)r.Next() << 32 | (ulong)r.Next()).ToString();
+            unchecked {
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+            }
             ufid += ".xml";
             using(var s = File.Create(ufid)) {
                 StreamWriter sw = new StreamWriter(s);
                 sw.Write(SF_XML_FORMAT, fontName, size, spacing, useKerning ? "true" : "false", style, defaultChar, cStart, cEnd);
                 sw.Flush();
             }
-            SpriteFont sf = Compile(g, ufid);
+            SpriteFont sf = Compile(g, ufid, out gR);
             File.Delete(ufid);
             return sf;
+        }
+    }
+
+    public static class ModelHelper {
+        public static void CreateBuffers<T>(GraphicsDevice g, T[] verts, VertexDeclaration vd, int[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = new VertexBuffer(g, vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = new IndexBuffer(g, IndexElementSize.ThirtyTwoBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(GameEngine ge, T[] verts, VertexDeclaration vd, int[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = ge.CreateVertexBuffer(vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = ge.CreateIndexBuffer(IndexElementSize.ThirtyTwoBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(GraphicsDevice g, T[] verts, VertexDeclaration vd, short[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = new VertexBuffer(g, vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = new IndexBuffer(g, IndexElementSize.SixteenBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(GameEngine ge, T[] verts, VertexDeclaration vd, short[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = ge.CreateVertexBuffer(vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = ge.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, bu);
+            ib.SetData(inds);
         }
     }
 }

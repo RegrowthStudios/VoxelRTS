@@ -82,7 +82,8 @@ namespace RTSEngine.Interfaces {
         // Copies Over Waypoints From The List
         public virtual void SetWaypoints(List<Vector2> wp) {
             waypoints.Clear();
-            waypoints.AddRange(wp);
+            if(wp != null)
+                waypoints.AddRange(wp);
         }
 
         // Scripted Logic For Movement

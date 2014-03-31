@@ -54,7 +54,7 @@ namespace RTSEngine.Data.Parsers {
             // Read All Units
             Match m = rgxUnit.Match(ms);
             while(m.Success) {
-                res.UnitTypes.Add(RegexHelper.ExtractDirectory(m, rootDir));
+                res.UnitTypes.Add(RegexHelper.ExtractFile(m, rootDir));
                 m = m.NextMatch();
             }
 

@@ -1,12 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSGame", "RTSGame\RTSGame.csproj", "{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}"
-	ProjectSection(ProjectDependencies) = postProject
-		{28292778-5EDC-4898-8E0C-9E32412174CD} = {28292778-5EDC-4898-8E0C-9E32412174CD}
-		{79AEFEF0-5165-4B43-BD2E-9F925A198C96} = {79AEFEF0-5165-4B43-BD2E-9F925A198C96}
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BandWidthTest", "BandWidthTest\BandWidthTest.csproj", "{4C209330-B4AF-4A62-A53F-5E2E8951844A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimConverter", "AnimConverter\AnimConverter.csproj", "{5429567D-B73B-465B-BA02-7741AEBA52BC}"
@@ -21,9 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSEngine", "RTSEngine\RTSE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerrainConverter", "TerrainConverter\TerrainConverter.csproj", "{EE2B4F5E-61F2-4762-A470-450569D286FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSCombatSim", "RTSCombatSim\RTSCombatSim.csproj", "{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimViewer", "AnimViewer\AnimViewer.csproj", "{20090AEA-B975-4804-A7F0-CF688E5F4A7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSGame", "RTSGame\RTSGame.csproj", "{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,16 +27,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Debug|x86.ActiveCfg = Debug|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Debug|x86.Build.0 = Debug|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Release|Any CPU.ActiveCfg = Release|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Release|Mixed Platforms.Build.0 = Release|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Release|x86.ActiveCfg = Release|x86
-		{1A720A0F-FB95-4B09-8A3C-59BA8BC63447}.Release|x86.Build.0 = Release|x86
 		{4C209330-B4AF-4A62-A53F-5E2E8951844A}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{4C209330-B4AF-4A62-A53F-5E2E8951844A}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{4C209330-B4AF-4A62-A53F-5E2E8951844A}.Debug|Mixed Platforms.Build.0 = Debug|x86
@@ -105,16 +87,6 @@ Global
 		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Release|Mixed Platforms.Build.0 = Release|x86
 		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Release|x86.ActiveCfg = Release|x86
 		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Release|x86.Build.0 = Release|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Debug|x86.ActiveCfg = Debug|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Debug|x86.Build.0 = Debug|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Release|Any CPU.ActiveCfg = Release|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Release|Mixed Platforms.Build.0 = Release|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Release|x86.ActiveCfg = Release|x86
-		{20090AEA-B975-4804-A7F0-CF688E5F4A7D}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
