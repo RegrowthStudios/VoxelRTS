@@ -23,7 +23,7 @@ namespace RTSEngine.Data.Team
         public RTSTeam Team { get; private set; }
 
         // Activity Of This Building
-        public bool Active { get; private set; }
+        public Queue<RTSUnit> UnitQueue { get; private set; }
 
         // Event Triggered When This Entity Receives Damage
         public event Action<IEntity, int> OnDamage;
@@ -100,6 +100,7 @@ namespace RTSEngine.Data.Team
             height = 0;
             Health = BuildingData.Health;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
+            UnitQueue = new Queue<RTSUnit>();
         }
 
         // Applies Damage To Health
@@ -119,9 +120,9 @@ namespace RTSEngine.Data.Team
                 OnDestruction(this);
         }
 
-        // Interchange Activity
-        public void ToggleActivity() {
-            Active = !Active;
+        // Enqueue New Unit
+        public void EnqueueUnit(RTSUnit unit) {
+            UnitQueue.Enqueue(unit);
         }
     }
 }
