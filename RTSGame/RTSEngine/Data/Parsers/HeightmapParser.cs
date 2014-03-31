@@ -30,9 +30,10 @@ namespace RTSEngine.Data.Parsers {
             d[i] = cols[ci + 1] > 128 ? (byte)0x01u : (byte)0x00u;
         }
 
-        public static HeightmapModel ParseModel(GameEngine ge, Vector3 size, FileInfo infoFile) {
+        public static HeightmapModel ParseModel(GameEngine ge, Vector3 size, int fWidth, int fHeight, FileInfo infoFile) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
+            Vector2 uvScale = new Vector2(1f / size.X, 1f / size.Z);
 
             // Read The Entire File
             string mStr;
@@ -103,10 +104,14 @@ namespace RTSEngine.Data.Parsers {
                 verts[i].Position -= aabb.Min;
                 // Scale Heights To [0,size.Y]
                 verts[i].Position *= size;
+                verts[i].TextureCoordinate = new Vector2(
+                    verts[i].Position.X * uvScale.X,
+                    verts[i].Position.Z * uvScale.Y
+                    );
             }
 
             // Create The Primary Model
-            HeightmapModel view = new HeightmapModel();
+            HeightmapModel view = new HeightmapModel(ge, fWidth, fHeight);
             ModelHelper.CreateBuffers(ge, verts, VertexPositionTexture.VertexDeclaration, inds, out view.VBPrimary, out view.IBPrimary, BufferUsage.WriteOnly);
             view.PrimaryTexture = t;
             #endregion

@@ -6,6 +6,7 @@ float4x4 VP;
 sampler2D Model : register(s0);
 sampler2D Color : register(s1);
 sampler2D Overlay : register(s2);
+sampler2D FOW : register(s3);
 
 // Used For RGB Palette Color Calculation
 float3 CPrimary;
@@ -14,6 +15,9 @@ float3 CTertiary;
 
 // Used For Animation To Figure Out The Actual Position And Normal
 float2 TexelSize;
+
+// To Determine It's Fog Of War
+float2 MapSize;
 
 // Always The Same Input
 struct VSI {

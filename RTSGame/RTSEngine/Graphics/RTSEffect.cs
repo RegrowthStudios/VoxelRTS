@@ -29,7 +29,7 @@ namespace RTSEngine.Graphics {
         }
     }
 
-    public class RTSEffect {
+    public class RTSFXEntity {
         // Effect Pass Keys
         public const string PASS_KEY_SIMPLE = "Simple";
         public const string PASS_KEY_ANIMATION = "Animation";
@@ -69,7 +69,7 @@ namespace RTSEngine.Graphics {
         // Used For Animation Pass
         private EffectParameter fxpTexelSize;
 
-        public RTSEffect(Effect _fx) {
+        public RTSFXEntity(Effect _fx) {
             if(_fx == null) throw new ArgumentNullException("A Null Effect Was Used");
 
             // Set The Effect To The First Technique
@@ -96,25 +96,65 @@ namespace RTSEngine.Graphics {
             fxPassAnimation.Apply();
         }
 
-        public void DrawPassSimple(GraphicsDevice g, VertexBuffer model, IndexBuffer indices) {
-            g.SetVertexBuffer(model);
-            g.Indices = indices;
-            g.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, model.VertexCount, 0, indices.IndexCount / 3);
-        }
-        public void DrawPassAnimation(GraphicsDevice g, VertexBuffer model, DynamicVertexBuffer instances, IndexBuffer indices) {
-            g.SetVertexBuffers(
-                new VertexBufferBinding(model),
-                new VertexBufferBinding(instances, 0, 1)
-                );
-            g.Indices = indices;
-            g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, model.VertexCount, 0, indices.IndexCount / 3, instances.VertexCount);
-        }
-
         public void SetTextures(GraphicsDevice g, Texture2D tAnim, Texture2D tMain, Texture2D tKey) {
             g.VertexTextures[0] = tAnim;
             g.Textures[1] = tMain;
             g.Textures[2] = tKey;
             fxpTexelSize.SetValue(new Vector2(1f / tAnim.Width, 1f / tAnim.Height));
+        }
+    }
+
+    public class RTSFXMap {
+        // Effect Pass Keys
+        public const string PASS_KEY_PRIMARY = "Primary";
+        public const string PASS_KEY_SECONDARY = "Secondary";
+        // Effect Parameter Keys
+        public const string PARAM_KEY_TEXELSIZE = "TexelSize";
+        public const string PARAM_KEY_MAPSIZE = "MapSize";
+        public const string PARAM_KEY_VP = "VP";
+
+        // The Effect And Its Passes
+        private Effect fx;
+        private EffectPass fxPassPrimary, fxPassSecondary;
+
+        private EffectParameter fxpMapSize, fxpTexelSize, fxpVP;
+        public Vector2 MapSize {
+            set { fxpMapSize.SetValue(value); }
+        }
+        public Matrix VP {
+            set { fxpVP.SetValue(value); }
+        }
+
+        public RTSFXMap(Effect _fx) {
+            if(_fx == null) throw new ArgumentNullException("A Null Effect Was Used");
+
+            // Set The Effect To The First Technique
+            fx = _fx;
+            fx.CurrentTechnique = fx.Techniques[0];
+
+            // Get The Passes
+            fxPassPrimary = fx.CurrentTechnique.Passes[PASS_KEY_PRIMARY];
+            fxPassSecondary = fx.CurrentTechnique.Passes[PASS_KEY_SECONDARY];
+
+            // Get The Parameters
+            fxpTexelSize = fx.Parameters[PARAM_KEY_TEXELSIZE];
+            fxpMapSize = fx.Parameters[PARAM_KEY_MAPSIZE];
+            fxpVP = fx.Parameters[PARAM_KEY_VP];
+        }
+
+        public void SetTextures(GraphicsDevice g, Texture2D tColor, Texture2D tFOW) {
+            g.Textures[0] = tColor;
+            g.SamplerStates[0] = SamplerState.LinearClamp;
+            g.Textures[1] = tFOW;
+            g.SamplerStates[1] = SamplerState.PointClamp;
+            fxpTexelSize.SetValue(new Vector2(1f / tFOW.Width, 1f / tFOW.Height));
+        }
+
+        public void ApplyPassPrimary() {
+            fxPassPrimary.Apply();
+        }
+        public void ApplyPassSecondary() {
+            fxPassSecondary.Apply();
         }
     }
 }

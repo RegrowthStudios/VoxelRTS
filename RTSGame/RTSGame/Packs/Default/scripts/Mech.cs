@@ -83,7 +83,6 @@ namespace RTS.Mech.Unit {
                 unit.MovementController.ApplyMove(g, dt);
             if(unit.CombatController != null)
                 unit.CombatController.Attack(g, dt);
-            unit.AnimationController.Update(g, dt);
         }
     }
 

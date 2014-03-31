@@ -14,7 +14,7 @@ namespace RTSEngine.Data {
     }
 
     public static class FogOfWarHelper {
-        public static FogOfWar GetFogOfWar(ref uint fog, int p) {
+        public static FogOfWar GetFogOfWar(uint fog, int p) {
             return (FogOfWar)((fog >> (p << 2)) & 0x03);
         }
         public static void SetFogOfWar(ref uint fog, int p, FogOfWar f) {
@@ -41,6 +41,10 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
+        public bool[,] Collision {
+            get;
+            private set;
+        }
 
         public List<Point> ActiveGrids {
             get;
@@ -62,6 +66,8 @@ namespace RTSEngine.Data {
                 }
             }
             ActiveGrids = new List<Point>();
+            Fog = new uint[grids.X, grids.Y];
+            Collision = new bool[grids.X, grids.Y];
         }
 
         public void Add(IEntity o) {
@@ -122,6 +128,20 @@ namespace RTSEngine.Data {
             for(int i1 = 0; i1 < al.Count; i1++)
                 for(int i2 = 0; i2 < sl.Count; i2++)
                     CollisionController.ProcessCollision(al[i1].CollisionGeometry, sl[i2].CollisionGeometry);
+        }
+
+        public void SetFogOfWar(int x, int y, int p, FogOfWar f) {
+            FogOfWarHelper.SetFogOfWar(ref Fog[x, y], p, f);
+        }
+        public FogOfWar GetFogOfWar(int x, int y, int p) {
+            return FogOfWarHelper.GetFogOfWar(Fog[x, y], p);
+        }
+
+        public void SetCollision(int x, int y, bool c) {
+            Collision[x, y] = c;
+        }
+        public bool GetCollision(int x, int y) {
+            return Collision[x, y];
         }
     }
 
