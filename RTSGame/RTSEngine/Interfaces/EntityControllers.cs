@@ -90,4 +90,17 @@ namespace RTSEngine.Interfaces {
         public abstract void DecideMove(GameState g, float dt);
         public abstract void ApplyMove(GameState g, float dt);
     }
+
+    public abstract class ACBuildingController {
+
+    }
+
+    public abstract class ACBuildingCombatController : ACBuildingController {
+
+    }
+
+    public abstract class ACBuildingActionController : ACBuildingController {
+
+
+    }
 }
