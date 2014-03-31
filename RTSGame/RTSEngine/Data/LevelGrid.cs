@@ -148,39 +148,53 @@ namespace RTSEngine.Data {
     public class ImpactGrid {
 
         private float cellSize;
-        private Point gridSize;
+        private Point numCells;
+        private Vector2 gridSize;
         private ImpactCell[,] grid;
 
         public ImpactGrid(CollisionGrid cg) {
             cellSize = 2 * cg.cellSize;
-            gridSize = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
+            numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
             cellSize = cg.size.X / gridSize.X;
-            grid = new ImpactCell[gridSize.X, gridSize.Y];
+            grid = new ImpactCell[numCells.X, numCells.Y];
+            gridSize = cg.size;
 
             for (int x = 0; x < gridSize.X; x++) {
                 for (int y = 0; y < gridSize.Y; y++) {
                     grid[x, y] = new ImpactCell();
                 }
             }
-            //each cell should send events to the region its in when impact should go up
-            //environmentinputcontroller should call thread.sleep and check game state time 
         }
 
+        public void AddImpactGenerator(ImpactGenerator g) {
+            Point p = HashHelper.Hash(g.Position, numCells, gridSize);
+            grid[p.X, p.Y].AddImpactGenerator(g);
+        }
     }
 
     public class ImpactCell {
-
+        
         public Region Region { get; set; }
-        public List<IEntity> ImpactGenerators { get; set; }  //change type
+        public List<ImpactGenerator> ImpactGenerators { get; set; }
+        public int CellImpact { get; private set; } 
+        public event Action<int> IncreaseImpact; 
 
         public ImpactCell() {
             Region = null;
-            ImpactGenerators = new List<IEntity>(); 
+            ImpactGenerators = new List<ImpactGenerator>();
+            CellImpact = 0;
         }
 
-        public void AddImpactGenerator(IEntity e) {
-            
+        public void AddImpactGenerator(ImpactGenerator g) {
+            ImpactGenerators.Add(g);
+            g.GenerateImpact += AddToImpact;
         }
+
+        public void AddToImpact(int amount){
+            CellImpact += amount;
+            IncreaseImpact(amount);
+        }
+
     }
 
     public static class HashHelper {

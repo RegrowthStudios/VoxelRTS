@@ -9,14 +9,15 @@ namespace RTSEngine.Data
 {
     public class Region
     {
-        public int Impact { get; set; } 
-        public List<RTSUnit> EnemyUnits { get; set; }
-        public List<IEntity> EnemyBuildings { get; set; }
-        public List<RTSUnit> FriendlyUnits { get; set; }
-        public List<IEntity> Resources { get; set; }
+        public int Impact { get; set; }
+        public List<ImpactCell> cells { get; set; } 
 
         public Region() {
 
+        }
+
+        public void IncreaseImpact(int amount) {
+        
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace RTSEngine.Interfaces {
-    interface ImpactGenerator {
-
+    public interface ImpactGenerator {
+        Vector2 Position { get; set; }
+        int ImpactAmount { get; set; }
+        event Action<int> GenerateImpact;
     }
 }
