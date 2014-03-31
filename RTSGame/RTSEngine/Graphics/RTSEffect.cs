@@ -109,8 +109,7 @@ namespace RTSEngine.Graphics {
         public const string PASS_KEY_PRIMARY = "Primary";
         public const string PASS_KEY_SECONDARY = "Secondary";
         // Effect Parameter Keys
-        public const string PARAM_KEY_TRANSLATION = "Translation";
-        public const string PARAM_KEY_SCALING = "Scaling";
+        public const string PARAM_KEY_TEXELSIZE = "TexelSize";
         public const string PARAM_KEY_MAPSIZE = "MapSize";
         public const string PARAM_KEY_VP = "VP";
 
@@ -118,13 +117,7 @@ namespace RTSEngine.Graphics {
         private Effect fx;
         private EffectPass fxPassPrimary, fxPassSecondary;
 
-        private EffectParameter fxpTranslation, fxpScaling, fxpMapSize, fxpVP;
-        public Vector3 Translation {
-            set { fxpTranslation.SetValue(value); }
-        }
-        public Vector3 Scaling {
-            set { fxpScaling.SetValue(value); }
-        }
+        private EffectParameter fxpMapSize, fxpTexelSize, fxpVP;
         public Vector2 MapSize {
             set { fxpMapSize.SetValue(value); }
         }
@@ -144,8 +137,7 @@ namespace RTSEngine.Graphics {
             fxPassSecondary = fx.CurrentTechnique.Passes[PASS_KEY_SECONDARY];
 
             // Get The Parameters
-            fxpTranslation = fx.Parameters[PARAM_KEY_TRANSLATION];
-            fxpScaling = fx.Parameters[PARAM_KEY_SCALING];
+            fxpTexelSize = fx.Parameters[PARAM_KEY_TEXELSIZE];
             fxpMapSize = fx.Parameters[PARAM_KEY_MAPSIZE];
             fxpVP = fx.Parameters[PARAM_KEY_VP];
         }
@@ -155,6 +147,7 @@ namespace RTSEngine.Graphics {
             g.SamplerStates[0] = SamplerState.LinearClamp;
             g.Textures[1] = tFOW;
             g.SamplerStates[1] = SamplerState.PointClamp;
+            fxpTexelSize.SetValue(new Vector2(1f / tFOW.Width, 1f / tFOW.Height));
         }
 
         public void ApplyPassPrimary() {

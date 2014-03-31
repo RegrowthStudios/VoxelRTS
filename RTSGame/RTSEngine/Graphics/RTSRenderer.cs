@@ -94,8 +94,6 @@ namespace RTSEngine.Graphics {
             Map = HeightmapParser.ParseModel(ge, new Vector3(map.Width, map.ScaleY, map.Depth), ge.State.CGrid.grids.X, ge.State.CGrid.grids.Y, geLoad.MapFile);
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
-            fxMap.Scaling = Vector3.One;
-            fxMap.Translation = Vector3.Zero;
 
             // Get Unit Models
             for(int ti = 0; ti < geLoad.Teams.Length; ti++) {
@@ -112,17 +110,56 @@ namespace RTSEngine.Graphics {
             }
         }
 
+        private void CheckSetFOW(CollisionGrid cg, int x, int y, int pIndex, FogOfWar f, float fN) {
+            if(x < 0 || x >= cg.grids.X) return;
+            if(y < 0 || y >= cg.grids.Y) return;
+            FogOfWar of = cg.GetFogOfWar(x, y, pIndex);
+            if(of != f && Map.FogOfWar[y * cg.grids.X + x] < fN) {
+                cg.SetFogOfWar(x, y, pIndex, f);
+                Map.SetFOW(x, y, fN);
+            }
+        }
+        public void UpdateFOW(GameState s, RTSTeam team, int pIndex) {
+            CollisionGrid cg = s.CGrid;
+            for(int ui = 0; ui < team.units.Count; ui++) {
+                Point p = HashHelper.Hash(team.units[ui].GridPosition, cg.grids, cg.size);
+                FogOfWar f = cg.GetFogOfWar(p.X, p.Y, pIndex);
+                switch(f) {
+                    case FogOfWar.Active:
+                        continue;
+                    case FogOfWar.Passive:
+                        cg.SetFogOfWar(p.X, p.Y, pIndex, f);
+                        Map.SetFOW(p.X, p.Y, 1f);
+                        CheckSetFOW(cg, p.X + 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
+                        CheckSetFOW(cg, p.X - 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
+                        CheckSetFOW(cg, p.X, p.Y + 1, pIndex, FogOfWar.Passive, 0.5f);
+                        CheckSetFOW(cg, p.X, p.Y - 1, pIndex, FogOfWar.Passive, 0.5f);
+                        break;
+                    case FogOfWar.Nothing:
+                        cg.SetFogOfWar(p.X, p.Y, pIndex, f);
+                        Map.SetFOW(p.X, p.Y, 1f);
+                        CheckSetFOW(cg, p.X + 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
+                        CheckSetFOW(cg, p.X - 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
+                        CheckSetFOW(cg, p.X, p.Y + 1, pIndex, FogOfWar.Passive, 0.5f);
+                        CheckSetFOW(cg, p.X, p.Y - 1, pIndex, FogOfWar.Passive, 0.5f);
+                        break;
+                }
+            }
+        }
+
         // Rendering Passes
         public void Draw(GameState s, float dt) {
             G.Clear(Color.Black);
 
             // TODO: Draw Environment Cube
-
+            UpdateFOW(s, s.Teams[0], 0);
             DrawMap();
             DrawAnimated();
             if(drawBox) DrawSelectionBox();
         }
         private void DrawMap() {
+            if(Map.Reset) Map.ApplyFOW();
+
             // Set States
             G.DepthStencilState = DepthStencilState.Default;
             G.RasterizerState = RasterizerState.CullCounterClockwise;
