@@ -39,7 +39,7 @@ namespace RTSEngine.Controllers {
             teamIndex = tIndex;
             state = s;
             active = new List<Point>();
-            heat = new int[s.CGrid.gridSize.X, s.CGrid.gridSize.Y];
+            heat = new int[s.CGrid.numCells.X, s.CGrid.numCells.Y];
         }
 
         private bool IsGood(int gx, int gy, int[,] val, ref FOWPoint p) {
@@ -93,16 +93,16 @@ namespace RTSEngine.Controllers {
             var queue = new Queue<FOWPoint>();
 
             // Generate All The Old FOW
-            int[,] val = new int[cg.gridSize.X, cg.gridSize.Y];
-            for(int y = 0; y < cg.gridSize.Y; y++) {
-                for(int x = 0; x < cg.gridSize.X; x++) {
+            int[,] val = new int[cg.numCells.X, cg.numCells.Y];
+            for(int y = 0; y < cg.numCells.Y; y++) {
+                for(int x = 0; x < cg.numCells.X; x++) {
                     if(heat[x, y] > 0) val[x, y] = 1;
                     else val[x, y] = 0;
                 }
             }
 
             for(int i = 0; i < team.units.Count; i++) {
-                Point p = HashHelper.Hash(team.units[i].GridPosition, cg.gridSize, cg.size);
+                Point p = HashHelper.Hash(team.units[i].GridPosition, cg.numCells, cg.size);
                 if(val[p.X, p.Y] < 2) {
                     queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PX, 2));
                     queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NX, 2));
@@ -116,11 +116,11 @@ namespace RTSEngine.Controllers {
             while(queue.Count > 0) {
                 FOWPoint fp = queue.Dequeue();
                 val[fp.X, fp.Y] = fp.TravelAmount;
-                AddPoints(cg.gridSize.X, cg.gridSize.Y, val, queue, ref fp);
+                AddPoints(cg.numCells.X, cg.numCells.Y, val, queue, ref fp);
             }
 
-            for(int y = 0; y < cg.gridSize.Y; y++) {
-                for(int x = 0; x < cg.gridSize.X; x++) {
+            for(int y = 0; y < cg.numCells.Y; y++) {
+                for(int x = 0; x < cg.numCells.X; x++) {
                     FogOfWar f = cg.GetFogOfWar(x, y, teamIndex);
                     switch(val[x, y]) {
                         case 1:

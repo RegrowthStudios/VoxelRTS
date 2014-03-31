@@ -91,7 +91,7 @@ namespace RTSEngine.Graphics {
 
             // Create The Map
             Heightmap map = ge.State.Map;
-            Map = HeightmapParser.ParseModel(ge, new Vector3(map.Width, map.ScaleY, map.Depth), ge.State.CGrid.gridSize.X, ge.State.CGrid.gridSize.Y, geLoad.MapFile);
+            Map = HeightmapParser.ParseModel(ge, new Vector3(map.Width, map.ScaleY, map.Depth), ge.State.CGrid.numCells.X, ge.State.CGrid.numCells.Y, geLoad.MapFile);
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
 
@@ -111,10 +111,10 @@ namespace RTSEngine.Graphics {
         }
 
         private void CheckSetFOW(CollisionGrid cg, int x, int y, int pIndex, FogOfWar f, float fN) {
-            if(x < 0 || x >= cg.gridSize.X) return;
-            if(y < 0 || y >= cg.gridSize.Y) return;
+            if(x < 0 || x >= cg.numCells.X) return;
+            if(y < 0 || y >= cg.numCells.Y) return;
             FogOfWar of = cg.GetFogOfWar(x, y, pIndex);
-            if(of != f && Map.FogOfWar[y * cg.gridSize.X + x] < fN) {
+            if(of != f && Map.FogOfWar[y * cg.numCells.X + x] < fN) {
                 cg.SetFogOfWar(x, y, pIndex, f);
                 Map.SetFOW(x, y, fN);
             }
@@ -122,7 +122,7 @@ namespace RTSEngine.Graphics {
         public void UpdateFOW(GameState s, RTSTeam team, int pIndex) {
             CollisionGrid cg = s.CGrid;
             for(int ui = 0; ui < team.units.Count; ui++) {
-                Point p = HashHelper.Hash(team.units[ui].GridPosition, cg.gridSize, cg.size);
+                Point p = HashHelper.Hash(team.units[ui].GridPosition, cg.numCells, cg.size);
                 FogOfWar f = cg.GetFogOfWar(p.X, p.Y, pIndex);
                 switch(f) {
                     case FogOfWar.Active:

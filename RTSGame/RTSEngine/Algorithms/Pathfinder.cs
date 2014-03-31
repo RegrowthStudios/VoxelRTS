@@ -67,7 +67,7 @@ namespace RTSEngine.Algorithms {
 
         public Pathfinder(CollisionGrid cg) {
             world = cg;
-            searchGrid = new SearchLocation[cg.gridSize.X, cg.gridSize.Y];
+            searchGrid = new SearchLocation[cg.numCells.X, cg.numCells.Y];
             queries = new ConcurrentQueue<PathQuery>();
             running = true;
             thread = new Thread(WorkThread);
@@ -157,8 +157,8 @@ namespace RTSEngine.Algorithms {
 
         // Run A* Search, Given This Pathfinder's World And A Query
         private void Pathfind(PathQuery q) {
-            Point cGridPoint = HashHelper.Hash(q.Start, world.gridSize, world.size);
-            Point gGridPoint = HashHelper.Hash(q.End, world.gridSize, world.size); ;
+            Point cGridPoint = HashHelper.Hash(q.Start, world.numCells, world.size);
+            Point gGridPoint = HashHelper.Hash(q.End, world.numCells, world.size); ;
             var closedSet = new HashSet<Point>();
             var openSet = new MinHeap<SearchLocation>(SearchLocation.Compare);
             var cameFrom = new Dictionary<Point, Point?>();

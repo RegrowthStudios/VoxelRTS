@@ -124,5 +124,101 @@ namespace RTSEngine.Data.Team
         public void EnqueueUnit(RTSUnit unit) {
             UnitQueue.Enqueue(unit);
         }
+
+        RTSTeam IEntity.Team {
+            get { throw new NotImplementedException(); }
+        }
+
+        int IEntity.UUID {
+            get { throw new NotImplementedException(); }
+        }
+
+        int IEntity.Health {
+            get { throw new NotImplementedException(); }
+        }
+
+        bool IEntity.IsAlive {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        Vector2 IEntity.GridPosition {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        float IEntity.Height {
+            get { throw new NotImplementedException(); }
+        }
+
+        Vector3 IEntity.WorldPosition {
+            get { throw new NotImplementedException(); }
+        }
+
+        ICollidable IEntity.CollisionGeometry {
+            get { throw new NotImplementedException(); }
+        }
+
+        BoundingBox IEntity.BBox {
+            get { throw new NotImplementedException(); }
+        }
+
+        IEntity IEntity.Target {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        event Action<IEntity, IEntity> IEntity.OnNewTarget {
+            add { throw new NotImplementedException(); }
+            remove { throw new NotImplementedException(); }
+        }
+
+        event Action<IEntity, int> IEntity.OnDamage {
+            add { throw new NotImplementedException(); }
+            remove { throw new NotImplementedException(); }
+        }
+
+        event Action<IEntity> IEntity.OnDestruction {
+            add { throw new NotImplementedException(); }
+            remove { throw new NotImplementedException(); }
+        }
+
+        ACUnitActionController IEntity.ActionController {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        ACUnitAnimationController IEntity.AnimationController {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        void IEntity.Destroy() {
+            throw new NotImplementedException();
+        }
+
+        void IEntity.Damage(int d) {
+            throw new NotImplementedException();
+        }
     }
 }
