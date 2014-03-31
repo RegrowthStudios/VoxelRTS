@@ -70,7 +70,6 @@
     <Compile Include="Data\Camera.cs" />
     <Compile Include="Data\DevCommands.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
-    <Compile Include="Data\HashGrid.cs" />
     <Compile Include="Data\Heightmap.cs" />
     <Compile Include="Data\Collision.cs" />
     <Compile Include="Data\Combat.cs" />

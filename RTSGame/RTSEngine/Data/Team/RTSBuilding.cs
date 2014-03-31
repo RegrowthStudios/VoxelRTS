@@ -112,5 +112,39 @@ namespace RTSEngine.Data.Team
             if (OnDestruction != null)
                 OnDestruction(this);
         }
+
+
+        public int UUID {
+            get { throw new NotImplementedException(); }
+        }
+
+        public IEntity Target {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        public event Action<IEntity, IEntity> OnNewTarget;
+
+        public ACUnitActionController ActionController {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
+
+        public ACUnitAnimationController AnimationController {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

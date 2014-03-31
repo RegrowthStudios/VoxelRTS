@@ -7,7 +7,7 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team
 {
-    class RTSBuildingData
+    public class RTSBuildingData
     {
         // The Friendly Name
         public string FriendlyName;
