@@ -28,6 +28,9 @@ namespace RTSEngine.Data.Team {
         // Speed Of The Unit
         public float MovementSpeed;
 
+        // How Long It Takes For The Building To Make This Unit
+        public int BuildTime;
+
         // BaseCombatData of The Unit
         public BaseCombatData BaseCombatData;
 

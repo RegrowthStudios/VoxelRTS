@@ -104,6 +104,6 @@ namespace RTSEngine.Interfaces {
 
     public abstract class ACBuildingActionController : ACBuildingController {
         public abstract void ApplyEnvImpact(GameState g);
-
+        public abstract void SpawnUnit(GameState g);
     }
 }
