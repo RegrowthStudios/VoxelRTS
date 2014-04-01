@@ -1,0 +1,12 @@
+﻿// Friendly Team Name
+NAME            [Mechanica]
+
+// Default Squad Controllers
+CTRLACTION      [RTS.Mech.Squad.Action]
+CTRLMOVEMENT    [RTS.Mech.Squad.Movement]
+CTRLTARGET      [RTS.Mech.Squad.Target]
+
+// List Of All Unit Types Belonging To Team
+UNIT            [..\units\soldier.unit]
+UNIT            [..\units\heavy.unit]
+UNIT            [..\units\armor.unit]

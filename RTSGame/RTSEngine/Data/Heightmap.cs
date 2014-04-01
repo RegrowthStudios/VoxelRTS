@@ -8,12 +8,9 @@ using RTSEngine.Graphics;
 
 namespace RTSEngine.Data {
     public class Heightmap {
-        // Bit Masks
-        private const int MASK_COLLISION = 0x01; 
-
         // Height Values
         private float[] heights;
-        private byte[] data;
+        private byte[] data; // TODO: remove
 
         // The BVH (Yay)
         public BVH BVH {
@@ -64,6 +61,10 @@ namespace RTSEngine.Data {
         public Vector2 Scale {
             get { return new Vector2(ScaleX, ScaleZ); }
         }
+        public float ScaleY {
+            get;
+            private set;
+        }
 
         // Constructor With Heightmap Data Passed In
         public Heightmap(float[] v, byte[] d, int w, int h) {
@@ -76,15 +77,12 @@ namespace RTSEngine.Data {
             GridWidth = HValueWidth - 1;
             GridDepth = HValueDepth - 1;
             BVH = new BVH();
-        }
-
-        // Build Directly From OBJ File
-        public void BuildBVH(VertexPositionTexture[] verts, int[] inds) {
-            BVH.Build(verts, inds);
+            ScaleY = 1f;
         }
 
         // Scale The Heights By A Certain Value
         public void ScaleHeights(float s) {
+            ScaleY *= s;
             for(int i = 0; i < heights.Length; i++)
                 heights[i] *= s;
         }
@@ -99,12 +97,6 @@ namespace RTSEngine.Data {
                 x <= 0 ? 0 : (x >= GridWidth - 1 ? GridWidth - 1 : (int)x),
                 z <= 0 ? 0 : (z >= GridDepth - 1 ? GridDepth - 1 : (int)z)
                 );
-        }
-
-        // Find The Worldspace For the Grid Location (x,z)
-        // TODO: Verify
-        public Vector2 UnMap(int x, int z) {
-            return new Vector2(ScaleX * ((float)x), ScaleZ * ((float)z));
         }
 
         // Retrieve Interpolated Height From The Heightmap
@@ -134,12 +126,6 @@ namespace RTSEngine.Data {
                 rx, rz
                 );
         }
-
-        // Does The Datum At This (x,z) Grid Location Indicate Collidable (Non-Passable)?
-        public bool IsCollidable(int x, int z) {
-            return (data[HeightMapIndex(x,z)] & MASK_COLLISION) == 1; 
-        }
-
         // Convert A 2D Index Into a 1D Index
         private int HeightMapIndex(int x, int z) {
             return z*HValueWidth + x;

@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
+using RTSEngine.Controllers;
 
 namespace RTSEngine.Data {
     // Holds All The Data Necessary For A Game
@@ -24,50 +25,55 @@ namespace RTSEngine.Data {
             set;
         }
 
+        // The Grids For The Level
+        public CollisionGrid CGrid {
+            get;
+            set;
+        }
+
+        // Controller Dictionary
+        public Dictionary<string, ReflectedUnitController> UnitControllers {
+            get;
+            private set;
+        }
+        public Dictionary<string, ReflectedSquadController> SquadControllers {
+            get;
+            private set;
+        }
+
         // Constant List Of Teams
         public RTSTeam[] Teams {
             get;
             private set;
         }
 
-        // List Of Unit Data
-        private RTSUnit[] units;
-        public IEnumerable<RTSUnit> Units {
-            get { return units; }
+        // Keeping Track Of Time
+        private int curFrame;
+        public int CurrentFrame {
+            get { return curFrame; }
+        }
+        public float TotalGameTime {
+            get { return curFrame * RTSConstants.GAME_DELTA_TIME; }
         }
 
-        // Create With Premade Data
-        public GameState(RTSTeam[] t) {
-            // Copy Over Teams
-            Teams = new RTSTeam[t.Length];
-            t.CopyTo(Teams, 0);
-
+        public GameState() {
             // No Data Yet Available
-            units = new RTSUnit[MAX_RTSUNIT_ID + 1];
+            UnitControllers = new Dictionary<string, ReflectedUnitController>();
+            SquadControllers = new Dictionary<string, ReflectedSquadController>();
+            //units = new RTSUnitData[MAX_RTSUNIT_ID + 1];
             Map = null;
         }
 
-        // Need These Accessors For Unit Types
-        public void AddRTSUnit(int id, RTSUnit u) {
-            // Check If Previous Slot Is Filled
-            if(units[id] != null)
-                throw new ArgumentException("ID Is Already Taken");
-
-            // TODO: Maybe Add Event
-            units[id] = u;
-        }
-        public void AddRTSUnit(RTSUnit u) {
-            // Try To Find An Empty Slot
-            for(int i = MIN_RTSUNIT_ID; i <= MAX_RTSUNIT_ID; i++) {
-                if(units[i] == null) {
-                    AddRTSUnit(i, u);
-                    return;
-                }
-            }
-        }
-        public RTSUnit GetRTSUnit(int id) {
-            return units[id];
+        // Create With Premade Data
+        public void SetTeams(RTSTeam[] t) {
+            // Copy Over Teams
+            Teams = new RTSTeam[t.Length];
+            t.CopyTo(Teams, 0);
         }
 
+        // Glorified Way For The Gameplay Controller To Keep Track Of Time
+        public void IncrementFrame() {
+            curFrame++;
+        }
     }
 }

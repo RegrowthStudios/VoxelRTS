@@ -6,24 +6,24 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
-    public class RTSSquad : ISquad {
-
+    public class RTSSquad {
         // This Squad's Team
         public RTSTeam Team {
             get;
             private set;
         }
 
-        //List of Combatants In The Squad
-        private List<ICombatEntity> combatants;
-        public IEnumerable<ICombatEntity> Combatants {
-            get { return combatants; }
+        // Units In The Squad
+        private List<RTSUnit> units;
+        public List<RTSUnit> Units {
+            get { return units; }
         }
 
-        //Number of Combatants In The Squad
-        public int EntityCount {
-            get { return combatants.Count; }
+        // Death Condition
+        public bool IsDead {
+            get { return units.Count < 1; }
         }
+        public event Action<RTSSquad> OnDeath;
 
         // The Average Position Of The Squad
         private Vector2 gridPos;
@@ -32,13 +32,34 @@ namespace RTSEngine.Data.Team {
         }
 
         // Events When Squad Is Altered
-        public event Action<ISquad, ICombatEntity> OnCombatantAddition;
+        public event Action<RTSSquad, RTSUnit> OnUnitAddition;
+        public event Action<RTSSquad, RTSUnit> OnUnitRemoval;
 
-        public event Action<ISquad, ICombatEntity> OnCombatantRemoval;
+        // The Action Controller For This Squad
+        private ACSquadActionController aController;
+        public ACSquadActionController ActionController {
+            get { return aController; }
+            set {
+                aController = value;
+                if(aController != null)
+                    aController.SetSquad(this);
+            }
+        }
+
+        // The Movement Controller For This Squad
+        private ACSquadMovementController mController;
+        public ACSquadMovementController MovementController {
+            get { return mController; }
+            set {
+                mController = value;
+                if(mController != null)
+                    mController.SetSquad(this);
+            }
+        }
 
         // The Targetting Controller For This Squad
-        private ITargettingController tController;
-        public ITargettingController TargettingController {
+        private ACSquadTargettingController tController;
+        public ACSquadTargettingController TargettingController {
             get { return tController; }
             set {
                 tController = value;
@@ -47,35 +68,74 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        public RTSSquad(RTSTeam team) {
+            Team = team;
+            units = new List<RTSUnit>();
+        }
+
         // Adds A Combatant To This Squad
-        public void AddCombatant(ICombatEntity e) {
-            combatants.Add(e);
-            if(OnCombatantAddition != null)
-                OnCombatantAddition(this,e);
+        public void Add(RTSUnit u) {
+            // Units Cannot Be Added Twice
+            if(u.Squad == this) return;
+
+            // Squad Invariant Performed Here
+            if(u.Squad != null) u.Squad.Remove(u);
+
+            u.Squad = this;
+            units.Add(u);
+            u.OnDestruction += OnUnitDestruction;
+            if(OnUnitAddition != null)
+                OnUnitAddition(this, u);
+        }
+        public void Remove(RTSUnit u) {
+            // Make Sure Unit Is In The Squad
+            if(u.Squad == this) {
+                // Remove All References
+                units.Remove(u);
+                u.OnDestruction -= OnUnitDestruction;
+
+                // Send Update Event
+                if(OnUnitRemoval != null)
+                    OnUnitRemoval(this, u);
+
+                // Check Death Condition
+                if(IsDead && OnDeath != null)
+                    OnDeath(this);
+            }
         }
 
         // Removes All Combatants From This Squad That Match A Predicate
-        public void RemoveAll(Predicate<ICombatEntity> f) {
-            foreach(var c in combatants) {
-                if(f(c)) {
-                    combatants.Remove(c);
-                    if(OnCombatantRemoval != null)
-                        OnCombatantRemoval(this, c);
+        public void RemoveAll(Predicate<RTSUnit> f) {
+            List<RTSUnit> nUnits = new List<RTSUnit>(units.Count);
+            for(int i = 0; i < units.Count; i++) {
+                if(f(units[i])) {
+                    if(OnUnitRemoval != null)
+                        OnUnitRemoval(this, units[i]);
                 }
+                else nUnits.Add(units[i]);
             }
+
+            // Set The New List Of Units
+            units = nUnits;
+
+            // Check Death Condition
+            if(IsDead && OnDeath != null) 
+                OnDeath(this);
         }
 
         // Should Be Done At The Beginning Of Each Frame (Only Once)
         public void RecalculateGridPosition() {
-            float sumX = 0;
-            float sumY = 0;
-            foreach(var c in Combatants){
-                sumX += c.GridPosition.X;
-                sumY += c.GridPosition.Y;
+            if(units.Count > 0) {
+                gridPos = Vector2.Zero;
+                foreach(var u in units)
+                    gridPos += u.GridPosition;
+                gridPos /= units.Count;
             }
-            gridPos.X = sumX / EntityCount;
-            gridPos.Y = sumY / EntityCount;
+        }
+
+        // When A Unit Dies, It Must Be Removed From Here
+        private void OnUnitDestruction(IEntity u) {
+            Remove(u as RTSUnit);
         }
     }
-
 }

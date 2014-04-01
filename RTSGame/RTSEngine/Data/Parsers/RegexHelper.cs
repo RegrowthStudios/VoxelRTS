@@ -7,10 +7,11 @@ using Microsoft.Xna.Framework;
 
 namespace RTSEngine.Data.Parsers {
     public static class RegexHelper {
+        public const string DATA_STRING_REGEX = @"[\w\s]+";
         public const string DATA_FILE_REGEX = @"[\w\.][\w|\s|.|\\|/]*";
         public const string DATA_NUM_REGEX = @"[\d\x2d]*\.*\d*";
         public const string DATA_INT_REGEX = @"[\d\x2d]+";
-        const string NUM_SPLIT = @"\s*[\x7c/,]\s*";
+        public const string NUM_SPLIT = @"\s*[\x7c/,]\s*";
         static readonly Regex RGX_VEC_SPLIT = new Regex(NUM_SPLIT);
         public const string DATA_VEC2_REGEX = DATA_NUM_REGEX + NUM_SPLIT + DATA_NUM_REGEX;
         public const string DATA_VEC3_REGEX = DATA_VEC2_REGEX + NUM_SPLIT + DATA_NUM_REGEX;
@@ -22,6 +23,9 @@ namespace RTSEngine.Data.Parsers {
         public static Regex Generate(string key, string data) {
             string rs = string.Format(@"{0}\s+\x5b({1})\x5d\s*", key, data);
             return new Regex(rs);
+        }
+        public static Regex GenerateString(string key) {
+            return Generate(key, DATA_STRING_REGEX);
         }
         public static Regex GenerateFile(string key) {
             return Generate(key, DATA_FILE_REGEX);

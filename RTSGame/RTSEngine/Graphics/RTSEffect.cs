@@ -6,10 +6,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace RTSEngine.Graphics {
-    /// <summary>
-    /// For Animation: Position = U, DV / Frame, 0
-    /// </summary>
-
     public struct VertexRTSAnimInst : IVertexType {
         #region Declaration
         public static readonly VertexDeclaration Declaration = new VertexDeclaration(
@@ -33,40 +29,33 @@ namespace RTSEngine.Graphics {
         }
     }
 
-    public class RTSEffect {
+    public class RTSFXEntity {
         // Effect Pass Keys
         public const string PASS_KEY_SIMPLE = "Simple";
-        public const string PASS_KEY_SWATCHED = "Swatched";
         public const string PASS_KEY_ANIMATION = "Animation";
         // Effect Parameter Keys
         public const string PARAM_KEY_WORLD = "World";
         public const string PARAM_KEY_VP = "VP";
-        public const string PARAM_KEY_TEX_COLOR_MAP = "TexColor";
         public const string PARAM_KEY_COLOR_PRIMARY = "CPrimary";
         public const string PARAM_KEY_COLOR_SECONDARY = "CSecondary";
         public const string PARAM_KEY_COLOR_TERTIARY = "CTertiary";
-        public const string PARAM_KEY_TEX_OVERLAY = "TexOverlay";
-        public const string PARAM_KEY_TEX_MODEL_MAP = "TexModelMap";
         public const string PARAM_KEY_TEXEL_SIZE = "TexelSize";
 
         // The Effect And Its Passes
         private Effect fx;
-        private EffectPass fxPassSimple, fxPassSwatched, fxPassAnimation;
+        private EffectPass fxPassSimple, fxPassAnimation;
 
         // Used For Simple Pass
-        private EffectParameter fxpWorld, fxpVP, fxpTexColor;
+        private EffectParameter fxpWorld, fxpVP;
         public Matrix World {
             set { fxpWorld.SetValue(value); }
         }
         public Matrix VP {
             set { fxpVP.SetValue(value); }
         }
-        public Texture2D TexColor {
-            set { fxpTexColor.SetValue(value); }
-        }
 
         // Used For Swatched Pass
-        private EffectParameter fxpColP, fxpColS, fxpColT, fxpTexOverlay;
+        private EffectParameter fxpColP, fxpColS, fxpColT;
         public Vector3 CPrimary {
             set { fxpColP.SetValue(value); }
         }
@@ -76,20 +65,11 @@ namespace RTSEngine.Graphics {
         public Vector3 CTertiary {
             set { fxpColT.SetValue(value); }
         }
-        public Texture2D TexOverlay {
-            set { fxpTexOverlay.SetValue(value); }
-        }
 
         // Used For Animation Pass
-        private EffectParameter fxpTexModel, fxpTexelSize;
-        public Texture2D TexModelMap {
-            set {
-                fxpTexModel.SetValue(value);
-                fxpTexelSize.SetValue(new Vector2(1f / value.Width, 1f / value.Height));
-            }
-        }
+        private EffectParameter fxpTexelSize;
 
-        public RTSEffect(Effect _fx) {
+        public RTSFXEntity(Effect _fx) {
             if(_fx == null) throw new ArgumentNullException("A Null Effect Was Used");
 
             // Set The Effect To The First Technique
@@ -98,48 +78,83 @@ namespace RTSEngine.Graphics {
 
             // Get The Passes
             fxPassSimple = fx.CurrentTechnique.Passes[PASS_KEY_SIMPLE];
-            fxPassSwatched = fx.CurrentTechnique.Passes[PASS_KEY_SWATCHED];
             fxPassAnimation = fx.CurrentTechnique.Passes[PASS_KEY_ANIMATION];
 
             // Get The Parameters
             fxpWorld = fx.Parameters[PARAM_KEY_WORLD];
             fxpVP = fx.Parameters[PARAM_KEY_VP];
-            fxpTexColor = fx.Parameters[PARAM_KEY_TEX_COLOR_MAP];
             fxpColP = fx.Parameters[PARAM_KEY_COLOR_PRIMARY];
             fxpColS = fx.Parameters[PARAM_KEY_COLOR_SECONDARY];
             fxpColT = fx.Parameters[PARAM_KEY_COLOR_TERTIARY];
-            fxpTexOverlay = fx.Parameters[PARAM_KEY_TEX_OVERLAY];
-            fxpTexModel = fx.Parameters[PARAM_KEY_TEX_MODEL_MAP];
             fxpTexelSize = fx.Parameters[PARAM_KEY_TEXEL_SIZE];
         }
 
         public void ApplyPassSimple() {
             fxPassSimple.Apply();
         }
-        public void ApplyPassSwatched() {
-            fxPassSwatched.Apply();
-        }
         public void ApplyPassAnimation() {
             fxPassAnimation.Apply();
         }
 
-        public void DrawPassSimple(GraphicsDevice g, VertexBuffer model, IndexBuffer indices) {
-            g.SetVertexBuffer(model);
-            g.Indices = indices;
-            g.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, model.VertexCount, 0, indices.IndexCount / 3);
+        public void SetTextures(GraphicsDevice g, Texture2D tAnim, Texture2D tMain, Texture2D tKey) {
+            g.VertexTextures[0] = tAnim;
+            g.Textures[1] = tMain;
+            g.Textures[2] = tKey;
+            fxpTexelSize.SetValue(new Vector2(1f / tAnim.Width, 1f / tAnim.Height));
         }
-        public void DrawPassSwatched(GraphicsDevice g, VertexBuffer model, IndexBuffer indices) {
-            g.SetVertexBuffer(model);
-            g.Indices = indices;
-            g.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, model.VertexCount, 0, indices.IndexCount / 3);
+    }
+
+    public class RTSFXMap {
+        // Effect Pass Keys
+        public const string PASS_KEY_PRIMARY = "Primary";
+        public const string PASS_KEY_SECONDARY = "Secondary";
+        // Effect Parameter Keys
+        public const string PARAM_KEY_TEXELSIZE = "TexelSize";
+        public const string PARAM_KEY_MAPSIZE = "MapSize";
+        public const string PARAM_KEY_VP = "VP";
+
+        // The Effect And Its Passes
+        private Effect fx;
+        private EffectPass fxPassPrimary, fxPassSecondary;
+
+        private EffectParameter fxpMapSize, fxpTexelSize, fxpVP;
+        public Vector2 MapSize {
+            set { fxpMapSize.SetValue(value); }
         }
-        public void DrawPassAnimation(GraphicsDevice g, VertexBuffer model, DynamicVertexBuffer instances, IndexBuffer indices) {
-            g.SetVertexBuffers(
-                new VertexBufferBinding(model),
-                new VertexBufferBinding(instances, 0, 1)
-                );
-            g.Indices = indices;
-            g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, model.VertexCount, 0, indices.IndexCount / 3, instances.VertexCount);
+        public Matrix VP {
+            set { fxpVP.SetValue(value); }
+        }
+
+        public RTSFXMap(Effect _fx) {
+            if(_fx == null) throw new ArgumentNullException("A Null Effect Was Used");
+
+            // Set The Effect To The First Technique
+            fx = _fx;
+            fx.CurrentTechnique = fx.Techniques[0];
+
+            // Get The Passes
+            fxPassPrimary = fx.CurrentTechnique.Passes[PASS_KEY_PRIMARY];
+            fxPassSecondary = fx.CurrentTechnique.Passes[PASS_KEY_SECONDARY];
+
+            // Get The Parameters
+            fxpTexelSize = fx.Parameters[PARAM_KEY_TEXELSIZE];
+            fxpMapSize = fx.Parameters[PARAM_KEY_MAPSIZE];
+            fxpVP = fx.Parameters[PARAM_KEY_VP];
+        }
+
+        public void SetTextures(GraphicsDevice g, Texture2D tColor, Texture2D tFOW) {
+            g.Textures[0] = tColor;
+            g.SamplerStates[0] = SamplerState.LinearClamp;
+            g.Textures[1] = tFOW;
+            g.SamplerStates[1] = SamplerState.PointClamp;
+            fxpTexelSize.SetValue(new Vector2(1f / tFOW.Width, 1f / tFOW.Height));
+        }
+
+        public void ApplyPassPrimary() {
+            fxPassPrimary.Apply();
+        }
+        public void ApplyPassSecondary() {
+            fxPassSecondary.Apply();
         }
     }
 }

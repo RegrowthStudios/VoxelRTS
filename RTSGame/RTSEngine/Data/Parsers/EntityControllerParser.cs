@@ -6,57 +6,19 @@ using System.Reflection;
 using System.CodeDom.Compiler;
 using Microsoft.CSharp;
 using RTSEngine.Interfaces;
+using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Parsers {
-    #region Compiled Arguments
-    public class ReflectedEntityController {
-        // The Types Of Controller That This Is
-        public EntityControllerType ControllerType {
-            get;
-            private set;
-        }
-
-        // The Constructor Of This Controller
-        private ConstructorInfo constructor;
-
-        public ReflectedEntityController(Type t) {
-            // Get Constructor
-            constructor = t.GetConstructor(new Type[0]);
-
-            // Find Controller Types
-            ControllerType = EntityControllerType.None;
-            Type[] interfaces = t.GetInterfaces();
-            foreach(var ti in interfaces) {
-                if(ti.IsEquivalentTo(typeof(IActionController)))
-                    ControllerType |= EntityControllerType.Action;
-                else if(ti.IsEquivalentTo(typeof(IMovementController)))
-                    ControllerType |= EntityControllerType.Movement;
-                else if(ti.IsEquivalentTo(typeof(ITargettingController)))
-                    ControllerType |= EntityControllerType.Targetting;
-                else if(ti.IsEquivalentTo(typeof(ICombatController)))
-                    ControllerType |= EntityControllerType.Combat;
-            }
-        }
-
-        public IEntityController CreateInstance() {
-            return constructor.Invoke(null) as IEntityController;
-        }
+    public struct DynCompiledResults {
+        public Dictionary<string, ReflectedUnitController> UnitControllers;
+        public Dictionary<string, ReflectedSquadController> SquadControllers;
     }
-    public class CompiledEntityControllers {
-        // The Dictionary Of Controllers
-        public readonly Dictionary<string, ReflectedEntityController> Controllers;
 
-        public CompiledEntityControllers() {
-            Controllers = new Dictionary<string, ReflectedEntityController>();
-        }
-    }
-    #endregion
-
-    public static class EntityControllerParser {
+    public static class DynControllerParser {
         // Create The Compiler
         private static readonly CSharpCodeProvider compiler = new CSharpCodeProvider();
 
-        public static CompiledEntityControllers Compile(string file, string[] references, out string error) {
+        public static DynCompiledResults Compile(string[] files, string[] references, out string error) {
             // No Error Default
             error = null;
 
@@ -66,65 +28,33 @@ namespace RTSEngine.Data.Parsers {
             compParams.GenerateExecutable = false;
             compParams.GenerateInMemory = true;
             compParams.TreatWarningsAsErrors = false;
-            CompilerResults cr = compiler.CompileAssemblyFromFile(compParams, file);
+            CompilerResults cr = compiler.CompileAssemblyFromFile(compParams, files);
 
             // Check For Errors
             if(cr.Errors.Count > 0) {
                 error = "";
                 foreach(var e in cr.Errors)
                     error += e + "\n";
-                return null;
+                return new DynCompiledResults();
             }
-            CompiledEntityControllers cec = new CompiledEntityControllers();
+
+            // Loop Through All Visible Types
+            DynCompiledResults res = new DynCompiledResults();
+            res.UnitControllers = new Dictionary<string, ReflectedUnitController>();
+            res.SquadControllers = new Dictionary<string, ReflectedSquadController>();
             Assembly a = cr.CompiledAssembly;
             Type[] types = a.GetExportedTypes();
             foreach(Type t in types) {
                 // We Don't Want Abstract Classes Or Interfaces
                 if(t.IsAbstract || t.IsInterface) continue;
 
-                Type[] interfaces = t.GetInterfaces();
-                foreach(Type ti in interfaces) {
-                    if(ti.Equals(typeof(IEntityController))) {
-                        cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
-                    }
-                }
+                // Check For The Superclass
+                if(t.IsSubclassOf(typeof(ACUnitController)))
+                    res.UnitControllers.Add(t.FullName, new ReflectedUnitController(t));
+                else if(t.IsSubclassOf(typeof(ACSquadController)))
+                    res.SquadControllers.Add(t.FullName, new ReflectedSquadController(t));
             }
-            return cec;
-        }
-        public static CompiledEntityControllers CompileText(string text, string[] references, out string error) {
-            // No Error Default
-            error = null;
-
-            // Compile
-            CompilerParameters compParams = new CompilerParameters(references, null, false);
-            compParams.CompilerOptions = "/optimize";
-            compParams.GenerateExecutable = false;
-            compParams.GenerateInMemory = true;
-            compParams.TreatWarningsAsErrors = false;
-            CompilerResults cr = compiler.CompileAssemblyFromSource(compParams, text);
-
-            // Check For Errors
-            if(cr.Errors.Count > 0) {
-                error = "";
-                foreach(var e in cr.Errors)
-                    error += e + "\n";
-                return null;
-            }
-            CompiledEntityControllers cec = new CompiledEntityControllers();
-            Assembly a = cr.CompiledAssembly;
-            Type[] types = a.GetExportedTypes();
-            foreach(Type t in types) {
-                // We Don't Want Abstract Classes Or Interfaces
-                if(t.IsAbstract || t.IsInterface) continue;
-
-                Type[] interfaces = t.GetInterfaces();
-                foreach(Type ti in interfaces) {
-                    if(ti.Equals(typeof(IEntityController))) {
-                        cec.Controllers.Add(t.FullName, new ReflectedEntityController(t));
-                    }
-                }
-            }
-            return cec;
+            return res;
         }
     }
 }

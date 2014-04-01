@@ -393,7 +393,20 @@ namespace Microsoft.Xna.Framework.Graphics {
             }
             return true;
         }
-
+        public static bool TryParse(Stream s, GraphicsDevice g, out VertexBuffer vb, out IndexBuffer ib, ParsingFlags ps = ParsingFlags.None) {
+            VertexPositionNormalTexture[] verts;
+            int[] inds;
+            if(!TryParse(s, out verts, out inds, ps)) {
+                vb = null;
+                ib = null;
+                return false;
+            }
+            vb = new VertexBuffer(g, VertexPositionNormalTexture.VertexDeclaration, verts.Length, BufferUsage.WriteOnly);
+            vb.SetData(verts);
+            ib = new IndexBuffer(g, IndexElementSize.ThirtyTwoBits, inds.Length, BufferUsage.WriteOnly);
+            ib.SetData(inds);
+            return true;
+        }
 
         // For Writing
         #region Intermediate Structs

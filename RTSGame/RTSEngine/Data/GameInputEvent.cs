@@ -19,8 +19,14 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public GameInputEvent(GameEventType a) {
+        public RTSTeam Team {
+            get;
+            private set;
+        }
+
+        public GameInputEvent(GameEventType a, RTSTeam t) {
             Action = a;
+            Team = t;
         }
     }
 
@@ -30,8 +36,8 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SelectEvent(List<IEntity> s)
-            : base(GameEventType.Select) {
+        public SelectEvent(List<IEntity> s, RTSTeam t)
+            : base(GameEventType.Select, t) {
             Selected = s;
         }
     }
@@ -42,21 +48,21 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SetWayPointEvent(Vector2 w)
-            : base(GameEventType.SetWaypoint) {
+        public SetWayPointEvent(Vector2 w, RTSTeam t)
+            : base(GameEventType.SetWaypoint, t) {
             Waypoint = w;
         }
     }
 
     public class SetTargetEvent : GameInputEvent {
-        public IDestructibleEntity Target {
+        public IEntity Target {
             get;
             private set;
         }
 
-        public SetTargetEvent(IDestructibleEntity t)
-            : base(GameEventType.SetTarget) {
-            Target = t;
+        public SetTargetEvent(IEntity target, RTSTeam t)
+            : base(GameEventType.SetTarget, t) {
+            Target = target;
         }
     }
 }

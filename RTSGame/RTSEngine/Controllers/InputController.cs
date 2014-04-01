@@ -8,11 +8,21 @@ using System.Collections.Concurrent;
 using RTSEngine.Data.Team;
 
 namespace RTSEngine.Controllers {
-    public class InputController : IInputController{
+    // Types Of Teams
+    public enum InputType {
+        Player,
+        AI,
+        Environment
+    }
+
+    public abstract class InputController : IDisposable {
 
         //Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
-        
+
+        //Currently Selected Entities
+        public readonly List<IEntity> selected;
+
         //The RTSTeam of the InputController
         public RTSTeam Team { get; private set; }
 
@@ -24,7 +34,9 @@ namespace RTSEngine.Controllers {
             GameState = g;
             Team = t;
             eventQueue = new ConcurrentQueue<GameInputEvent>();
+            selected = new List<IEntity>();
         }
+        public abstract void Dispose();
 
         //Adds Event To Concurrent Queue
         public void AddEvent(GameInputEvent e) {
@@ -35,7 +47,6 @@ namespace RTSEngine.Controllers {
         public void AppendEvents(LinkedList<GameInputEvent> l) {
             int count = eventQueue.Count;
             GameInputEvent e;
-
             while(count > 0) {
                 if(eventQueue.TryDequeue(out e)) {
                     l.AddLast(e);

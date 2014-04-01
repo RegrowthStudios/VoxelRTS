@@ -4,48 +4,106 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using RTSEngine.Data;
+using RTSEngine.Data.Team;
 
 namespace RTSEngine.Interfaces {
-    // Bitfield Flags For Entity Controller Type
-    public enum EntityControllerType {
-        None = 0x00,
-        Action = 0x01,
-        Movement = 0x02,
-        Targetting = 0x04,
-        Combat = 0x08
+    public enum AnimationType {
+        None,
+        Rest,
+        Walking,
+        PrepareCombatRanged,
+        CombatRanged,
+        CombatMelee,
+        Death,
+        Special0,
+        Special1
     }
 
-    public interface IEntityController {
-        // The Entity That This Controller is Controlling
-        IEntity Entity { get; }
+    // Base Controller Functionality
+    public abstract class ACUnitController {
+        // The Unit That Is Being Controlled
+        protected RTSUnit unit;
+        public RTSUnit Unit {
+            get { return Unit; }
+        }
 
-        // Will Set Once And Then Fail On Later Occurences
-        void SetEntity(IEntity e);
+        public void SetUnit(RTSUnit u) {
+            if(u == null) return;
+            if(unit != null)
+                throw new ArgumentException("Cannot Rebind This Controller To Another Unit");
+            unit = u;
+            return;
+        }
+        public T SetUnit<T>(RTSUnit u) where T : ACUnitController {
+            SetUnit(u);
+            return this as T;
+        }
     }
 
-    public interface IMovementController : IEntityController {
-        // List Of Waypoints To Move Each Target
-        IEnumerable<Vector2> Waypoints { get; }
-
-        // Provides Controller With A New Move List
-        void SetWaypoints(Vector2[] p);
-
-        // Performs The Critical Logic Of This Controller
-        void DecideMove(GameState g, float dt);
-
-        void ApplyMove(GameState g, float dt);
+    // A Super Controller Called By The Gameplay Controller
+    public abstract class ACUnitActionController : ACUnitController {
+        // Scripted Super-Controller Logic
+        public abstract void DecideAction(GameState g, float dt);
+        public abstract void ApplyAction(GameState g, float dt);
     }
 
-    public interface IActionController : IEntityController {
-        // Performs Decision Logic For The Entity
-        void DecideAction(GameState g, float dt);
+    // Steps Animations And May Send Particle Events
+    public abstract class ACUnitAnimationController : ACUnitController {
+        // FSM
+        protected AnimationType animation;
+        public AnimationType Animation {
+            get { return animation; }
+        }
 
-        // Apply The Entity's Decision
-        void ApplyAction(GameState g, float dt);
+        // This Is The Value Read By The Renderer
+        public float AnimationFrame {
+            get;
+            protected set;
+        }
+
+        // Scripted Animation
+        public abstract void SetAnimation(AnimationType t);
+        public abstract void Update(GameState s, float dt);
     }
 
-    public interface ICombatController : IEntityController {
-        // Attack This Controller's Entity's Target, If Possible
-        void Attack(GameState g, float dt);
+    // Reasons About How Combat Damage Should Be Performed To A Unit's Target
+    public abstract class ACUnitCombatController : ACUnitController {
+        // Scripted Logic For Attacking
+        public abstract void Attack(GameState g, float dt);
+    }
+
+    // Special Movement Mechanics
+    public abstract class ACUnitMovementController : ACUnitController {
+        protected readonly List<Vector2> waypoints = new List<Vector2>();
+        public List<Vector2> Waypoints {
+            get { return waypoints; }
+        }
+
+        // Copies Over Waypoints From The List
+        public virtual void SetWaypoints(List<Vector2> wp) {
+            waypoints.Clear();
+            if(wp != null)
+                waypoints.AddRange(wp);
+        }
+
+        // Scripted Logic For Movement
+        public abstract void DecideMove(GameState g, float dt);
+        public abstract void ApplyMove(GameState g, float dt);
+    }
+
+    public abstract class ACBuildingController {
+        protected RTSBuilding building;
+        public RTSBuilding Building {
+            get { return building; }
+            set { building = value; }
+        }
+        public void setBuilding(RTSBuilding building) {
+            this.building = building;
+        }
+    }
+
+    public abstract class ACBuildingActionController : ACBuildingController {
+        public abstract void ApplyEnvImpact(GameState g);
+        public abstract void SpawnUnit(GameState g);
     }
 }

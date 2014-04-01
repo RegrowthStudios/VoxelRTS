@@ -1,0 +1,9 @@
+﻿// Pre-computed Height Data
+DAT         [height.png]
+
+// The Primary Model And Texture
+HMP         [map.obj]
+HTP         [map.png]
+
+// The Size Of The Map
+SIZE        [200, 8, 200]

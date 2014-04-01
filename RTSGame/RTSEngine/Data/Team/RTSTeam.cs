@@ -3,101 +3,94 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Controllers;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     // "Army Painter" Color Values
-    public struct RTSTeamColorScheme {
-        public static RTSTeamColorScheme Default {
+    public struct RTSColorScheme {
+        public static RTSColorScheme Default {
             get {
-                return new RTSTeamColorScheme() {
+                return new RTSColorScheme() {
+                    Name = "Default",
                     Primary = Vector3.One,
                     Secondary = Vector3.One * 0.8f,
-                    Tertiary = Vector3.One * 0.3f
+                    Tertiary = Vector3.One * 0.1f
                 };
             }
         }
 
+        public string Name;
         public Vector3 Primary;
         public Vector3 Secondary;
         public Vector3 Tertiary;
     }
 
     public class RTSTeam {
-        // Team Color
-        public RTSTeamColorScheme ColorSheme {
+        // Team Colors
+        public RTSColorScheme ColorScheme {
             get;
             set;
         }
 
         // Unit Data
-        public List<RTSUnit> UnitData{
-            get;
-            private set;
-        }
+        public readonly List<RTSUnitData> unitData;
 
-        // This Is All The Units In The Team
-        private List<RTSUnitInstance> units;
-        public IEnumerable<RTSUnitInstance> Units {
-            get { return units; }
-        }
-        public int UnitCount {
-            get { return units.Count; }
-        }
+        // Entity Data
+        public readonly List<RTSUnit> units;
+        public readonly List<RTSSquad> squads;
+        public ReflectedSquadController scDefaultAction;
+        public ReflectedSquadController scDefaultMovement;
+        public ReflectedSquadController scDefaultTargetting;
 
-        // This Is All The Squads In The Team
-        private List<RTSSquad> squads;
-        public IEnumerable<RTSSquad> Squads {
-            get { return squads; }
-        }
-        public int SquadCount {
-            get { return squads.Count; }
-        }
-
-        public IInputController Input {
+        public InputController Input {
             get;
             set;
         }
 
-        public event Action<RTSUnitInstance> OnNewUnitSpawn;
+        // Events
+        public event Action<RTSUnit> OnUnitSpawn;
+        public event Action<RTSSquad> OnSquadCreation;
 
         public RTSTeam() {
-            ColorSheme = RTSTeamColorScheme.Default;
+            ColorScheme = RTSColorScheme.Default;
 
             // Teams Starts Out Empty
-            UnitData = new List<RTSUnit>();
-            units = new List<RTSUnitInstance>();
+            unitData = new List<RTSUnitData>();
+            units = new List<RTSUnit>();
             squads = new List<RTSSquad>();
 
             // No Input Is Available For The Team Yet
             Input = null;
         }
 
-        public void AddUnitType(RTSUnit t) {
-            UnitData.Add(t);
+        // For Adding Parsed Unit Data
+        public void AddUnitData(RTSUnitData t) {
+            unitData.Add(t);
         }
-
 
         // Unit Addition And Removal
-        public RTSUnitInstance AddUnit(int type, Vector2 pos) {
-            RTSUnitInstance rui = new RTSUnitInstance(this, UnitData[type], pos);
+        public RTSUnit AddUnit(int type, Vector2 pos) {
+            RTSUnit rui = new RTSUnit(this, unitData[type], pos);
             units.Add(rui);
-            if(OnNewUnitSpawn != null)
-                OnNewUnitSpawn(rui);
+            if(OnUnitSpawn != null)
+                OnUnitSpawn(rui);
             return rui;
         }
-        public void RemoveUnit(RTSUnitInstance u) {
+        public void RemoveUnit(RTSUnit u) {
             units.Remove(u);
         }
-        public void RemoveAll(Predicate<RTSUnitInstance> f) {
+        public void RemoveAll(Predicate<RTSUnit> f) {
             units.RemoveAll(f);
         }
 
         // Squad Addition And Removal
         public RTSSquad AddSquad() {
-            RTSSquad s = new RTSSquad();
-            squads.Add(s);
-            return s;
+            RTSSquad squad = new RTSSquad(this);
+            squads.Add(squad);
+            if(OnSquadCreation != null)
+                OnSquadCreation(squad);
+            return squad;
         }
         public void RemoveSquad(RTSSquad u) {
             squads.Remove(u);

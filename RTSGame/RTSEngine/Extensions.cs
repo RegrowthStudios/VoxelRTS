@@ -7,6 +7,9 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
 using Microsoft.Xna.Framework.Content.Pipeline.Processors;
+using System.IO;
+using RTSEngine.Controllers;
+using RTSEngine.Graphics;
 
 namespace Microsoft.Xna.Framework.Graphics {
     #region Content Pipeline Context Data
@@ -58,6 +61,26 @@ namespace Microsoft.Xna.Framework.Graphics {
     }
 
     public static class XNASpriteFont {
+        private const string SF_XML_FORMAT =
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<XnaContent xmlns:Graphics=""Microsoft.Xna.Framework.Content.Pipeline.Graphics"">
+  <Asset Type=""Graphics:FontDescription"">
+    <FontName>{0}</FontName>
+    <Size>{1}</Size>
+    <Spacing>{2}</Spacing>
+    <UseKerning>{3}</UseKerning>
+    <Style>{4}</Style>
+    <!-- <DefaultCharacter>{5}</DefaultCharacter> -->
+    <CharacterRegions>
+      <CharacterRegion>
+        <Start>&#{6};</Start>
+        <End>&#{7};</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>
+";
+
         // Reflection Information For Private Fields
         static FieldInfo sfcTexture;
         static FieldInfo sfcGlyphs;
@@ -97,7 +120,8 @@ namespace Microsoft.Xna.Framework.Graphics {
             txcMipmaps = props.First((mi) => { return mi.Name.Equals("Mipmaps"); });
         }
 
-        public static SpriteFont Compile(GraphicsDevice g, string file) {
+
+        public static SpriteFont Compile(GraphicsDevice g, string file, out IDisposable gR) {
             FontDescriptionImporter ei = new FontDescriptionImporter();
             FontDescription ec = ei.Import(file, new RTSImporterContext());
             FontDescriptionProcessor ep = new FontDescriptionProcessor();
@@ -123,7 +147,65 @@ namespace Microsoft.Xna.Framework.Graphics {
             char? defaultChar = sfcDefaultChar.GetValue(cec) as char?;
 
             // Invoke Private SpriteFont Constructor
+            gR = texture;
             return sfConstructor.Invoke(new object[] { texture, glyphs, cropping, charMap, lineSpacing, spacing, kerning, defaultChar }) as SpriteFont;
+        }
+        public static SpriteFont Compile(GraphicsDevice g,
+            string fontName,
+            int size,
+            out IDisposable gR,
+            int spacing = 0,
+            bool useKerning = true,
+            string style = "Regular",
+            char defaultChar = '*',
+            int cStart = 32,
+            int cEnd = 126
+            ) {
+            Random r = new Random();
+            string ufid = "";
+            unchecked {
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+                ufid += ((ulong)(r.Next() << 32) | (ulong)r.Next()).ToString();
+            }
+            ufid += ".xml";
+            using(var s = File.Create(ufid)) {
+                StreamWriter sw = new StreamWriter(s);
+                sw.Write(SF_XML_FORMAT, fontName, size, spacing, useKerning ? "true" : "false", style, defaultChar, cStart, cEnd);
+                sw.Flush();
+            }
+            SpriteFont sf = Compile(g, ufid, out gR);
+            File.Delete(ufid);
+            return sf;
+        }
+    }
+
+    public static class ModelHelper {
+        public static void CreateBuffers<T>(GraphicsDevice g, T[] verts, VertexDeclaration vd, int[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = new VertexBuffer(g, vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = new IndexBuffer(g, IndexElementSize.ThirtyTwoBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(RTSRenderer renderer, T[] verts, VertexDeclaration vd, int[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = renderer.CreateVertexBuffer(vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = renderer.CreateIndexBuffer(IndexElementSize.ThirtyTwoBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(GraphicsDevice g, T[] verts, VertexDeclaration vd, short[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = new VertexBuffer(g, vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = new IndexBuffer(g, IndexElementSize.SixteenBits, inds.Length, bu);
+            ib.SetData(inds);
+        }
+        public static void CreateBuffers<T>(RTSRenderer renderer, T[] verts, VertexDeclaration vd, short[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
+            vb = renderer.CreateVertexBuffer(vd, verts.Length, bu);
+            vb.SetData(verts);
+            ib = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, bu);
+            ib.SetData(inds);
         }
     }
 }
