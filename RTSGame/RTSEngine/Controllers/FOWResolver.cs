@@ -43,6 +43,9 @@ namespace RTSEngine.Controllers {
             heat = new int[s.CGrid.numCells.X, s.CGrid.numCells.Y];
         }
 
+        private bool InBounds(int gx, int gy, ref FOWPoint p) {
+            return p.X >= 0 && p.X < gx && p.Y >= 0 && p.Y < gy;
+        }
         private bool IsGood(int gx, int gy, int[,] val, ref FOWPoint p) {
             if(p.X >= 0 && p.X < gx && p.Y >= 0 && p.Y < gy) {
                 return val[p.X, p.Y] < p.TravelAmount;
@@ -120,7 +123,7 @@ namespace RTSEngine.Controllers {
             // Fan Out Heat
             while(queue.Count > 0) {
                 FOWPoint fp = queue.Dequeue();
-                if(val[fp.X, fp.Y] < fp.TravelAmount) {
+                if(InBounds(cg.numCells.X, cg.numCells.Y, ref fp) && val[fp.X, fp.Y] < fp.TravelAmount) {
                     val[fp.X, fp.Y] = fp.TravelAmount;
                     AddPoints(cg.numCells.X, cg.numCells.Y, val, queue, ref fp);
                 }

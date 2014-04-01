@@ -53,6 +53,7 @@
     <Compile Include="Algorithms\MinHeap.cs" />
     <Compile Include="Algorithms\Pathfinder.cs" />
     <Compile Include="Algorithms\TimeBudgeting.cs" />
+    <Compile Include="Algorithms\AStar.cs" />
     <Compile Include="Controllers\AIInputController.cs" />
     <Compile Include="Controllers\CameraController.cs" />
     <Compile Include="Controllers\DevConsole.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Net\NetSerializer.cs" />
     <Compile Include="Net\NetStreamMultiReceiver.cs" />
     <Compile Include="Net\NetStreamMultiSender.cs" />
+    <Compile Include="Net\NetStateController.cs" />
     <Compile Include="Screens\GameSelectScreen.cs" />
     <Compile Include="Screens\InduZtryScreen.cs" />
     <Compile Include="Interfaces\EntityControllers.cs" />

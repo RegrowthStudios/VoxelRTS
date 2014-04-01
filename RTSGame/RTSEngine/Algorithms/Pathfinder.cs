@@ -15,13 +15,13 @@ namespace RTSEngine.Algorithms {
             get;
             set;
         }
-        
+
         // Flag If The Query Is Old And Shouldn't Be Completed
         public bool IsOld {
             get;
             set;
         }
-        
+
         // The Start And End For Pathfinding
         public Vector2 Start {
             get;
@@ -44,7 +44,7 @@ namespace RTSEngine.Algorithms {
             waypoints = new List<Vector2>();
         }
     }
-    
+
     public struct SearchLocation {
         public Point Loc;
         public int GScore;
@@ -60,12 +60,12 @@ namespace RTSEngine.Algorithms {
     }
 
     public class Pathfinder : IDisposable {
-        private bool running; 
+        private bool running;
         private Thread thread;
         private CollisionGrid world;
         private SearchLocation[,] searchGrid;
 
-        private ConcurrentQueue<PathQuery> queries; 
+        private ConcurrentQueue<PathQuery> queries;
 
         public Pathfinder(CollisionGrid cg) {
             world = cg;
@@ -82,11 +82,11 @@ namespace RTSEngine.Algorithms {
             thread.Priority = ThreadPriority.Normal;
             thread.Start();
         }
-     
+
         public void Add(PathQuery q) {
             queries.Enqueue(q);
         }
-        
+
         public void WorkThread() {
             while(running) {
                 while(HasQuery()) {
@@ -99,33 +99,33 @@ namespace RTSEngine.Algorithms {
                 Thread.Sleep(100);
             }
         }
-        
+
         public void Dispose() {
             running = false;
             thread.Join();
         }
-        
+
         private bool HasQuery() {
             return queries.Count > 0;
         }
-        
+
         // Get The Search Grid Locations Adjacent To The Input
         private bool PointPossible(Point p) {
             return p.X >= 0 && p.X < world.numCells.X && p.Y >= 0 && p.Y < world.numCells.Y;
         }
-        
+
         private IEnumerable<SearchLocation> NeighborhoodOrdinal(SearchLocation loc) {
             foreach(Point p in NeighborhoodDiag(loc.Loc).Where(PointPossible)) {
                 yield return searchGrid[p.X, p.Y];
             }
         }
-        
+
         private IEnumerable<SearchLocation> NeighborhoodCardinal(SearchLocation loc) {
             foreach(Point p in NeighborhoodAlign(loc.Loc).Where(PointPossible)) {
                 yield return searchGrid[p.X, p.Y];
             }
         }
-        
+
         // Return An Array Of The Ordinal Points Adjacent To P
         private IEnumerable<Point> NeighborhoodDiag(Point p) {
             yield return new Point(p.X + 1, p.Y + 1);
@@ -168,53 +168,11 @@ namespace RTSEngine.Algorithms {
             DevConsole.AddCommand("Pathfinding...");
             Point cGridPoint = HashHelper.Hash(q.Start, world.numCells, world.size);
             Point gGridPoint = HashHelper.Hash(q.End, world.numCells, world.size); ;
-            var closedSet = new HashSet<Point>();
-            var openSet = new MinHeap<SearchLocation>(SearchLocation.Compare);
-            var cameFrom = new Dictionary<Point, Point?>();
-            SearchLocation current = new SearchLocation(cGridPoint);
-            current.FScore = ManhatDist(cGridPoint,gGridPoint);
-            openSet.Insert(current);
-            // TODO: Verify
-            bool success = false;
-            while(openSet.Count > 0) {
-                DevConsole.AddCommand("Entered while loop");
-                current = openSet.Pop();
-                if(current.Loc == gGridPoint) {
-                    DevConsole.AddCommand("Found goal");
-                    success = true;
-                    break;
-                }
-                closedSet.Add(current.Loc);
-                foreach(SearchLocation neighbor in NeighborhoodOrdinal(current)) {
-                    DevConsole.AddCommand("Searching Ordinal Neighbors...");
-                    if(closedSet.Contains(neighbor.Loc) || world.GetCollision(neighbor.Loc.X, neighbor.Loc.Y)) continue;
-                    int gScoreNew = current.GScore + 14;
-                    if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
-                        DevConsole.AddCommand("Exploring Ordinal...");
-                        cameFrom[neighbor.Loc] = current.Loc;
-                        SearchLocation _neighbor = neighbor; // Can't Change Iteration Var
-                        _neighbor.GScore = gScoreNew;
-                        _neighbor.FScore = gScoreNew + ManhatDist(_neighbor.Loc, gGridPoint);
-                        if(!openSet.Contains(_neighbor)) openSet.Insert(_neighbor);
-                    }
-                }
-                foreach(SearchLocation neighbor in NeighborhoodCardinal(current)) {
-                    DevConsole.AddCommand("Searching Cardinal Neighbors...");
-                    if(closedSet.Contains(neighbor.Loc) || world.GetCollision(neighbor.Loc.X, neighbor.Loc.Y)) continue;
-                    int gScoreNew = current.GScore + 10;
-                    if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
-                        DevConsole.AddCommand("Exploring Cardinal...");
-                        cameFrom[neighbor.Loc] = current.Loc;
-                        SearchLocation _neighbor = neighbor; // Can't Change Iteration Var
-                        _neighbor.GScore = gScoreNew;
-                        _neighbor.FScore = gScoreNew + ManhatDist(_neighbor.Loc, gGridPoint);
-                        if(!openSet.Contains(_neighbor)) openSet.Insert(_neighbor);
-                    }
-                }
-            }
+            AStar bp = new AStar(world, cGridPoint, gGridPoint);
+            List<Point> l = bp.Evaluate();
             // Finished
-            if(success) {
-                foreach(Point wp in ReconstructPath(cameFrom, gGridPoint)) {
+            if(l != null) {
+                foreach(Point wp in l) {
                     q.waypoints.Add(new Vector2(wp.X * world.cellSize, wp.Y * world.cellSize));
                 }
                 DevConsole.AddCommand("Path found with size " + q.waypoints.Count);
