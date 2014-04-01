@@ -8,28 +8,27 @@ using RTSEngine.Controllers;
 
 namespace RTSEngine.Net {
     public class NetStreamMultiReceiver : IDisposable {
-        Socket s;
-        IPAddress ipAddrRemote;
-        IPEndPoint ipEndLocal;
+        UdpClient client;
+        IPEndPoint ipeLocal;
 
         public NetStreamMultiReceiver(string ip, int port) {
-            s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            ipEndLocal = new IPEndPoint(IPAddress.Any, port);
-            s.Bind(ipEndLocal);
-
-            ipAddrRemote = IPAddress.Parse(ip);
-
-            s.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(ipAddrRemote, IPAddress.Any));
+            client = new UdpClient();
+            client.ExclusiveAddressUse = false;
+            ipeLocal = new IPEndPoint(IPAddress.Any, port);
+            client.Client.ReceiveTimeout = 1000;
+            client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            client.ExclusiveAddressUse = false;
+            client.Client.Bind(ipeLocal);
+            IPAddress multicastaddress = IPAddress.Parse(ip);
+            client.JoinMulticastGroup(multicastaddress);
         }
         public void Dispose() {
-            s.Close();
-            s.Dispose();
+            client.Close();
         }
 
-        public string Receive(int maxLength) {
-            byte[] b = new byte[maxLength];
-            int bc = s.Receive(b);
-            return ASCIIEncoding.Unicode.GetString(b, 0, bc);
+        public string Receive() {
+            byte[] b = client.Receive(ref ipeLocal);
+            return Encoding.Unicode.GetString(b);
         }
     }
 }

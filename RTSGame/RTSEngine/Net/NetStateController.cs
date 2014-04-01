@@ -32,7 +32,7 @@ namespace RTSEngine.Net {
 
         void NetThread() {
             while(playing) {
-                string c = recv.Receive(1024);
+                string c = recv.Receive();
                 if(!string.IsNullOrWhiteSpace(c)) {
                     DevConsole.AddCommand(c);
                 }

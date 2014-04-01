@@ -207,10 +207,13 @@ namespace RTS {
         }
         void NetThread() {
             while(playing) {
-                string c = recv.Receive(1024);
-                if(!string.IsNullOrWhiteSpace(c)) {
-                    DevConsole.AddCommand(c);
+                try {
+                    string c = recv.Receive();
+                    if(!string.IsNullOrWhiteSpace(c)) {
+                        DevConsole.AddCommand(c);
+                    }
                 }
+                catch(Exception) { }
             }
         }
     }
