@@ -41,6 +41,15 @@ namespace RTSEngine.Data.Parsers {
             }
             return res;
         }
+        public static RTSRaceData Parse(FileInfo fi) {
+            if(fi == null || !fi.Exists) return null;
+
+            RTSRaceData res = null;
+            using(FileStream s = File.OpenRead(fi.FullName)) {
+                res = Parse(s, fi.Directory.FullName);
+            }
+            return res;
+        }
         private static RTSRaceData Parse(Stream s, string rootDir) {
             RTSRaceData res = new RTSRaceData();
 

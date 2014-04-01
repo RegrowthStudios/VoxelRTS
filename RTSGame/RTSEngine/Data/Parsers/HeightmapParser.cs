@@ -30,7 +30,7 @@ namespace RTSEngine.Data.Parsers {
             d[i] = cols[ci + 1] > 128 ? (byte)0x01u : (byte)0x00u;
         }
 
-        public static HeightmapModel ParseModel(GameEngine ge, Vector3 size, int fWidth, int fHeight, FileInfo infoFile) {
+        public static HeightmapModel ParseModel(RTSRenderer ge, Vector3 size, int fWidth, int fHeight, FileInfo infoFile) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
             Vector2 uvScale = new Vector2(1f / size.X, 1f / size.Z);

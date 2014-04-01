@@ -152,53 +152,56 @@ namespace RTSEngine.Data {
     }
 
     public class ImpactGrid {
-
+        
+        // Size Of Each Cell In The Impact Grid
         private float cellSize;
-        private Point numCells;
-        private Vector2 size;
-        private ImpactCell[,] grid;
 
+        // Number Of Cells In The Impact Grid
+        private Point numCells;
+
+        // Size Of The Impact Grid
+        private Vector2 size;
+
+        // Stores The Region Each Cell Is Located In
+        public Region[,] Region { get; set; }
+
+        // Stores The ImpactGenerators Of Each Cell Of The Impact Grid
+        public List<ImpactGenerator>[,] ImpactGenerators { get; set; }
+
+        // Stores The Impact of Each Cell Of The Impact Grid
+        public int[,] CellImpact { get; private set; } 
+
+        // Creates An Impact Grid Using The Size And Cell Size Of The Given Collision Grid
         public ImpactGrid(CollisionGrid cg) {
             cellSize = 2 * cg.cellSize;
             numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
             cellSize = cg.size.X / numCells.X;
-            grid = new ImpactCell[numCells.X, numCells.Y];
             size = cg.size;
+            Region = new Region[numCells.X, numCells.Y];
+            ImpactGenerators = new List<ImpactGenerator>[numCells.X, numCells.Y];
+            CellImpact = new int[numCells.X, numCells.Y];
 
             for (int x = 0; x < numCells.X; x++) {
                 for (int y = 0; y < numCells.Y; y++) {
-                    grid[x, y] = new ImpactCell();
+                    Region[x, y] = null;
+                    ImpactGenerators[x, y] = new List<ImpactGenerator>();
+                    CellImpact[x,y] = 0;
                 }
             }
         }
 
+        // Adds An Impact Generator To The Appropriate Cell In The Impact Grid
         public void AddImpactGenerator(ImpactGenerator g) {
             Point p = HashHelper.Hash(g.Position, numCells, size);
-            grid[p.X, p.Y].AddImpactGenerator(g);
-        }
-    }
-
-    public class ImpactCell {
-        
-        public Region Region { get; set; }
-        public List<ImpactGenerator> ImpactGenerators { get; set; }
-        public int CellImpact { get; private set; } 
-        public event Action<int> IncreaseImpact; 
-
-        public ImpactCell() {
-            Region = null;
-            ImpactGenerators = new List<ImpactGenerator>();
-            CellImpact = 0;
+            ImpactGenerators[p.X, p.Y].Add(g);
+            g.GenerateImpact += AddToCellImpact;
         }
 
-        public void AddImpactGenerator(ImpactGenerator g) {
-            ImpactGenerators.Add(g);
-            g.GenerateImpact += AddToImpact;
-        }
-
-        public void AddToImpact(int amount){
-            CellImpact += amount;
-            IncreaseImpact(amount);
+        // Listens To GenerateImpact Events And Adds Impact To The Appropriate Cell And Region 
+        public void AddToCellImpact(Vector2 pos, int amount) {
+            Point p = HashHelper.Hash(pos, numCells, size);
+            CellImpact[p.X, p.Y] += amount;
+            Region[p.X, p.Y].AddToRegionImpact(amount);
         }
     }
 

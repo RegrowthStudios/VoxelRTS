@@ -16,6 +16,11 @@ namespace RTSEngine.Controllers {
     public static class RTSConstants {
         public const float GAME_DELTA_TIME = 1f / 60f;
         public const float CGRID_SIZE = 2f;
+
+        public const string MC_ADDR = "228.8.8.8";
+        public const int MC_LOBBY_PORT = 22880;
+        public const int MC_GAME_PORT_MIN = 23000;
+        public const int MC_CLIENT_PORT_MIN = 23100;
     }
 
     // A Playable Team
@@ -35,13 +40,6 @@ namespace RTSEngine.Controllers {
     }
 
     public class GameEngine : IDisposable {
-        // The Graphics Device
-        private GraphicsDeviceManager gdm;
-        public GraphicsDevice G {
-            get { return gdm.GraphicsDevice; }
-        }
-        private GameWindow window;
-
         // Data To Be Managed By The Engine
         public GameState State {
             get;
@@ -51,110 +49,25 @@ namespace RTSEngine.Controllers {
             get;
             private set;
         }
-        private readonly ConcurrentBag<IDisposable> toDispose;
 
-        public GameEngine(GraphicsDeviceManager _gdm, GameWindow w) {
-            // Get That Reference
-            gdm = _gdm;
-            toDispose = new ConcurrentBag<IDisposable>();
-            window = w;
+        public GameEngine() {
         }
         public void Dispose() {
             if(State != null) {
-                DevConsole.OnNewCommand -= PlayController.OnDevCommand;
-
+                PlayController.Dispose();
                 for(int ti = 0; ti < State.Teams.Length; ti++) {
                     State.Teams[ti].Input.Dispose();
                 }
             }
-
-            // Dispose All In The List
-            IDisposable[] td = new IDisposable[toDispose.Count];
-            toDispose.CopyTo(td, 0);
-            for(int i = 0; i < td.Length; i++) {
-                td[i].Dispose();
-                td[i] = null;
-            }
         }
-
-        #region Graphics Data Creation That Will Be Ready For Disposal At The End Of The Game
-        public VertexBuffer CreateVertexBuffer(VertexDeclaration vd, int s, BufferUsage usage = BufferUsage.WriteOnly) {
-            VertexBuffer vb = new VertexBuffer(G, vd, s, usage);
-            toDispose.Add(vb);
-            return vb;
-        }
-        public DynamicVertexBuffer CreateDynamicVertexBuffer(VertexDeclaration vd, int s, BufferUsage usage = BufferUsage.WriteOnly) {
-            DynamicVertexBuffer vb = new DynamicVertexBuffer(G, vd, s, usage);
-            toDispose.Add(vb);
-            return vb;
-        }
-        public IndexBuffer CreateIndexBuffer(IndexElementSize id, int s, BufferUsage usage = BufferUsage.WriteOnly) {
-            IndexBuffer ib = new IndexBuffer(G, id, s, usage);
-            toDispose.Add(ib);
-            return ib;
-        }
-        public Texture2D CreateTexture2D(int w, int h, SurfaceFormat format = SurfaceFormat.Color, bool mipmap = false) {
-            Texture2D t = new Texture2D(G, w, h, mipmap, format);
-            toDispose.Add(t);
-            return t;
-        }
-        public Texture2D LoadTexture2D(Stream s) {
-            Texture2D t = Texture2D.FromStream(G, s);
-            toDispose.Add(t);
-            return t;
-        }
-        public Texture2D LoadTexture2D(string file) {
-            Texture2D t;
-            using(FileStream fs = File.OpenRead(file)) {
-                t = LoadTexture2D(fs);
-            }
-            return t;
-        }
-        public RenderTarget2D CreateRenderTarget2D(int w, int h, SurfaceFormat sf = SurfaceFormat.Color, DepthFormat df = DepthFormat.Depth24Stencil8, RenderTargetUsage usage = RenderTargetUsage.DiscardContents, int msc = 1, bool mipmap = false) {
-            RenderTarget2D t = new RenderTarget2D(G, w, h, mipmap, sf, df, msc, usage);
-            toDispose.Add(t);
-            return t;
-        }
-        public Effect LoadEffect(string file) {
-            Effect fx = XNAEffect.Compile(G, file);
-            toDispose.Add(fx);
-            return fx;
-        }
-        public BasicEffect CreateEffect() {
-            BasicEffect fx = new BasicEffect(G);
-            toDispose.Add(fx);
-            return fx;
-        }
-        public SpriteFont LoadFont(string file) {
-            IDisposable disp;
-            SpriteFont f = XNASpriteFont.Compile(G, file, out disp);
-            toDispose.Add(disp);
-            return f;
-        }
-        public SpriteFont LoadFont(string file, out IDisposable disp) {
-            SpriteFont f = XNASpriteFont.Compile(G, file, out disp);
-            toDispose.Add(disp);
-            return f;
-        }
-        public SpriteFont CreateFont(string fontName, int size, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
-            IDisposable disp;
-            SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
-            toDispose.Add(disp);
-            return f;
-        }
-        public SpriteFont CreateFont(string fontName, int size, out IDisposable disp, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
-            SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
-            toDispose.Add(disp);
-            return f;
-        }
-        #endregion
 
         public void Load(EngineLoadData d) {
-            PlayController = new GameplayController();
-            DevConsole.OnNewCommand += PlayController.OnDevCommand;
-
             // Create Game State
             State = new GameState();
+
+            // Make Gameplay Controller
+            PlayController = new GameplayController();
+
             LoadControllers();
             State.SetTeams(LoadTeams(d.Teams));
 

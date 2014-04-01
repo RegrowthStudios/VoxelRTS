@@ -17,7 +17,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
-using System.Threading.Tasks;
+using RTSEngine.Net;
 
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
@@ -30,8 +30,9 @@ namespace RTS {
         Vector3 spawnLoc;
         int team, unit;
         bool doAdd, playing, pauseEngine, pauseRender;
-        Thread tEngine;
+        Thread tEngine, tNet;
         SpriteFont sfDebug;
+        NetStreamMultiReceiver recv;
 
         public override int Next {
             get { return -1; }
@@ -63,8 +64,7 @@ namespace RTS {
             gameInput = engine.State.Teams[0].Input as PlayerInputController;
             gameInput.Camera = camera;
 
-
-            sfDebug = engine.CreateFont("Courier New", 32);
+            sfDebug = renderer.CreateFont("Courier New", 32);
             tEngine = new Thread(EngineThread);
             tEngine.Priority = ThreadPriority.Highest;
             tEngine.TrySetApartmentState(ApartmentState.MTA);
@@ -73,6 +73,13 @@ namespace RTS {
             pauseEngine = false;
             pauseRender = false;
             tEngine.Start();
+
+            recv = new NetStreamMultiReceiver(RTSConstants.MC_ADDR, RTSConstants.MC_GAME_PORT_MIN);
+            tNet = new Thread(NetThread);
+            tNet.Priority = ThreadPriority.BelowNormal;
+            tNet.TrySetApartmentState(ApartmentState.MTA);
+            tNet.IsBackground = true;
+            tNet.Start();
         }
         public override void OnExit(GameTime gameTime) {
             MouseEventDispatcher.OnMousePress -= OnMP;
@@ -87,6 +94,8 @@ namespace RTS {
 
             playing = false;
             tEngine.Join();
+            tNet.Join();
+            recv.Dispose();
             engine.Dispose();
         }
 
@@ -194,6 +203,14 @@ namespace RTS {
                 int dt = (int)(tCur.TotalMilliseconds - tPrev.TotalMilliseconds);
                 if(dt < milliRun) Thread.Sleep(milliRun - dt);
                 tPrev = tCur;
+            }
+        }
+        void NetThread() {
+            while(playing) {
+                string c = recv.Receive(1024);
+                if(!string.IsNullOrWhiteSpace(c)) {
+                    DevConsole.AddCommand(c);
+                }
             }
         }
     }

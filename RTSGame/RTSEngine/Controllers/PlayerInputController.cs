@@ -18,16 +18,18 @@ namespace RTSEngine.Controllers {
 
         public PlayerInputController(GameState g, RTSTeam t)
             : base(g, t) {
-            MouseEventDispatcher.OnMouseRelease += new OnMouseRelease(OnMouseRelease);
-            MouseEventDispatcher.OnMousePress += new OnMousePress(OnMousePress);
+            MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
+            MouseEventDispatcher.OnMousePress += OnMousePress;
         }
         public override void Dispose() {
-            MouseEventDispatcher.OnMouseRelease -= new OnMouseRelease(OnMouseRelease);
-            MouseEventDispatcher.OnMousePress -= new OnMousePress(OnMousePress);
+            MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
+            MouseEventDispatcher.OnMousePress -= OnMousePress;
         }
 
         public void OnMouseRelease(Vector2 location, MouseButton b) {
             if(b == MouseButton.Left) {
+                if(Camera == null) return;
+
                 // Get Selection Frustum
                 BoundingFrustum frustum = Camera.GetSelectionBox(Vector2.Min(location, mousePressedPos), Vector2.Max(location, mousePressedPos));
 
@@ -44,6 +46,8 @@ namespace RTSEngine.Controllers {
         }
         public void OnMousePress(Vector2 location, MouseButton b) {
             if(b == MouseButton.Right) {
+                if(Camera == null) return;
+
                 BoundingBox box;
                 IEntity target = null;
                 Ray viewRay = Camera.GetViewRay(location);

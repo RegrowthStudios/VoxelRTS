@@ -45,7 +45,7 @@ namespace RTSEngine.Controllers {
     }
     #endregion
 
-    public class GameplayController {
+    public class GameplayController : IDisposable {
         public const int SQUAD_BUDGET_BINS = 10;
         public const int UNIT_BUDGET_BINS = 30;
         private const int FOW_BUDGET_BINS = 8;
@@ -89,8 +89,12 @@ namespace RTSEngine.Controllers {
 
             squadQueries = new List<SquadQuery>();
         }
+        public void Dispose() {
+            DevConsole.OnNewCommand -= OnDevCommand;
+        }
 
         public void Init(GameState s) {
+            DevConsole.OnNewCommand += OnDevCommand;
             tbFOWCalculations.ClearTasks();
             for(int ti = 0; ti < s.Teams.Length; ti++) {
                 tbFOWCalculations.AddTask(new FOWTask(s, ti));
