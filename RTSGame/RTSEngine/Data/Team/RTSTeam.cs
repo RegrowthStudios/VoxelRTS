@@ -40,6 +40,7 @@ namespace RTSEngine.Data.Team {
         public readonly List<RTSUnit> units;
         public readonly List<RTSSquad> squads;
         public ReflectedSquadController scDefaultAction;
+        public ReflectedSquadController scDefaultMovement;
         public ReflectedSquadController scDefaultTargetting;
 
         public InputController Input {

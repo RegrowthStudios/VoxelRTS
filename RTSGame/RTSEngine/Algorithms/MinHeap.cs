@@ -36,6 +36,7 @@ namespace RTSEngine.Algorithms {
             return min;
         }
 
+        // TODO: Fix Remove And Contains
         new public void Remove(T o) {
             int i = 0;
             bool done = false;
@@ -61,26 +62,26 @@ namespace RTSEngine.Algorithms {
             }
         }
 
-        new public bool Contains(T o) {
-            int i = 0;
-            bool done = false;
-            while(!done) {
-                if(this[i].Equals(o)) return true;
-                else {
-                    int left = 2 * i + 1;
-                    // Look At Left Child Next
-                    if(f(o, this[i]) < 0) {
-                        i = left;
-                    }
-                    // Look At Right Child Next
-                    else {
-                        i = left + 1;
-                    }
-                    done = !(i < this.Count);
-                }
-            }
-            return false;
-        }
+        //new public bool Contains(T o) {
+        //    int i = 0;
+        //    bool done = false;
+        //    while(!done) {
+        //        if(this[i].Equals(o)) return true;
+        //        else {
+        //            int left = 2 * i + 1;
+        //            // Look At Left Child Next
+        //            if(f(o, this[i]) < 0) {
+        //                i = left;
+        //            }
+        //            // Look At Right Child Next
+        //            else {
+        //                i = left + 1;
+        //            }
+        //            done = !(i < this.Count);
+        //        }
+        //    }
+        //    return false;
+        //}
 
         private void Heapify(int i) {
             int smallest;

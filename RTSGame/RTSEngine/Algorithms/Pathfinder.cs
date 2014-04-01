@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Xna.Framework;
+using RTSEngine.Controllers;
 using RTSEngine.Data;
 
 namespace RTSEngine.Algorithms {
@@ -59,15 +60,22 @@ namespace RTSEngine.Algorithms {
     }
 
     public class Pathfinder : IDisposable {
-        private bool running;
-        private ConcurrentQueue<PathQuery> queries; 
+        private bool running; 
         private Thread thread;
         private CollisionGrid world;
         private SearchLocation[,] searchGrid;
 
+        private ConcurrentQueue<PathQuery> queries; 
+
         public Pathfinder(CollisionGrid cg) {
             world = cg;
             searchGrid = new SearchLocation[cg.numCells.X, cg.numCells.Y];
+            for(int i = 0; i < cg.numCells.X; i++) {
+                for(int j = 0; j < cg.numCells.Y; j++) {
+                    searchGrid[i, j].Loc.X = i;
+                    searchGrid[i, j].Loc.Y = j;
+                }
+            }
             queries = new ConcurrentQueue<PathQuery>();
             running = true;
             thread = new Thread(WorkThread);
@@ -103,16 +111,16 @@ namespace RTSEngine.Algorithms {
         
         // Get The Search Grid Locations Adjacent To The Input
         private bool PointPossible(Point p) {
-            return p.X >= 0 && p.X < searchGrid.GetLength(0) && p.Y >= 0 && p.Y < searchGrid.GetLength(1);
+            return p.X >= 0 && p.X < world.numCells.X && p.Y >= 0 && p.Y < world.numCells.Y;
         }
         
-        private IEnumerable<SearchLocation> NeighborhoodDiag(SearchLocation loc) {
+        private IEnumerable<SearchLocation> NeighborhoodOrdinal(SearchLocation loc) {
             foreach(Point p in NeighborhoodDiag(loc.Loc).Where(PointPossible)) {
                 yield return searchGrid[p.X, p.Y];
             }
         }
         
-        private IEnumerable<SearchLocation> NeighborhoodAlign(SearchLocation loc) {
+        private IEnumerable<SearchLocation> NeighborhoodCardinal(SearchLocation loc) {
             foreach(Point p in NeighborhoodAlign(loc.Loc).Where(PointPossible)) {
                 yield return searchGrid[p.X, p.Y];
             }
@@ -157,6 +165,7 @@ namespace RTSEngine.Algorithms {
 
         // Run A* Search, Given This Pathfinder's World And A Query
         private void Pathfind(PathQuery q) {
+            DevConsole.AddCommand("Pathfinding...");
             Point cGridPoint = HashHelper.Hash(q.Start, world.numCells, world.size);
             Point gGridPoint = HashHelper.Hash(q.End, world.numCells, world.size); ;
             var closedSet = new HashSet<Point>();
@@ -168,17 +177,20 @@ namespace RTSEngine.Algorithms {
             // TODO: Verify
             bool success = false;
             while(openSet.Count > 0) {
+                DevConsole.AddCommand("Entered while loop");
                 current = openSet.Pop();
                 if(current.Loc == gGridPoint) {
+                    DevConsole.AddCommand("Found goal");
                     success = true;
                     break;
                 }
-                openSet.Remove(current);
                 closedSet.Add(current.Loc);
-                foreach(SearchLocation neighbor in NeighborhoodDiag(current)) {
+                foreach(SearchLocation neighbor in NeighborhoodOrdinal(current)) {
+                    DevConsole.AddCommand("Searching Ordinal Neighbors...");
                     if(closedSet.Contains(neighbor.Loc) || world.GetCollision(neighbor.Loc.X, neighbor.Loc.Y)) continue;
                     int gScoreNew = current.GScore + 14;
                     if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
+                        DevConsole.AddCommand("Exploring Ordinal...");
                         cameFrom[neighbor.Loc] = current.Loc;
                         SearchLocation _neighbor = neighbor; // Can't Change Iteration Var
                         _neighbor.GScore = gScoreNew;
@@ -186,10 +198,12 @@ namespace RTSEngine.Algorithms {
                         if(!openSet.Contains(_neighbor)) openSet.Insert(_neighbor);
                     }
                 }
-                foreach(SearchLocation neighbor in NeighborhoodAlign(current)) {
+                foreach(SearchLocation neighbor in NeighborhoodCardinal(current)) {
+                    DevConsole.AddCommand("Searching Cardinal Neighbors...");
                     if(closedSet.Contains(neighbor.Loc) || world.GetCollision(neighbor.Loc.X, neighbor.Loc.Y)) continue;
                     int gScoreNew = current.GScore + 10;
                     if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
+                        DevConsole.AddCommand("Exploring Cardinal...");
                         cameFrom[neighbor.Loc] = current.Loc;
                         SearchLocation _neighbor = neighbor; // Can't Change Iteration Var
                         _neighbor.GScore = gScoreNew;
@@ -201,8 +215,12 @@ namespace RTSEngine.Algorithms {
             // Finished
             if(success) {
                 foreach(Point wp in ReconstructPath(cameFrom, gGridPoint)) {
-                    q.waypoints.Add(new Vector2(wp.X*world.cellSize, wp.Y*world.cellSize));
+                    q.waypoints.Add(new Vector2(wp.X * world.cellSize, wp.Y * world.cellSize));
                 }
+                DevConsole.AddCommand("Path found with size " + q.waypoints.Count);
+            }
+            else {
+                DevConsole.AddCommand("Pathfinder failed :(");
             }
             q.IsComplete = true;
         }

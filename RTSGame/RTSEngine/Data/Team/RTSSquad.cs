@@ -46,6 +46,17 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // The Movement Controller For This Squad
+        private ACSquadMovementController mController;
+        public ACSquadMovementController MovementController {
+            get { return mController; }
+            set {
+                mController = value;
+                if(mController != null)
+                    mController.SetSquad(this);
+            }
+        }
+
         // The Targetting Controller For This Squad
         private ACSquadTargettingController tController;
         public ACSquadTargettingController TargettingController {

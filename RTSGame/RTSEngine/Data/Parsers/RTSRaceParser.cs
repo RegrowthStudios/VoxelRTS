@@ -14,6 +14,7 @@ namespace RTSEngine.Data.Parsers {
         const string EXTENSION = "race";
         static readonly Regex rgxName = RegexHelper.GenerateString("NAME");
         private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlMovement = RegexHelper.Generate("CTRLMOVEMENT", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlTargetting = RegexHelper.Generate("CTRLTARGET", @"[\w\s\.]+");
         static readonly Regex rgxUnit = RegexHelper.GenerateFile("UNIT");
 
@@ -49,6 +50,7 @@ namespace RTSEngine.Data.Parsers {
             // Read Name
             res.Name = RegexHelper.Extract(rgxName.Match(ms));
             res.DefaultSquadActionController = RegexHelper.Extract(rgxCtrlAction.Match(ms));
+            res.DefaultSquadMovementController = RegexHelper.Extract(rgxCtrlMovement.Match(ms));
             res.DefaultSquadTargettingController = RegexHelper.Extract(rgxCtrlTargetting.Match(ms));
 
             // Read All Units

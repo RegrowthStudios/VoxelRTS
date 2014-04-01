@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
 
@@ -33,6 +34,16 @@ namespace RTSEngine.Interfaces {
         // Scripted Super-Controller Logic
         public abstract void DecideAction(GameState g, float dt);
         public abstract void ApplyAction(GameState g, float dt);
+    }
+
+    // The Movement Controller That Dictates The General Movement Behavior Of Units In The Squad
+    // TODO: Add Formation Stuff Here
+    public abstract class ACSquadMovementController : ACSquadController {
+        private List<Vector2> waypoints = new List<Vector2>();
+        public List<Vector2> Waypoints {
+            get { return waypoints; }
+            set { waypoints = value; }
+        }
     }
 
     // Controls The Targetting That A Squad Performs

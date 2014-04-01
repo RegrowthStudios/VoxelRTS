@@ -20,6 +20,10 @@ namespace RTS.Mech.Squad {
         }
     }
 
+    public class Movement : ACSquadMovementController {
+
+    }
+
     public class Target : ACSquadTargettingController {
         public override void DecideTarget(GameState g, float dt) {
             if(targetSquad == null) {

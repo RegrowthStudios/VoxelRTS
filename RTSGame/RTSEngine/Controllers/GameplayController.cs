@@ -66,6 +66,19 @@ namespace RTSEngine.Controllers {
         private TimeBudget tbUnitDecisions;
         private TimeBudget tbFOWCalculations;
 
+        // Pathfinding
+        private Pathfinder pathfinder;
+        private List<SquadQuery> squadQueries;
+
+        public struct SquadQuery {
+            public RTSSquad squad;
+            public PathQuery query;
+            public SquadQuery(RTSSquad s, PathQuery q) {
+                squad = s;
+                query = q; 
+            }
+        }
+
         public GameplayController() {
             TimePlayed = 0f;
             commands = new Queue<DevCommand>();
@@ -73,6 +86,8 @@ namespace RTSEngine.Controllers {
             tbSquadDecisions = new TimeBudget(SQUAD_BUDGET_BINS);
             tbUnitDecisions = new TimeBudget(UNIT_BUDGET_BINS);
             tbFOWCalculations = new TimeBudget(FOW_BUDGET_BINS);
+
+            squadQueries = new List<SquadQuery>();
         }
 
         public void Init(GameState s) {
@@ -80,6 +95,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.Teams.Length; ti++) {
                 tbFOWCalculations.AddTask(new FOWTask(s, ti));
             }
+            pathfinder = new Pathfinder(s.CGrid);
         }
 
         // The Update Function
@@ -89,6 +105,9 @@ namespace RTSEngine.Controllers {
             // Input Pass
             ResolveInput(s, dt);
             ApplyInput(s, dt);
+
+            // Pathfinding Pass
+            ApplyFinishedPathQueries();
 
             // Logic Pass
             ApplyLogic(s, dt);
@@ -154,7 +173,20 @@ namespace RTSEngine.Controllers {
                     }
                 }
             }
-            if(squad != null) AddSquadTask(s, squad);
+            if(squad != null) {
+                AddSquadTask(s, squad);
+                // Setup Pathfinding Query
+                foreach(var squadQuery in squadQueries) {
+                    if(squadQuery.squad == squad) {
+                        squadQuery.query.IsOld = true;
+                    }
+                }
+                squad.MovementController = e.Team.scDefaultMovement.CreateInstance<ACSquadMovementController>();
+                squad.RecalculateGridPosition();
+                PathQuery query = new PathQuery(squad.GridPosition, e.Waypoint);
+                squadQueries.Add(new SquadQuery(squad, query));
+                pathfinder.Add(query);
+            }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
             List<IEntity> selected = e.Team.Input.selected;
@@ -174,6 +206,22 @@ namespace RTSEngine.Controllers {
                 squad.TargettingController = e.Team.scDefaultTargetting.CreateInstance<ACSquadTargettingController>();
                 squad.TargettingController.Target = e.Target as RTSUnit;
             }
+        }
+        
+        // Apply Results Of Any Finished Pathfinding
+        private void ApplyFinishedPathQueries() {
+            List<SquadQuery> newQueries = new List<SquadQuery>();
+            foreach(var squadQuery in squadQueries) {
+                RTSSquad squad = squadQuery.squad;
+                PathQuery query = squadQuery.query;
+                if(!query.IsOld && query.IsComplete) {
+                    squad.MovementController.Waypoints = query.waypoints;
+                }
+                else if (!query.IsOld) {
+                    newQueries.Add(squadQuery);
+                }
+            }
+            squadQueries = newQueries;
         }
 
         // Logic Stage
