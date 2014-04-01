@@ -63,6 +63,7 @@ namespace RTSEngine.Algorithms {
             fScore[start.X, start.Y] = gScore[start.X, start.Y] + Estimate(start.X, start.Y);
 
             var openSet = new MinHeap<Point>(Comparison, 30);
+            var closedSet = new List<Point>();
             openSet.Insert(start);
             while(openSet.Count > 0) {
                 Point p = openSet.Pop();
@@ -73,7 +74,7 @@ namespace RTSEngine.Algorithms {
                 }
                 foreach(Point n in NeighborhoodAlign(p).Where(PointPossible)) {
                     int tgs = gScore[p.X, p.Y] + 10;
-                    if(!openSet.Contains(n) || tgs < gScore[n.X, n.Y]) {
+                    if(tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
                         fScore[n.X, n.Y] = gScore[n.X, n.Y] + Estimate(n.X, n.Y);
@@ -84,7 +85,7 @@ namespace RTSEngine.Algorithms {
                 }
                 foreach(Point n in NeighborhoodDiag(p).Where(PointPossible)) {
                     int tgs = gScore[p.X, p.Y] + 14;
-                    if(!openSet.Contains(n) || tgs < gScore[n.X, n.Y]) {
+                    if(tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
                         fScore[n.X, n.Y] = gScore[n.X, n.Y] + Estimate(n.X, n.Y);
@@ -99,7 +100,7 @@ namespace RTSEngine.Algorithms {
 
         private void BuildPath(List<Point> p) {
             Point cur = end;
-            while(cur.X == start.X && cur.Y == start.Y) {
+            while(cur.X != start.X || cur.Y != start.Y) {
                 p.Add(cur);
                 cur = prev[cur.X, cur.Y];
             }
