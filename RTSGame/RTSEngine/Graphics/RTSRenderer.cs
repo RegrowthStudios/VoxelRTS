@@ -1,18 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using RTSEngine.Data;
-using RTSEngine.Controllers;
 using BlisterUI.Input;
-using RTSEngine.Data.Parsers;
-using System.IO;
+using RTSEngine.Controllers;
+using RTSEngine.Data;
 using RTSEngine.Data.Team;
+using RTSEngine.Data.Parsers;
 
 namespace RTSEngine.Graphics {
+    public struct VisualTeam {
+        public int TeamIndex;
+        public RTSColorScheme ColorScheme;
+        public string RaceFileInfo;
+    }
+
     public class RTSRenderer : IDisposable {
         // Really Should Not Be Holding This Though
         private GameWindow window;
@@ -49,17 +56,22 @@ namespace RTSEngine.Graphics {
         private RTSFXEntity fxAnim;
         private RTSFXMap fxMap;
 
-        public RTSRenderer(GameEngine ge, GraphicsDeviceManager gdm, string fxAnimFile, string fxMapFile, GameWindow w) {
+        // Graphics Data To Dispose
+        private readonly ConcurrentBag<IDisposable> toDispose;
+
+        public RTSRenderer(GraphicsDeviceManager gdm, string fxAnimFile, string fxMapFile, GameWindow w) {
             window = w;
             gManager = gdm;
+            toDispose = new ConcurrentBag<IDisposable>();
+
             UnitModels = new List<RTSUnitModel>();
 
-            tPixel = ge.CreateTexture2D(1, 1);
+            tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
 
-            fxMap = new RTSFXMap(ge.LoadEffect(fxMapFile));
+            fxMap = new RTSFXMap(LoadEffect(fxMapFile));
 
-            fxSelection = ge.CreateEffect();
+            fxSelection = CreateEffect();
             fxSelection.LightingEnabled = false;
             fxSelection.FogEnabled = false;
             fxSelection.TextureEnabled = false;
@@ -67,7 +79,7 @@ namespace RTSEngine.Graphics {
             fxSelection.World = Matrix.Identity;
             fxSelection.Texture = tPixel;
 
-            fxAnim = new RTSFXEntity(ge.LoadEffect(fxAnimFile));
+            fxAnim = new RTSFXEntity(LoadEffect(fxAnimFile));
             fxAnim.World = Matrix.Identity;
             fxAnim.CPrimary = Vector3.UnitX;
             fxAnim.CSecondary = Vector3.UnitY;
@@ -82,68 +94,127 @@ namespace RTSEngine.Graphics {
             MouseEventDispatcher.OnMousePress -= OnMousePress;
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
             MouseEventDispatcher.OnMouseMotion -= OnMouseMove;
-            Camera.Controller.Unhook(window);
+
+            // Dispose All In The List
+            IDisposable[] td = new IDisposable[toDispose.Count];
+            toDispose.CopyTo(td, 0);
+            for(int i = 0; i < td.Length; i++) {
+                td[i].Dispose();
+                td[i] = null;
+            }
         }
 
-        public void HookToGame(GameEngine ge, Camera camera, EngineLoadData geLoad) {
+        #region Graphics Data Creation That Will Be Ready For Disposal At The End Of The Game
+        public VertexBuffer CreateVertexBuffer(VertexDeclaration vd, int s, BufferUsage usage = BufferUsage.WriteOnly) {
+            VertexBuffer vb = new VertexBuffer(G, vd, s, usage);
+            toDispose.Add(vb);
+            return vb;
+        }
+        public DynamicVertexBuffer CreateDynamicVertexBuffer(VertexDeclaration vd, int s, BufferUsage usage = BufferUsage.WriteOnly) {
+            DynamicVertexBuffer vb = new DynamicVertexBuffer(G, vd, s, usage);
+            toDispose.Add(vb);
+            return vb;
+        }
+        public IndexBuffer CreateIndexBuffer(IndexElementSize id, int s, BufferUsage usage = BufferUsage.WriteOnly) {
+            IndexBuffer ib = new IndexBuffer(G, id, s, usage);
+            toDispose.Add(ib);
+            return ib;
+        }
+        public Texture2D CreateTexture2D(int w, int h, SurfaceFormat format = SurfaceFormat.Color, bool mipmap = false) {
+            Texture2D t = new Texture2D(G, w, h, mipmap, format);
+            toDispose.Add(t);
+            return t;
+        }
+        public Texture2D LoadTexture2D(Stream s) {
+            Texture2D t = Texture2D.FromStream(G, s);
+            toDispose.Add(t);
+            return t;
+        }
+        public Texture2D LoadTexture2D(string file) {
+            Texture2D t;
+            using(FileStream fs = File.OpenRead(file)) {
+                t = LoadTexture2D(fs);
+            }
+            return t;
+        }
+        public RenderTarget2D CreateRenderTarget2D(int w, int h, SurfaceFormat sf = SurfaceFormat.Color, DepthFormat df = DepthFormat.Depth24Stencil8, RenderTargetUsage usage = RenderTargetUsage.DiscardContents, int msc = 1, bool mipmap = false) {
+            RenderTarget2D t = new RenderTarget2D(G, w, h, mipmap, sf, df, msc, usage);
+            toDispose.Add(t);
+            return t;
+        }
+        public Effect LoadEffect(string file) {
+            Effect fx = XNAEffect.Compile(G, file);
+            toDispose.Add(fx);
+            return fx;
+        }
+        public BasicEffect CreateEffect() {
+            BasicEffect fx = new BasicEffect(G);
+            toDispose.Add(fx);
+            return fx;
+        }
+        public SpriteFont LoadFont(string file) {
+            IDisposable disp;
+            SpriteFont f = XNASpriteFont.Compile(G, file, out disp);
+            toDispose.Add(disp);
+            return f;
+        }
+        public SpriteFont LoadFont(string file, out IDisposable disp) {
+            SpriteFont f = XNASpriteFont.Compile(G, file, out disp);
+            toDispose.Add(disp);
+            return f;
+        }
+        public SpriteFont CreateFont(string fontName, int size, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
+            IDisposable disp;
+            SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
+            toDispose.Add(disp);
+            return f;
+        }
+        public SpriteFont CreateFont(string fontName, int size, out IDisposable disp, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
+            SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
+            toDispose.Add(disp);
+            return f;
+        }
+        #endregion
+
+        public void HookToGame(GameState state, Camera camera, FileInfo mapFile) {
             // Get The Camera
             Camera = camera;
 
             // Create The Map
-            Heightmap map = ge.State.Map;
-            Map = HeightmapParser.ParseModel(ge, new Vector3(map.Width, map.ScaleY, map.Depth), ge.State.CGrid.numCells.X, ge.State.CGrid.numCells.Y, geLoad.MapFile);
+            Heightmap map = state.Map;
+            Map = HeightmapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, mapFile);
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
 
-            // Get Unit Models
-            for(int ti = 0; ti < geLoad.Teams.Length; ti++) {
-                RTSTeamResult res = geLoad.Teams[ti];
-                RTSTeam team = ge.State.Teams[ti];
-                for(int ui = 0; ui < team.unitData.Count; ui++) {
-                    RTSUnitModel uModel = RTSUnitDataParser.ParseModel(ge, team.unitData[ui], res.TeamType.UnitTypes[ui]);
-                    uModel.ColorPrimary = team.ColorScheme.Primary;
-                    uModel.ColorSecondary = team.ColorScheme.Secondary;
-                    uModel.ColorTertiary = team.ColorScheme.Tertiary;
-                    team.OnUnitSpawn += uModel.OnUnitSpawn;
-                    UnitModels.Add(uModel);
-                }
+            // Hook FOW
+            state.CGrid.OnFOWChange += OnFOWChange;
+        }
+        public void LoadTeamVisuals(GameState state, VisualTeam vt) {
+            RTSTeam team = state.Teams[vt.TeamIndex];
+            team.ColorScheme = vt.ColorScheme;
+            RTSRaceData res = RTSRaceParser.Parse(new FileInfo(vt.RaceFileInfo));
+            for(int ui = 0; ui < team.unitData.Count; ui++) {
+                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, team.unitData[ui], res.UnitTypes[ui]);
+                uModel.ColorPrimary = team.ColorScheme.Primary;
+                uModel.ColorSecondary = team.ColorScheme.Secondary;
+                uModel.ColorTertiary = team.ColorScheme.Tertiary;
+                team.OnUnitSpawn += uModel.OnUnitSpawn;
+                UnitModels.Add(uModel);
             }
         }
-
-        private void CheckSetFOW(CollisionGrid cg, int x, int y, int pIndex, FogOfWar f, float fN) {
-            if(x < 0 || x >= cg.numCells.X) return;
-            if(y < 0 || y >= cg.numCells.Y) return;
-            FogOfWar of = cg.GetFogOfWar(x, y, pIndex);
-            if(of != f && Map.FogOfWar[y * cg.numCells.X + x] < fN) {
-                cg.SetFogOfWar(x, y, pIndex, f);
-                Map.SetFOW(x, y, fN);
-            }
-        }
-        public void UpdateFOW(GameState s, RTSTeam team, int pIndex) {
-            CollisionGrid cg = s.CGrid;
-            for(int ui = 0; ui < team.units.Count; ui++) {
-                Point p = HashHelper.Hash(team.units[ui].GridPosition, cg.numCells, cg.size);
-                FogOfWar f = cg.GetFogOfWar(p.X, p.Y, pIndex);
-                switch(f) {
-                    case FogOfWar.Active:
-                        continue;
-                    case FogOfWar.Passive:
-                        cg.SetFogOfWar(p.X, p.Y, pIndex, f);
-                        Map.SetFOW(p.X, p.Y, 1f);
-                        CheckSetFOW(cg, p.X + 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X - 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X, p.Y + 1, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X, p.Y - 1, pIndex, FogOfWar.Passive, 0.5f);
-                        break;
-                    case FogOfWar.Nothing:
-                        cg.SetFogOfWar(p.X, p.Y, pIndex, f);
-                        Map.SetFOW(p.X, p.Y, 1f);
-                        CheckSetFOW(cg, p.X + 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X - 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X, p.Y + 1, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X, p.Y - 1, pIndex, FogOfWar.Passive, 0.5f);
-                        break;
-                }
+        private void OnFOWChange(int x, int y, int p, FogOfWar f) {
+            if(p != 0) return;
+            switch(f) {
+                case FogOfWar.All:
+                case FogOfWar.Active:
+                    Map.SetFOW(x, y, 1f);
+                    break;
+                case FogOfWar.Passive:
+                    Map.SetFOW(x, y, 0.5f);
+                    break;
+                case FogOfWar.Nothing:
+                    Map.SetFOW(x, y, 0f);
+                    break;
             }
         }
 
@@ -161,9 +232,8 @@ namespace RTSEngine.Graphics {
         public void Draw(GameState s, float dt) {
             G.Clear(Color.Black);
 
-            // TODO: Draw Environment Cube
-            UpdateFOW(s, s.Teams[0], 0);
             DrawMap();
+            // TODO: Draw Static
             DrawAnimated();
             if(drawBox) DrawSelectionBox();
         }

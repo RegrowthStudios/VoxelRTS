@@ -17,6 +17,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerrainConverter", "Terrain
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSGame", "RTSGame\RTSGame.csproj", "{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSServer", "RTSServer\RTSServer.csproj", "{63818D1E-626A-4258-A302-8761E45BEF68}"
+	ProjectSection(ProjectDependencies) = postProject
+		{28292778-5EDC-4898-8E0C-9E32412174CD} = {28292778-5EDC-4898-8E0C-9E32412174CD}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +92,16 @@ Global
 		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Release|Mixed Platforms.Build.0 = Release|x86
 		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Release|x86.ActiveCfg = Release|x86
 		{DBC499DD-D0E7-4294-9E08-C6A1BBD13606}.Release|x86.Build.0 = Release|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Debug|x86.ActiveCfg = Debug|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Debug|x86.Build.0 = Debug|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Release|Any CPU.ActiveCfg = Release|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Release|Mixed Platforms.Build.0 = Release|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Release|x86.ActiveCfg = Release|x86
+		{63818D1E-626A-4258-A302-8761E45BEF68}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

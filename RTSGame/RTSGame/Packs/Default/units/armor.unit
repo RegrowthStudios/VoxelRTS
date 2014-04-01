@@ -21,7 +21,7 @@ BBOXMAX         [0.4 , 1.0 , 0.4]
 
 // Combat Data
 ARMOR           [8]
-RANGE           [0 , 1]
+RANGE           [0 , 8]
 TIMER           [0.5]
 DAMAGE          [30 , 45]
 CRITCHANCE      [0.05]
