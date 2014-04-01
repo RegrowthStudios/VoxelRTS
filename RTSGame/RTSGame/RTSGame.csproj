@@ -65,6 +65,7 @@
     <Compile Include="Addition\OrbitingCamera.cs" />
     <Compile Include="App.cs" />
     <Compile Include="ColorSchemeScreen.cs" />
+    <Compile Include="LobbyScreen.cs" />
     <Compile Include="MenuScreen.cs" />
     <Compile Include="RTSScreen.cs" />
     <Content Include="Content\Audio\btnClick.wav">
@@ -196,7 +197,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Packs\Default\buildings\" />
+    <Folder Include="Packs\Default\animations\buildings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

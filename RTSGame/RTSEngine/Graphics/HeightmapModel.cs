@@ -22,7 +22,7 @@ namespace RTSEngine.Graphics {
             private set;
         }
 
-        public HeightmapModel(GameEngine ge, int fw, int fh) {
+        public HeightmapModel(RTSRenderer renderer, int fw, int fh) {
             FW = fw;
             FH = fh;
             FogOfWar = new float[FW * FH];
@@ -32,7 +32,7 @@ namespace RTSEngine.Graphics {
             //    FogOfWar[i] = r.Next(3) / 2f;
             //}
             Reset = false;
-            FogOfWarTexture = ge.CreateTexture2D(fw, fh, SurfaceFormat.Single, false);
+            FogOfWarTexture = renderer.CreateTexture2D(fw, fh, SurfaceFormat.Single, false);
             FogOfWarTexture.SetData(FogOfWar);
         }
 

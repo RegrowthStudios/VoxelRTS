@@ -58,7 +58,7 @@ namespace RTSEngine.Graphics {
             get { return instances.Count; }
         }
 
-        public RTSUnitModel(GameEngine ge, RTSUnitData data, Stream sModel, Texture2D tAnim) {
+        public RTSUnitModel(RTSRenderer renderer, RTSUnitData data, Stream sModel, Texture2D tAnim) {
             // Create With The Animation Texture
             AnimationTexture = tAnim;
             Vector2 texelSize = new Vector2(1f / (AnimationTexture.Width), 1f / (AnimationTexture.Height));
@@ -79,14 +79,14 @@ namespace RTSEngine.Graphics {
             }
 
             // Create Model Geometry
-            ModelHelper.CreateBuffers(ge, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
+            ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
 
             // Create Instance Buffer
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
             instances = new List<RTSUnit>(Data.MaxCount);
             for(int i = 0; i < instVerts.Length; i++)
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
-            dvbInstances = ge.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
+            dvbInstances = renderer.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
             dvbInstances.SetData(instVerts);
             dvbInstances.ContentLost += (s, a) => { rebuildDVB = true; };
             rebuildDVB = false;

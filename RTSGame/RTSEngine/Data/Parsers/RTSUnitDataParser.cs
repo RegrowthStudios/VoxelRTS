@@ -37,7 +37,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxCtrlAnimation = RegexHelper.Generate("CTRLANIM", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlCombat = RegexHelper.Generate("CTRLCOMBAT", @"[\w\s\.]+");
 
-        private static Texture2D AnimationFromBitmap(GameEngine ge, FileInfo fi) {
+        private static Texture2D AnimationFromBitmap(RTSRenderer renderer, FileInfo fi) {
             Texture2D t;
             float[] sData = null;
             int w, h;
@@ -49,11 +49,11 @@ namespace RTSEngine.Data.Parsers {
                 System.Runtime.InteropServices.Marshal.Copy(data.Scan0, sData, 0, (data.Stride * data.Height) >> 2);
                 bmp.UnlockBits(data);
             }
-            t = ge.CreateTexture2D(w, h, SurfaceFormat.Single);
+            t = renderer.CreateTexture2D(w, h, SurfaceFormat.Single);
             t.SetData(sData);
             return t;
         }
-        public static RTSUnitModel ParseModel(GameEngine ge, RTSUnitData data, FileInfo infoFile) {
+        public static RTSUnitModel ParseModel(RTSRenderer renderer, RTSUnitData data, FileInfo infoFile) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -83,11 +83,11 @@ namespace RTSEngine.Data.Parsers {
 
             RTSUnitModel model;
             using(var sModel = File.OpenRead(fiModel.FullName)) {
-                Texture2D tAnim = AnimationFromBitmap(ge, fiAnim);
-                model = new RTSUnitModel(ge, data, sModel, tAnim);
+                Texture2D tAnim = AnimationFromBitmap(renderer, fiAnim);
+                model = new RTSUnitModel(renderer, data, sModel, tAnim);
             }
-            model.ModelTexture = ge.LoadTexture2D(fiTexMain.FullName);
-            model.ColorCodeTexture = ge.LoadTexture2D(fiTexKey.FullName);
+            model.ModelTexture = renderer.LoadTexture2D(fiTexMain.FullName);
+            model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
             return model;
         }
         public static RTSUnitData ParseData(Dictionary<string, ReflectedUnitController> controllers, FileInfo infoFile) {

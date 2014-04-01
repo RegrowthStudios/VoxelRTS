@@ -57,6 +57,7 @@ namespace RTS {
 
         // Renderer
         private GameEngine engine;
+        private RTSRenderer renderer;
         private RTSFXEntity fx;
         private WidgetRenderer wr;
         private IDisposable fontDisp;
@@ -104,10 +105,11 @@ namespace RTS {
             MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
             MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
 
-            engine = new GameEngine(game.Graphics, game.Window);
+            engine = new GameEngine();
+            renderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
 
             // Rendering Effect
-            fx = new RTSFXEntity(engine.LoadEffect(FX_FILE_PATH));
+            fx = new RTSFXEntity(renderer.LoadEffect(FX_FILE_PATH));
 
             // Default Team
             team = new RTSTeam();
@@ -130,6 +132,7 @@ namespace RTS {
         }
         public override void OnExit(GameTime gameTime) {
             if(unitModel != null) DisposeUnit();
+            renderer.Dispose();
             engine.Dispose();
             camera = null;
             MouseEventDispatcher.OnMousePress -= sP.OnMousePress;
@@ -282,7 +285,7 @@ namespace RTS {
             FileInfo fi = _fi as FileInfo;
 
             RTSUnitData _unitData = RTSUnitDataParser.ParseData(null, fi);
-            RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(engine, _unitData, fi);
+            RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(renderer, _unitData, fi);
             RTSUnit _unit = new RTSUnit(team, _unitData, Vector2.Zero);
             _unit.Height = 0;
             _unitModel.OnUnitSpawn(_unit);
