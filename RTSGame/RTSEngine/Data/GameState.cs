@@ -31,6 +31,11 @@ namespace RTSEngine.Data {
             set;
         }
 
+        public ImpactGrid IGrid {
+            get;
+            set;
+        }
+
         // Controller Dictionary
         public Dictionary<string, ReflectedUnitController> UnitControllers {
             get;
@@ -45,6 +50,12 @@ namespace RTSEngine.Data {
         public RTSTeam[] Teams {
             get;
             private set;
+        }
+
+        // List of Regions In The Environment
+        public List<Region> Regions { 
+            get; 
+            private set; 
         }
 
         // Keeping Track Of Time
