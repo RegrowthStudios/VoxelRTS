@@ -187,10 +187,10 @@ namespace RTSEngine.Data {
 
         public void AddImpactGenerator(ImpactGenerator g) {
             ImpactGenerators.Add(g);
-            g.GenerateImpact += AddToImpact;
+            g.GenerateImpact += AddToCellImpact;
         }
 
-        public void AddToImpact(int amount){
+        public void AddToCellImpact(int amount){
             CellImpact += amount;
             IncreaseImpact(amount);
         }
