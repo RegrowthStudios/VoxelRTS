@@ -156,49 +156,39 @@ namespace RTSEngine.Data {
         private float cellSize;
         private Point numCells;
         private Vector2 size;
-        private ImpactCell[,] grid;
+
+        public Region[,] Region { get; set; }
+        public List<ImpactGenerator>[,] ImpactGenerators { get; set; }
+        public int[,] CellImpact { get; private set; } 
 
         public ImpactGrid(CollisionGrid cg) {
             cellSize = 2 * cg.cellSize;
             numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
             cellSize = cg.size.X / numCells.X;
-            grid = new ImpactCell[numCells.X, numCells.Y];
             size = cg.size;
+            Region = new Region[numCells.X, numCells.Y];
+            ImpactGenerators = new List<ImpactGenerator>[numCells.X, numCells.Y];
+            CellImpact = new int[numCells.X, numCells.Y];
 
             for (int x = 0; x < numCells.X; x++) {
                 for (int y = 0; y < numCells.Y; y++) {
-                    grid[x, y] = new ImpactCell();
+                    Region[x, y] = null;
+                    ImpactGenerators[x, y] = new List<ImpactGenerator>();
+                    CellImpact[x,y] = 0;
                 }
             }
         }
 
         public void AddImpactGenerator(ImpactGenerator g) {
             Point p = HashHelper.Hash(g.Position, numCells, size);
-            grid[p.X, p.Y].AddImpactGenerator(g);
-        }
-    }
-
-    public class ImpactCell {
-        
-        public Region Region { get; set; }
-        public List<ImpactGenerator> ImpactGenerators { get; set; }
-        public int CellImpact { get; private set; } 
-        public event Action<int> IncreaseImpact; 
-
-        public ImpactCell() {
-            Region = null;
-            ImpactGenerators = new List<ImpactGenerator>();
-            CellImpact = 0;
-        }
-
-        public void AddImpactGenerator(ImpactGenerator g) {
-            ImpactGenerators.Add(g);
+            ImpactGenerators[p.X, p.Y].Add(g);
             g.GenerateImpact += AddToCellImpact;
         }
 
-        public void AddToCellImpact(int amount){
-            CellImpact += amount;
-            IncreaseImpact(amount);
+        public void AddToCellImpact(Vector2 pos, int amount) {
+            Point p = HashHelper.Hash(pos, numCells, size);
+            CellImpact[p.X, p.Y] += amount;
+            Region[p.X, p.Y].AddToRegionImpact(amount);
         }
     }
 

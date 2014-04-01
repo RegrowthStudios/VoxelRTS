@@ -8,6 +8,6 @@ namespace RTSEngine.Interfaces {
     public interface ImpactGenerator {
         Vector2 Position { get; set; }
         int ImpactAmount { get; set; }
-        event Action<int> GenerateImpact;
+        event Action<Vector2, int> GenerateImpact;
     }
 }

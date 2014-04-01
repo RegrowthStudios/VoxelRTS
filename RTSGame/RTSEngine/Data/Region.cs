@@ -9,16 +9,12 @@ namespace RTSEngine.Data
 {
     public class Region
     {
-        public int RegionImpact { get; set; }
-        public List<ImpactCell> cells { get; set; } 
+        public int RegionImpact { get; private set; }
 
-        public Region(List<ImpactCell> cellList) {
-            cells = cellList;
+        public Region() {
+           
             RegionImpact = 0;
-            foreach (var c in cells) {
-                c.IncreaseImpact += AddToRegionImpact;
-                RegionImpact += c.CellImpact;
-            }
+
         }
 
         public void AddToRegionImpact(int amount) {
