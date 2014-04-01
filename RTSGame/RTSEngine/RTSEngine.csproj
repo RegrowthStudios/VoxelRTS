@@ -76,6 +76,7 @@
     <Compile Include="Data\GameState.cs" />
     <Compile Include="Data\LevelGrid.cs" />
     <Compile Include="Data\Parsers\EntityControllerParser.cs" />
+    <Compile Include="Data\Parsers\GameLoader.cs" />
     <Compile Include="Data\Parsers\HeightmapParser.cs" />
     <Compile Include="Data\Parsers\RegexHelper.cs" />
     <Compile Include="Data\Parsers\RTSColorSchemeParser.cs" />

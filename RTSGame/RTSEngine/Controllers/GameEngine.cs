@@ -54,7 +54,7 @@ namespace RTSEngine.Controllers {
         }
         public void Dispose() {
             if(State != null) {
-                DevConsole.OnNewCommand -= PlayController.OnDevCommand;
+                PlayController.Dispose();
                 for(int ti = 0; ti < State.Teams.Length; ti++) {
                     State.Teams[ti].Input.Dispose();
                 }
@@ -67,7 +67,6 @@ namespace RTSEngine.Controllers {
 
             // Make Gameplay Controller
             PlayController = new GameplayController();
-            DevConsole.OnNewCommand += PlayController.OnDevCommand;
 
             LoadControllers();
             State.SetTeams(LoadTeams(d.Teams));
