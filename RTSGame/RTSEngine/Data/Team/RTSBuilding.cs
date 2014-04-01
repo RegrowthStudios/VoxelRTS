@@ -7,10 +7,9 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team
 {
-    public class RTSBuilding : IEntity
-    {
+    public class RTSBuilding : IEntity {
         # region Properties
-        public RTSBuildingData BuildingData { get; private set;}
+        public RTSBuildingData BuildingData { get; private set; }
         // Unique ID
         public int UUID {
             get;
@@ -34,19 +33,19 @@ namespace RTSEngine.Data.Team
         public bool IsAlive {
             get { return Health > 0; }
             set {
-                if (!value)
+                if(!value)
                     Destroy();
-                else if (!IsAlive)
+                else if(!IsAlive)
                     throw new InvalidOperationException("Cannot Bring Back Units From The Dead");
             }
         }
-        
+
         private ACBuildingActionController aController;
         public ACBuildingActionController ActionController {
             get { return aController; }
             set {
                 aController = value;
-                if (aController != null) aController.setBuilding(this);
+                if(aController != null) aController.setBuilding(this);
             }
         }
         #endregion
@@ -92,8 +91,7 @@ namespace RTSEngine.Data.Team
         #endregion
 
         // Constructor
-        public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position)
-        {
+        public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {
             Team = team;
             BuildingData = data;
             gridPos = position;
@@ -106,17 +104,16 @@ namespace RTSEngine.Data.Team
         // Applies Damage To Health
         public void Damage(int d) {
             Health -= d;
-            if (OnDamage != null)
+            if(OnDamage != null)
                 OnDamage(this, d);
-            if (!IsAlive)
+            if(!IsAlive)
                 Destroy();
         }
 
         // Destroys This Entity
-        public void Destroy()
-        {
+        public void Destroy() {
             Health = 0;
-            if (OnDestruction != null)
+            if(OnDestruction != null)
                 OnDestruction(this);
         }
 
@@ -125,19 +122,9 @@ namespace RTSEngine.Data.Team
             UnitQueue.Enqueue(unit);
         }
 
-        RTSTeam IEntity.Team {
-            get { throw new NotImplementedException(); }
-        }
-
-        int IEntity.UUID {
-            get { throw new NotImplementedException(); }
-        }
-
-        int IEntity.Health {
-            get { throw new NotImplementedException(); }
-        }
-
-        bool IEntity.IsAlive {
+        // TODO: Implement Missing Interface Elements
+        #region AUTO-IMPLEMENTED MISSING INTERFACE ELEMENTS
+        public IEntity Target {
             get {
                 throw new NotImplementedException();
             }
@@ -146,54 +133,7 @@ namespace RTSEngine.Data.Team
             }
         }
 
-        Vector2 IEntity.GridPosition {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
-        }
-
-        float IEntity.Height {
-            get { throw new NotImplementedException(); }
-        }
-
-        Vector3 IEntity.WorldPosition {
-            get { throw new NotImplementedException(); }
-        }
-
-        ICollidable IEntity.CollisionGeometry {
-            get { throw new NotImplementedException(); }
-        }
-
-        BoundingBox IEntity.BBox {
-            get { throw new NotImplementedException(); }
-        }
-
-        IEntity IEntity.Target {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
-        }
-
-        event Action<IEntity, IEntity> IEntity.OnNewTarget {
-            add { throw new NotImplementedException(); }
-            remove { throw new NotImplementedException(); }
-        }
-
-        event Action<IEntity, int> IEntity.OnDamage {
-            add { throw new NotImplementedException(); }
-            remove { throw new NotImplementedException(); }
-        }
-
-        event Action<IEntity> IEntity.OnDestruction {
-            add { throw new NotImplementedException(); }
-            remove { throw new NotImplementedException(); }
-        }
+        public event Action<IEntity, IEntity> OnNewTarget;
 
         ACUnitActionController IEntity.ActionController {
             get {
@@ -204,7 +144,7 @@ namespace RTSEngine.Data.Team
             }
         }
 
-        ACUnitAnimationController IEntity.AnimationController {
+        public ACUnitAnimationController AnimationController {
             get {
                 throw new NotImplementedException();
             }
@@ -212,13 +152,6 @@ namespace RTSEngine.Data.Team
                 throw new NotImplementedException();
             }
         }
-
-        void IEntity.Destroy() {
-            throw new NotImplementedException();
-        }
-
-        void IEntity.Damage(int d) {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }
