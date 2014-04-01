@@ -152,15 +152,26 @@ namespace RTSEngine.Data {
     }
 
     public class ImpactGrid {
-
+        
+        // Size Of Each Cell In The Impact Grid
         private float cellSize;
+
+        // Number Of Cells In The Impact Grid
         private Point numCells;
+
+        // Size Of The Impact Grid
         private Vector2 size;
 
+        // Stores The Region Each Cell Is Located In
         public Region[,] Region { get; set; }
+
+        // Stores The ImpactGenerators Of Each Cell Of The Impact Grid
         public List<ImpactGenerator>[,] ImpactGenerators { get; set; }
+
+        // Stores The Impact of Each Cell Of The Impact Grid
         public int[,] CellImpact { get; private set; } 
 
+        // Creates An Impact Grid Using The Size And Cell Size Of The Given Collision Grid
         public ImpactGrid(CollisionGrid cg) {
             cellSize = 2 * cg.cellSize;
             numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
@@ -179,12 +190,14 @@ namespace RTSEngine.Data {
             }
         }
 
+        // Adds An Impact Generator To The Appropriate Cell In The Impact Grid
         public void AddImpactGenerator(ImpactGenerator g) {
             Point p = HashHelper.Hash(g.Position, numCells, size);
             ImpactGenerators[p.X, p.Y].Add(g);
             g.GenerateImpact += AddToCellImpact;
         }
 
+        // Listens To GenerateImpact Events And Adds Impact To The Appropriate Cell And Region 
         public void AddToCellImpact(Vector2 pos, int amount) {
             Point p = HashHelper.Hash(pos, numCells, size);
             CellImpact[p.X, p.Y] += amount;

@@ -11,8 +11,9 @@ namespace RTSEngine.Data
     {
         public int RegionImpact { get; private set; }
 
+
         public Region() {
-           
+
             RegionImpact = 0;
 
         }
