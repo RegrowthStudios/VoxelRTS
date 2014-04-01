@@ -45,6 +45,10 @@ namespace RTS {
             get;
             private set;
         }
+        public RTSNetScreen RTSNetScreen {
+            get;
+            private set;
+        }
         public ColorSchemeScreen ColorSchemeScreen {
             get;
             private set;
@@ -63,6 +67,7 @@ namespace RTS {
             MenuScreen = new RTS.MenuScreen();
             LoadScreen = new RTS.LoadScreen();
             RTSScreen = new RTS.RTSScreen();
+            RTSNetScreen = new RTS.RTSNetScreen();
             ColorSchemeScreen = new RTS.ColorSchemeScreen();
         }
 
@@ -85,6 +90,7 @@ namespace RTS {
                 MenuScreen,
                 LoadScreen,
                 RTSScreen,
+                RTSNetScreen,
                 ColorSchemeScreen
                 );
         }

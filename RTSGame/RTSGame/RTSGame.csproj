@@ -67,6 +67,7 @@
     <Compile Include="ColorSchemeScreen.cs" />
     <Compile Include="LobbyScreen.cs" />
     <Compile Include="MenuScreen.cs" />
+    <Compile Include="RTSNetScreen.cs" />
     <Compile Include="RTSScreen.cs" />
     <Content Include="Content\Audio\btnClick.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

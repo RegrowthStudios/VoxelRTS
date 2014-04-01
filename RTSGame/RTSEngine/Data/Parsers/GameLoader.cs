@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RTSEngine.Data.Parsers {
     public static class GameLoader {
-        public static void Build(GameState s) {
+        public static void BuildLocal(GameState s) {
 
         }
     }
