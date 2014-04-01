@@ -31,6 +31,11 @@ namespace RTSEngine.Data {
             set;
         }
 
+        public ImpactGrid IGrid {
+            get;
+            set;
+        }
+
         // Controller Dictionary
         public Dictionary<string, ReflectedUnitController> UnitControllers {
             get;
