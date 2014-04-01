@@ -9,6 +9,7 @@ namespace RTSEngine.Controllers
 {
     public class EnvironmentInputController : InputController
     {
+
         public EnvironmentInputController(GameState g, RTSTeam t)
             : base(g, t) {
 
@@ -17,5 +18,9 @@ namespace RTSEngine.Controllers
         public override void Dispose() {
             throw new NotImplementedException();
         }
+
+
+        
+
     }
 }

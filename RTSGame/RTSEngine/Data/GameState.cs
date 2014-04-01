@@ -47,6 +47,12 @@ namespace RTSEngine.Data {
             private set;
         }
 
+        // List of Regions In The Environment
+        public List<Region> Regions { 
+            get; 
+            private set; 
+        }
+
         // Keeping Track Of Time
         private int curFrame;
         public int CurrentFrame {
