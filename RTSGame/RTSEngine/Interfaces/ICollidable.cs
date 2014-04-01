@@ -17,8 +17,6 @@ namespace RTSEngine.Interfaces {
         Vector2 Center { get; set; }
         float Height { get; set; }
 
-        // TODO: Add Height Parameter
-
         // The Encapsulating Radii For The Geometry
         float InnerRadius { get; }
         float BoundingRadius { get; }

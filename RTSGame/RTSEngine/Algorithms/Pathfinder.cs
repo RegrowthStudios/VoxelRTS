@@ -11,27 +11,14 @@ using RTSEngine.Data;
 namespace RTSEngine.Algorithms {
     public class PathQuery {
         // Flag If The Path Query Is Resolved
-        public bool IsComplete {
-            get;
-            set;
-        }
-        
-        // Flag If The Query Is Old And Shouldn't Be Completed
-        public bool IsOld {
-            get;
-            set;
-        }
-        
-        // The Start And End For Pathfinding
-        public Vector2 Start {
-            get;
-            private set;
-        }
+        public bool IsComplete { get; set; }
 
-        public Vector2 End {
-            get;
-            private set;
-        }
+        // Flag If The Query Is Old And Shouldn't Be Completed
+        public bool IsOld { get; set; }
+
+        // The Start And End For Pathfinding
+        public Vector2 Start { get; private set; }
+        public Vector2 End { get; private set; }
 
         // Where To Store The Data
         public readonly List<Vector2> waypoints;
@@ -44,52 +31,40 @@ namespace RTSEngine.Algorithms {
             waypoints = new List<Vector2>();
         }
     }
-    
-    public struct SearchLocation {
-        public Point Loc;
-        public int GScore;
-        public int FScore;
-        public static int Compare(SearchLocation x, SearchLocation y) {
-            return x.FScore.CompareTo(y.FScore);
-        }
-        public SearchLocation(Point p) {
-            Loc = p;
-            GScore = 0;
-            FScore = 0;
-        }
-    }
 
     public class Pathfinder : IDisposable {
-        private bool running; 
-        private Thread thread;
+        // A*
         private CollisionGrid world;
-        private SearchLocation[,] searchGrid;
-
-        private ConcurrentQueue<PathQuery> queries; 
+        protected Point[,] prev;
+        protected int[,] gScore, fScore;
+        protected Point start;
+        protected Point end;
+        // Threading
+        private bool running;
+        private ConcurrentQueue<PathQuery> queries;
+        private Thread thread;
 
         public Pathfinder(CollisionGrid cg) {
+            // A*
             world = cg;
-            searchGrid = new SearchLocation[cg.numCells.X, cg.numCells.Y];
-            for(int i = 0; i < cg.numCells.X; i++) {
-                for(int j = 0; j < cg.numCells.Y; j++) {
-                    searchGrid[i, j].Loc.X = i;
-                    searchGrid[i, j].Loc.Y = j;
-                }
-            }
-            queries = new ConcurrentQueue<PathQuery>();
+            prev = new Point[world.numCells.X, world.numCells.Y];
+            fScore = new int[world.numCells.X, world.numCells.Y];
+            gScore = new int[world.numCells.X, world.numCells.Y];
+            // Threading
             running = true;
+            queries = new ConcurrentQueue<PathQuery>();
             thread = new Thread(WorkThread);
             thread.Priority = ThreadPriority.Normal;
             thread.Start();
         }
-     
+
         public void Add(PathQuery q) {
             queries.Enqueue(q);
         }
-        
+
         public void WorkThread() {
             while(running) {
-                while(HasQuery()) {
+                while(queries.Count > 0) {
                     PathQuery q;
                     if(queries.TryDequeue(out q)) {
                         if(q.IsOld) continue;
@@ -99,34 +74,30 @@ namespace RTSEngine.Algorithms {
                 Thread.Sleep(100);
             }
         }
-        
+
         public void Dispose() {
             running = false;
             thread.Join();
         }
-        
-        private bool HasQuery() {
-            return queries.Count > 0;
+
+        // Heuristic Function
+        private int Estimate(int x, int y) {
+            Point md = new Point(Math.Abs(x - end.X), Math.Abs(y - end.Y));
+            if(md.X < md.Y)
+                return md.X * 14 + (md.Y - md.X) * 10;
+            else
+                return md.Y * 14 + (md.X - md.Y) * 10;
         }
-        
+
+        private int Comparison(Point p1, Point p2) {
+            return fScore[p1.X, p1.Y].CompareTo(fScore[p2.X, p2.Y]);
+        }
+
         // Get The Search Grid Locations Adjacent To The Input
-        private bool PointPossible(Point p) {
+        private bool InGrid(Point p) {
             return p.X >= 0 && p.X < world.numCells.X && p.Y >= 0 && p.Y < world.numCells.Y;
         }
-        
-        private IEnumerable<SearchLocation> NeighborhoodOrdinal(SearchLocation loc) {
-            foreach(Point p in NeighborhoodDiag(loc.Loc).Where(PointPossible)) {
-                yield return searchGrid[p.X, p.Y];
-            }
-        }
-        
-        private IEnumerable<SearchLocation> NeighborhoodCardinal(SearchLocation loc) {
-            foreach(Point p in NeighborhoodAlign(loc.Loc).Where(PointPossible)) {
-                yield return searchGrid[p.X, p.Y];
-            }
-        }
-        
-        // Return An Array Of The Ordinal Points Adjacent To P
+
         private IEnumerable<Point> NeighborhoodDiag(Point p) {
             yield return new Point(p.X + 1, p.Y + 1);
             yield return new Point(p.X + 1, p.Y - 1);
@@ -134,7 +105,6 @@ namespace RTSEngine.Algorithms {
             yield return new Point(p.X - 1, p.Y - 1);
         }
 
-        // Return An Array Of The Cardinal Points Adjacent To P
         private IEnumerable<Point> NeighborhoodAlign(Point p) {
             yield return new Point(p.X + 1, p.Y);
             yield return new Point(p.X - 1, p.Y);
@@ -142,87 +112,83 @@ namespace RTSEngine.Algorithms {
             yield return new Point(p.X, p.Y - 1);
         }
 
-        // Manhattan Distance
-        private int ManhatDist(Point start, Point end) {
-            int xDist = Math.Abs(end.X - start.X);
-            int yDist = Math.Abs(end.Y - start.Y);
-            if(xDist < yDist)
-                return xDist * 14 + (yDist - xDist) * 10;
-            else
-                return yDist * 14 + (xDist - yDist) * 10;
-        }
-
-        private LinkedList<Point> ReconstructPath(Dictionary<Point, Point?> cameFrom, Point current) {
-            var path = new LinkedList<Point>();
-            path.AddFirst(current);
-            Point prev = current;
-            while(cameFrom[prev] != null) {
-                prev = cameFrom[prev].Value;
-                path.AddFirst(prev);
+        private void BuildPath(List<Point> p) {
+            Point cur = end;
+            while(cur.X != start.X || cur.Y != start.Y) {
+                p.Add(cur);
+                cur = prev[cur.X, cur.Y];
             }
-            return path;
+            p.Add(cur);
         }
 
         // Run A* Search, Given This Pathfinder's World And A Query
         private void Pathfind(PathQuery q) {
+#if DEBUG
             DevConsole.AddCommand("Pathfinding...");
-            Point cGridPoint = HashHelper.Hash(q.Start, world.numCells, world.size);
-            Point gGridPoint = HashHelper.Hash(q.End, world.numCells, world.size); ;
-            var closedSet = new HashSet<Point>();
-            var openSet = new MinHeap<SearchLocation>(SearchLocation.Compare);
-            var cameFrom = new Dictionary<Point, Point?>();
-            SearchLocation current = new SearchLocation(cGridPoint);
-            current.FScore = ManhatDist(cGridPoint,gGridPoint);
-            openSet.Insert(current);
-            // TODO: Verify
-            bool success = false;
+#endif
+
+            // Initialization
+            start = HashHelper.Hash(q.Start, world.numCells, world.size);
+            end = HashHelper.Hash(q.End, world.numCells, world.size); ;
+            for(int y = 0; y < world.numCells.Y; y++) {
+                for(int x = 0; x < world.numCells.X; x++) {
+                    fScore[x, y] = int.MaxValue;
+                    gScore[x, y] = int.MaxValue;
+                }
+            }
+            gScore[start.X, start.Y] = 0;
+            fScore[start.X, start.Y] = Estimate(start.X, start.Y);
+            var openSet = new MinHeap<Point>(Comparison, 30);
+            openSet.Insert(start);
+
+            // A* Loop
+            List<Point> path = null;
             while(openSet.Count > 0) {
-                DevConsole.AddCommand("Entered while loop");
-                current = openSet.Pop();
-                if(current.Loc == gGridPoint) {
-                    DevConsole.AddCommand("Found goal");
-                    success = true;
+                Point p = openSet.Pop();
+                if(p.X == end.X && p.Y == end.Y) {
+                    path = new List<Point>();
+                    BuildPath(path);
                     break;
                 }
-                closedSet.Add(current.Loc);
-                foreach(SearchLocation neighbor in NeighborhoodOrdinal(current)) {
-                    DevConsole.AddCommand("Searching Ordinal Neighbors...");
-                    if(closedSet.Contains(neighbor.Loc) || world.GetCollision(neighbor.Loc.X, neighbor.Loc.Y)) continue;
-                    int gScoreNew = current.GScore + 14;
-                    if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
-                        DevConsole.AddCommand("Exploring Ordinal...");
-                        cameFrom[neighbor.Loc] = current.Loc;
-                        SearchLocation _neighbor = neighbor; // Can't Change Iteration Var
-                        _neighbor.GScore = gScoreNew;
-                        _neighbor.FScore = gScoreNew + ManhatDist(_neighbor.Loc, gGridPoint);
-                        if(!openSet.Contains(_neighbor)) openSet.Insert(_neighbor);
+                foreach(Point n in NeighborhoodAlign(p).Where(InGrid)) {
+                    int tgs = gScore[p.X, p.Y] + 10;
+                    if(tgs < gScore[n.X, n.Y]) {
+                        prev[n.X, n.Y] = p;
+                        gScore[n.X, n.Y] = tgs;
+                        fScore[n.X, n.Y] = gScore[n.X, n.Y] + Estimate(n.X, n.Y);
+                        if(!openSet.Contains(n)) {
+                            openSet.Insert(n);
+                        }
                     }
                 }
-                foreach(SearchLocation neighbor in NeighborhoodCardinal(current)) {
-                    DevConsole.AddCommand("Searching Cardinal Neighbors...");
-                    if(closedSet.Contains(neighbor.Loc) || world.GetCollision(neighbor.Loc.X, neighbor.Loc.Y)) continue;
-                    int gScoreNew = current.GScore + 10;
-                    if(!openSet.Contains(neighbor) || gScoreNew < neighbor.GScore) {
-                        DevConsole.AddCommand("Exploring Cardinal...");
-                        cameFrom[neighbor.Loc] = current.Loc;
-                        SearchLocation _neighbor = neighbor; // Can't Change Iteration Var
-                        _neighbor.GScore = gScoreNew;
-                        _neighbor.FScore = gScoreNew + ManhatDist(_neighbor.Loc, gGridPoint);
-                        if(!openSet.Contains(_neighbor)) openSet.Insert(_neighbor);
+                foreach(Point n in NeighborhoodDiag(p).Where(InGrid)) {
+                    int tgs = gScore[p.X, p.Y] + 14;
+                    if(tgs < gScore[n.X, n.Y]) {
+                        prev[n.X, n.Y] = p;
+                        gScore[n.X, n.Y] = tgs;
+                        fScore[n.X, n.Y] = gScore[n.X, n.Y] + Estimate(n.X, n.Y);
+                        if(!openSet.Contains(n)) {
+                            openSet.Insert(n);
+                        }
                     }
                 }
             }
-            // Finished
-            if(success) {
-                foreach(Point wp in ReconstructPath(cameFrom, gGridPoint)) {
+            // A* Conclusion
+            if(path != null) {
+                foreach(Point wp in path) {
                     q.waypoints.Add(new Vector2(wp.X * world.cellSize, wp.Y * world.cellSize));
                 }
+            }
+            q.IsComplete = true;
+#if DEBUG
+            if(path != null) {
                 DevConsole.AddCommand("Path found with size " + q.waypoints.Count);
             }
             else {
-                DevConsole.AddCommand("Pathfinder failed :(");
+                DevConsole.AddCommand("Pathfinding failed :(");
             }
-            q.IsComplete = true;
+#endif
+            
         }
     }
 }
