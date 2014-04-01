@@ -25,14 +25,17 @@ namespace RTSEngine.Controllers
         // Ore Will Regenerate This Amount During Each Recovery Phase
         //private int regenerate_amount = 5;
 
-       // private int spawn_number = 5; 
+        //private int spawn_number = 5; 
 
         public ImpactGrid Grid { get; private set; }
+
+        public Random Random { get; private set; }
 
         public EnvironmentInputController(GameState g, RTSTeam t)
             : base(g, t) {
             treeLocations = new List<Point>();
             Grid = g.IGrid;
+            Random = new Random();
         }
 
         public void Init() {
@@ -62,9 +65,9 @@ namespace RTSEngine.Controllers
                             p = c;
                         }
                     }
-                    // Spawn Environmental Units At That Cell
-                    
-
+                    // Spawn Environmental Units In That Cell
+                    //Vector2 offset = new Vector2(Random.Next(), Random.Next());
+                    //AddEvent(new SpawnUnitEvent(Team, ));
                 }
             }
         }
