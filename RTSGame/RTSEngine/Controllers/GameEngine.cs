@@ -186,6 +186,8 @@ namespace RTSEngine.Controllers {
                         break;
                 }
             }
+
+            PlayController.Init(State);
         }
 
         // Data Parsing And Loading

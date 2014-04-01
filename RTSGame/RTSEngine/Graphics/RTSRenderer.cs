@@ -95,6 +95,9 @@ namespace RTSEngine.Graphics {
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
 
+            // Hook FOW
+            ge.State.CGrid.OnFOWChange += OnFOWChange;
+
             // Get Unit Models
             for(int ti = 0; ti < geLoad.Teams.Length; ti++) {
                 RTSTeamResult res = geLoad.Teams[ti];
@@ -109,41 +112,19 @@ namespace RTSEngine.Graphics {
                 }
             }
         }
-
-        private void CheckSetFOW(CollisionGrid cg, int x, int y, int pIndex, FogOfWar f, float fN) {
-            if(x < 0 || x >= cg.numCells.X) return;
-            if(y < 0 || y >= cg.numCells.Y) return;
-            FogOfWar of = cg.GetFogOfWar(x, y, pIndex);
-            if(of != f && Map.FogOfWar[y * cg.numCells.X + x] < fN) {
-                cg.SetFogOfWar(x, y, pIndex, f);
-                Map.SetFOW(x, y, fN);
-            }
-        }
-        public void UpdateFOW(GameState s, RTSTeam team, int pIndex) {
-            CollisionGrid cg = s.CGrid;
-            for(int ui = 0; ui < team.units.Count; ui++) {
-                Point p = HashHelper.Hash(team.units[ui].GridPosition, cg.numCells, cg.size);
-                FogOfWar f = cg.GetFogOfWar(p.X, p.Y, pIndex);
-                switch(f) {
-                    case FogOfWar.Active:
-                        continue;
-                    case FogOfWar.Passive:
-                        cg.SetFogOfWar(p.X, p.Y, pIndex, f);
-                        Map.SetFOW(p.X, p.Y, 1f);
-                        CheckSetFOW(cg, p.X + 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X - 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X, p.Y + 1, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X, p.Y - 1, pIndex, FogOfWar.Passive, 0.5f);
-                        break;
-                    case FogOfWar.Nothing:
-                        cg.SetFogOfWar(p.X, p.Y, pIndex, f);
-                        Map.SetFOW(p.X, p.Y, 1f);
-                        CheckSetFOW(cg, p.X + 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X - 1, p.Y, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X, p.Y + 1, pIndex, FogOfWar.Passive, 0.5f);
-                        CheckSetFOW(cg, p.X, p.Y - 1, pIndex, FogOfWar.Passive, 0.5f);
-                        break;
-                }
+        private void OnFOWChange(int x, int y, int p, FogOfWar f) {
+            if(p != 0) return;
+            switch(f) {
+                case FogOfWar.All:
+                case FogOfWar.Active:
+                    Map.SetFOW(x, y, 1f);
+                    break;
+                case FogOfWar.Passive:
+                    Map.SetFOW(x, y, 0.5f);
+                    break;
+                case FogOfWar.Nothing:
+                    Map.SetFOW(x, y, 0f);
+                    break;
             }
         }
 
@@ -161,9 +142,8 @@ namespace RTSEngine.Graphics {
         public void Draw(GameState s, float dt) {
             G.Clear(Color.Black);
 
-            // TODO: Draw Environment Cube
-            UpdateFOW(s, s.Teams[0], 0);
             DrawMap();
+            // TODO: Draw Static
             DrawAnimated();
             if(drawBox) DrawSelectionBox();
         }

@@ -51,6 +51,8 @@ namespace RTSEngine.Data {
             private set;
         }
 
+        public event Action<int, int, int, FogOfWar> OnFOWChange;
+
         public CollisionGrid(float w, float h, float cs) {
             // Round down the grid size so they all fit into the map
             size = new Vector2(w, h);
@@ -131,7 +133,11 @@ namespace RTSEngine.Data {
         }
 
         public void SetFogOfWar(int x, int y, int p, FogOfWar f) {
+            FogOfWar of = GetFogOfWar(x, y, p);
+            if(f == of) return;
             FogOfWarHelper.SetFogOfWar(ref Fog[x, y], p, f);
+            if(OnFOWChange != null)
+                OnFOWChange(x, y, p, f);
         }
         public FogOfWar GetFogOfWar(int x, int y, int p) {
             return FogOfWarHelper.GetFogOfWar(Fog[x, y], p);

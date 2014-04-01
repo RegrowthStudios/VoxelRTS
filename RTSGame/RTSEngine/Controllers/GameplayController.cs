@@ -48,6 +48,7 @@ namespace RTSEngine.Controllers {
     public class GameplayController {
         public const int SQUAD_BUDGET_BINS = 10;
         public const int UNIT_BUDGET_BINS = 30;
+        private const int FOW_BUDGET_BINS = 8;
 
         // Way To Track Time
         public float TimePlayed {
@@ -63,6 +64,7 @@ namespace RTSEngine.Controllers {
 
         private TimeBudget tbSquadDecisions;
         private TimeBudget tbUnitDecisions;
+        private TimeBudget tbFOWCalculations;
 
         public GameplayController() {
             TimePlayed = 0f;
@@ -70,6 +72,14 @@ namespace RTSEngine.Controllers {
 
             tbSquadDecisions = new TimeBudget(SQUAD_BUDGET_BINS);
             tbUnitDecisions = new TimeBudget(UNIT_BUDGET_BINS);
+            tbFOWCalculations = new TimeBudget(FOW_BUDGET_BINS);
+        }
+
+        public void Init(GameState s) {
+            tbFOWCalculations.ClearTasks();
+            for(int ti = 0; ti < s.Teams.Length; ti++) {
+                tbFOWCalculations.AddTask(new FOWTask(s, ti));
+            }
         }
 
         // The Update Function
@@ -204,6 +214,9 @@ namespace RTSEngine.Controllers {
                     if(team.units[i].ActionController != null)
                         team.units[i].ActionController.ApplyAction(s, dt);
             }
+
+            // Calculate FOW
+            tbFOWCalculations.DoTasks(dt);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSpawn c) {
             RTSSquad squad = s.Teams[c.TeamIndex].AddSquad();
