@@ -44,6 +44,7 @@ namespace RTSEngine.Controllers {
 
     public enum SquadControllerType {
         Action,
+        Movement,
         Targetting
     }
     public class ReflectedSquadController {
@@ -61,6 +62,8 @@ namespace RTSEngine.Controllers {
             constructor = t.GetConstructor(new Type[0]);
             if(t.IsSubclassOf(typeof(ACSquadActionController)))
                 ControllerType = SquadControllerType.Action;
+            else if(t.IsSubclassOf(typeof(ACSquadMovementController)))
+                ControllerType = SquadControllerType.Movement;
             else if(t.IsSubclassOf(typeof(ACSquadTargettingController)))
                 ControllerType = SquadControllerType.Targetting;
             else

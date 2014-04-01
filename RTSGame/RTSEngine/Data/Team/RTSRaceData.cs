@@ -9,6 +9,7 @@ namespace RTSEngine.Data.Team {
         public string Name;
         public List<FileInfo> UnitTypes;
         public string DefaultSquadActionController;
+        public string DefaultSquadMovementController;
         public string DefaultSquadTargettingController;
 
         public RTSRaceData() {
