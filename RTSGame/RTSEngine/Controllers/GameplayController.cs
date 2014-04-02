@@ -91,6 +91,7 @@ namespace RTSEngine.Controllers {
         }
         public void Dispose() {
             DevConsole.OnNewCommand -= OnDevCommand;
+            pathfinder.Dispose();
         }
 
         public void Init(GameState s) {
@@ -100,6 +101,12 @@ namespace RTSEngine.Controllers {
                 tbFOWCalculations.AddTask(new FOWTask(s, ti));
             }
             pathfinder = new Pathfinder(s.CGrid);
+
+            // Start The AI
+            for(int ti = 0; ti < s.Teams.Length; ti++) {
+                AIInputController aic = s.Teams[ti].Input as AIInputController;
+                if(aic != null) aic.Start();
+            }
         }
 
         // The Update Function

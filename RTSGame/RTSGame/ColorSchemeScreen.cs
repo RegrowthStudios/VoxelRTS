@@ -56,7 +56,6 @@ namespace RTS {
         private int curUnit;
 
         // Renderer
-        private GameEngine engine;
         private RTSRenderer renderer;
         private RTSFXEntity fx;
         private WidgetRenderer wr;
@@ -105,7 +104,6 @@ namespace RTS {
             MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
             MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
 
-            engine = new GameEngine();
             renderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
 
             // Rendering Effect
@@ -133,7 +131,6 @@ namespace RTS {
         public override void OnExit(GameTime gameTime) {
             if(unitModel != null) DisposeUnit();
             renderer.Dispose();
-            engine.Dispose();
             camera = null;
             MouseEventDispatcher.OnMousePress -= sP.OnMousePress;
             MouseEventDispatcher.OnMouseMotion -= sP.OnMouseMovement;

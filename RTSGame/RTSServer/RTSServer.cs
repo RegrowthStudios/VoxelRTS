@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework;
 
 namespace RTSServer {
     public class RTSServer : IDisposable {
-        private GameEngine engine;
+        private GameState state;
         private bool running;
         private ConcurrentQueue<string> commands;
 
@@ -36,8 +36,8 @@ namespace RTSServer {
             eld.Teams[1].Colors.Secondary *= Vector3.UnitZ;
             eld.Teams[1].Colors.Tertiary *= Vector3.UnitZ;
 
-            engine = new GameEngine();
-            engine.Load(eld);
+            state = new GameState();
+            GameEngine.BuildLocal(state, eld);
 
             commands = new ConcurrentQueue<string>();
         }

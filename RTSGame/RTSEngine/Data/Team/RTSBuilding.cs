@@ -5,8 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
-namespace RTSEngine.Data.Team
-{
+namespace RTSEngine.Data.Team {
     public class RTSBuilding : IEntity {
         # region Properties
         public RTSBuildingData BuildingData { get; private set; }

@@ -47,7 +47,7 @@ namespace RTS {
             get { return loadData; }
             set { loadData = value; }
         }
-        public GameEngine LoadedEngine {
+        public GameState LoadedState {
             get;
             private set;
         }
@@ -155,20 +155,20 @@ namespace RTS {
             loadData.Teams[1].Colors.Secondary *= Vector3.UnitZ;
             loadData.Teams[1].Colors.Tertiary *= Vector3.UnitZ;
 
-            LoadedEngine = new GameEngine();
-            LoadedEngine.Load(LoadData);
+            LoadedState = new GameState();
+            GameEngine.BuildLocal(LoadedState, LoadData);
 
             // Create Camera And Graphics
             LoadedCamera = new Camera(G.Viewport);
             LoadedCamera.Controller.Hook(game.Window);
             LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
-            LoadedRenderer.HookToGame(LoadedEngine.State, LoadedCamera, game.LoadScreen.LoadData.MapFile);
-            LoadedRenderer.LoadTeamVisuals(LoadedEngine.State, new VisualTeam() {
+            LoadedRenderer.HookToGame(LoadedState, LoadedCamera, game.LoadScreen.LoadData.MapFile);
+            LoadedRenderer.LoadTeamVisuals(LoadedState, new VisualTeam() {
                 TeamIndex = 0,
                 ColorScheme = loadData.Teams[0].Colors,
                 RaceFileInfo = @"Packs\Default\races\player.race"
             });
-            LoadedRenderer.LoadTeamVisuals(LoadedEngine.State, new VisualTeam() {
+            LoadedRenderer.LoadTeamVisuals(LoadedState, new VisualTeam() {
                 TeamIndex = 1,
                 ColorScheme = loadData.Teams[1].Colors,
                 RaceFileInfo = @"Packs\Default\races\robots.race"
