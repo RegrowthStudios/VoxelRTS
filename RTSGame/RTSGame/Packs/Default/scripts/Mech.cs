@@ -110,16 +110,16 @@ namespace RTS.Mech.Unit {
             alCombat = new AnimationLoop(120, 149);
             alCombat.FrameSpeed = 30;
 
-            SetAnimation(FSMState.None);
+            SetAnimation(BehaviorFSM.None);
         }
 
         private void SetAnimation(int state) {
             switch(state) {
-                case FSMState.Walking:
+                case BehaviorFSM.Walking:
                     alCurrent = alWalk;
                     alCurrent.Restart(true);
                     break;
-                case FSMState.CombatMelee:
+                case BehaviorFSM.CombatMelee:
                     alCurrent = alCombat;
                     alCurrent.Restart(true);
                     break;
@@ -132,7 +132,7 @@ namespace RTS.Mech.Unit {
             if(lastState != unit.State) {
                 // A New Animation State If Provided
                 SetAnimation(unit.State);
-                if(lastState == FSMState.None) {
+                if(lastState == BehaviorFSM.None) {
                     rt = r.Next(120, 350) / 10f;
                 }
             }
@@ -146,7 +146,7 @@ namespace RTS.Mech.Unit {
                 AnimationFrame = alCurrent.CurrentFrame;
             }
 
-            if(lastState == FSMState.None) {
+            if(lastState == BehaviorFSM.None) {
                 // Check For A Random Animation
                 if(alCurrent == null) {
                     rt -= dt;
@@ -177,7 +177,7 @@ namespace RTS.Mech.Unit {
         public override void Attack(GameState g, float dt) {
             if(attackCooldown > 0)
                 attackCooldown -= dt;
-            if(unit.State != FSMState.None)
+            if(unit.State != BehaviorFSM.None)
                 return;
             if(unit.Target != null) {
                 if(!unit.Target.IsAlive) {
@@ -191,7 +191,7 @@ namespace RTS.Mech.Unit {
 
                 if(attackCooldown <= 0) {
                     attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;
-                    unit.State = FSMState.CombatMelee;
+                    unit.State = BehaviorFSM.CombatMelee;
                     if(minDistSquared <= distSquared) {
                         unit.DamageTarget(critRoller.NextDouble());
                         if(!unit.Target.IsAlive) unit.Target = null;
@@ -216,8 +216,8 @@ namespace RTS.Mech.Unit {
                 float ur = unit.CollisionGeometry.BoundingRadius + unit.Target.CollisionGeometry.BoundingRadius;
                 ur *= 1.3f;
                 doMove = udisp.LengthSquared() > (ur * ur);
-                if(!doMove && unit.State == FSMState.Walking)
-                    unit.State = FSMState.CombatMelee;
+                if(!doMove && unit.State == BehaviorFSM.Walking)
+                    unit.State = BehaviorFSM.CombatMelee;
                 return;
             }
             else if(Waypoints.Count < 1) return;
@@ -226,8 +226,8 @@ namespace RTS.Mech.Unit {
             Vector2 disp = waypoint - unit.GridPosition;
             doMove = disp.LengthSquared() > (DECIDE_DIST * DECIDE_DIST);
 
-            if(!doMove && unit.State == FSMState.Walking)
-                unit.State = FSMState.None;
+            if(!doMove && unit.State == BehaviorFSM.Walking)
+                unit.State = BehaviorFSM.None;
         }
         public override void ApplyMove(GameState g, float dt) {
             if(!doMove) return;
@@ -239,19 +239,19 @@ namespace RTS.Mech.Unit {
 
                 // This Logic Prevents The Unit From Hovering Around Its Goal
                 if(magnitude < STOP_DIST) {
-                    if(unit.State == FSMState.Walking)
-                        unit.State = FSMState.None;
+                    if(unit.State == BehaviorFSM.Walking)
+                        unit.State = BehaviorFSM.None;
                     return;
                 }
-                unit.State = FSMState.Walking;
+                unit.State = BehaviorFSM.Walking;
 
                 if(scaledChange.LengthSquared() > magnitude * magnitude)
                     unit.Move(change);
                 else
                     unit.Move(scaledChange);
             }
-            else if(unit.State == FSMState.Walking)
-                unit.State = FSMState.None;
+            else if(unit.State == BehaviorFSM.Walking)
+                unit.State = BehaviorFSM.None;
         }
     }
 }

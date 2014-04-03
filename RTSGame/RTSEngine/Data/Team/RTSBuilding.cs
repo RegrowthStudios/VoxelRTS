@@ -156,6 +156,15 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
+
+        public int TargetingOrders {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
+        }
         #endregion
     }
 }

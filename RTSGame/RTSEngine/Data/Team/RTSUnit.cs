@@ -19,9 +19,31 @@ namespace RTSEngine.Data.Team {
         // RTSTeam Of The Unit
         public RTSTeam Team { get; private set; }
 
+        // The Unit's Behavior Code
+        private int BehaviorCode;
+
+        // The Unit's State
         public int State {
-            get;
-            set;
+            get { return BehaviorFSM.GetByte(BehaviorCode, 0); }
+            set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 0); }
+        }
+
+        // The Unit's Targeting Orders
+        public int TargetingOrders {
+            get { return BehaviorFSM.GetByte(BehaviorCode, 1); }
+            set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 1); }
+        }
+
+        // The Unit's Combat Orders
+        public int CombatOrders {
+            get { return BehaviorFSM.GetByte(BehaviorCode, 2); }
+            set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 2); }
+        }
+
+        // The Unit's Movement Orders
+        public int MovementOrders {
+            get { return BehaviorFSM.GetByte(BehaviorCode, 3); }
+            set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 3); }
         }
 
         // This Unit's Cost In Capital
