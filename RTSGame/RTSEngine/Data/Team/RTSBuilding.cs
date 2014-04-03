@@ -5,8 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
-namespace RTSEngine.Data.Team
-{
+namespace RTSEngine.Data.Team {
     public class RTSBuilding : IEntity {
         # region Properties
         public RTSBuildingData BuildingData { get; private set; }
@@ -151,6 +150,11 @@ namespace RTSEngine.Data.Team
             set {
                 throw new NotImplementedException();
             }
+        }
+
+        public int State {
+            get;
+            set;
         }
         #endregion
     }

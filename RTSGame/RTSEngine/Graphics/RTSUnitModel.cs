@@ -54,8 +54,9 @@ namespace RTSEngine.Graphics {
         private bool rebuildDVB;
         private VertexRTSAnimInst[] instVerts;
         private List<RTSUnit> instances;
-        public int InstanceCount {
-            get { return instances.Count; }
+        private List<RTSUnit> visible;
+        public int VisibleInstanceCount {
+            get { return visible.Count; }
         }
 
         public RTSUnitModel(RTSRenderer renderer, RTSUnitData data, Stream sModel, Texture2D tAnim) {
@@ -82,6 +83,7 @@ namespace RTSEngine.Graphics {
             ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
 
             // Create Instance Buffer
+            visible = new List<RTSUnit>();
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
             instances = new List<RTSUnit>(Data.MaxCount);
             for(int i = 0; i < instVerts.Length; i++)
@@ -92,17 +94,21 @@ namespace RTSEngine.Graphics {
             rebuildDVB = false;
         }
 
-        public void UpdateInstances(GraphicsDevice g) {
-            instances.RemoveAll(RTSEngine.Controllers.GameplayController.IsEntityDead);
-
-            for(int i = 0; i < InstanceCount; i++) {
+        public void UpdateInstances(GraphicsDevice g, Predicate<RTSUnit> fVisible) {
+            instances.RemoveAll(GameplayController.IsEntityDead);
+            visible = new List<RTSUnit>();
+            for(int i = 0; i < instances.Count; i++) {
+                if(fVisible(instances[i]))
+                    visible.Add(instances[i]);
+            }
+            for(int i = 0; i < VisibleInstanceCount; i++) {
                 instVerts[i].World =
                     Matrix.CreateRotationY(
-                        (float)Math.Atan2(-instances[i].ViewDirection.Y, instances[i].ViewDirection.X)
+                        (float)Math.Atan2(-visible[i].ViewDirection.Y, visible[i].ViewDirection.X)
                     ) *
-                    Matrix.CreateTranslation(instances[i].WorldPosition)
+                    Matrix.CreateTranslation(visible[i].WorldPosition)
                     ;
-                instVerts[i].AnimationFrame = instances[i].AnimationController == null ? 0 : instances[i].AnimationController.AnimationFrame;
+                instVerts[i].AnimationFrame = visible[i].AnimationController == null ? 0 : visible[i].AnimationController.AnimationFrame;
             }
             if(rebuildDVB) {
                 dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
@@ -118,8 +124,8 @@ namespace RTSEngine.Graphics {
             g.Indices = ibModel;
         }
         public void DrawInstances(GraphicsDevice g) {
-            if(InstanceCount > 0)
-                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, InstanceCount);
+            if(VisibleInstanceCount > 0)
+                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, VisibleInstanceCount);
         }
 
         public void OnUnitSpawn(RTSUnit u) {

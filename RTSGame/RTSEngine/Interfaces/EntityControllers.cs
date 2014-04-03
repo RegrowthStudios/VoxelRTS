@@ -5,18 +5,19 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
+using RTSEngine.Graphics;
 
 namespace RTSEngine.Interfaces {
-    public enum AnimationType {
-        None,
-        Rest,
-        Walking,
-        PrepareCombatRanged,
-        CombatRanged,
-        CombatMelee,
-        Death,
-        Special0,
-        Special1
+    public static class FSMState {
+        public const int None = 0;
+        public const int Rest = None + 1;
+        public const int Walking = Rest + 1;
+        public const int PrepareCombatRanged = Walking + 1;
+        public const int CombatRanged = PrepareCombatRanged + 1;
+        public const int CombatMelee = CombatRanged + 1;
+        public const int Death = CombatMelee + 1;
+        public const int Special0 = Death + 1;
+        public const int Special1 = Special0 + 1;
     }
 
     // Base Controller Functionality
@@ -49,20 +50,29 @@ namespace RTSEngine.Interfaces {
 
     // Steps Animations And May Send Particle Events
     public abstract class ACUnitAnimationController : ACUnitController {
-        // FSM
-        protected AnimationType animation;
-        public AnimationType Animation {
-            get { return animation; }
-        }
-
         // This Is The Value Read By The Renderer
         public float AnimationFrame {
             get;
             protected set;
         }
 
+        // Local List Of Particles For The Controller
+        private List<Particle> particles = new List<Particle>();
+        public bool HasParticles {
+            get { return particles.Count > 0; }
+        }
+
+        protected void AddParticle(Particle p) {
+            particles.Add(p);
+        }
+        public void GetParticles(List<Particle> lOut) {
+            if(particles.Count > 0) {
+                lOut.AddRange(particles);
+                particles.Clear();
+            }
+        }
+
         // Scripted Animation
-        public abstract void SetAnimation(AnimationType t);
         public abstract void Update(GameState s, float dt);
     }
 
@@ -74,16 +84,10 @@ namespace RTSEngine.Interfaces {
 
     // Special Movement Mechanics
     public abstract class ACUnitMovementController : ACUnitController {
-        protected readonly List<Vector2> waypoints = new List<Vector2>();
+        private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {
             get { return waypoints; }
-        }
-
-        // Copies Over Waypoints From The List
-        public virtual void SetWaypoints(List<Vector2> wp) {
-            waypoints.Clear();
-            if(wp != null)
-                waypoints.AddRange(wp);
+            set { waypoints = value; }
         }
 
         // Scripted Logic For Movement

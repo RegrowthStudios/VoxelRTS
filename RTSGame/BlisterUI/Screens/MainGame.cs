@@ -21,6 +21,7 @@ namespace BlisterUI {
         // List Of Screens And The Current Screen
         protected ScreenList screenList;
         protected IGameScreen screen;
+        private GameTime lastTime;
 
         public MainGame()
             : base() {
@@ -51,6 +52,7 @@ namespace BlisterUI {
         }
 
         protected override void Update(GameTime gameTime) {
+            lastTime = gameTime;
             if(screen != null) {
                 switch(screen.State) {
                     case ScreenState.Running:
@@ -73,20 +75,26 @@ namespace BlisterUI {
                         }
                         break;
                     case ScreenState.ExitApplication:
-                        FullQuit(gameTime);
+                        Exit();
                         return;
                 }
                 base.Update(gameTime);
             }
             else {
-                FullQuit(gameTime);
+                Exit();
             }
         }
         protected override void Draw(GameTime gameTime) {
+            lastTime = gameTime;
             if(screen != null && screen.State == ScreenState.Running) {
                 screen.Draw(gameTime);
             }
             base.Draw(gameTime);
+        }
+
+        protected override void OnExiting(object sender, EventArgs args) {
+            FullQuit(lastTime);
+            base.OnExiting(sender, args);
         }
 
         protected virtual void FullQuit(GameTime gameTime) {
@@ -94,7 +102,6 @@ namespace BlisterUI {
                 screen.OnExit(gameTime);
             }
             screenList.destroy(gameTime);
-            Exit();
         }
     }
 }

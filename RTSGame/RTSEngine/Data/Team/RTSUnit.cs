@@ -19,6 +19,11 @@ namespace RTSEngine.Data.Team {
         // RTSTeam Of The Unit
         public RTSTeam Team { get; private set; }
 
+        public int State {
+            get;
+            set;
+        }
+
         // This Unit's Cost In Capital
         public int CapitalCost { get; private set; }
 

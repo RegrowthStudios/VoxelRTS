@@ -46,7 +46,11 @@ namespace RTSEngine.Graphics {
         }
 
         // All The Unit Models To Render
-        public List<RTSUnitModel> UnitModels {
+        public List<RTSUnitModel> NonFriendlyUnitModels {
+            get;
+            private set;
+        }
+        public List<RTSUnitModel> FriendlyUnitModels {
             get;
             private set;
         }
@@ -56,6 +60,12 @@ namespace RTSEngine.Graphics {
         private RTSFXEntity fxAnim;
         private RTSFXMap fxMap;
 
+        // The Friendly Team To Be Visualizing
+        private int teamIndex;
+
+        // Particle Effects
+        private ParticleRenderer pRenderer;
+
         // Graphics Data To Dispose
         private readonly ConcurrentBag<IDisposable> toDispose;
 
@@ -64,7 +74,8 @@ namespace RTSEngine.Graphics {
             gManager = gdm;
             toDispose = new ConcurrentBag<IDisposable>();
 
-            UnitModels = new List<RTSUnitModel>();
+            NonFriendlyUnitModels = new List<RTSUnitModel>();
+            FriendlyUnitModels = new List<RTSUnitModel>();
 
             tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
@@ -89,6 +100,8 @@ namespace RTSEngine.Graphics {
             MouseEventDispatcher.OnMousePress += OnMousePress;
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMouseMotion += OnMouseMove;
+
+            pRenderer = new ParticleRenderer();
         }
         public void Dispose() {
             MouseEventDispatcher.OnMousePress -= OnMousePress;
@@ -176,11 +189,12 @@ namespace RTSEngine.Graphics {
         }
         #endregion
 
-        public void HookToGame(GameState state, Camera camera, FileInfo mapFile) {
+        public void HookToGame(GameState state, int ti, Camera camera, FileInfo mapFile) {
             // Get The Camera
             Camera = camera;
 
             // Create The Map
+            teamIndex = ti;
             Heightmap map = state.Map;
             Map = HeightmapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, mapFile);
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
@@ -190,20 +204,20 @@ namespace RTSEngine.Graphics {
             state.CGrid.OnFOWChange += OnFOWChange;
         }
         public void LoadTeamVisuals(GameState state, VisualTeam vt) {
-            RTSTeam team = state.Teams[vt.TeamIndex];
+            RTSTeam team = state.teams[vt.TeamIndex];
             team.ColorScheme = vt.ColorScheme;
             RTSRaceData res = RTSRaceParser.Parse(new FileInfo(vt.RaceFileInfo));
-            for(int ui = 0; ui < team.unitData.Count; ui++) {
-                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, team.unitData[ui], res.UnitTypes[ui]);
+            for(int ui = 0; ui < team.race.activeUnits.Length; ui++) {
+                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, team.race.activeUnits[ui].Data, res.UnitTypes[ui]);
                 uModel.ColorPrimary = team.ColorScheme.Primary;
                 uModel.ColorSecondary = team.ColorScheme.Secondary;
                 uModel.ColorTertiary = team.ColorScheme.Tertiary;
                 team.OnUnitSpawn += uModel.OnUnitSpawn;
-                UnitModels.Add(uModel);
+                NonFriendlyUnitModels.Add(uModel);
             }
         }
         private void OnFOWChange(int x, int y, int p, FogOfWar f) {
-            if(p != 0) return;
+            if(p != teamIndex) return;
             switch(f) {
                 case FogOfWar.All:
                 case FogOfWar.Active:
@@ -218,22 +232,50 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void UpdateAnimations(GameState s, float dt) {
+        public void UpdateVisible(CollisionGrid cg) {
+            // All Team Friendly Units Are Visible
             RTSTeam team;
-            for(int ti = 0; ti < s.Teams.Length; ti++) {
-                team = s.Teams[ti];
-                for(int i = 0; i < team.units.Count; i++)
-                    if(team.units[i].AnimationController != null)
+            List<RTSUnit> units;
+            BoundingFrustum frustum = new BoundingFrustum(Camera.View * Camera.Projection);
+
+            Predicate<RTSUnit> fFV = (u) => {
+                return frustum.Intersects(u.BBox);
+            };
+            foreach(var um in FriendlyUnitModels)
+                um.UpdateInstances(G, fFV);
+
+            Predicate<RTSUnit> fNFV = (u) => {
+                Point up = HashHelper.Hash(u.GridPosition, cg.numCells, cg.size);
+                if(cg.GetFogOfWar(up.X, up.Y, teamIndex) != FogOfWar.Active)
+                    return false;
+                return frustum.Intersects(u.BBox);
+            };
+            foreach(var um in NonFriendlyUnitModels)
+                um.UpdateInstances(G, fNFV);
+        }
+        public void UpdateAnimations(GameState s, float dt) {
+            var np = new List<Particle>();
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                RTSTeam team = s.activeTeams[ti].Team;
+                for(int i = 0; i < team.units.Count; i++) {
+                    if(team.units[i].AnimationController != null) {
                         team.units[i].AnimationController.Update(s, dt);
+                        if(team.units[i].AnimationController.HasParticles) {
+                            team.units[i].AnimationController.GetParticles(np);
+                        }
+                    }
+                }
             }
+            pRenderer.Update(np, dt);
         }
 
         // Rendering Passes
         public void Draw(GameState s, float dt) {
             G.Clear(Color.Black);
-
+            
             DrawMap();
             // TODO: Draw Static
+            UpdateVisible(s.CGrid);
             DrawAnimated();
             if(drawBox) DrawSelectionBox();
         }
@@ -274,13 +316,12 @@ namespace RTSEngine.Graphics {
             G.VertexSamplerStates[0] = SamplerState.PointClamp;
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
-            foreach(RTSUnitModel unitModel in UnitModels) {
+            foreach(RTSUnitModel unitModel in NonFriendlyUnitModels) {
                 fxAnim.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
                 fxAnim.CPrimary = unitModel.ColorPrimary;
                 fxAnim.CSecondary = unitModel.ColorSecondary;
                 fxAnim.CTertiary = unitModel.ColorTertiary;
                 fxAnim.ApplyPassAnimation();
-                unitModel.UpdateInstances(G);
                 unitModel.SetInstances(G);
                 unitModel.DrawInstances(G);
             }

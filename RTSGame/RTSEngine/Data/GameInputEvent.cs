@@ -10,7 +10,9 @@ namespace RTSEngine.Data {
     public enum GameEventType {
         Select,
         SetWaypoint,
-        SetTarget
+        SetTarget,
+        SpawnUnit,
+        SpawnBuilding
     }
 
     public class GameInputEvent {
@@ -64,5 +66,30 @@ namespace RTSEngine.Data {
             : base(GameEventType.SetTarget, t) {
             Target = target;
         }
+    }
+
+    public class SpawnUnitEvent : GameInputEvent {
+        public Vector2 Position {
+            get;
+            private set;
+        }
+
+        public SpawnUnitEvent(RTSTeam t, Vector2 pos)
+            : base(GameEventType.SpawnUnit, t) {
+            Position = pos;
+        }
+    }
+
+    public class SpawnBuildingEvent : GameInputEvent {
+        public Vector2 Position {
+            get;
+            private set;
+        }
+
+        public SpawnBuildingEvent(RTSTeam t, Vector2 pos) 
+            : base (GameEventType.SpawnBuilding, t) {
+                Position = pos;
+        }
+
     }
 }
