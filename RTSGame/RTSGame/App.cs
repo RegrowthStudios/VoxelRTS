@@ -86,7 +86,7 @@ namespace RTS {
         protected override void BuildScreenList() {
             screenList = new BlisterUI.ScreenList(this, 0,
                 new BlisterUI.FalseFirstScreen(2),
-                new RTSEngine.Screens.InduZtryScreen(1),
+                new InduZtryScreen(1),
                 MenuScreen,
                 LoadScreen,
                 RTSScreen,

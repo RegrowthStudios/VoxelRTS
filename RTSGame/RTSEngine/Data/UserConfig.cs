@@ -10,6 +10,7 @@ namespace RTSEngine.Data {
     public static class UserConfig {
         private static bool changeDetected = false;
 
+        // Fullscreen Option
         private static bool useFullscreen;
         public static bool UseFullscreen {
             get { return useFullscreen; }

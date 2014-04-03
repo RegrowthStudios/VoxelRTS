@@ -8,28 +8,23 @@ using RTSEngine.Controllers;
 
 namespace RTSEngine.Net {
     public class NetStreamMultiSender : IDisposable {
-        Socket s;
-        IPAddress ipAddr;
-        IPEndPoint ipEnd;
+        UdpClient client;
+        IPEndPoint ipeRemote;
 
         public NetStreamMultiSender(string ip, int port) {
-            s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            ipAddr = IPAddress.Parse(ip);
-            s.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(ipAddr));
-            s.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, 2);
-
-            ipEnd = new IPEndPoint(ipAddr, port);
-            s.Connect(ipEnd);
+            client = new UdpClient();
+            IPAddress multicastaddress = IPAddress.Parse(ip);
+            client.JoinMulticastGroup(multicastaddress);
+            ipeRemote = new IPEndPoint(multicastaddress, port);
+            client.Connect(ipeRemote);
         }
         public void Dispose() {
-            s.Close();
-            s.Dispose();
+            client.Close();
         }
 
-        public int Send(String m) {
-            byte[] b = ASCIIEncoding.Unicode.GetBytes(m);
-            s.Send(b, b.Length, SocketFlags.None);
-            return b.Length;
+        public void Send(String m) {
+            byte[] b = Encoding.Unicode.GetBytes(m);
+            client.Send(b, b.Length, ipeRemote);
         }
     }
 }

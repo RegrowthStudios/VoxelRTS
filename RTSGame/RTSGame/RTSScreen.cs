@@ -21,7 +21,8 @@ using RTSEngine.Net;
 
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
-        private GameEngine engine;
+        private GameplayController playController;
+        private GameState state;
         private RTSRenderer renderer;
         private Camera camera;
         private DevConsoleView dcv;
@@ -29,10 +30,10 @@ namespace RTS {
 
         Vector3 spawnLoc;
         int team, unit;
-        bool doAdd, playing, pauseEngine, pauseRender;
-        Thread tEngine, tNet;
+        bool doAdd, pauseEngine, pauseRender;
+        int playing;
+        Thread tEngine;
         SpriteFont sfDebug;
-        NetStreamMultiReceiver recv;
 
         public override int Next {
             get { return -1; }
@@ -58,28 +59,23 @@ namespace RTS {
             team = 0;
             unit = 0;
 
-            engine = game.LoadScreen.LoadedEngine;
+            state = game.LoadScreen.LoadedState;
             camera = game.LoadScreen.LoadedCamera;
             renderer = game.LoadScreen.LoadedRenderer;
-            gameInput = engine.State.Teams[0].Input as PlayerInputController;
+            playController = new GameplayController();
+            gameInput = state.teams[0].Input as PlayerInputController;
             gameInput.Camera = camera;
+            playController.Init(state);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
             tEngine = new Thread(EngineThread);
             tEngine.Priority = ThreadPriority.Highest;
             tEngine.TrySetApartmentState(ApartmentState.MTA);
             tEngine.IsBackground = true;
-            playing = true;
+            playing = 1;
             pauseEngine = false;
             pauseRender = false;
             tEngine.Start();
-
-            recv = new NetStreamMultiReceiver(RTSConstants.MC_ADDR, RTSConstants.MC_GAME_PORT_MIN);
-            tNet = new Thread(NetThread);
-            tNet.Priority = ThreadPriority.BelowNormal;
-            tNet.TrySetApartmentState(ApartmentState.MTA);
-            tNet.IsBackground = true;
-            tNet.Start();
         }
         public override void OnExit(GameTime gameTime) {
             MouseEventDispatcher.OnMousePress -= OnMP;
@@ -92,22 +88,21 @@ namespace RTS {
             camera.Controller.Unhook(game.Window);
             renderer.Dispose();
 
-            playing = false;
+            Thread.VolatileWrite(ref playing, 0);
             tEngine.Join();
-            tNet.Join();
-            recv.Dispose();
-            engine.Dispose();
+            GameEngine.Dispose(state);
+            state = null;
         }
 
         public override void Update(GameTime gameTime) {
             // This Tells Us We Are GPU-Bound
             //Thread.Sleep(10);
-            renderer.UpdateAnimations(engine.State, (float)game.TargetElapsedTime.TotalSeconds);
+            renderer.UpdateAnimations(state, (float)game.TargetElapsedTime.TotalSeconds);
         }
         public override void Draw(GameTime gameTime) {
             if(!pauseRender) {
-                camera.Update(engine.State.Map, RTSConstants.GAME_DELTA_TIME);
-                renderer.Draw(engine.State, RTSConstants.GAME_DELTA_TIME);
+                camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
+                renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
 
                 // TODO: Draw UI
             }
@@ -133,7 +128,7 @@ namespace RTS {
             if(b == MouseButton.Right) {
                 Ray r = renderer.Camera.GetViewRay(p);
                 IntersectionRecord rec = new IntersectionRecord();
-                if(engine.State.Map.BVH.Intersect(ref rec, r)) {
+                if(state.Map.BVH.Intersect(ref rec, r)) {
                     spawnLoc = r.Position + r.Direction * rec.T;
                     if(doAdd)
                         DevConsole.AddCommand(string.Format("spawn [{0},{1},{2},{3},{4}]", team, unit, 1, spawnLoc.X, spawnLoc.Z));
@@ -191,26 +186,18 @@ namespace RTS {
             TimeSpan tCur;
             TimeSpan tPrev = DateTime.Now.TimeOfDay;
             int milliRun = (int)(RTSConstants.GAME_DELTA_TIME * 1000);
-            while(playing) {
+            while(playing != 0) {
                 if(pauseEngine) {
                     Thread.Sleep(milliRun);
                     continue;
                 }
-                engine.Update();
+                playController.Update(state, RTSConstants.GAME_DELTA_TIME);
 
                 // Sleep For A While
                 tCur = DateTime.Now.TimeOfDay;
                 int dt = (int)(tCur.TotalMilliseconds - tPrev.TotalMilliseconds);
                 if(dt < milliRun) Thread.Sleep(milliRun - dt);
                 tPrev = tCur;
-            }
-        }
-        void NetThread() {
-            while(playing) {
-                string c = recv.Receive(1024);
-                if(!string.IsNullOrWhiteSpace(c)) {
-                    DevConsole.AddCommand(c);
-                }
             }
         }
     }

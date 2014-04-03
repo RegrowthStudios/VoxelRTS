@@ -13,6 +13,9 @@ namespace RTSEngine.Interfaces {
         // Entity's Unique ID
         int UUID { get; }
 
+        // State For FSM
+        int State { get; set; }
+
         // The Current Health Of The Entity
         int Health { get; }
 

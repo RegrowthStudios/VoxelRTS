@@ -52,8 +52,9 @@ namespace RTSEngine.Controllers {
                 IEntity target = null;
                 Ray viewRay = Camera.GetViewRay(location);
                 float? dist;
-                for(int i = 0; i < GameState.Teams.Length; i++) {
-                    foreach(RTSUnit unit in GameState.Teams[i].units) {
+                for(int i = 0; i < GameState.activeTeams.Length; i++) {
+                    RTSTeam team = GameState.activeTeams[i].Team;
+                    foreach(RTSUnit unit in team.units) {
                         box = unit.BBox;
                         dist = viewRay.Intersects(box);
                         if(dist != null) {

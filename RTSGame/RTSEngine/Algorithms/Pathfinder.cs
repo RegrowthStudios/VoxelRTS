@@ -55,6 +55,7 @@ namespace RTSEngine.Algorithms {
             queries = new ConcurrentQueue<PathQuery>();
             thread = new Thread(WorkThread);
             thread.Priority = ThreadPriority.Normal;
+            thread.IsBackground = true;
             thread.Start();
         }
 

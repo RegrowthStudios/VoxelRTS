@@ -33,15 +33,12 @@ namespace RTSEngine.Data.Team {
             set;
         }
 
-        // Unit Data
-        public readonly List<RTSUnitData> unitData;
+        // Team Race
+        public readonly RTSRace race;
 
         // Entity Data
         public readonly List<RTSUnit> units;
         public readonly List<RTSSquad> squads;
-        public ReflectedSquadController scDefaultAction;
-        public ReflectedSquadController scDefaultMovement;
-        public ReflectedSquadController scDefaultTargetting;
 
         public InputController Input {
             get;
@@ -56,7 +53,7 @@ namespace RTSEngine.Data.Team {
             ColorScheme = RTSColorScheme.Default;
 
             // Teams Starts Out Empty
-            unitData = new List<RTSUnitData>();
+            race = new RTSRace();
             units = new List<RTSUnit>();
             squads = new List<RTSSquad>();
 
@@ -64,14 +61,9 @@ namespace RTSEngine.Data.Team {
             Input = null;
         }
 
-        // For Adding Parsed Unit Data
-        public void AddUnitData(RTSUnitData t) {
-            unitData.Add(t);
-        }
-
         // Unit Addition And Removal
         public RTSUnit AddUnit(int type, Vector2 pos) {
-            RTSUnit rui = new RTSUnit(this, unitData[type], pos);
+            RTSUnit rui = new RTSUnit(this, race.units[type], pos);
             units.Add(rui);
             if(OnUnitSpawn != null)
                 OnUnitSpawn(rui);
