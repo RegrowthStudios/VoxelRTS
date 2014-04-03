@@ -47,7 +47,7 @@ namespace RTSEngine.Controllers {
                     case InputType.Environment:
                         // TODO: Make This Class
                         EnvironmentInputController envController = new EnvironmentInputController(state, state.activeTeams[ti].Team);
-                        envController.Init();
+                        //envController.Init();
                         break;
                     default:
                         throw new Exception("Type does not exist");

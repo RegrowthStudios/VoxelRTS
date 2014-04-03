@@ -1,81 +1,172 @@
 ﻿using Microsoft.Xna.Framework;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
+using RTSEngine.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace RTSEngine.Controllers
 {
     public class EnvironmentInputController : InputController
-    { 
-        // Stores The Locations Of The Original Trees On The Map
-        private List<Point> treeLocations;
+    {
+        Thread thread;
+        private bool running;
+        private bool paused;
 
-        // Impact At Which Environment Will Begin Spawning Units
-        private int spawn_impact = 10;
+        private Random random;
+        private ImpactGrid grid;
+        private int counter;
+        private Vector2[] treePositions;
 
-        // Impact At Which Environment Will No Longer Recover
-        private int recover_impact = 20;
+        private IndexedBuildingType tree;
+        private IndexedBuildingType ore;
+        private IndexedUnitType walkingTree1;
+        private IndexedUnitType walkingTree2;
+        private IndexedUnitType rockGolem1;
+        private IndexedUnitType rockGolem2;
 
-        // New Trees Will Spawn Within This Radius Of Original Trees
-        //private float spawn_radius = 5;
 
-        // Ore Will Regenerate This Amount During Each Recovery Phase
-        //private int regenerate_amount = 5;
+        private const int LEVEL_ONE = 10;
+        private const int LEVEL_TWO = 20;
+        private const int RECOVER_IMPACT = 20;
+        private const int MAX_TREE_SPAWN = 10;
+        private const int MAX_OFFSET = 10;
+        private const int MIN_RECOVER = 5;
+        private const int MAX_RECOVER = 10;
+        private const int MAX_UNIT_SPAWN = 10;
+        private const int RECOVER_TIME = 30;
+        private const int SPAWN_TIME = 60;
 
-        //private int spawn_number = 5; 
-
-        public ImpactGrid Grid { get; private set; }
-
-        public Random Random { get; private set; }
 
         public EnvironmentInputController(GameState g, RTSTeam t)
             : base(g, t) {
-            treeLocations = new List<Point>();
-            Grid = g.IGrid;
-            Random = new Random();
+            grid = g.IGrid;
+            random = new Random();
+            thread = new Thread(WorkThread);
+            thread.IsBackground = true;
+            running = true;
+            paused = true;
+            thread.Start();
         }
 
-        public void Init() {
-            //Store where trees first were in the map
+        public void Init(IndexedUnitType wt1, IndexedUnitType wt2, IndexedUnitType rg1, IndexedUnitType rg2, 
+            IndexedBuildingType t, IndexedBuildingType o, Vector2[] treePos, Vector2[] orePos) {
+            walkingTree1 = wt1;
+            walkingTree2 = wt2;
+            rockGolem1 = rg1;
+            rockGolem2 = rg2;
+            tree = t;
+            ore = o;
+            treePositions = treePos;
+            for (int i = 0; i < treePositions.Length; i++) {
+                AddEvent(new SpawnBuildingEvent(Team, tree, treePositions[i]));
+            }
+            for (int j = 0; j < orePos.Length; j++) {
+                AddEvent(new SpawnBuildingEvent(Team, ore, orePos[j]));
+            }
         }
-        
+
+        private void WorkThread() {
+            while (running) {
+                if (paused) {
+                    Thread.Sleep(1000);
+                    continue;
+                }
+                if (counter % SPAWN_TIME == 0) {
+                    SpawnUnits();
+                    counter = counter % (SPAWN_TIME + RECOVER_TIME);
+                }
+                if (counter % RECOVER_TIME == 0) {
+                    Recover();
+                    counter = counter % (SPAWN_TIME + RECOVER_TIME);
+                }
+                counter++;
+                Thread.Sleep(1000);
+            }
+        }
+
         private void Recover() {
             foreach (var r in GameState.Regions) {
-                if (r.RegionImpact < recover_impact) {
-                    //spawn new trees within a certain radius of original trees 
-                    //ore restores health
+                if (r.RegionImpact < RECOVER_IMPACT && r.RegionImpact > 0) {
+                    // Randomly Choose The Location Of A Starting Tree
+                    int tp = random.Next(treePositions.Length);
+                    Vector2 treeLocation = treePositions[tp];
+                    Vector2 offset;
 
+                    // Spawn A Random Number Of Trees 
+                    int numTrees = random.Next(MAX_TREE_SPAWN);
+                    for (int i = 0; i < numTrees; i++) {
+                        offset.X = random.Next(MAX_OFFSET);
+                        offset.Y = random.Next(MAX_OFFSET);
+                        AddEvent(new SpawnBuildingEvent(Team, tree, treeLocation + offset));
+                        r.AddToRegionImpact(-tree.Data.Impact);
+                    }
 
-
-
+                    // Regenerate Ore Health
+                    foreach (var c in r.Cells) {
+                        foreach (var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
+                            if (o.Data.FriendlyName.Equals(ore.Data.FriendlyName)) {
+                                int recover = random.Next(MIN_RECOVER, MAX_RECOVER);
+                                o.Health += recover;
+                                r.AddToRegionImpact(-(ore.Data.Impact / recover));
+                            }
+                        }
+                    }
                 }
             }
         }
 
         private void SpawnUnits() {  
             foreach (var r in GameState.Regions) {
-                if (r.RegionImpact > spawn_impact) {
+                if (r.RegionImpact > LEVEL_ONE) {
                     // Find The Cell With The Largest Impact
                     Point p = r.Cells.First();
                     foreach (var c in r.Cells) {
-                        if (Grid.CellImpact[c.X, c.Y] > Grid.CellImpact[p.X, p.Y]){
+                        if (grid.CellImpact[c.X, c.Y] > grid.CellImpact[p.X, p.Y]){
                             p = c;
                         }
                     }
+                    // Randomly Choose An Impact Generator In That Cell
+                    ImpactGenerator g = null;
+                    while (g == null || !g.Data.FriendlyName.Equals(ore.Data.FriendlyName) || !g.Data.FriendlyName.Equals(tree.Data.FriendlyName)) {
+                        int i = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
+                        g = grid.ImpactGenerators[p.X, p.Y][i];
+                    }
                     // Spawn Environmental Units In That Cell
-                    //Vector2 offset = new Vector2(Random.Next(), Random.Next());
-                    //AddEvent(new SpawnUnitEvent(Team, ));
+                    IndexedUnitType spawnData;
+                    if (g.Data.FriendlyName.Equals(ore.Data.FriendlyName)) {
+                        if (r.RegionImpact > LEVEL_TWO) 
+                            spawnData = rockGolem2;
+                        else 
+                            spawnData = rockGolem1;
+                    }
+                    else {
+                        if (r.RegionImpact > LEVEL_TWO) 
+                            spawnData = walkingTree2;
+                        else 
+                            spawnData = walkingTree1;
+                    }
+                    Vector2 spawnPos = g.Position;
+                    Vector2 offset;
+                    int numUnits = random.Next(MAX_UNIT_SPAWN);
+                    for (int j = 0; j < numUnits; j++) {
+                        offset.X = random.Next(MAX_OFFSET);
+                        offset.Y = random.Next(MAX_OFFSET);
+                        AddEvent(new SpawnUnitEvent(Team, spawnData, spawnPos + offset));
+                    }
                 }
             }
         }
-        
-        public override void Dispose() {
-            throw new NotImplementedException();
+
+        public void Start() {
+            counter = 0;
+            paused = false;
         }
-       
+        public override void Dispose() {
+            running = false;
+        }
     }
-       
 }

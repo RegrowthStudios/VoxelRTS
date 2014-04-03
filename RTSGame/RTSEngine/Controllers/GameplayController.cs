@@ -151,6 +151,12 @@ namespace RTSEngine.Controllers {
                     case GameEventType.SetTarget:
                         ApplyInput(s, dt, e as SetTargetEvent);
                         break;
+                    case GameEventType.SpawnUnit:
+                        ApplyInput(s, dt, e as SpawnUnitEvent);
+                        break;
+                    case GameEventType.SpawnBuilding:
+                        ApplyInput(s, dt, e as SpawnBuildingEvent);
+                        break;
                     default:
                         throw new Exception("Event does not exist.");
                 }
@@ -211,7 +217,24 @@ namespace RTSEngine.Controllers {
                 squad.TargettingController.Target = e.Target as RTSUnit;
             }
         }
-        
+
+        private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
+            RTSSquad squad = e.Team.AddSquad();
+            RTSUnit unit = e.Team.AddUnit(e.Type.Index, e.Position);
+            unit.ActionController = e.Type.Data.DefaultActionController.CreateInstance<ACUnitActionController>();
+            unit.AnimationController = e.Type.Data.DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
+            unit.MovementController = e.Type.Data.DefaultMoveController.CreateInstance<ACUnitMovementController>();
+            unit.CombatController = e.Type.Data.DefaultCombatController.CreateInstance<ACUnitCombatController>();
+            squad.Add(unit);
+            AddUnitTask(s, unit);
+            squad.RecalculateGridPosition();
+            AddSquadTask(s, squad);
+        }
+
+        private void ApplyInput(GameState s, float dt, SpawnBuildingEvent e) {
+
+        }
+
         // Apply Results Of Any Finished Pathfinding
         private void ApplyFinishedPathQueries() {
             List<SquadQuery> newQueries = new List<SquadQuery>();
