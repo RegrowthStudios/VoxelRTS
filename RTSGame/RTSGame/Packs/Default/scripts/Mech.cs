@@ -80,7 +80,7 @@ namespace RTS.Mech.Squad {
 namespace RTS.Mech.Unit {
     public class Action : ACUnitActionController {
         public override void DecideAction(GameState g, float dt) {
-            // Change FSM
+            // TODO: Real Behavior FSM
 
             if(unit.MovementController != null)
                 unit.MovementController.DecideMove(g, dt);
@@ -209,25 +209,50 @@ namespace RTS.Mech.Unit {
         bool doMove;
         protected Vector2 waypoint;
 
+        // TODO: Cut Out Unit.Squad.MovementController By Linking Each Unit MC Directly To A Squad MC?
         public override void DecideMove(GameState g, float dt) {
+#if DEBUG
+            DevConsole.AddCommand("entered decide move");
+#endif
             if(unit.Target != null) {
-                waypoint = unit.Target.GridPosition;
-                Vector2 udisp = waypoint - unit.GridPosition;
-                float ur = unit.CollisionGeometry.BoundingRadius + unit.Target.CollisionGeometry.BoundingRadius;
-                ur *= 1.3f;
-                doMove = udisp.LengthSquared() > (ur * ur);
-                if(!doMove && unit.State == BehaviorFSM.Walking)
-                    unit.State = BehaviorFSM.CombatMelee;
-                return;
+                switch(unit.CombatOrders) {
+                    case BehaviorFSM.UseMeleeAttack:
+                        waypoint = unit.Target.GridPosition;
+                        Vector2 udisp = waypoint - unit.GridPosition;
+                        float ur = unit.CollisionGeometry.BoundingRadius + unit.Target.CollisionGeometry.BoundingRadius;
+                        ur *= 1.3f;
+                        doMove = udisp.LengthSquared() > (ur * ur);
+                        if(!doMove && unit.State == BehaviorFSM.Walking)
+                            unit.State = BehaviorFSM.CombatMelee;
+                        return;
+                    case BehaviorFSM.UseRangedAttack:
+                        return;
+                }
+
             }
-            else if(Waypoints.Count < 1) return;
+            else if(!CurrentWaypointIsSet) {
+                // Pathfinding Has Not Finished; Temporarily Aim Toward Squad Goal
+                waypoint = SquadGoal;
+            }
+            else if(CurrentWaypoint >= 0 && CurrentWaypoint < unit.Squad.MovementController.Waypoints.Count) {
+                // Find This Unit's Formation Post (Offset)
+                // TODO: Try A Dictionary{UUID -> Post}
+                Vector2 post = Vector2.Zero;
+                foreach(var fa in unit.Squad.MovementController.formationAssignments) {
+                    if(fa.UUID == unit.UUID) {
+                        post = fa.Post;
+                        break;
+                    }
+                }
+                // Use The Next Squad Waypoint And The Post To Assign A Waypoint
+                waypoint = unit.Squad.MovementController.Waypoints[CurrentWaypoint--] + post;
 
-            waypoint = Waypoints[Waypoints.Count - 1];
-            Vector2 disp = waypoint - unit.GridPosition;
-            doMove = disp.LengthSquared() > (DECIDE_DIST * DECIDE_DIST);
+                Vector2 disp = waypoint - unit.GridPosition;
+                doMove = disp.LengthSquared() > (DECIDE_DIST * DECIDE_DIST);
 
-            if(!doMove && unit.State == BehaviorFSM.Walking)
-                unit.State = BehaviorFSM.None;
+                if(!doMove && unit.State == BehaviorFSM.Walking)
+                    unit.State = BehaviorFSM.None;
+            }
         }
         public override void ApplyMove(GameState g, float dt) {
             if(!doMove) return;

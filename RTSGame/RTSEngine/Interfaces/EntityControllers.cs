@@ -25,10 +25,12 @@ namespace RTSEngine.Interfaces {
         public const int TargetAggressively = TargetPassively + 1;
 
         // Combat Order Codes - Will Influence Behavior While In Combat
-        public const int AlwaysAttack = 0;
+        public const int UseRangedAttack = 0;
+        public const int UseMeleeAttack = UseRangedAttack + 1;
 
-        // Formation Order Codes - Will Influence Movement Behavior While In A Squad
+        // Movement Order Codes - Will Influence Movement Behavior
         public const int FreeFormation = 0;
+        public const int BoxFormation = FreeFormation + 1;
         
         public static int GetState(int behaviorCode) {
             return GetByte(behaviorCode, 0);
@@ -118,11 +120,13 @@ namespace RTSEngine.Interfaces {
 
     // Special Movement Mechanics
     public abstract class ACUnitMovementController : ACUnitController {
-        private List<Vector2> waypoints = new List<Vector2>();
-        public List<Vector2> Waypoints {
-            get { return waypoints; }
-            set { waypoints = value; }
-        }
+        // TODO: Remove?
+        public Vector2 SquadGoal { get; set; }  
+        
+        // Index Of Squad Waypoint This Unit Is Currently Attempting To Reach
+        public int CurrentWaypoint { get; set; }
+
+        public bool CurrentWaypointIsSet { get; set; }
 
         // Scripted Logic For Movement
         public abstract void DecideMove(GameState g, float dt);
