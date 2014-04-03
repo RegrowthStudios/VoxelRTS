@@ -63,7 +63,7 @@ namespace RTS {
             camera = game.LoadScreen.LoadedCamera;
             renderer = game.LoadScreen.LoadedRenderer;
             playController = new GameplayController();
-            gameInput = state.Teams[0].Input as PlayerInputController;
+            gameInput = state.teams[0].Input as PlayerInputController;
             gameInput.Camera = camera;
             playController.Init(state);
 

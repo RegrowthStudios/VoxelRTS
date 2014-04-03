@@ -49,12 +49,12 @@ namespace RTSEngine.Controllers {
             }
         }
         private void SpawnUnits(Random r) {
-            int ui = r.Next(3);
+            int ui = r.Next(Team.race.activeUnits.Length);
             int cc = Team.units.Aggregate<RTSUnit, int>(0, (i, u) => {
-                if(u.UnitData == Team.unitData[ui]) return i + 1;
+                if(u.UnitData == Team.race.activeUnits[ui].Data) return i + 1;
                 else return i;
             });
-            cc = Team.unitData[ui].MaxCount - cc;
+            cc = Team.race.activeUnits[ui].Data.MaxCount - cc;
             if(cc > 10) cc = 10;
             if(cc < 1) return;
             DevConsole.AddCommand(string.Format("spawn [{0}, {1}, {2}, {3}, {4}]",

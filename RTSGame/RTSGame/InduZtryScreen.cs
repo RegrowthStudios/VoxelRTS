@@ -9,7 +9,7 @@ using RTSEngine.Graphics;
 using BlisterUI;
 using BlisterUI.Input;
 
-namespace RTSEngine.Screens {
+namespace RTS {
     public class InduZtryScreen : GameScreenIndexed {
         // Lightning Fade Time
         private const float LERP_TIME = 4f;

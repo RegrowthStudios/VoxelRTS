@@ -162,7 +162,7 @@ namespace RTS {
             LoadedCamera = new Camera(G.Viewport);
             LoadedCamera.Controller.Hook(game.Window);
             LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
-            LoadedRenderer.HookToGame(LoadedState, LoadedCamera, game.LoadScreen.LoadData.MapFile);
+            LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera, game.LoadScreen.LoadData.MapFile);
             LoadedRenderer.LoadTeamVisuals(LoadedState, new VisualTeam() {
                 TeamIndex = 0,
                 ColorScheme = loadData.Teams[0].Colors,

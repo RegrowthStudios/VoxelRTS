@@ -251,7 +251,7 @@ namespace RTS {
                     G.SamplerStates[2] = SamplerState.LinearClamp;
                     fx.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
 
-                    unitModel.UpdateInstances(G);
+                    unitModel.UpdateInstances(G, (u) => { return true; });
                     unitModel.SetInstances(G);
                     fx.ApplyPassAnimation();
                     unitModel.DrawInstances(G);
@@ -464,8 +464,6 @@ namespace RTS {
             animLoop.FrameSpeed = sp;
         }
 
-        public override void SetAnimation(AnimationType t) {
-        }
         public override void Update(GameState s, float dt) {
             animLoop.Step(dt);
             AnimationFrame = animLoop.CurrentFrame;

@@ -13,26 +13,6 @@ using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Controllers {
-    public static class RTSConstants {
-        public static readonly string[] REFERENCES = {
-            "System.dll",
-            "System.Core.dll",
-            "System.Data.dll",
-            "System.Xml.dll",
-            "System.Xml.Linq.dll",
-            @"lib\Microsoft.Xna.Framework.dll",
-            "RTSEngine.dll"
-        };
-
-        public const float GAME_DELTA_TIME = 1f / 60f;
-        public const float CGRID_SIZE = 2f;
-
-        public const string MC_ADDR = "228.8.8.8";
-        public const int MC_LOBBY_PORT = 22880;
-        public const int MC_GAME_PORT_MIN = 23000;
-        public const int MC_CLIENT_PORT_MIN = 23100;
-    }
-
     // A Playable Team
     public struct RTSTeamResult {
         public RTSRaceData TeamType;
@@ -54,19 +34,19 @@ namespace RTSEngine.Controllers {
             BuildControllers(state);
             state.SetTeams(BuildTeams(state, eld.Teams));
 
-            for(int ti = 0; ti < state.Teams.Length; ti++) {
+            for(int ti = 0; ti < state.activeTeams.Length; ti++) {
                 switch(eld.Teams[ti].InputType) {
                     case InputType.Player:
-                        var pic = new PlayerInputController(state, state.Teams[ti]);
-                        state.Teams[ti].Input = pic;
+                        var pic = new PlayerInputController(state, state.activeTeams[ti].Team);
+                        state.activeTeams[ti].Team.Input = pic;
                         break;
                     case InputType.AI:
                         // TODO: Make This Class
-                        state.Teams[ti].Input = new AIInputController(state, state.Teams[ti], ti);
+                        state.activeTeams[ti].Team.Input = new AIInputController(state, state.activeTeams[ti].Team, state.activeTeams[ti].Index);
                         break;
                     case InputType.Environment:
                         // TODO: Make This Class
-                        EnvironmentInputController envController = new EnvironmentInputController(state, state.Teams[ti]);
+                        EnvironmentInputController envController = new EnvironmentInputController(state, state.activeTeams[ti].Team);
                         envController.Init();
                         break;
                     default:
@@ -98,28 +78,32 @@ namespace RTSEngine.Controllers {
             // Create Grid
             state.CGrid = new CollisionGrid(state.Map.Width, state.Map.Depth, RTSConstants.CGRID_SIZE);
         }
-        private static RTSTeam[] BuildTeams(GameState state, RTSTeamResult[] teamResults) {
-            RTSTeam[] t = new RTSTeam[teamResults.Length];
+        private static IndexedTeam[] BuildTeams(GameState state, RTSTeamResult[] teamResults) {
+            IndexedTeam[] t = new IndexedTeam[teamResults.Length];
             RTSTeam team;
             int i = 0;
             foreach(var res in teamResults) {
                 team = new RTSTeam();
                 team.ColorScheme = res.Colors;
-                team.scDefaultAction = state.SquadControllers[res.TeamType.DefaultSquadActionController];
-                team.scDefaultMovement = state.SquadControllers[res.TeamType.DefaultSquadMovementController];
-                team.scDefaultTargetting = state.SquadControllers[res.TeamType.DefaultSquadTargettingController];
+                team.race.scAction = state.SquadControllers[res.TeamType.DefaultSquadActionController];
+                team.race.scMovement = state.SquadControllers[res.TeamType.DefaultSquadMovementController];
+                team.race.scTargetting = state.SquadControllers[res.TeamType.DefaultSquadTargettingController];
+                int ui = 0;
                 foreach(FileInfo unitDataFile in res.TeamType.UnitTypes) {
                     RTSUnitData data = RTSUnitDataParser.ParseData(state.UnitControllers, unitDataFile);
-                    team.AddUnitData(data);
+                    team.race.units[ui++] = data;
                 }
-                t[i++] = team;
+                team.race.UpdateActiveUnits();
+                t[i] = new IndexedTeam(i, team);
+                i++;
             }
             return t;
         }
 
         public static void Dispose(GameState state) {
-            for(int ti = 0; ti < state.Teams.Length; ti++) {
-                state.Teams[ti].Input.Dispose();
+            for(int ti = 0; ti < state.teams.Length; ti++) {
+                if(state.teams[ti] != null)
+                    state.teams[ti].Input.Dispose();
             }
         }
     }

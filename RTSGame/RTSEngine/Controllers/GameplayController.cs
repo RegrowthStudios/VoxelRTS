@@ -48,13 +48,7 @@ namespace RTSEngine.Controllers {
     public class GameplayController : IDisposable {
         public const int SQUAD_BUDGET_BINS = 10;
         public const int UNIT_BUDGET_BINS = 30;
-        private const int FOW_BUDGET_BINS = 8;
-
-        // Way To Track Time
-        public float TimePlayed {
-            get;
-            private set;
-        }
+        public const int FOW_BUDGET_BINS = 8;
 
         // Queue Of Events
         private LinkedList<GameInputEvent> events;
@@ -70,7 +64,7 @@ namespace RTSEngine.Controllers {
         private Pathfinder pathfinder;
         private List<SquadQuery> squadQueries;
 
-        public struct SquadQuery {
+        struct SquadQuery {
             public RTSSquad squad;
             public PathQuery query;
             public SquadQuery(RTSSquad s, PathQuery q) {
@@ -80,7 +74,6 @@ namespace RTSEngine.Controllers {
         }
 
         public GameplayController() {
-            TimePlayed = 0f;
             commands = new Queue<DevCommand>();
 
             tbSquadDecisions = new TimeBudget(SQUAD_BUDGET_BINS);
@@ -97,21 +90,21 @@ namespace RTSEngine.Controllers {
         public void Init(GameState s) {
             DevConsole.OnNewCommand += OnDevCommand;
             tbFOWCalculations.ClearTasks();
-            for(int ti = 0; ti < s.Teams.Length; ti++) {
-                tbFOWCalculations.AddTask(new FOWTask(s, ti));
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                tbFOWCalculations.AddTask(new FOWTask(s, s.activeTeams[ti].Index));
             }
             pathfinder = new Pathfinder(s.CGrid);
 
             // Start The AI
-            for(int ti = 0; ti < s.Teams.Length; ti++) {
-                AIInputController aic = s.Teams[ti].Input as AIInputController;
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                AIInputController aic = s.activeTeams[ti].Team.Input as AIInputController;
                 if(aic != null) aic.Start();
             }
         }
 
         // The Update Function
         public void Update(GameState s, float dt) {
-            TimePlayed += dt;
+            s.IncrementFrame(dt);
 
             // Input Pass
             ResolveInput(s, dt);
@@ -134,9 +127,9 @@ namespace RTSEngine.Controllers {
         private void ResolveInput(GameState s, float dt) {
             // TODO: Use InputControllers From The Teams
             events = new LinkedList<GameInputEvent>();
-            foreach(var team in s.Teams) {
-                if(team.Input != null) {
-                    team.Input.AppendEvents(events);
+            foreach(var active in s.activeTeams) {
+                if(active.Team.Input != null) {
+                    active.Team.Input.AppendEvents(events);
                 }
             }
 
@@ -192,7 +185,7 @@ namespace RTSEngine.Controllers {
                         squadQuery.query.IsOld = true;
                     }
                 }
-                squad.MovementController = e.Team.scDefaultMovement.CreateInstance<ACSquadMovementController>();
+                squad.MovementController = e.Team.race.scMovement.CreateInstance<ACSquadMovementController>();
                 squad.RecalculateGridPosition();
                 PathQuery query = new PathQuery(squad.GridPosition, e.Waypoint);
                 squadQueries.Add(new SquadQuery(squad, query));
@@ -213,8 +206,8 @@ namespace RTSEngine.Controllers {
                 }
                 if(squad == null) return;
                 AddSquadTask(s, squad);
-                squad.ActionController = e.Team.scDefaultAction.CreateInstance<ACSquadActionController>();
-                squad.TargettingController = e.Team.scDefaultTargetting.CreateInstance<ACSquadTargettingController>();
+                squad.ActionController = e.Team.race.scAction.CreateInstance<ACSquadActionController>();
+                squad.TargettingController = e.Team.race.scTargetting.CreateInstance<ACSquadTargettingController>();
                 squad.TargettingController.Target = e.Target as RTSUnit;
             }
         }
@@ -261,14 +254,14 @@ namespace RTSEngine.Controllers {
             tbUnitDecisions.DoTasks(dt);
 
             // Apply Decisions
-            for(int ti = 0; ti < s.Teams.Length; ti++) {
-                team = s.Teams[ti];
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                team = s.activeTeams[ti].Team;
                 for(int i = 0; i < team.squads.Count; i++)
                     if(team.squads[i].ActionController != null)
                         team.squads[i].ActionController.ApplyAction(s, dt);
             }
-            for(int ti = 0; ti < s.Teams.Length; ti++) {
-                team = s.Teams[ti];
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                team = s.activeTeams[ti].Team;
                 for(int i = 0; i < team.units.Count; i++)
                     if(team.units[i].ActionController != null)
                         team.units[i].ActionController.ApplyAction(s, dt);
@@ -278,13 +271,14 @@ namespace RTSEngine.Controllers {
             tbFOWCalculations.DoTasks(dt);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSpawn c) {
-            RTSSquad squad = s.Teams[c.TeamIndex].AddSquad();
+            RTSTeam team = s.teams[c.TeamIndex];
+            RTSSquad squad = team.AddSquad();
             for(int ci = 0; ci < c.Count; ci++) {
-                RTSUnit unit = s.Teams[c.TeamIndex].AddUnit(c.UnitIndex, new Vector2(c.X, c.Z));
-                unit.ActionController = s.Teams[c.TeamIndex].unitData[c.UnitIndex].DefaultActionController.CreateInstance<ACUnitActionController>();
-                unit.AnimationController = s.Teams[c.TeamIndex].unitData[c.UnitIndex].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
-                unit.MovementController = s.Teams[c.TeamIndex].unitData[c.UnitIndex].DefaultMoveController.CreateInstance<ACUnitMovementController>();
-                unit.CombatController = s.Teams[c.TeamIndex].unitData[c.UnitIndex].DefaultCombatController.CreateInstance<ACUnitCombatController>();
+                RTSUnit unit = team.AddUnit(c.UnitIndex, new Vector2(c.X, c.Z));
+                unit.ActionController = team.race.units[c.UnitIndex].DefaultActionController.CreateInstance<ACUnitActionController>();
+                unit.AnimationController = team.race.units[c.UnitIndex].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
+                unit.MovementController = team.race.units[c.UnitIndex].DefaultMoveController.CreateInstance<ACUnitMovementController>();
+                unit.CombatController = team.race.units[c.UnitIndex].DefaultCombatController.CreateInstance<ACUnitCombatController>();
                 squad.Add(unit);
                 AddUnitTask(s, unit);
             }
@@ -292,8 +286,8 @@ namespace RTSEngine.Controllers {
             AddSquadTask(s, squad);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
-            for(int ti = 0; ti < s.Teams.Length; ti++) {
-                foreach(var unit in s.Teams[ti].units) {
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                foreach(var unit in s.activeTeams[ti].Team.units) {
                     if(unit.MovementController != null)
                         unit.MovementController.SetWaypoints(null);
                 }
@@ -301,8 +295,8 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandKill c) {
             RTSTeam team;
-            for(int ti = 0; ti < s.Teams.Length; ti++) {
-                team = s.Teams[ti];
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                team = s.activeTeams[ti].Team;
                 foreach(var unit in team.units) {
                     unit.Damage(9001); // OVER 9000
                 }
@@ -325,12 +319,15 @@ namespace RTSEngine.Controllers {
 
         // Physics Stage
         private void ResolvePhysics(GameState s, float dt) {
+            RTSTeam team;
+            
             // Initialize hash grid
             var hashGrid = s.CGrid;
             hashGrid.ClearDynamic();
 
             // Move Geometry To The Unit's Location and hash into the grid
-            foreach(RTSTeam team in s.Teams) {
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                team = s.activeTeams[ti].Team;
                 foreach(RTSUnit unit in team.units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
                     hashGrid.Add(unit);
@@ -352,7 +349,8 @@ namespace RTSEngine.Controllers {
             }
 
             // Move Unit's Location To The Geometry After Heightmap Collision
-            foreach(RTSTeam team in s.Teams) {
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                team = s.activeTeams[ti].Team;
                 foreach(RTSUnit unit in team.units) {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
                     unit.GridPosition = unit.CollisionGeometry.Center;
@@ -363,8 +361,11 @@ namespace RTSEngine.Controllers {
 
         // Cleanup Stage
         private void Cleanup(GameState s, float dt) {
+            RTSTeam team;
+
             // Remove All Dead Entities
-            foreach(var team in s.Teams) {
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                team = s.activeTeams[ti].Team;
                 team.RemoveAll(IsEntityDead);
                 team.RemoveAll(IsSquadEmpty);
             }

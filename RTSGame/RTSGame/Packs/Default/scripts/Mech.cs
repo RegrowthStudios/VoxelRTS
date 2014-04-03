@@ -46,9 +46,10 @@ namespace RTS.Mech.Squad {
         private void FindTargetSquad(GameState g) {
             targetSquad = null;
             float minDist = float.MaxValue;
-            for(int i = 0; i < g.Teams.Length; i++) {
-                if(g.Teams[i] == squad.Team) continue;
-                foreach(var sq in g.Teams[i].squads) {
+            for(int i = 0; i < g.activeTeams.Length; i++) {
+                RTSTeam team = g.activeTeams[i].Team;
+                if(team == squad.Team) continue;
+                foreach(var sq in team.squads) {
                     float d = (sq.GridPosition - squad.GridPosition).LengthSquared();
                     if(d < minDist) {
                         targetSquad = sq;
@@ -79,6 +80,8 @@ namespace RTS.Mech.Squad {
 namespace RTS.Mech.Unit {
     public class Action : ACUnitActionController {
         public override void DecideAction(GameState g, float dt) {
+            // Change FSM
+
             if(unit.MovementController != null)
                 unit.MovementController.DecideMove(g, dt);
         }
@@ -97,6 +100,7 @@ namespace RTS.Mech.Unit {
         private AnimationLoop alCurrent;
 
         private float rt;
+        private int lastState;
 
         public Animation() {
             alRest = new AnimationLoop(0, 59);
@@ -106,51 +110,58 @@ namespace RTS.Mech.Unit {
             alCombat = new AnimationLoop(120, 149);
             alCombat.FrameSpeed = 30;
 
-            animation = AnimationType.Rest;
-            SetAnimation(AnimationType.None);
+            SetAnimation(FSMState.None);
         }
 
-        public override void SetAnimation(AnimationType t) {
-            if(animation == t) return;
-            switch(t) {
-                case AnimationType.None:
-                    alCurrent = null;
-                    AnimationFrame = 0;
-                    rt = r.Next(120, 350) / 10f;
-                    break;
-                case AnimationType.Walking:
+        private void SetAnimation(int state) {
+            switch(state) {
+                case FSMState.Walking:
                     alCurrent = alWalk;
                     alCurrent.Restart(true);
                     break;
-                case AnimationType.Rest:
-                    alCurrent = alRest;
-                    alCurrent.Restart(false);
-                    break;
-                case AnimationType.CombatMelee:
+                case FSMState.CombatMelee:
                     alCurrent = alCombat;
                     alCurrent.Restart(true);
                     break;
                 default:
+                    alCurrent = null;
                     return;
             }
-            animation = t;
         }
         public override void Update(GameState s, float dt) {
+            if(lastState != unit.State) {
+                // A New Animation State If Provided
+                SetAnimation(unit.State);
+                if(lastState == FSMState.None) {
+                    rt = r.Next(120, 350) / 10f;
+                }
+            }
+
+            // Save Last State
+            lastState = unit.State;
+
+            // Step The Current Animation
             if(alCurrent != null) {
                 alCurrent.Step(dt);
                 AnimationFrame = alCurrent.CurrentFrame;
+            }
 
-                if(animation == AnimationType.CombatMelee || animation == AnimationType.Rest) {
-                    if(alCurrent.EndFrame == alCurrent.CurrentFrame) {
-                        SetAnimation(AnimationType.None);
-                        return;
+            if(lastState == FSMState.None) {
+                // Check For A Random Animation
+                if(alCurrent == null) {
+                    rt -= dt;
+                    if(rt <= 0) {
+                        rt = r.Next(120, 350) / 10f;
+                        alCurrent = alRest;
+                        alCurrent.Restart(false);
                     }
                 }
-            }
-            else {
-                rt -= dt;
-                if(rt < 0) {
-                    SetAnimation(AnimationType.Rest);
+                else {
+                    // Check If At The End Of The Loop
+                    if(AnimationFrame == alCurrent.EndFrame) {
+                        alCurrent = null;
+                        rt = r.Next(120, 350) / 10f;
+                    }
                 }
             }
         }
@@ -166,7 +177,7 @@ namespace RTS.Mech.Unit {
         public override void Attack(GameState g, float dt) {
             if(attackCooldown > 0)
                 attackCooldown -= dt;
-            if(unit.AnimationController.Animation != AnimationType.None)
+            if(unit.State != FSMState.None)
                 return;
             if(unit.Target != null) {
                 if(!unit.Target.IsAlive) {
@@ -180,7 +191,7 @@ namespace RTS.Mech.Unit {
 
                 if(attackCooldown <= 0) {
                     attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;
-                    unit.AnimationController.SetAnimation(AnimationType.CombatMelee);
+                    unit.State = FSMState.CombatMelee;
                     if(minDistSquared <= distSquared) {
                         unit.DamageTarget(critRoller.NextDouble());
                         if(!unit.Target.IsAlive) unit.Target = null;
@@ -205,8 +216,8 @@ namespace RTS.Mech.Unit {
                 float ur = unit.CollisionGeometry.BoundingRadius + unit.Target.CollisionGeometry.BoundingRadius;
                 ur *= 1.3f;
                 doMove = udisp.LengthSquared() > (ur * ur);
-                if(!doMove && unit.AnimationController.Animation == AnimationType.Walking)
-                    unit.AnimationController.SetAnimation(AnimationType.None);
+                if(!doMove && unit.State == FSMState.Walking)
+                    unit.State = FSMState.CombatMelee;
                 return;
             }
             else if(waypoints.Count < 1) return;
@@ -215,8 +226,8 @@ namespace RTS.Mech.Unit {
             Vector2 disp = waypoint - unit.GridPosition;
             doMove = disp.LengthSquared() > (DECIDE_DIST * DECIDE_DIST);
 
-            if(!doMove && unit.AnimationController.Animation == AnimationType.Walking)
-                unit.AnimationController.SetAnimation(AnimationType.None);
+            if(!doMove && unit.State == FSMState.Walking)
+                unit.State = FSMState.None;
         }
         public override void ApplyMove(GameState g, float dt) {
             if(!doMove) return;
@@ -228,19 +239,19 @@ namespace RTS.Mech.Unit {
 
                 // This Logic Prevents The Unit From Hovering Around Its Goal
                 if(magnitude < STOP_DIST) {
-                    if(unit.AnimationController.Animation == AnimationType.Walking)
-                        unit.AnimationController.SetAnimation(AnimationType.None);
+                    if(unit.State == FSMState.Walking)
+                        unit.State = FSMState.None;
                     return;
                 }
-                unit.AnimationController.SetAnimation(AnimationType.Walking);
+                unit.State = FSMState.Walking;
 
                 if(scaledChange.LengthSquared() > magnitude * magnitude)
                     unit.Move(change);
                 else
                     unit.Move(scaledChange);
             }
-            else if(unit.AnimationController.Animation == AnimationType.Walking)
-                unit.AnimationController.SetAnimation(AnimationType.None);
+            else if(unit.State == FSMState.Walking)
+                unit.State = FSMState.None;
         }
     }
 }

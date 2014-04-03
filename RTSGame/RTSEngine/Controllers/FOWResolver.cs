@@ -37,7 +37,7 @@ namespace RTSEngine.Controllers {
         private int[,] heat;
 
         public FOWTask(GameState s, int tIndex)
-            : base(s.Teams[tIndex].units.Count) {
+            : base(s.teams[tIndex].units.Count) {
             teamIndex = tIndex;
             state = s;
             heat = new int[s.CGrid.numCells.X, s.CGrid.numCells.Y];
@@ -90,7 +90,7 @@ namespace RTSEngine.Controllers {
             }
         }
         public override void DoWork(float dt) {
-            RTSTeam team = state.Teams[teamIndex];
+            RTSTeam team = state.teams[teamIndex];
             CollisionGrid cg = state.CGrid;
 
             // Generate All The Old FOW

@@ -151,6 +151,11 @@ namespace RTSEngine.Data.Team {
                 throw new NotImplementedException();
             }
         }
+
+        public int State {
+            get;
+            set;
+        }
         #endregion
     }
 }
