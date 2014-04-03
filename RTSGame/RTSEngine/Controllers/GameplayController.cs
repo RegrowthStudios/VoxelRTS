@@ -162,7 +162,7 @@ namespace RTSEngine.Controllers {
             e.Team.Input.selected.AddRange(e.Selected);
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
-            List<Vector2> wp = new List<Vector2>(2);
+            List<Vector2> wp = new List<Vector2>();
             wp.Add(e.Waypoint);
             List<IEntity> selected = e.Team.Input.selected;
             RTSSquad squad = null;
@@ -171,7 +171,7 @@ namespace RTSEngine.Controllers {
                     RTSUnit u = unit as RTSUnit;
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
-                        u.MovementController.SetWaypoints(wp);
+                        u.MovementController.Waypoints = wp;
                         u.Target = null;
                         squad.Add(u);
                     }
@@ -288,7 +288,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.Teams.Length; ti++) {
                 foreach(var unit in s.Teams[ti].units) {
                     if(unit.MovementController != null)
-                        unit.MovementController.SetWaypoints(null);
+                        unit.MovementController.Waypoints = null;
                 }
             }
         }

@@ -209,9 +209,9 @@ namespace RTS.Mech.Unit {
                     unit.AnimationController.SetAnimation(AnimationType.None);
                 return;
             }
-            else if(waypoints.Count < 1) return;
+            else if(Waypoints.Count < 1) return;
 
-            waypoint = waypoints[waypoints.Count - 1];
+            waypoint = Waypoints[Waypoints.Count - 1];
             Vector2 disp = waypoint - unit.GridPosition;
             doMove = disp.LengthSquared() > (DECIDE_DIST * DECIDE_DIST);
 
@@ -245,6 +245,7 @@ namespace RTS.Mech.Unit {
     }
 }
 
+// TODO: Finish This Implementation
 //namespace RTS.Mech.Building {
 //    public class Action : ACBuildingActionController {
 //        public int time = -1;

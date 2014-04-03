@@ -74,16 +74,10 @@ namespace RTSEngine.Interfaces {
 
     // Special Movement Mechanics
     public abstract class ACUnitMovementController : ACUnitController {
-        protected readonly List<Vector2> waypoints = new List<Vector2>();
+        private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {
             get { return waypoints; }
-        }
-
-        // Copies Over Waypoints From The List
-        public virtual void SetWaypoints(List<Vector2> wp) {
-            waypoints.Clear();
-            if(wp != null)
-                waypoints.AddRange(wp);
+            set { waypoints = value; }
         }
 
         // Scripted Logic For Movement

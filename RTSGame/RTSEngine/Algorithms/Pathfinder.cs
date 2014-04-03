@@ -180,6 +180,7 @@ namespace RTSEngine.Algorithms {
                 }
             }
             q.IsComplete = true;
+            // TODO: Add Path Smoothing
 #if DEBUG
             if(path != null) {
                 DevConsole.AddCommand("Path found with size " + q.waypoints.Count);
@@ -188,7 +189,6 @@ namespace RTSEngine.Algorithms {
                 DevConsole.AddCommand("Pathfinding failed :(");
             }
 #endif
-            
         }
     }
 }
