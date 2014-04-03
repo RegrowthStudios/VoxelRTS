@@ -103,11 +103,11 @@ namespace RTS.Mech.Unit {
         private int lastState;
 
         public Animation() {
-            alRest = new AnimationLoop(0, 59);
+            alRest = new AnimationLoop(60, 149);
             alRest.FrameSpeed = 30;
-            alWalk = new AnimationLoop(60, 119);
-            alWalk.FrameSpeed = 50;
-            alCombat = new AnimationLoop(120, 149);
+            alWalk = new AnimationLoop(0, 59);
+            alWalk.FrameSpeed = 80;
+            alCombat = new AnimationLoop(105, 109);
             alCombat.FrameSpeed = 30;
 
             SetAnimation(FSMState.None);

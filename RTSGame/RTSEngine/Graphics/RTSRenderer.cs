@@ -17,7 +17,7 @@ namespace RTSEngine.Graphics {
     public struct VisualTeam {
         public int TeamIndex;
         public RTSColorScheme ColorScheme;
-        public string RaceFileInfo;
+        public RTSRaceData RaceFileInfo;
     }
 
     public class RTSRenderer : IDisposable {
@@ -206,7 +206,7 @@ namespace RTSEngine.Graphics {
         public void LoadTeamVisuals(GameState state, VisualTeam vt) {
             RTSTeam team = state.teams[vt.TeamIndex];
             team.ColorScheme = vt.ColorScheme;
-            RTSRaceData res = RTSRaceParser.Parse(new FileInfo(vt.RaceFileInfo));
+            RTSRaceData res = vt.RaceFileInfo;
             for(int ui = 0; ui < team.race.activeUnits.Length; ui++) {
                 RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, team.race.activeUnits[ui].Data, res.UnitTypes[ui]);
                 uModel.ColorPrimary = team.ColorScheme.Primary;
@@ -234,8 +234,6 @@ namespace RTSEngine.Graphics {
 
         public void UpdateVisible(CollisionGrid cg) {
             // All Team Friendly Units Are Visible
-            RTSTeam team;
-            List<RTSUnit> units;
             BoundingFrustum frustum = new BoundingFrustum(Camera.View * Camera.Projection);
 
             Predicate<RTSUnit> fFV = (u) => {

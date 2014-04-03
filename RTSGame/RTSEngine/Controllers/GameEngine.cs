@@ -13,26 +13,49 @@ using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Controllers {
-    // A Playable Team
-    public struct RTSTeamResult {
-        public RTSRaceData TeamType;
-        public RTSColorScheme Colors;
+    // This Is How A Team Should Be Made
+    public struct TeamInitOption {
+        public string PlayerName;
         public InputType InputType;
+        public string Race;
+        public RTSColorScheme Colors;
     }
 
     // The Data The Engine Needs To Know About To Properly Create A Game
     public struct EngineLoadData {
         // Teams In The Battle
-        public RTSTeamResult[] Teams;
+        public TeamInitOption[] Teams;
+
+        public Dictionary<string, RTSRaceData> Races;
 
         // Where To Load The Map
         public FileInfo MapFile;
     }
 
     public static class GameEngine {
+        public static void SearchAllInitInfo(DirectoryInfo dir, Dictionary<string, RTSRaceData> dictRaces, Dictionary<string, RTSColorScheme> dictSchemes) {
+            var files = dir.GetFiles();
+            foreach(var file in files) {
+                if(file.Extension.ToLower().EndsWith("race")) {
+                    RTSRaceData rd = RTSRaceParser.Parse(file);
+                    if(rd != null)
+                        dictRaces.Add(rd.Name, rd);
+                }
+                else if(file.Extension.ToLower().EndsWith("scheme")) {
+                    RTSColorScheme? scheme = RTSColorSchemeParser.Parse(file);
+                    if(scheme.HasValue)
+                        dictSchemes.Add(scheme.Value.Name, scheme.Value);
+                }
+            }
+            var dirs = dir.GetDirectories();
+            foreach(var subDir in dirs) {
+                SearchAllInitInfo(subDir, dictRaces, dictSchemes);
+            }
+        }
+
         public static void BuildLocal(GameState state, EngineLoadData eld) {
             BuildControllers(state);
-            state.SetTeams(BuildTeams(state, eld.Teams));
+            state.SetTeams(BuildTeams(state, eld));
 
             for(int ti = 0; ti < state.activeTeams.Length; ti++) {
                 switch(eld.Teams[ti].InputType) {
@@ -78,26 +101,28 @@ namespace RTSEngine.Controllers {
             // Create Grid
             state.CGrid = new CollisionGrid(state.Map.Width, state.Map.Depth, RTSConstants.CGRID_SIZE);
         }
-        private static IndexedTeam[] BuildTeams(GameState state, RTSTeamResult[] teamResults) {
-            IndexedTeam[] t = new IndexedTeam[teamResults.Length];
+        private static IndexedTeam[] BuildTeams(GameState state, EngineLoadData eld) {
+            var t = new List<IndexedTeam>();
             RTSTeam team;
-            int i = 0;
-            foreach(var res in teamResults) {
+            for(int i = 0; i < eld.Teams.Length; i++) {
+                TeamInitOption res = eld.Teams[i];
+                if(res.InputType == InputType.None)
+                    continue;
                 team = new RTSTeam();
+                RTSRaceData rd = eld.Races[res.Race];
                 team.ColorScheme = res.Colors;
-                team.race.scAction = state.SquadControllers[res.TeamType.DefaultSquadActionController];
-                team.race.scMovement = state.SquadControllers[res.TeamType.DefaultSquadMovementController];
-                team.race.scTargetting = state.SquadControllers[res.TeamType.DefaultSquadTargettingController];
+                team.race.scAction = state.SquadControllers[rd.DefaultSquadActionController];
+                team.race.scMovement = state.SquadControllers[rd.DefaultSquadMovementController];
+                team.race.scTargetting = state.SquadControllers[rd.DefaultSquadTargettingController];
                 int ui = 0;
-                foreach(FileInfo unitDataFile in res.TeamType.UnitTypes) {
+                foreach(FileInfo unitDataFile in rd.UnitTypes) {
                     RTSUnitData data = RTSUnitDataParser.ParseData(state.UnitControllers, unitDataFile);
                     team.race.units[ui++] = data;
                 }
                 team.race.UpdateActiveUnits();
-                t[i] = new IndexedTeam(i, team);
-                i++;
+                t.Add(new IndexedTeam(i, team));
             }
-            return t;
+            return t.ToArray();
         }
 
         public static void Dispose(GameState state) {

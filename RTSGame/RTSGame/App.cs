@@ -33,7 +33,15 @@ namespace RTS {
         private static App app;
 
         // Screens
+        public LoginScreen LoginScreen {
+            get;
+            private set;
+        }
         public MenuScreen MenuScreen {
+            get;
+            private set;
+        }
+        public LobbyScreen LobbyScreen {
             get;
             private set;
         }
@@ -64,7 +72,9 @@ namespace RTS {
             // Get User Config Parameter For Fullscreen
             graphics.IsFullScreen = UserConfig.UseFullscreen;
 
+            LoginScreen = new RTS.LoginScreen();
             MenuScreen = new RTS.MenuScreen();
+            LobbyScreen = new RTS.LobbyScreen();
             LoadScreen = new RTS.LoadScreen();
             RTSScreen = new RTS.RTSScreen();
             RTSNetScreen = new RTS.RTSNetScreen();
@@ -87,7 +97,9 @@ namespace RTS {
             screenList = new BlisterUI.ScreenList(this, 0,
                 new BlisterUI.FalseFirstScreen(2),
                 new InduZtryScreen(1),
+                LoginScreen,
                 MenuScreen,
+                LobbyScreen,
                 LoadScreen,
                 RTSScreen,
                 RTSNetScreen,

@@ -19,7 +19,7 @@ namespace RTS {
             protected set;
         }
         public override int Previous {
-            get { return -1; }
+            get { return game.LoginScreen.Index; }
             protected set { }
         }
 
@@ -147,7 +147,7 @@ namespace RTS {
         private void MenuScreen_OnButtonPress(RectButton obj) {
             seClick.Play();
             if(obj == buttons[0]) {
-                Next = game.LoadScreen.Index;
+                Next = game.LobbyScreen.Index;
                 State = ScreenState.ChangeNext;
             }
             else if(obj == buttons[1]) {
