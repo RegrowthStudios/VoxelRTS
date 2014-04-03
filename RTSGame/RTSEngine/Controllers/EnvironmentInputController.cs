@@ -62,10 +62,10 @@ namespace RTSEngine.Controllers
             ore = o;
             treePositions = treePos;
             for (int i = 0; i < treePositions.Length; i++) {
-                AddEvent(new SpawnBuildingEvent(Team, tree, treePositions[i]));
+                AddEvent(new SpawnBuildingEvent(Team, tree.Index, treePositions[i]));
             }
             for (int j = 0; j < orePos.Length; j++) {
-                AddEvent(new SpawnBuildingEvent(Team, ore, orePos[j]));
+                AddEvent(new SpawnBuildingEvent(Team, ore.Index, orePos[j]));
             }
         }
 
@@ -101,7 +101,7 @@ namespace RTSEngine.Controllers
                     for (int i = 0; i < numTrees; i++) {
                         offset.X = random.Next(MAX_OFFSET);
                         offset.Y = random.Next(MAX_OFFSET);
-                        AddEvent(new SpawnBuildingEvent(Team, tree, treeLocation + offset));
+                        AddEvent(new SpawnBuildingEvent(Team, tree.Index, treeLocation + offset));
                         r.AddToRegionImpact(-tree.Data.Impact);
                     }
 
@@ -155,7 +155,7 @@ namespace RTSEngine.Controllers
                     for (int j = 0; j < numUnits; j++) {
                         offset.X = random.Next(MAX_OFFSET);
                         offset.Y = random.Next(MAX_OFFSET);
-                        AddEvent(new SpawnUnitEvent(Team, spawnData, spawnPos + offset));
+                        AddEvent(new SpawnUnitEvent(Team, spawnData.Index, spawnPos + offset));
                     }
                 }
             }

@@ -219,12 +219,13 @@ namespace RTSEngine.Controllers {
         }
 
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
-            RTSSquad squad = e.Team.AddSquad();
-            RTSUnit unit = e.Team.AddUnit(e.Type.Index, e.Position);
-            unit.ActionController = e.Type.Data.DefaultActionController.CreateInstance<ACUnitActionController>();
-            unit.AnimationController = e.Type.Data.DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
-            unit.MovementController = e.Type.Data.DefaultMoveController.CreateInstance<ACUnitMovementController>();
-            unit.CombatController = e.Type.Data.DefaultCombatController.CreateInstance<ACUnitCombatController>();
+            RTSTeam team = e.Team;
+            RTSSquad squad = team.AddSquad();
+            RTSUnit unit = team.AddUnit(e.Type, e.Position);
+            unit.ActionController = team.race.units[e.Type].DefaultActionController.CreateInstance<ACUnitActionController>();
+            unit.AnimationController = team.race.units[e.Type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
+            unit.MovementController = team.race.units[e.Type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
+            unit.CombatController = team.race.units[e.Type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
             squad.Add(unit);
             AddUnitTask(s, unit);
             squad.RecalculateGridPosition();

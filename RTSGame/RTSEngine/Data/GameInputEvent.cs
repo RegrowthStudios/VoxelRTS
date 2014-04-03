@@ -69,7 +69,7 @@ namespace RTSEngine.Data {
     }
 
     public class SpawnUnitEvent : GameInputEvent {
-        public IndexedUnitType Type {
+        public int Type {
             get;
             private set;
         }
@@ -79,7 +79,7 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SpawnUnitEvent(RTSTeam t, IndexedUnitType type, Vector2 pos)
+        public SpawnUnitEvent(RTSTeam t, int type, Vector2 pos)
             : base(GameEventType.SpawnUnit, t) {
             Type = type;
             Position = pos;
@@ -87,7 +87,7 @@ namespace RTSEngine.Data {
     }
 
     public class SpawnBuildingEvent : GameInputEvent {
-        public IndexedBuildingType Type {
+        public int Type {
             get;
             private set;
         }
@@ -97,7 +97,7 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SpawnBuildingEvent(RTSTeam t, IndexedBuildingType type, Vector2 pos) 
+        public SpawnBuildingEvent(RTSTeam t, int type, Vector2 pos) 
             : base (GameEventType.SpawnBuilding, t) {
             Type = type;    
             Position = pos;
