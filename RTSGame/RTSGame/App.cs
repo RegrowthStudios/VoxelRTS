@@ -68,6 +68,8 @@ namespace RTS {
             : base() {
             // Make Sure We Are Using The Most Recent Graphics Version
             graphics.GraphicsProfile = GraphicsProfile.HiDef;
+            graphics.PreferredBackBufferWidth = UserConfig.ResolutionWidth;
+            graphics.PreferredBackBufferHeight = UserConfig.ResolutionHeight;
 
             // Get User Config Parameter For Fullscreen
             graphics.IsFullScreen = UserConfig.UseFullscreen;

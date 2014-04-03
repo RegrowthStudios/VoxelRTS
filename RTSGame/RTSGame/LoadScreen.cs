@@ -24,6 +24,13 @@ namespace RTS {
         const int BAR_HEIGHT = 10;
         const int BAR_WIDTH = 180;
         const int BACK_SIZE = 3;
+
+        const string TIPS_FILE = @"Content\UI\tips.txt";
+        const string TIPS_FONT = @"Courier New";
+        const int TIPS_FONT_SIZE = 12;
+        const int TIPS_HEIGHT = 140;
+        const int TIPS_OFFSET = 5;
+
         static readonly Color COLOR_LOW = Color.Maroon;
         static readonly Color COLOR_HIGH = Color.Teal;
         static readonly Color COLOR_BACK = new Color(8, 8, 8);
@@ -69,26 +76,8 @@ namespace RTS {
         private bool isLoaded;
 
         public override void Build() {
-            DirectoryInfo id = new DirectoryInfo(IMAGE_DIR);
-            imageList = new List<FileInfo>();
-            foreach(var file in id.GetFiles()) {
-                if(file.Extension.EndsWith("png"))
-                    imageList.Add(file);
-            }
-
-            // Read All Tips
-            tips = new List<string>();
-            Regex rgxTip = new Regex(@"\x5b([^\x5d]+)\x5d");
-            string mStr = null;
-            using(var s = File.OpenRead(@"Content\UI\tips.txt")) {
-                mStr = new StreamReader(s).ReadToEnd();
-            }
-            Match m = rgxTip.Match(mStr);
-            while(m.Success) {
-                tips.Add(m.Groups[1].Value);
-                m = m.NextMatch();
-            }
-            return;
+            FindAllImages();
+            ReadAllTips();
         }
         public override void Destroy(GameTime gameTime) {
         }
@@ -103,11 +92,13 @@ namespace RTS {
             tPixel.SetData(new Color[] { Color.White });
 
             percent = 0f;
-            isLoaded = false;
 
-            font = XNASpriteFont.Compile(G, "Courier New", 14, out tFont);
+            // Font For Tips
+            font = XNASpriteFont.Compile(G, TIPS_FONT, TIPS_FONT_SIZE, out tFont);
             tip = tips[r.Next(tips.Count)];
 
+            // Create The Loading Thread
+            isLoaded = false;
             Thread tWork = new Thread(WorkThread);
             tWork.Priority = ThreadPriority.AboveNormal;
             tWork.IsBackground = true;
@@ -158,42 +149,60 @@ namespace RTS {
             SB.Draw(tPixel, rBack, COLOR_BACK);
             SB.Draw(tPixel, rBar, Color.Lerp(COLOR_LOW, COLOR_HIGH, percent));
 
-            SB.Draw(tPixel, new Rectangle(5, 5, 480, 160), new Color(0, 0, 0, 230));
-            SB.DrawString(font, tip, new Vector2(10, 10), new Color(10, 80, 180, 255));
+            SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
+            SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
             SB.End();
         }
 
+        private void FindAllImages() {
+            DirectoryInfo id = new DirectoryInfo(IMAGE_DIR);
+            imageList = new List<FileInfo>();
+            foreach(var file in id.GetFiles()) {
+                if(file.Extension.EndsWith("png"))
+                    imageList.Add(file);
+            }
+        }
+        private void ReadAllTips() {
+            tips = new List<string>();
+            Regex rgxTip = new Regex(@"\x5b([^\x5d]+)\x5d");
+            string mStr = null;
+            using(var s = File.OpenRead(TIPS_FILE)) {
+                mStr = new StreamReader(s).ReadToEnd();
+            }
+            Match m = rgxTip.Match(mStr);
+            while(m.Success) {
+                tips.Add(m.Groups[1].Value);
+                m = m.NextMatch();
+            }
+        }
         private void WorkThread() {
-            loadData = new EngineLoadData();
-            loadData.MapFile = new FileInfo(@"Packs\Default\maps\0\test.map");
-            var teamRes = RTSRaceParser.ParseAll(new DirectoryInfo("Packs"));
-
+            // Grab The Initialization Info
             loadData = game.LobbyScreen.InitInfo;
 
+            // Build The Local Game State
             LoadedState = new GameState();
             GameEngine.BuildLocal(LoadedState, LoadData);
 
-            // Create Camera And Graphics
+            // Create Camera
             LoadedCamera = new Camera(G.Viewport);
             LoadedCamera.Controller.Hook(game.Window);
+
+            // Load The Renderer
             LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
-
             LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera, game.LoadScreen.LoadData.MapFile);
-            LoadedRenderer.LoadTeamVisuals(LoadedState, new VisualTeam() {
-                TeamIndex = 0,
-                ColorScheme = loadData.Teams[0].Colors,
-                RaceFileInfo = loadData.Races[loadData.Teams[0].Race]
-            });
-            LoadedRenderer.LoadTeamVisuals(LoadedState, new VisualTeam() {
-                TeamIndex = 1,
-                ColorScheme = loadData.Teams[1].Colors,
-                RaceFileInfo = loadData.Races[loadData.Teams[1].Race]
-            });
+            VisualTeam vt;
+            for(int i = 0; i < loadData.Teams.Length; i++) {
+                var td = loadData.Teams[i];
+                if(td.InputType == InputType.None)
+                    continue;
 
+                // Create The Visual Data
+                vt.TeamIndex = i;
+                vt.RaceFileInfo = loadData.Races[td.Race];
+                vt.ColorScheme = td.Colors;
+                LoadedRenderer.LoadTeamVisuals(LoadedState, vt);
+            }
             isLoaded = true;
-        }
-        private void LoadCallback(string m, float p) {
-            // percent = p;
         }
     }
 }
