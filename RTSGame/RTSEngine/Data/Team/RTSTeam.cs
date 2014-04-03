@@ -39,6 +39,7 @@ namespace RTSEngine.Data.Team {
         // Entity Data
         public readonly List<RTSUnit> units;
         public readonly List<RTSSquad> squads;
+        public readonly List<RTSBuilding> buildings;
 
         public InputController Input {
             get;
@@ -56,6 +57,7 @@ namespace RTSEngine.Data.Team {
             race = new RTSRace();
             units = new List<RTSUnit>();
             squads = new List<RTSSquad>();
+            buildings = new List<RTSBuilding>();
 
             // No Input Is Available For The Team Yet
             Input = null;
@@ -90,5 +92,16 @@ namespace RTSEngine.Data.Team {
         public void RemoveAll(Predicate<RTSSquad> f) {
             squads.RemoveAll(f);
         }
+
+        // Building Addition And Removal
+        public RTSBuilding AddBuilding(int type, Vector2 pos) {
+            RTSBuilding b = new RTSBuilding(this, race.buildings[type], pos);
+            buildings.Add(b);
+            return b;
+        }
+        public void RemoveBuilding(RTSBuilding b) {
+            buildings.Remove(b);
+        }
+        
     }
 }
