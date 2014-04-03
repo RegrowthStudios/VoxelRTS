@@ -4,7 +4,7 @@ NAME            [Armored Soldier]
 // Unit Model
 MODEL           [..\..\models\Dog.obj]
 TEXMAIN         [..\..\textures\Dog.png]
-TEXCOLOR        [..\..\textures\NoKey.png]
+TEXCOLOR        [..\..\textures\DogKey.png]
 ANIMATION       [..\..\animations\Dog.png]
 MAXCOUNT        [1000]
 

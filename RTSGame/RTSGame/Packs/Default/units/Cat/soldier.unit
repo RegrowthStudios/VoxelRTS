@@ -4,7 +4,7 @@ NAME            [Soldier]
 // Unit Model
 MODEL           [..\..\models\Cat.obj]
 TEXMAIN         [..\..\textures\Cat.png]
-TEXCOLOR        [..\..\textures\NoKey.png]
+TEXCOLOR        [..\..\textures\CatKey.png]
 ANIMATION       [..\..\animations\Cat.png]
 MAXCOUNT        [1000]
 
