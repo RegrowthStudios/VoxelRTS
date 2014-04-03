@@ -67,6 +67,7 @@
     <Compile Include="ColorSchemeScreen.cs" />
     <Compile Include="InduZtryScreen.cs" />
     <Compile Include="LobbyScreen.cs" />
+    <Compile Include="LoginScreen.cs" />
     <Compile Include="MenuScreen.cs" />
     <Compile Include="RTSNetScreen.cs" />
     <Compile Include="RTSScreen.cs" />
@@ -100,6 +101,15 @@
     <Content Include="Content\UI\Mouse\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\UI\tips.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\animations\Cat.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\animations\Dog.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\animations\Mech2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -112,6 +122,12 @@
     <Content Include="Packs\Default\maps\0\map.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Packs\Default\textures\Cat.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\textures\Dog.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\textures\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -120,6 +136,9 @@
     </Content>
     <Content Include="Packs\Default\animations\Mech1.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\textures\NoKey.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="README.txt" />
     <None Include="Content\Textures\Laser.png">
@@ -137,12 +156,42 @@
     <None Include="Packs\Default\maps\0\test.map">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Packs\Default\models\Cat.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\models\Dog.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Packs\Default\races\Cat.race">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\Dog.race">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Packs\Default\races\player.race">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Packs\Default\races\robots.race">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Packs\Default\units\Cat\armor.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\units\Cat\heavy.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\units\Cat\soldier.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\units\Dog\armor.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\units\Dog\heavy.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\units\Dog\soldier.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Packs\Default\units\soldier.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -155,9 +204,15 @@
     <None Include="Packs\Default\units\armor.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="User\schemes\red.scheme" />
-    <None Include="User\schemes\blue.scheme" />
-    <None Include="User\schemes\default.scheme" />
+    <Content Include="Packs\schemes\red.scheme">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\schemes\blue.scheme">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\schemes\default.scheme">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\RTSGame\BlisterUI\BlisterUI.csproj">
@@ -199,7 +254,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Packs\Default\animations\buildings\" />
+    <Folder Include="Packs\Default\buildings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

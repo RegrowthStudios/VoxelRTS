@@ -10,6 +10,7 @@ using RTSEngine.Data.Team;
 namespace RTSEngine.Controllers {
     // Types Of Teams
     public enum InputType {
+        None,
         Player,
         AI,
         Environment

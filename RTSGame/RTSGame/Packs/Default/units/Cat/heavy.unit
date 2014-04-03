@@ -1,0 +1,32 @@
+﻿// Friendly Unit Name
+NAME            [Heavy Soldier]
+
+// Unit Model
+MODEL           [..\..\models\Cat.obj]
+TEXMAIN         [..\..\textures\Cat.png]
+TEXCOLOR        [..\..\textures\NoKey.png]
+ANIMATION       [..\..\animations\Cat.png]
+MAXCOUNT        [1000]
+
+// Unit Data
+HEALTH          [80]
+SPEED           [2.4]
+COST            [6 , 1]
+BUILDTIME       [15]
+
+// Collision Data
+RADIUS          [0.4]
+BBOXMIN         [-0.4 , 0.0 , -0.4]
+BBOXMAX         [0.4 , 1.0 , 0.4]
+
+// Combat Data
+ARMOR           [0]
+RANGE           [0 , 16]
+TIMER           [1]
+DAMAGE          [25 , 35]
+CRITCHANCE      [0.05]
+
+CTRLACTION      [RTS.Mech.Unit.Action]
+CTRLANIM        [RTS.Mech.Unit.Animation]
+CTRLCOMBAT      [RTS.Mech.Unit.Combat]
+CTRLMOVE        [RTS.Mech.Unit.Movement]
