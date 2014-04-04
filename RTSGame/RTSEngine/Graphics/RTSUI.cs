@@ -16,7 +16,7 @@ namespace RTSEngine.Graphics {
         public Texture2D Texture;
         public Action<GameState> FOnPress;
     }
-    
+
     /**
      * RTS UI Menus:
      * When Units Selected: Unit/Type Counts
@@ -24,9 +24,12 @@ namespace RTSEngine.Graphics {
      * When Building Selected: Building/Profile
      */
     public class RTSUI : IDisposable {
-        private WidgetRenderer wrLeftPanel, wrProfile;
+        private WidgetRenderer wrButtonPanel, wrProfile;
         private Texture2D tTransparent;
-        private RectButton[,] btnLeft;
+        private RectButton[,] btnPanel;
+        private Action<GameState>[,] fPanel;
+        private LinkedList<Point> pressed;
+
         public int ButtonRows {
             get;
             private set;
@@ -37,49 +40,77 @@ namespace RTSEngine.Graphics {
         }
 
         public RTSUI(GraphicsDevice g, SpriteFont font) {
-            wrLeftPanel = new WidgetRenderer(g, font);
+            wrButtonPanel = new WidgetRenderer(g, font);
+            pressed = new LinkedList<Point>();
             wrProfile = new WidgetRenderer(g, font);
 
             tTransparent = new Texture2D(g, 1, 1);
             tTransparent.SetData(new Color[] { Color.Transparent });
         }
         public void Dispose() {
+            foreach(var b in btnPanel) b.Dispose();
             tTransparent.Dispose();
-            wrLeftPanel.Dispose();
+            wrButtonPanel.Dispose();
             wrProfile.Dispose();
         }
 
-        private void BuildLeftPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {
+        private void BuildButtonPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {
             ButtonRows = rows;
             ButtonColumns = cols;
 
             ButtonHighlightOptions bh1 = new ButtonHighlightOptions(bSize, bSize, cInactive);
             ButtonHighlightOptions bh2 = new ButtonHighlightOptions(bSize, bSize, cHovered);
-            btnLeft = new RectButton[ButtonColumns, ButtonRows];
+            btnPanel = new RectButton[ButtonColumns, ButtonRows];
+            fPanel = new Action<GameState>[ButtonColumns, ButtonRows];
             for(int iy = 0; iy < ButtonRows; iy++) {
                 for(int ix = 0; ix < ButtonColumns; ix++) {
-                    btnLeft[ix, iy] = new RectButton(wrLeftPanel, bh1, bh2);
+                    btnPanel[ix, iy] = new RectButton(wrButtonPanel, bh1, bh2);
                     if(ix > 0) {
-                        btnLeft[ix, iy].OffsetAlignX = Alignment.RIGHT;
-                        btnLeft[ix, iy].OffsetAlignY = Alignment.TOP;
-                        btnLeft[ix, iy].Offset = new Point(bSpacing, 0);
-                        btnLeft[ix, iy].Parent = btnLeft[ix - 1, iy];
+                        btnPanel[ix, iy].OffsetAlignX = Alignment.RIGHT;
+                        btnPanel[ix, iy].OffsetAlignY = Alignment.TOP;
+                        btnPanel[ix, iy].Offset = new Point(bSpacing, 0);
+                        btnPanel[ix, iy].Parent = btnPanel[ix - 1, iy];
                     }
                     else if(iy > 0) {
-                        btnLeft[ix, iy].OffsetAlignX = Alignment.LEFT;
-                        btnLeft[ix, iy].OffsetAlignY = Alignment.BOTTOM;
-                        btnLeft[ix, iy].Offset = new Point(0, bSpacing);
-                        btnLeft[ix, iy].Parent = btnLeft[ix, iy - 1];
+                        btnPanel[ix, iy].OffsetAlignX = Alignment.LEFT;
+                        btnPanel[ix, iy].OffsetAlignY = Alignment.BOTTOM;
+                        btnPanel[ix, iy].Offset = new Point(0, bSpacing);
+                        btnPanel[ix, iy].Parent = btnPanel[ix, iy - 1];
                     }
+                    btnPanel[ix, iy].OnButtonPress += (b) => {
+                        pressed.AddLast(new Point(ix, iy));
+                    };
+                }
+            }
+            ClearButtons();
+        }
+        public void SetButtons(IEnumerable<RTSUIButton> buttons) {
+            ClearButtons();
+            foreach(var b in buttons) {
+                btnPanel[b.X, b.Y].Texture = b.Texture;
+                fPanel[b.X, b.Y] = b.FOnPress;
+                btnPanel[b.X, b.Y].Hook();
+            }
+        }
+        public void ClearButtons() {
+            Array.Clear(fPanel, 0, ButtonRows * ButtonColumns);
+            for(int iy = 0; iy < ButtonRows; iy++) {
+                for(int ix = 0; ix < ButtonColumns; ix++) {
+                    btnPanel[ix, iy].Texture = tTransparent;
+                    btnPanel[ix, iy].Unhook();
                 }
             }
         }
 
-        public void SetButtons(IEnumerable<RTSUIButton> buttons) {
-
-        }
-        public void ClearButtons() {
-
+        public void UpdateButtons(GameState s) {
+            int c = pressed.Count;
+            while(c > 0) {
+                Point p = pressed.First.Value;
+                pressed.RemoveFirst();
+                if(fPanel[p.X, p.Y] != null)
+                    fPanel[p.X, p.Y](s);
+                c--;
+            }
         }
     }
 }
