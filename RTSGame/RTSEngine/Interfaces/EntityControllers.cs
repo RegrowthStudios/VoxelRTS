@@ -128,6 +128,10 @@ namespace RTSEngine.Interfaces {
 
         public bool CurrentWaypointIsSet { get; set; }
 
+        public bool HasValidWaypoint() {
+            return CurrentWaypoint >= 0 && CurrentWaypoint < unit.Squad.MovementController.Waypoints.Count;
+        }
+
         // Scripted Logic For Movement
         public abstract void DecideMove(GameState g, float dt);
         public abstract void ApplyMove(GameState g, float dt);

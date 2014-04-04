@@ -21,7 +21,86 @@ namespace RTS.Mech.Squad {
     }
 
     public class Movement : ACSquadMovementController {
+        // TODO: Implement
+        // Decide Where Units In This Squad Should Go When Moving
+        public override void ApplyMovementFormation(int movementOrder) {
+            switch(movementOrder) {
+                case BehaviorFSM.BoxFormation:
+                    // Determine Spacing Bewteen Units In Formation
+                    float spacing = float.MinValue;
+                    foreach(var unit in squad.Units) {
+                        if(unit.CollisionGeometry.BoundingRadius > spacing) {
+                            spacing = unit.CollisionGeometry.BoundingRadius;
+                        }
+                    }
+                    spacing *= 2;
+                    int numUnits = squad.Units.Count;
+                    int numFullRows = (int)Math.Ceiling(Math.Sqrt(numUnits / phi));
+                    int unitsPerRow = numUnits / numFullRows;
 
+                    // Special Spacing For The Last Row
+                    float lastSpacing = spacing;
+                    int numLastUnits = numUnits % numFullRows;
+                    lastSpacing = ((float)unitsPerRow) / ((float)numLastUnits);
+
+                    // Calculate Formation As Offsets From Squad Waypoint
+                    List<Vector2> formation = new List<Vector2>();
+                    float rOffset = (numLastUnits > 0) ? numFullRows * spacing / 2.0f : (numFullRows - 1) * spacing / 2.0f;
+                    float cOffset = -(unitsPerRow - 1) * spacing / 2.0f;
+                    for(int r = 0; r < numFullRows; r++) {
+                        rOffset -= r * spacing;
+                        for(int c = 0; c < unitsPerRow; c++) {
+                            cOffset += c * spacing;
+                            formation.Add(new Vector2(rOffset, cOffset));
+                        }
+                    }
+                    if(numLastUnits > 0) {
+                        rOffset -= spacing;
+                        cOffset = -(numLastUnits - 1) * lastSpacing / 2.0f;
+                        for(int c = 0; c < numLastUnits; c++) {
+                            cOffset += c * lastSpacing;
+                            formation.Add(new Vector2(rOffset, cOffset));
+                        }
+                    }
+
+                    // Assign The Units To Posts In The Formation
+                    bool[] assigned = new bool[formation.Count];
+                    foreach(var unit in squad.Units) {
+                        Vector2 pos = unit.GridPosition;
+                        float minDistSq = float.MaxValue;
+                        int assignment = 0;
+                        for(int i = 0; i < formation.Count; i++) {
+                            float distSq = Vector2.DistanceSquared(pos, formation[i]);
+                            if(!assigned[i] && distSq < minDistSq) {
+                                minDistSq = distSq;
+                                assignment = i;
+                            }
+                        }
+                        assigned[assignment] = true;
+                        if(!formationAssignments.ContainsKey(unit.UUID)) {
+                            formationAssignments.Add(unit.UUID, formation[assignment]);
+                        }
+                    }
+                    break;
+                case BehaviorFSM.FreeFormation:
+                    foreach(var unit in squad.Units) {
+                        if(!formationAssignments.ContainsKey(unit.UUID)) {
+                            formationAssignments.Add(unit.UUID, Vector2.Zero);
+                        }
+                    }
+                    break;
+            }
+            foreach(var fa in formationAssignments) {
+                //#if DEBUG
+                //                RTSEngine.Controllers.DevConsole.AddCommand("unit "+fa.UUID+" : "+fa.Post);
+                //#endif
+            }
+        }
+        // TODO: Implement
+        // Decide Where Units In This Squad Should Go When Close To Their Target
+        public override void CalculateTargetFormation() {
+
+        }
     }
 
     public class Target : ACSquadTargettingController {
@@ -81,7 +160,6 @@ namespace RTS.Mech.Unit {
     public class Action : ACUnitActionController {
         public override void DecideAction(GameState g, float dt) {
             // TODO: Real Behavior FSM
-
             if(unit.MovementController != null)
                 unit.MovementController.DecideMove(g, dt);
         }
@@ -211,9 +289,6 @@ namespace RTS.Mech.Unit {
 
         // TODO: Cut Out Unit.Squad.MovementController By Linking Each Unit MC Directly To A Squad MC?
         public override void DecideMove(GameState g, float dt) {
-#if DEBUG
-            DevConsole.AddCommand("entered decide move");
-#endif
             if(unit.Target != null) {
                 switch(unit.CombatOrders) {
                     case BehaviorFSM.UseMeleeAttack:
@@ -232,18 +307,13 @@ namespace RTS.Mech.Unit {
             }
             else if(!CurrentWaypointIsSet) {
                 // Pathfinding Has Not Finished; Temporarily Aim Toward Squad Goal
-                waypoint = SquadGoal;
+                doMove = false;
+                //waypoint = SquadGoal;
             }
-            else if(CurrentWaypoint >= 0 && CurrentWaypoint < unit.Squad.MovementController.Waypoints.Count) {
+            else if(CurrentWaypointIsSet && HasValidWaypoint()) {
+
                 // Find This Unit's Formation Post (Offset)
-                // TODO: Try A Dictionary{UUID -> Post}
-                Vector2 post = Vector2.Zero;
-                foreach(var fa in unit.Squad.MovementController.formationAssignments) {
-                    if(fa.UUID == unit.UUID) {
-                        post = fa.Post;
-                        break;
-                    }
-                }
+                Vector2 post = unit.Squad.MovementController.RotatedFormationAssignments[unit.UUID];
                 // Use The Next Squad Waypoint And The Post To Assign A Waypoint
                 waypoint = unit.Squad.MovementController.Waypoints[CurrentWaypoint--] + post;
 

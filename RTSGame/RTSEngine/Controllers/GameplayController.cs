@@ -173,7 +173,7 @@ namespace RTSEngine.Controllers {
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
                         //u.MovementController.Waypoints = wp;
-                        u.MovementController.SquadGoal = e.Waypoint;
+                        //u.MovementController.SquadGoal = e.Waypoint;
                         u.Target = null;
                         squad.Add(u);
                     }
@@ -183,7 +183,7 @@ namespace RTSEngine.Controllers {
                 AddSquadTask(s, squad);
                 // Setup Pathfinding Query
                 foreach(var squadQuery in squadQueries) {
-                    if(squadQuery.squad == squad) {
+                    if(squadQuery.squad.Equals(squad)) {
                         squadQuery.query.IsOld = true;
                     }
                 }
@@ -192,6 +192,7 @@ namespace RTSEngine.Controllers {
                 PathQuery query = new PathQuery(squad.GridPosition, e.Waypoint);
                 squadQueries.Add(new SquadQuery(squad, query));
                 pathfinder.Add(query);
+                // TODO: Get The Formation Order From The Input Event
                 squad.MovementController.ApplyMovementFormation(BehaviorFSM.BoxFormation);
             }
         }
