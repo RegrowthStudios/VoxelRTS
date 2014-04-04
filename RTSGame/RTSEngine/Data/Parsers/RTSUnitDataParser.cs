@@ -19,7 +19,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
         private static readonly Regex rgxColorTex = RegexHelper.GenerateFile("TEXCOLOR");
         private static readonly Regex rgxAnimation = RegexHelper.GenerateFile("ANIMATION");
-        private static readonly Regex rgxMaxCount = RegexHelper.GenerateFile("MAXCOUNT");
+        private static readonly Regex rgxMaxCount = RegexHelper.GenerateInteger("MAXCOUNT");
         private static readonly Regex rgxHealth = RegexHelper.GenerateInteger("HEALTH");
         private static readonly Regex rgxSpeed = RegexHelper.GenerateNumber("SPEED");
         private static readonly Regex rgxCost = RegexHelper.GenerateVec2Int("COST");

@@ -12,6 +12,7 @@ namespace RTSEngine.Data.Parsers {
     public struct DynCompiledResults {
         public Dictionary<string, ReflectedUnitController> UnitControllers;
         public Dictionary<string, ReflectedSquadController> SquadControllers;
+        public Dictionary<string, ReflectedBuildingController> BuildingControllers;
     }
 
     public static class DynControllerParser {
@@ -38,10 +39,13 @@ namespace RTSEngine.Data.Parsers {
                 return new DynCompiledResults();
             }
 
-            // Loop Through All Visible Types
+            // Dictionaries
             DynCompiledResults res = new DynCompiledResults();
             res.UnitControllers = new Dictionary<string, ReflectedUnitController>();
             res.SquadControllers = new Dictionary<string, ReflectedSquadController>();
+            res.BuildingControllers = new Dictionary<string, ReflectedBuildingController>();
+
+            // Loop Through All Visible Types
             Assembly a = cr.CompiledAssembly;
             Type[] types = a.GetExportedTypes();
             foreach(Type t in types) {
@@ -53,6 +57,8 @@ namespace RTSEngine.Data.Parsers {
                     res.UnitControllers.Add(t.FullName, new ReflectedUnitController(t));
                 else if(t.IsSubclassOf(typeof(ACSquadController)))
                     res.SquadControllers.Add(t.FullName, new ReflectedSquadController(t));
+                else if(t.IsSubclassOf(typeof(ACBuildingController)))
+                    res.BuildingControllers.Add(t.FullName, new ReflectedBuildingController(t));
             }
             return res;
         }

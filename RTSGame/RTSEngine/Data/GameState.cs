@@ -51,6 +51,10 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
+        public Dictionary<string, ReflectedBuildingController> BuildingControllers {
+            get;
+            private set;
+        }
 
         // Constant List Of Teams
         public readonly RTSTeam[] teams;
@@ -80,6 +84,7 @@ namespace RTSEngine.Data {
             // No Data Yet Available
             UnitControllers = new Dictionary<string, ReflectedUnitController>();
             SquadControllers = new Dictionary<string, ReflectedSquadController>();
+            BuildingControllers = new Dictionary<string, ReflectedBuildingController>();
             Map = null;
 
             curFrame = 0;

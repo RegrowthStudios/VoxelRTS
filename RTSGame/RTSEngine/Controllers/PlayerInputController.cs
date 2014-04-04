@@ -16,7 +16,7 @@ namespace RTSEngine.Controllers {
         private Vector2 mousePressedPos;
         public Camera Camera { get; set; }
 
-        public PlayerInputController(GameState g, RTSTeam t)
+        public PlayerInputController(GameState g, int t)
             : base(g, t) {
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMousePress += OnMousePress;
@@ -41,7 +41,7 @@ namespace RTSEngine.Controllers {
                     if(SelectionDetection.Intersects(frustum, ref box))
                         selected.Add(Team.units[i]);
                 }
-                AddEvent(new SelectEvent(selected, Team));
+                AddEvent(new SelectEvent(TeamIndex, selected));
             }
         }
         public void OnMousePress(Vector2 location, MouseButton b) {
@@ -66,11 +66,11 @@ namespace RTSEngine.Controllers {
                     IntersectionRecord rec = new IntersectionRecord();
                     if(GameState.Map.BVH.Intersect(ref rec, viewRay)) {
                         Vector3 rh = viewRay.Position + viewRay.Direction * rec.T;
-                        AddEvent(new SetWayPointEvent(new Vector2(rh.X, rh.Z), Team));
+                        AddEvent(new SetWayPointEvent(TeamIndex, new Vector2(rh.X, rh.Z)));
                     }
                 }
                 else {
-                    AddEvent(new SetTargetEvent(target, Team));
+                    AddEvent(new SetTargetEvent(TeamIndex, target));
                 }
             }
             else if(b == MouseButton.Left) {

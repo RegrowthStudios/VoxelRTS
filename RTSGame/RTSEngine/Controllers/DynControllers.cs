@@ -6,6 +6,7 @@ using System.Reflection;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Controllers {
+    #region Unit
     public enum UnitControllerType {
         Action,
         Animation,
@@ -41,7 +42,9 @@ namespace RTSEngine.Controllers {
             return constructor.Invoke(null) as T;
         }
     }
+    #endregion
 
+    #region Squad
     public enum SquadControllerType {
         Action,
         Movement,
@@ -74,5 +77,34 @@ namespace RTSEngine.Controllers {
             return constructor.Invoke(null) as T;
         }
     }
+    #endregion
 
+    #region Building
+    public enum BuildingControllerType {
+        Action
+    }
+    public class ReflectedBuildingController {
+        // The Types Of Controller That This Is
+        public BuildingControllerType ControllerType {
+            get;
+            private set;
+        }
+
+        // The Constructor Of This Controller
+        private ConstructorInfo constructor;
+
+        public ReflectedBuildingController(Type t) {
+            // Get Constructor
+            constructor = t.GetConstructor(new Type[0]);
+            if(t.IsSubclassOf(typeof(ACBuildingActionController)))
+                ControllerType = BuildingControllerType.Action;
+            else
+                throw new ArgumentException("This Script Is Not Subclassing A Building Controller");
+        }
+
+        public T CreateInstance<T>() where T : ACBuildingController {
+            return constructor.Invoke(null) as T;
+        }
+    }
+    #endregion
 }

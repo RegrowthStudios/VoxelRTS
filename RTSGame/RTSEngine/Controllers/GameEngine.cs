@@ -60,16 +60,16 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < state.activeTeams.Length; ti++) {
                 switch(eld.Teams[ti].InputType) {
                     case InputType.Player:
-                        var pic = new PlayerInputController(state, state.activeTeams[ti].Team);
+                        var pic = new PlayerInputController(state, state.activeTeams[ti].Index);
                         state.activeTeams[ti].Team.Input = pic;
                         break;
                     case InputType.AI:
                         // TODO: Make This Class
-                        state.activeTeams[ti].Team.Input = new AIInputController(state, state.activeTeams[ti].Team, state.activeTeams[ti].Index);
+                        state.activeTeams[ti].Team.Input = new AIInputController(state, state.activeTeams[ti].Index);
                         break;
                     case InputType.Environment:
                         // TODO: Make This Class
-                        EnvironmentInputController envController = new EnvironmentInputController(state, state.activeTeams[ti].Team);
+                        EnvironmentInputController envController = new EnvironmentInputController(state, state.activeTeams[ti].Index);
                         //envController.Init();
                         break;
                     default:
@@ -91,6 +91,8 @@ namespace RTSEngine.Controllers {
                 state.UnitControllers.Add(kv.Key, kv.Value);
             foreach(KeyValuePair<string, ReflectedSquadController> kv in res.SquadControllers)
                 state.SquadControllers.Add(kv.Key, kv.Value);
+            foreach(KeyValuePair<string, ReflectedBuildingController> kv in res.BuildingControllers)
+                state.BuildingControllers.Add(kv.Key, kv.Value);
         }
         private static void BuildMap(GameState state, FileInfo infoFile) {
             // Parse Map Data
@@ -114,12 +116,18 @@ namespace RTSEngine.Controllers {
                 team.race.scAction = state.SquadControllers[rd.DefaultSquadActionController];
                 team.race.scMovement = state.SquadControllers[rd.DefaultSquadMovementController];
                 team.race.scTargetting = state.SquadControllers[rd.DefaultSquadTargettingController];
-                int ui = 0;
+                int type = 0;
                 foreach(FileInfo unitDataFile in rd.UnitTypes) {
                     RTSUnitData data = RTSUnitDataParser.ParseData(state.UnitControllers, unitDataFile);
-                    team.race.units[ui++] = data;
+                    team.race.units[type++] = data;
                 }
                 team.race.UpdateActiveUnits();
+                type = 0;
+                foreach(FileInfo buildingDataFile in rd.BuildingTypes) {
+                    RTSBuildingData data = RTSBuildingDataParser.ParseData(state.BuildingControllers, buildingDataFile);
+                    team.race.buildings[type++] = data;
+                }
+                team.race.UpdateActiveBuildings();
                 t.Add(new IndexedTeam(i, team));
             }
             return t.ToArray();

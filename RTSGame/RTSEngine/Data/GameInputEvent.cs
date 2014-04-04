@@ -21,12 +21,12 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public RTSTeam Team {
+        public int Team {
             get;
             private set;
         }
 
-        public GameInputEvent(GameEventType a, RTSTeam t) {
+        public GameInputEvent(GameEventType a, int t) {
             Action = a;
             Team = t;
         }
@@ -38,7 +38,7 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SelectEvent(List<IEntity> s, RTSTeam t)
+        public SelectEvent(int t, List<IEntity> s)
             : base(GameEventType.Select, t) {
             Selected = s;
         }
@@ -50,7 +50,7 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SetWayPointEvent(Vector2 w, RTSTeam t)
+        public SetWayPointEvent(int t, Vector2 w)
             : base(GameEventType.SetWaypoint, t) {
             Waypoint = w;
         }
@@ -62,7 +62,7 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SetTargetEvent(IEntity target, RTSTeam t)
+        public SetTargetEvent(int t, IEntity target)
             : base(GameEventType.SetTarget, t) {
             Target = target;
         }
@@ -73,13 +73,13 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
-        
+
         public Vector2 Position {
             get;
             private set;
         }
 
-        public SpawnUnitEvent(RTSTeam t, int type, Vector2 pos)
+        public SpawnUnitEvent(int t, int type, Vector2 pos)
             : base(GameEventType.SpawnUnit, t) {
             Type = type;
             Position = pos;
@@ -91,15 +91,15 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
-        
+
         public Vector2 Position {
             get;
             private set;
         }
 
-        public SpawnBuildingEvent(RTSTeam t, int type, Vector2 pos) 
-            : base (GameEventType.SpawnBuilding, t) {
-            Type = type;    
+        public SpawnBuildingEvent(int t, int type, Vector2 pos)
+            : base(GameEventType.SpawnBuilding, t) {
+            Type = type;
             Position = pos;
         }
     }

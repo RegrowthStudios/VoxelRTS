@@ -131,7 +131,9 @@ namespace RTS {
                 if(state.Map.BVH.Intersect(ref rec, r)) {
                     spawnLoc = r.Position + r.Direction * rec.T;
                     if(doAdd)
-                        DevConsole.AddCommand(string.Format("spawn [{0},{1},{2},{3},{4}]", team, unit, 1, spawnLoc.X, spawnLoc.Z));
+                        gameInput.AddEvent(new SpawnUnitEvent(
+                            team, unit, new Vector2(spawnLoc.X, spawnLoc.Z)
+                            ));
                 }
             }
         }

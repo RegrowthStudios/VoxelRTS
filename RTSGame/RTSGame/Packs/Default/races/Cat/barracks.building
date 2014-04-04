@@ -1,0 +1,20 @@
+﻿// Friendly Unit Name
+NAME            [Barracks]
+
+// Unit Model
+MODEL           [..\..\models\Cat.obj]
+TEXMAIN         [..\..\textures\Cat.png]
+TEXCOLOR        [..\..\textures\CatKey.png]
+MAXCOUNT        [1000]
+
+// Unit Data
+HEALTH          [120]
+COST            [20]
+BUILDTIME       [20]
+
+// Collision Data
+RADIUS          [0.4]
+BBOXMIN         [-0.4 , 0.0 , -0.4]
+BBOXMAX         [0.4 , 1.0 , 0.4]
+
+CTRLACTION      [RTS.Mech.Unit.Action]
