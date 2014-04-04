@@ -151,7 +151,7 @@ namespace RTSEngine.Data {
             Collision[x, y] = c;
         }
         public bool GetCollision(int x, int y) {
-            return Collision[x, y];
+            return Collision[x, y] || EStatic[x, y].Count > 0;
         }
 
         public void OnBuildingSpawn(RTSBuilding b) {
