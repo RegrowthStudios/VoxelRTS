@@ -154,13 +154,13 @@ namespace RTSEngine.Data {
     public class ImpactGrid {
         
         // Size Of Each Cell In The Impact Grid
-        private float cellSize;
+        public readonly float cellSize;
 
         // Number Of Cells In The Impact Grid
-        private Point numCells;
+        public readonly Point numCells;
 
         // Size Of The Impact Grid
-        private Vector2 size;
+        public readonly Vector2 size;
 
         // Stores The Region Each Cell Is Located In
         public Region[,] Region { get; set; }
