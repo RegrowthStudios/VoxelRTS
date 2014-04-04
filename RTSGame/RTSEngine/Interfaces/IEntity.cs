@@ -16,9 +16,6 @@ namespace RTSEngine.Interfaces {
         // State For Deciding Actions
         int State { get; set; }
 
-        // Orders To Govern Targeting Behavior
-        int TargetingOrders { get; set; }
-
         // The Current Health Of The Entity
         int Health { get; }
 

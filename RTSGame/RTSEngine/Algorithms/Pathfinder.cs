@@ -175,7 +175,7 @@ namespace RTSEngine.Algorithms {
                 bool canMove = false;
                 foreach(Point n in NeighborhoodAlign(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 10;
-                    canMove = !world.GetCollision(n.X, n.Y);
+                    canMove = InGrid(n) && !world.GetCollision(n.X, n.Y);
                     if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
@@ -188,9 +188,9 @@ namespace RTSEngine.Algorithms {
                 foreach(Point n in NeighborhoodDiag(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 14;
                     // To Move Diagonally, Destination Must Be Reachable By Horizontal & Vertical Moves As Well
-                    canMove = !world.GetCollision(n.X, n.Y);
+                    canMove = InGrid(n) && !world.GetCollision(n.X, n.Y);
                     foreach(Point d in DiagDecomp(p, n)) {
-                        canMove &= !world.GetCollision(d.X, d.Y);
+                        canMove &= InGrid(d) && !world.GetCollision(d.X, d.Y);
                     }
                     if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;

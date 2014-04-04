@@ -210,7 +210,7 @@ namespace RTSEngine.Controllers {
                 squadQueries.Add(new SquadQuery(squad, query));
                 pathfinder.Add(query);
                 // TODO: Get The Formation Order From The Input Event
-                squad.MovementController.ApplyMovementFormation(BehaviorFSM.BoxFormation);
+                squad.MovementController.ApplyMovementFormation(BehaviorFSM.FreeFormation);
             }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {

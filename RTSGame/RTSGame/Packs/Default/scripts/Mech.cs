@@ -36,8 +36,10 @@ namespace RTS.Mech.Squad {
                     spacing *= 2;
                     int numUnits = squad.Units.Count;
                     int numFullRows = (int)Math.Floor(Math.Sqrt(numUnits / phi));
+                    if(numFullRows <= 0)
+                        return;
                     int numRows = (int)Math.Ceiling(Math.Sqrt(numUnits / phi));
-                    int unitsPerFullRow = numFullRows <= 0 ? numUnits : numUnits / numFullRows;
+                    int unitsPerFullRow = numUnits / numFullRows;
 
                     // Special Spacing For The Last Row
                     float lastRowSpacing = spacing;
@@ -83,6 +85,9 @@ namespace RTS.Mech.Squad {
                         assigned[assignment] = true;
                         formationAssignments[unit.UUID] = formation[assignment];
                     }
+                    break;
+                case BehaviorFSM.CircleFormation:
+                    // TODO: Implement
                     break;
                 case BehaviorFSM.FreeFormation:
                     foreach(var unit in squad.Units) {
@@ -291,6 +296,8 @@ namespace RTS.Mech.Unit {
         protected Vector2 waypoint;
 
         public override void DecideMove(GameState g, float dt) {
+            if(unit.Squad == null)
+                waypoint = unit.GridPosition;
             if(unit.Target != null) {
                 switch(unit.CombatOrders) {
                     case BehaviorFSM.UseMeleeAttack:
@@ -308,7 +315,7 @@ namespace RTS.Mech.Unit {
             }
             else if(!HasPath) {
                 // Pathfinding Has Not Finished: Make The Formation
-                if (unit.Squad != null && unit.Squad.MovementController != null) {
+                if (unit.Squad.MovementController != null) {
                     Vector2 post = unit.Squad.MovementController.formationAssignments[unit.UUID];
                     waypoint = unit.GridPosition + post;
                     SetDoMove();
