@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Content.Pipeline.Graphics;
@@ -10,7 +11,7 @@ using Microsoft.Xna.Framework.Content.Pipeline.Processors;
 using System.IO;
 using RTSEngine.Controllers;
 using RTSEngine.Graphics;
-
+using Microsoft.Win32;
 namespace Microsoft.Xna.Framework.Graphics {
     #region Content Pipeline Context Data
     class RTSContentLogger : ContentBuildLogger {
@@ -50,6 +51,7 @@ namespace Microsoft.Xna.Framework.Graphics {
     }
     #endregion
 
+    #region XNA Content
     public static class XNAEffect {
         public static Effect Compile(GraphicsDevice g, string file) {
             EffectImporter ei = new EffectImporter();
@@ -181,6 +183,7 @@ namespace Microsoft.Xna.Framework.Graphics {
             return sf;
         }
     }
+    #endregion
 
     public static class ModelHelper {
         public static void CreateBuffers<T>(GraphicsDevice g, T[] verts, VertexDeclaration vd, int[] inds, out VertexBuffer vb, out IndexBuffer ib, BufferUsage bu = BufferUsage.WriteOnly) where T : struct, IVertexType {
@@ -206,6 +209,21 @@ namespace Microsoft.Xna.Framework.Graphics {
             vb.SetData(verts);
             ib = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, bu);
             ib.SetData(inds);
+        }
+    }
+
+    public static class Installation {
+        [DllImport("gdi32.dll", EntryPoint = "AddFontResourceW", SetLastError = true)]
+        public static extern int AddFontResource([In][MarshalAs(UnmanagedType.LPWStr)]string lpFileName);
+
+        [DllImport("gdi32.dll", EntryPoint = "RemoveFontResourceW", SetLastError = true)]
+        public static extern int RemoveFontResource([In][MarshalAs(UnmanagedType.LPWStr)]string lpFileName);
+
+        public static void InstallFont(string name, FileInfo fi) {
+            string p = Path.Combine(@"C:\Windows\Fonts", fi.Name);
+            if(!File.Exists(p)) File.Copy(fi.FullName, p);
+
+            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts", name + " (TrueType)", fi.Name);
         }
     }
 }
