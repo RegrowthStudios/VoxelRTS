@@ -17,27 +17,33 @@ namespace RTSEngine.Controllers {
         private Random random;
         private ImpactGrid grid;
         private int counter;
-        private Point[] treePositions;
+
+        private Vector2[] treePositions;
 
         private IndexedBuildingType tree;
         private IndexedBuildingType ore;
-        private IndexedUnitType walkingTree1;
-        private IndexedUnitType walkingTree2;
-        private IndexedUnitType rockGolem1;
-        private IndexedUnitType rockGolem2;
+        private Point[,] numSpawns;
+        private IndexedUnitType[] spawns;
 
-
+        // Impact Levels For Level One, Level Two, Level Three
         private const int LEVEL_ONE = 10;
         private const int LEVEL_TWO = 20;
-        private const int RECOVER_IMPACT = 20;
-        private const int MAX_TREE_SPAWN = 10;
-        private const int MAX_OFFSET = 10;
-        private const int MIN_RECOVER = 5;
-        private const int MAX_RECOVER = 10;
-        private const int MAX_UNIT_SPAWN = 10;
+        private const int LEVEL_THREE = 30;
+
+        // Impact Level At Which Region Will No Longer Recover
+        private const int RECOVER_IMPACT = 25;
+
+        // Time Intervals At Which Recovery And Spawning Happens (In Seconds)
         private const int RECOVER_TIME = 30;
         private const int SPAWN_TIME = 60;
 
+        // Maximum Number Of Units Per Region
+        private const int SPAWN_CAP = 30;
+
+        private const int MAX_OFFSET = 20;
+        private const int MIN_RECOVER = 5;
+        private const int MAX_RECOVER = 10;
+        
         public EnvironmentInputController(GameState g, int ti)
             : base(g, ti) {
             grid = g.IGrid;
@@ -49,20 +55,19 @@ namespace RTSEngine.Controllers {
             thread.Start();
         }
 
-        public void Init(IndexedUnitType wt1, IndexedUnitType wt2, IndexedUnitType rg1, IndexedUnitType rg2,
-            IndexedBuildingType t, IndexedBuildingType o, Point[] treePos, Point[] orePos) {
-            walkingTree1 = wt1;
-            walkingTree2 = wt2;
-            rockGolem1 = rg1;
-            rockGolem2 = rg2;
+        public void Init(IndexedUnitType[] s, Point[,] n, IndexedBuildingType t, IndexedBuildingType o, Vector2[] treePos, Vector2[] orePos) {
+            spawns = s;
+            numSpawns = n;
             tree = t;
             ore = o;
             treePositions = treePos;
             for(int i = 0; i < treePositions.Length; i++) {
-                AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, treePositions[i]));
+                Point treeC = HashHelper.Hash(treePositions[i], GameState.IGrid.numCells, GameState.IGrid.size);
+                AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, treeC));
             }
             for(int j = 0; j < orePos.Length; j++) {
-                AddEvent(new SpawnBuildingEvent(TeamIndex, ore.Index, orePos[j]));
+                Point oreC = HashHelper.Hash(orePos[j], GameState.IGrid.numCells, GameState.IGrid.size);
+                AddEvent(new SpawnBuildingEvent(TeamIndex, ore.Index, oreC));
             }
         }
 
@@ -90,18 +95,24 @@ namespace RTSEngine.Controllers {
                 if(r.RegionImpact < RECOVER_IMPACT && r.RegionImpact > 0) {
                     // Randomly Choose The Location Of A Starting Tree
                     int tp = random.Next(treePositions.Length);
-                    Point treeLocation = treePositions[tp];
-                    Point offset;
-
-                    // Spawn A Random Number Of Trees 
-                    int numTrees = random.Next(MAX_TREE_SPAWN);
-                    for(int i = 0; i < numTrees; i++) {
-                        offset.X = random.Next(MAX_OFFSET);
-                        offset.Y = random.Next(MAX_OFFSET);
-                        AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, new Point(treeLocation.X + offset.X, treeLocation.Y + offset.Y)));
-                        r.AddToRegionImpact(-tree.Data.Impact);
+                    Vector2 treePos = treePositions[tp];
+                    Point treeC = HashHelper.Hash(treePos,GameState.CGrid.numCells,GameState.CGrid.size);
+                    Point treeI = HashHelper.Hash(treePos,grid.numCells,grid.size);
+                    // Spawn Trees Around The Starting Tree
+                    for(int x = -1; x <= 1; x+=2) {
+                        for (int y = -1; y <= 1; y+=2) {
+                            Point newTreeC = new Point(treeC.X + x, treeC.Y + y);
+                            Vector2 newTreePos = new Vector2(newTreeC.X * GameState.CGrid.size.X, newTreeC.Y * GameState.CGrid.size.Y);
+                            Point newTreeI = HashHelper.Hash(newTreePos, grid.numCells, grid.size);
+                            foreach (var t in GameState.IGrid.ImpactGenerators[newTreeI.X,newTreeI.Y]) {
+                                Point tc = HashHelper.Hash(t.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
+                                if (!Point.Equals(tc, newTreeC) && tc.X > -1 && tc.Y > -1 && tc.X < GameState.CGrid.numCells.X && tc.Y < GameState.CGrid.numCells.Y) {
+                                    AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, newTreeC));
+                                    r.AddToRegionImpact(-tree.Data.Impact);
+                                }
+                            }
+                        }
                     }
-
                     // Regenerate Ore Health
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
@@ -112,6 +123,7 @@ namespace RTSEngine.Controllers {
                             }
                         }
                     }
+
                 }
             }
         }
@@ -132,30 +144,45 @@ namespace RTSEngine.Controllers {
                         int i = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
                         g = grid.ImpactGenerators[p.X, p.Y][i];
                     }
-                    // Spawn Environmental Units In That Cell
-                    IndexedUnitType spawnData;
-                    if(g.Data.FriendlyName.Equals(ore.Data.FriendlyName)) {
-                        if(r.RegionImpact > LEVEL_TWO)
-                            spawnData = rockGolem2;
-                        else
-                            spawnData = rockGolem1;
-                    }
-                    else {
-                        if(r.RegionImpact > LEVEL_TWO)
-                            spawnData = walkingTree2;
-                        else
-                            spawnData = walkingTree1;
-                    }
-                    Vector2 spawnPos = g.Position;
+                    // Decide Level
+                    int level;
+                    if (r.RegionImpact > LEVEL_THREE)
+                        level = 3;
+                    else if (r.RegionImpact > LEVEL_TWO)
+                        level = 2;
+                    else if (r.RegionImpact > LEVEL_ONE)
+                        level = 1;
+                    else
+                        level = 0;
+                    // Spawn Environmental Units
+                    Vector2 spawnPos = g.GridPosition;
                     Vector2 offset;
-                    int numUnits = random.Next(MAX_UNIT_SPAWN);
-                    for(int j = 0; j < numUnits; j++) {
-                        offset.X = random.Next(MAX_OFFSET);
-                        offset.Y = random.Next(MAX_OFFSET);
-                        AddEvent(new SpawnUnitEvent(TeamIndex, spawnData.Index, spawnPos + offset));
+                    int numSpawn;
+                    if (level != 0){
+                        for (int i = 0; i < numSpawns.GetLength(1); i++) {
+                            numSpawn = random.Next(numSpawns[level - 1, i].X, numSpawns[level - 1, i].Y);
+                            offset.X = random.Next(MAX_OFFSET);
+                            offset.Y = random.Next(MAX_OFFSET);
+                            for (int j = 0; j < numSpawn; j++) {
+                                AddEvent(new SpawnUnitEvent(TeamIndex, spawns[i].Index, spawnPos + offset));
+                            }
+                        }
                     }
+
+
                 }
             }
+        }
+
+        private void MoveUnits() {
+
+
+
+        }
+
+        private void SetTargetOfUnits() {
+
+
         }
 
         public void Start() {

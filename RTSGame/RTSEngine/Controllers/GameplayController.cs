@@ -254,6 +254,7 @@ namespace RTSEngine.Controllers {
             AddBuildingTask(s, building);
             building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
             building.CollisionGeometry.Height = building.Height;
+            s.IGrid.AddImpactGenerator(building);
         }
         private void AddUnitTask(GameState s, RTSUnit unit) {
             var btu = new BTaskUnitDecision(s, unit);

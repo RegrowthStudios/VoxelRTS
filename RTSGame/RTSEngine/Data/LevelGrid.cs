@@ -162,13 +162,13 @@ namespace RTSEngine.Data {
     public class ImpactGrid {
         
         // Size Of Each Cell In The Impact Grid
-        private float cellSize;
+        public readonly float cellSize;
 
         // Number Of Cells In The Impact Grid
-        private Point numCells;
+        public readonly Point numCells;
 
         // Size Of The Impact Grid
-        private Vector2 size;
+        public readonly Vector2 size;
 
         // Stores The Region Each Cell Is Located In
         public Region[,] Region { get; set; }
@@ -200,7 +200,7 @@ namespace RTSEngine.Data {
 
         // Adds An Impact Generator To The Appropriate Cell In The Impact Grid
         public void AddImpactGenerator(ImpactGenerator g) {
-            Point p = HashHelper.Hash(g.Position, numCells, size);
+            Point p = HashHelper.Hash(g.GridPosition, numCells, size);
             ImpactGenerators[p.X, p.Y].Add(g);
             g.GenerateImpact += AddToCellImpact;
         }
