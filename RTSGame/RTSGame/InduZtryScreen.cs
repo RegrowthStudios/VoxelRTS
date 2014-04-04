@@ -22,7 +22,7 @@ namespace RTS {
 
         // Lightning Arguments
         private const float BOLT_WIDTH = 4f, BOLT_JAG = 3f, BOLT_MIN = 1f, BOLT_MAX = 6f;
-        private const float BRANCH_WIDTH = 2.66667f, BRANCH_JAG = 3f, BRANCH_MIN = 2f, BRANCH_MAX = 18f, BRANCH_SLOPE = 0.001f;
+        private const float BRANCH_WIDTH = 2.33333f, BRANCH_JAG = 3f, BRANCH_MIN = 6f, BRANCH_MAX = 24f, BRANCH_SLOPE = 0.0005f;
 
         // Lightning Color Combinations
         private static readonly Color[] textColors = {
