@@ -7,11 +7,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
-using RTSEngine.Data;
 
 namespace RTSEngine.Graphics {
-    // TODO: Animations Applied By A Controller From A Check On A Frame (Specified In File)
-    public class RTSUnitModel {
+    public class RTSBuildingModel {
         public const ParsingFlags MODEL_READ_FLAGS = ParsingFlags.ConversionOpenGL;
 
         // Visual Information
@@ -31,29 +29,25 @@ namespace RTSEngine.Graphics {
         // Geometry Information
         private VertexBuffer vbModel;
         private IndexBuffer ibModel;
-        public Texture2D AnimationTexture {
-            get;
-            set;
-        }
 
         // Instances That Will Be Animated
-        public RTSUnitData Data {
+        public RTSBuildingData Data {
             get;
             private set;
         }
         private DynamicVertexBuffer dvbInstances;
         private bool rebuildDVB;
         private VertexRTSAnimInst[] instVerts;
-        private List<RTSUnit> instances;
-        private List<RTSUnit> visible;
+        private List<RTSBuilding> instances;
+        private List<RTSBuilding> visible;
         public int VisibleInstanceCount {
             get { return visible.Count; }
         }
 
-        public RTSUnitModel(RTSRenderer renderer, Stream sModel, Texture2D tAnim) {
+        public RTSBuildingModel(RTSRenderer renderer, RTSTeam team, int buildingType, Stream sModel) {
             // Create With The Animation Texture
-            AnimationTexture = tAnim;
-            Vector2 texelSize = new Vector2(1f / (AnimationTexture.Width), 1f / (AnimationTexture.Height));
+            Data = team.race.buildings[buildingType];
+            team.OnBuildingSpawn += OnBuildingSpawn;
 
             // Parse The Model File
             VertexPositionNormalTexture[] pVerts;
@@ -61,40 +55,30 @@ namespace RTSEngine.Graphics {
             int[] inds;
             if(!ObjParser.TryParse(sModel, out pVerts, out inds, MODEL_READ_FLAGS))
                 throw new ArgumentException("Bad Model File Format");
-
-            // Reformat Vertices
             verts = new VertexPositionTexture[pVerts.Length];
             for(int i = 0; i < verts.Length; i++) {
-                verts[i].Position = new Vector3((i + 0.5f) / AnimationTexture.Width, 0, 0);
+                verts[i].Position = pVerts[i].Position;
                 verts[i].TextureCoordinate = pVerts[i].TextureCoordinate;
             }
 
             // Create Model Geometry
             ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
-        }
-
-        public void Hook(RTSRenderer renderer, GameState s, int team, int unit) {
-            // Filter For Unit Types
-            Data = s.teams[team].race.units[unit];
-
-            // Always Add A Unit To List When Spawned
-            s.teams[team].OnUnitSpawn += OnUnitSpawn;
 
             // Create Instance Buffer
-            visible = new List<RTSUnit>();
+            visible = new List<RTSBuilding>();
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
-            instances = new List<RTSUnit>(Data.MaxCount);
+            instances = new List<RTSBuilding>(Data.MaxCount);
             for(int i = 0; i < instVerts.Length; i++)
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = renderer.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
             dvbInstances.SetData(instVerts);
-            dvbInstances.ContentLost += (sender, args) => { rebuildDVB = true; };
+            dvbInstances.ContentLost += (s, a) => { rebuildDVB = true; };
             rebuildDVB = false;
         }
 
-        public void UpdateInstances(GraphicsDevice g, Predicate<RTSUnit> fRemoval, Predicate<RTSUnit> fVisible) {
+        public void UpdateInstances(GraphicsDevice g, Predicate<RTSBuilding> fRemoval, Predicate<RTSBuilding> fVisible) {
             instances.RemoveAll(fRemoval);
-            visible = new List<RTSUnit>();
+            visible = new List<RTSBuilding>();
             for(int i = 0; i < instances.Count; i++) {
                 if(fVisible(instances[i]))
                     visible.Add(instances[i]);
@@ -106,7 +90,6 @@ namespace RTSEngine.Graphics {
                     ) *
                     Matrix.CreateTranslation(visible[i].WorldPosition)
                     ;
-                instVerts[i].AnimationFrame = visible[i].AnimationController == null ? 0 : visible[i].AnimationController.AnimationFrame;
             }
             if(rebuildDVB) {
                 dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
@@ -126,9 +109,9 @@ namespace RTSEngine.Graphics {
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, VisibleInstanceCount);
         }
 
-        private void OnUnitSpawn(RTSUnit u) {
-            if(u.UnitData == Data)
-                instances.Add(u);
+        private void OnBuildingSpawn(RTSBuilding b) {
+            if(b.BuildingData == Data)
+                instances.Add(b);
         }
     }
 }

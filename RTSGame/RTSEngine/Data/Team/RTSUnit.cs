@@ -7,8 +7,11 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSUnit : ICombatEntity {
-        // RTSUnit Data Of The Unit
-        public RTSUnitData UnitData { get; private set; }
+        // Common Data
+        public RTSUnitData UnitData {
+            get;
+            private set;
+        }
 
         // Unique ID
         public int UUID {
@@ -16,28 +19,36 @@ namespace RTSEngine.Data.Team {
             private set;
         }
 
-        // RTSTeam Of The Unit
-        public RTSTeam Team { get; private set; }
+        // Unit's Team And Squad
+        public RTSTeam Team {
+            get;
+            private set;
+        }
+        public RTSSquad Squad {
+            get;
+            set;
+        }
 
+        // State Information
         public int State {
             get;
             set;
         }
 
-        // This Unit's Cost In Capital
-        public int CapitalCost { get; private set; }
+        // View Direction
+        public Vector2 ViewDirection {
+            get;
+            private set;
+        }
 
-        // Unit's View Direction
-        public Vector2 ViewDirection { get; private set; }
-
-        // 2-D Position Of The Unit
+        // 2D Position
         private Vector2 gridPos;
         public Vector2 GridPosition {
             get { return gridPos; }
             set { gridPos = value; }
         }
 
-        // 3-D Position Of The Unit
+        // 3D Position
         private float height;
         public float Height {
             get { return height; }
@@ -47,7 +58,7 @@ namespace RTSEngine.Data.Team {
             get { return new Vector3(gridPos.X, height, gridPos.Y); }
         }
 
-        // Target Of The Unit
+        // Target
         protected IEntity target;
         public IEntity Target {
             get { return target; }
@@ -60,11 +71,14 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        // Event Triggered When This Entity Find A New Attack Target (Null When Can't Find One)
+        // Event Triggered When New Target Found (Null When Can't Find One)
         public event Action<IEntity, IEntity> OnNewTarget;
 
         // This Unit's Current Health
-        public int Health { get; private set; }
+        public int Health {
+            get;
+            private set;
+        }
         public bool IsAlive {
             get {
                 return Health > 0;
@@ -77,15 +91,8 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        public RTSSquad Squad {
-            get;
-            set;
-        }
-
-        // Event Triggered When This Entity Receives Damage
+        // Damaging Events
         public event Action<IEntity, int> OnDamage;
-
-        // Destruction Event
         public event Action<IEntity> OnDestruction;
 
         // Collision Geometry
@@ -104,21 +111,14 @@ namespace RTSEngine.Data.Team {
 
         // Speed Of Movement For The Entity
         public float MovementSpeed {
-            get { return UnitData.MovementSpeed; }
+            get { return UnitData.MovementSpeed * MovementMultiplier; }
+        }
+        public float MovementMultiplier {
+            get;
+            set;
         }
 
-        // MovementController of The Unit
-        private ACUnitMovementController mController;
-        public ACUnitMovementController MovementController {
-            get { return mController; }
-            set {
-                mController = value;
-                if(mController != null)
-                    mController.SetUnit(this);
-            }
-        }
-
-        // ActionController of The Unit
+        // Action Controller
         private ACUnitActionController aController;
         public ACUnitActionController ActionController {
             get { return aController; }
@@ -129,7 +129,7 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        // CombatController of The Unit
+        // Combat Controller
         private ACUnitCombatController cController;
         public ACUnitCombatController CombatController {
             get { return cController; }
@@ -140,6 +140,18 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // Movement Controller
+        private ACUnitMovementController mController;
+        public ACUnitMovementController MovementController {
+            get { return mController; }
+            set {
+                mController = value;
+                if(mController != null)
+                    mController.SetUnit(this);
+            }
+        }
+
+        // Animation Controller
         private ACUnitAnimationController anController;
         public ACUnitAnimationController AnimationController {
             get { return anController; }
@@ -155,15 +167,21 @@ namespace RTSEngine.Data.Team {
 
         // Creates a New RTSUnitInstance on the Given Team with the Given Data at the Given Position
         public RTSUnit(RTSTeam team, RTSUnitData data, Vector2 position) {
+            // Identification
             UUID = UUIDGenerator.GetUUID();
             Team = team;
-            UnitData = data;
+            Squad = null;
             gridPos = position;
+
+            // Set From Common Data
+            UnitData = data;
+            Health = UnitData.Health;
+
+            // Default Information
             height = 0;
             ViewDirection = Vector2.UnitX;
-            Health = UnitData.Health;
-            CapitalCost = UnitData.CapitalCost;
             CollisionGeometry = UnitData.ICollidableShape.Clone() as ICollidable;
+            MovementMultiplier = 1f;
         }
 
         // Computes The Damage To Deal With Access To A Random Number And A Target

@@ -95,19 +95,31 @@ namespace RTSEngine.Interfaces {
         public abstract void ApplyMove(GameState g, float dt);
     }
 
+    // Base Controller Functionality
     public abstract class ACBuildingController {
+        // The Building That Is Being Controlled
         protected RTSBuilding building;
         public RTSBuilding Building {
             get { return building; }
-            set { building = value; }
         }
-        public void setBuilding(RTSBuilding building) {
-            this.building = building;
+
+        public void SetBuilding(RTSBuilding b) {
+            if(b == null) return;
+            if(building != null)
+                throw new ArgumentException("Cannot Rebind This Controller To Another Building");
+            building = b;
+            return;
+        }
+        public T SetBuilding<T>(RTSBuilding b) where T : ACUnitController {
+            SetBuilding(b);
+            return this as T;
         }
     }
 
+    // A Super Controller Called By The Gameplay Controller
     public abstract class ACBuildingActionController : ACBuildingController {
-        public abstract void ApplyEnvImpact(GameState g);
-        public abstract void SpawnUnit(GameState g);
+        // Scripted Super-Controller Logic
+        public abstract void DecideAction(GameState g, float dt);
+        public abstract void ApplyAction(GameState g, float dt);
     }
 }

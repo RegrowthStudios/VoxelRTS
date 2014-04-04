@@ -48,6 +48,7 @@ namespace RTSEngine.Data.Team {
 
         // Events
         public event Action<RTSUnit> OnUnitSpawn;
+        public event Action<RTSBuilding> OnBuildingSpawn;
         public event Action<RTSSquad> OnSquadCreation;
 
         public RTSTeam() {
@@ -97,11 +98,15 @@ namespace RTSEngine.Data.Team {
         public RTSBuilding AddBuilding(int type, Vector2 pos) {
             RTSBuilding b = new RTSBuilding(this, race.buildings[type], pos);
             buildings.Add(b);
+            if(OnBuildingSpawn != null)
+                OnBuildingSpawn(b);
             return b;
         }
         public void RemoveBuilding(RTSBuilding b) {
             buildings.Remove(b);
         }
-        
+        public void RemoveAll(Predicate<RTSBuilding> f) {
+            buildings.RemoveAll(f);
+        }
     }
 }

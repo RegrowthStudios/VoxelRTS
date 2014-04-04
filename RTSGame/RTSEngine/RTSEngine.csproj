@@ -74,6 +74,7 @@
     <Compile Include="Data\Combat.cs" />
     <Compile Include="Data\GameState.cs" />
     <Compile Include="Data\LevelGrid.cs" />
+    <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
     <Compile Include="Data\Parsers\EntityControllerParser.cs" />
     <Compile Include="Data\Parsers\HeightmapParser.cs" />
     <Compile Include="Data\Parsers\RegexHelper.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Graphics\MouseRenderer.cs" />
     <Compile Include="Graphics\ParticleRenderer.cs" />
     <Compile Include="Graphics\Particles.cs" />
+    <Compile Include="Graphics\RTSBuildingModel.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Interfaces\ImpactGenerator.cs" />

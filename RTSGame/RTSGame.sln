@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSServer", "RTSServer\RTSS
 		{28292778-5EDC-4898-8E0C-9E32412174CD} = {28292778-5EDC-4898-8E0C-9E32412174CD}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RTSInstaller", "RTSInstaller\RTSInstaller.csproj", "{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,16 @@ Global
 		{63818D1E-626A-4258-A302-8761E45BEF68}.Release|Mixed Platforms.Build.0 = Release|x86
 		{63818D1E-626A-4258-A302-8761E45BEF68}.Release|x86.ActiveCfg = Release|x86
 		{63818D1E-626A-4258-A302-8761E45BEF68}.Release|x86.Build.0 = Release|x86
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AB1D68E1-75FB-4253-B095-ECD3BEF92FC9}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

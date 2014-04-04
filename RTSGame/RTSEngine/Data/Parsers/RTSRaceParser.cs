@@ -17,6 +17,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxCtrlMovement = RegexHelper.Generate("CTRLMOVEMENT", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlTargetting = RegexHelper.Generate("CTRLTARGET", @"[\w\s\.]+");
         static readonly Regex rgxUnit = RegexHelper.GenerateFile("UNIT");
+        static readonly Regex rgxBuilding = RegexHelper.GenerateFile("BUILDING");
 
         private static bool IsFile(FileInfo fi) {
             return fi.Extension.EndsWith(EXTENSION);
@@ -52,20 +53,25 @@ namespace RTSEngine.Data.Parsers {
         }
         private static RTSRaceData Parse(Stream s, string rootDir) {
             RTSRaceData res = new RTSRaceData();
-
-            StreamReader sr = new StreamReader(s);
-            string ms = sr.ReadToEnd();
+            string mStr = new StreamReader(s).ReadToEnd();
 
             // Read Name
-            res.Name = RegexHelper.Extract(rgxName.Match(ms));
-            res.DefaultSquadActionController = RegexHelper.Extract(rgxCtrlAction.Match(ms));
-            res.DefaultSquadMovementController = RegexHelper.Extract(rgxCtrlMovement.Match(ms));
-            res.DefaultSquadTargettingController = RegexHelper.Extract(rgxCtrlTargetting.Match(ms));
+            res.Name = RegexHelper.Extract(rgxName.Match(mStr));
+            res.DefaultSquadActionController = RegexHelper.Extract(rgxCtrlAction.Match(mStr));
+            res.DefaultSquadMovementController = RegexHelper.Extract(rgxCtrlMovement.Match(mStr));
+            res.DefaultSquadTargettingController = RegexHelper.Extract(rgxCtrlTargetting.Match(mStr));
 
             // Read All Units
-            Match m = rgxUnit.Match(ms);
+            Match m = rgxUnit.Match(mStr);
             while(m.Success) {
                 res.UnitTypes.Add(RegexHelper.ExtractFile(m, rootDir));
+                m = m.NextMatch();
+            }
+
+            // Read All Buildings
+            m = rgxBuilding.Match(mStr);
+            while(m.Success) {
+                res.BuildingTypes.Add(RegexHelper.ExtractFile(m, rootDir));
                 m = m.NextMatch();
             }
 

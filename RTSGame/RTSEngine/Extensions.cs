@@ -214,11 +214,6 @@ namespace Microsoft.Xna.Framework.Graphics {
 
     public static class Installation {
         public static void InstallFont(string name, FileInfo fi) {
-            string p = Path.Combine(@"C:\Windows\Fonts", fi.Name);
-            if(!File.Exists(p))
-                File.Copy(fi.FullName, p);
-
-            Registry.SetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts", name + " (TrueType)", fi.Name);
         }
     }
 }

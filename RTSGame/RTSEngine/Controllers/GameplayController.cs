@@ -56,6 +56,7 @@ namespace RTSEngine.Controllers {
         // Queue Of Commands
         private Queue<DevCommand> commands;
 
+        // Budgeted Tasks That Do Not Require Immediate Computation
         private TimeBudget tbSquadDecisions;
         private TimeBudget tbUnitDecisions;
         private TimeBudget tbFOWCalculations;
@@ -390,7 +391,8 @@ namespace RTSEngine.Controllers {
             // Remove All Dead Entities
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
-                team.RemoveAll(IsEntityDead);
+                team.RemoveAll(IsUnitDead);
+                team.RemoveAll(IsBuildingDead);
                 team.RemoveAll(IsSquadEmpty);
             }
 
@@ -399,6 +401,12 @@ namespace RTSEngine.Controllers {
         }
         public static bool IsEntityDead(IEntity e) {
             return !e.IsAlive;
+        }
+        public static bool IsUnitDead(RTSUnit u) {
+            return IsEntityDead(u);
+        }
+        public static bool IsBuildingDead(RTSBuilding b) {
+            return IsEntityDead(b);
         }
         private static bool IsSquadEmpty(RTSSquad s) {
             return s.IsDead;

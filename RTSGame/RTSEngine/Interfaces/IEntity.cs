@@ -27,6 +27,9 @@ namespace RTSEngine.Interfaces {
         float Height { get; }
         Vector3 WorldPosition { get; }
 
+        // View Direction
+        Vector2 ViewDirection { get; }
+
         // Collision Geometry
         ICollidable CollisionGeometry { get; }
         BoundingBox BBox { get; }
@@ -38,10 +41,6 @@ namespace RTSEngine.Interfaces {
         event Action<IEntity, IEntity> OnNewTarget;
         event Action<IEntity, int> OnDamage;
         event Action<IEntity> OnDestruction;
-
-        // Controllers
-        ACUnitActionController ActionController { get; set; }
-        ACUnitAnimationController AnimationController { get; set; }
 
         // Calls The Destruction Event
         void Destroy();

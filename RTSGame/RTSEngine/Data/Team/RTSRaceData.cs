@@ -8,6 +8,7 @@ namespace RTSEngine.Data.Team {
     public class RTSRaceData {
         public string Name;
         public List<FileInfo> UnitTypes;
+        public List<FileInfo> BuildingTypes;
         public string DefaultSquadActionController;
         public string DefaultSquadMovementController;
         public string DefaultSquadTargettingController;
@@ -15,6 +16,7 @@ namespace RTSEngine.Data.Team {
         public RTSRaceData() {
             Name = null;
             UnitTypes = new List<FileInfo>();
+            BuildingTypes = new List<FileInfo>();
         }
     }
 }
