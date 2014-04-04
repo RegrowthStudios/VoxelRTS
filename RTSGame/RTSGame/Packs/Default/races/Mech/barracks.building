@@ -2,9 +2,9 @@
 NAME            [Barracks]
 
 // Unit Model
-MODEL           [..\..\models\Tree.obj]
-TEXMAIN         [..\..\textures\Tree.png]
-TEXCOLOR        [..\..\textures\NoKey.png]
+MODEL           [..\..\models\Barracks.obj]
+TEXMAIN         [..\..\textures\BarracksMain.png]
+TEXCOLOR        [..\..\textures\BarracksKey.png]
 MAXCOUNT        [1000]
 
 // Unit Data
