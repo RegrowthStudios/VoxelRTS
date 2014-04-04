@@ -106,7 +106,7 @@ namespace RTSEngine.Controllers {
                             Point newTreeI = HashHelper.Hash(newTreePos, grid.numCells, grid.size);
                             foreach (var t in GameState.IGrid.ImpactGenerators[newTreeI.X,newTreeI.Y]) {
                                 Point tc = HashHelper.Hash(t.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
-                                if (!Point.Equals(tc, newTreeC)) {
+                                if (!Point.Equals(tc, newTreeC) && tc.X > -1 && tc.Y > -1 && tc.X < GameState.CGrid.numCells.X && tc.Y < GameState.CGrid.numCells.Y) {
                                     AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, newTreeC));
                                     r.AddToRegionImpact(-tree.Data.Impact);
                                 }
