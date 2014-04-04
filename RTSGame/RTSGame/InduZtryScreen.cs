@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Graphics;
@@ -11,8 +12,13 @@ using BlisterUI.Input;
 
 namespace RTS {
     public class InduZtryScreen : GameScreenIndexed {
+        private const string SOUND_FILE_LIGHTNING = @"Content\Audio\lightning.wav";
+        private const string SOUND_FILE_THUNDER = @"Content\Audio\thunder.wav";
+
         // Lightning Fade Time
         private const float LERP_TIME = 4f;
+        private const float THUNDER_TIME = 1.5f;
+        private const int LIGHTNING_PLAY_PAUSE = 5;
 
         // Lightning Arguments
         private const float BOLT_WIDTH = 4f, BOLT_JAG = 3f, BOLT_MIN = 1f, BOLT_MAX = 6f;
@@ -48,6 +54,9 @@ namespace RTS {
         private LightningGenerator.BoltArgs lBoltArgs;
         private LightningGenerator.BranchArgs lBranchArgs;
         private Random r;
+        private SoundEffect seLightning, seThunder;
+        private float nextThunder;
+        private int lastLightning;
 
         // How To Calculate A Fade Between Two Types Of Lightning
         private float t;
@@ -129,14 +138,23 @@ namespace RTS {
             originLEndL = new Vector2(rsLEndL.X + rsLEndL.Width, rsLEndL.Y + rsLEndL.Height / 2f);
             originLMid = new Vector2(0, rsLMid.Y + rsLMid.Height / 2f);
             originLEndR = new Vector2(0, rsLEndR.Y + rsLEndR.Height / 2f);
-        }
-        public override void OnExit(GameTime gameTime) { 
-            KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
 
+            using(var s = System.IO.File.OpenRead(SOUND_FILE_LIGHTNING)) {
+                seLightning = SoundEffect.FromStream(s);
+            }
+            using(var s = System.IO.File.OpenRead(SOUND_FILE_THUNDER)) {
+                seThunder = SoundEffect.FromStream(s);
+            }
+            nextThunder = 0;
+        }
+        public override void OnExit(GameTime gameTime) {
+            KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
 
             rtLightning.Dispose();
             rtLightningPrev.Dispose();
             tLightning.Dispose();
+            seLightning.Dispose();
+            seThunder.Dispose();
         }
 
         private void DrawLightning(LightningData data, float w) {
@@ -156,9 +174,19 @@ namespace RTS {
         }
 
         public override void Update(GameTime gameTime) {
-            t -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            t -= dt;
+            nextThunder -= dt;
+            if(nextThunder < 0) {
+                seThunder.Play();
+                nextThunder = (float)(r.NextDouble() * THUNDER_TIME + 1.5);
+            }
         }
         public override void Draw(GameTime gameTime) {
+            if(lastLightning > 0)
+                lastLightning--;
+            bool playSound = false;
+
             // Compute Lightning
             LightningData bolts = new LightningData(lBoltArgs.Color);
             LightningData branches = new LightningData(lBranchArgs.Color);
@@ -182,13 +210,18 @@ namespace RTS {
                     LightningGenerator.CreateLightning(lBoltArgs, ref bolts, r);
                 }
                 else {
+                    playSound = true;
                     float bsx = (float)r.NextDouble() * ViewSize.X;
                     lBranchArgs.Start = new Vector2(bsx, 0);
                     lBranchArgs.End = new Vector2(bsx, ViewSize.Y * 10f);
                     LightningGenerator.CreateBranch(lBranchArgs, ref branches, r);
                 }
             }
-
+            playSound &= lastLightning == 0;
+            if(playSound) {
+                lastLightning = LIGHTNING_PLAY_PAUSE;
+                seLightning.Play();
+            }
             // Set Render Target To Lightning
             G.SetRenderTarget(rtLightning);
             G.Clear(Color.Transparent);
@@ -233,11 +266,7 @@ namespace RTS {
         }
 
         void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
-            switch(args.KeyCode) {
-                case Keys.Escape:
-                    State = ScreenState.ChangeNext;
-                    break;
-            }
+            State = ScreenState.ChangeNext;
         }
     }
 }
