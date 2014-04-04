@@ -143,7 +143,8 @@ namespace RTS {
                     spawnLoc = r.Position + r.Direction * rec.T;
                     if(doAdd)
                         gameInput.AddEvent(new SpawnBuildingEvent(
-                            team, 0, new Vector2(spawnLoc.X, spawnLoc.Z)
+                            team, 0,
+                            HashHelper.Hash(new Vector2(spawnLoc.X, spawnLoc.Z), state.CGrid.numCells, state.CGrid.size)
                             ));
                 }
             }

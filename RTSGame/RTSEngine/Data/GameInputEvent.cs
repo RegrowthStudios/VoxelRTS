@@ -92,15 +92,15 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public Vector2 Position {
+        public Point GridPosition {
             get;
             private set;
         }
 
-        public SpawnBuildingEvent(int t, int type, Vector2 pos)
+        public SpawnBuildingEvent(int t, int type, Point gPos)
             : base(GameEventType.SpawnBuilding, t) {
             Type = type;
-            Position = pos;
+            GridPosition = gPos;
         }
     }
 }

@@ -249,7 +249,8 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyInput(GameState s, float dt, SpawnBuildingEvent e) {
             RTSTeam team = s.teams[e.Team];
-            RTSBuilding building = team.AddBuilding(e.Type, e.Position);
+            Vector2 wp = new Vector2(e.GridPosition.X + 0.5f, e.GridPosition.Y + 0.5f) * s.CGrid.cellSize;
+            RTSBuilding building = team.AddBuilding(e.Type, wp);
             building.ActionController = team.race.buildings[e.Type].DefaultActionController.CreateInstance<ACBuildingActionController>();
             AddBuildingTask(s, building);
             building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);

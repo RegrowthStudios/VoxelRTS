@@ -17,7 +17,7 @@ namespace RTSEngine.Controllers {
         private Random random;
         private ImpactGrid grid;
         private int counter;
-        private Vector2[] treePositions;
+        private Point[] treePositions;
 
         private IndexedBuildingType tree;
         private IndexedBuildingType ore;
@@ -50,7 +50,7 @@ namespace RTSEngine.Controllers {
         }
 
         public void Init(IndexedUnitType wt1, IndexedUnitType wt2, IndexedUnitType rg1, IndexedUnitType rg2,
-            IndexedBuildingType t, IndexedBuildingType o, Vector2[] treePos, Vector2[] orePos) {
+            IndexedBuildingType t, IndexedBuildingType o, Point[] treePos, Point[] orePos) {
             walkingTree1 = wt1;
             walkingTree2 = wt2;
             rockGolem1 = rg1;
@@ -90,15 +90,15 @@ namespace RTSEngine.Controllers {
                 if(r.RegionImpact < RECOVER_IMPACT && r.RegionImpact > 0) {
                     // Randomly Choose The Location Of A Starting Tree
                     int tp = random.Next(treePositions.Length);
-                    Vector2 treeLocation = treePositions[tp];
-                    Vector2 offset;
+                    Point treeLocation = treePositions[tp];
+                    Point offset;
 
                     // Spawn A Random Number Of Trees 
                     int numTrees = random.Next(MAX_TREE_SPAWN);
                     for(int i = 0; i < numTrees; i++) {
                         offset.X = random.Next(MAX_OFFSET);
                         offset.Y = random.Next(MAX_OFFSET);
-                        AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, treeLocation + offset));
+                        AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, new Point(treeLocation.X + offset.X, treeLocation.Y + offset.Y)));
                         r.AddToRegionImpact(-tree.Data.Impact);
                     }
 
