@@ -254,7 +254,7 @@ namespace RTSEngine.Controllers {
             AddBuildingTask(s, building);
             building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
             building.CollisionGeometry.Height = building.Height;
-            s.IGrid.AddImpactGenerator(building);
+            //s.IGrid.AddImpactGenerator(building);
         }
         private void AddUnitTask(GameState s, RTSUnit unit) {
             var btu = new BTaskUnitDecision(s, unit);
@@ -288,8 +288,7 @@ namespace RTSEngine.Controllers {
                     squad.MovementController.Waypoints = query.waypoints;
                     // Tell All The Units In The Squad To Head To The First Waypoint
                     foreach(var unit in squad.Units) {
-                        unit.MovementController.CurrentWaypointIndex = query.waypoints.Count - 1;
-                        unit.MovementController.HasPath = true;
+                        squad.MovementController.CurrentWaypointIndices[unit.UUID] = query.waypoints.Count - 1;
                     }
                 }
                 else if(!query.IsOld) {
@@ -352,9 +351,12 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                foreach(var unit in s.activeTeams[ti].Team.units) {
-                    if(unit.MovementController != null)
-                        unit.MovementController.CurrentWaypointIndex = -1;
+                foreach(var squad in s.activeTeams[ti].Team.squads) {
+                    if(squad.MovementController != null) {
+                        foreach(var unit in squad.Units) {
+                            squad.MovementController.CurrentWaypointIndices[unit.UUID] = -1;
+                        }
+                    }
                 }
             }
         }

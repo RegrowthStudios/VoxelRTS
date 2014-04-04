@@ -121,23 +121,23 @@ namespace RTSEngine.Interfaces {
 
     // Special Movement Mechanics
     public abstract class ACUnitMovementController : ACUnitController {        
-        // Index Of Squad Waypoint That This Controller's Unit Is Currently Attempting To Reach
-        public int CurrentWaypointIndex { get; set; }
+        //// Index Of Squad Waypoint That This Controller's Unit Is Currently Attempting To Reach
+        //public int CurrentWaypointIndex { get; set; }
         
-        // Has This Controller's Unit's Squad's Pathfinding Query Been Resolved?
-        public bool HasPath { get; set; }
+        //// Has This Controller's Unit's Squad's Pathfinding Query Been Resolved?
+        //public bool HasPath { get; set; }
         
-        // Does The Provided Index Point To A Valid Squad Waypoint?
-        public bool IsValid(int idx) {
-            if(unit.Squad == null || unit.Squad.MovementController == null || unit.Squad.MovementController.Waypoints == null)
-                return false;
-            else
-                return idx >= 0 && idx < unit.Squad.MovementController.Waypoints.Count;
-        }
+        //// Does The Provided Index Point To A Valid Squad Waypoint?
+        //public bool IsValid(int idx) {
+        //    if(unit.Squad == null || unit.Squad.MovementController == null || unit.Squad.MovementController.Waypoints == null)
+        //        return false;
+        //    else
+        //        return idx >= 0 && idx < unit.Squad.MovementController.Waypoints.Count;
+        //}
 
-        // Scripted Logic For Movement
-        public abstract void DecideMove(GameState g, float dt);
-        public abstract void ApplyMove(GameState g, float dt);
+        //// Scripted Logic For Movement
+        //public abstract void DecideMove(GameState g, float dt);
+        //public abstract void ApplyMove(GameState g, float dt);
     }
 
     // Base Controller Functionality

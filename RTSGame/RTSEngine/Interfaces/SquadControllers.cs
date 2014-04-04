@@ -46,8 +46,21 @@ namespace RTSEngine.Interfaces {
         public List<Vector2> Waypoints {
             get { return waypoints; }
             set { waypoints = value; }
-        }        
-    
+        }
+
+        // The Index Of The Current Waypoint Each Unit In This Squad Is Supposed To Head Toward
+        // Key: UUID; Value: CurrentWaypointIndex
+        private Dictionary<int, int> currentWaypointIndices = new Dictionary<int, int>();
+        public Dictionary<int, int> CurrentWaypointIndices {
+            get { return currentWaypointIndices; }
+            set { currentWaypointIndices = value; }
+        }
+
+        // Does The Provided Index Point To A Valid Squad Waypoint?
+        public bool IsValid(int idx) {
+            return Waypoints != null && idx >= 0 && idx < Waypoints.Count;
+        }
+
         // Units' Displacements From The Squad's Waypoints At Origin
         public readonly Dictionary<int, Vector2> formationAssignments = new Dictionary<int, Vector2>();
 
@@ -62,12 +75,16 @@ namespace RTSEngine.Interfaces {
             }
             return rfa;
         }
-
+ 
         // Decide Where Units In This Squad Should Go When Moving
         public abstract void ApplyMovementFormation(int movementOrder);
 
         // Decide Where Units In This Squad Should Go When Close To Their Target
         public abstract void CalculateTargetFormation();
+        
+        // Scripted Logic For Movement
+        public abstract void DecideMoves(GameState g, float dt);
+        public abstract void ApplyMoves(GameState g, float dt);
     }
 
     // Controls The Targetting That A Squad Performs
