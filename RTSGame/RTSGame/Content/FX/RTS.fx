@@ -29,10 +29,10 @@ struct VSO {
     float2 UV : TEXCOORD0;
 };
 
-VSO VS(VSI input) {
+VSO VS_Inst(VSI input, float4x4 InstWorld : POSITION1) {
     VSO output;
 
-    float4 worldPosition = mul(input.Position, World);
+    float4 worldPosition = mul(InstWorld, input.Position);
     output.Position = mul(worldPosition, VP);
     output.UV = input.UV;
 
@@ -56,9 +56,6 @@ VSO VS_Anim(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD
     return output;
 }
 
-float4 PS(VSO input) : COLOR0 {
-    return tex2D(Color, input.UV);
-}
 float4 PS_Swatch(VSO input) : COLOR0 {
     float4 swatch = tex2D(Overlay, input.UV);
     float4 color = tex2D(Color, input.UV);
@@ -67,11 +64,11 @@ float4 PS_Swatch(VSO input) : COLOR0 {
 }
 
 technique Default {
-    pass Simple {
-        VertexShader = compile vs_3_0 VS();
-        PixelShader = compile ps_3_0 PS();
+    pass Building {
+        VertexShader = compile vs_3_0 VS_Inst();
+        PixelShader = compile ps_3_0 PS_Swatch();
     }
-    pass Animation {
+    pass Unit {
         VertexShader = compile vs_3_0 VS_Anim();
         PixelShader = compile ps_3_0 PS_Swatch();
     }

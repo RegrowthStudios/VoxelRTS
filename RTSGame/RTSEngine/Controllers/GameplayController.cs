@@ -141,14 +141,12 @@ namespace RTSEngine.Controllers {
 
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
-            // TODO: Use InputControllers From The Teams
             events = new LinkedList<GameInputEvent>();
             foreach(var active in s.activeTeams) {
                 if(active.Team.Input != null) {
                     active.Team.Input.AppendEvents(events);
                 }
             }
-
         }
         private void ApplyInput(GameState s, float dt) {
             GameInputEvent e;
@@ -253,7 +251,9 @@ namespace RTSEngine.Controllers {
             RTSTeam team = s.teams[e.Team];
             RTSBuilding building = team.AddBuilding(e.Type, e.Position);
             building.ActionController = team.race.buildings[e.Type].DefaultActionController.CreateInstance<ACBuildingActionController>();
-
+            AddBuildingTask(s, building);
+            building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
+            building.CollisionGeometry.Height = building.Height;
         }
         private void AddUnitTask(GameState s, RTSUnit unit) {
             var btu = new BTaskUnitDecision(s, unit);

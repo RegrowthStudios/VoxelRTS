@@ -251,7 +251,7 @@ namespace RTS {
 
                     unitModel.UpdateInstances(G, GameplayController.IsUnitDead, (u) => { return true; });
                     unitModel.SetInstances(G);
-                    fx.ApplyPassAnimation();
+                    fx.ApplyPassUnit();
                     unitModel.DrawInstances(G);
 
                     // Cause XNA Is Retarded Like That

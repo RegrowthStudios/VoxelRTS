@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
+using RTSEngine.Data;
 
 namespace RTSEngine.Graphics {
     public class RTSBuildingModel {
@@ -44,11 +45,7 @@ namespace RTSEngine.Graphics {
             get { return visible.Count; }
         }
 
-        public RTSBuildingModel(RTSRenderer renderer, RTSTeam team, int buildingType, Stream sModel) {
-            // Create With The Animation Texture
-            Data = team.race.buildings[buildingType];
-            team.OnBuildingSpawn += OnBuildingSpawn;
-
+        public RTSBuildingModel(RTSRenderer renderer, Stream sModel) {
             // Parse The Model File
             VertexPositionNormalTexture[] pVerts;
             VertexPositionTexture[] verts;
@@ -63,6 +60,14 @@ namespace RTSEngine.Graphics {
 
             // Create Model Geometry
             ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
+        }
+
+        public void Hook(RTSRenderer renderer, GameState s, int team, int building) {
+            // Filter For Unit Types
+            Data = s.teams[team].race.buildings[building];
+
+            // Always Add A Unit To List When Spawned
+            s.teams[team].OnBuildingSpawn += OnBuildingSpawn;
 
             // Create Instance Buffer
             visible = new List<RTSBuilding>();
@@ -72,7 +77,7 @@ namespace RTSEngine.Graphics {
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = renderer.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
             dvbInstances.SetData(instVerts);
-            dvbInstances.ContentLost += (s, a) => { rebuildDVB = true; };
+            dvbInstances.ContentLost += (sender, args) => { rebuildDVB = true; };
             rebuildDVB = false;
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data {
@@ -83,7 +84,10 @@ namespace RTSEngine.Data {
                     ActiveGrids.Add(p);
                 EDynamic[p.X, p.Y].Add(o);
             }
-            else EStatic[p.X, p.Y].Add(o);
+            else {
+                EStatic[p.X, p.Y].Add(o);
+                o.OnDestruction += (_o) => { EStatic[p.X, p.Y].Remove(o); };
+            }
         }
 
         public void ClearDynamic() {
@@ -148,6 +152,10 @@ namespace RTSEngine.Data {
         }
         public bool GetCollision(int x, int y) {
             return Collision[x, y];
+        }
+
+        public void OnBuildingSpawn(RTSBuilding b) {
+            Add(b);
         }
     }
 

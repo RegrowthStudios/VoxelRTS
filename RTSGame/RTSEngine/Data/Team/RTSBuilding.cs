@@ -135,6 +135,8 @@ namespace RTSEngine.Data.Team {
             height = 0;
             Health = BuildingData.Health;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
+            ViewDirection = Vector2.UnitX;
+            CollisionGeometry.Center = GridPosition;
             UnitQueue = new Queue<RTSUnit>();
         }
 

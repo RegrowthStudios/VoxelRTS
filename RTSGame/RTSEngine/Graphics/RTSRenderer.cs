@@ -225,6 +225,7 @@ namespace RTSEngine.Graphics {
             }
             for(int i = 0; i < team.race.activeBuildings.Length; i++) {
                 RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.activeBuildings[i].Index, res.BuildingTypes[i]);
+                bModel.Hook(this, state, vt.TeamIndex, team.race.activeBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
                 NonFriendlyBuildingModels.Add(bModel);
             }
@@ -308,6 +309,7 @@ namespace RTSEngine.Graphics {
             DrawMap();
             // TODO: Draw Static
             UpdateVisible(s.CGrid);
+            DrawBuildings();
             DrawAnimated();
             if(drawBox) DrawSelectionBox();
         }
@@ -340,6 +342,23 @@ namespace RTSEngine.Graphics {
                 G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBSecondary.VertexCount, 0, Map.TrianglesSecondary);
             }
         }
+        private void DrawBuildings() {
+            // Set Camera
+            fxAnim.VP = Camera.View * Camera.Projection;
+
+            // Loop Through Models
+            G.SamplerStates[1] = SamplerState.LinearClamp;
+            G.SamplerStates[2] = SamplerState.LinearClamp;
+            foreach(RTSBuildingModel buildingModel in NonFriendlyBuildingModels) {
+                fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
+                fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
+                fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
+                fxAnim.CTertiary = buildingModel.ColorScheme.Tertiary;
+                fxAnim.ApplyPassBuilding();
+                buildingModel.SetInstances(G);
+                buildingModel.DrawInstances(G);
+            }
+        }
         private void DrawAnimated() {
             // Set Camera
             fxAnim.VP = Camera.View * Camera.Projection;
@@ -353,7 +372,7 @@ namespace RTSEngine.Graphics {
                 fxAnim.CPrimary = unitModel.ColorScheme.Primary;
                 fxAnim.CSecondary = unitModel.ColorScheme.Secondary;
                 fxAnim.CTertiary = unitModel.ColorScheme.Tertiary;
-                fxAnim.ApplyPassAnimation();
+                fxAnim.ApplyPassUnit();
                 unitModel.SetInstances(G);
                 unitModel.DrawInstances(G);
             }
