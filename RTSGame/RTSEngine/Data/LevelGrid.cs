@@ -160,7 +160,7 @@ namespace RTSEngine.Data {
     }
 
     public class ImpactGrid {
-        
+
         // Size Of Each Cell In The Impact Grid
         public readonly float cellSize;
 
@@ -177,7 +177,7 @@ namespace RTSEngine.Data {
         public List<ImpactGenerator>[,] ImpactGenerators { get; set; }
 
         // Stores The Impact of Each Cell Of The Impact Grid
-        public int[,] CellImpact { get; private set; } 
+        public int[,] CellImpact { get; private set; }
 
         // Creates An Impact Grid Using The Size And Cell Size Of The Given Collision Grid
         public ImpactGrid(CollisionGrid cg) {
@@ -189,11 +189,11 @@ namespace RTSEngine.Data {
             ImpactGenerators = new List<ImpactGenerator>[numCells.X, numCells.Y];
             CellImpact = new int[numCells.X, numCells.Y];
 
-            for (int x = 0; x < numCells.X; x++) {
-                for (int y = 0; y < numCells.Y; y++) {
+            for(int x = 0; x < numCells.X; x++) {
+                for(int y = 0; y < numCells.Y; y++) {
                     Region[x, y] = null;
                     ImpactGenerators[x, y] = new List<ImpactGenerator>();
-                    CellImpact[x,y] = 0;
+                    CellImpact[x, y] = 0;
                 }
             }
         }

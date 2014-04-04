@@ -63,6 +63,7 @@
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\PlayerInputController.cs" />
+    <Compile Include="Controllers\RTSButton.cs" />
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
     <Compile Include="Data\DevCommands.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Graphics\Particles.cs" />
     <Compile Include="Graphics\RTSBuildingModel.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
+    <Compile Include="Graphics\RTSUI.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Interfaces\ImpactGenerator.cs" />
     <Compile Include="Net\NetSerializer.cs" />
