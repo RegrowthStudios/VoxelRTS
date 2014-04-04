@@ -213,15 +213,10 @@ namespace Microsoft.Xna.Framework.Graphics {
     }
 
     public static class Installation {
-        [DllImport("gdi32.dll", EntryPoint = "AddFontResourceW", SetLastError = true)]
-        public static extern int AddFontResource([In][MarshalAs(UnmanagedType.LPWStr)]string lpFileName);
-
-        [DllImport("gdi32.dll", EntryPoint = "RemoveFontResourceW", SetLastError = true)]
-        public static extern int RemoveFontResource([In][MarshalAs(UnmanagedType.LPWStr)]string lpFileName);
-
         public static void InstallFont(string name, FileInfo fi) {
             string p = Path.Combine(@"C:\Windows\Fonts", fi.Name);
-            if(!File.Exists(p)) File.Copy(fi.FullName, p);
+            if(!File.Exists(p))
+                File.Copy(fi.FullName, p);
 
             Registry.SetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts", name + " (TrueType)", fi.Name);
         }

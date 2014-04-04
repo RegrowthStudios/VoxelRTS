@@ -18,7 +18,7 @@ namespace RTS {
         private static readonly Color PANEL_INACTIVE_COLOR = new Color(14, 14, 14, 255);
         private static readonly Color PANEL_HIGHLIGHT_COLOR = new Color(10, 40, 100, 255);
         private static readonly Color PANEL_TEXT_COLOR = new Color(200, 200, 200, 255);
-        private const string FONT = "Chintzy CPU BRK";
+        private const string FONT = "Chintzy CPU Shadow BRK";
         private const int FONT_SIZE = 32;
         const int BUTTON_SPACING_X = 10;
         const int BUTTON_SPACING_Y = 10;
@@ -53,6 +53,7 @@ namespace RTS {
 
         public override void OnEntry(GameTime gameTime) {
             Installation.InstallFont("Chintzy CPU BRK", new FileInfo(@"Content\UI\chintzy.ttf"));
+            Installation.InstallFont("Chintzy CPU Shadow BRK", new FileInfo(@"Content\UI\chintzys.ttf"));
             
             SpriteFont f = XNASpriteFont.Compile(G, FONT, FONT_SIZE, out fontDisp);
             wr = new WidgetRenderer(G, f);
