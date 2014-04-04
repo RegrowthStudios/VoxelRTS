@@ -30,7 +30,7 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
-
+        
         // View Direction
         public Vector2 ViewDirection {
             get;

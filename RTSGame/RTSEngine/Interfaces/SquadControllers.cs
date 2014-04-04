@@ -37,13 +37,37 @@ namespace RTSEngine.Interfaces {
     }
 
     // The Movement Controller That Dictates The General Movement Behavior Of Units In The Squad
-    // TODO: Add Formation Stuff Here
     public abstract class ACSquadMovementController : ACSquadController {
+        // Box Formation Will Follow The Golden Ratio Phi
+        protected const float phi = 1.61803398875f;
+
+        // Waypoints That Units In This Squad Will Generally Follow
         private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {
             get { return waypoints; }
             set { waypoints = value; }
+        }        
+    
+        // Units' Displacements From The Squad's Waypoints At Origin
+        public readonly Dictionary<int, Vector2> formationAssignments = new Dictionary<int, Vector2>();
+
+        // Given An Angle, Rotate The Formation Assignments
+        public Dictionary<int, Vector2> RotateFormation(float a) {
+            var rfa = new Dictionary<int, Vector2>(); 
+            Matrix mr = Matrix.CreateRotationZ(a);
+            foreach(var fa in formationAssignments) {
+                int uuid = fa.Key;
+                Vector2 post = fa.Value;
+                rfa[uuid] = Vector2.TransformNormal(post, mr);
+            }
+            return rfa;
         }
+
+        // Decide Where Units In This Squad Should Go When Moving
+        public abstract void ApplyMovementFormation(int movementOrder);
+
+        // Decide Where Units In This Squad Should Go When Close To Their Target
+        public abstract void CalculateTargetFormation();
     }
 
     // Controls The Targetting That A Squad Performs

@@ -184,8 +184,6 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
             RTSTeam team = s.teams[e.Team];
-            List<Vector2> wp = new List<Vector2>();
-            wp.Add(e.Waypoint);
             List<IEntity> selected = team.Input.selected;
             RTSSquad squad = null;
             if(selected != null && selected.Count > 0) {
@@ -193,7 +191,6 @@ namespace RTSEngine.Controllers {
                     RTSUnit u = unit as RTSUnit;
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
-                        u.MovementController.Waypoints = wp;
                         u.Target = null;
                         squad.Add(u);
                     }
@@ -203,7 +200,7 @@ namespace RTSEngine.Controllers {
                 AddSquadTask(s, squad);
                 // Setup Pathfinding Query
                 foreach(var squadQuery in squadQueries) {
-                    if(squadQuery.squad == squad) {
+                    if(squadQuery.squad.Equals(squad)) {
                         squadQuery.query.IsOld = true;
                     }
                 }
@@ -212,6 +209,8 @@ namespace RTSEngine.Controllers {
                 PathQuery query = new PathQuery(squad.GridPosition, e.Waypoint);
                 squadQueries.Add(new SquadQuery(squad, query));
                 pathfinder.Add(query);
+                // TODO: Get The Formation Order From The Input Event
+                squad.MovementController.ApplyMovementFormation(BehaviorFSM.BoxFormation);
             }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
@@ -286,6 +285,11 @@ namespace RTSEngine.Controllers {
                 PathQuery query = squadQuery.query;
                 if(!query.IsOld && query.IsComplete) {
                     squad.MovementController.Waypoints = query.waypoints;
+                    // Tell All The Units In The Squad To Head To The First Waypoint
+                    foreach(var unit in squad.Units) {
+                        unit.MovementController.CurrentWaypointIndex = query.waypoints.Count - 1;
+                        unit.MovementController.HasPath = true;
+                    }
                 }
                 else if(!query.IsOld) {
                     newQueries.Add(squadQuery);
@@ -349,7 +353,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 foreach(var unit in s.activeTeams[ti].Team.units) {
                     if(unit.MovementController != null)
-                        unit.MovementController.Waypoints = null;
+                        unit.MovementController.CurrentWaypointIndex = -1;
                 }
             }
         }
