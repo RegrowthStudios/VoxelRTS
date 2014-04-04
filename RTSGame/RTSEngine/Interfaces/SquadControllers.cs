@@ -38,7 +38,7 @@ namespace RTSEngine.Interfaces {
 
     // The Movement Controller That Dictates The General Movement Behavior Of Units In The Squad
     public abstract class ACSquadMovementController : ACSquadController {
-        // Box Formation Follows The Golden Ratio Phi
+        // Box Formation Will Follow The Golden Ratio Phi
         protected const float phi = 1.61803398875f;
 
         // Waypoints That Units In This Squad Will Generally Follow
@@ -51,22 +51,16 @@ namespace RTSEngine.Interfaces {
         // Units' Displacements From The Squad's Waypoints At Origin
         public readonly Dictionary<int, Vector2> formationAssignments = new Dictionary<int, Vector2>();
 
-        // Units' Rotated Displacements From The Squad's Waypoints At Origin
-        public Dictionary<int, Vector2> RotatedFormationAssignments { get; set; }
-
         // Given An Angle, Rotate The Formation Assignments
-        protected void RotateFormation(float a) {
+        public Dictionary<int, Vector2> RotateFormation(float a) {
+            var rfa = new Dictionary<int, Vector2>(); 
             Matrix mr = Matrix.CreateRotationZ(a);
             foreach(var fa in formationAssignments) {
                 int uuid = fa.Key;
                 Vector2 post = fa.Value;
-                if(!RotatedFormationAssignments.ContainsKey(uuid)) {
-                    RotatedFormationAssignments[uuid] = Vector2.TransformNormal(post, mr);
-                }
-                else {
-                    RotatedFormationAssignments.Add(uuid,Vector2.TransformNormal(post, mr));
-                }
+                rfa[uuid] = Vector2.TransformNormal(post, mr);
             }
+            return rfa;
         }
 
         // Decide Where Units In This Squad Should Go When Moving

@@ -162,9 +162,6 @@ namespace RTSEngine.Controllers {
             e.Team.Input.selected.AddRange(e.Selected);
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
-            // TODO: Sort This Out: We Don't Need Waypoints Here Anymore, But What Do We Do While Waiting For the PathQuery?
-            //List<Vector2> wp = new List<Vector2>();
-            //wp.Add(e.Waypoint);
             List<IEntity> selected = e.Team.Input.selected;
             RTSSquad squad = null;
             if(selected != null && selected.Count > 0) {
@@ -172,8 +169,6 @@ namespace RTSEngine.Controllers {
                     RTSUnit u = unit as RTSUnit;
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
-                        //u.MovementController.Waypoints = wp;
-                        //u.MovementController.SquadGoal = e.Waypoint;
                         u.Target = null;
                         squad.Add(u);
                     }
@@ -226,8 +221,8 @@ namespace RTSEngine.Controllers {
                     squad.MovementController.Waypoints = query.waypoints;
                     // Tell All The Units In The Squad To Head To The First Waypoint
                     foreach(var unit in squad.Units) {
-                        unit.MovementController.CurrentWaypoint = query.waypoints.Count-1;
-                        unit.MovementController.CurrentWaypointIsSet = true;
+                        unit.MovementController.CurrentWaypointIndex = query.waypoints.Count - 1;
+                        unit.MovementController.HasPath = true;
                     }
                 }
                 else if (!query.IsOld) {
@@ -298,7 +293,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 foreach(var unit in s.activeTeams[ti].Team.units) {
                     if(unit.MovementController != null)
-                        unit.MovementController.CurrentWaypoint = -1;
+                        unit.MovementController.CurrentWaypointIndex = -1;
                 }
             }
         }

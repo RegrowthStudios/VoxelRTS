@@ -31,6 +31,7 @@ namespace RTSEngine.Interfaces {
         // Movement Order Codes - Will Influence Movement Behavior
         public const int FreeFormation = 0;
         public const int BoxFormation = FreeFormation + 1;
+        public const int CircleFormation = BoxFormation + 1;
         
         public static int GetState(int behaviorCode) {
             return GetByte(behaviorCode, 0);
@@ -119,17 +120,19 @@ namespace RTSEngine.Interfaces {
     }
 
     // Special Movement Mechanics
-    public abstract class ACUnitMovementController : ACUnitController {
-        // TODO: Remove?
-        public Vector2 SquadGoal { get; set; }  
+    public abstract class ACUnitMovementController : ACUnitController {        
+        // Index Of Squad Waypoint That This Controller's Unit Is Currently Attempting To Reach
+        public int CurrentWaypointIndex { get; set; }
         
-        // Index Of Squad Waypoint This Unit Is Currently Attempting To Reach
-        public int CurrentWaypoint { get; set; }
-
-        public bool CurrentWaypointIsSet { get; set; }
-
-        public bool HasValidWaypoint() {
-            return CurrentWaypoint >= 0 && CurrentWaypoint < unit.Squad.MovementController.Waypoints.Count;
+        // Has This Controller's Unit's Squad's Pathfinding Query Been Resolved?
+        public bool HasPath { get; set; }
+        
+        // Does The Provided Index Point To A Valid Squad Waypoint?
+        public bool IsValid(int idx) {
+            if(unit.Squad == null || unit.Squad.MovementController == null || unit.Squad.MovementController.Waypoints == null)
+                return false;
+            else
+                return idx >= 0 && idx < unit.Squad.MovementController.Waypoints.Count;
         }
 
         // Scripted Logic For Movement
