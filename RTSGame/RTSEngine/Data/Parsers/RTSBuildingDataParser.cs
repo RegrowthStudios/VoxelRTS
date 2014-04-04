@@ -30,22 +30,6 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
         private static readonly Regex rgxColorTex = RegexHelper.GenerateFile("TEXCOLOR");
 
-        private static Texture2D AnimationFromBitmap(RTSRenderer renderer, FileInfo fi) {
-            Texture2D t;
-            float[] sData = null;
-            int w, h;
-            using(var bmp = System.Drawing.Bitmap.FromFile(fi.FullName) as System.Drawing.Bitmap) {
-                w = bmp.Width;
-                h = bmp.Height;
-                sData = new float[w * h];
-                System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
-                System.Runtime.InteropServices.Marshal.Copy(data.Scan0, sData, 0, (data.Stride * data.Height) >> 2);
-                bmp.UnlockBits(data);
-            }
-            t = renderer.CreateTexture2D(w, h, SurfaceFormat.Single);
-            t.SetData(sData);
-            return t;
-        }
         public static RTSBuildingModel ParseModel(RTSRenderer renderer, RTSTeam team, int buildingType, FileInfo infoFile) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
@@ -74,7 +58,7 @@ namespace RTSEngine.Data.Parsers {
 
             RTSBuildingModel model;
             using(var sModel = File.OpenRead(fiModel.FullName)) {
-                model = new RTSBuildingModel(renderer, team, buildingType, sModel);
+                model = new RTSBuildingModel(renderer, sModel);
             }
             model.ModelTexture = renderer.LoadTexture2D(fiTexMain.FullName);
             model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
@@ -123,7 +107,7 @@ namespace RTSEngine.Data.Parsers {
             data.BBox.Min = RegexHelper.ExtractVec3(mp[ri++]);
             data.BBox.Max = RegexHelper.ExtractVec3(mp[ri++]);
             Vector2 cr = RegexHelper.ExtractVec2(mp[ri++]);
-            data.ICollidableShape = new CollisionRect(cr.X, cr.Y, Vector2.Zero, true);
+            data.ICollidableShape = new CollisionCircle(cr.Length() * 0.5f, Vector2.Zero, true);
 
             // Get The Controllers From The Controller Dictionary
             if(controllers != null) {

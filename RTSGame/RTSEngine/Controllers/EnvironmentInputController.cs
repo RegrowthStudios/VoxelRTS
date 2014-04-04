@@ -17,7 +17,9 @@ namespace RTSEngine.Controllers {
         private Random random;
         private ImpactGrid grid;
         private int counter;
+
         private Vector2[] treePositions;
+
         private IndexedBuildingType tree;
         private IndexedBuildingType ore;
         private Point[,] numSpawns;
@@ -60,10 +62,12 @@ namespace RTSEngine.Controllers {
             ore = o;
             treePositions = treePos;
             for(int i = 0; i < treePositions.Length; i++) {
-                AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, treePositions[i]));
+                Point treeC = HashHelper.Hash(treePositions[i], GameState.IGrid.numCells, GameState.IGrid.size);
+                AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, treeC));
             }
             for(int j = 0; j < orePos.Length; j++) {
-                AddEvent(new SpawnBuildingEvent(TeamIndex, ore.Index, orePos[j]));
+                Point oreC = HashHelper.Hash(orePos[j], GameState.IGrid.numCells, GameState.IGrid.size);
+                AddEvent(new SpawnBuildingEvent(TeamIndex, ore.Index, oreC));
             }
         }
 
@@ -101,15 +105,14 @@ namespace RTSEngine.Controllers {
                             Vector2 newTreePos = new Vector2(newTreeC.X * GameState.CGrid.size.X, newTreeC.Y * GameState.CGrid.size.Y);
                             Point newTreeI = HashHelper.Hash(newTreePos, grid.numCells, grid.size);
                             foreach (var t in GameState.IGrid.ImpactGenerators[newTreeI.X,newTreeI.Y]) {
-                                Point tc = HashHelper.Hash(t.Position, GameState.CGrid.numCells, GameState.CGrid.size);
+                                Point tc = HashHelper.Hash(t.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
                                 if (!Point.Equals(tc, newTreeC)) {
-                                    AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, newTreePos));
+                                    AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, newTreeC));
                                     r.AddToRegionImpact(-tree.Data.Impact);
                                 }
                             }
                         }
                     }
-
                     // Regenerate Ore Health
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
@@ -120,7 +123,6 @@ namespace RTSEngine.Controllers {
                             }
                         }
                     }
-
 
                 }
             }
@@ -153,7 +155,7 @@ namespace RTSEngine.Controllers {
                     else
                         level = 0;
                     // Spawn Environmental Units
-                    Vector2 spawnPos = g.Position;
+                    Vector2 spawnPos = g.GridPosition;
                     Vector2 offset;
                     int numSpawn;
                     if (level != 0){

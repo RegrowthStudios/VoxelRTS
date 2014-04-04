@@ -136,6 +136,18 @@ namespace RTS {
                             ));
                 }
             }
+            if(b == MouseButton.Left) {
+                Ray r = renderer.Camera.GetViewRay(p);
+                IntersectionRecord rec = new IntersectionRecord();
+                if(state.Map.BVH.Intersect(ref rec, r)) {
+                    spawnLoc = r.Position + r.Direction * rec.T;
+                    if(doAdd)
+                        gameInput.AddEvent(new SpawnBuildingEvent(
+                            team, 0,
+                            HashHelper.Hash(new Vector2(spawnLoc.X, spawnLoc.Z), state.CGrid.numCells, state.CGrid.size)
+                            ));
+                }
+            }
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {

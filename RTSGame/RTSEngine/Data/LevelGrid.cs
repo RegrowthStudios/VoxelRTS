@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data {
@@ -83,7 +84,10 @@ namespace RTSEngine.Data {
                     ActiveGrids.Add(p);
                 EDynamic[p.X, p.Y].Add(o);
             }
-            else EStatic[p.X, p.Y].Add(o);
+            else {
+                EStatic[p.X, p.Y].Add(o);
+                o.OnDestruction += (_o) => { EStatic[p.X, p.Y].Remove(o); };
+            }
         }
 
         public void ClearDynamic() {
@@ -147,7 +151,11 @@ namespace RTSEngine.Data {
             Collision[x, y] = c;
         }
         public bool GetCollision(int x, int y) {
-            return Collision[x, y];
+            return Collision[x, y] || EStatic[x, y].Count > 0;
+        }
+
+        public void OnBuildingSpawn(RTSBuilding b) {
+            Add(b);
         }
     }
 
@@ -192,7 +200,7 @@ namespace RTSEngine.Data {
 
         // Adds An Impact Generator To The Appropriate Cell In The Impact Grid
         public void AddImpactGenerator(ImpactGenerator g) {
-            Point p = HashHelper.Hash(g.Position, numCells, size);
+            Point p = HashHelper.Hash(g.GridPosition, numCells, size);
             ImpactGenerators[p.X, p.Y].Add(g);
             g.GenerateImpact += AddToCellImpact;
         }

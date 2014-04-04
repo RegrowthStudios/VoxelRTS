@@ -1,5 +1,5 @@
 ﻿// Friendly Team Name
-NAME            [Dog]
+NAME            [Mechanica]
 
 // Default Squad Controllers
 CTRLACTION      [RTS.Mech.Squad.Action]
@@ -7,6 +7,9 @@ CTRLMOVEMENT    [RTS.Mech.Squad.Movement]
 CTRLTARGET      [RTS.Mech.Squad.Target]
 
 // List Of All Unit Types Belonging To Team
-UNIT            [..\units\Dog\soldier.unit]
-UNIT            [..\units\Dog\heavy.unit]
-UNIT            [..\units\Dog\armor.unit]
+UNIT            [soldier.unit]
+UNIT            [heavy.unit]
+UNIT            [armor.unit]
+
+// List Of All Building Types Belonging To Team
+BUILDING        [barracks.building]

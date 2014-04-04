@@ -55,25 +55,27 @@ namespace RTSEngine.Controllers {
 
         public static void BuildLocal(GameState state, EngineLoadData eld) {
             BuildControllers(state);
+
             state.SetTeams(BuildTeams(state, eld));
 
-            for(int ti = 0; ti < state.activeTeams.Length; ti++) {
+            for(int ti = 0; ti < state.teams.Length; ti++) {
                 switch(eld.Teams[ti].InputType) {
                     case InputType.Player:
-                        var pic = new PlayerInputController(state, state.activeTeams[ti].Index);
-                        state.activeTeams[ti].Team.Input = pic;
+                        var pic = new PlayerInputController(state, ti);
+                        state.teams[ti].Input = pic;
                         break;
                     case InputType.AI:
                         // TODO: Make This Class
-                        state.activeTeams[ti].Team.Input = new AIInputController(state, state.activeTeams[ti].Index);
+                        state.teams[ti].Input = new AIInputController(state, ti);
                         break;
                     case InputType.Environment:
                         // TODO: Make This Class
-                        EnvironmentInputController envController = new EnvironmentInputController(state, state.activeTeams[ti].Index);
-                        //envController.Init();
+                        EnvironmentInputController envController = new EnvironmentInputController(state, ti);
+                        // envController.Init();
+                        state.teams[ti].Input = envController;
                         break;
                     default:
-                        throw new Exception("Type does not exist");
+                        break;
                 }
             }
 
@@ -102,6 +104,9 @@ namespace RTSEngine.Controllers {
 
             // Create Grid
             state.CGrid = new CollisionGrid(state.Map.Width, state.Map.Depth, RTSConstants.CGRID_SIZE);
+            foreach(var team in (from t in state.activeTeams select t.Team)) {
+                team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
+            }
         }
         private static IndexedTeam[] BuildTeams(GameState state, EngineLoadData eld) {
             var t = new List<IndexedTeam>();

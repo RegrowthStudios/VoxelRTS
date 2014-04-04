@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
-    public class RTSBuilding : IEntity {
+    public class RTSBuilding : IEntity, ImpactGenerator {
         // Common Data
         public RTSBuildingData BuildingData {
             get;
@@ -73,7 +73,7 @@ namespace RTSEngine.Data.Team {
         // This Building's Current Health
         public int Health {
             get;
-            private set;
+            set;
         }
         public bool IsAlive {
             get {
@@ -135,6 +135,8 @@ namespace RTSEngine.Data.Team {
             height = 0;
             Health = BuildingData.Health;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
+            ViewDirection = Vector2.UnitX;
+            CollisionGeometry.Center = GridPosition;
             UnitQueue = new Queue<RTSUnit>();
         }
 
@@ -157,6 +159,18 @@ namespace RTSEngine.Data.Team {
         // Enqueue New Unit
         public void EnqueueUnit(RTSUnit unit) {
             UnitQueue.Enqueue(unit);
+        }
+
+
+        public event Action<Vector2, int> GenerateImpact;
+
+        public RTSBuildingData Data {
+            get {
+                throw new NotImplementedException();
+            }
+            set {
+                throw new NotImplementedException();
+            }
         }
     }
 }

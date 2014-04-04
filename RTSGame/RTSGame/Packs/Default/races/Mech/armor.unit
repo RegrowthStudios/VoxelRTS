@@ -1,18 +1,18 @@
 ﻿// Friendly Unit Name
-NAME            [Soldier]
+NAME            [Armored Soldier]
 
 // Unit Model
-MODEL           [..\models\MechBase.obj]
-TEXMAIN         [..\textures\Main.png]
-TEXCOLOR        [..\textures\Key.png]
-ANIMATION       [..\animations\Mech1.png]
+MODEL           [..\..\models\MechBase.obj]
+TEXMAIN         [..\..\textures\Main.png]
+TEXCOLOR        [..\..\textures\Key.png]
+ANIMATION       [..\..\animations\Mech3.png]
 MAXCOUNT        [1000]
 
 // Unit Data
-HEALTH          [60]
-SPEED           [3]
-COST            [5 , 1]
-BUILDTIME       [10]
+HEALTH          [120]
+SPEED           [3.3]
+COST            [20 , 2]
+BUILDTIME       [20]
 
 // Collision Data
 RADIUS          [0.4]
@@ -20,10 +20,10 @@ BBOXMIN         [-0.4 , 0.0 , -0.4]
 BBOXMAX         [0.4 , 1.0 , 0.4]
 
 // Combat Data
-ARMOR           [0]
-RANGE           [0 , 10]
-TIMER           [0.33]
-DAMAGE          [10 , 15]
+ARMOR           [8]
+RANGE           [0 , 8]
+TIMER           [0.5]
+DAMAGE          [30 , 45]
 CRITCHANCE      [0.05]
 
 CTRLACTION      [RTS.Mech.Unit.Action]
