@@ -284,7 +284,7 @@ namespace RTS {
                 widgets[i].Set(pt, races, schemes);
             }
             widgets[0].PlayerType = "Player";
-            widgets[0].Race = "Player";
+            widgets[0].Race = "Mechanica";
             widgets[1].PlayerType = "Computer";
             widgets[1].Race = "Mechanica";
 

@@ -106,7 +106,7 @@ namespace RTSEngine.Graphics {
             ButtonMinimap = new RectButton(wrMain, bh1, bh2, renderer.Minimap.Terrain);
             ButtonMinimap.AlignX = Alignment.RIGHT;
             ButtonMinimap.AlignY = Alignment.BOTTOM;
-            ButtonMinimap.Offset = new Point(-s, -s);
+            ButtonMinimap.Offset = new Point(-buf, -buf);
             ButtonMinimap.OffsetAlignX = Alignment.RIGHT;
             ButtonMinimap.OffsetAlignY = Alignment.BOTTOM;
             ButtonMinimap.Parent = rectBottomPanel;
