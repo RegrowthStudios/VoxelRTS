@@ -61,6 +61,7 @@
     <Compile Include="Controllers\FOWResolver.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
+    <Compile Include="Controllers\GameTypeController.cs" />
     <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\PlayerInputController.cs" />
     <Compile Include="Controllers\RTSButton.cs" />
