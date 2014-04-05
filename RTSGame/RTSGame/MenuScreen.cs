@@ -152,7 +152,7 @@ namespace RTS {
                     break;
             }
         }
-        private void MenuScreen_OnButtonPress(RectButton obj) {
+        private void MenuScreen_OnButtonPress(RectButton obj, Vector2 m) {
             seClick.Play();
             if(obj == buttons[0]) {
                 Next = game.LobbyScreen.Index;
@@ -174,7 +174,7 @@ namespace RTS {
                 State = ScreenState.ExitApplication;
             }
         }
-        private void MenuScreen_OnMouseEntry(RectButton obj) {
+        private void MenuScreen_OnMouseEntry(RectButton obj, Vector2 m) {
             seHover.Play();
         }
     }

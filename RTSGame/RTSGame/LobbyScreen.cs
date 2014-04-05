@@ -175,15 +175,15 @@ namespace RTS {
             ButtonPlayerType.OnButtonPress += ButtonPlayerType_OnButtonPress;
         }
 
-        void ButtonScheme_OnButtonPress(RectButton obj) {
+        void ButtonScheme_OnButtonPress(RectButton obj, Vector2 m) {
             si = (si + 1) % lSchemes.Length;
             Scheme = lSchemes[si];
         }
-        void ButtonRace_OnButtonPress(RectButton obj) {
+        void ButtonRace_OnButtonPress(RectButton obj, Vector2 m) {
             ri = (ri + 1) % lRaces.Length;
             Race = lRaces[ri];
         }
-        void ButtonPlayerType_OnButtonPress(RectButton obj) {
+        void ButtonPlayerType_OnButtonPress(RectButton obj, Vector2 m) {
             ti = (ti + 1) % lTypes.Length;
             PlayerType = lTypes[ti];
         }

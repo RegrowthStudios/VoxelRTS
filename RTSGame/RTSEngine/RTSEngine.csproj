@@ -99,6 +99,7 @@
     <Compile Include="Graphics\DevConsoleView.cs" />
     <Compile Include="Graphics\HeightmapModel.cs" />
     <Compile Include="Graphics\LightningGenerator.cs" />
+    <Compile Include="Graphics\Minimap.cs" />
     <Compile Include="Graphics\MouseRenderer.cs" />
     <Compile Include="Graphics\ParticleRenderer.cs" />
     <Compile Include="Graphics\Particles.cs" />

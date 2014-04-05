@@ -66,6 +66,7 @@ namespace RTS {
             gameInput = state.teams[0].Input as PlayerInputController;
             gameInput.Camera = camera;
             playController.Init(state);
+            renderer.RTSUI.OnMinimapClick += RTSUI_OnMinimapClick;
 
             sfDebug = renderer.CreateFont("Courier New", 32);
             tEngine = new Thread(EngineThread);
@@ -102,9 +103,11 @@ namespace RTS {
         public override void Draw(GameTime gameTime) {
             if(!pauseRender) {
                 camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
+                renderer.Update(state);
                 renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
 
                 // TODO: Draw UI
+                renderer.DrawUI(SB);
             }
 
             if(DevConsole.IsActivated) {
@@ -125,6 +128,18 @@ namespace RTS {
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
+            // Check If We Clicked On The Minimap
+            Vector2 minir;
+            if(renderer.RTSUI.ButtonMinimap.Inside((int)p.X, (int)p.Y, out minir)) {
+                Vector2 mapPos = minir * state.CGrid.size;
+                if(b == MouseButton.Right && gameInput.selected.Count > 0) {
+                    gameInput.AddEvent(new SetWayPointEvent(gameInput.TeamIndex, mapPos));
+                }
+                else {
+                    camera.MoveTo(mapPos.X, mapPos.Y);
+                }
+            }
+
             if(b == MouseButton.Right) {
                 Ray r = renderer.Camera.GetViewRay(p);
                 IntersectionRecord rec = new IntersectionRecord();
@@ -194,6 +209,8 @@ namespace RTS {
                     doAdd = false;
                     break;
             }
+        }
+        private void RTSUI_OnMinimapClick(Vector2 obj) {
         }
 
         void EngineThread() {

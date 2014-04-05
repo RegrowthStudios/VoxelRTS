@@ -73,7 +73,7 @@ namespace RTS {
             tFont.Dispose();
         }
 
-        void bFinish_OnButtonPress(RectButton obj) {
+        void bFinish_OnButtonPress(RectButton obj, Vector2 m) {
             string n = tInput.Text;
             if(!n.Equals(UserConfig.DEFAULT_USER_NAME) && !string.IsNullOrWhiteSpace(n)) {
                 UserConfig.UserName = n;

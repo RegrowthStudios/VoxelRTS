@@ -23,8 +23,11 @@ namespace RTSEngine.Graphics {
     public class RTSRenderer : IDisposable {
         // Really Should Not Be Holding This Though
         private GameWindow window;
+        public GameWindow Window {
+            get { return window; }
+        }
         private GraphicsDeviceManager gManager;
-        private GraphicsDevice G {
+        public GraphicsDevice G {
             get { return gManager.GraphicsDevice; }
         }
 
@@ -43,6 +46,10 @@ namespace RTSEngine.Graphics {
         public HeightmapModel Map {
             get;
             set;
+        }
+        public Minimap Minimap {
+            get;
+            private set;
         }
 
         // All The Unit Models To Render
@@ -73,6 +80,10 @@ namespace RTSEngine.Graphics {
 
         // Particle Effects
         private ParticleRenderer pRenderer;
+        public RTSUI RTSUI {
+            get;
+            private set;
+        }
 
         // Graphics Data To Dispose
         private readonly ConcurrentBag<IDisposable> toDispose;
@@ -112,6 +123,7 @@ namespace RTSEngine.Graphics {
             MouseEventDispatcher.OnMouseMotion += OnMouseMove;
 
             pRenderer = new ParticleRenderer();
+            Minimap = new Minimap();
         }
         public void Dispose() {
             MouseEventDispatcher.OnMousePress -= OnMousePress;
@@ -125,6 +137,7 @@ namespace RTSEngine.Graphics {
                 td[i].Dispose();
                 td[i] = null;
             }
+            RTSUI.Dispose();
         }
 
         #region Graphics Data Creation That Will Be Ready For Disposal At The End Of The Game
@@ -212,6 +225,11 @@ namespace RTSEngine.Graphics {
 
             // Hook FOW
             state.CGrid.OnFOWChange += OnFOWChange;
+            Minimap.Hook(this, state, ti);
+
+            // Create UI
+            RTSUI = new RTSUI(this, "Courier New", 32, 140);
+            RTSUI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
         }
         public void LoadTeamVisuals(GameState state, VisualTeam vt) {
             RTSTeam team = state.teams[vt.TeamIndex];
@@ -302,20 +320,24 @@ namespace RTSEngine.Graphics {
             pRenderer.Update(np, dt);
         }
 
+        public void Update(GameState state) {
+            RTSUI.UpdateButtons(state);
+            if(Map.Reset) Map.ApplyFOW();
+            Minimap.Refresh(this);
+        }
+
         // Rendering Passes
         public void Draw(GameState s, float dt) {
             G.Clear(Color.Black);
 
-            DrawMap();
+            DrawMap(Camera.View * Camera.Projection);
             // TODO: Draw Static
             UpdateVisible(s.CGrid);
             DrawBuildings();
             DrawAnimated();
             if(drawBox) DrawSelectionBox();
         }
-        private void DrawMap() {
-            if(Map.Reset) Map.ApplyFOW();
-
+        public void DrawMap(Matrix mVP) {
             // Set States
             G.DepthStencilState = DepthStencilState.Default;
             G.RasterizerState = RasterizerState.CullCounterClockwise;
@@ -323,7 +345,7 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[0] = SamplerState.LinearClamp;
 
             // Set Camera
-            fxMap.VP = Camera.View * Camera.Projection;
+            fxMap.VP = mVP;
 
             // Primary Map Model
             if(Map.TrianglesPrimary > 0) {
@@ -399,6 +421,9 @@ namespace RTSEngine.Graphics {
                     new VertexPositionColor(new Vector3(min.X, max.Y, 0), new Color(1f, 0, 1f, 0.3f)),
                     new VertexPositionColor(max, new Color(1f, 0, 0f, 0.3f)),
                 }, 0, 2, VertexPositionColor.VertexDeclaration);
+        }
+        public void DrawUI(SpriteBatch batch) {
+            RTSUI.Draw(batch);
         }
 
         // Selection Box Handling
