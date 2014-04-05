@@ -26,8 +26,6 @@ namespace RTSEngine.Controllers {
         // Teams In The Battle
         public TeamInitOption[] Teams;
 
-        public Dictionary<string, RTSRaceData> Races;
-
         // Where To Load The Map
         public FileInfo MapFile;
     }
@@ -53,10 +51,10 @@ namespace RTSEngine.Controllers {
             }
         }
 
-        public static void BuildLocal(GameState state, EngineLoadData eld) {
+        public static void BuildLocal(GameState state, EngineLoadData eld, Dictionary<string, RTSRaceData> races) {
             BuildControllers(state);
 
-            state.SetTeams(BuildTeams(state, eld));
+            state.SetTeams(BuildTeams(state, eld, races));
 
             for(int ti = 0; ti < state.teams.Length; ti++) {
                 switch(eld.Teams[ti].InputType) {
@@ -96,19 +94,7 @@ namespace RTSEngine.Controllers {
             foreach(KeyValuePair<string, ReflectedBuildingController> kv in res.BuildingControllers)
                 state.BuildingControllers.Add(kv.Key, kv.Value);
         }
-        private static void BuildMap(GameState state, FileInfo infoFile) {
-            // Parse Map Data
-            state.Map = HeightmapParser.ParseData(infoFile);
-            if(state.Map == null)
-                throw new ArgumentNullException("Could Not Load Heightmap");
-
-            // Create Grid
-            state.CGrid = new CollisionGrid(state.Map.Width, state.Map.Depth, RTSConstants.CGRID_SIZE);
-            foreach(var team in (from t in state.activeTeams select t.Team)) {
-                team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
-            }
-        }
-        private static IndexedTeam[] BuildTeams(GameState state, EngineLoadData eld) {
+        private static IndexedTeam[] BuildTeams(GameState state, EngineLoadData eld, Dictionary<string, RTSRaceData> races) {
             var t = new List<IndexedTeam>();
             RTSTeam team;
             for(int i = 0; i < eld.Teams.Length; i++) {
@@ -116,7 +102,7 @@ namespace RTSEngine.Controllers {
                 if(res.InputType == InputType.None)
                     continue;
                 team = new RTSTeam();
-                RTSRaceData rd = eld.Races[res.Race];
+                RTSRaceData rd = races[res.Race];
                 team.ColorScheme = res.Colors;
                 team.race.scAction = state.SquadControllers[rd.DefaultSquadActionController];
                 team.race.scMovement = state.SquadControllers[rd.DefaultSquadMovementController];
@@ -136,6 +122,18 @@ namespace RTSEngine.Controllers {
                 t.Add(new IndexedTeam(i, team));
             }
             return t.ToArray();
+        }
+        private static void BuildMap(GameState state, FileInfo infoFile) {
+            // Parse Map Data
+            state.Map = HeightmapParser.ParseData(infoFile);
+            if(state.Map == null)
+                throw new ArgumentNullException("Could Not Load Heightmap");
+
+            // Create Grid
+            state.CGrid = new CollisionGrid(state.Map.Width, state.Map.Depth, RTSConstants.CGRID_SIZE);
+            foreach(var team in (from t in state.activeTeams select t.Team)) {
+                team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
+            }
         }
 
         public static void Dispose(GameState state) {

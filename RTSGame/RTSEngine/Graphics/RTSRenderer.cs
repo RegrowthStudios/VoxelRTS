@@ -72,6 +72,7 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        private Dictionary<int, bool> beenViewed;
 
         // Effects
         private BasicEffect fxSimple;
@@ -85,6 +86,7 @@ namespace RTSEngine.Graphics {
             get;
             set;
         }
+
 
         // Particle Effects
         private ParticleRenderer pRenderer;
@@ -105,6 +107,7 @@ namespace RTSEngine.Graphics {
             FriendlyUnitModels = new List<RTSUnitModel>();
             NonFriendlyBuildingModels = new List<RTSBuildingModel>();
             FriendlyBuildingModels = new List<RTSBuildingModel>();
+            beenViewed = new Dictionary<int, bool>();
 
             tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
@@ -245,19 +248,33 @@ namespace RTSEngine.Graphics {
         }
         public void LoadTeamVisuals(GameState state, VisualTeam vt) {
             RTSTeam team = state.teams[vt.TeamIndex];
-            team.ColorScheme = vt.ColorScheme;
             RTSRaceData res = vt.RaceFileInfo;
+
+            // Set Color Scheme Appropriately
+            team.ColorScheme = vt.ColorScheme;
+
+            // Create Unit Graphics
+            var ums = vt.TeamIndex == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
             for(int i = 0; i < team.race.activeUnits.Length; i++) {
                 RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, res.UnitTypes[i]);
                 uModel.Hook(this, state, vt.TeamIndex, team.race.activeUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
-                NonFriendlyUnitModels.Add(uModel);
+                ums.Add(uModel);
             }
+
+            // Create Building Graphics
+            var bms = vt.TeamIndex == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
             for(int i = 0; i < team.race.activeBuildings.Length; i++) {
                 RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.activeBuildings[i].Index, res.BuildingTypes[i]);
                 bModel.Hook(this, state, vt.TeamIndex, team.race.activeBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
-                NonFriendlyBuildingModels.Add(bModel);
+                bms.Add(bModel);
+            }
+
+            if(vt.TeamIndex != teamIndex) {
+                team.OnBuildingSpawn += (b) => {
+                    beenViewed.Add(b.UUID, false);
+                };
             }
         }
         private void OnFOWChange(int x, int y, int p, FogOfWar f) {
@@ -314,20 +331,20 @@ namespace RTSEngine.Graphics {
             BoundingFrustum frustum = new BoundingFrustum(Camera.View * Camera.Projection);
 
             // Update Units
-            Predicate<RTSUnit> fFV = (u) => {
+            Predicate<RTSUnit> fFVU = (u) => {
                 return frustum.Intersects(u.BBox);
             };
             foreach(var um in FriendlyUnitModels)
-                um.UpdateInstances(G, GameplayController.IsUnitDead, fFV);
+                um.UpdateInstances(G, GameplayController.IsUnitDead, fFVU);
 
-            Predicate<RTSUnit> fNFV = (u) => {
+            Predicate<RTSUnit> fNFVU = (u) => {
                 Point up = HashHelper.Hash(u.GridPosition, cg.numCells, cg.size);
                 if(cg.GetFogOfWar(up.X, up.Y, teamIndex) != FogOfWar.Active)
                     return false;
                 return frustum.Intersects(u.BBox);
             };
             foreach(var um in NonFriendlyUnitModels)
-                um.UpdateInstances(G, GameplayController.IsUnitDead, fNFV);
+                um.UpdateInstances(G, GameplayController.IsUnitDead, fNFVU);
 
             // Update Buildings
             Predicate<RTSBuilding> fFVB = (b) => {
@@ -338,9 +355,15 @@ namespace RTSEngine.Graphics {
 
             Predicate<RTSBuilding> fNFVB = (b) => {
                 Point up = HashHelper.Hash(b.GridPosition, cg.numCells, cg.size);
-                if(cg.GetFogOfWar(up.X, up.Y, teamIndex) == FogOfWar.Nothing)
-                    return false;
-                return frustum.Intersects(b.BBox);
+                switch(cg.GetFogOfWar(up.X, up.Y, teamIndex)) {
+                    case FogOfWar.Passive:
+                        return beenViewed[b.UUID];
+                    case FogOfWar.Active:
+                        beenViewed[b.UUID] = true;
+                        return frustum.Intersects(b.BBox);
+                    default:
+                        return false;
+                }
             };
             Predicate<RTSBuilding> fNFRB = (b) => {
                 Point up = HashHelper.Hash(b.GridPosition, cg.numCells, cg.size);
@@ -426,6 +449,15 @@ namespace RTSEngine.Graphics {
                 buildingModel.SetInstances(G);
                 buildingModel.DrawInstances(G);
             }
+            foreach(RTSBuildingModel buildingModel in FriendlyBuildingModels) {
+                fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
+                fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
+                fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
+                fxAnim.CTertiary = buildingModel.ColorScheme.Tertiary;
+                fxAnim.ApplyPassBuilding();
+                buildingModel.SetInstances(G);
+                buildingModel.DrawInstances(G);
+            }
         }
         private void DrawAnimated() {
             // Set Camera
@@ -436,6 +468,15 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
             foreach(RTSUnitModel unitModel in NonFriendlyUnitModels) {
+                fxAnim.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
+                fxAnim.CPrimary = unitModel.ColorScheme.Primary;
+                fxAnim.CSecondary = unitModel.ColorScheme.Secondary;
+                fxAnim.CTertiary = unitModel.ColorScheme.Tertiary;
+                fxAnim.ApplyPassUnit();
+                unitModel.SetInstances(G);
+                unitModel.DrawInstances(G);
+            }
+            foreach(RTSUnitModel unitModel in FriendlyUnitModels) {
                 fxAnim.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
                 fxAnim.CPrimary = unitModel.ColorScheme.Primary;
                 fxAnim.CSecondary = unitModel.ColorScheme.Secondary;
@@ -497,6 +538,7 @@ namespace RTSEngine.Graphics {
 
             G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionTexture.VertexDeclaration);
         }
+
         public void DrawUI(SpriteBatch batch) {
             RTSUI.Draw(batch);
         }

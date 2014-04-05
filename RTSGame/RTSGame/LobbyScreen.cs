@@ -228,7 +228,10 @@ namespace RTS {
         }
 
         // Init Info Helper
-        Dictionary<string, RTSRaceData> races;
+        public Dictionary<string, RTSRaceData> Races {
+            get;
+            private set;
+        }
         Dictionary<string, RTSColorScheme> schemes;
 
         private EngineLoadData eld;
@@ -247,9 +250,9 @@ namespace RTS {
 
         public override void OnEntry(GameTime gameTime) {
             // Load All The Races And Schemes
-            races = new Dictionary<string, RTSRaceData>();
+            Races = new Dictionary<string, RTSRaceData>();
             schemes = new Dictionary<string, RTSColorScheme>();
-            GameEngine.SearchAllInitInfo(new DirectoryInfo("Packs"), races, schemes);
+            GameEngine.SearchAllInitInfo(new DirectoryInfo("Packs"), Races, schemes);
             if(schemes.Count < 1)
                 schemes.Add("Default", RTSColorScheme.Default);
             string defScheme = "Default";
@@ -260,7 +263,6 @@ namespace RTS {
 
             // Set Init Data To Be Nothing
             eld = new EngineLoadData();
-            eld.Races = new Dictionary<string, RTSRaceData>(races);
             eld.Teams = new TeamInitOption[GameState.MAX_PLAYERS];
             for(int i = 0; i < eld.Teams.Length; i++) {
                 eld.Teams[i].InputType = InputType.None;
@@ -281,7 +283,7 @@ namespace RTS {
                 }
                 widgets[i].TextIndex.Text = (i + 1).ToString();
                 widgets[i].TextUser.Text = "Unknown";
-                widgets[i].Set(pt, races, schemes);
+                widgets[i].Set(pt, Races, schemes);
             }
             widgets[0].PlayerType = "Player";
             widgets[0].Race = "Mechanica";
@@ -299,8 +301,6 @@ namespace RTS {
             tFont.Dispose();
 
             // Clear Init Info
-            races.Clear();
-            races = null;
             schemes.Clear();
             schemes = null;
         }
