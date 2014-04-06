@@ -148,7 +148,9 @@ namespace RTSEngine.Graphics {
                 td[i].Dispose();
                 td[i] = null;
             }
-            RTSUI.Dispose();
+            if(RTSUI != null) {
+                RTSUI.Dispose();
+            }
         }
 
         #region Graphics Data Creation That Will Be Ready For Disposal At The End Of The Game

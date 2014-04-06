@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using RTSEngine.Data;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using BlisterUI.Input;
 using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
@@ -13,8 +14,10 @@ using RTSEngine.Data.Team;
 namespace RTSEngine.Controllers {
     public class PlayerInputController : InputController {
         private const float MIN_RECT_SIZE = 20f;
+        private const MouseButton BUTTON_SELECT = MouseButton.Left;
+        private const MouseButton BUTTON_ACTION = MouseButton.Right;
 
-        private Vector2 mousePressedPos;
+        private Vector2 selectionRectStart;
 
         // Visual Elements That Are Used By The Controller
         public Camera Camera {
@@ -119,13 +122,13 @@ namespace RTSEngine.Controllers {
         }
 
         public void OnMouseRelease(Vector2 location, MouseButton b) {
-            if(b == MouseButton.Left) {
+            if(b == BUTTON_SELECT) {
                 // Check If Camera Available
                 if(Camera == null) return;
 
                 // Order Mouse Positions
-                Vector2 mMin = Vector2.Min(location, mousePressedPos);
-                Vector2 mMax = Vector2.Max(location, mousePressedPos);
+                Vector2 mMin = Vector2.Min(location, selectionRectStart);
+                Vector2 mMax = Vector2.Max(location, selectionRectStart);
 
                 // Check If Should Use A Selection Rectangle
                 if(UseSelectionRect(mMin, mMax)) {
@@ -150,7 +153,7 @@ namespace RTSEngine.Controllers {
             }
         }
         public void OnMousePress(Vector2 location, MouseButton b) {
-            if(b == MouseButton.Right) {
+            if(b == BUTTON_ACTION) {
                 if(Camera == null) return;
 
                 // Get Ray From Mouse Position
@@ -169,8 +172,8 @@ namespace RTSEngine.Controllers {
                     }
                 }
             }
-            else if(b == MouseButton.Left) {
-                mousePressedPos = location;
+            else if(b == BUTTON_SELECT) {
+                selectionRectStart = location;
             }
         }
     }
