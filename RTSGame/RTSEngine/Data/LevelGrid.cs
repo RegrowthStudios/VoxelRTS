@@ -54,11 +54,10 @@ namespace RTSEngine.Data {
 
         public event Action<int, int, int, FogOfWar> OnFOWChange;
 
-        public CollisionGrid(float w, float h, float cs) {
-            // Round down the grid size so they all fit into the map
-            size = new Vector2(w, h);
-            numCells = new Point((int)Math.Ceiling(size.X / cs), (int)Math.Ceiling(size.Y / cs));
-            cellSize = size.X / numCells.X;
+        public CollisionGrid(int w, int h, float cs) {
+            numCells = new Point(w, h);
+            cellSize = cs;
+            size = new Vector2(w, h) * cellSize;
 
             EDynamic = new List<IEntity>[numCells.X, numCells.Y];
             EStatic = new List<IEntity>[numCells.X, numCells.Y];
@@ -160,7 +159,7 @@ namespace RTSEngine.Data {
     }
 
     public class ImpactGrid {
-        
+
         // Size Of Each Cell In The Impact Grid
         public readonly float cellSize;
 
@@ -177,7 +176,7 @@ namespace RTSEngine.Data {
         public List<ImpactGenerator>[,] ImpactGenerators { get; set; }
 
         // Stores The Impact of Each Cell Of The Impact Grid
-        public int[,] CellImpact { get; private set; } 
+        public int[,] CellImpact { get; private set; }
 
         // Creates An Impact Grid Using The Size And Cell Size Of The Given Collision Grid
         public ImpactGrid(CollisionGrid cg) {
@@ -189,11 +188,11 @@ namespace RTSEngine.Data {
             ImpactGenerators = new List<ImpactGenerator>[numCells.X, numCells.Y];
             CellImpact = new int[numCells.X, numCells.Y];
 
-            for (int x = 0; x < numCells.X; x++) {
-                for (int y = 0; y < numCells.Y; y++) {
+            for(int x = 0; x < numCells.X; x++) {
+                for(int y = 0; y < numCells.Y; y++) {
                     Region[x, y] = null;
                     ImpactGenerators[x, y] = new List<ImpactGenerator>();
-                    CellImpact[x,y] = 0;
+                    CellImpact[x, y] = 0;
                 }
             }
         }
@@ -211,6 +210,12 @@ namespace RTSEngine.Data {
             CellImpact[p.X, p.Y] += amount;
             Region[p.X, p.Y].AddToRegionImpact(amount);
         }
+    }
+
+    public struct LevelGrid {
+        public Heightmap L0;
+        public CollisionGrid L1;
+        public ImpactGrid L2;
     }
 
     public static class HashHelper {

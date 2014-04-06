@@ -14,6 +14,7 @@ namespace RTS {
     public class InduZtryScreen : GameScreenIndexed {
         private const string SOUND_FILE_LIGHTNING = @"Content\Audio\lightning.wav";
         private const string SOUND_FILE_THUNDER = @"Content\Audio\thunder.wav";
+        private const string TEXTURE_FILE = @"Content\Textures\InduZtry.png";
 
         // Lightning Fade Time
         private const float LERP_TIME = 4f;
@@ -114,7 +115,7 @@ namespace RTS {
                 tLightning = Texture2D.FromStream(G, fs);
             }
             textPos = new List<Vector2>();
-            using(var bmp = System.Drawing.Bitmap.FromFile("Content\\Textures\\INDUZTRY.png") as System.Drawing.Bitmap) {
+            using(var bmp = System.Drawing.Bitmap.FromFile(TEXTURE_FILE) as System.Drawing.Bitmap) {
                 for(int y = 0; y < bmp.Height; y++) {
                     for(int x = 0; x < bmp.Width; x++) {
                         if(bmp.GetPixel(x, y).A > 60) {

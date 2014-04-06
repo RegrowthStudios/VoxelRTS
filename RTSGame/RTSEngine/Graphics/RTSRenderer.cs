@@ -21,10 +21,16 @@ namespace RTSEngine.Graphics {
     }
 
     public class RTSRenderer : IDisposable {
+        private const float SELECTION_RADIUS_MODIFIER = 1.1f;
+        private const float SELECTION_HEIGHT_PLACEMENT = 0.05f;
+
         // Really Should Not Be Holding This Though
         private GameWindow window;
+        public GameWindow Window {
+            get { return window; }
+        }
         private GraphicsDeviceManager gManager;
-        private GraphicsDevice G {
+        public GraphicsDevice G {
             get { return gManager.GraphicsDevice; }
         }
 
@@ -44,6 +50,10 @@ namespace RTSEngine.Graphics {
             get;
             set;
         }
+        public Minimap Minimap {
+            get;
+            private set;
+        }
 
         // All The Unit Models To Render
         public List<RTSUnitModel> NonFriendlyUnitModels {
@@ -62,17 +72,28 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        private Dictionary<int, bool> beenViewed;
 
         // Effects
-        private BasicEffect fxSelection;
+        private BasicEffect fxSimple;
         private RTSFXEntity fxAnim;
         private RTSFXMap fxMap;
 
         // The Friendly Team To Be Visualizing
         private int teamIndex;
+        private InputController teamInput;
+        public Texture2D SelectionCircleTexture {
+            get;
+            set;
+        }
+
 
         // Particle Effects
         private ParticleRenderer pRenderer;
+        public RTSUI RTSUI {
+            get;
+            private set;
+        }
 
         // Graphics Data To Dispose
         private readonly ConcurrentBag<IDisposable> toDispose;
@@ -86,19 +107,20 @@ namespace RTSEngine.Graphics {
             FriendlyUnitModels = new List<RTSUnitModel>();
             NonFriendlyBuildingModels = new List<RTSBuildingModel>();
             FriendlyBuildingModels = new List<RTSBuildingModel>();
+            beenViewed = new Dictionary<int, bool>();
 
             tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
 
             fxMap = new RTSFXMap(LoadEffect(fxMapFile));
 
-            fxSelection = CreateEffect();
-            fxSelection.LightingEnabled = false;
-            fxSelection.FogEnabled = false;
-            fxSelection.TextureEnabled = false;
-            fxSelection.VertexColorEnabled = true;
-            fxSelection.World = Matrix.Identity;
-            fxSelection.Texture = tPixel;
+            fxSimple = CreateEffect();
+            fxSimple.LightingEnabled = false;
+            fxSimple.FogEnabled = false;
+            fxSimple.TextureEnabled = false;
+            fxSimple.VertexColorEnabled = true;
+            fxSimple.World = Matrix.Identity;
+            fxSimple.Texture = tPixel;
 
             fxAnim = new RTSFXEntity(LoadEffect(fxAnimFile));
             fxAnim.World = Matrix.Identity;
@@ -112,6 +134,7 @@ namespace RTSEngine.Graphics {
             MouseEventDispatcher.OnMouseMotion += OnMouseMove;
 
             pRenderer = new ParticleRenderer();
+            Minimap = new Minimap();
         }
         public void Dispose() {
             MouseEventDispatcher.OnMousePress -= OnMousePress;
@@ -124,6 +147,9 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < td.Length; i++) {
                 td[i].Dispose();
                 td[i] = null;
+            }
+            if(RTSUI != null) {
+                RTSUI.Dispose();
             }
         }
 
@@ -200,34 +226,57 @@ namespace RTSEngine.Graphics {
         #endregion
 
         public void HookToGame(GameState state, int ti, Camera camera, FileInfo mapFile) {
+            // Get The Team To Be Visualized
+            teamIndex = ti;
+            teamInput = state.teams[teamIndex].Input;
+            SelectionCircleTexture = LoadTexture2D(@"Content\Textures\SelectionCircle.png");
+
             // Get The Camera
             Camera = camera;
 
             // Create The Map
-            teamIndex = ti;
             Heightmap map = state.Map;
-            Map = HeightmapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, mapFile);
+            Map = MapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, mapFile);
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
 
             // Hook FOW
             state.CGrid.OnFOWChange += OnFOWChange;
+            Minimap.Hook(this, state, ti);
+
+            // Create UI
+            RTSUI = new RTSUI(this, "Courier New", 32, 140);
+            RTSUI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
         }
         public void LoadTeamVisuals(GameState state, VisualTeam vt) {
             RTSTeam team = state.teams[vt.TeamIndex];
-            team.ColorScheme = vt.ColorScheme;
             RTSRaceData res = vt.RaceFileInfo;
+
+            // Set Color Scheme Appropriately
+            team.ColorScheme = vt.ColorScheme;
+
+            // Create Unit Graphics
+            var ums = vt.TeamIndex == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
             for(int i = 0; i < team.race.activeUnits.Length; i++) {
                 RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, res.UnitTypes[i]);
                 uModel.Hook(this, state, vt.TeamIndex, team.race.activeUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
-                NonFriendlyUnitModels.Add(uModel);
+                ums.Add(uModel);
             }
+
+            // Create Building Graphics
+            var bms = vt.TeamIndex == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
             for(int i = 0; i < team.race.activeBuildings.Length; i++) {
                 RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.activeBuildings[i].Index, res.BuildingTypes[i]);
                 bModel.Hook(this, state, vt.TeamIndex, team.race.activeBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
-                NonFriendlyBuildingModels.Add(bModel);
+                bms.Add(bModel);
+            }
+
+            if(vt.TeamIndex != teamIndex) {
+                team.OnBuildingSpawn += (b) => {
+                    beenViewed.Add(b.UUID, false);
+                };
             }
         }
         private void OnFOWChange(int x, int y, int p, FogOfWar f) {
@@ -246,25 +295,58 @@ namespace RTSEngine.Graphics {
             }
         }
 
+        public void UpdateSelections(out VertexPositionTexture[] verts, out int[] inds) {
+            // Check If We Need To Render Any Selected Entities
+            if(teamInput.selected.Count < 1) {
+                verts = null;
+                inds = null;
+                return;
+            }
+
+            // Build The Selections
+            verts = new VertexPositionTexture[teamInput.selected.Count * 4];
+            int i = 0;
+            foreach(var e in teamInput.selected) {
+                Vector2 c = e.GridPosition;
+                float r = e.CollisionGeometry.BoundingRadius * SELECTION_RADIUS_MODIFIER;
+                float h = e.Height;
+                h += (e.BBox.Max.Y - e.BBox.Min.Y) * SELECTION_HEIGHT_PLACEMENT;
+                verts[i++] = new VertexPositionTexture(new Vector3(c.X - r, h, c.Y - r), Vector2.Zero);
+                verts[i++] = new VertexPositionTexture(new Vector3(c.X + r, h, c.Y - r), Vector2.UnitX);
+                verts[i++] = new VertexPositionTexture(new Vector3(c.X - r, h, c.Y + r), Vector2.UnitY);
+                verts[i++] = new VertexPositionTexture(new Vector3(c.X + r, h, c.Y + r), Vector2.One);
+            }
+
+            inds = new int[teamInput.selected.Count * 6];
+            for(int vi = 0, ii = 0; vi < verts.Length; ) {
+                inds[ii++] = vi + 0;
+                inds[ii++] = vi + 1;
+                inds[ii++] = vi + 2;
+                inds[ii++] = vi + 2;
+                inds[ii++] = vi + 1;
+                inds[ii++] = vi + 3;
+                vi += 4;
+            }
+        }
         public void UpdateVisible(CollisionGrid cg) {
             // All Team Friendly Units Are Visible
             BoundingFrustum frustum = new BoundingFrustum(Camera.View * Camera.Projection);
 
             // Update Units
-            Predicate<RTSUnit> fFV = (u) => {
+            Predicate<RTSUnit> fFVU = (u) => {
                 return frustum.Intersects(u.BBox);
             };
             foreach(var um in FriendlyUnitModels)
-                um.UpdateInstances(G, GameplayController.IsUnitDead, fFV);
+                um.UpdateInstances(G, GameplayController.IsUnitDead, fFVU);
 
-            Predicate<RTSUnit> fNFV = (u) => {
+            Predicate<RTSUnit> fNFVU = (u) => {
                 Point up = HashHelper.Hash(u.GridPosition, cg.numCells, cg.size);
                 if(cg.GetFogOfWar(up.X, up.Y, teamIndex) != FogOfWar.Active)
                     return false;
                 return frustum.Intersects(u.BBox);
             };
             foreach(var um in NonFriendlyUnitModels)
-                um.UpdateInstances(G, GameplayController.IsUnitDead, fNFV);
+                um.UpdateInstances(G, GameplayController.IsUnitDead, fNFVU);
 
             // Update Buildings
             Predicate<RTSBuilding> fFVB = (b) => {
@@ -275,9 +357,15 @@ namespace RTSEngine.Graphics {
 
             Predicate<RTSBuilding> fNFVB = (b) => {
                 Point up = HashHelper.Hash(b.GridPosition, cg.numCells, cg.size);
-                if(cg.GetFogOfWar(up.X, up.Y, teamIndex) == FogOfWar.Nothing)
-                    return false;
-                return frustum.Intersects(b.BBox);
+                switch(cg.GetFogOfWar(up.X, up.Y, teamIndex)) {
+                    case FogOfWar.Passive:
+                        return beenViewed[b.UUID];
+                    case FogOfWar.Active:
+                        beenViewed[b.UUID] = true;
+                        return frustum.Intersects(b.BBox);
+                    default:
+                        return false;
+                }
             };
             Predicate<RTSBuilding> fNFRB = (b) => {
                 Point up = HashHelper.Hash(b.GridPosition, cg.numCells, cg.size);
@@ -302,20 +390,25 @@ namespace RTSEngine.Graphics {
             pRenderer.Update(np, dt);
         }
 
+        public void Update(GameState state) {
+            RTSUI.UpdateButtons(state);
+            if(Map.Reset) Map.ApplyFOW();
+            Minimap.Refresh(this);
+        }
+
         // Rendering Passes
         public void Draw(GameState s, float dt) {
             G.Clear(Color.Black);
 
-            DrawMap();
+            DrawMap(Camera.View * Camera.Projection);
             // TODO: Draw Static
             UpdateVisible(s.CGrid);
             DrawBuildings();
             DrawAnimated();
+            DrawSelectionCircles(s.teams[teamIndex].ColorScheme.Secondary);
             if(drawBox) DrawSelectionBox();
         }
-        private void DrawMap() {
-            if(Map.Reset) Map.ApplyFOW();
-
+        public void DrawMap(Matrix mVP) {
             // Set States
             G.DepthStencilState = DepthStencilState.Default;
             G.RasterizerState = RasterizerState.CullCounterClockwise;
@@ -323,7 +416,7 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[0] = SamplerState.LinearClamp;
 
             // Set Camera
-            fxMap.VP = Camera.View * Camera.Projection;
+            fxMap.VP = mVP;
 
             // Primary Map Model
             if(Map.TrianglesPrimary > 0) {
@@ -358,6 +451,15 @@ namespace RTSEngine.Graphics {
                 buildingModel.SetInstances(G);
                 buildingModel.DrawInstances(G);
             }
+            foreach(RTSBuildingModel buildingModel in FriendlyBuildingModels) {
+                fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
+                fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
+                fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
+                fxAnim.CTertiary = buildingModel.ColorScheme.Tertiary;
+                fxAnim.ApplyPassBuilding();
+                buildingModel.SetInstances(G);
+                buildingModel.DrawInstances(G);
+            }
         }
         private void DrawAnimated() {
             // Set Camera
@@ -376,15 +478,27 @@ namespace RTSEngine.Graphics {
                 unitModel.SetInstances(G);
                 unitModel.DrawInstances(G);
             }
+            foreach(RTSUnitModel unitModel in FriendlyUnitModels) {
+                fxAnim.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
+                fxAnim.CPrimary = unitModel.ColorScheme.Primary;
+                fxAnim.CSecondary = unitModel.ColorScheme.Secondary;
+                fxAnim.CTertiary = unitModel.ColorScheme.Tertiary;
+                fxAnim.ApplyPassUnit();
+                unitModel.SetInstances(G);
+                unitModel.DrawInstances(G);
+            }
 
             // Cause XNA Is Retarded Like That
             G.VertexTextures[0] = null;
             G.VertexSamplerStates[0] = SamplerState.LinearClamp;
         }
         private void DrawSelectionBox() {
+            fxSimple.TextureEnabled = false;
+            fxSimple.VertexColorEnabled = true;
+
             Vector2 ss = new Vector2(G.Viewport.TitleSafeArea.Width, G.Viewport.TitleSafeArea.Height);
-            fxSelection.View = Matrix.CreateLookAt(new Vector3(ss / 2, -1), new Vector3(ss / 2, 0), Vector3.Down);
-            fxSelection.Projection = Matrix.CreateOrthographic(ss.X, ss.Y, 0, 2);
+            fxSimple.View = Matrix.CreateLookAt(new Vector3(ss / 2, -1), new Vector3(ss / 2, 0), Vector3.Down);
+            fxSimple.Projection = Matrix.CreateOrthographic(ss.X, ss.Y, 0, 2);
 
             G.DepthStencilState = DepthStencilState.None;
             G.BlendState = BlendState.NonPremultiplied;
@@ -392,13 +506,43 @@ namespace RTSEngine.Graphics {
 
             Vector3 min = new Vector3(Vector2.Min(start, end), 0);
             Vector3 max = new Vector3(Vector2.Max(start, end), 0);
-            fxSelection.CurrentTechnique.Passes[0].Apply();
+            fxSimple.CurrentTechnique.Passes[0].Apply();
             G.DrawUserPrimitives(PrimitiveType.TriangleStrip, new VertexPositionColor[] {
                     new VertexPositionColor(min, new Color(0f, 0, 1f, 0.3f)),
                     new VertexPositionColor(new Vector3(max.X, min.Y, 0), new Color(1f, 0, 1f, 0.3f)),
                     new VertexPositionColor(new Vector3(min.X, max.Y, 0), new Color(1f, 0, 1f, 0.3f)),
                     new VertexPositionColor(max, new Color(1f, 0, 0f, 0.3f)),
                 }, 0, 2, VertexPositionColor.VertexDeclaration);
+        }
+        private void DrawSelectionCircles(Vector3 c) {
+            if(SelectionCircleTexture == null)
+                return;
+            VertexPositionTexture[] verts;
+            int[] inds;
+            UpdateSelections(out verts, out inds);
+            if(verts == null || inds == null)
+                return;
+
+            fxSimple.TextureEnabled = true;
+            fxSimple.VertexColorEnabled = false;
+
+            G.SamplerStates[0] = SamplerState.LinearClamp;
+            G.DepthStencilState = DepthStencilState.DepthRead;
+            G.RasterizerState = RasterizerState.CullCounterClockwise;
+            G.BlendState = BlendState.Additive;
+
+            fxSimple.Texture = SelectionCircleTexture;
+            fxSimple.World = Matrix.Identity;
+            fxSimple.View = Camera.View;
+            fxSimple.Projection = Camera.Projection;
+            fxSimple.DiffuseColor = c;
+            fxSimple.CurrentTechnique.Passes[0].Apply();
+
+            G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionTexture.VertexDeclaration);
+        }
+
+        public void DrawUI(SpriteBatch batch) {
+            RTSUI.Draw(batch);
         }
 
         // Selection Box Handling

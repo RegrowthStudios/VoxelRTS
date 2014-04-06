@@ -65,6 +65,7 @@ namespace RTS {
             playController = new GameplayController();
             gameInput = state.teams[0].Input as PlayerInputController;
             gameInput.Camera = camera;
+            gameInput.UI = renderer.RTSUI;
             playController.Init(state);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
@@ -102,9 +103,11 @@ namespace RTS {
         public override void Draw(GameTime gameTime) {
             if(!pauseRender) {
                 camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
+                renderer.Update(state);
                 renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
 
                 // TODO: Draw UI
+                renderer.DrawUI(SB);
             }
 
             if(DevConsole.IsActivated) {

@@ -126,12 +126,16 @@ namespace BlisterUI.Widgets {
         protected abstract void DisposeOther();
 
         public abstract void PreInit();
-        
+
         public abstract void AddAllDrawables(WidgetRenderer r);
         public abstract void RemoveAllDrawables(WidgetRenderer r);
 
         public Point GetOffset(int x, int y) {
             return new Point(x - X, y - Y);
+        }
+        public bool Inside(int x, int y) {
+            Point p = GetOffset(x, y);
+            return p.X >= 0 && p.X < Width && p.Y >= 0 && p.Y < Height;
         }
         public bool Inside(int x, int y, out Vector2 ratio) {
             Point p = GetOffset(x, y);

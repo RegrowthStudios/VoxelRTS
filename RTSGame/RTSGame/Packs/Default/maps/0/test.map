@@ -6,4 +6,7 @@ HMP         [map.obj]
 HTP         [map.png]
 
 // The Size Of The Map
-SIZE        [200, 8, 200]
+HEIGHT      [5]
+
+// Region Key Information
+REGIONS     [Region5x5.png]

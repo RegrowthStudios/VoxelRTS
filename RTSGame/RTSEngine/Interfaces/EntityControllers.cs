@@ -122,4 +122,9 @@ namespace RTSEngine.Interfaces {
         public abstract void DecideAction(GameState g, float dt);
         public abstract void ApplyAction(GameState g, float dt);
     }
+
+    // A Button That Will Be Shown
+    public abstract class ACRTSButton {
+        public abstract void Apply(GameState s);
+    }
 }

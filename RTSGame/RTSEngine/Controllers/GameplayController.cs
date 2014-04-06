@@ -180,7 +180,8 @@ namespace RTSEngine.Controllers {
         private void ApplyInput(GameState s, float dt, SelectEvent e) {
             RTSTeam team = s.teams[e.Team];
             team.Input.selected.Clear();
-            team.Input.selected.AddRange(e.Selected);
+            if(e.Selected != null && e.Selected.Count > 0)
+                team.Input.selected.AddRange(e.Selected);
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
             RTSTeam team = s.teams[e.Team];

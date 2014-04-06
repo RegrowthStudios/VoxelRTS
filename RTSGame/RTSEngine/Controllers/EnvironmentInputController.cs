@@ -45,7 +45,7 @@ namespace RTSEngine.Controllers {
         private const int MAX_OFFSET = 20;
         private const int MIN_RECOVER = 5;
         private const int MAX_RECOVER = 10;
-        
+
         public EnvironmentInputController(GameState g, int ti)
             : base(g, ti) {
             grid = g.IGrid;
@@ -115,23 +115,24 @@ namespace RTSEngine.Controllers {
             }
         }
 
+        // Recovery Phase
         private void Recover() {
             foreach(var r in GameState.Regions) {
                 if(r.RegionImpact < RECOVER_IMPACT && r.RegionImpact > 0) {
                     // Randomly Choose The Location Of A Starting Tree
                     int tp = random.Next(treePositions.Length);
                     Vector2 treePos = treePositions[tp];
-                    Point treeC = HashHelper.Hash(treePos,GameState.CGrid.numCells,GameState.CGrid.size);
-                    Point treeI = HashHelper.Hash(treePos,grid.numCells,grid.size);
+                    Point treeC = HashHelper.Hash(treePos, GameState.CGrid.numCells, GameState.CGrid.size);
+                    Point treeI = HashHelper.Hash(treePos, grid.numCells, grid.size);
                     // Spawn Trees Around The Starting Tree
-                    for(int x = -1; x <= 1; x+=2) {
-                        for (int y = -1; y <= 1; y+=2) {
+                    for(int x = -1; x <= 1; x += 2) {
+                        for(int y = -1; y <= 1; y += 2) {
                             Point newTreeC = new Point(treeC.X + x, treeC.Y + y);
                             Vector2 newTreePos = new Vector2(newTreeC.X * GameState.CGrid.size.X, newTreeC.Y * GameState.CGrid.size.Y);
                             Point newTreeI = HashHelper.Hash(newTreePos, grid.numCells, grid.size);
-                            foreach (var t in GameState.IGrid.ImpactGenerators[newTreeI.X,newTreeI.Y]) {
+                            foreach(var t in GameState.IGrid.ImpactGenerators[newTreeI.X, newTreeI.Y]) {
                                 Point tc = HashHelper.Hash(t.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
-                                if (!Point.Equals(tc, newTreeC) && tc.X > -1 && tc.Y > -1 && tc.X < GameState.CGrid.numCells.X && tc.Y < GameState.CGrid.numCells.Y) {
+                                if(!Point.Equals(tc, newTreeC) && tc.X > -1 && tc.Y > -1 && tc.X < GameState.CGrid.numCells.X && tc.Y < GameState.CGrid.numCells.Y) {
                                     AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, newTreeC));
                                     r.AddToRegionImpact(-tree.Data.Impact);
                                 }
@@ -153,6 +154,7 @@ namespace RTSEngine.Controllers {
             }
         }
 
+        // Disaster Phase
         private void SpawnUnits() {
             foreach(var r in GameState.Regions) {
                 // Decide Level
@@ -187,7 +189,7 @@ namespace RTSEngine.Controllers {
                             numSpawn = random.Next(numSpawns[level - 1, i].X, numSpawns[level - 1, i].Y);
                             offset.X = random.Next(MAX_OFFSET);
                             offset.Y = random.Next(MAX_OFFSET);
-                            for (int j = 0; j < numSpawn; j++) {
+                            for(int j = 0; j < numSpawn; j++) {
                                 AddEvent(new SpawnUnitEvent(TeamIndex, spawns[i].Index, spawnPos + offset));
                             }
                     }

@@ -26,6 +26,9 @@ namespace RTSEngine.Data.Team {
         // Time To Build The Building
         public int BuildTime;
 
+        // View Radius
+        public int SightRadius;
+
         // ICollidableShape of The Building
         public Point GridSize;
         public ICollidable ICollidableShape;

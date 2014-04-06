@@ -105,12 +105,6 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        // Activity Of This Building // TODO: FIX
-        public Queue<RTSUnit> UnitQueue {
-            get;
-            private set;
-        }
-
         private ACBuildingActionController aController;
         public ACBuildingActionController ActionController {
             get { return aController; }
@@ -136,15 +130,17 @@ namespace RTSEngine.Data.Team {
 
         // Constructor
         public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {
+            // Identification
+            UUID = UUIDGenerator.GetUUID();
             Team = team;
-            BuildingData = data;
             gridPos = position;
+
+            BuildingData = data;
             height = 0;
             Health = BuildingData.Health;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
             ViewDirection = Vector2.UnitX;
             CollisionGeometry.Center = GridPosition;
-            UnitQueue = new Queue<RTSUnit>();
         }
 
         // Applies Damage To Health
@@ -163,9 +159,11 @@ namespace RTSEngine.Data.Team {
                 OnDestruction(this);
         }
 
+        Queue<RTSUnit> UnitQueue;
         // Enqueue New Unit
         public void EnqueueUnit(RTSUnit unit) {
             UnitQueue.Enqueue(unit);
         }
+
     }
 }

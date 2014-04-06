@@ -20,6 +20,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxMaxCount = RegexHelper.GenerateInteger("MAXCOUNT");
         private static readonly Regex rgxImpact = RegexHelper.GenerateInteger("IMPACT");
         private static readonly Regex rgxBuildTime = RegexHelper.GenerateInteger("BUILDTIME");
+        private static readonly Regex rgxSightRadius = RegexHelper.GenerateInteger("SIGHTRADIUS");
         private static readonly Regex rgxGridSize = RegexHelper.GenerateVec2Int("GRIDSIZE");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
         private static readonly Regex rgxBBMax = RegexHelper.GenerateVec3("BBOXMAX");
@@ -83,6 +84,7 @@ namespace RTSEngine.Data.Parsers {
                 rgxMaxCount.Match(mStr),
                 rgxImpact.Match(mStr),
                 rgxBuildTime.Match(mStr),
+                rgxSightRadius.Match(mStr),
                 rgxGridSize.Match(mStr),
                 rgxBBMin.Match(mStr),
                 rgxBBMax.Match(mStr),
@@ -101,6 +103,7 @@ namespace RTSEngine.Data.Parsers {
             data.MaxCount = RegexHelper.ExtractInt(mp[ri++]);
             data.Impact = RegexHelper.ExtractInt(mp[ri++]);
             data.BuildTime = RegexHelper.ExtractInt(mp[ri++]);
+            data.SightRadius = RegexHelper.ExtractInt(mp[ri++]);
             buf = RegexHelper.ExtractVec2I(mp[ri++]);
             data.GridSize.X = buf[0];
             data.GridSize.Y = buf[1];

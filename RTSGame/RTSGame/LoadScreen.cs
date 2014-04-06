@@ -178,10 +178,11 @@ namespace RTS {
         private void WorkThread() {
             // Grab The Initialization Info
             loadData = game.LobbyScreen.InitInfo;
+            var races = game.LobbyScreen.Races;
 
             // Build The Local Game State
             LoadedState = new GameState();
-            GameEngine.BuildLocal(LoadedState, LoadData);
+            GameEngine.BuildLocal(LoadedState, LoadData, races);
 
             // Create Camera
             LoadedCamera = new Camera(G.Viewport);
@@ -198,7 +199,7 @@ namespace RTS {
 
                 // Create The Visual Data
                 vt.TeamIndex = i;
-                vt.RaceFileInfo = loadData.Races[td.Race];
+                vt.RaceFileInfo = races[td.Race];
                 vt.ColorScheme = td.Colors;
                 LoadedRenderer.LoadTeamVisuals(LoadedState, vt);
             }

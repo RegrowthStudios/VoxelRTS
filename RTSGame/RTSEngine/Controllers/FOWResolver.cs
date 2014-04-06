@@ -37,7 +37,7 @@ namespace RTSEngine.Controllers {
         private int[,] heat;
 
         public FOWTask(GameState s, int tIndex)
-            : base(s.teams[tIndex].units.Count) {
+            : base(s.teams[tIndex].units.Count + s.teams[tIndex].buildings.Count) {
             teamIndex = tIndex;
             state = s;
             heat = new int[s.CGrid.numCells.X, s.CGrid.numCells.Y];
@@ -110,6 +110,18 @@ namespace RTSEngine.Controllers {
             for(int i = 0; i < team.units.Count; i++) {
                 Point p = HashHelper.Hash(team.units[i].GridPosition, cg.numCells, cg.size);
                 int vRadius = (int)(team.units[i].UnitData.BaseCombatData.MaxRange / cg.cellSize);
+                if(val[p.X, p.Y] < vRadius) {
+                    queue.Enqueue(new FOWPoint(p.X + 1, p.Y, TravelDirection.PX, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X - 1, p.Y, TravelDirection.NX, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y + 1, TravelDirection.PY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y - 1, TravelDirection.NY, vRadius));
+                    cg.SetFogOfWar(p.X, p.Y, teamIndex, FogOfWar.Active);
+                    val[p.X, p.Y] = vRadius;
+                }
+            }
+            for(int i = 0; i < team.buildings.Count; i++) {
+                Point p = HashHelper.Hash(team.buildings[i].GridPosition, cg.numCells, cg.size);
+                int vRadius = (int)(team.buildings[i].BuildingData.SightRadius / cg.cellSize);
                 if(val[p.X, p.Y] < vRadius) {
                     queue.Enqueue(new FOWPoint(p.X + 1, p.Y, TravelDirection.PX, vRadius));
                     queue.Enqueue(new FOWPoint(p.X - 1, p.Y, TravelDirection.NX, vRadius));
