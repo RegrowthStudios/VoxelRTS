@@ -91,6 +91,7 @@ namespace RTSEngine.Data.Team {
         protected Queue<RTSUnit> unitQueue;
         public Queue<RTSUnit> UnitQueue {
             get;
+            set;
         }
 
         // Default Spawn Position For Units
