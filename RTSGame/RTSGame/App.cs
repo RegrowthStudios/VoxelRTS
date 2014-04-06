@@ -41,6 +41,10 @@ namespace RTS {
             get;
             private set;
         }
+        public PressEnterScreen PressEnterScreen {
+            get;
+            private set;
+        }
         public LoginScreen LoginScreen {
             get;
             private set;
@@ -84,6 +88,7 @@ namespace RTS {
 
             CompanyScreen = new RTS.CompanyScreen();
             InduZtryScreen = new RTS.InduZtryScreen(2);
+            PressEnterScreen = new RTS.PressEnterScreen();
             LoginScreen = new RTS.LoginScreen();
             MenuScreen = new RTS.MenuScreen();
             LobbyScreen = new RTS.LobbyScreen();
@@ -110,6 +115,7 @@ namespace RTS {
                 new BlisterUI.FalseFirstScreen(1),
                 CompanyScreen,
                 InduZtryScreen,
+                PressEnterScreen,
                 LoginScreen,
                 MenuScreen,
                 LobbyScreen,

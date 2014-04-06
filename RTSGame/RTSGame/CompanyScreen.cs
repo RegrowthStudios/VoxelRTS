@@ -54,8 +54,12 @@ namespace RTS {
             seiFire = seFire.CreateInstance();
             seiFire.Play();
             seiFire.Volume = 0f;
+
+            KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;
         }
         public override void OnExit(GameTime gameTime) {
+            KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
+
             fx.Dispose();
             tNoise.Dispose();
             tColor.Dispose();
@@ -107,6 +111,16 @@ namespace RTS {
 
             if(et > SCREEN_MAX_TIME)
                 State = ScreenState.ChangeNext;
+        }
+
+        void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
+            switch(args.KeyCode) {
+                case Keys.Space:
+                case Keys.Enter:
+                case Keys.Escape:
+                    State = ScreenState.ChangeNext;
+                    break;
+            }
         }
     }
 }
