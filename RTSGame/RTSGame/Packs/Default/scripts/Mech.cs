@@ -29,7 +29,6 @@ namespace RTS.Mech.Squad {
          * SQUAD LOGIC SECTION
          */ 
         // Decide Where Units In This Squad Should Go When Moving
-        // TODO: Make Units Go To Squad Wapoint If Their Posts Are Bad
         public override void ApplyMovementFormation(int movementOrder) {
             switch(movementOrder) {
                 case BehaviorFSM.BoxFormation:
@@ -174,9 +173,21 @@ namespace RTS.Mech.Squad {
                         if(rotatedPosts.ContainsKey(unit.UUID)) {
                             Vector2 post = RotateFormation(a)[unit.UUID];
                             // Use The Next Squad Waypoint And The Post To Assign A Waypoint
-                            unitWaypoints[unit.UUID] = currWaypoint + post;
-                            CurrentWaypointIndices[unit.UUID]--;
+                            Vector2 candidate = currWaypoint + post;
+                            CollisionGrid cg = g.CGrid;
+                            Point unitGoal = HashHelper.Hash(candidate, cg.numCells, cg.size);
+                            
+                            //bool occupied = false;
+                            //foreach(var otherUnit in squad.Units) {
+                            //    Point otherUnitLoc = HashHelper.Hash(otherUnit.GridPosition, cg.numCells, cg.size);
+                            //    occupied &= unitGoal.X == otherUnitLoc.X && unitGoal.Y == otherUnitLoc.Y;
+                            //}
+
+                            // Make Units Go To Squad Waypoint If Their Posts Are Bad
+                            unitWaypoints[unit.UUID] = cg.GetCollision(unitGoal.X, unitGoal.Y) ? currWaypoint : candidate;
                             SetDoMove(unit);
+                            if(!doMove[unit.UUID])
+                                CurrentWaypointIndices[unit.UUID]--;
                         }
                     }
                     if(!doMove.ContainsKey(unit.UUID) || !doMove[unit.UUID] && ShouldRest(unit))
