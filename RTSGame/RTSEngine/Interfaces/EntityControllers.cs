@@ -25,8 +25,8 @@ namespace RTSEngine.Interfaces {
         public const int TargetAggressively = TargetPassively + 1;
 
         // Combat Order Codes - Will Influence Behavior While In Combat
-        public const int UseRangedAttack = 0;
-        public const int UseMeleeAttack = UseRangedAttack + 1;
+        public const int UseMeleeAttack = 0;
+        public const int UseRangedAttack = UseMeleeAttack + 1;
 
         // Movement Order Codes - Will Influence Movement Behavior
         public const int FreeFormation = 0;

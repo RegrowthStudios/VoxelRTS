@@ -198,21 +198,12 @@ namespace RTSEngine.Controllers {
             }
             if(squad != null) {
                 AddSquadTask(s, squad);
-                // Setup Pathfinding Query
-                foreach(var squadQuery in squadQueries) {
-                    if(squadQuery.squad.Equals(squad)) {
-                        squadQuery.query.IsOld = true;
-                    }
-                }
+                squad.ActionController = team.race.scAction.CreateInstance<ACSquadActionController>();
                 squad.MovementController = team.race.scMovement.CreateInstance<ACSquadMovementController>();
-                squad.RecalculateGridPosition();
-                PathQuery query = new PathQuery(squad.GridPosition, e.Waypoint);
-                squadQueries.Add(new SquadQuery(squad, query));
-                pathfinder.Add(query);
-                // TODO: Get The Formation Order From The Input Event
-                squad.MovementController.ApplyMovementFormation(BehaviorFSM.FreeFormation);
+                SendPathQuery(squad, e);
             }
         }
+
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
             RTSTeam team = s.teams[e.Team];
             List<IEntity> selected = team.Input.selected;
@@ -229,8 +220,10 @@ namespace RTSEngine.Controllers {
                 if(squad == null) return;
                 AddSquadTask(s, squad);
                 squad.ActionController = team.race.scAction.CreateInstance<ACSquadActionController>();
-                squad.TargettingController = team.race.scTargetting.CreateInstance<ACSquadTargettingController>();
-                squad.TargettingController.Target = e.Target as RTSUnit;
+                squad.TargetingController = team.race.scTargetting.CreateInstance<ACSquadTargetingController>();
+                squad.MovementController = team.race.scMovement.CreateInstance<ACSquadMovementController>();
+                squad.TargetingController.Target = e.Target as RTSUnit;
+                SendPathQuery(squad, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
@@ -276,6 +269,28 @@ namespace RTSEngine.Controllers {
                 tbEntityDecisions.RemoveTask(btu);
             };
             tbEntityDecisions.AddTask(btu);
+        }
+
+        // Setup And Send Pathfinding Query
+        private void SendPathQuery(RTSSquad squad, GameInputEvent e) {
+            foreach(var squadQuery in squadQueries) {
+                if(squadQuery.squad.Equals(squad)) {
+                    squadQuery.query.IsOld = true;
+                }
+            }
+            squad.RecalculateGridPosition();
+            PathQuery query = null;
+            var swe = e as SetWayPointEvent;
+            var ste = e as SetTargetEvent;
+            if(swe != null)
+                query = new PathQuery(squad.GridPosition, swe.Waypoint);
+            else if(ste != null)
+                query = new PathQuery(squad.GridPosition, ste.Target.GridPosition);
+            squadQueries.Add(new SquadQuery(squad, query));
+            pathfinder.Add(query);
+            // TODO: Get The Formation Order From The Input Event
+            if(squad.MovementController != null)
+                squad.MovementController.ApplyMovementFormation(BehaviorFSM.BoxFormation);
         }
 
         // Apply Results Of Any Finished Pathfinding

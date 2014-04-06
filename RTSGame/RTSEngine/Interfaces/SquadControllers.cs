@@ -88,7 +88,7 @@ namespace RTSEngine.Interfaces {
     }
 
     // Controls The Targetting That A Squad Performs
-    public abstract class ACSquadTargettingController : ACSquadController {
+    public abstract class ACSquadTargetingController : ACSquadController {
         // A Squad Target
         protected RTSSquad targetSquad;
 
