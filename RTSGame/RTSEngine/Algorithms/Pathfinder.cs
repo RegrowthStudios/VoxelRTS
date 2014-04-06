@@ -115,15 +115,15 @@ namespace RTSEngine.Algorithms {
 
         // Return The Two Aligned Locations One Could Cross Instead Of Moving Diagonally From P to N
         private IEnumerable<Point> DiagDecomp(Point p, Point n) {
-            if(p.X < n.X && p.Y < n.Y) {
+            if(n.X < p.X && n.Y < p.Y) {
                 yield return new Point(p.X - 1, p.Y);
                 yield return new Point(p.X, p.Y - 1);
             }
-            else if(p.X < n.X) {
+            else if(n.X < p.X) {
                 yield return new Point(p.X - 1, p.Y);
                 yield return new Point(p.X, p.Y + 1);
             }
-            else if(p.Y < n.Y) {
+            else if(n.Y < p.Y) {
                 yield return new Point(p.X + 1, p.Y);
                 yield return new Point(p.X, p.Y - 1);
             }

@@ -66,12 +66,31 @@ namespace RTSEngine.Interfaces {
 
         // Given An Angle, Rotate The Formation Assignments
         public Dictionary<int, Vector2> RotateFormation(float a) {
-            var rfa = new Dictionary<int, Vector2>(); 
+            var rotatedFormations = new List<Vector2>();
             Matrix mr = Matrix.CreateRotationZ(a);
             foreach(var fa in formationAssignments) {
                 int uuid = fa.Key;
                 Vector2 post = fa.Value;
-                rfa[uuid] = Vector2.TransformNormal(post, mr);
+                rotatedFormations.Add(Vector2.TransformNormal(post, mr));
+            }
+            // Re-assign The Units To Posts In The Rotated Formation
+            var rfa = new Dictionary<int, Vector2>();
+            bool[] assigned = new bool[rotatedFormations.Count];
+            foreach(var unit in squad.Units) {
+                Vector2 pos = unit.GridPosition;
+                float minDistSq = float.MaxValue;
+                int assignment = 0;
+                for(int i = 0; i < rotatedFormations.Count; i++) {
+                    float distSq = Vector2.DistanceSquared(pos, rotatedFormations[i]);
+                    if(!assigned[i] && distSq < minDistSq) {
+                        minDistSq = distSq;
+                        assignment = i;
+                    }
+                }
+                if(assigned.Length > 0) {
+                    assigned[assignment] = true;
+                    rfa[unit.UUID] = rotatedFormations[assignment];
+                }
             }
             return rfa;
         }

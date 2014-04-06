@@ -171,20 +171,19 @@ namespace RTS.Mech.Squad {
                         float a = (float)Math.Atan2(disp.Y, disp.X);
                         Dictionary<int, Vector2> rotatedPosts = RotateFormation(a);
                         if(rotatedPosts.ContainsKey(unit.UUID)) {
-                            Vector2 post = RotateFormation(a)[unit.UUID];
                             // Use The Next Squad Waypoint And The Post To Assign A Waypoint
-                            Vector2 candidate = currWaypoint + post;
+                            Vector2 post = currWaypoint + RotateFormation(a)[unit.UUID];
                             CollisionGrid cg = g.CGrid;
-                            Point unitGoal = HashHelper.Hash(candidate, cg.numCells, cg.size);
-                            
-                            //bool occupied = false;
-                            //foreach(var otherUnit in squad.Units) {
-                            //    Point otherUnitLoc = HashHelper.Hash(otherUnit.GridPosition, cg.numCells, cg.size);
-                            //    occupied &= unitGoal.X == otherUnitLoc.X && unitGoal.Y == otherUnitLoc.Y;
-                            //}
+                            Point unitGoal = HashHelper.Hash(post, cg.numCells, cg.size);
+
+                            bool occupied = false;
+                            foreach(var otherUnit in squad.Units) {
+                                Point otherUnitLoc = HashHelper.Hash(otherUnit.GridPosition, cg.numCells, cg.size);
+                                occupied &= unitGoal.X == otherUnitLoc.X && unitGoal.Y == otherUnitLoc.Y;
+                            }
 
                             // Make Units Go To Squad Waypoint If Their Posts Are Bad
-                            unitWaypoints[unit.UUID] = cg.GetCollision(unitGoal.X, unitGoal.Y) ? currWaypoint : candidate;
+                            unitWaypoints[unit.UUID] = occupied || cg.GetCollision(unitGoal.X, unitGoal.Y) ? currWaypoint : post;
                             SetDoMove(unit);
                             if(!doMove[unit.UUID])
                                 CurrentWaypointIndices[unit.UUID]--;
