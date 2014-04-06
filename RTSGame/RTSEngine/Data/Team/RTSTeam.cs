@@ -67,6 +67,10 @@ namespace RTSEngine.Data.Team {
         // Unit Addition And Removal
         public RTSUnit AddUnit(int type, Vector2 pos) {
             RTSUnit rui = new RTSUnit(this, race.units[type], pos);
+            rui.ActionController = race.units[type].DefaultActionController.CreateInstance<ACUnitActionController>();
+            rui.AnimationController = race.units[type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
+            rui.MovementController = race.units[type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
+            rui.CombatController = race.units[type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
             units.Add(rui);
             if(OnUnitSpawn != null)
                 OnUnitSpawn(rui);
@@ -82,6 +86,9 @@ namespace RTSEngine.Data.Team {
         // Squad Addition And Removal
         public RTSSquad AddSquad() {
             RTSSquad squad = new RTSSquad(this);
+            squad.ActionController = race.scAction.CreateInstance<ACSquadActionController>();
+            squad.MovementController = race.scMovement.CreateInstance<ACSquadMovementController>();
+            squad.TargettingController = race.scTargetting.CreateInstance<ACSquadTargettingController>();
             squads.Add(squad);
             if(OnSquadCreation != null)
                 OnSquadCreation(squad);
@@ -97,6 +104,7 @@ namespace RTSEngine.Data.Team {
         // Building Addition And Removal
         public RTSBuilding AddBuilding(int type, Vector2 pos) {
             RTSBuilding b = new RTSBuilding(this, race.buildings[type], pos);
+            b.ActionController = race.buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
             buildings.Add(b);
             if(OnBuildingSpawn != null)
                 OnBuildingSpawn(b);
