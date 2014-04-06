@@ -277,8 +277,9 @@ namespace RTS.Mech.Building {
                 buildTime -= dt;
                 // If Finished Building The Unit
                 if(buildTime < 0) {
-                    Building.Team.AddUnit(unit, building.GridPosition);
+                    building.Team.AddUnit(unit, building.GridPosition);
                     buildTime = 0;
+                    building.GenerateImpact(building.GridPosition, building.Team.race.units[unit].Impact);
                     unit = -1;
                 }
             }

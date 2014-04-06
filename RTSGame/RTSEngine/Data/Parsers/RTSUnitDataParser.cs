@@ -24,6 +24,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxSpeed = RegexHelper.GenerateNumber("SPEED");
         private static readonly Regex rgxCost = RegexHelper.GenerateVec2Int("COST");
         private static readonly Regex rgxBuildTime = RegexHelper.GenerateInteger("BUILDTIME");
+        private static readonly Regex rgxImpact = RegexHelper.GenerateInteger("IMPACT");
         private static readonly Regex rgxRadius = RegexHelper.GenerateNumber("RADIUS");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
         private static readonly Regex rgxBBMax = RegexHelper.GenerateVec3("BBOXMAX");
@@ -105,6 +106,7 @@ namespace RTSEngine.Data.Parsers {
             Match[] mp = {
                 rgxName.Match(mStr),
                 rgxHealth.Match(mStr),
+                rgxImpact.Match(mStr),
                 rgxBuildTime.Match(mStr),
                 rgxCost.Match(mStr),
                 rgxMaxCount.Match(mStr),
@@ -130,6 +132,7 @@ namespace RTSEngine.Data.Parsers {
             RTSUnitData data = new RTSUnitData();
             data.FriendlyName = RegexHelper.Extract(mp[ri++]);
             data.Health = RegexHelper.ExtractInt(mp[ri++]);
+            data.Impact = RegexHelper.ExtractInt(mp[ri++]);
             data.BuildTime = RegexHelper.ExtractInt(mp[ri++]);
             buf = RegexHelper.ExtractVec2I(mp[ri++]);
             data.CapitalCost = buf[0];
