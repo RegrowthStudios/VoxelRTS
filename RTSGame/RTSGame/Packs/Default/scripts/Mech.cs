@@ -272,15 +272,15 @@ namespace RTS.Mech.Building {
         }
 
         public override void ApplyAction(GameState g, float dt) {
-            // If Finished Building The Unit
-            if (buildTime < 0) {
-                Building.Team.AddUnit(unit, building.GridPosition);
-                buildTime = 0;
-                unit = -1;
-            }
             // If The Unit Is Still Being Produced
-            if (unit != null) {
+            if (unit >= 0) {
                 buildTime -= dt;
+                // If Finished Building The Unit
+                if(buildTime < 0) {
+                    Building.Team.AddUnit(unit, building.GridPosition);
+                    buildTime = 0;
+                    unit = -1;
+                }
             }
         }
     }
