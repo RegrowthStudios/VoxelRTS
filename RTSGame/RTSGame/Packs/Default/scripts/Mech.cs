@@ -256,14 +256,14 @@ namespace RTS.Mech.Unit {
     }
 }
 
-// TODO: Finish This Implementation
+// TODO: Verify
 namespace RTS.Mech.Building {
     public class Action : ACBuildingActionController {
         public float buildTime; // How Long It Takes To Finish Producing The Unit
         private RTSUnit unit; // Unit To Be Produced
+
         public override void DecideAction(GameState g, float dt) {
-            if (unit == null && Building.UnitQueue.Count > 0)
-            {
+            if (unit == null && Building.UnitQueue.Count > 0) {
                 unit = Building.UnitQueue.Dequeue();
                 buildTime = unit.UnitData.BuildTime;
             }
