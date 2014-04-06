@@ -21,8 +21,6 @@ namespace RTSEngine.Controllers {
         private int counter;
 
         private Vector2[] treePositions;
-<<<<<<< HEAD
-
         private int tree;
         public RTSBuildingData FloraData {
             get { return Team.race.buildings[tree]; }
@@ -31,10 +29,6 @@ namespace RTSEngine.Controllers {
         public RTSBuildingData OreData {
             get { return Team.race.buildings[ore]; }
         }
-=======
-        private IndexedBuildingType tree;
-        private IndexedBuildingType ore;
->>>>>>> 709822d17e75c30d8f3f0887013e7628b3318419
         private Point[,] numSpawns;
         private IndexedUnitType[] spawns;
         private int[] spawnCaps;
@@ -180,11 +174,11 @@ namespace RTSEngine.Controllers {
             foreach(var r in GameState.Regions) {
                 // Decide Level
                 int level;
-                if (r.RegionImpact > LEVEL_THREE)
+                if(r.RegionImpact > LEVEL_THREE)
                     level = 3;
-                else if (r.RegionImpact > LEVEL_TWO)
+                else if(r.RegionImpact > LEVEL_TWO)
                     level = 2;
-                else if (r.RegionImpact > LEVEL_ONE)
+                else if(r.RegionImpact > LEVEL_ONE)
                     level = 1;
                 else
                     level = 0;
@@ -202,40 +196,23 @@ namespace RTSEngine.Controllers {
                         int i = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
                         g = grid.ImpactGenerators[p.X, p.Y][i];
                     }
-<<<<<<< HEAD
-                    // Decide Level
-                    int level;
-                    if(r.RegionImpact > LEVEL_THREE)
-                        level = 3;
-                    else if(r.RegionImpact > LEVEL_TWO)
-                        level = 2;
-                    else if(r.RegionImpact > LEVEL_ONE)
-                        level = 1;
-                    else
-                        level = 0;
 
-=======
->>>>>>> 709822d17e75c30d8f3f0887013e7628b3318419
                     // Spawn Environmental Units
                     Vector2 spawnPos = g.GridPosition;
                     Vector2 offset;
                     int numSpawn;
-<<<<<<< HEAD
                     if(level != 0) {
                         // TODO: Why Was This Here
-                        for(int i = 0; i < numSpawns.GetLength(1); i++) {
-=======
-                    for (int i = 0; i < numSpawns.GetLength(1) && r.units.Count < spawnCaps[level - 1]; i++) {
->>>>>>> 709822d17e75c30d8f3f0887013e7628b3318419
+                        for(int i = 0; i < numSpawns.GetLength(1) && r.units.Count < spawnCaps[level - 1]; i++) {
                             numSpawn = random.Next(numSpawns[level - 1, i].X, numSpawns[level - 1, i].Y);
                             offset.X = random.Next(MAX_OFFSET);
                             offset.Y = random.Next(MAX_OFFSET);
                             for(int j = 0; j < numSpawn; j++) {
                                 AddEvent(new SpawnUnitEvent(TeamIndex, spawns[i].Index, spawnPos + offset));
                             }
+                        }
                     }
                 }
-
             }
         }
 
