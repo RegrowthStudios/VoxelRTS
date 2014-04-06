@@ -43,16 +43,27 @@ namespace RTSEngine.Graphics {
 
     #region Bullet Instancing
     public struct VertexBulletInstance : IVertexType {
+        #region Declaration
         public static readonly VertexDeclaration Declaration = new VertexDeclaration(
-            new VertexElement()
+            new VertexElement(sizeof(float) * 0, VertexElementFormat.Vector4, VertexElementUsage.Position, 1),
+            new VertexElement(sizeof(float) * 4, VertexElementFormat.Vector4, VertexElementUsage.Position, 2),
+            new VertexElement(sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.Position, 3),
+            new VertexElement(sizeof(float) * 12, VertexElementFormat.Vector4, VertexElementUsage.Position, 4),
+            new VertexElement(sizeof(float) * 16, VertexElementFormat.Color, VertexElementUsage.Color, 0)
         );
         public VertexDeclaration VertexDeclaration {
             get { return Declaration; }
         }
+        #endregion
 
         public Matrix Transform;
         public Color Tint;
-    } 
+
+        public VertexBulletInstance(Matrix m, Color c) {
+            Transform = m;
+            Tint = c;
+        }
+    }
     #endregion
     public class BulletParticle : Particle {
         public Vector3 origin;
