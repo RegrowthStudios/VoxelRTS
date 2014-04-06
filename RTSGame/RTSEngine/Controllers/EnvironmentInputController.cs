@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using RTSEngine.Data;
+using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using System;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     public class EnvironmentInputController : InputController {
@@ -20,8 +22,14 @@ namespace RTSEngine.Controllers {
 
         private Vector2[] treePositions;
 
-        private IndexedBuildingType tree;
-        private IndexedBuildingType ore;
+        private int tree;
+        public RTSBuildingData FloraData {
+            get { return Team.race.buildings[tree]; }
+        }
+        private int ore;
+        public RTSBuildingData OreData {
+            get { return Team.race.buildings[ore]; }
+        }
         private Point[,] numSpawns;
         private IndexedUnitType[] spawns;
 
@@ -55,20 +63,25 @@ namespace RTSEngine.Controllers {
             thread.Start();
         }
 
-        public void Init(IndexedUnitType[] s, Point[,] n, IndexedBuildingType t, IndexedBuildingType o, Vector2[] treePos, Vector2[] orePos) {
-            spawns = s;
-            numSpawns = n;
-            tree = t;
-            ore = o;
-            treePositions = treePos;
-            for(int i = 0; i < treePositions.Length; i++) {
-                Point treeC = HashHelper.Hash(treePositions[i], GameState.IGrid.numCells, GameState.IGrid.size);
-                AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, treeC));
-            }
-            for(int j = 0; j < orePos.Length; j++) {
-                Point oreC = HashHelper.Hash(orePos[j], GameState.IGrid.numCells, GameState.IGrid.size);
-                AddEvent(new SpawnBuildingEvent(TeamIndex, ore.Index, oreC));
-            }
+        public void Init(FileInfo infoRace) {
+            EnvironmentInitData eid = EnvironmentDataParser.Parse(infoRace);
+            tree = eid.FloraType;
+            ore = eid.OreType;
+
+            //spawns = s;
+            //numSpawns = n;
+            //treePositions = treePos;
+
+
+            // TODO: This Is Done When The Level Is Loaded
+            //for(int i = 0; i < treePositions.Length; i++) {
+            //    Point treeC = HashHelper.Hash(treePositions[i], GameState.IGrid.numCells, GameState.IGrid.size);
+            //    AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, treeC));
+            //}
+            //for(int j = 0; j < orePos.Length; j++) {
+            //    Point oreC = HashHelper.Hash(orePos[j], GameState.IGrid.numCells, GameState.IGrid.size);
+            //    AddEvent(new SpawnBuildingEvent(TeamIndex, ore.Index, oreC));
+            //}
         }
 
         private void WorkThread() {
@@ -99,6 +112,7 @@ namespace RTSEngine.Controllers {
                     Vector2 treePos = treePositions[tp];
                     Point treeC = HashHelper.Hash(treePos, GameState.CGrid.numCells, GameState.CGrid.size);
                     Point treeI = HashHelper.Hash(treePos, grid.numCells, grid.size);
+
                     // Spawn Trees Around The Starting Tree
                     for(int x = -1; x <= 1; x += 2) {
                         for(int y = -1; y <= 1; y += 2) {
@@ -108,19 +122,20 @@ namespace RTSEngine.Controllers {
                             foreach(var t in GameState.IGrid.ImpactGenerators[newTreeI.X, newTreeI.Y]) {
                                 Point tc = HashHelper.Hash(t.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
                                 if(!Point.Equals(tc, newTreeC) && tc.X > -1 && tc.Y > -1 && tc.X < GameState.CGrid.numCells.X && tc.Y < GameState.CGrid.numCells.Y) {
-                                    AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, newTreeC));
-                                    r.AddToRegionImpact(-tree.Data.Impact);
+                                    AddEvent(new SpawnBuildingEvent(TeamIndex, tree, newTreeC));
+                                    r.AddToRegionImpact(-FloraData.Impact);
                                 }
                             }
                         }
                     }
+
                     // Regenerate Ore Health
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
-                            if(o.Data.FriendlyName.Equals(ore.Data.FriendlyName)) {
+                            if(o.Data.FriendlyName.Equals(OreData.FriendlyName)) {
                                 int recover = random.Next(MIN_RECOVER, MAX_RECOVER);
                                 o.Health += recover;
-                                r.AddToRegionImpact(-(ore.Data.Impact / recover));
+                                r.AddToRegionImpact(-(OreData.Impact / recover));
                             }
                         }
                     }
@@ -142,7 +157,7 @@ namespace RTSEngine.Controllers {
                     }
                     // Randomly Choose An Impact Generator In That Cell
                     ImpactGenerator g = null;
-                    while(g == null || !g.Data.FriendlyName.Equals(ore.Data.FriendlyName) || !g.Data.FriendlyName.Equals(tree.Data.FriendlyName)) {
+                    while(g == null || !g.Data.FriendlyName.Equals(OreData.FriendlyName) || !g.Data.FriendlyName.Equals(FloraData.FriendlyName)) {
                         int i = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
                         g = grid.ImpactGenerators[p.X, p.Y][i];
                     }
@@ -156,11 +171,13 @@ namespace RTSEngine.Controllers {
                         level = 1;
                     else
                         level = 0;
+
                     // Spawn Environmental Units
                     Vector2 spawnPos = g.GridPosition;
                     Vector2 offset;
                     int numSpawn;
                     if(level != 0) {
+                        // TODO: Why Was This Here
                         for(int i = 0; i < numSpawns.GetLength(1); i++) {
                             numSpawn = random.Next(numSpawns[level - 1, i].X, numSpawns[level - 1, i].Y);
                             offset.X = random.Next(MAX_OFFSET);
@@ -170,8 +187,6 @@ namespace RTSEngine.Controllers {
                             }
                         }
                     }
-
-
                 }
             }
         }

@@ -19,6 +19,8 @@ namespace RTSEngine.Data.Parsers {
         public const string DATA_VEC2I_REGEX = DATA_INT_REGEX + NUM_SPLIT + DATA_INT_REGEX;
         public const string DATA_VEC3I_REGEX = DATA_VEC2I_REGEX + NUM_SPLIT + DATA_INT_REGEX;
         public const string DATA_VEC4I_REGEX = DATA_VEC3I_REGEX + NUM_SPLIT + DATA_INT_REGEX;
+        public const string DATA_ARRAYI_REGEX = DATA_INT_REGEX + "(" + NUM_SPLIT + DATA_INT_REGEX + ")*";
+
 
         public static Regex Generate(string key, string data) {
             string rs = string.Format(@"{0}\s+\x5b({1})\x5d\s*", key, data);
