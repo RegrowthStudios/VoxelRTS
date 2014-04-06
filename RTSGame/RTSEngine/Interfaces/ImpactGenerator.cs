@@ -10,7 +10,6 @@ namespace RTSEngine.Interfaces {
     public interface ImpactGenerator {
         Vector2 GridPosition { get; set; }
         int Health { get; set; }
-        int Impact { get; set; }
         event Action<Vector2, int> GenerateImpact;
         RTSBuildingData Data { get; set; }
     }
