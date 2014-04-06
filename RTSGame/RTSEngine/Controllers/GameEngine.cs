@@ -54,6 +54,10 @@ namespace RTSEngine.Controllers {
         public static void BuildLocal(GameState state, EngineLoadData eld, Dictionary<string, RTSRaceData> races) {
             BuildControllers(state);
 
+            // Load The Map
+            FileInfo fiEnvSpawn;
+            BuildMap(state, eld.MapFile, out fiEnvSpawn);
+
             state.SetTeams(BuildTeams(state, eld, races));
 
             for(int ti = 0; ti < state.teams.Length; ti++) {
@@ -69,7 +73,7 @@ namespace RTSEngine.Controllers {
                     case InputType.Environment:
                         // TODO: Make This Class
                         EnvironmentInputController envController = new EnvironmentInputController(state, ti);
-                        envController.Init(races[eld.Teams[ti].Race].InfoFile, null);
+                        envController.Init(races[eld.Teams[ti].Race].InfoFile, fiEnvSpawn);
                         state.teams[ti].Input = envController;
                         break;
                     default:
@@ -77,8 +81,10 @@ namespace RTSEngine.Controllers {
                 }
             }
 
-            // Load The Map
-            BuildMap(state, eld.MapFile);
+            // Hook Building Spawn Events To Collision Grid
+            foreach(var team in (from t in state.activeTeams select t.Team)) {
+                team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
+            }
         }
         private static void BuildControllers(GameState state) {
             // Add Controllers
@@ -123,17 +129,12 @@ namespace RTSEngine.Controllers {
             }
             return t.ToArray();
         }
-        private static void BuildMap(GameState state, FileInfo infoFile) {
+        private static void BuildMap(GameState state, FileInfo infoFile, out FileInfo fiEnvSpawn) {
             // Parse Map Data
-            var lg = MapParser.ParseData(infoFile);
+            var lg = MapParser.ParseData(infoFile, out fiEnvSpawn);
             if(!lg.HasValue)
                 throw new ArgumentNullException("Could Not Load Heightmap");
             state.SetGrids(lg.Value);
-
-            // Hook Building Spawn Events To Collision Grid
-            foreach(var team in (from t in state.activeTeams select t.Team)) {
-                team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
-            }
         }
 
         public static void Dispose(GameState state) {

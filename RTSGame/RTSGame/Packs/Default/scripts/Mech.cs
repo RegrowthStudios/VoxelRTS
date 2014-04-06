@@ -259,6 +259,8 @@ namespace RTS.Mech.Unit {
 // TODO: Verify
 namespace RTS.Mech.Building {
     public class Action : ACBuildingActionController {
+        private Queue<int> unitQueue = new Queue<int>();
+
         public float buildTime; // How Long It Takes To Finish Producing The Unit
         private RTSUnit unit; // Unit To Be Produced
 
@@ -268,17 +270,25 @@ namespace RTS.Mech.Building {
                 buildTime = unit.UnitData.BuildTime;
             }
         }
+        private int unit = -1; // Unit To Be Produced
+        public override void DecideAction(GameState g, float dt) {
+            if (unit < 0 && unitQueue.Count > 0)
+            {
+                unit = unitQueue.Dequeue();
+                buildTime = building.Team.race.units[unit].BuildTime;
+            }
+        }
 
         public override void ApplyAction(GameState g, float dt) {
-            // If Finished Building The Unit
-            if (buildTime < 0) {
-                Building.Team.AddUnit(unit.Type, unit.GridPosition);
-                buildTime = 0;
-                unit == null;
-            }
             // If The Unit Is Still Being Produced
-            if (unit != null) {
+            if (unit >= 0) {
                 buildTime -= dt;
+                // If Finished Building The Unit
+                if(buildTime < 0) {
+                    Building.Team.AddUnit(unit, building.GridPosition);
+                    buildTime = 0;
+                    unit = -1;
+                }
             }
         }
     }

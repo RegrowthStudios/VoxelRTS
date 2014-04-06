@@ -201,14 +201,13 @@ namespace RTSEngine.Controllers {
                 }
             }
             if(squad != null) {
-                AddSquadTask(s, squad);
+                AddTask(s, squad);
                 // Setup Pathfinding Query
                 foreach(var squadQuery in squadQueries) {
                     if(squadQuery.squad == squad) {
                         squadQuery.query.IsOld = true;
                     }
                 }
-                squad.MovementController = team.race.scMovement.CreateInstance<ACSquadMovementController>();
                 squad.RecalculateGridPosition();
                 PathQuery query = new PathQuery(squad.GridPosition, e.Waypoint);
                 squadQueries.Add(new SquadQuery(squad, query));
@@ -229,50 +228,48 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                AddSquadTask(s, squad);
-                squad.ActionController = team.race.scAction.CreateInstance<ACSquadActionController>();
-                squad.TargettingController = team.race.scTargetting.CreateInstance<ACSquadTargettingController>();
                 squad.TargettingController.Target = e.Target as RTSUnit;
+                AddTask(s, squad);
             }
         }
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
             RTSTeam team = s.teams[e.Team];
-            RTSSquad squad = team.AddSquad();
             RTSUnit unit = team.AddUnit(e.Type, e.Position);
-            unit.ActionController = team.race.units[e.Type].DefaultActionController.CreateInstance<ACUnitActionController>();
-            unit.AnimationController = team.race.units[e.Type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
-            unit.MovementController = team.race.units[e.Type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
-            unit.CombatController = team.race.units[e.Type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
+            AddTask(s, unit);
+
+            // Add A Single Unit Squad
+            RTSSquad squad = team.AddSquad();
             squad.Add(unit);
-            AddUnitTask(s, unit);
             squad.RecalculateGridPosition();
-            AddSquadTask(s, squad);
+            AddTask(s, squad);
         }
         private void ApplyInput(GameState s, float dt, SpawnBuildingEvent e) {
             RTSTeam team = s.teams[e.Team];
             Vector2 wp = new Vector2(e.GridPosition.X + 0.5f, e.GridPosition.Y + 0.5f) * s.CGrid.cellSize;
             RTSBuilding building = team.AddBuilding(e.Type, wp);
-            building.ActionController = team.race.buildings[e.Type].DefaultActionController.CreateInstance<ACBuildingActionController>();
-            AddBuildingTask(s, building);
+            AddTask(s, building);
+
+            // Set Default Height
             building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
             building.CollisionGeometry.Height = building.Height;
+
             s.IGrid.AddImpactGenerator(building);
         }
-        private void AddUnitTask(GameState s, RTSUnit unit) {
+        private void AddTask(GameState s, RTSUnit unit) {
             var btu = new BTaskUnitDecision(s, unit);
             unit.OnDestruction += (o) => {
                 tbEntityDecisions.RemoveTask(btu);
             };
             tbEntityDecisions.AddTask(btu);
         }
-        private void AddSquadTask(GameState s, RTSSquad squad) {
+        private void AddTask(GameState s, RTSSquad squad) {
             var bts = new BTaskSquadDecision(s, squad);
             squad.OnDeath += (o) => {
                 tbSquadDecisions.RemoveTask(bts);
             };
             tbSquadDecisions.AddTask(bts);
         }
-        private void AddBuildingTask(GameState s, RTSBuilding building) {
+        private void AddTask(GameState s, RTSBuilding building) {
             var btu = new BTaskBuildingDecision(s, building);
             building.OnDestruction += (o) => {
                 tbEntityDecisions.RemoveTask(btu);

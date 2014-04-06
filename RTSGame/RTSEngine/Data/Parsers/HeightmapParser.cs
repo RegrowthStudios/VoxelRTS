@@ -25,6 +25,7 @@ namespace RTSEngine.Data.Parsers {
         static readonly Regex rgxHTexSFile = RegexHelper.GenerateFile("HTS");
         static readonly Regex rgxHeight = RegexHelper.GenerateNumber("HEIGHT");
         static readonly Regex rgxRegions = RegexHelper.GenerateFile("REGIONS");
+        static readonly Regex rgxSpawn = RegexHelper.GenerateFile("SPAWNS");
 
         private static void ConvertPixel(byte[] cols, int ci, float[] h, byte[] d, int i) {
             h[i] = 1f - (cols[ci + 2] / 255f);
@@ -155,8 +156,9 @@ namespace RTSEngine.Data.Parsers {
 
             return view;
         }
-        public static LevelGrid? ParseData(FileInfo data) {
+        public static LevelGrid? ParseData(FileInfo data, out FileInfo fiEnvSpawn) {
             // Check File Existence
+            fiEnvSpawn = null;
             if(data == null || !data.Exists) return null;
 
             // Read The Entire File
@@ -171,7 +173,8 @@ namespace RTSEngine.Data.Parsers {
                 rgxDataFile.Match(mStr),
                 rgxHeight.Match(mStr),
                 rgxHModelPFile.Match(mStr),
-                rgxRegions.Match(mStr)
+                rgxRegions.Match(mStr),
+                rgxSpawn.Match(mStr)
             };
 
             if(!mp[0].Success || !mp[1].Success || !mp[2].Success) return null;
@@ -180,6 +183,9 @@ namespace RTSEngine.Data.Parsers {
             FileInfo mfi = RegexHelper.ExtractFile(mp[2], data.Directory.FullName);
             FileInfo rfi = RegexHelper.ExtractFile(mp[3], data.Directory.FullName);
             if(!hfi.Exists || !mfi.Exists || !rfi.Exists) return null;
+
+            if(mp[4].Success)
+                fiEnvSpawn = RegexHelper.ExtractFile(mp[4], data.Directory.FullName);
 
             // Read Height Data
             LevelGrid grid = new LevelGrid();
