@@ -290,7 +290,7 @@ namespace RTSEngine.Controllers {
             pathfinder.Add(query);
             // TODO: Get The Formation Order From The Input Event
             if(squad.MovementController != null)
-                squad.MovementController.ApplyMovementFormation(BehaviorFSM.FreeFormation);
+                squad.MovementController.ApplyMovementFormation(BehaviorFSM.BoxFormation);
         }
 
         // Apply Results Of Any Finished Pathfinding
