@@ -88,6 +88,7 @@
     <Compile Include="Addition\OrbitingCamera.cs" />
     <Compile Include="App.cs" />
     <Compile Include="ColorSchemeScreen.cs" />
+    <Compile Include="CompanyScreen.cs" />
     <Compile Include="InduZtryScreen.cs" />
     <Compile Include="LobbyScreen.cs" />
     <Compile Include="LoginScreen.cs" />
@@ -100,11 +101,17 @@
     <Content Include="Content\Audio\btnHover.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\Audio\Fire.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\Audio\lightning.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Audio\thunder.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\FX\Fire.fx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\FX\Map.fx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -118,6 +125,18 @@
     <None Include="Content\Textures\SelectionCircle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Content\Textures\FireColorLogo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\FireAlpha.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\FireColor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Textures\FireNoise.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\UI\MainP1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
