@@ -259,22 +259,24 @@ namespace RTS.Mech.Unit {
 // TODO: Finish This Implementation
 namespace RTS.Mech.Building {
     public class Action : ACBuildingActionController {
+        private Queue<int> unitQueue = new Queue<int>();
+
         public float buildTime; // How Long It Takes To Finish Producing The Unit
-        private RTSUnit unit; // Unit To Be Produced
+        private int unit = -1; // Unit To Be Produced
         public override void DecideAction(GameState g, float dt) {
-            if (unit == null && Building.UnitQueue.Count > 0)
+            if (unit < 0 && unitQueue.Count > 0)
             {
-                unit = Building.UnitQueue.Dequeue();
-                buildTime = unit.UnitData.BuildTime;
+                unit = unitQueue.Dequeue();
+                buildTime = building.Team.race.units[unit].BuildTime;
             }
         }
 
         public override void ApplyAction(GameState g, float dt) {
             // If Finished Building The Unit
             if (buildTime < 0) {
-                Building.Team.AddUnit(unit.Type, unit.GridPosition);
+                Building.Team.AddUnit(unit, building.GridPosition);
                 buildTime = 0;
-                unit == null;
+                unit = -1;
             }
             // If The Unit Is Still Being Produced
             if (unit != null) {
