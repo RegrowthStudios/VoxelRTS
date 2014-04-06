@@ -14,7 +14,7 @@ using System.Collections.Concurrent;
 using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Parsers {
-    public static class HeightmapParser {
+    public static class MapParser {
         // Data Detection
         const string EXTENSION = "map";
         const ParsingFlags READ_FLAGS = ParsingFlags.ConversionOpenGL;
@@ -23,7 +23,8 @@ namespace RTSEngine.Data.Parsers {
         static readonly Regex rgxHTexPFile = RegexHelper.GenerateFile("HTP");
         static readonly Regex rgxHModelSFile = RegexHelper.GenerateFile("HMS");
         static readonly Regex rgxHTexSFile = RegexHelper.GenerateFile("HTS");
-        static readonly Regex rgxSize = RegexHelper.GenerateVec3("SIZE");
+        static readonly Regex rgxHeight = RegexHelper.GenerateNumber("HEIGHT");
+        static readonly Regex rgxRegions = RegexHelper.GenerateFile("REGIONS");
 
         private static void ConvertPixel(byte[] cols, int ci, float[] h, byte[] d, int i) {
             h[i] = 1f - (cols[ci + 2] / 255f);
@@ -154,7 +155,7 @@ namespace RTSEngine.Data.Parsers {
 
             return view;
         }
-        public static Heightmap ParseData(FileInfo data) {
+        public static LevelGrid? ParseData(FileInfo data) {
             // Check File Existence
             if(data == null || !data.Exists) return null;
 
@@ -168,21 +169,24 @@ namespace RTSEngine.Data.Parsers {
             // Match Tokens
             Match[] mp = {
                 rgxDataFile.Match(mStr),
-                rgxSize.Match(mStr),
-                rgxHModelPFile.Match(mStr)
+                rgxHeight.Match(mStr),
+                rgxHModelPFile.Match(mStr),
+                rgxRegions.Match(mStr)
             };
 
             if(!mp[0].Success || !mp[1].Success || !mp[2].Success) return null;
             FileInfo hfi = RegexHelper.ExtractFile(mp[0], data.Directory.FullName);
-            Vector3 size = RegexHelper.ExtractVec3(mp[1]);
+            float height = RegexHelper.ExtractFloat(mp[1]);
             FileInfo mfi = RegexHelper.ExtractFile(mp[2], data.Directory.FullName);
-            if(!hfi.Exists || !mfi.Exists) return null;
+            FileInfo rfi = RegexHelper.ExtractFile(mp[3], data.Directory.FullName);
+            if(!hfi.Exists || !mfi.Exists || !rfi.Exists) return null;
 
             // Read Height Data
-            Heightmap map = null;
+            LevelGrid grid = new LevelGrid();
+            int w, h;
             using(var bmp = Bitmap.FromFile(hfi.FullName) as Bitmap) {
-                int w = bmp.Width;
-                int h = bmp.Height;
+                w = bmp.Width;
+                h = bmp.Height;
                 float[] hd = new float[w * h];
                 byte[] cd = new byte[w * h];
                 byte[] col = new byte[w * h * 4];
@@ -191,20 +195,62 @@ namespace RTSEngine.Data.Parsers {
                 // Convert Bitmap
                 System.Drawing.Imaging.BitmapData bd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
                 System.Runtime.InteropServices.Marshal.Copy(bd.Scan0, col, 0, bd.Stride * bd.Height);
+                bmp.UnlockBits(bd);
+
                 for(int y = 0; y < h; y++) {
                     for(int x = 0; x < w; x++) {
                         ConvertPixel(col, ci, hd, cd, i++);
                         ci += 4;
                     }
                 }
+                grid.L0 = new Heightmap(hd, cd, w, h);
+            }
+
+            // Read Regions
+            var regionCells = new Dictionary<int, List<Microsoft.Xna.Framework.Point>>();
+            using(var bmp = Bitmap.FromFile(rfi.FullName) as Bitmap) {
+                w = bmp.Width;
+                h = bmp.Height;
+
+                // Create The Impact And Collision Grid Based Off The Image Size
+                grid.L1 = new CollisionGrid(w * 2, h * 2, RTSConstants.CGRID_SIZE);
+                grid.L2 = new ImpactGrid(grid.L1);
+
+                // Convert Bitmap
+                int[] ids = new int[w * h];
+                System.Drawing.Imaging.BitmapData bd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
+                System.Runtime.InteropServices.Marshal.Copy(bd.Scan0, ids, 0, ids.Length);
                 bmp.UnlockBits(bd);
-                map = new Heightmap(hd, cd, w, h);
+
+                // Find All The Regions
+                int ii = 0;
+                for(int y = 0; y < h; y++) {
+                    for(int x = 0; x < w; x++) {
+                        if(regionCells.ContainsKey(ids[ii])) {
+                            regionCells[ids[ii]].Add(new Microsoft.Xna.Framework.Point(x, y));
+                        }
+                        else {
+                            var l = new List<Microsoft.Xna.Framework.Point>();
+                            l.Add(new Microsoft.Xna.Framework.Point(x, y));
+                            regionCells.Add(ids[ii], l);
+                        }
+                        ii++;
+                    }
+                }
+            }
+
+            // Create The Regions
+            foreach(var kv in regionCells) {
+                Region r = new Region(kv.Value);
+                foreach(var p in r.Cells) {
+                    grid.L2.Region[p.X, p.Y] = r;
+                }
             }
 
             // Apply Heightmap Size
-            map.Width = size.X;
-            map.Depth = size.Z;
-            map.ScaleHeights(size.Y);
+            grid.L0.Width = grid.L1.size.X;
+            grid.L0.Depth = grid.L1.size.Y;
+            grid.L0.ScaleHeights(height);
 
             // Try To Parse The Primary Model For BVH
             VertexPositionNormalTexture[] vertsPNT;
@@ -230,14 +276,14 @@ namespace RTSEngine.Data.Parsers {
                 if(verts[i].Position.Z > aabb.Max.Z) aabb.Max.Z = verts[i].Position.Z;
                 if(verts[i].Position.Z < aabb.Min.Z) aabb.Min.Z = verts[i].Position.Z;
             }
-            size /= aabb.Max - aabb.Min;
+            Vector3 scale = new Vector3(grid.L1.size.X, height, grid.L1.size.Y) / (aabb.Max - aabb.Min);
             for(int i = 0; i < verts.Length; i++) {
                 verts[i].Position -= aabb.Min;
-                verts[i].Position *= size;
+                verts[i].Position *= scale;
             }
-            map.BVH.Build(verts, inds);
+            grid.L0.BVH.Build(verts, inds);
 
-            return map;
+            return grid;
         }
     }
 }

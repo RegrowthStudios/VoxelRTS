@@ -26,20 +26,16 @@ namespace RTSEngine.Data {
         public const int MAX_NONENV_PLAYERS = 8;
         public const int MAX_PLAYERS = MAX_NONENV_PLAYERS + 1;
 
-        // The Map For The Level
-        public Heightmap Map {
-            get;
-            set;
-        }
-
         // The Grids For The Level
+        private LevelGrid grid;
+        public Heightmap Map {
+            get { return grid.L0; }
+        }
         public CollisionGrid CGrid {
-            get;
-            set;
+            get { return grid.L1; }
         }
         public ImpactGrid IGrid {
-            get;
-            set;
+            get { return grid.L2; }
         }
 
         // Controller Dictionary
@@ -85,13 +81,21 @@ namespace RTSEngine.Data {
             UnitControllers = new Dictionary<string, ReflectedUnitController>();
             SquadControllers = new Dictionary<string, ReflectedSquadController>();
             BuildingControllers = new Dictionary<string, ReflectedBuildingController>();
-            Map = null;
+            grid = new LevelGrid();
+            grid.L0 = null;
+            grid.L1 = null;
+            grid.L2 = null;
 
             curFrame = 0;
             timePlayed = 0f;
         }
 
         // Create With Premade Data
+        public void SetGrids(LevelGrid lg) {
+            grid.L0 = lg.L0;
+            grid.L1 = lg.L1;
+            grid.L2 = lg.L2;
+        }
         public void SetTeams(IndexedTeam[] t) {
             int c = 0;
             foreach(IndexedTeam it in t) {

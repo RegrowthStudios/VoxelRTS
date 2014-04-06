@@ -54,11 +54,10 @@ namespace RTSEngine.Data {
 
         public event Action<int, int, int, FogOfWar> OnFOWChange;
 
-        public CollisionGrid(float w, float h, float cs) {
-            // Round down the grid size so they all fit into the map
-            size = new Vector2(w, h);
-            numCells = new Point((int)Math.Ceiling(size.X / cs), (int)Math.Ceiling(size.Y / cs));
-            cellSize = size.X / numCells.X;
+        public CollisionGrid(int w, int h, float cs) {
+            numCells = new Point(w, h);
+            cellSize = cs;
+            size = new Vector2(w, h) * cellSize;
 
             EDynamic = new List<IEntity>[numCells.X, numCells.Y];
             EStatic = new List<IEntity>[numCells.X, numCells.Y];
@@ -211,6 +210,12 @@ namespace RTSEngine.Data {
             CellImpact[p.X, p.Y] += amount;
             Region[p.X, p.Y].AddToRegionImpact(amount);
         }
+    }
+
+    public struct LevelGrid {
+        public Heightmap L0;
+        public CollisionGrid L1;
+        public ImpactGrid L2;
     }
 
     public static class HashHelper {

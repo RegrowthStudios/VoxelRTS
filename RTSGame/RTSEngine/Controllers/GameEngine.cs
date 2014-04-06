@@ -125,12 +125,12 @@ namespace RTSEngine.Controllers {
         }
         private static void BuildMap(GameState state, FileInfo infoFile) {
             // Parse Map Data
-            state.Map = HeightmapParser.ParseData(infoFile);
-            if(state.Map == null)
+            var lg = MapParser.ParseData(infoFile);
+            if(!lg.HasValue)
                 throw new ArgumentNullException("Could Not Load Heightmap");
+            state.SetGrids(lg.Value);
 
-            // Create Grid
-            state.CGrid = new CollisionGrid(state.Map.Width, state.Map.Depth, RTSConstants.CGRID_SIZE);
+            // Hook Building Spawn Events To Collision Grid
             foreach(var team in (from t in state.activeTeams select t.Team)) {
                 team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
             }
