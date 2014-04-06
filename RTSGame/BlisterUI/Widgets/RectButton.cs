@@ -24,7 +24,52 @@ namespace BlisterUI.Widgets {
         public event Action<RectButton, Vector2> OnButtonPress;
         public event Action<RectButton, Vector2> OnMouseExit;
 
-        private ButtonHighlightOptions optDefault, optHighlight;
+        // The Inactive State
+        private ButtonHighlightOptions optInactive;
+        public int InactiveWidth {
+            get { return optInactive.Width; }
+            set {
+                optInactive.Width = value;
+                if(!IsHovered) Width = optInactive.Width;
+            }
+        }
+        public int InactiveHeight {
+            get { return optInactive.Height; }
+            set {
+                optInactive.Height = value;
+                if(!IsHovered) Height = optInactive.Height;
+            }
+        }
+        public Color InactiveColor {
+            get { return optInactive.Color; }
+            set {
+                optInactive.Color = value;
+                if(!IsHovered) Color = optInactive.Color;
+            }
+        }
+
+        private ButtonHighlightOptions optActive;
+        public int ActiveWidth {
+            get { return optActive.Width; }
+            set {
+                optActive.Width = value;
+                if(IsHovered) Width = optActive.Width;
+            }
+        }
+        public int ActiveHeight {
+            get { return optActive.Height; }
+            set {
+                optActive.Height = value;
+                if(IsHovered) Height = optActive.Height;
+            }
+        }
+        public Color ActiveColor {
+            get { return optActive.Color; }
+            set {
+                optActive.Color = value;
+                if(IsHovered) Color = optActive.Color;
+            }
+        }
 
         private bool isHovered;
         public bool IsHovered {
@@ -32,18 +77,33 @@ namespace BlisterUI.Widgets {
         }
 
         private bool isHooked;
+        public bool IsHooked {
+            get { return isHooked; }
+        }
 
         public RectButton(WidgetRenderer r, ButtonHighlightOptions inactive, ButtonHighlightOptions active, Texture2D t = null)
             : base(r, t) {
-            optDefault = inactive;
-            optHighlight = active;
+            optInactive = inactive;
+            optActive = active;
 
             // Set To Default
             isHooked = false;
             isHovered = false;
-            Width = optDefault.Width;
-            Height = optDefault.Height;
-            Color = optDefault.Color;
+            Width = optInactive.Width;
+            Height = optInactive.Height;
+            Color = optInactive.Color;
+        }
+        public RectButton(WidgetRenderer r, int w, int h, Color cInactive, Color cActive, Texture2D t = null)
+            : base(r, t) {
+            optInactive = new ButtonHighlightOptions(w, h, cInactive);
+            optActive = new ButtonHighlightOptions(w, h, cActive);
+
+            // Set To Default
+            isHooked = false;
+            isHovered = false;
+            Width = optInactive.Width;
+            Height = optInactive.Height;
+            Color = optInactive.Color;
         }
         protected override void DisposeOther() {
             base.DisposeOther();
@@ -61,20 +121,20 @@ namespace BlisterUI.Widgets {
             MouseEventDispatcher.OnMousePress -= OnMousePress;
         }
 
-        public void SetHover(bool b, Vector2 m) {
+        public void SetActive(bool b, Vector2 m) {
             if(isHovered != b) {
                 isHovered = b;
                 if(isHovered) {
-                    Width = optHighlight.Width;
-                    Height = optHighlight.Height;
-                    Color = optHighlight.Color;
+                    Width = optActive.Width;
+                    Height = optActive.Height;
+                    Color = optActive.Color;
                     if(OnMouseEntry != null)
                         OnMouseEntry(this, m);
                 }
                 else {
-                    Width = optDefault.Width;
-                    Height = optDefault.Height;
-                    Color = optDefault.Color;
+                    Width = optInactive.Width;
+                    Height = optInactive.Height;
+                    Color = optInactive.Color;
                     if(OnMouseExit != null)
                         OnMouseExit(this, m);
                 }
@@ -85,7 +145,7 @@ namespace BlisterUI.Widgets {
             int x = (int)p.X;
             int y = (int)p.Y;
             Vector2 r;
-            SetHover(Inside(x, y, out r), p);
+            SetActive(Inside(x, y, out r), p);
         }
         public void OnMousePress(Vector2 p, MouseButton b) {
             OnMouseMotion(p, Vector2.Zero);
