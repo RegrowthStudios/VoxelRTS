@@ -289,7 +289,7 @@ namespace RTSEngine.Data {
                 else {
                     // If rect2 is below rect1
                     if(d.Y < 0) {
-                        if(left1 - right2 > top2 - bottom1)
+                        if(right2 - left1 > top2 - bottom1)
                             pushAmount.Y = top2 - bottom1 + OFFSET; // rect1 pushed up
                         else
                             pushAmount.X = right2 - left1 + OFFSET; // rect1 pushed right
