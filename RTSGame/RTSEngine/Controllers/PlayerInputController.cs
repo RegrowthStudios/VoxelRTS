@@ -153,27 +153,49 @@ namespace RTSEngine.Controllers {
             }
         }
         public void OnMousePress(Vector2 location, MouseButton b) {
-            if(b == BUTTON_ACTION) {
-                if(Camera == null) return;
-
-                // Get Ray From Mouse Position
-                Ray ray = Camera.GetViewRay(location);
-                IEntity se = SelectFromRay(ray);
-                if(se != null) {
-                    // Use Entity As A Target
-                    AddEvent(new SetTargetEvent(TeamIndex, se));
-                }
-                else {
-                    // Add A Waypoint Event
-                    IntersectionRecord rec = new IntersectionRecord();
-                    if(GameState.Map.BVH.Intersect(ref rec, ray)) {
-                        Vector3 rh = ray.Position + ray.Direction * rec.T;
-                        AddEvent(new SetWayPointEvent(TeamIndex, new Vector2(rh.X, rh.Z)));
+            Point pl = new Point((int)location.X, (int)location.Y);
+            if(UI.PanelBottom.Inside(pl.X, pl.Y)) {
+                // Check UI Actions
+                Vector2 r;
+                if(UI.ButtonMinimap.Inside(pl.X, pl.Y, out r)) {
+                    // Use The Minimap
+                    Vector2 mapPos = r * GameState.CGrid.size;
+                    if(b == BUTTON_SELECT) {
+                        // Move To The Minimap Spot
+                        Camera.MoveTo(mapPos.X, mapPos.Y);
+                    }
+                    else if(b == BUTTON_ACTION) {
+                        // Try To Move Selected Units There
+                        if(selected.Count > 0) {
+                            AddEvent(new SetWayPointEvent(TeamIndex, mapPos));
+                        }
                     }
                 }
             }
-            else if(b == BUTTON_SELECT) {
-                selectionRectStart = location;
+            else {
+                // Action In The World
+                if(b == BUTTON_ACTION) {
+                    if(Camera == null) return;
+
+                    // Get Ray From Mouse Position
+                    Ray ray = Camera.GetViewRay(location);
+                    IEntity se = SelectFromRay(ray);
+                    if(se != null) {
+                        // Use Entity As A Target
+                        AddEvent(new SetTargetEvent(TeamIndex, se));
+                    }
+                    else {
+                        // Add A Waypoint Event
+                        IntersectionRecord rec = new IntersectionRecord();
+                        if(GameState.Map.BVH.Intersect(ref rec, ray)) {
+                            Vector3 rh = ray.Position + ray.Direction * rec.T;
+                            AddEvent(new SetWayPointEvent(TeamIndex, new Vector2(rh.X, rh.Z)));
+                        }
+                    }
+                }
+                else if(b == BUTTON_SELECT) {
+                    selectionRectStart = location;
+                }
             }
         }
     }

@@ -29,7 +29,11 @@ namespace RTSEngine.Graphics {
 
         private WidgetRenderer wrButtonPanel, wrMain;
 
-        private RectWidget rectBounds, rectBottomPanel;
+        private RectWidget rectBounds;
+        public RectWidget PanelBottom {
+            get;
+            private set;
+        }
 
         private Texture2D tTransparent;
         private RectButton[,] btnPanel;
@@ -87,20 +91,20 @@ namespace RTSEngine.Graphics {
             };
             rectBounds.LayerDepth = 1f;
 
-            rectBottomPanel = new RectWidget(wrMain);
-            rectBottomPanel.Color = c;
-            rectBottomPanel.Width = rectBounds.Width;
-            rectBottomPanel.Height = ph;
-            rectBottomPanel.Offset = new Point(0, 0);
-            rectBottomPanel.OffsetAlignY = Alignment.BOTTOM;
-            rectBottomPanel.OffsetAlignX = Alignment.MID;
-            rectBottomPanel.AlignX = Alignment.MID;
-            rectBottomPanel.AlignY = Alignment.BOTTOM;
-            rectBottomPanel.Parent = rectBounds;
-            rectBottomPanel.LayerDepth = rectBounds.LayerDepth - LAYER_DELTA;
+            PanelBottom = new RectWidget(wrMain);
+            PanelBottom.Color = c;
+            PanelBottom.Width = rectBounds.Width;
+            PanelBottom.Height = ph;
+            PanelBottom.Offset = new Point(0, 0);
+            PanelBottom.OffsetAlignY = Alignment.BOTTOM;
+            PanelBottom.OffsetAlignX = Alignment.MID;
+            PanelBottom.AlignX = Alignment.MID;
+            PanelBottom.AlignY = Alignment.BOTTOM;
+            PanelBottom.Parent = rectBounds;
+            PanelBottom.LayerDepth = rectBounds.LayerDepth - LAYER_DELTA;
         }
         private void BuildMinimap(RTSRenderer renderer, int buf) {
-            int s = rectBottomPanel.Height - buf * 2;
+            int s = PanelBottom.Height - buf * 2;
             ButtonHighlightOptions bh1 = new ButtonHighlightOptions(s, s, Color.LightCyan);
             ButtonHighlightOptions bh2 = new ButtonHighlightOptions(s, s, Color.LightGoldenrodYellow);
             ButtonMinimap = new RectButton(wrMain, bh1, bh2, renderer.Minimap.Terrain);
@@ -109,8 +113,8 @@ namespace RTSEngine.Graphics {
             ButtonMinimap.Offset = new Point(-buf, -buf);
             ButtonMinimap.OffsetAlignX = Alignment.RIGHT;
             ButtonMinimap.OffsetAlignY = Alignment.BOTTOM;
-            ButtonMinimap.Parent = rectBottomPanel;
-            ButtonMinimap.LayerDepth = rectBottomPanel.LayerDepth - LAYER_DELTA;
+            ButtonMinimap.Parent = PanelBottom;
+            ButtonMinimap.LayerDepth = PanelBottom.LayerDepth - LAYER_DELTA;
             ButtonMinimap.OnButtonPress += OnMinimapPress;
         }
 
@@ -187,7 +191,7 @@ namespace RTSEngine.Graphics {
         }
 
         private void OnWindowResize() {
-            rectBottomPanel.Width = rectBounds.Width;
+            PanelBottom.Width = rectBounds.Width;
         }
     }
 }
