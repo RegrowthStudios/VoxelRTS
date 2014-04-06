@@ -69,7 +69,7 @@ namespace RTSEngine.Controllers {
             thread.Start();
         }
 
-        public void Init(FileInfo infoRace) {
+        public void Init(FileInfo infoRace, FileInfo spawnImage) {
             EnvironmentInitData eid = EnvironmentDataParser.Parse(infoRace);
             tree = eid.FloraType;
             ore = eid.OreType;
@@ -119,10 +119,10 @@ namespace RTSEngine.Controllers {
         }
 
         private void UpdateUnitsInRegion() {
-            foreach (var r in GameState.Regions) {
+            foreach(var r in GameState.Regions) {
                 r.units = new List<IEntity>();
             }
-            foreach (var u in Team.units) {
+            foreach(var u in Team.units) {
                 Point unitI = HashHelper.Hash(u.GridPosition, grid.numCells, grid.size);
                 grid.Region[unitI.X, unitI.Y].units.Add(u);
             }
@@ -217,10 +217,10 @@ namespace RTSEngine.Controllers {
         }
 
         private void SetInitTarget() {
-            foreach (var r in GameState.Regions) {
+            foreach(var r in GameState.Regions) {
                 // Select Units Not In A Squad
                 List<IEntity> squad = new List<IEntity>();
-                foreach (RTSUnit u in r.units){
+                foreach(RTSUnit u in r.units) {
                     if(u.Squad.Units.Count == 1)
                         squad.Add(u);
                 }
@@ -228,14 +228,14 @@ namespace RTSEngine.Controllers {
                 // Set The Target For Those Units
                 IEntity target = null;
                 Vector2 sumPos = Vector2.Zero;
-                foreach (var u2 in squad)
+                foreach(var u2 in squad)
                     sumPos += u2.GridPosition;
                 Vector2 averagePos = new Vector2(sumPos.X / squad.Count, sumPos.Y / squad.Count);
-                foreach (var t2 in GameState.activeTeams) 
-                    if (t2.Index != TeamIndex) 
-                        foreach (var u3 in t2.Team.units) 
-                            if (target == null || Vector2.Distance(u3.GridPosition, averagePos) < Vector2.Distance(u3.GridPosition, target.GridPosition)) 
-                                target = u3;    
+                foreach(var t2 in GameState.activeTeams)
+                    if(t2.Index != TeamIndex)
+                        foreach(var u3 in t2.Team.units)
+                            if(target == null || Vector2.Distance(u3.GridPosition, averagePos) < Vector2.Distance(u3.GridPosition, target.GridPosition))
+                                target = u3;
                 AddEvent(new SetTargetEvent(TeamIndex, target));
             }
         }

@@ -48,6 +48,7 @@ namespace RTSEngine.Data.Parsers {
             RTSRaceData res = null;
             using(FileStream s = File.OpenRead(fi.FullName)) {
                 res = Parse(s, fi.Directory.FullName);
+                res.InfoFile = fi;
             }
             return res;
         }

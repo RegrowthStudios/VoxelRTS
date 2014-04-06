@@ -69,7 +69,7 @@ namespace RTSEngine.Controllers {
                     case InputType.Environment:
                         // TODO: Make This Class
                         EnvironmentInputController envController = new EnvironmentInputController(state, ti);
-                        // envController.Init();
+                        envController.Init(races[eld.Teams[ti].Race].InfoFile, null);
                         state.teams[ti].Input = envController;
                         break;
                     default:
