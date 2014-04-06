@@ -297,7 +297,22 @@ namespace RTS.Mech.Squad {
 namespace RTS.Mech.Unit {
     public class Action : ACUnitActionController {
         public override void DecideAction(GameState g, float dt) {
-
+            // TODO: The Real FSM
+            switch(unit.State) {
+                case BehaviorFSM.CombatMelee:
+                    unit.CollisionGeometry.IsStatic = true;
+                    break;
+                case BehaviorFSM.CombatRanged:
+                    unit.CollisionGeometry.IsStatic = true;
+                    break;
+                case BehaviorFSM.Rest:
+                    if(unit.Squad.MovementController == null)
+                        unit.CollisionGeometry.IsStatic = true;
+                    break;
+                default:
+                    unit.CollisionGeometry.IsStatic = false;
+                    break;
+            }
         }
         public override void ApplyAction(GameState g, float dt) {
             if(unit.CombatController != null)

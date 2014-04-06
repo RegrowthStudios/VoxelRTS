@@ -23,6 +23,7 @@ namespace RTSEngine.Interfaces {
         // Targeting Order Codes - Will Influence Targeting Behavior
         public const int TargetPassively = 0;
         public const int TargetAggressively = TargetPassively + 1;
+        public const int TargetOmnisciently = TargetAggressively + 1;
 
         // Combat Order Codes - Will Influence Behavior While In Combat
         public const int UseMeleeAttack = 0;
