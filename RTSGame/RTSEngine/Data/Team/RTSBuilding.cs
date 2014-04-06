@@ -87,6 +87,19 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // Units To Be Produced By This Building
+        protected Queue<RTSUnit> unitQueue;
+        public Queue<RTSUnit> UnitQueue {
+            get;
+        }
+
+        // Default Spawn Position For Units
+        public Vector2 DefaultSpawnPos()
+        {
+            float radius = CollisionGeometry.BoundingRadius;
+            return new Vector2(gridPos.X, gridPos.Y + radius);
+        }
+
         // Damaging Events
         public event Action<IEntity, int> OnDamage;
         public event Action<IEntity> OnDestruction;
@@ -159,10 +172,10 @@ namespace RTSEngine.Data.Team {
                 OnDestruction(this);
         }
 
-        Queue<RTSUnit> UnitQueue;
-        // Enqueue New Unit
-        public void EnqueueUnit(RTSUnit unit) {
-            UnitQueue.Enqueue(unit);
+        // Enqueue Unit For Production
+        public void EnqueueUnit(int type) {
+            RTSUnit unit = new RTSUnit(Team, Team.race.units[type], DefaultSpawnPos());
+            unitQueue.Enqueue(unit);
         }
 
     }
