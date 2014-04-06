@@ -55,7 +55,10 @@ namespace RTSEngine.Interfaces {
         protected RTSUnit targetUnit;
         public RTSUnit Target {
             get { return targetUnit; }
-            set { targetUnit = value; }
+            set { 
+                targetUnit = value;
+                targetSquad = value.Squad;
+            }
         }
 
         // Find And Setting A Target For This Squad

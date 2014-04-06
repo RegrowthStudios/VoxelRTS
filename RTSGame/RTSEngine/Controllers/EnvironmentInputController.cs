@@ -21,6 +21,7 @@ namespace RTSEngine.Controllers {
         private int counter;
 
         private Vector2[] treePositions;
+<<<<<<< HEAD
 
         private int tree;
         public RTSBuildingData FloraData {
@@ -30,8 +31,13 @@ namespace RTSEngine.Controllers {
         public RTSBuildingData OreData {
             get { return Team.race.buildings[ore]; }
         }
+=======
+        private IndexedBuildingType tree;
+        private IndexedBuildingType ore;
+>>>>>>> 709822d17e75c30d8f3f0887013e7628b3318419
         private Point[,] numSpawns;
         private IndexedUnitType[] spawns;
+        private int[] spawnCaps;
 
         // Impact Levels For Level One, Level Two, Level Three
         private const int LEVEL_ONE = 10;
@@ -46,7 +52,9 @@ namespace RTSEngine.Controllers {
         private const int SPAWN_TIME = 60;
 
         // Maximum Number Of Units Per Region
-        private const int SPAWN_CAP = 30;
+        private const int SPAWN_CAP1 = 10;
+        private const int SPAWN_CAP2 = 20;
+        private const int SPAWN_CAP3 = 30;
 
         private const int MAX_OFFSET = 20;
         private const int MIN_RECOVER = 5;
@@ -55,6 +63,10 @@ namespace RTSEngine.Controllers {
         public EnvironmentInputController(GameState g, int ti)
             : base(g, ti) {
             grid = g.IGrid;
+            spawnCaps = new int[3];
+            spawnCaps[0] = SPAWN_CAP1;
+            spawnCaps[1] = SPAWN_CAP2;
+            spawnCaps[2] = SPAWN_CAP3;
             random = new Random();
             thread = new Thread(WorkThread);
             thread.IsBackground = true;
@@ -90,16 +102,35 @@ namespace RTSEngine.Controllers {
                     Thread.Sleep(1000);
                     continue;
                 }
+                UpdateUnitsInRegion();
                 if(counter % SPAWN_TIME == 0) {
                     SpawnUnits();
-                    counter = counter % (SPAWN_TIME + RECOVER_TIME);
+                    SetInitTarget();
                 }
                 if(counter % RECOVER_TIME == 0) {
                     Recover();
-                    counter = counter % (SPAWN_TIME + RECOVER_TIME);
                 }
                 counter++;
+                counter = counter % (SPAWN_TIME + RECOVER_TIME);
                 Thread.Sleep(1000);
+            }
+        }
+
+        public void Start() {
+            counter = 0;
+            paused = false;
+        }
+        public override void Dispose() {
+            running = false;
+        }
+
+        private void UpdateUnitsInRegion() {
+            foreach (var r in GameState.Regions) {
+                r.units = new List<IEntity>();
+            }
+            foreach (var u in Team.units) {
+                Point unitI = HashHelper.Hash(u.GridPosition, grid.numCells, grid.size);
+                grid.Region[unitI.X, unitI.Y].units.Add(u);
             }
         }
 
@@ -147,7 +178,17 @@ namespace RTSEngine.Controllers {
         // Disaster Phase
         private void SpawnUnits() {
             foreach(var r in GameState.Regions) {
-                if(r.RegionImpact > LEVEL_ONE) {
+                // Decide Level
+                int level;
+                if (r.RegionImpact > LEVEL_THREE)
+                    level = 3;
+                else if (r.RegionImpact > LEVEL_TWO)
+                    level = 2;
+                else if (r.RegionImpact > LEVEL_ONE)
+                    level = 1;
+                else
+                    level = 0;
+                if(level > 0) {
                     // Find The Cell With The Largest Impact
                     Point p = r.Cells.First();
                     foreach(var c in r.Cells) {
@@ -161,6 +202,7 @@ namespace RTSEngine.Controllers {
                         int i = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
                         g = grid.ImpactGenerators[p.X, p.Y][i];
                     }
+<<<<<<< HEAD
                     // Decide Level
                     int level;
                     if(r.RegionImpact > LEVEL_THREE)
@@ -172,40 +214,54 @@ namespace RTSEngine.Controllers {
                     else
                         level = 0;
 
+=======
+>>>>>>> 709822d17e75c30d8f3f0887013e7628b3318419
                     // Spawn Environmental Units
                     Vector2 spawnPos = g.GridPosition;
                     Vector2 offset;
                     int numSpawn;
+<<<<<<< HEAD
                     if(level != 0) {
                         // TODO: Why Was This Here
                         for(int i = 0; i < numSpawns.GetLength(1); i++) {
+=======
+                    for (int i = 0; i < numSpawns.GetLength(1) && r.units.Count < spawnCaps[level - 1]; i++) {
+>>>>>>> 709822d17e75c30d8f3f0887013e7628b3318419
                             numSpawn = random.Next(numSpawns[level - 1, i].X, numSpawns[level - 1, i].Y);
                             offset.X = random.Next(MAX_OFFSET);
                             offset.Y = random.Next(MAX_OFFSET);
                             for(int j = 0; j < numSpawn; j++) {
                                 AddEvent(new SpawnUnitEvent(TeamIndex, spawns[i].Index, spawnPos + offset));
                             }
-                        }
                     }
                 }
+
             }
         }
-        private void MoveUnits() {
 
-
-
+        private void SetInitTarget() {
+            foreach (var r in GameState.Regions) {
+                // Select Units Not In A Squad
+                List<IEntity> squad = new List<IEntity>();
+                foreach (RTSUnit u in r.units){
+                    if(u.Squad.Units.Count == 1)
+                        squad.Add(u);
+                }
+                AddEvent(new SelectEvent(TeamIndex, squad));
+                // Set The Target For Those Units
+                IEntity target = null;
+                Vector2 sumPos = Vector2.Zero;
+                foreach (var u2 in squad)
+                    sumPos += u2.GridPosition;
+                Vector2 averagePos = new Vector2(sumPos.X / squad.Count, sumPos.Y / squad.Count);
+                foreach (var t2 in GameState.activeTeams) 
+                    if (t2.Index != TeamIndex) 
+                        foreach (var u3 in t2.Team.units) 
+                            if (target == null || Vector2.Distance(u3.GridPosition, averagePos) < Vector2.Distance(u3.GridPosition, target.GridPosition)) 
+                                target = u3;    
+                AddEvent(new SetTargetEvent(TeamIndex, target));
+            }
         }
-        private void SetTargetOfUnits() {
 
-
-        }
-
-        public void Start() {
-            counter = 0;
-            paused = false;
-        }
-        public override void Dispose() {
-            running = false;
-        }
     }
 }
