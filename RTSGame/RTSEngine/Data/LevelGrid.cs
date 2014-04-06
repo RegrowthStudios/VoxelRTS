@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data {
@@ -53,11 +54,10 @@ namespace RTSEngine.Data {
 
         public event Action<int, int, int, FogOfWar> OnFOWChange;
 
-        public CollisionGrid(float w, float h, float cs) {
-            // Round down the grid size so they all fit into the map
-            size = new Vector2(w, h);
-            numCells = new Point((int)Math.Ceiling(size.X / cs), (int)Math.Ceiling(size.Y / cs));
-            cellSize = size.X / numCells.X;
+        public CollisionGrid(int w, int h, float cs) {
+            numCells = new Point(w, h);
+            cellSize = cs;
+            size = new Vector2(w, h) * cellSize;
 
             EDynamic = new List<IEntity>[numCells.X, numCells.Y];
             EStatic = new List<IEntity>[numCells.X, numCells.Y];
@@ -83,7 +83,10 @@ namespace RTSEngine.Data {
                     ActiveGrids.Add(p);
                 EDynamic[p.X, p.Y].Add(o);
             }
-            else EStatic[p.X, p.Y].Add(o);
+            else {
+                EStatic[p.X, p.Y].Add(o);
+                o.OnDestruction += (_o) => { EStatic[p.X, p.Y].Remove(o); };
+            }
         }
 
         public void ClearDynamic() {
@@ -147,20 +150,24 @@ namespace RTSEngine.Data {
             Collision[x, y] = c;
         }
         public bool GetCollision(int x, int y) {
-            return Collision[x, y];
+            return Collision[x, y] || EStatic[x, y].Count > 0;
+        }
+
+        public void OnBuildingSpawn(RTSBuilding b) {
+            Add(b);
         }
     }
 
     public class ImpactGrid {
-        
+
         // Size Of Each Cell In The Impact Grid
-        private float cellSize;
+        public readonly float cellSize;
 
         // Number Of Cells In The Impact Grid
-        private Point numCells;
+        public readonly Point numCells;
 
         // Size Of The Impact Grid
-        private Vector2 size;
+        public readonly Vector2 size;
 
         // Stores The Region Each Cell Is Located In
         public Region[,] Region { get; set; }
@@ -169,7 +176,7 @@ namespace RTSEngine.Data {
         public List<ImpactGenerator>[,] ImpactGenerators { get; set; }
 
         // Stores The Impact of Each Cell Of The Impact Grid
-        public int[,] CellImpact { get; private set; } 
+        public int[,] CellImpact { get; private set; }
 
         // Creates An Impact Grid Using The Size And Cell Size Of The Given Collision Grid
         public ImpactGrid(CollisionGrid cg) {
@@ -181,18 +188,18 @@ namespace RTSEngine.Data {
             ImpactGenerators = new List<ImpactGenerator>[numCells.X, numCells.Y];
             CellImpact = new int[numCells.X, numCells.Y];
 
-            for (int x = 0; x < numCells.X; x++) {
-                for (int y = 0; y < numCells.Y; y++) {
+            for(int x = 0; x < numCells.X; x++) {
+                for(int y = 0; y < numCells.Y; y++) {
                     Region[x, y] = null;
                     ImpactGenerators[x, y] = new List<ImpactGenerator>();
-                    CellImpact[x,y] = 0;
+                    CellImpact[x, y] = 0;
                 }
             }
         }
 
         // Adds An Impact Generator To The Appropriate Cell In The Impact Grid
         public void AddImpactGenerator(ImpactGenerator g) {
-            Point p = HashHelper.Hash(g.Position, numCells, size);
+            Point p = HashHelper.Hash(g.GridPosition, numCells, size);
             ImpactGenerators[p.X, p.Y].Add(g);
             g.GenerateImpact += AddToCellImpact;
         }
@@ -203,6 +210,12 @@ namespace RTSEngine.Data {
             CellImpact[p.X, p.Y] += amount;
             Region[p.X, p.Y].AddToRegionImpact(amount);
         }
+    }
+
+    public struct LevelGrid {
+        public Heightmap L0;
+        public CollisionGrid L1;
+        public ImpactGrid L2;
     }
 
     public static class HashHelper {

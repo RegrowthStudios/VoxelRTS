@@ -33,7 +33,27 @@ namespace RTS {
         private static App app;
 
         // Screens
+        public CompanyScreen CompanyScreen {
+            get;
+            private set;
+        }
+        public InduZtryScreen InduZtryScreen {
+            get;
+            private set;
+        }
+        public PressEnterScreen PressEnterScreen {
+            get;
+            private set;
+        }
+        public LoginScreen LoginScreen {
+            get;
+            private set;
+        }
         public MenuScreen MenuScreen {
+            get;
+            private set;
+        }
+        public LobbyScreen LobbyScreen {
             get;
             private set;
         }
@@ -60,11 +80,18 @@ namespace RTS {
             : base() {
             // Make Sure We Are Using The Most Recent Graphics Version
             graphics.GraphicsProfile = GraphicsProfile.HiDef;
+            graphics.PreferredBackBufferWidth = UserConfig.ResolutionWidth;
+            graphics.PreferredBackBufferHeight = UserConfig.ResolutionHeight;
 
             // Get User Config Parameter For Fullscreen
             graphics.IsFullScreen = UserConfig.UseFullscreen;
 
+            CompanyScreen = new RTS.CompanyScreen();
+            InduZtryScreen = new RTS.InduZtryScreen(2);
+            PressEnterScreen = new RTS.PressEnterScreen();
+            LoginScreen = new RTS.LoginScreen();
             MenuScreen = new RTS.MenuScreen();
+            LobbyScreen = new RTS.LobbyScreen();
             LoadScreen = new RTS.LoadScreen();
             RTSScreen = new RTS.RTSScreen();
             RTSNetScreen = new RTS.RTSNetScreen();
@@ -85,9 +112,13 @@ namespace RTS {
 
         protected override void BuildScreenList() {
             screenList = new BlisterUI.ScreenList(this, 0,
-                new BlisterUI.FalseFirstScreen(2),
-                new InduZtryScreen(1),
+                new BlisterUI.FalseFirstScreen(1),
+                CompanyScreen,
+                InduZtryScreen,
+                PressEnterScreen,
+                LoginScreen,
                 MenuScreen,
+                LobbyScreen,
                 LoadScreen,
                 RTSScreen,
                 RTSNetScreen,

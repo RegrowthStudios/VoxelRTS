@@ -43,7 +43,6 @@ namespace RTS {
         // Viewing Information
         private RTSUnitData unitData;
         private RTSUnitModel unitModel;
-        private RTSTeam team;
         private RTSUnit unit;
         private RTSColorScheme colorScheme;
         private object drawLock = new object();
@@ -110,7 +109,6 @@ namespace RTS {
             fx = new RTSFXEntity(renderer.LoadEffect(FX_FILE_PATH));
 
             // Default Team
-            team = new RTSTeam();
             sP.Color = RTSColorScheme.Default.Primary;
             sS.Color = RTSColorScheme.Default.Secondary;
             sT.Color = RTSColorScheme.Default.Tertiary;
@@ -251,9 +249,9 @@ namespace RTS {
                     G.SamplerStates[2] = SamplerState.LinearClamp;
                     fx.SetTextures(G, unitModel.AnimationTexture, unitModel.ModelTexture, unitModel.ColorCodeTexture);
 
-                    unitModel.UpdateInstances(G, (u) => { return true; });
+                    unitModel.UpdateInstances(G, GameplayController.IsUnitDead, (u) => { return true; });
                     unitModel.SetInstances(G);
-                    fx.ApplyPassAnimation();
+                    fx.ApplyPassUnit();
                     unitModel.DrawInstances(G);
 
                     // Cause XNA Is Retarded Like That
@@ -281,11 +279,15 @@ namespace RTS {
         private void UnitLoader(object _fi) {
             FileInfo fi = _fi as FileInfo;
 
+            GameState state = new GameState();
+            state.SetTeams(new IndexedTeam[] { new IndexedTeam(0, new RTSTeam()) });
             RTSUnitData _unitData = RTSUnitDataParser.ParseData(null, fi);
-            RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(renderer, _unitData, fi);
-            RTSUnit _unit = new RTSUnit(team, _unitData, Vector2.Zero);
+            state.teams[0].race.units[0] = _unitData;
+            state.teams[0].race.UpdateActiveUnits();
+            RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(renderer, fi);
+            _unitModel.Hook(renderer, state, 0, 0);
+            RTSUnit _unit = state.teams[0].AddUnit(0, Vector2.Zero);
             _unit.Height = 0;
-            _unitModel.OnUnitSpawn(_unit);
 
             // Create The Full Animation Loop
             _unit.AnimationController = new BlankAnimController(0, (_unitModel.AnimationTexture.Height / 3) - 1, 30f);
@@ -448,7 +450,7 @@ namespace RTS {
         public void OnMouseRelease(Vector2 pos, MouseButton b) {
             if(b == MouseButton.Left && active >= 0) active = -1;
         }
-    } 
+    }
     #endregion
 
     #region Full Animation Loop Controller
@@ -468,6 +470,6 @@ namespace RTS {
             animLoop.Step(dt);
             AnimationFrame = animLoop.CurrentFrame;
         }
-    } 
+    }
     #endregion
 }

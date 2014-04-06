@@ -7,11 +7,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
+using RTSEngine.Data;
 
 namespace RTSEngine.Graphics {
-
     // TODO: Animations Applied By A Controller From A Check On A Frame (Specified In File)
-
     public class RTSUnitModel {
         public const ParsingFlags MODEL_READ_FLAGS = ParsingFlags.ConversionOpenGL;
 
@@ -24,15 +23,7 @@ namespace RTSEngine.Graphics {
             get;
             set;
         }
-        public Vector3 ColorPrimary {
-            get;
-            set;
-        }
-        public Vector3 ColorSecondary {
-            get;
-            set;
-        }
-        public Vector3 ColorTertiary {
+        public RTSColorScheme ColorScheme {
             get;
             set;
         }
@@ -59,11 +50,10 @@ namespace RTSEngine.Graphics {
             get { return visible.Count; }
         }
 
-        public RTSUnitModel(RTSRenderer renderer, RTSUnitData data, Stream sModel, Texture2D tAnim) {
+        public RTSUnitModel(RTSRenderer renderer, Stream sModel, Texture2D tAnim) {
             // Create With The Animation Texture
             AnimationTexture = tAnim;
             Vector2 texelSize = new Vector2(1f / (AnimationTexture.Width), 1f / (AnimationTexture.Height));
-            Data = data;
 
             // Parse The Model File
             VertexPositionNormalTexture[] pVerts;
@@ -81,6 +71,14 @@ namespace RTSEngine.Graphics {
 
             // Create Model Geometry
             ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
+        }
+
+        public void Hook(RTSRenderer renderer, GameState s, int team, int unit) {
+            // Filter For Unit Types
+            Data = s.teams[team].race.units[unit];
+
+            // Always Add A Unit To List When Spawned
+            s.teams[team].OnUnitSpawn += OnUnitSpawn;
 
             // Create Instance Buffer
             visible = new List<RTSUnit>();
@@ -90,12 +88,12 @@ namespace RTSEngine.Graphics {
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = renderer.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
             dvbInstances.SetData(instVerts);
-            dvbInstances.ContentLost += (s, a) => { rebuildDVB = true; };
+            dvbInstances.ContentLost += (sender, args) => { rebuildDVB = true; };
             rebuildDVB = false;
         }
 
-        public void UpdateInstances(GraphicsDevice g, Predicate<RTSUnit> fVisible) {
-            instances.RemoveAll(GameplayController.IsEntityDead);
+        public void UpdateInstances(GraphicsDevice g, Predicate<RTSUnit> fRemoval, Predicate<RTSUnit> fVisible) {
+            instances.RemoveAll(fRemoval);
             visible = new List<RTSUnit>();
             for(int i = 0; i < instances.Count; i++) {
                 if(fVisible(instances[i]))
@@ -128,7 +126,7 @@ namespace RTSEngine.Graphics {
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, VisibleInstanceCount);
         }
 
-        public void OnUnitSpawn(RTSUnit u) {
+        private void OnUnitSpawn(RTSUnit u) {
             if(u.UnitData == Data)
                 instances.Add(u);
         }

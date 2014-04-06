@@ -6,31 +6,79 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
-    public class RTSBuilding : IEntity {
-        # region Properties
-        public RTSBuildingData BuildingData { get; private set; }
+    public class RTSBuilding : IEntity, ImpactGenerator {
+        // Common Data
+        public RTSBuildingData BuildingData {
+            get;
+            private set;
+        }
+
         // Unique ID
         public int UUID {
             get;
             private set;
         }
 
-        // This Unit's Current Health
-        public int Health { get; private set; }
+        // Building's Team
+        public RTSTeam Team {
+            get;
+            private set;
+        }
 
-        public RTSTeam Team { get; private set; }
+        // State Information
+        public int State {
+            get;
+            set;
+        }
 
-        // Activity Of This Building
-        public Queue<RTSUnit> UnitQueue { get; private set; }
+        // View Direction
+        public Vector2 ViewDirection {
+            get;
+            private set;
+        }
 
-        // Event Triggered When This Entity Receives Damage
-        public event Action<IEntity, int> OnDamage;
+        // 2D Position
+        private Vector2 gridPos;
+        public Vector2 GridPosition {
+            get { return gridPos; }
+            set { gridPos = value; }
+        }
 
-        // Destruction Event
-        public event Action<IEntity> OnDestruction;
+        // 3D Position
+        private float height;
+        public float Height {
+            get { return height; }
+            set { height = value; }
+        }
+        public Vector3 WorldPosition {
+            get { return new Vector3(gridPos.X, height, gridPos.Y); }
+        }
 
+        // Target
+        protected IEntity target;
+        public IEntity Target {
+            get { return target; }
+            set {
+                if(target != value) {
+                    target = value;
+                    if(OnNewTarget != null)
+                        OnNewTarget(this, target);
+                }
+            }
+        }
+
+        // Event Triggered When New Target Found (Null When Can't Find One)
+        public event Action<IEntity, IEntity> OnNewTarget;
+
+        // This Building's Current Health
+        public int Health {
+            get;
+            set;
+        }
         public bool IsAlive {
-            get { return Health > 0; }
+            get {
+                return Health > 0;
+            }
             set {
                 if(!value)
                     Destroy();
@@ -39,17 +87,16 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        private ACBuildingActionController aController;
-        public ACBuildingActionController ActionController {
-            get { return aController; }
-            set {
-                aController = value;
-                if(aController != null) aController.setBuilding(this);
-            }
+        // Default Spawn Position For Units
+        public Vector2 DefaultSpawnPos() {
+            float radius = CollisionGeometry.BoundingRadius;
+            return new Vector2(gridPos.X, gridPos.Y + radius);
         }
-        #endregion
 
-        #region Spacial Properties
+        // Damaging Events
+        public event Action<IEntity, int> OnDamage;
+        public event Action<IEntity> OnDestruction;
+
         // Collision Geometry
         public ICollidable CollisionGeometry {
             get;
@@ -64,40 +111,42 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        // 2-D Position Of The Building
-        private Vector2 gridPos;
-        public Vector2 GridPosition {
-            get { return gridPos; }
-            set { gridPos = value; }
+        private ACBuildingActionController aController;
+        public ACBuildingActionController ActionController {
+            get { return aController; }
+            set {
+                aController = value;
+                if(aController != null) aController.SetBuilding(this);
+            }
         }
 
-        // 3-D Position Of The Building
-        private float height;
-        public float Height {
-            get { return height; }
-            set { height = value; }
-        }
-        public Vector3 WorldPosition {
-            get { return new Vector3(gridPos.X, height, gridPos.Y); }
-        }
-
-        // Target Of The Building
+        // Waypoint Of The Building
         protected Vector2 targetPos;
         public Vector2 TargetPos {
             get { return targetPos; }
             set { targetPos = value; }
         }
-        #endregion
+
+        public event Action<Vector2, int> GenerateImpact;
+
+        public RTSBuildingData Data {
+            get;
+            set;
+        }
 
         // Constructor
         public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {
+            // Identification
+            UUID = UUIDGenerator.GetUUID();
             Team = team;
-            BuildingData = data;
             gridPos = position;
+
+            BuildingData = data;
             height = 0;
             Health = BuildingData.Health;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
-            UnitQueue = new Queue<RTSUnit>();
+            ViewDirection = Vector2.UnitX;
+            CollisionGeometry.Center = GridPosition;
         }
 
         // Applies Damage To Health
@@ -115,47 +164,5 @@ namespace RTSEngine.Data.Team {
             if(OnDestruction != null)
                 OnDestruction(this);
         }
-
-        // Enqueue New Unit
-        public void EnqueueUnit(RTSUnit unit) {
-            UnitQueue.Enqueue(unit);
-        }
-
-        // TODO: Implement Missing Interface Elements
-        #region AUTO-IMPLEMENTED MISSING INTERFACE ELEMENTS
-        public IEntity Target {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
-        }
-
-        public event Action<IEntity, IEntity> OnNewTarget;
-
-        ACUnitActionController IEntity.ActionController {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
-        }
-
-        public ACUnitAnimationController AnimationController {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
-        }
-
-        public int State {
-            get;
-            set;
-        }
-        #endregion
     }
 }

@@ -18,43 +18,37 @@ namespace RTSEngine.Data.Parsers {
             return fi.Extension.EndsWith(EXTENSION);
         }
 
-        public static List<RTSColorScheme> ParseAll(DirectoryInfo dir) {
-            if(!dir.Exists)
-                throw new DirectoryNotFoundException("Color Scheme Directory Doesn't Exist");
+        public static RTSColorScheme? Parse(FileInfo infoFile) {
+            // Check File Existence
+            if(infoFile == null || !infoFile.Exists) return null;
 
-            var l = new List<RTSColorScheme>();
-            RTSColorScheme buf;
-            foreach(FileInfo fi in dir.GetFiles().Where(IsFile)) {
-                using(FileStream s = File.OpenRead(fi.FullName)) {
-                    if(Parse(s, out buf)) l.Add(buf);
-                }
+            // Read The Entire File
+            string mStr;
+            using(FileStream fs = File.OpenRead(infoFile.FullName)) {
+                StreamReader s = new StreamReader(fs);
+                mStr = s.ReadToEnd();
             }
-            return l;
-        }
-        private static bool Parse(Stream s, out RTSColorScheme scheme) {
-            scheme = new RTSColorScheme();
+            RTSColorScheme scheme = new RTSColorScheme();
 
             // Read All And Match
-            StreamReader sr = new StreamReader(s);
-            string ms = sr.ReadToEnd();
             Match[] m = {
-                rgxName.Match(ms),
-                rgxPrimary.Match(ms),
-                rgxSecondary.Match(ms),
-                rgxTertiary.Match(ms)
+                rgxName.Match(mStr),
+                rgxPrimary.Match(mStr),
+                rgxSecondary.Match(mStr),
+                rgxTertiary.Match(mStr)
             };
 
             // Check For All Primary Data
             foreach(var match in m)
                 if(!match.Success)
-                    return false;
+                    return null;
 
             // Extract Data
             scheme.Name = RegexHelper.Extract(m[0]);
             scheme.Primary = RegexHelper.ExtractVec3(m[1]);
             scheme.Secondary = RegexHelper.ExtractVec3(m[2]);
             scheme.Tertiary = RegexHelper.ExtractVec3(m[3]);
-            return true;
+            return scheme;
         }
     }
 }

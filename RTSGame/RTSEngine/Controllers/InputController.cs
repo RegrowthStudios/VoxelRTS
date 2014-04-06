@@ -10,6 +10,7 @@ using RTSEngine.Data.Team;
 namespace RTSEngine.Controllers {
     // Types Of Teams
     public enum InputType {
+        None,
         Player,
         AI,
         Environment
@@ -24,15 +25,24 @@ namespace RTSEngine.Controllers {
         public readonly List<IEntity> selected;
 
         //The RTSTeam of the InputController
-        public RTSTeam Team { get; private set; }
+        public int TeamIndex {
+            get;
+            private set;
+        }
+        public RTSTeam Team {
+            get { return GameState.teams[TeamIndex]; }
+        }
 
         //Stores GameState
-        public GameState GameState { get; private set; }
+        public GameState GameState {
+            get;
+            private set;
+        }
 
         //Creates An InputController For The Given RTSTeam
-        public InputController(GameState g, RTSTeam t) {
+        public InputController(GameState g, int t) {
             GameState = g;
-            Team = t;
+            TeamIndex = t;
             eventQueue = new ConcurrentQueue<GameInputEvent>();
             selected = new List<IEntity>();
         }

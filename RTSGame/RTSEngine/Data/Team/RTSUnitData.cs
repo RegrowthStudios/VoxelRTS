@@ -35,9 +35,9 @@ namespace RTSEngine.Data.Team {
         public ICollidable ICollidableShape;
         public BoundingBox BBox;
 
-        public ReflectedUnitController DefaultMoveController;
         public ReflectedUnitController DefaultActionController;
-        public ReflectedUnitController DefaultAnimationController;
         public ReflectedUnitController DefaultCombatController;
+        public ReflectedUnitController DefaultMoveController;
+        public ReflectedUnitController DefaultAnimationController;
     }
 }

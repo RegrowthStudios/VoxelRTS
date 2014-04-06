@@ -12,11 +12,9 @@ namespace RTSEngine.Controllers {
     public class AIInputController : InputController {
         Thread t;
         bool running, paused;
-        int teamIndex;
 
-        public AIInputController(GameState g, RTSTeam _t, int ti)
-            : base(g, _t) {
-            teamIndex = ti;
+        public AIInputController(GameState g, int ti)
+            : base(g, ti) {
             t = new Thread(WorkThread);
             t.IsBackground = true;
             running = true;
@@ -57,13 +55,23 @@ namespace RTSEngine.Controllers {
             cc = Team.race.activeUnits[ui].Data.MaxCount - cc;
             if(cc > 10) cc = 10;
             if(cc < 1) return;
-            DevConsole.AddCommand(string.Format("spawn [{0}, {1}, {2}, {3}, {4}]",
-                teamIndex,
-                ui,
-                r.Next(1, cc),
-                r.Next((int)GameState.Map.Width - 20) + 10,
-                r.Next((int)GameState.Map.Depth - 20) + 10
-                ));
+            int uc = r.Next(1, cc);
+            for(int i = 0; i < uc; i++) {
+                AddEvent(new SpawnUnitEvent(
+                    TeamIndex,
+                    ui,
+                    new Vector2(
+                        r.Next((int)GameState.Map.Width - 20) + 10,
+                        r.Next((int)GameState.Map.Depth - 20) + 10)
+                    ));
+            }
+            //DevConsole.AddCommand(string.Format("spawn [{0}, {1}, {2}, {3}, {4}]",
+            //    TeamIndex,
+            //    ui,
+            //    r.Next(1, cc),
+            //    r.Next((int)GameState.Map.Width - 20) + 10,
+            //    r.Next((int)GameState.Map.Depth - 20) + 10
+            //    ));
         }
         private void MoveUnits(Random r) {
             var toMove = new List<IEntity>();
@@ -72,12 +80,12 @@ namespace RTSEngine.Controllers {
                     toMove.Add(unit);
             }
             if(toMove.Count < 1) return;
-            AddEvent(new SelectEvent(toMove, Team));
+            AddEvent(new SelectEvent(TeamIndex, toMove));
             AddEvent(new SetWayPointEvent(
+                TeamIndex,
                 new Vector2(
                     r.Next((int)GameState.Map.Width - 20) + 10,
-                    r.Next((int)GameState.Map.Depth - 20) + 10),
-                Team
+                    r.Next((int)GameState.Map.Depth - 20) + 10)
                 ));
         }
     }

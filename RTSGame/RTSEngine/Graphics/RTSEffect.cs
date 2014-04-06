@@ -31,8 +31,8 @@ namespace RTSEngine.Graphics {
 
     public class RTSFXEntity {
         // Effect Pass Keys
-        public const string PASS_KEY_SIMPLE = "Simple";
-        public const string PASS_KEY_ANIMATION = "Animation";
+        public const string PASS_KEY_BUILDING = "Building";
+        public const string PASS_KEY_UNIT = "Unit";
         // Effect Parameter Keys
         public const string PARAM_KEY_WORLD = "World";
         public const string PARAM_KEY_VP = "VP";
@@ -43,7 +43,7 @@ namespace RTSEngine.Graphics {
 
         // The Effect And Its Passes
         private Effect fx;
-        private EffectPass fxPassSimple, fxPassAnimation;
+        private EffectPass fxPassBuilding, fxPassUnit;
 
         // Used For Simple Pass
         private EffectParameter fxpWorld, fxpVP;
@@ -77,8 +77,8 @@ namespace RTSEngine.Graphics {
             fx.CurrentTechnique = fx.Techniques[0];
 
             // Get The Passes
-            fxPassSimple = fx.CurrentTechnique.Passes[PASS_KEY_SIMPLE];
-            fxPassAnimation = fx.CurrentTechnique.Passes[PASS_KEY_ANIMATION];
+            fxPassBuilding = fx.CurrentTechnique.Passes[PASS_KEY_BUILDING];
+            fxPassUnit = fx.CurrentTechnique.Passes[PASS_KEY_UNIT];
 
             // Get The Parameters
             fxpWorld = fx.Parameters[PARAM_KEY_WORLD];
@@ -89,11 +89,11 @@ namespace RTSEngine.Graphics {
             fxpTexelSize = fx.Parameters[PARAM_KEY_TEXEL_SIZE];
         }
 
-        public void ApplyPassSimple() {
-            fxPassSimple.Apply();
+        public void ApplyPassBuilding() {
+            fxPassBuilding.Apply();
         }
-        public void ApplyPassAnimation() {
-            fxPassAnimation.Apply();
+        public void ApplyPassUnit() {
+            fxPassUnit.Apply();
         }
 
         public void SetTextures(GraphicsDevice g, Texture2D tAnim, Texture2D tMain, Texture2D tKey) {
@@ -101,6 +101,10 @@ namespace RTSEngine.Graphics {
             g.Textures[1] = tMain;
             g.Textures[2] = tKey;
             fxpTexelSize.SetValue(new Vector2(1f / tAnim.Width, 1f / tAnim.Height));
+        }
+        public void SetTextures(GraphicsDevice g, Texture2D tMain, Texture2D tKey) {
+            g.Textures[1] = tMain;
+            g.Textures[2] = tKey;
         }
     }
 

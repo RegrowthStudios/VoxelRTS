@@ -65,6 +65,7 @@ namespace RTS {
             playController = new GameplayController();
             gameInput = state.teams[0].Input as PlayerInputController;
             gameInput.Camera = camera;
+            gameInput.UI = renderer.RTSUI;
             playController.Init(state);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
@@ -102,9 +103,11 @@ namespace RTS {
         public override void Draw(GameTime gameTime) {
             if(!pauseRender) {
                 camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
+                renderer.Update(state);
                 renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
 
                 // TODO: Draw UI
+                renderer.DrawUI(SB);
             }
 
             if(DevConsole.IsActivated) {
@@ -131,7 +134,21 @@ namespace RTS {
                 if(state.Map.BVH.Intersect(ref rec, r)) {
                     spawnLoc = r.Position + r.Direction * rec.T;
                     if(doAdd)
-                        DevConsole.AddCommand(string.Format("spawn [{0},{1},{2},{3},{4}]", team, unit, 1, spawnLoc.X, spawnLoc.Z));
+                        gameInput.AddEvent(new SpawnUnitEvent(
+                            team, unit, new Vector2(spawnLoc.X, spawnLoc.Z)
+                            ));
+                }
+            }
+            if(b == MouseButton.Left) {
+                Ray r = renderer.Camera.GetViewRay(p);
+                IntersectionRecord rec = new IntersectionRecord();
+                if(state.Map.BVH.Intersect(ref rec, r)) {
+                    spawnLoc = r.Position + r.Direction * rec.T;
+                    if(doAdd)
+                        gameInput.AddEvent(new SpawnBuildingEvent(
+                            team, 0,
+                            HashHelper.Hash(new Vector2(spawnLoc.X, spawnLoc.Z), state.CGrid.numCells, state.CGrid.size)
+                            ));
                 }
             }
         }

@@ -21,12 +21,12 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public RTSTeam Team {
+        public int Team {
             get;
             private set;
         }
 
-        public GameInputEvent(GameEventType a, RTSTeam t) {
+        public GameInputEvent(GameEventType a, int t) {
             Action = a;
             Team = t;
         }
@@ -38,7 +38,7 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SelectEvent(List<IEntity> s, RTSTeam t)
+        public SelectEvent(int t, List<IEntity> s)
             : base(GameEventType.Select, t) {
             Selected = s;
         }
@@ -50,7 +50,7 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SetWayPointEvent(Vector2 w, RTSTeam t)
+        public SetWayPointEvent(int t, Vector2 w)
             : base(GameEventType.SetWaypoint, t) {
             Waypoint = w;
         }
@@ -62,34 +62,45 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public SetTargetEvent(IEntity target, RTSTeam t)
+        public SetTargetEvent(int t, IEntity target)
             : base(GameEventType.SetTarget, t) {
             Target = target;
         }
     }
 
     public class SpawnUnitEvent : GameInputEvent {
+        public int Type {
+            get;
+            private set;
+        }
+
         public Vector2 Position {
             get;
             private set;
         }
 
-        public SpawnUnitEvent(RTSTeam t, Vector2 pos)
+        public SpawnUnitEvent(int t, int type, Vector2 pos)
             : base(GameEventType.SpawnUnit, t) {
+            Type = type;
             Position = pos;
         }
     }
 
     public class SpawnBuildingEvent : GameInputEvent {
-        public Vector2 Position {
+        public int Type {
             get;
             private set;
         }
 
-        public SpawnBuildingEvent(RTSTeam t, Vector2 pos) 
-            : base (GameEventType.SpawnBuilding, t) {
-                Position = pos;
+        public Point GridPosition {
+            get;
+            private set;
         }
 
+        public SpawnBuildingEvent(int t, int type, Point gPos)
+            : base(GameEventType.SpawnBuilding, t) {
+            Type = type;
+            GridPosition = gPos;
+        }
     }
 }

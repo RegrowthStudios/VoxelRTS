@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="Input\Poll\GamePadManager.cs" />
     <Compile Include="Input\Handlers.cs" />
+    <Compile Include="Input\TextInput.cs" />
     <Compile Include="Input\WMHookInput.cs" />
     <Compile Include="Input\Poll\InputManager.cs" />
     <Compile Include="Input\KeyboardEventDispatcher.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Widgets\Drawables.cs" />
     <Compile Include="Widgets\RectButton.cs" />
     <Compile Include="Widgets\RectWidget.cs" />
+    <Compile Include="Widgets\ScrollBar.cs" />
     <Compile Include="Widgets\TextWidget.cs" />
     <Compile Include="Widgets\WidgetRenderer.cs" />
   </ItemGroup>

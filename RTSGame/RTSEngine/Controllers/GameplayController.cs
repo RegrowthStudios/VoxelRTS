@@ -43,11 +43,26 @@ namespace RTSEngine.Controllers {
                 unit.ActionController.DecideAction(state, dt);
         }
     }
+    class BTaskBuildingDecision : ACBudgetedTask {
+        private GameState state;
+        private RTSBuilding building;
+
+        public BTaskBuildingDecision(GameState g, RTSBuilding b) :
+            base(1) {
+            building = b;
+            state = g;
+        }
+
+        public override void DoWork(float dt) {
+            if(building.ActionController != null)
+                building.ActionController.DecideAction(state, dt);
+        }
+    }
     #endregion
 
     public class GameplayController : IDisposable {
         public const int SQUAD_BUDGET_BINS = 10;
-        public const int UNIT_BUDGET_BINS = 30;
+        public const int ENTITY_BUDGET_BINS = 30;
         public const int FOW_BUDGET_BINS = 8;
 
         // Queue Of Events
@@ -56,8 +71,9 @@ namespace RTSEngine.Controllers {
         // Queue Of Commands
         private Queue<DevCommand> commands;
 
+        // Budgeted Tasks That Do Not Require Immediate Computation
         private TimeBudget tbSquadDecisions;
-        private TimeBudget tbUnitDecisions;
+        private TimeBudget tbEntityDecisions;
         private TimeBudget tbFOWCalculations;
 
         // Pathfinding
@@ -69,7 +85,7 @@ namespace RTSEngine.Controllers {
             public PathQuery query;
             public SquadQuery(RTSSquad s, PathQuery q) {
                 squad = s;
-                query = q; 
+                query = q;
             }
         }
 
@@ -77,7 +93,7 @@ namespace RTSEngine.Controllers {
             commands = new Queue<DevCommand>();
 
             tbSquadDecisions = new TimeBudget(SQUAD_BUDGET_BINS);
-            tbUnitDecisions = new TimeBudget(UNIT_BUDGET_BINS);
+            tbEntityDecisions = new TimeBudget(ENTITY_BUDGET_BINS);
             tbFOWCalculations = new TimeBudget(FOW_BUDGET_BINS);
 
             squadQueries = new List<SquadQuery>();
@@ -125,14 +141,12 @@ namespace RTSEngine.Controllers {
 
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
-            // TODO: Use InputControllers From The Teams
             events = new LinkedList<GameInputEvent>();
             foreach(var active in s.activeTeams) {
                 if(active.Team.Input != null) {
                     active.Team.Input.AppendEvents(events);
                 }
             }
-
         }
         private void ApplyInput(GameState s, float dt) {
             GameInputEvent e;
@@ -151,6 +165,12 @@ namespace RTSEngine.Controllers {
                     case GameEventType.SetTarget:
                         ApplyInput(s, dt, e as SetTargetEvent);
                         break;
+                    case GameEventType.SpawnUnit:
+                        ApplyInput(s, dt, e as SpawnUnitEvent);
+                        break;
+                    case GameEventType.SpawnBuilding:
+                        ApplyInput(s, dt, e as SpawnBuildingEvent);
+                        break;
                     default:
                         throw new Exception("Event does not exist.");
                 }
@@ -158,13 +178,16 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyInput(GameState s, float dt, SelectEvent e) {
-            e.Team.Input.selected.Clear();
-            e.Team.Input.selected.AddRange(e.Selected);
+            RTSTeam team = s.teams[e.Team];
+            team.Input.selected.Clear();
+            if(e.Selected != null && e.Selected.Count > 0)
+                team.Input.selected.AddRange(e.Selected);
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
+            RTSTeam team = s.teams[e.Team];
             List<Vector2> wp = new List<Vector2>();
             wp.Add(e.Waypoint);
-            List<IEntity> selected = e.Team.Input.selected;
+            List<IEntity> selected = team.Input.selected;
             RTSSquad squad = null;
             if(selected != null && selected.Count > 0) {
                 foreach(var unit in selected) {
@@ -178,14 +201,13 @@ namespace RTSEngine.Controllers {
                 }
             }
             if(squad != null) {
-                AddSquadTask(s, squad);
+                AddTask(s, squad);
                 // Setup Pathfinding Query
                 foreach(var squadQuery in squadQueries) {
                     if(squadQuery.squad == squad) {
                         squadQuery.query.IsOld = true;
                     }
                 }
-                squad.MovementController = e.Team.race.scMovement.CreateInstance<ACSquadMovementController>();
                 squad.RecalculateGridPosition();
                 PathQuery query = new PathQuery(squad.GridPosition, e.Waypoint);
                 squadQueries.Add(new SquadQuery(squad, query));
@@ -193,7 +215,8 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
-            List<IEntity> selected = e.Team.Input.selected;
+            RTSTeam team = s.teams[e.Team];
+            List<IEntity> selected = team.Input.selected;
 
             if(selected != null && selected.Count > 0) {
                 RTSSquad squad = null;
@@ -205,13 +228,55 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                AddSquadTask(s, squad);
-                squad.ActionController = e.Team.race.scAction.CreateInstance<ACSquadActionController>();
-                squad.TargettingController = e.Team.race.scTargetting.CreateInstance<ACSquadTargettingController>();
                 squad.TargettingController.Target = e.Target as RTSUnit;
+                AddTask(s, squad);
             }
         }
-        
+        private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
+            RTSTeam team = s.teams[e.Team];
+            RTSUnit unit = team.AddUnit(e.Type, e.Position);
+            AddTask(s, unit);
+
+            // Add A Single Unit Squad
+            RTSSquad squad = team.AddSquad();
+            squad.Add(unit);
+            squad.RecalculateGridPosition();
+            AddTask(s, squad);
+        }
+        private void ApplyInput(GameState s, float dt, SpawnBuildingEvent e) {
+            RTSTeam team = s.teams[e.Team];
+            Vector2 wp = new Vector2(e.GridPosition.X + 0.5f, e.GridPosition.Y + 0.5f) * s.CGrid.cellSize;
+            RTSBuilding building = team.AddBuilding(e.Type, wp);
+            AddTask(s, building);
+
+            // Set Default Height
+            building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
+            building.CollisionGeometry.Height = building.Height;
+
+            s.IGrid.AddImpactGenerator(building);
+        }
+        private void AddTask(GameState s, RTSUnit unit) {
+            var btu = new BTaskUnitDecision(s, unit);
+            unit.OnDestruction += (o) => {
+                tbEntityDecisions.RemoveTask(btu);
+            };
+            tbEntityDecisions.AddTask(btu);
+        }
+        private void AddTask(GameState s, RTSSquad squad) {
+            var bts = new BTaskSquadDecision(s, squad);
+            squad.OnDeath += (o) => {
+                tbSquadDecisions.RemoveTask(bts);
+            };
+            tbSquadDecisions.AddTask(bts);
+        }
+        private void AddTask(GameState s, RTSBuilding building) {
+            var btu = new BTaskBuildingDecision(s, building);
+            building.OnDestruction += (o) => {
+                tbEntityDecisions.RemoveTask(btu);
+            };
+            tbEntityDecisions.AddTask(btu);
+        }
+
         // Apply Results Of Any Finished Pathfinding
         private void ApplyFinishedPathQueries() {
             List<SquadQuery> newQueries = new List<SquadQuery>();
@@ -221,7 +286,7 @@ namespace RTSEngine.Controllers {
                 if(!query.IsOld && query.IsComplete) {
                     squad.MovementController.Waypoints = query.waypoints;
                 }
-                else if (!query.IsOld) {
+                else if(!query.IsOld) {
                     newQueries.Add(squadQuery);
                 }
             }
@@ -251,39 +316,33 @@ namespace RTSEngine.Controllers {
 
             // Find Decisions For Currently Budgeted Tasks
             tbSquadDecisions.DoTasks(dt);
-            tbUnitDecisions.DoTasks(dt);
+            tbEntityDecisions.DoTasks(dt);
 
-            // Apply Decisions
+            // Apply Decisions For Squads
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
                 for(int i = 0; i < team.squads.Count; i++)
                     if(team.squads[i].ActionController != null)
                         team.squads[i].ActionController.ApplyAction(s, dt);
             }
+            // Apply Decisions For Units And Buildings
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
                 for(int i = 0; i < team.units.Count; i++)
                     if(team.units[i].ActionController != null)
                         team.units[i].ActionController.ApplyAction(s, dt);
+                for(int i = 0; i < team.buildings.Count; i++)
+                    if(team.buildings[i].ActionController != null)
+                        team.buildings[i].ActionController.ApplyAction(s, dt);
             }
 
             // Calculate FOW
             tbFOWCalculations.DoTasks(dt);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSpawn c) {
-            RTSTeam team = s.teams[c.TeamIndex];
-            RTSSquad squad = team.AddSquad();
-            for(int ci = 0; ci < c.Count; ci++) {
-                RTSUnit unit = team.AddUnit(c.UnitIndex, new Vector2(c.X, c.Z));
-                unit.ActionController = team.race.units[c.UnitIndex].DefaultActionController.CreateInstance<ACUnitActionController>();
-                unit.AnimationController = team.race.units[c.UnitIndex].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
-                unit.MovementController = team.race.units[c.UnitIndex].DefaultMoveController.CreateInstance<ACUnitMovementController>();
-                unit.CombatController = team.race.units[c.UnitIndex].DefaultCombatController.CreateInstance<ACUnitCombatController>();
-                squad.Add(unit);
-                AddUnitTask(s, unit);
-            }
-            squad.RecalculateGridPosition();
-            AddSquadTask(s, squad);
+            // Multiple Spawn Events
+            SpawnUnitEvent e = new SpawnUnitEvent(c.TeamIndex, c.UnitIndex, new Vector2(c.X, c.Z));
+            for(int i = 0; i < c.Count; i++) ApplyInput(s, dt, e);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
@@ -302,25 +361,11 @@ namespace RTSEngine.Controllers {
                 }
             }
         }
-        private void AddUnitTask(GameState s, RTSUnit unit) {
-            var btu = new BTaskUnitDecision(s, unit);
-            unit.OnDestruction += (o) => {
-                tbUnitDecisions.RemoveTask(btu);
-            };
-            tbUnitDecisions.AddTask(btu);
-        }
-        private void AddSquadTask(GameState s, RTSSquad squad) {
-            var bts = new BTaskSquadDecision(s, squad);
-            squad.OnDeath += (o) => {
-                tbSquadDecisions.RemoveTask(bts);
-            };
-            tbSquadDecisions.AddTask(bts);
-        }
 
         // Physics Stage
         private void ResolvePhysics(GameState s, float dt) {
             RTSTeam team;
-            
+
             // Initialize hash grid
             var hashGrid = s.CGrid;
             hashGrid.ClearDynamic();
@@ -366,7 +411,8 @@ namespace RTSEngine.Controllers {
             // Remove All Dead Entities
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
-                team.RemoveAll(IsEntityDead);
+                team.RemoveAll(IsUnitDead);
+                team.RemoveAll(IsBuildingDead);
                 team.RemoveAll(IsSquadEmpty);
             }
 
@@ -375,6 +421,12 @@ namespace RTSEngine.Controllers {
         }
         public static bool IsEntityDead(IEntity e) {
             return !e.IsAlive;
+        }
+        public static bool IsUnitDead(RTSUnit u) {
+            return IsEntityDead(u);
+        }
+        public static bool IsBuildingDead(RTSBuilding b) {
+            return IsEntityDead(b);
         }
         private static bool IsSquadEmpty(RTSSquad s) {
             return s.IsDead;

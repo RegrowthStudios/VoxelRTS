@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO;
 using Microsoft.Xna.Framework;
@@ -23,6 +24,13 @@ namespace RTS {
         const int BAR_HEIGHT = 10;
         const int BAR_WIDTH = 180;
         const int BACK_SIZE = 3;
+
+        const string TIPS_FILE = @"Content\UI\tips.txt";
+        const string TIPS_FONT = @"Courier New";
+        const int TIPS_FONT_SIZE = 12;
+        const int TIPS_HEIGHT = 140;
+        const int TIPS_OFFSET = 5;
+
         static readonly Color COLOR_LOW = Color.Maroon;
         static readonly Color COLOR_HIGH = Color.Teal;
         static readonly Color COLOR_BACK = new Color(8, 8, 8);
@@ -40,6 +48,10 @@ namespace RTS {
         private Texture2D tLoad, tPixel;
         private List<FileInfo> imageList;
         private float percent;
+        public List<string> tips;
+        string tip;
+        SpriteFont font;
+        IDisposable tFont;
 
         // Engine Data
         private EngineLoadData loadData;
@@ -64,12 +76,8 @@ namespace RTS {
         private bool isLoaded;
 
         public override void Build() {
-            DirectoryInfo id = new DirectoryInfo(IMAGE_DIR);
-            imageList = new List<FileInfo>();
-            foreach(var file in id.GetFiles()) {
-                if(file.Extension.EndsWith("png"))
-                    imageList.Add(file);
-            }
+            FindAllImages();
+            ReadAllTips();
         }
         public override void Destroy(GameTime gameTime) {
         }
@@ -84,14 +92,21 @@ namespace RTS {
             tPixel.SetData(new Color[] { Color.White });
 
             percent = 0f;
-            isLoaded = false;
 
+            // Font For Tips
+            font = XNASpriteFont.Compile(G, TIPS_FONT, TIPS_FONT_SIZE, out tFont);
+            tip = tips[r.Next(tips.Count)];
+
+            // Create The Loading Thread
+            isLoaded = false;
             Thread tWork = new Thread(WorkThread);
             tWork.Priority = ThreadPriority.AboveNormal;
             tWork.IsBackground = true;
             tWork.Start();
         }
         public override void OnExit(GameTime gameTime) {
+            tFont.Dispose();
+            font = null;
             tLoad.Dispose();
             tPixel.Dispose();
         }
@@ -127,57 +142,68 @@ namespace RTS {
             rBack.Width -= (BOUNDS_OFFSET - BACK_SIZE) * 2;
             rBack.Height = BAR_HEIGHT + BACK_SIZE * 2;
 
-            SB.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+            SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
             // Draw A Background Image
             SB.Draw(tLoad, G.Viewport.Bounds, Color.White);
             // Draw The Progress Bar
             SB.Draw(tPixel, rBack, COLOR_BACK);
             SB.Draw(tPixel, rBar, Color.Lerp(COLOR_LOW, COLOR_HIGH, percent));
+
+            SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
+            SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
             SB.End();
         }
 
+        private void FindAllImages() {
+            DirectoryInfo id = new DirectoryInfo(IMAGE_DIR);
+            imageList = new List<FileInfo>();
+            foreach(var file in id.GetFiles()) {
+                if(file.Extension.EndsWith("png"))
+                    imageList.Add(file);
+            }
+        }
+        private void ReadAllTips() {
+            tips = new List<string>();
+            Regex rgxTip = new Regex(@"\x5b([^\x5d]+)\x5d");
+            string mStr = null;
+            using(var s = File.OpenRead(TIPS_FILE)) {
+                mStr = new StreamReader(s).ReadToEnd();
+            }
+            Match m = rgxTip.Match(mStr);
+            while(m.Success) {
+                tips.Add(m.Groups[1].Value);
+                m = m.NextMatch();
+            }
+        }
         private void WorkThread() {
-            loadData = new EngineLoadData();
-            loadData.MapFile = new FileInfo(@"Packs\Default\maps\0\test.map");
-            var teamRes = RTSRaceParser.ParseAll(new DirectoryInfo("Packs"));
+            // Grab The Initialization Info
+            loadData = game.LobbyScreen.InitInfo;
+            var races = game.LobbyScreen.Races;
 
-            loadData.Teams = new RTSTeamResult[2];
-            loadData.Teams[0].TeamType = RTSRaceParser.Parse(new FileInfo(@"Packs\Default\races\player.race"));
-            loadData.Teams[0].InputType = InputType.Player;
-            loadData.Teams[0].Colors = RTSColorScheme.Default;
-            loadData.Teams[0].Colors.Primary *= Vector3.UnitX;
-            loadData.Teams[0].Colors.Secondary *= Vector3.UnitX;
-            loadData.Teams[0].Colors.Tertiary *= Vector3.UnitX;
-            loadData.Teams[1].TeamType = RTSRaceParser.Parse(new FileInfo(@"Packs\Default\races\robots.race"));
-            loadData.Teams[1].InputType = InputType.AI;
-            loadData.Teams[1].Colors = RTSColorScheme.Default;
-            loadData.Teams[1].Colors.Primary *= Vector3.UnitZ;
-            loadData.Teams[1].Colors.Secondary *= Vector3.UnitZ;
-            loadData.Teams[1].Colors.Tertiary *= Vector3.UnitZ;
-
+            // Build The Local Game State
             LoadedState = new GameState();
-            GameEngine.BuildLocal(LoadedState, LoadData);
+            GameEngine.BuildLocal(LoadedState, LoadData, races);
 
-            // Create Camera And Graphics
+            // Create Camera
             LoadedCamera = new Camera(G.Viewport);
             LoadedCamera.Controller.Hook(game.Window);
+
+            // Load The Renderer
             LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
             LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera, game.LoadScreen.LoadData.MapFile);
-            LoadedRenderer.LoadTeamVisuals(LoadedState, new VisualTeam() {
-                TeamIndex = 0,
-                ColorScheme = loadData.Teams[0].Colors,
-                RaceFileInfo = @"Packs\Default\races\player.race"
-            });
-            LoadedRenderer.LoadTeamVisuals(LoadedState, new VisualTeam() {
-                TeamIndex = 1,
-                ColorScheme = loadData.Teams[1].Colors,
-                RaceFileInfo = @"Packs\Default\races\robots.race"
-            });
+            VisualTeam vt;
+            for(int i = 0; i < loadData.Teams.Length; i++) {
+                var td = loadData.Teams[i];
+                if(td.InputType == InputType.None)
+                    continue;
 
+                // Create The Visual Data
+                vt.TeamIndex = i;
+                vt.RaceFileInfo = races[td.Race];
+                vt.ColorScheme = td.Colors;
+                LoadedRenderer.LoadTeamVisuals(LoadedState, vt);
+            }
             isLoaded = true;
-        }
-        private void LoadCallback(string m, float p) {
-            // percent = p;
         }
     }
 }

@@ -106,7 +106,7 @@ namespace RTS.Mech.Unit {
             alRest = new AnimationLoop(0, 59);
             alRest.FrameSpeed = 30;
             alWalk = new AnimationLoop(60, 119);
-            alWalk.FrameSpeed = 50;
+            alWalk.FrameSpeed = 80;
             alCombat = new AnimationLoop(120, 149);
             alCombat.FrameSpeed = 30;
 
@@ -256,32 +256,40 @@ namespace RTS.Mech.Unit {
     }
 }
 
-// TODO: Finish This Implementation
-//namespace RTS.Mech.Building {
-//    public class Action : ACBuildingActionController {
-//        public int time = -1;
-//        // Update Unit Build Time
-//        public void Update(GameState g) {
-//            if (Building.UnitQueue.Count > 0) {
-//                // Initialize Timer If Building Is Just Starting To Produce
-//                if (time == -1)
-//                    time = Building.UnitQueue.Peek().UnitData.BuildTime;
-//                else if (time == 0) {
-//                    SpawnUnit(g);
-//                    ApplyEnvImpact(g);
-//                }
-//                time--;
-//            }
-//        }
+// TODO: Verify
+namespace RTS.Mech.Building {
+    public class Action : ACBuildingActionController {
+        private Queue<int> unitQueue = new Queue<int>();
 
-//        // Produce Unit
-//        public void SpawnUnit (GameState g){
-            
-//        }
+        public float buildTime; // How Long It Takes To Finish Producing The Unit
+        private RTSUnit unit; // Unit To Be Produced
 
-//        // Apply Environmental Impact
-//        public void  ApplyEnvImpact(GameState g){
-         
-//        }
-//    }
-//}
+        public override void DecideAction(GameState g, float dt) {
+            if (unit == null && Building.UnitQueue.Count > 0) {
+                unit = Building.UnitQueue.Dequeue();
+                buildTime = unit.UnitData.BuildTime;
+            }
+        }
+        private int unit = -1; // Unit To Be Produced
+        public override void DecideAction(GameState g, float dt) {
+            if (unit < 0 && unitQueue.Count > 0)
+            {
+                unit = unitQueue.Dequeue();
+                buildTime = building.Team.race.units[unit].BuildTime;
+            }
+        }
+
+        public override void ApplyAction(GameState g, float dt) {
+            // If The Unit Is Still Being Produced
+            if (unit >= 0) {
+                buildTime -= dt;
+                // If Finished Building The Unit
+                if(buildTime < 0) {
+                    Building.Team.AddUnit(unit, building.GridPosition);
+                    buildTime = 0;
+                    unit = -1;
+                }
+            }
+        }
+    }
+}

@@ -19,7 +19,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
         private static readonly Regex rgxColorTex = RegexHelper.GenerateFile("TEXCOLOR");
         private static readonly Regex rgxAnimation = RegexHelper.GenerateFile("ANIMATION");
-        private static readonly Regex rgxMaxCount = RegexHelper.GenerateFile("MAXCOUNT");
+        private static readonly Regex rgxMaxCount = RegexHelper.GenerateInteger("MAXCOUNT");
         private static readonly Regex rgxHealth = RegexHelper.GenerateInteger("HEALTH");
         private static readonly Regex rgxSpeed = RegexHelper.GenerateNumber("SPEED");
         private static readonly Regex rgxCost = RegexHelper.GenerateVec2Int("COST");
@@ -53,7 +53,7 @@ namespace RTSEngine.Data.Parsers {
             t.SetData(sData);
             return t;
         }
-        public static RTSUnitModel ParseModel(RTSRenderer renderer, RTSUnitData data, FileInfo infoFile) {
+        public static RTSUnitModel ParseModel(RTSRenderer renderer, FileInfo infoFile) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -84,7 +84,7 @@ namespace RTSEngine.Data.Parsers {
             RTSUnitModel model;
             using(var sModel = File.OpenRead(fiModel.FullName)) {
                 Texture2D tAnim = AnimationFromBitmap(renderer, fiAnim);
-                model = new RTSUnitModel(renderer, data, sModel, tAnim);
+                model = new RTSUnitModel(renderer, sModel, tAnim);
             }
             model.ModelTexture = renderer.LoadTexture2D(fiTexMain.FullName);
             model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
