@@ -157,7 +157,7 @@ namespace RTSEngine.Controllers {
             if(UI.PanelBottom.Inside(pl.X, pl.Y)) {
                 // Check UI Actions
                 Vector2 r;
-                if(UI.ButtonMinimap.Inside(pl.X, pl.Y, out r)) {
+                if(UI.Minimap.Inside(pl.X, pl.Y, out r)) {
                     // Use The Minimap
                     Vector2 mapPos = r * GameState.CGrid.size;
                     if(b == BUTTON_SELECT) {

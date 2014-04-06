@@ -55,7 +55,7 @@ namespace RTSEngine.Graphics {
             private set;
         }
 
-        // All The Unit Models To Render
+        // All The Models To Render
         public List<RTSUnitModel> NonFriendlyUnitModels {
             get;
             private set;
@@ -86,7 +86,6 @@ namespace RTSEngine.Graphics {
             get;
             set;
         }
-
 
         // Particle Effects
         private ParticleRenderer pRenderer;
@@ -295,38 +294,39 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void UpdateSelections(out VertexPositionTexture[] verts, out int[] inds) {
-            // Check If We Need To Render Any Selected Entities
-            if(teamInput.selected.Count < 1) {
-                verts = null;
-                inds = null;
-                return;
+        public void UpdateAnimations(GameState s, float dt) {
+            var np = new List<Particle>();
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                RTSTeam team = s.activeTeams[ti].Team;
+                for(int i = 0; i < team.units.Count; i++) {
+                    if(team.units[i].AnimationController != null) {
+                        team.units[i].AnimationController.Update(s, dt);
+                        if(team.units[i].AnimationController.HasParticles) {
+                            team.units[i].AnimationController.GetParticles(np);
+                        }
+                    }
+                }
             }
+            pRenderer.Update(np, dt);
+        }
 
-            // Build The Selections
-            verts = new VertexPositionTexture[teamInput.selected.Count * 4];
-            int i = 0;
-            foreach(var e in teamInput.selected) {
-                Vector2 c = e.GridPosition;
-                float r = e.CollisionGeometry.BoundingRadius * SELECTION_RADIUS_MODIFIER;
-                float h = e.Height;
-                h += (e.BBox.Max.Y - e.BBox.Min.Y) * SELECTION_HEIGHT_PLACEMENT;
-                verts[i++] = new VertexPositionTexture(new Vector3(c.X - r, h, c.Y - r), Vector2.Zero);
-                verts[i++] = new VertexPositionTexture(new Vector3(c.X + r, h, c.Y - r), Vector2.UnitX);
-                verts[i++] = new VertexPositionTexture(new Vector3(c.X - r, h, c.Y + r), Vector2.UnitY);
-                verts[i++] = new VertexPositionTexture(new Vector3(c.X + r, h, c.Y + r), Vector2.One);
-            }
+        public void Update(GameState state) {
+            RTSUI.UpdateButtons(state);
+            if(Map.Reset) Map.ApplyFOW();
+            Minimap.Refresh(this);
+        }
 
-            inds = new int[teamInput.selected.Count * 6];
-            for(int vi = 0, ii = 0; vi < verts.Length; ) {
-                inds[ii++] = vi + 0;
-                inds[ii++] = vi + 1;
-                inds[ii++] = vi + 2;
-                inds[ii++] = vi + 2;
-                inds[ii++] = vi + 1;
-                inds[ii++] = vi + 3;
-                vi += 4;
-            }
+        // Rendering Passes
+        public void Draw(GameState s, float dt) {
+            UpdateVisible(s.CGrid);
+
+            G.Clear(Color.Black);
+
+            DrawMap(Camera.View * Camera.Projection);
+            DrawBuildings();
+            DrawUnits();
+            DrawSelectionCircles(s.teams[teamIndex].ColorScheme.Secondary);
+            if(drawBox) DrawSelectionBox();
         }
         public void UpdateVisible(CollisionGrid cg) {
             // All Team Friendly Units Are Visible
@@ -374,40 +374,8 @@ namespace RTSEngine.Graphics {
             foreach(var bm in NonFriendlyBuildingModels)
                 bm.UpdateInstances(G, fNFRB, fNFVB);
         }
-        public void UpdateAnimations(GameState s, float dt) {
-            var np = new List<Particle>();
-            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                RTSTeam team = s.activeTeams[ti].Team;
-                for(int i = 0; i < team.units.Count; i++) {
-                    if(team.units[i].AnimationController != null) {
-                        team.units[i].AnimationController.Update(s, dt);
-                        if(team.units[i].AnimationController.HasParticles) {
-                            team.units[i].AnimationController.GetParticles(np);
-                        }
-                    }
-                }
-            }
-            pRenderer.Update(np, dt);
-        }
 
-        public void Update(GameState state) {
-            RTSUI.UpdateButtons(state);
-            if(Map.Reset) Map.ApplyFOW();
-            Minimap.Refresh(this);
-        }
-
-        // Rendering Passes
-        public void Draw(GameState s, float dt) {
-            G.Clear(Color.Black);
-
-            DrawMap(Camera.View * Camera.Projection);
-            // TODO: Draw Static
-            UpdateVisible(s.CGrid);
-            DrawBuildings();
-            DrawAnimated();
-            DrawSelectionCircles(s.teams[teamIndex].ColorScheme.Secondary);
-            if(drawBox) DrawSelectionBox();
-        }
+        // Draw The Map
         public void DrawMap(Matrix mVP) {
             // Set States
             G.DepthStencilState = DepthStencilState.Default;
@@ -435,6 +403,8 @@ namespace RTSEngine.Graphics {
                 G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBSecondary.VertexCount, 0, Map.TrianglesSecondary);
             }
         }
+
+        // Draw Buildings
         private void DrawBuildings() {
             // Set Camera
             fxAnim.VP = Camera.View * Camera.Projection;
@@ -461,7 +431,9 @@ namespace RTSEngine.Graphics {
                 buildingModel.DrawInstances(G);
             }
         }
-        private void DrawAnimated() {
+
+        // Draw Units
+        private void DrawUnits() {
             // Set Camera
             fxAnim.VP = Camera.View * Camera.Projection;
 
@@ -492,6 +464,8 @@ namespace RTSEngine.Graphics {
             G.VertexTextures[0] = null;
             G.VertexSamplerStates[0] = SamplerState.LinearClamp;
         }
+
+        // Draw Selection Box
         private void DrawSelectionBox() {
             fxSimple.TextureEnabled = false;
             fxSimple.VertexColorEnabled = true;
@@ -514,6 +488,8 @@ namespace RTSEngine.Graphics {
                     new VertexPositionColor(max, new Color(1f, 0, 0f, 0.3f)),
                 }, 0, 2, VertexPositionColor.VertexDeclaration);
         }
+
+        // Draw Selection Circles Under Selected Units
         private void DrawSelectionCircles(Vector3 c) {
             if(SelectionCircleTexture == null)
                 return;
@@ -540,7 +516,41 @@ namespace RTSEngine.Graphics {
 
             G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionTexture.VertexDeclaration);
         }
+        public void UpdateSelections(out VertexPositionTexture[] verts, out int[] inds) {
+            // Check If We Need To Render Any Selected Entities
+            if(teamInput.selected.Count < 1) {
+                verts = null;
+                inds = null;
+                return;
+            }
 
+            // Build The Selections
+            verts = new VertexPositionTexture[teamInput.selected.Count * 4];
+            int i = 0;
+            foreach(var e in teamInput.selected) {
+                Vector2 c = e.GridPosition;
+                float r = e.CollisionGeometry.BoundingRadius * SELECTION_RADIUS_MODIFIER;
+                float h = e.Height;
+                h += (e.BBox.Max.Y - e.BBox.Min.Y) * SELECTION_HEIGHT_PLACEMENT;
+                verts[i++] = new VertexPositionTexture(new Vector3(c.X - r, h, c.Y - r), Vector2.Zero);
+                verts[i++] = new VertexPositionTexture(new Vector3(c.X + r, h, c.Y - r), Vector2.UnitX);
+                verts[i++] = new VertexPositionTexture(new Vector3(c.X - r, h, c.Y + r), Vector2.UnitY);
+                verts[i++] = new VertexPositionTexture(new Vector3(c.X + r, h, c.Y + r), Vector2.One);
+            }
+
+            inds = new int[teamInput.selected.Count * 6];
+            for(int vi = 0, ii = 0; vi < verts.Length; ) {
+                inds[ii++] = vi + 0;
+                inds[ii++] = vi + 1;
+                inds[ii++] = vi + 2;
+                inds[ii++] = vi + 2;
+                inds[ii++] = vi + 1;
+                inds[ii++] = vi + 3;
+                vi += 4;
+            }
+        }
+
+        // Draw The UI
         public void DrawUI(SpriteBatch batch) {
             RTSUI.Draw(batch);
         }

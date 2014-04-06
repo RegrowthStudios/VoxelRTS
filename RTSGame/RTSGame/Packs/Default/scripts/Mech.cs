@@ -262,14 +262,6 @@ namespace RTS.Mech.Building {
         private Queue<int> unitQueue = new Queue<int>();
 
         public float buildTime; // How Long It Takes To Finish Producing The Unit
-        private RTSUnit unit; // Unit To Be Produced
-
-        public override void DecideAction(GameState g, float dt) {
-            if (unit == null && Building.UnitQueue.Count > 0) {
-                unit = Building.UnitQueue.Dequeue();
-                buildTime = unit.UnitData.BuildTime;
-            }
-        }
         private int unit = -1; // Unit To Be Produced
         public override void DecideAction(GameState g, float dt) {
             if (unit < 0 && unitQueue.Count > 0)
