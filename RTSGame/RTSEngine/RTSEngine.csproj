@@ -107,7 +107,7 @@
     <Compile Include="Graphics\Particles.cs" />
     <Compile Include="Graphics\RTSBuildingModel.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
-    <Compile Include="Graphics\RTSUI.cs" />
+    <Compile Include="Graphics\UI\RTSUI.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Interfaces\ImpactGenerator.cs" />
     <Compile Include="Net\NetSerializer.cs" />
@@ -130,6 +130,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Coordinate Spaces.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Graphics\Particles\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
