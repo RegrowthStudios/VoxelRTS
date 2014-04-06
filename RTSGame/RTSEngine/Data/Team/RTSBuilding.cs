@@ -127,6 +127,13 @@ namespace RTSEngine.Data.Team {
             set { targetPos = value; }
         }
 
+        public event Action<Vector2, int> GenerateImpact;
+
+        public RTSBuildingData Data {
+            get;
+            set;
+        }
+
         // Constructor
         public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {
             Team = team;
@@ -159,18 +166,6 @@ namespace RTSEngine.Data.Team {
         // Enqueue New Unit
         public void EnqueueUnit(RTSUnit unit) {
             UnitQueue.Enqueue(unit);
-        }
-
-
-        public event Action<Vector2, int> GenerateImpact;
-
-        public RTSBuildingData Data {
-            get {
-                throw new NotImplementedException();
-            }
-            set {
-                throw new NotImplementedException();
-            }
         }
     }
 }

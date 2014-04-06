@@ -12,6 +12,7 @@ namespace RTSEngine.Data
     {
         public int RegionImpact { get; private set; }
         public List<Point> Cells { get; private set; }
+        public List<IEntity> units { get; set; }
 
         public Region(List<Point> cellList) {
             Cells = cellList;
