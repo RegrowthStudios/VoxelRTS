@@ -57,7 +57,7 @@ namespace RTSEngine.Interfaces {
             get { return targetUnit; }
             set { 
                 targetUnit = value;
-                targetSquad = value.Squad;
+                targetSquad = targetUnit != null ? targetUnit.Squad : null;
             }
         }
 

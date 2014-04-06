@@ -180,11 +180,13 @@ namespace RTSEngine.Data {
 
             // Reference: stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection/402010#402010
             Vector2 d = circle.Center - rect.Center;
+            d = new Vector2(Math.Abs(d.X), Math.Abs(d.Y));
             Vector2 cd = new Vector2(d.X - rect.Width * 0.5f, d.Y - rect.Depth * 0.5f);
             float cornerDistSqr = cd.LengthSquared();
 
             // If circle and rectangle collide
-            if(d.X <= rect.Width / 2 || d.Y <= rect.Depth / 2 || cornerDistSqr <= circle.Radius * circle.Radius) {
+            if(d.X <= rect.Width / 2 + circle.Radius && d.Y <= rect.Depth / 2 + circle.Radius
+                || cornerDistSqr <= circle.Radius * circle.Radius) {
                 // If circle and rectangle centers completely overlap,
                 // slightly move one of the object's center so they don't completely overlap
                 if(d.Length() == 0) {
@@ -287,7 +289,7 @@ namespace RTSEngine.Data {
                 else {
                     // If rect2 is below rect1
                     if(d.Y < 0) {
-                        if(left1 - right2 > top2 - bottom1)
+                        if(right2 - left1 > top2 - bottom1)
                             pushAmount.Y = top2 - bottom1 + OFFSET; // rect1 pushed up
                         else
                             pushAmount.X = right2 - left1 + OFFSET; // rect1 pushed right

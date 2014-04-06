@@ -85,8 +85,8 @@ namespace RTSEngine.Controllers {
             spawnCaps = new int[] { eid.L1SpawnCap, eid.L2SpawnCap, eid.L3SpawnCap };
             recoverImpact = eid.RecoverImpact;
             spawnOffset = eid.SpawnOffset;
-            int[][] minNumSpawn = new int[3][] { eid.L1MinNumSpawn, eid.L1MaxNumSpawn, eid.L2MinNumSpawn };
-            int[][] maxNumSpawn = new int[3][] { eid.L2MaxNumSpawn, eid.L3MinNumSpawn, eid.L3MaxNumSpawn };
+            minNumSpawn = new int[3][] { eid.L1MinNumSpawn, eid.L1MaxNumSpawn, eid.L2MinNumSpawn };
+            maxNumSpawn = new int[3][] { eid.L2MaxNumSpawn, eid.L3MinNumSpawn, eid.L3MaxNumSpawn };
  
 
             // TODO: This Is Done When The Level Is Loaded

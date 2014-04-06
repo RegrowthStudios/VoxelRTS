@@ -13,6 +13,7 @@ HEALTH          [60]
 SPEED           [3]
 COST            [5 , 1]
 BUILDTIME       [10]
+IMPACT          [10]
 
 // Collision Data
 RADIUS          [0.4]

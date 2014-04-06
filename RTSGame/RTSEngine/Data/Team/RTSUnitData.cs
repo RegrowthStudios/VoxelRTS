@@ -25,6 +25,9 @@ namespace RTSEngine.Data.Team {
         // Speed Of The Unit
         public float MovementSpeed;
 
+        // Environment Impact When Unit Is Produced
+        public int Impact;
+
         // How Long It Takes For The Building To Make This Unit
         public int BuildTime;
 
