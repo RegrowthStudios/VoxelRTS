@@ -40,11 +40,10 @@ namespace RTSEngine.Graphics {
         private Action<GameState>[,] fPanel;
         private LinkedList<Point> pressed;
 
-        public RectButton ButtonMinimap {
+        public RectWidget Minimap {
             get;
             private set;
         }
-        public event Action<Vector2> OnMinimapClick;
 
         public int ButtonRows {
             get;
@@ -67,7 +66,6 @@ namespace RTSEngine.Graphics {
 
             BuildBounds(renderer, ph, new Color(20, 20, 20));
             BuildMinimap(renderer, 5);
-            ButtonMinimap.Hook();
         }
         public void Dispose() {
             foreach(var b in btnPanel)
@@ -105,17 +103,17 @@ namespace RTSEngine.Graphics {
         }
         private void BuildMinimap(RTSRenderer renderer, int buf) {
             int s = PanelBottom.Height - buf * 2;
-            ButtonHighlightOptions bh1 = new ButtonHighlightOptions(s, s, Color.LightCyan);
-            ButtonHighlightOptions bh2 = new ButtonHighlightOptions(s, s, Color.LightGoldenrodYellow);
-            ButtonMinimap = new RectButton(wrMain, bh1, bh2, renderer.Minimap.Terrain);
-            ButtonMinimap.AlignX = Alignment.RIGHT;
-            ButtonMinimap.AlignY = Alignment.BOTTOM;
-            ButtonMinimap.Offset = new Point(-buf, -buf);
-            ButtonMinimap.OffsetAlignX = Alignment.RIGHT;
-            ButtonMinimap.OffsetAlignY = Alignment.BOTTOM;
-            ButtonMinimap.Parent = PanelBottom;
-            ButtonMinimap.LayerDepth = PanelBottom.LayerDepth - LAYER_DELTA;
-            ButtonMinimap.OnButtonPress += OnMinimapPress;
+            Minimap = new RectWidget(wrMain, renderer.Minimap.Terrain);
+            Minimap.Width = s;
+            Minimap.Height = s;
+            Minimap.Color = Color.White;
+            Minimap.AlignX = Alignment.RIGHT;
+            Minimap.AlignY = Alignment.BOTTOM;
+            Minimap.Offset = new Point(-buf, -buf);
+            Minimap.OffsetAlignX = Alignment.RIGHT;
+            Minimap.OffsetAlignY = Alignment.BOTTOM;
+            Minimap.Parent = PanelBottom;
+            Minimap.LayerDepth = PanelBottom.LayerDepth - LAYER_DELTA;
         }
 
         public void BuildButtonPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {
@@ -174,15 +172,6 @@ namespace RTSEngine.Graphics {
                 if(fPanel[p.X, p.Y] != null)
                     fPanel[p.X, p.Y](s);
                 c--;
-            }
-        }
-        public void OnMinimapPress(RectButton obj, Vector2 m) {
-            Vector2 r;
-            ButtonMinimap.Inside((int)m.X, (int)m.Y, out r);
-            r.X = MathHelper.Clamp(r.X, 0, 1);
-            r.Y = MathHelper.Clamp(r.Y, 0, 1);
-            if(OnMinimapClick != null) {
-                OnMinimapClick(r);
             }
         }
 
