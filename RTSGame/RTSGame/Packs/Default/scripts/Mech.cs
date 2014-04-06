@@ -26,6 +26,13 @@ namespace RTS.Mech.Squad {
         public override void ApplyMovementFormation(int movementOrder) {
             switch(movementOrder) {
                 case BehaviorFSM.BoxFormation:
+                    int numUnits = squad.Units.Count;
+                    int numFullRows = (int)Math.Floor(Math.Sqrt(numUnits / phi));
+                    if(numFullRows == 0)
+                        return;
+                    int numRows = (int)Math.Ceiling(Math.Sqrt(numUnits / phi));
+                    int unitsPerFullRow = numUnits / numFullRows;
+                    
                     // Determine Spacing Bewteen Units In Formation
                     float spacing = float.MinValue;
                     foreach(var unit in squad.Units) {
@@ -34,10 +41,6 @@ namespace RTS.Mech.Squad {
                         }
                     }
                     spacing *= 2;
-                    int numUnits = squad.Units.Count;
-                    int numFullRows = (int)Math.Floor(Math.Sqrt(numUnits / phi));
-                    int numRows = (int)Math.Ceiling(Math.Sqrt(numUnits / phi));
-                    int unitsPerFullRow = numFullRows <= 0 ? numUnits : numUnits / numFullRows;
 
                     // Special Spacing For The Last Row
                     float lastRowSpacing = spacing;
@@ -291,6 +294,8 @@ namespace RTS.Mech.Unit {
         protected Vector2 waypoint;
 
         public override void DecideMove(GameState g, float dt) {
+            if(unit.Squad == null || unit.Squad.MovementController == null)
+                return;
             if(unit.Target != null) {
                 switch(unit.CombatOrders) {
                     case BehaviorFSM.UseMeleeAttack:
