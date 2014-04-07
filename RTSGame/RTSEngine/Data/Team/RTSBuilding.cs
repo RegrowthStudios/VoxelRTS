@@ -8,8 +8,32 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSBuilding : IEntity, ImpactGenerator {
-        public static void Serialize(BinaryWriter s, RTSBuilding building) {
+        public static void Serialize(BinaryWriter s, RTSBuilding e) {
+            s.Write(e.BuildingData.Index);
+            s.Write(e.UUID);
+            s.Write(e.State);
+            s.Write(e.ViewDirection);
+            s.Write(e.GridPosition);
+            s.Write(e.Height);
+            if(e.Target != null) {
+                s.Write(true);
+                s.Write(e.Target.UUID);
+            }
+            else {
+                s.Write(false);
+            }
+            s.Write(e.Health);
+            if(e.ActionController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+        }
+        public static RTSBuilding Deserialize(BinaryReader s, GameState state) {
             // TODO: Implement
+            return null;
         }
 
         // Common Data

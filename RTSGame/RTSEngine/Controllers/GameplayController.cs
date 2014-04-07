@@ -382,6 +382,7 @@ namespace RTSEngine.Controllers {
         private void ApplyLogic(GameState s, float dt, DevCommandSave c) {
             using(var fs = File.Create(c.file.FullName)) {
                 StateSerializer.Serialize(new BinaryWriter(fs), s);
+                fs.Flush();
             }
         }
 

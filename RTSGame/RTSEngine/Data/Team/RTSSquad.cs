@@ -10,6 +10,36 @@ namespace RTSEngine.Data.Team {
     public class RTSSquad {
         public static void Serialize(BinaryWriter s, RTSSquad squad) {
             // TODO: Implement
+            s.Write(squad.units.Count);
+            foreach(var unit in squad.units) {
+                s.Write(unit.UUID);
+            }
+            s.Write(squad.GridPosition);
+            if(squad.ActionController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(squad.MovementController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(squad.TargettingController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+        }
+        public static RTSSquad Deserialize(BinaryReader s, GameState state) {
+            // TODO: Implement
+            return null;
         }
 
         // This Squad's Team
@@ -124,7 +154,7 @@ namespace RTSEngine.Data.Team {
             units = nUnits;
 
             // Check Death Condition
-            if(IsDead && OnDeath != null) 
+            if(IsDead && OnDeath != null)
                 OnDeath(this);
         }
 

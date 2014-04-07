@@ -49,7 +49,5 @@ namespace RTSEngine.Data.Parsers {
                 RTSSquad.Serialize(s, squad);
             }
         }
-
-
     }
 }

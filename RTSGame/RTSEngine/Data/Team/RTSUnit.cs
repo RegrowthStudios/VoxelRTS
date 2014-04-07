@@ -8,10 +8,55 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSUnit : ICombatEntity {
-        public static void Serialize(BinaryWriter s, RTSUnit unit) {
-            // TODO: Implement
+        public static void Serialize(BinaryWriter s, RTSUnit e) {
+            s.Write(e.UnitData.Index);
+            s.Write(e.UUID);
+            s.Write(e.State);
+            s.Write(e.ViewDirection);
+            s.Write(e.GridPosition);
+            s.Write(e.Height);
+            if(e.Target != null) {
+                s.Write(true);
+                s.Write(e.Target.UUID);
+            }
+            else {
+                s.Write(false);
+            }
+            s.Write(e.Health);
+            s.Write(e.MovementMultiplier);
+            if(e.ActionController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.CombatController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.MovementController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.AnimationController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
         }
-
+        public static RTSUnit Deserialize(BinaryReader s, GameState state) {
+            // TODO: Implement
+            return null;
+        }
 
         // Common Data
         public RTSUnitData UnitData {

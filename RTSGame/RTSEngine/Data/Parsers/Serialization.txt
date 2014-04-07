@@ -88,7 +88,6 @@
  - Target UUID
  - Health
  - Action Controller
-   - Key
    - Data [CUSTOM]
 
 ~~~+====+
@@ -104,16 +103,12 @@
  - Health
  - Movement Multiplier
  - Action Controller
-   - Key
    - Data [CUSTOM]
  - Combat Controller
-   - Key
    - Data [CUSTOM]
  - Movement Controller
-   - Key
    - Data [CUSTOM]
  - Animation Controller
-   - Key
    - Data [CUSTOM]
 
 ~~~+=====+
@@ -123,11 +118,8 @@
    - UUID
  - Average Grid Position
  - Action Controller
-   - Key
    - Data [CUSTOM]
  - Movement Controller
-   - Key
    - Data [CUSTOM]
  - Targetting Controller
-   - Key
    - Data [CUSTOM]

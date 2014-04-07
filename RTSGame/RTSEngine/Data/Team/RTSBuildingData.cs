@@ -44,6 +44,7 @@ namespace RTSEngine.Data.Team {
 
         // The Friendly Name
         public string FriendlyName;
+        public int Index;
 
         // Health Of The Building
         public int Health;

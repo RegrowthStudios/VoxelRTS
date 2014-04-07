@@ -1,10 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace RTSEngine.Data {
     public struct BaseCombatData {
+        public static void Serialize(BinaryWriter s, ref BaseCombatData data) {
+            s.Write(data.MinRange);
+            s.Write(data.MaxRange);
+            s.Write(data.AttackDamage);
+            s.Write(data.CriticalDamage);
+            s.Write(data.AttackTimer);
+            s.Write(data.Armor);
+            s.Write(data.CriticalChance);
+        }
+        public static void Deserialize(BinaryReader s, ref BaseCombatData data) {
+            data.MinRange = s.ReadInt32();
+            data.MaxRange = s.ReadInt32();
+            data.AttackDamage = s.ReadInt32();
+            data.CriticalDamage = s.ReadInt32();
+            data.AttackTimer = s.ReadSingle();
+            data.Armor = s.ReadInt32();
+            data.CriticalChance = s.ReadDouble();
+        }
+
         // Maximum And Minimum Range Of Attacking
         public int MaxRange, MinRange;
 
