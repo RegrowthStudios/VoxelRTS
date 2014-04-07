@@ -24,7 +24,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxGridSize = RegexHelper.GenerateVec2Int("GRIDSIZE");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
         private static readonly Regex rgxBBMax = RegexHelper.GenerateVec3("BBOXMAX");
-        private static readonly Regex rgxCRect = RegexHelper.GenerateVec2("CRECT");
+        private static readonly Regex rgxCRect = RegexHelper.GenerateVec4("CRECT");
         private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
 
         private static readonly Regex rgxModel = RegexHelper.GenerateFile("MODEL");
@@ -109,9 +109,9 @@ namespace RTSEngine.Data.Parsers {
             data.GridSize.Y = buf[1];
             data.BBox.Min = RegexHelper.ExtractVec3(mp[ri++]);
             data.BBox.Max = RegexHelper.ExtractVec3(mp[ri++]);
-            Vector2 cr = RegexHelper.ExtractVec2(mp[ri++]);
+            Vector4 cr = RegexHelper.ExtractVec4(mp[ri++]);
             //data.ICollidableShape = new CollisionCircle(cr.Length() * 0.5f, Vector2.Zero, true);
-            data.ICollidableShape = new CollisionRect(cr.X, cr.Y, Vector2.Zero, true);
+            data.ICollidableShape = new CollisionRect(cr.X, cr.Y, new Vector2(cr.Z, cr.W), true);
 
             // Get The Controllers From The Controller Dictionary
             if(controllers != null) {

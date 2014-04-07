@@ -37,9 +37,18 @@ namespace RTSEngine.Data.Team {
         public readonly RTSRace race;
 
         // Entity Data
-        public readonly List<RTSUnit> units;
-        public readonly List<RTSSquad> squads;
-        public readonly List<RTSBuilding> buildings;
+        private List<RTSUnit> units;
+        public List<RTSUnit> Units {
+            get { return units; }
+        }
+        private List<RTSSquad> squads;
+        public List<RTSSquad> Squads {
+            get { return squads; }
+        }
+        private List<RTSBuilding> buildings;
+        public List<RTSBuilding> Buildings {
+            get { return buildings; }
+        }
 
         public InputController Input {
             get;
@@ -66,21 +75,28 @@ namespace RTSEngine.Data.Team {
 
         // Unit Addition And Removal
         public RTSUnit AddUnit(int type, Vector2 pos) {
-            RTSUnit rui = new RTSUnit(this, race.Units[type], pos);
-            rui.ActionController = race.Units[type].DefaultActionController.CreateInstance<ACUnitActionController>();
-            rui.AnimationController = race.Units[type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
-            rui.MovementController = race.Units[type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
-            rui.CombatController = race.Units[type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
-            units.Add(rui);
+            if(race.Units[type].CurrentCount >= race.Units[type].MaxCount) return null;
+
+            RTSUnit unit = new RTSUnit(this, race.Units[type], pos);
+            unit.UnitData.CurrentCount++;
+            unit.ActionController = race.Units[type].DefaultActionController.CreateInstance<ACUnitActionController>();
+            unit.AnimationController = race.Units[type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
+            unit.MovementController = race.Units[type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
+            unit.CombatController = race.Units[type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
+            Units.Add(unit);
             if(OnUnitSpawn != null)
-                OnUnitSpawn(rui);
-            return rui;
-        }
-        public void RemoveUnit(RTSUnit u) {
-            units.Remove(u);
+                OnUnitSpawn(unit);
+            return unit;
         }
         public void RemoveAll(Predicate<RTSUnit> f) {
-            units.RemoveAll(f);
+            var nu = new List<RTSUnit>(units.Count);
+            for(int i = 0; i < units.Count; i++) {
+                if(f(units[i]))
+                    units[i].UnitData.CurrentCount--;
+                else
+                    nu.Add(units[i]);
+            }
+            System.Threading.Interlocked.Exchange(ref units, nu);
         }
 
         // Squad Addition And Removal
@@ -94,27 +110,33 @@ namespace RTSEngine.Data.Team {
                 OnSquadCreation(squad);
             return squad;
         }
-        public void RemoveSquad(RTSSquad u) {
-            squads.Remove(u);
-        }
         public void RemoveAll(Predicate<RTSSquad> f) {
-            squads.RemoveAll(f);
+            Squads.RemoveAll(f);
         }
 
         // Building Addition And Removal
         public RTSBuilding AddBuilding(int type, Vector2 pos) {
+            if(race.Buildings[type].CurrentCount >= race.Buildings[type].MaxCount) return null;
+
             RTSBuilding b = new RTSBuilding(this, race.Buildings[type], pos);
+            b.BuildingData.CurrentCount++;
             b.ActionController = race.Buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
-            buildings.Add(b);
+            Buildings.Add(b);
             if(OnBuildingSpawn != null)
                 OnBuildingSpawn(b);
             return b;
         }
-        public void RemoveBuilding(RTSBuilding b) {
-            buildings.Remove(b);
-        }
         public void RemoveAll(Predicate<RTSBuilding> f) {
-            buildings.RemoveAll(f);
+            var nb = new List<RTSBuilding>(buildings.Count);
+            for(int i = 0; i < buildings.Count; i++) {
+                if(f(buildings[i]))
+                    buildings[i].BuildingData.CurrentCount--;
+                else
+                    nb.Add(buildings[i]);
+            }
+            System.Threading.Interlocked.Exchange(ref buildings, nb);
+
+            Buildings.RemoveAll(f);
         }
     }
 }

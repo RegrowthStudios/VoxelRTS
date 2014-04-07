@@ -18,7 +18,7 @@ namespace RTSEngine.Data.Team {
         public int CapitalCost;
 
         // Maximum Number Of These Buildings Supported
-        public int MaxCount;
+        public int MaxCount, CurrentCount;
 
         // Environment Impact
         public int Impact;

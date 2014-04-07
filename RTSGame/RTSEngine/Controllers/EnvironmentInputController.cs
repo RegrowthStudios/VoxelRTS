@@ -146,7 +146,7 @@ namespace RTSEngine.Controllers {
             foreach(var r in GameState.Regions) {
                 r.units = new List<IEntity>();
             }
-            foreach(var u in Team.units) {
+            foreach(var u in Team.Units) {
                 Point unitI = HashHelper.Hash(u.GridPosition, grid.numCells, grid.size);
                 grid.Region[unitI.X, unitI.Y].units.Add(u);
             }
@@ -252,7 +252,7 @@ namespace RTSEngine.Controllers {
                 Vector2 averagePos = new Vector2(sumPos.X / squad.Count, sumPos.Y / squad.Count);
                 foreach(var t2 in GameState.activeTeams)
                     if(t2.Index != TeamIndex)
-                        foreach(var u3 in t2.Team.units)
+                        foreach(var u3 in t2.Team.Units)
                             if(target == null || Vector2.Distance(u3.GridPosition, averagePos) < Vector2.Distance(u3.GridPosition, target.GridPosition))
                                 target = u3;
                 AddEvent(new SetTargetEvent(TeamIndex, target));

@@ -28,9 +28,10 @@ namespace RTS {
         private DevConsoleView dcv;
         private PlayerInputController gameInput;
 
-        Vector3 spawnLoc;
+        Vector3 clickWorldPos;
         int team, unit;
-        bool doAdd, pauseEngine, pauseRender;
+        bool pauseEngine, pauseRender;
+        bool addUnit, addBuilding;
         int playing;
         Thread tEngine;
         SpriteFont sfDebug;
@@ -55,7 +56,7 @@ namespace RTS {
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
 
             dcv = new DevConsoleView(G);
-            doAdd = false;
+            addUnit = false;
             team = 0;
             unit = 0;
 
@@ -132,22 +133,15 @@ namespace RTS {
                 Ray r = renderer.Camera.GetViewRay(p);
                 IntersectionRecord rec = new IntersectionRecord();
                 if(state.Map.BVH.Intersect(ref rec, r)) {
-                    spawnLoc = r.Position + r.Direction * rec.T;
-                    if(doAdd)
+                    clickWorldPos = r.Position + r.Direction * rec.T;
+                    if(addUnit)
                         gameInput.AddEvent(new SpawnUnitEvent(
-                            team, unit, new Vector2(spawnLoc.X, spawnLoc.Z)
+                            team, unit, new Vector2(clickWorldPos.X, clickWorldPos.Z)
                             ));
-                }
-            }
-            if(b == MouseButton.Left) {
-                Ray r = renderer.Camera.GetViewRay(p);
-                IntersectionRecord rec = new IntersectionRecord();
-                if(state.Map.BVH.Intersect(ref rec, r)) {
-                    spawnLoc = r.Position + r.Direction * rec.T;
-                    if(doAdd)
+                    else if(addBuilding)
                         gameInput.AddEvent(new SpawnBuildingEvent(
                             team, 0,
-                            HashHelper.Hash(new Vector2(spawnLoc.X, spawnLoc.Z), state.CGrid.numCells, state.CGrid.size)
+                            HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size)
                             ));
                 }
             }
@@ -170,7 +164,10 @@ namespace RTS {
                     unit = 2;
                     break;
                 case Keys.E:
-                    doAdd = true;
+                    addUnit = true;
+                    break;
+                case Keys.R:
+                    addBuilding = true;
                     break;
                 case Keys.P:
                     if(!DevConsole.IsActivated)
@@ -194,7 +191,10 @@ namespace RTS {
         public void OnKR(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
                 case Keys.E:
-                    doAdd = false;
+                    addUnit = false;
+                    break;
+                case Keys.R:
+                    addBuilding = false;
                     break;
             }
         }

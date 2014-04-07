@@ -48,7 +48,7 @@ namespace RTSEngine.Controllers {
         }
         private void SpawnUnits(Random r) {
             int ui = r.Next(Team.race.ActiveUnits.Length);
-            int cc = Team.units.Aggregate<RTSUnit, int>(0, (i, u) => {
+            int cc = Team.Units.Aggregate<RTSUnit, int>(0, (i, u) => {
                 if(u.UnitData == Team.race.ActiveUnits[ui].Data) return i + 1;
                 else return i;
             });
@@ -75,7 +75,7 @@ namespace RTSEngine.Controllers {
         }
         private void MoveUnits(Random r) {
             var toMove = new List<IEntity>();
-            foreach(var unit in Team.units) {
+            foreach(var unit in Team.Units) {
                 if(r.Next(100) > 80)
                     toMove.Add(unit);
             }

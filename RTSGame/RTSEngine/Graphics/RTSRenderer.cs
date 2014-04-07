@@ -309,11 +309,11 @@ namespace RTSEngine.Graphics {
             if(np == null) np = new List<Particle>();
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 RTSTeam team = s.activeTeams[ti].Team;
-                for(int i = 0; i < team.units.Count; i++) {
-                    if(team.units[i].AnimationController != null) {
-                        team.units[i].AnimationController.Update(s, dt);
-                        if(team.units[i].AnimationController.HasParticles) {
-                            team.units[i].AnimationController.GetParticles(np);
+                for(int i = 0; i < team.Units.Count; i++) {
+                    if(team.Units[i].AnimationController != null) {
+                        team.Units[i].AnimationController.Update(s, dt);
+                        if(team.Units[i].AnimationController.HasParticles) {
+                            team.Units[i].AnimationController.GetParticles(np);
                         }
                     }
                 }

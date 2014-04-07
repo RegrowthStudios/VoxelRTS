@@ -146,7 +146,7 @@ namespace RTSEngine.Data.Team {
             Health = BuildingData.Health;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
             ViewDirection = Vector2.UnitX;
-            CollisionGeometry.Center = GridPosition;
+            CollisionGeometry.Center += GridPosition;
         }
 
         // Applies Damage To Health
