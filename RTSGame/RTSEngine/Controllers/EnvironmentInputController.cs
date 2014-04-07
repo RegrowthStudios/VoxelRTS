@@ -22,10 +22,10 @@ namespace RTSEngine.Controllers {
 
         private List<Point> treeLocations;
         public RTSBuildingData FloraData {
-            get { return Team.race.buildings[floraType]; }
+            get { return Team.race.Buildings[floraType]; }
         }
         public RTSBuildingData OreData {
-            get { return Team.race.buildings[oreType]; }
+            get { return Team.race.Buildings[oreType]; }
         }
 
         // Indices For Resources And Units

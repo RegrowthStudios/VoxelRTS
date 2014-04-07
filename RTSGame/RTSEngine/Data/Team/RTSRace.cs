@@ -28,43 +28,45 @@ namespace RTSEngine.Data.Team {
         public const int MAX_UNIT_TYPES = 24;
         public const int MAX_BUILDING_TYPES = 36;
 
-        public readonly RTSUnitData[] units;
-        public IndexedUnitType[] activeUnits;
+        public string FriendlyName;
 
-        public readonly RTSBuildingData[] buildings;
-        public IndexedBuildingType[] activeBuildings;
+        public readonly RTSUnitData[] Units;
+        public IndexedUnitType[] ActiveUnits;
 
-        public ReflectedSquadController scAction;
-        public ReflectedSquadController scMovement;
-        public ReflectedSquadController scTargetting;
+        public readonly RTSBuildingData[] Buildings;
+        public IndexedBuildingType[] ActiveBuildings;
+
+        public ReflectedSquadController SCAction;
+        public ReflectedSquadController SCMovement;
+        public ReflectedSquadController SCTargetting;
 
         public RTSRace() {
-            units = new RTSUnitData[MAX_UNIT_TYPES];
-            activeUnits = new IndexedUnitType[0];
-            buildings = new RTSBuildingData[MAX_BUILDING_TYPES];
-            activeBuildings = new IndexedBuildingType[0];
+            Units = new RTSUnitData[MAX_UNIT_TYPES];
+            ActiveUnits = new IndexedUnitType[0];
+            Buildings = new RTSBuildingData[MAX_BUILDING_TYPES];
+            ActiveBuildings = new IndexedBuildingType[0];
         }
 
         public void UpdateActiveUnits() {
             int c = 0;
             for(int i = 0; i < MAX_UNIT_TYPES; i++) {
-                if(units[i] != null) c++;
+                if(Units[i] != null) c++;
             }
-            activeUnits = new IndexedUnitType[c];
+            ActiveUnits = new IndexedUnitType[c];
             c = 0;
             for(int i = 0; i < MAX_UNIT_TYPES; i++) {
-                if(units[i] != null) activeUnits[c++] = new IndexedUnitType(i, units[i]);
+                if(Units[i] != null) ActiveUnits[c++] = new IndexedUnitType(i, Units[i]);
             }
         }
         public void UpdateActiveBuildings() {
             int c = 0;
             for(int i = 0; i < MAX_BUILDING_TYPES; i++) {
-                if(buildings[i] != null) c++;
+                if(Buildings[i] != null) c++;
             }
-            activeBuildings = new IndexedBuildingType[c];
+            ActiveBuildings = new IndexedBuildingType[c];
             c = 0;
             for(int i = 0; i < MAX_BUILDING_TYPES; i++) {
-                if(buildings[i] != null) activeBuildings[c++] = new IndexedBuildingType(i, buildings[i]);
+                if(Buildings[i] != null) ActiveBuildings[c++] = new IndexedBuildingType(i, Buildings[i]);
             }
         }
     }

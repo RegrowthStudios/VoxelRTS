@@ -7,6 +7,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace RTSEngine.Graphics {
     public class ParticleRenderer {
+        public const string FILE_BULLET_MODEL = @"Content\FX\Particles\Bullet.obj";
+        public const string FILE_BULLET_TEXTURE = @"Content\FX\Particles\Bullet.png";
         public const int MAX_BULLETS = 1000;
 
         // Lists Of Particles
@@ -16,6 +18,7 @@ namespace RTSEngine.Graphics {
         // Models
         private VertexBuffer vbBullet;
         private IndexBuffer ibBullet;
+        private Texture2D tBullet;
         private DynamicVertexBuffer dvbBullet;
         private VertexBufferBinding[] vbbBullets;
 
@@ -44,6 +47,9 @@ namespace RTSEngine.Graphics {
             vbbBullets[0] = new VertexBufferBinding(vbBullet);
             vbbBullets[1] = new VertexBufferBinding(dvbBullet, 0, 1);
         }
+        public void LoadBulletTexture(RTSRenderer renderer, string f) {
+            tBullet = renderer.LoadTexture2D(f);
+        }
 
         public void Update(List<Particle> newParticles, float dt) {
             // Update Particles
@@ -51,21 +57,39 @@ namespace RTSEngine.Graphics {
             pBullets.AsParallel().ForAll(fp);
 
             // Remove Dead Particles
-            pBullets.RemoveAll(Particle.IsParticleDead);
+            bool addB = pBullets.RemoveAll(Particle.IsParticleDead) > 0;
 
             // Add New Particles
             for(int i = 0; i < newParticles.Count; i++) {
                 switch(newParticles[i].Type) {
                     case ParticleType.Bullet:
                         pBullets.Add(newParticles[i] as BulletParticle);
+                        addB = true;
                         break;
                 }
             }
+
+            if(addB) {
+                // Make Sure We Don't Run Over
+                if(pBullets.Count > MAX_BULLETS)
+                    pBullets.RemoveRange(0, pBullets.Count - MAX_BULLETS);
+
+                for(int i = 0; i < pBullets.Count; i++) {
+                    bullets[i] = pBullets[i].instance;
+                }
+                dvbBullet.SetData(bullets);
+            }
         }
 
-        public void SetBulletBuffers(GraphicsDevice g) {
+        public void SetBullets(GraphicsDevice g) {
+            g.Textures[0] = tBullet;
+            g.SamplerStates[0] = SamplerState.LinearClamp;
             g.SetVertexBuffers(vbbBullets);
             g.Indices = ibBullet;
+        }
+        public void DrawBullets(GraphicsDevice g) {
+            if(pBullets.Count > 0)
+                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbBullet.VertexCount, 0, ibBullet.IndexCount / 3, pBullets.Count);
         }
     }
 }

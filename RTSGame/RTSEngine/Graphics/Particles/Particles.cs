@@ -81,8 +81,9 @@ namespace RTSEngine.Graphics {
             distance = dist;
 
             // Create Instance Matrix
+            float s = (float)Math.Tan(angle);
             instance.Transform =
-                Matrix.CreateScale(distance, distance * (float)Math.Tan(angle), distance) *
+                Matrix.CreateScale(distance * s, distance * s, distance) *
                 Matrix.CreateWorld(origin, direction, Vector3.Up);
             instance.Tint = Color.White;
         }
