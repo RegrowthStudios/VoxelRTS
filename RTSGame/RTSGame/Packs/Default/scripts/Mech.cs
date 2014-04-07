@@ -8,6 +8,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
 using RTSEngine.Graphics;
+using RTSEngine.Algorithms;
 
 namespace RTS.Mech.Squad {
     public class Action : ACSquadActionController {
@@ -103,9 +104,16 @@ namespace RTS.Mech.Squad {
             Vector2 netForce = squad.Units.Count*Force(unit, waypoint);
             CollisionGrid cg = g.CGrid;
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
-            RTSBuilding b = cg.EStatic[unitCell.X, unitCell.Y];
-            if(b != null)
-                netForce += Force(unit, b);
+            foreach(Point n in Pathfinder.NeighborhoodAlign(unitCell)) {
+                RTSBuilding b = cg.EStatic[n.X, n.Y];
+                if(b != null)
+                    netForce += Force(unit, b);
+            }
+            foreach(Point n in Pathfinder.NeighborhoodDiag(unitCell)) {
+                RTSBuilding b = cg.EStatic[n.X, n.Y];
+                if(b != null)
+                    netForce += 10*Force(unit, b);
+            }
             foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
                 netForce += Force(unit, otherUnit);
             }

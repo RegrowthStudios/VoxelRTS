@@ -99,14 +99,14 @@ namespace RTSEngine.Algorithms {
             return p.X >= 0 && p.X < world.numCells.X && p.Y >= 0 && p.Y < world.numCells.Y;
         }
 
-        private IEnumerable<Point> NeighborhoodDiag(Point p) {
+        public static IEnumerable<Point> NeighborhoodDiag(Point p) {
             yield return new Point(p.X + 1, p.Y + 1);
             yield return new Point(p.X + 1, p.Y - 1);
             yield return new Point(p.X - 1, p.Y + 1);
             yield return new Point(p.X - 1, p.Y - 1);
         }
 
-        private IEnumerable<Point> NeighborhoodAlign(Point p) {
+        public static IEnumerable<Point> NeighborhoodAlign(Point p) {
             yield return new Point(p.X + 1, p.Y);
             yield return new Point(p.X - 1, p.Y);
             yield return new Point(p.X, p.Y + 1);
