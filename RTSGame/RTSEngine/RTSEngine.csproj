@@ -68,7 +68,6 @@
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
     <Compile Include="Data\DevCommands.cs" />
-    <Compile Include="Data\Environment.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
     <Compile Include="Data\Heightmap.cs" />
     <Compile Include="Data\Collision.cs" />
