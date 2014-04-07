@@ -67,7 +67,7 @@ namespace RTSEngine.Controllers {
                 ControllerType = SquadControllerType.Action;
             else if(t.IsSubclassOf(typeof(ACSquadMovementController)))
                 ControllerType = SquadControllerType.Movement;
-            else if(t.IsSubclassOf(typeof(ACSquadTargettingController)))
+            else if(t.IsSubclassOf(typeof(ACSquadTargetingController)))
                 ControllerType = SquadControllerType.Targetting;
             else
                 throw new ArgumentException("This Script Is Not Subclassing A Squad Controller");

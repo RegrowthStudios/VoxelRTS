@@ -37,17 +37,77 @@ namespace RTSEngine.Interfaces {
     }
 
     // The Movement Controller That Dictates The General Movement Behavior Of Units In The Squad
-    // TODO: Add Formation Stuff Here
     public abstract class ACSquadMovementController : ACSquadController {
+        // Box Formation Will Follow The Golden Ratio Phi
+        protected const float phi = 1.61803398875f;
+
+        // Waypoints That Units In This Squad Will Generally Follow
         private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {
             get { return waypoints; }
             set { waypoints = value; }
         }
+
+        // The Index Of The Current Waypoint Each Unit In This Squad Is Supposed To Head Toward
+        // Key: UUID; Value: CurrentWaypointIndex
+        private Dictionary<int, int> currentWaypointIndices = new Dictionary<int, int>();
+        public Dictionary<int, int> CurrentWaypointIndices {
+            get { return currentWaypointIndices; }
+            set { currentWaypointIndices = value; }
+        }
+
+        // Does The Provided Index Point To A Valid Squad Waypoint?
+        public bool IsValid(int idx) {
+            return Waypoints != null && idx >= 0 && idx < Waypoints.Count;
+        }
+
+        // Units' Displacements From The Squad's Waypoints At Origin
+        public readonly Dictionary<int, Vector2> formationAssignments = new Dictionary<int, Vector2>();
+
+        // Given An Angle, Rotate The Formation Assignments
+        public Dictionary<int, Vector2> RotateFormation(float a) {
+            var rotatedFormations = new List<Vector2>();
+            Matrix mr = Matrix.CreateRotationZ(a);
+            foreach(var fa in formationAssignments) {
+                int uuid = fa.Key;
+                Vector2 post = fa.Value;
+                rotatedFormations.Add(Vector2.TransformNormal(post, mr));
+            }
+            // Re-assign The Units To Posts In The Rotated Formation
+            var rfa = new Dictionary<int, Vector2>();
+            bool[] assigned = new bool[rotatedFormations.Count];
+            foreach(var unit in squad.Units) {
+                Vector2 pos = unit.GridPosition;
+                float minDistSq = float.MaxValue;
+                int assignment = 0;
+                for(int i = 0; i < rotatedFormations.Count; i++) {
+                    float distSq = Vector2.DistanceSquared(pos, rotatedFormations[i]);
+                    if(!assigned[i] && distSq < minDistSq) {
+                        minDistSq = distSq;
+                        assignment = i;
+                    }
+                }
+                if(assigned.Length > 0) {
+                    assigned[assignment] = true;
+                    rfa[unit.UUID] = rotatedFormations[assignment];
+                }
+            }
+            return rfa;
+        }
+ 
+        // Decide Where Units In This Squad Should Go When Moving
+        public abstract void ApplyMovementFormation(int movementOrder);
+
+        // Decide Where Units In This Squad Should Go When Close To Their Target
+        public abstract void CalculateTargetFormation();
+        
+        // Scripted Logic For Movement
+        public abstract void DecideMoves(GameState g, float dt);
+        public abstract void ApplyMoves(GameState g, float dt);
     }
 
     // Controls The Targetting That A Squad Performs
-    public abstract class ACSquadTargettingController : ACSquadController {
+    public abstract class ACSquadTargetingController : ACSquadController {
         // A Squad Target
         protected RTSSquad targetSquad;
 

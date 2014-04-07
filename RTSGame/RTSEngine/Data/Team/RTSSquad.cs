@@ -58,8 +58,8 @@ namespace RTSEngine.Data.Team {
         }
 
         // The Targetting Controller For This Squad
-        private ACSquadTargettingController tController;
-        public ACSquadTargettingController TargettingController {
+        private ACSquadTargetingController tController;
+        public ACSquadTargetingController TargetingController {
             get { return tController; }
             set {
                 tController = value;

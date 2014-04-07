@@ -113,6 +113,26 @@ namespace RTSEngine.Algorithms {
             yield return new Point(p.X, p.Y - 1);
         }
 
+        // Return The Two Aligned Locations One Could Cross Instead Of Moving Diagonally From P to N
+        private IEnumerable<Point> DiagDecomp(Point p, Point n) {
+            if(n.X < p.X && n.Y < p.Y) {
+                yield return new Point(p.X - 1, p.Y);
+                yield return new Point(p.X, p.Y - 1);
+            }
+            else if(n.X < p.X) {
+                yield return new Point(p.X - 1, p.Y);
+                yield return new Point(p.X, p.Y + 1);
+            }
+            else if(n.Y < p.Y) {
+                yield return new Point(p.X + 1, p.Y);
+                yield return new Point(p.X, p.Y - 1);
+            }
+            else {
+                yield return new Point(p.X + 1, p.Y);
+                yield return new Point(p.X, p.Y + 1);
+            }
+        }
+
         private void BuildPath(List<Point> p) {
             Point cur = end;
             while(cur.X != start.X || cur.Y != start.Y) {
@@ -143,6 +163,7 @@ namespace RTSEngine.Algorithms {
             openSet.Insert(start);
 
             // A* Loop
+            // TODO: Add Fog Awareness
             List<Point> path = null;
             while(openSet.Count > 0) {
                 Point p = openSet.Pop();
@@ -151,9 +172,11 @@ namespace RTSEngine.Algorithms {
                     BuildPath(path);
                     break;
                 }
+                bool canMove = false;
                 foreach(Point n in NeighborhoodAlign(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 10;
-                    if(tgs < gScore[n.X, n.Y]) {
+                    canMove = InGrid(n) && !world.GetCollision(n.X, n.Y);
+                    if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
                         fScore[n.X, n.Y] = gScore[n.X, n.Y] + Estimate(n.X, n.Y);
@@ -164,7 +187,12 @@ namespace RTSEngine.Algorithms {
                 }
                 foreach(Point n in NeighborhoodDiag(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 14;
-                    if(tgs < gScore[n.X, n.Y]) {
+                    // To Move Diagonally, Destination Must Be Reachable By Horizontal & Vertical Moves As Well
+                    canMove = InGrid(n) && !world.GetCollision(n.X, n.Y);
+                    foreach(Point d in DiagDecomp(p, n)) {
+                        canMove &= InGrid(d) && !world.GetCollision(d.X, d.Y);
+                    }
+                    if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
                         fScore[n.X, n.Y] = gScore[n.X, n.Y] + Estimate(n.X, n.Y);

@@ -13,7 +13,7 @@ namespace RTSEngine.Interfaces {
         // Entity's Unique ID
         int UUID { get; }
 
-        // State For FSM
+        // State For Deciding Actions
         int State { get; set; }
 
         // The Current Health Of The Entity
@@ -50,6 +50,12 @@ namespace RTSEngine.Interfaces {
     }
 
     public interface ICombatEntity : IEntity {
+        // Orders To Govern Combat Behavior
+        int CombatOrders { get; set; }
+
+        // Orders To Govern Movement Behavior
+        int MovementOrders { get; set; }
+
         // Event From Combat
         event Action<ICombatEntity, IEntity> OnAttackMade;
 

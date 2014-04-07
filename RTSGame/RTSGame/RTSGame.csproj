@@ -221,9 +221,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="LoadScreen.cs" />
-    <Content Include="Packs\Default\scripts\Mech.cs">
+    <Compile Include="Packs\Default\scripts\Mech.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Packs\Default\levels\0.dat" />
     <None Include="Packs\Default\maps\0\map.obj">
