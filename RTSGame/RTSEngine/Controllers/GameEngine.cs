@@ -112,7 +112,7 @@ namespace RTSEngine.Controllers {
                 team.ColorScheme = res.Colors;
                 team.race.scAction = state.SquadControllers[rd.DefaultSquadActionController];
                 team.race.scMovement = state.SquadControllers[rd.DefaultSquadMovementController];
-                team.race.scTargetting = state.SquadControllers[rd.DefaultSquadTargettingController];
+                team.race.scTargeting = state.SquadControllers[rd.DefaultSquadTargetingController];
                 int type = 0;
                 foreach(FileInfo unitDataFile in rd.UnitTypes) {
                     RTSUnitData data = RTSUnitDataParser.ParseData(state.UnitControllers, unitDataFile);

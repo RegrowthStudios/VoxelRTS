@@ -15,7 +15,7 @@ namespace RTSEngine.Data.Parsers {
         static readonly Regex rgxName = RegexHelper.GenerateString("NAME");
         private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlMovement = RegexHelper.Generate("CTRLMOVEMENT", @"[\w\s\.]+");
-        private static readonly Regex rgxCtrlTargetting = RegexHelper.Generate("CTRLTARGET", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlTargeting = RegexHelper.Generate("CTRLTARGET", @"[\w\s\.]+");
         static readonly Regex rgxUnit = RegexHelper.GenerateFile("UNIT");
         static readonly Regex rgxBuilding = RegexHelper.GenerateFile("BUILDING");
 
@@ -60,7 +60,7 @@ namespace RTSEngine.Data.Parsers {
             res.Name = RegexHelper.Extract(rgxName.Match(mStr));
             res.DefaultSquadActionController = RegexHelper.Extract(rgxCtrlAction.Match(mStr));
             res.DefaultSquadMovementController = RegexHelper.Extract(rgxCtrlMovement.Match(mStr));
-            res.DefaultSquadTargettingController = RegexHelper.Extract(rgxCtrlTargetting.Match(mStr));
+            res.DefaultSquadTargetingController = RegexHelper.Extract(rgxCtrlTargeting.Match(mStr));
 
             // Read All Units
             Match m = rgxUnit.Match(mStr);

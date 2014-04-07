@@ -12,7 +12,7 @@ namespace RTSEngine.Data.Team {
         public List<FileInfo> BuildingTypes;
         public string DefaultSquadActionController;
         public string DefaultSquadMovementController;
-        public string DefaultSquadTargettingController;
+        public string DefaultSquadTargetingController;
 
         public RTSRaceData() {
             UnitTypes = new List<FileInfo>();

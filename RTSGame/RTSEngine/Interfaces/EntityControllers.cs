@@ -32,7 +32,6 @@ namespace RTSEngine.Interfaces {
         // Movement Order Codes - Will Influence Movement Behavior
         public const int FreeFormation = 0;
         public const int BoxFormation = FreeFormation + 1;
-        public const int CircleFormation = BoxFormation + 1;
         
         public static int GetState(int behaviorCode) {
             return GetByte(behaviorCode, 0);

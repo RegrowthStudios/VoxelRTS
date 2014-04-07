@@ -36,7 +36,7 @@ namespace RTSEngine.Data.Team {
 
         public ReflectedSquadController scAction;
         public ReflectedSquadController scMovement;
-        public ReflectedSquadController scTargetting;
+        public ReflectedSquadController scTargeting;
 
         public RTSRace() {
             units = new RTSUnitData[MAX_UNIT_TYPES];

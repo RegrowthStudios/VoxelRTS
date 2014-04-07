@@ -11,14 +11,14 @@ using RTSEngine.Controllers;
 namespace RTS.Mech.Squad {
     public class Action : ACSquadActionController {
         public override void DecideAction(GameState g, float dt) {
-            if(squad.TargetingController != null)
-                squad.TargetingController.DecideTarget(g, dt);
+            //if(squad.TargetingController != null)
+            //    squad.TargetingController.DecideTarget(g, dt);
             if(squad.MovementController != null)
                 squad.MovementController.DecideMoves(g, dt);
         }
         public override void ApplyAction(GameState g, float dt) {
-            if(squad.TargetingController != null)
-                squad.TargetingController.ApplyTarget(g, dt);
+            //if(squad.TargetingController != null)
+            //    squad.TargetingController.ApplyTarget(g, dt);
             if(squad.MovementController != null)
                 squad.MovementController.ApplyMoves(g, dt);
         }
@@ -50,7 +50,7 @@ namespace RTS.Mech.Squad {
                     spacing *= 2;
 
                     // Calculate Formation As Offsets From Squad Waypoint
-                    List<Vector2> formation = new List<Vector2>();
+                    Formation = new List<Vector2>();
                     float rOffset = (unitsInLastRow > 0) ? numFullRows * spacing / 2.0f : (numFullRows - 1) * spacing / 2.0f;
                     float cOffset;
                     rOffset += spacing;
@@ -59,7 +59,7 @@ namespace RTS.Mech.Squad {
                         cOffset = -((unitsPerFullRow - 1) * spacing / 2.0f) - spacing;
                         for(int c = 0; c < unitsPerFullRow; c++) {
                             cOffset += spacing;
-                            formation.Add(new Vector2(rOffset, cOffset));
+                            Formation.Add(new Vector2(rOffset, cOffset));
                         }
                     }
                     // Special Spacing For The Last Row
@@ -69,44 +69,17 @@ namespace RTS.Mech.Squad {
                         cOffset = -((unitsInLastRow - 1) * lastRowSpacing / 2.0f) - lastRowSpacing;
                         for(int c = 0; c < unitsInLastRow; c++) {
                             cOffset += lastRowSpacing;
-                            formation.Add(new Vector2(rOffset, cOffset));
+                            Formation.Add(new Vector2(rOffset, cOffset));
                         }
-                    }
-
-                    // Assign The Units To Posts In The Formation
-                    bool[] assigned = new bool[formation.Count];
-                    foreach(var unit in squad.Units) {
-                        Vector2 pos = unit.GridPosition;
-                        float minDistSq = float.MaxValue;
-                        int assignment = 0;
-                        for(int i = 0; i < formation.Count; i++) {
-                            float distSq = Vector2.DistanceSquared(pos, formation[i]);
-                            if(!assigned[i] && distSq < minDistSq) {
-                                minDistSq = distSq;
-                                assignment = i;
-                            }
-                        }
-                        assigned[assignment] = true;
-                        formationAssignments[unit.UUID] = formation[assignment];
-                    }
-                    break;
-                case BehaviorFSM.CircleFormation:
-                    // TODO: Implement
-                    foreach(var unit in squad.Units) {
-                        formationAssignments[unit.UUID] = Vector2.Zero;
                     }
                     break;
                 case BehaviorFSM.FreeFormation:
+                    Formation = new List<Vector2>();
                     foreach(var unit in squad.Units) {
-                        formationAssignments[unit.UUID] = Vector2.Zero;
+                        Formation.Add(Vector2.Zero);
                     }
                     break;
             }
-        }
-        // TODO: Implement
-        // Decide Where Units In This Squad Should Go When Close To Their Target
-        public override void CalculateTargetFormation() {
-
         }
 
         /**
@@ -118,39 +91,32 @@ namespace RTS.Mech.Squad {
         // Whether Units In This Squad Have Decided To Move (Key: UUID)
         Dictionary<int, bool> doMove = new Dictionary<int, bool>();
 
-        // The Waypoints To Which This Controller Has Decided To Send Its Units (Key: UUID)
-        Dictionary<int, Vector2> unitWaypoints = new Dictionary<int, Vector2>();
-
         public override void DecideMoves(GameState g, float dt) {
             // Pathfinding Has Not Finished: Make The Formation At The Average Squad Position
+            squad.RecalculateGridPosition();
             if(Waypoints == null || Waypoints.Count == 0) {
                 foreach(var unit in squad.Units) {
-                    if(formationAssignments.ContainsKey(unit.UUID)) {
-                        Vector2 post = formationAssignments[unit.UUID];
-                        unitWaypoints[unit.UUID] = squad.GridPosition + post;
-                        DecideMoveForUnit(unit);
-                    }
+                    SetNetForce(g, unit, squad.GridPosition, null);
+                    DecideMoveForUnit(unit);
                 }
             }
             // Having A Target Trumps Regular Movement
-            // TODO: Make Targeting Use Pathfinding Queries As Well
             else if(squad.TargetingController != null && squad.TargetingController.Target != null) {
                 foreach(var unit in squad.Units) {
+                    RTSUnit target = unit.Target as RTSUnit;
                     switch(unit.CombatOrders) {
                         case BehaviorFSM.UseMeleeAttack:
-                            RTSUnit target = unit.Target as RTSUnit;
-                            if(target != null) {
-                                unitWaypoints[unit.UUID] = target.GridPosition;
-                                Vector2 udisp = unitWaypoints[unit.UUID] - unit.GridPosition;
-                                float ur = unit.CollisionGeometry.BoundingRadius + target.CollisionGeometry.BoundingRadius;
-                                ur *= 1.3f;
-                                doMove[unit.UUID] = udisp.LengthSquared() > (ur * ur);
-                                if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
-                                    unit.State = BehaviorFSM.CombatMelee;
-                            }
+                            float r = unit.CollisionGeometry.BoundingRadius + target.CollisionGeometry.BoundingRadius;
+                            r *= 1.3f;
+                            DoTargeting(g, unit, target, r);
+                            if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
+                                unit.State = BehaviorFSM.CombatMelee;
                             break;
-                        case BehaviorFSM.UseRangedAttack:
-                            // TODO: Make Use Of CalculateTargetFormation() Below
+                        default: // case BehaviorFSM.UseRangedAttack:
+                            r = unit.UnitData.BaseCombatData.MaxRange;
+                            DoTargeting(g, unit, target, r);
+                            if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
+                                unit.State = BehaviorFSM.CombatRanged;
                             break;
                     }
                 }
@@ -159,23 +125,61 @@ namespace RTS.Mech.Squad {
             else {
                 foreach(var unit in squad.Units) {
                     if(CurrentWaypointIndices.ContainsKey(unit.UUID) && IsValid(CurrentWaypointIndices[unit.UUID])) {
-                        //// Find This Unit's Formation Post (Offset)
-                        Vector2 currWaypoint = squad.MovementController.Waypoints[CurrentWaypointIndices[unit.UUID]];
-                        float a = (float)Math.Atan2(currWaypoint.Y, currWaypoint.X);
-                        Dictionary<int, Vector2> rotatedPosts = RotateFormation(a);
-                        if(rotatedPosts.ContainsKey(unit.UUID)) {
-                            // Use The Next Squad Waypoint And The Post To Assign A Waypoint
-                            Vector2 post = currWaypoint + RotateFormation(a)[unit.UUID];
-                            CollisionGrid cg = g.CGrid;
-                            Point unitGoal = HashHelper.Hash(post, cg.numCells, cg.size);
-                            // Make Units Go To Squad Waypoint If Their Posts Are Bad
-                            // TODO: Add Some Kind Of Awareness About The Other Squad Units
-                            unitWaypoints[unit.UUID] = cg.GetCollision(unitGoal.X, unitGoal.Y) ? currWaypoint : post;
-                            DecideMoveForUnit(unit);
-                        }
+                        Vector2 waypoint = squad.MovementController.Waypoints[CurrentWaypointIndices[unit.UUID]];
+                        SetNetForce(g, unit, waypoint, null);
+                        DecideMoveForUnit(unit);
                     }
                 }
             }
+        }
+
+        private void SetNetForce(GameState g, RTSUnit unit, Vector2 waypoint, List<Vector2> targetFormation) {
+            Vector2 netForce = Vector2.Zero;
+            if(targetFormation == null) {
+                float a = (float)Math.Atan2(waypoint.Y, waypoint.X);
+                foreach(var post in RotateFormations(a)) {
+                    netForce += Force(unit, post + waypoint);
+                }
+            }
+            else {
+                foreach(var post in targetFormation) {
+                    netForce += Force(unit, post + waypoint);
+                }
+            }
+            CollisionGrid cg = g.CGrid;
+            Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
+            foreach(var entity in cg.EStatic[unitCell.X, unitCell.Y]) {
+                netForce += Force(unit, entity);
+            }
+            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
+                netForce += Force(unit, otherUnit);
+            }
+            NetForces[unit.UUID] = netForce;
+        }
+
+        // TODO: Make This Predict (Or Omnisciently Read) Where The Target Will Be Because It Could Be Moving
+        private void DoTargeting(GameState g, RTSUnit unit, RTSUnit target, float r) {
+            if(target != null) {
+                if(IsValid(CurrentWaypointIndices[unit.UUID])) {
+                    Vector2 waypoint = Waypoints[CurrentWaypointIndices[unit.UUID]];
+                    if(waypoint.X == target.GridPosition.X && waypoint.Y == target.GridPosition.Y) {
+                        List<Vector2> targetFormation = new List<Vector2>();
+                        float step = (float)Math.PI / 16;
+                        float angle = 0;
+                        while(angle < 2 * Math.PI) {
+                            targetFormation.Add(new Vector2((float)(r * Math.Sin(angle)), (float)(r * Math.Sin(angle))));
+                            angle += step;
+                        }
+                        SetNetForce(g, unit, waypoint, targetFormation);
+                    }
+                    else {
+                        SetNetForce(g, unit, waypoint, null);
+                    }
+
+                }
+            }
+            Vector2 udisp = target.GridPosition - unit.GridPosition;
+            doMove[unit.UUID] = udisp.LengthSquared() > (r * r);
         }
 
         public override void ApplyMoves(GameState g, float dt) {
@@ -187,8 +191,8 @@ namespace RTS.Mech.Squad {
                     minDefaultMoveSpeed = moveSpeed;
             }
             foreach(var unit in squad.Units) {
-                if(!doMove.ContainsKey(unit.UUID) || !doMove[unit.UUID] || !unitWaypoints.ContainsKey(unit.UUID)) continue;
-                Vector2 change = unitWaypoints[unit.UUID] - unit.GridPosition;
+                if(!doMove.ContainsKey(unit.UUID) || !doMove[unit.UUID]) continue;
+                Vector2 change =  NetForces.ContainsKey(unit.UUID) ? NetForces[unit.UUID] - unit.GridPosition : Vector2.Zero;
                 if(change != Vector2.Zero) {
                     float magnitude = change.Length();
                     Vector2 scaledChange = (change / magnitude) * minDefaultMoveSpeed * dt;
@@ -205,8 +209,8 @@ namespace RTS.Mech.Squad {
         }
 
         private void DecideMoveForUnit(RTSUnit unit) {
-            if(!unitWaypoints.ContainsKey(unit.UUID) || !CurrentWaypointIndices.ContainsKey(unit.UUID)) return;
-            Vector2 disp = unitWaypoints[unit.UUID] - unit.GridPosition;
+            if(!CurrentWaypointIndices.ContainsKey(unit.UUID)) return;
+            Vector2 disp = Waypoints[CurrentWaypointIndices[unit.UUID]] - unit.GridPosition;
             if(disp.Length() < STOP_DIST) {
                 CurrentWaypointIndices[unit.UUID]--;
             }

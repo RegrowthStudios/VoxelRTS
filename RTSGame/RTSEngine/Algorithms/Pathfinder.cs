@@ -144,10 +144,6 @@ namespace RTSEngine.Algorithms {
 
         // Run A* Search, Given This Pathfinder's World And A Query
         private void Pathfind(PathQuery q) {
-#if DEBUG
-            DevConsole.AddCommand("Pathfinding...");
-#endif
-
             // Initialization
             start = HashHelper.Hash(q.Start, world.numCells, world.size);
             end = HashHelper.Hash(q.End, world.numCells, world.size); ;
@@ -210,14 +206,6 @@ namespace RTSEngine.Algorithms {
             }
             q.IsComplete = true;
             // TODO: Add Path Smoothing
-#if DEBUG
-            if(path != null) {
-                DevConsole.AddCommand("Path found with size " + q.waypoints.Count);
-            }
-            else {
-                DevConsole.AddCommand("Pathfinding failed :(");
-            }
-#endif
         }
     }
 }
