@@ -125,7 +125,7 @@ namespace RTSEngine.Interfaces {
  
         // Decide Where Units In This Squad Should Tend To Go While Moving
         // Sets Formation Field/Property
-        public abstract void ApplyMovementFormation(int movementOrder);
+        public abstract void ApplyMovementFormation(int movementOrder, CollisionGrid cg);
         
         // Scripted Logic For Movement
         public abstract void DecideMoves(GameState g, float dt);
