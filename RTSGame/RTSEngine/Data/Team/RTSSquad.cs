@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -7,6 +8,10 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSSquad {
+        public static void Serialize(BinaryWriter s, RTSSquad squad) {
+            // TODO: Implement
+        }
+
         // This Squad's Team
         public RTSTeam Team {
             get;

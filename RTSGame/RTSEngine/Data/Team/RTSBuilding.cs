@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -7,6 +8,10 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSBuilding : IEntity, ImpactGenerator {
+        public static void Serialize(BinaryWriter s, RTSBuilding building) {
+            // TODO: Implement
+        }
+
         // Common Data
         public RTSBuildingData BuildingData {
             get;
@@ -87,12 +92,6 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        // Default Spawn Position For Units
-        public Vector2 DefaultSpawnPos() {
-            float radius = CollisionGeometry.BoundingRadius;
-            return new Vector2(gridPos.X, gridPos.Y + radius);
-        }
-
         // Damaging Events
         public event Action<IEntity, int> OnDamage;
         public event Action<IEntity> OnDestruction;
@@ -120,19 +119,7 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        // Waypoint Of The Building
-        protected Vector2 targetPos;
-        public Vector2 TargetPos {
-            get { return targetPos; }
-            set { targetPos = value; }
-        }
-
         public event Action<Vector2, int> GenerateImpact;
-
-        public RTSBuildingData Data {
-            get;
-            set;
-        }
 
         // Constructor
         public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {

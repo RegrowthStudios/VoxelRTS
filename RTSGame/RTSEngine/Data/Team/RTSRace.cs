@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using RTSEngine.Controllers;
@@ -25,6 +26,21 @@ namespace RTSEngine.Data.Team {
     }
 
     public class RTSRace {
+        public static void Serialize(BinaryWriter s, RTSRace race) {
+            // TODO: Implement
+            s.Write(race.FriendlyName);
+            s.Write(race.ActiveUnits.Length);
+            foreach(var d in race.ActiveUnits) {
+                s.Write(d.Index);
+                RTSUnitData.Serialize(s, d.Data);
+            }
+            s.Write(race.ActiveBuildings.Length);
+            foreach(var d in race.ActiveBuildings) {
+                s.Write(d.Index);
+                RTSBuildingData.Serialize(s, d.Data);
+            }
+        }
+
         public const int MAX_UNIT_TYPES = 24;
         public const int MAX_BUILDING_TYPES = 36;
 

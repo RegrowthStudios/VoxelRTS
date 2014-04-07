@@ -186,6 +186,13 @@ namespace RTS {
                 case Keys.Escape:
                     State = ScreenState.ChangePrevious;
                     break;
+                case Keys.F2:
+                    using(var fileStream = File.Create("game.sg")) {
+                        BinaryWriter bw = new BinaryWriter(fileStream);
+                        StateSerializer.Serialize(bw, state);
+                        bw.Flush();
+                    }
+                    break;
             }
         }
         public void OnKR(object s, KeyEventArgs a) {

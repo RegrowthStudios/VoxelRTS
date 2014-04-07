@@ -10,6 +10,7 @@ using BlisterUI.Input;
 using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
 using RTSEngine.Data.Team;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     public class PlayerInputController : InputController {
@@ -30,7 +31,7 @@ namespace RTSEngine.Controllers {
         }
 
         public PlayerInputController(GameState g, int t)
-            : base(g, t) {
+            : base(g, t, InputType.Player) {
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMousePress += OnMousePress;
         }
@@ -197,6 +198,10 @@ namespace RTSEngine.Controllers {
                     selectionRectStart = location;
                 }
             }
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement
         }
     }
 }

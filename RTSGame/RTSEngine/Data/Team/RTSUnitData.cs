@@ -5,9 +5,14 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
+using System.IO;
 
 namespace RTSEngine.Data.Team {
     public class RTSUnitData {
+        public static void Serialize(BinaryWriter s, RTSUnitData rTSUnitData) {
+            // TODO: Implement
+        }
+
         // The Friendly Name
         public string FriendlyName;
 

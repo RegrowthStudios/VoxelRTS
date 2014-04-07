@@ -1,0 +1,133 @@
+﻿~~~+==========+
+   |Game State|
+   +==========+
+ - Current Frame
+ - Total Game Time
+ - Last UUID
+ - Num Unit Controllers For All:
+   - Unit Controller Key
+ - Num Building Controllers For All:
+   - Building Controller Key
+ - Num Active Teams For All:
+   - Index
+   - Team
+     - Race
+       - Race [SERIALIZER]
+     - Input Controller
+       - Type
+       - Data [CUSTOM]
+     - Color Scheme [MARSHAL]
+     - Num Buildings For All:
+       - Building [SERIALIZER]
+     - Num Units For All:
+       - Unit [SERIALIZER]
+     - Num Squads For All:
+       - Squad [SERIALIZER]
+
+~~~+====+
+   |Race|
+   +====+
+ - Name
+ - Num Active Unit Data For All:
+   - Index
+   - Data
+     - Name
+     - Health
+     - Capital Cost 
+     - Population Cost
+     - Max Count
+     - Current Count
+     - Move Speed
+     - Impact
+     - Build Time
+     - Combat Data [MARSHAL]
+     - Collision Shape
+       - Type
+       - Center
+       - Static
+       - Radius / Bounds
+     - BBox Min
+     - BBox Max
+     - Unit Action Controller Key
+     - Unit Combat Controller Key
+     - Unit Movement Controller Key
+     - Unit Animation Controller Key
+ - Num Active Building Data For All:
+   - Index
+   - Data
+     - Name
+     - Health
+     - Capital Cost 
+     - Max Count
+     - Current Count
+     - Impact
+     - Build Time
+     - Sight Radius
+     - Grid Size
+     - Collision Shape
+       - Type
+       - Center
+       - Static
+       - Radius / Bounds
+     - BBox Min
+     - BBox Max
+     - Building Action Controller Key
+ - Squad Action Controller Key
+ - Squad Movement Controller Key
+ - Squad Targetting Controller Key
+
+~~~+========+
+   |Building|
+   +========+
+ - Type Index
+ - UUID
+ - State
+ - View Direction
+ - Grid Position
+ - Height
+ - Target UUID
+ - Health
+ - Action Controller
+   - Key
+   - Data [CUSTOM]
+
+~~~+====+
+   |Unit|
+   +====+
+ - Type Index
+ - UUID
+ - State
+ - View Direction
+ - Grid Position
+ - Height
+ - Target UUID
+ - Health
+ - Movement Multiplier
+ - Action Controller
+   - Key
+   - Data [CUSTOM]
+ - Combat Controller
+   - Key
+   - Data [CUSTOM]
+ - Movement Controller
+   - Key
+   - Data [CUSTOM]
+ - Animation Controller
+   - Key
+   - Data [CUSTOM]
+
+~~~+=====+
+   |Squad|
+   +=====+
+ - Num Units For All:
+   - UUID
+ - Average Grid Position
+ - Action Controller
+   - Key
+   - Data [CUSTOM]
+ - Movement Controller
+   - Key
+   - Data [CUSTOM]
+ - Targetting Controller
+   - Key
+   - Data [CUSTOM]

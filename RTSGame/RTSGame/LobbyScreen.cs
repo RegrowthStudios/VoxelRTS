@@ -12,6 +12,7 @@ using BlisterUI.Widgets;
 using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
+using RTSEngine.Data.Parsers;
 
 namespace RTS {
     public class TeamInitWidget : IDisposable {

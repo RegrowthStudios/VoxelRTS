@@ -7,6 +7,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     public class AIInputController : InputController {
@@ -14,7 +15,7 @@ namespace RTSEngine.Controllers {
         bool running, paused;
 
         public AIInputController(GameState g, int ti)
-            : base(g, ti) {
+            : base(g, ti, InputType.AI) {
             t = new Thread(WorkThread);
             t.IsBackground = true;
             running = true;
@@ -87,6 +88,10 @@ namespace RTSEngine.Controllers {
                     r.Next((int)GameState.Map.Width - 20) + 10,
                     r.Next((int)GameState.Map.Depth - 20) + 10)
                 ));
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement
         }
     }
 }

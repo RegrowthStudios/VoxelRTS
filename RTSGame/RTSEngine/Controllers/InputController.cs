@@ -6,6 +6,7 @@ using RTSEngine.Data;
 using RTSEngine.Interfaces;
 using System.Collections.Concurrent;
 using RTSEngine.Data.Team;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     // Types Of Teams
@@ -17,6 +18,11 @@ namespace RTSEngine.Controllers {
     }
 
     public abstract class InputController : IDisposable {
+        public InputType Type {
+            get;
+            private set;
+        }
+
         //Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
 
@@ -40,7 +46,8 @@ namespace RTSEngine.Controllers {
         }
 
         //Creates An InputController For The Given RTSTeam
-        public InputController(GameState g, int t) {
+        public InputController(GameState g, int t, InputType it) {
+            Type = it;
             GameState = g;
             TeamIndex = t;
             eventQueue = new ConcurrentQueue<GameInputEvent>();
@@ -73,5 +80,7 @@ namespace RTSEngine.Controllers {
                 OnNewSelection(this, selected);
             }
         }
+
+        public abstract void Serialize(BinaryWriter s);
     }
 }

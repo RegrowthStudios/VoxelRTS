@@ -58,7 +58,7 @@ namespace RTSEngine.Controllers {
         
 
         public EnvironmentInputController(GameState g, int ti)
-            : base(g, ti) {
+            : base(g, ti, InputType.Environment) {
             grid = g.IGrid;
             random = new Random();
             thread = new Thread(WorkThread);
@@ -179,7 +179,7 @@ namespace RTSEngine.Controllers {
                     // Regenerate Ore Health
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
-                            if(o.Data.FriendlyName.Equals(OreData.FriendlyName)) {
+                            if(o.BuildingData.FriendlyName.Equals(OreData.FriendlyName)) {
                                 o.Health += recoverImpact;
                                 r.AddToRegionImpact(-(OreData.Impact / recoverImpact));
                             }
@@ -213,7 +213,7 @@ namespace RTSEngine.Controllers {
                     }
                     // Randomly Choose An Impact Generator In That Cell
                     ImpactGenerator g = null;
-                    while(g == null || !g.Data.FriendlyName.Equals(OreData.FriendlyName) || !g.Data.FriendlyName.Equals(FloraData.FriendlyName)) {
+                    while(g == null || !g.BuildingData.FriendlyName.Equals(OreData.FriendlyName) || !g.BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
                         int i = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
                         g = grid.ImpactGenerators[p.X, p.Y][i];
                     }
@@ -259,5 +259,8 @@ namespace RTSEngine.Controllers {
             }
         }
 
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement
+        }
     }
 }

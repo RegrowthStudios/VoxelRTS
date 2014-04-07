@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -8,6 +9,10 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSBuildingData {
+        public static void Serialize(BinaryWriter s, RTSBuildingData rTSBuildingData) {
+            // TODO: Implement
+        }
+
         // The Friendly Name
         public string FriendlyName;
 

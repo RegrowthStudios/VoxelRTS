@@ -75,6 +75,7 @@
     <Compile Include="Data\Combat.cs" />
     <Compile Include="Data\GameState.cs" />
     <Compile Include="Data\LevelGrid.cs" />
+    <Compile Include="Data\Parsers\EngineLoadParser.cs" />
     <Compile Include="Data\Parsers\EnvironmentDataParser.cs" />
     <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
     <Compile Include="Data\Parsers\EntityControllerParser.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="Data\Parsers\RTSColorSchemeParser.cs" />
     <Compile Include="Data\Parsers\RTSRaceParser.cs" />
     <Compile Include="Data\Parsers\RTSUnitDataParser.cs" />
+    <Compile Include="Data\Parsers\StateSerializer.cs" />
     <Compile Include="Data\Region.cs" />
     <Compile Include="Data\RTSConstants.cs" />
     <Compile Include="Data\SelectionDetection.cs" />
@@ -131,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Coordinate Spaces.txt" />
+    <Content Include="Data\Parsers\Serialization.txt" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
