@@ -112,7 +112,7 @@ namespace RTS.Mech.Squad {
             foreach(Point n in Pathfinder.NeighborhoodDiag(unitCell)) {
                 RTSBuilding b = cg.EStatic[n.X, n.Y];
                 if(b != null)
-                    netForce += 10*Force(unit, b);
+                    netForce += 5*Force(unit, b);
             }
             foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
                 netForce += Force(unit, otherUnit);

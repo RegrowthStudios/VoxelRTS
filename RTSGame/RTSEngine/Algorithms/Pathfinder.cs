@@ -201,7 +201,7 @@ namespace RTSEngine.Algorithms {
             // A* Conclusion
             if(path != null) {
                 foreach(Point wp in path) {
-                    q.waypoints.Add(new Vector2(wp.X * world.cellSize, wp.Y * world.cellSize));
+                    q.waypoints.Add(new Vector2(((float)wp.X + 0.5f) * world.cellSize, ((float)wp.Y + 0.5f) * world.cellSize));
                 }
             }
             q.IsComplete = true;
