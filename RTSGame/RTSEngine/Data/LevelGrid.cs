@@ -26,15 +26,18 @@ namespace RTSEngine.Data {
     }
 
     public class CollisionGrid {
+        // Full Size Of The Map
         public readonly Vector2 size;
+
+        // Number And Size Of Cells
         public readonly Point numCells;
         public readonly float cellSize;
 
-        public List<IEntity>[,] EDynamic {
+        public List<RTSUnit>[,] EDynamic {
             get;
             private set;
         }
-        public List<IEntity>[,] EStatic {
+        public RTSBuilding[,] EStatic {
             get;
             private set;
         }
@@ -47,6 +50,7 @@ namespace RTSEngine.Data {
             private set;
         }
 
+        // Locations In The Grid Which Contain Units
         public List<Point> ActiveGrids {
             get;
             private set;
@@ -59,12 +63,11 @@ namespace RTSEngine.Data {
             cellSize = cs;
             size = new Vector2(w, h) * cellSize;
 
-            EDynamic = new List<IEntity>[numCells.X, numCells.Y];
-            EStatic = new List<IEntity>[numCells.X, numCells.Y];
+            EDynamic = new List<RTSUnit>[numCells.X, numCells.Y];
+            EStatic = new RTSBuilding[numCells.X, numCells.Y];
             for(int x = 0; x < numCells.X; x++) {
                 for(int y = 0; y < numCells.Y; y++) {
-                    EDynamic[x, y] = new List<IEntity>();
-                    EStatic[x, y] = new List<IEntity>();
+                    EDynamic[x, y] = new List<RTSUnit>();
                 }
             }
             ActiveGrids = new List<Point>();
@@ -72,26 +75,40 @@ namespace RTSEngine.Data {
             Collision = new bool[numCells.X, numCells.Y];
         }
 
-        public void Add(IEntity o) {
-            // Canonical position of the object represented in 0~1
+        public void Add(RTSUnit o) {
             Point p = HashHelper.Hash(o.CollisionGeometry.Center, numCells, size);
 
-            // Move To Correct List
-            if(!o.CollisionGeometry.IsStatic) {
-                // Check If Active
-                if(EDynamic[p.X, p.Y].Count < 1)
-                    ActiveGrids.Add(p);
-                EDynamic[p.X, p.Y].Add(o);
+            // Check If Active
+            if(EDynamic[p.X, p.Y].Count < 1)
+                ActiveGrids.Add(p);
+            EDynamic[p.X, p.Y].Add(o);
+        }
+        public bool CanAddBuilding(Vector2 pos, Point gs) {
+            // Check All The Cells
+            Point p = HashHelper.Hash(pos, numCells, size);
+            for(int y = 0; y < gs.Y; y++) {
+                for(int x = 0; x < gs.X; x++) {
+                    if(EStatic[p.X + x, p.Y + y] != null)
+                        return false;
+                }
             }
-            else {
-                EStatic[p.X, p.Y].Add(o);
-                o.OnDestruction += (_o) => { EStatic[p.X, p.Y].Remove(o); };
+            return true;
+        }
+        public void Add(RTSBuilding b) {
+            b.OnDestruction += OnBuildingDestruction;
+
+            // Add To All The Cells
+            Point p = HashHelper.Hash(b.CollisionGeometry.Center, numCells, size);
+            for(int y = 0; y < b.BuildingData.GridSize.Y; y++) {
+                for(int x = 0; x < b.BuildingData.GridSize.X; x++) {
+                    EStatic[p.X + x, p.Y + y] = b;
+                }
             }
         }
 
         public void ClearDynamic() {
             for(int i = 0; i < ActiveGrids.Count; i++)
-                EDynamic[ActiveGrids[i].X, ActiveGrids[i].Y] = new List<IEntity>();
+                EDynamic[ActiveGrids[i].X, ActiveGrids[i].Y] = new List<RTSUnit>();
             ActiveGrids = new List<Point>();
         }
 
@@ -108,7 +125,7 @@ namespace RTSEngine.Data {
             var sl2 = EStatic[ox, oy];
 
             // Empty Check
-            if(al2.Count + sl2.Count < 1) return;
+            if(al2.Count + (sl2 == null ? 0 : 1) < 1) return;
 
             for(int i1 = 0; i1 < al1.Count; i1++) {
                 // Dynamic-Dynamic
@@ -117,8 +134,8 @@ namespace RTSEngine.Data {
                     if(al1[i1].UUID > al2[i2].UUID)
                         CollisionController.ProcessCollision(al1[i1].CollisionGeometry, al2[i2].CollisionGeometry);
                 // Dynamic-Static
-                for(int i2 = 0; i2 < sl2.Count; i2++)
-                    CollisionController.ProcessCollision(al1[i1].CollisionGeometry, sl2[i2].CollisionGeometry);
+                if(sl2 != null)
+                    CollisionController.ProcessCollision(al1[i1].CollisionGeometry, sl2.CollisionGeometry);
             }
         }
         public void HandleGridCollision(int x, int y) {
@@ -130,9 +147,9 @@ namespace RTSEngine.Data {
                 for(int i2 = i1 + 1; i2 < al.Count; i2++)
                     CollisionController.ProcessCollision(al[i1].CollisionGeometry, al[i2].CollisionGeometry);
             // Dynamic-Static
-            for(int i1 = 0; i1 < al.Count; i1++)
-                for(int i2 = 0; i2 < sl.Count; i2++)
-                    CollisionController.ProcessCollision(al[i1].CollisionGeometry, sl[i2].CollisionGeometry);
+            if(sl != null)
+                for(int i1 = 0; i1 < al.Count; i1++)
+                    CollisionController.ProcessCollision(al[i1].CollisionGeometry, sl.CollisionGeometry);
         }
 
         public void SetFogOfWar(int x, int y, int p, FogOfWar f) {
@@ -150,11 +167,23 @@ namespace RTSEngine.Data {
             Collision[x, y] = c;
         }
         public bool GetCollision(int x, int y) {
-            return Collision[x, y] || EStatic[x, y].Count > 0;
+            return Collision[x, y] || EStatic[x, y] != null;
         }
 
         public void OnBuildingSpawn(RTSBuilding b) {
             Add(b);
+        }
+        public void OnBuildingDestruction(IEntity o) {
+            o.OnDestruction -= OnBuildingDestruction;
+            RTSBuilding b = o as RTSBuilding;
+
+            // Add To All The Cells
+            Point p = HashHelper.Hash(b.CollisionGeometry.Center, numCells, size);
+            for(int y = 0; y < b.BuildingData.GridSize.Y; y++) {
+                for(int x = 0; x < b.BuildingData.GridSize.X; x++) {
+                    EStatic[p.X + x, p.Y + y] = null;
+                }
+            }
         }
     }
 

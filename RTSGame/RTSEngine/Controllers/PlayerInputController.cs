@@ -55,7 +55,7 @@ namespace RTSEngine.Controllers {
             BoundingBox box;
 
             // Loop Through All The Units
-            var units = Team.units;
+            var units = Team.Units;
             for(int i = 0; i < units.Count; i++) {
                 box = units[i].BBox;
                 if(SelectionDetection.Intersects(f, ref box))
@@ -63,7 +63,7 @@ namespace RTSEngine.Controllers {
             }
 
             // Loop Through All The Buildings
-            var buildings = Team.buildings;
+            var buildings = Team.Buildings;
             for(int i = 0; i < buildings.Count; i++) {
                 box = buildings[i].BBox;
                 if(SelectionDetection.Intersects(f, ref box))
@@ -99,7 +99,7 @@ namespace RTSEngine.Controllers {
                 // TODO: Check FOW As Well
 
                 // Loop Through All The Units
-                foreach(RTSUnit unit in team.units) {
+                foreach(RTSUnit unit in team.Units) {
                     box = unit.BBox;
                     dist = r.Intersects(box);
                     if(dist != null && dist.Value < closest) {
@@ -109,7 +109,7 @@ namespace RTSEngine.Controllers {
                 }
 
                 // Loop Through All The Buildings
-                foreach(RTSBuilding building in team.buildings) {
+                foreach(RTSBuilding building in team.Buildings) {
                     box = building.BBox;
                     dist = r.Intersects(box);
                     if(dist != null && dist.Value < closest) {

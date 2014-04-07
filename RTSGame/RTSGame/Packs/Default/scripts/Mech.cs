@@ -50,7 +50,7 @@ namespace RTS.Mech.Squad {
             for(int i = 0; i < g.activeTeams.Length; i++) {
                 RTSTeam team = g.activeTeams[i].Team;
                 if(team == squad.Team) continue;
-                foreach(var sq in team.squads) {
+                foreach(var sq in team.Squads) {
                     float d = (sq.GridPosition - squad.GridPosition).LengthSquared();
                     if(d < minDist) {
                         targetSquad = sq;

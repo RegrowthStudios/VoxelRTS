@@ -20,7 +20,7 @@ namespace RTSEngine.Data.Team {
         public int PopulationCost;
 
         // Maximum Number Of These Units Supported
-        public int MaxCount;
+        public int MaxCount, CurrentCount;
 
         // Speed Of The Unit
         public float MovementSpeed;

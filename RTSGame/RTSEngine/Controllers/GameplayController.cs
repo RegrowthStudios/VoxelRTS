@@ -232,6 +232,11 @@ namespace RTSEngine.Controllers {
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
             RTSTeam team = s.teams[e.Team];
             RTSUnit unit = team.AddUnit(e.Type, e.Position);
+
+            // Check If A Unit Was Possible
+            if(unit == null) return;
+
+            // Add Decision Tasks
             AddTask(s, unit);
 
             // Add A Single Unit Squad
@@ -242,8 +247,17 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyInput(GameState s, float dt, SpawnBuildingEvent e) {
             RTSTeam team = s.teams[e.Team];
+
+            // Check If We Can Add A Building There
             Vector2 wp = new Vector2(e.GridPosition.X + 0.5f, e.GridPosition.Y + 0.5f) * s.CGrid.cellSize;
+            if(!s.CGrid.CanAddBuilding(wp, team.race.Buildings[e.Type].GridSize)) return;
+
             RTSBuilding building = team.AddBuilding(e.Type, wp);
+
+            // Check If A Building Was Possible
+            if(building == null) return;
+
+            // Add Building Decision Task
             AddTask(s, building);
 
             // Set Default Height
@@ -318,19 +332,19 @@ namespace RTSEngine.Controllers {
             // Apply Decisions For Squads
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
-                for(int i = 0; i < team.squads.Count; i++)
-                    if(team.squads[i].ActionController != null)
-                        team.squads[i].ActionController.ApplyAction(s, dt);
+                for(int i = 0; i < team.Squads.Count; i++)
+                    if(team.Squads[i].ActionController != null)
+                        team.Squads[i].ActionController.ApplyAction(s, dt);
             }
             // Apply Decisions For Units And Buildings
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
-                for(int i = 0; i < team.units.Count; i++)
-                    if(team.units[i].ActionController != null)
-                        team.units[i].ActionController.ApplyAction(s, dt);
-                for(int i = 0; i < team.buildings.Count; i++)
-                    if(team.buildings[i].ActionController != null)
-                        team.buildings[i].ActionController.ApplyAction(s, dt);
+                for(int i = 0; i < team.Units.Count; i++)
+                    if(team.Units[i].ActionController != null)
+                        team.Units[i].ActionController.ApplyAction(s, dt);
+                for(int i = 0; i < team.Buildings.Count; i++)
+                    if(team.Buildings[i].ActionController != null)
+                        team.Buildings[i].ActionController.ApplyAction(s, dt);
             }
 
             // Calculate FOW
@@ -343,7 +357,7 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                foreach(var unit in s.activeTeams[ti].Team.units) {
+                foreach(var unit in s.activeTeams[ti].Team.Units) {
                     if(unit.MovementController != null)
                         unit.MovementController.Waypoints = null;
                 }
@@ -353,8 +367,11 @@ namespace RTSEngine.Controllers {
             RTSTeam team;
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
-                foreach(var unit in team.units) {
+                foreach(var unit in team.Units) {
                     unit.Damage(9001); // OVER 9000
+                }
+                foreach(var building in team.Buildings) {
+                    building.Damage(9001); // OVER 9000
                 }
             }
         }
@@ -370,7 +387,7 @@ namespace RTSEngine.Controllers {
             // Move Geometry To The Unit's Location and hash into the grid
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
-                foreach(RTSUnit unit in team.units) {
+                foreach(RTSUnit unit in team.Units) {
                     unit.CollisionGeometry.Center = unit.GridPosition;
                     hashGrid.Add(unit);
                 }
@@ -393,7 +410,7 @@ namespace RTSEngine.Controllers {
             // Move Unit's Location To The Geometry After Heightmap Collision
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
-                foreach(RTSUnit unit in team.units) {
+                foreach(RTSUnit unit in team.Units) {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
                     unit.GridPosition = unit.CollisionGeometry.Center;
                     unit.Height = unit.CollisionGeometry.Height;
