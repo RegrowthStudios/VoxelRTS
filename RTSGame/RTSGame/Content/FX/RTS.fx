@@ -60,7 +60,7 @@ float4 PS_Swatch(VSO input) : COLOR0 {
     float4 swatch = tex2D(Overlay, input.UV);
     float4 color = tex2D(Color, input.UV);
     float3 sv = swatch.r * CPrimary + swatch.g * CSecondary + swatch.b * CTertiary;
-    return swatch.a > 0.5 ? float4(sv, 1) : color;
+    return lerp(color, float4(sv, 1), swatch.a);
 }
 
 technique Default {
