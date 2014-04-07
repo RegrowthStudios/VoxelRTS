@@ -103,7 +103,7 @@ namespace RTS {
             MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
             MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
 
-            renderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
+            renderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
 
             // Rendering Effect
             fx = new RTSFXEntity(renderer.LoadEffect(FX_FILE_PATH));

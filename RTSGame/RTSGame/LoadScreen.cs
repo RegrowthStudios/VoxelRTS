@@ -189,7 +189,7 @@ namespace RTS {
             LoadedCamera.Controller.Hook(game.Window);
 
             // Load The Renderer
-            LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", game.Window);
+            LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
             LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera, game.LoadScreen.LoadData.MapFile);
             VisualTeam vt;
             for(int i = 0; i < loadData.Teams.Length; i++) {

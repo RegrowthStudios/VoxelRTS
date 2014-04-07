@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
+using RTSEngine.Graphics;
 
 namespace RTSEngine.Data {
     public struct IndexedTeam {
@@ -67,11 +68,15 @@ namespace RTSEngine.Data {
         public int CurrentFrame {
             get { return curFrame; }
         }
-
         private float timePlayed;
         public float TotalGameTime {
             get { return timePlayed; }
         }
+
+        // Particle Events
+        private object lckParticles;
+        private List<Particle> particles;
+        private List<Particle> tmpParticles;
 
         public GameState() {
             teams = new RTSTeam[MAX_PLAYERS];
@@ -88,6 +93,10 @@ namespace RTSEngine.Data {
 
             curFrame = 0;
             timePlayed = 0f;
+
+            lckParticles = new object();
+            particles = new List<Particle>();
+            tmpParticles = new List<Particle>();
         }
 
         // Create With Premade Data
@@ -113,6 +122,27 @@ namespace RTSEngine.Data {
         public void IncrementFrame(float dt) {
             curFrame++;
             timePlayed += dt;
+            if(tmpParticles.Count > 0) {
+                lock(lckParticles) {
+                    particles.AddRange(tmpParticles);
+                }
+                tmpParticles = new List<Particle>();
+            }
+        }
+
+        public List<Particle> GetParticles() {
+            if(particles.Count > 0) {
+                List<Particle> p;
+                lock(lckParticles) {
+                    p = particles;
+                    particles = new List<Particle>();
+                }
+                return p;
+            }
+            return null;
+        }
+        public void AddParticle(Particle p) {
+            tmpParticles.Add(p);
         }
     }
 }

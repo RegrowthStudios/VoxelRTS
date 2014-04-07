@@ -7,6 +7,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
+using RTSEngine.Graphics;
 
 namespace RTS.Mech.Squad {
     public class Action : ACSquadActionController {
@@ -130,6 +131,19 @@ namespace RTS.Mech.Unit {
         }
         public override void Update(GameState s, float dt) {
             if(lastState != unit.State) {
+                if(lastState == FSMState.CombatMelee) {
+                    Vector3 o = unit.WorldPosition + Vector3.Up;
+                    Vector3 d;
+                    if(unit.Target != null)
+                        d = unit.Target.WorldPosition + Vector3.Up;
+                    else
+                        d = o + new Vector3(unit.ViewDirection.X, 0, unit.ViewDirection.Y);
+                    d -= o;
+                    d.Normalize();
+                    BulletParticle bp = new BulletParticle(o, d, 0.05f, 1f, 0.1f);
+                    AddParticle(bp);
+                }
+
                 // A New Animation State If Provided
                 SetAnimation(unit.State);
                 if(lastState == FSMState.None) {
