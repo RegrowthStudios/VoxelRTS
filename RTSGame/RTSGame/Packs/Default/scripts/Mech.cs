@@ -114,6 +114,23 @@ namespace RTS.Mech.Unit {
             SetAnimation(FSMState.None);
         }
 
+        public override void SetUnit(RTSUnit u) {
+            base.SetUnit(u);
+            if(unit != null) {
+                unit.OnAttackMade += unit_OnAttackMade;
+            }
+        }
+
+        void unit_OnAttackMade(ICombatEntity arg1, IEntity arg2) {
+            Vector3 o = arg1.WorldPosition + Vector3.Up;
+            Vector3 d = arg2.WorldPosition + Vector3.Up;
+            d -= o;
+            d.Normalize();
+            BulletParticle bp = new BulletParticle(o, d, 0.05f, 1.4f, 0.1f);
+            bp.instance.Tint = Color.Red;
+            AddParticle(bp);
+        }
+
         private void SetAnimation(int state) {
             switch(state) {
                 case FSMState.Walking:
@@ -131,19 +148,6 @@ namespace RTS.Mech.Unit {
         }
         public override void Update(GameState s, float dt) {
             if(lastState != unit.State) {
-                if(lastState == FSMState.CombatMelee) {
-                    Vector3 o = unit.WorldPosition + Vector3.Up;
-                    Vector3 d;
-                    if(unit.Target != null)
-                        d = unit.Target.WorldPosition + Vector3.Up;
-                    else
-                        d = o + new Vector3(unit.ViewDirection.X, 0, unit.ViewDirection.Y);
-                    d -= o;
-                    d.Normalize();
-                    BulletParticle bp = new BulletParticle(o, d, 0.05f, 1f, 0.1f);
-                    AddParticle(bp);
-                }
-
                 // A New Animation State If Provided
                 SetAnimation(unit.State);
                 if(lastState == FSMState.None) {
