@@ -9,6 +9,7 @@ using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
 using RTSEngine.Algorithms;
 using RTSEngine.Data.Parsers;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     #region Time Budgeting
@@ -322,6 +323,9 @@ namespace RTSEngine.Controllers {
                     case DevCommandType.Kill:
                         ApplyLogic(s, dt, comm as DevCommandKill);
                         break;
+                    case DevCommandType.Save:
+                        ApplyLogic(s, dt, comm as DevCommandSave);
+                        break;
                 }
             }
 
@@ -373,6 +377,11 @@ namespace RTSEngine.Controllers {
                 foreach(var building in team.Buildings) {
                     building.Damage(9001); // OVER 9000
                 }
+            }
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandSave c) {
+            using(var fs = File.Create(c.file.FullName)) {
+                StateSerializer.Serialize(new BinaryWriter(fs), s);
             }
         }
 
@@ -461,6 +470,10 @@ namespace RTSEngine.Controllers {
                 return;
             }
             else if(DevCommandKill.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandSave.TryParse(s, out c)) {
                 commands.Enqueue(c);
                 return;
             }
