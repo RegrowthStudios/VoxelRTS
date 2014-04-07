@@ -42,8 +42,8 @@ namespace RTSEngine.Interfaces {
         protected const float phi = 1.61803398875f;
 
         // The Constants Used In Flow Field Calculations
-        protected const float rForce =  1f;
-        protected const float aForce = -10f;
+        protected const float rForce =  10f;
+        protected const float aForce = -100f;
 
         // Waypoints That Units In This Squad Will Generally Follow
         private List<Vector2> waypoints = new List<Vector2>();
@@ -65,6 +65,22 @@ namespace RTSEngine.Interfaces {
         public Dictionary<int, int> CurrentWaypointIndices {
             get { return currentWaypointIndices; }
             set { currentWaypointIndices = value; }
+        }
+
+        protected const int historySize = 20;
+        // The Last Few Locations Each Unit Has Been To
+        private Dictionary<int, Queue<Vector2>> unitHistory = new Dictionary<int, Queue<Vector2>>();
+        public Dictionary<int, Queue<Vector2>> UnitHistory {
+            get { return unitHistory; }
+            set { unitHistory = value; }
+        }
+
+        public void AddToHistory(RTSUnit unit, Vector2 location) {
+            if(UnitHistory.ContainsKey(unit.UUID)) {
+                if(UnitHistory[unit.UUID].Count >= historySize)
+                    UnitHistory[unit.UUID].Dequeue();
+                UnitHistory[unit.UUID].Enqueue(location);
+            }
         }
 
         // The Net Force On Each Unit In This Squad
