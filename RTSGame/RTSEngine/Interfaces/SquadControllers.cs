@@ -41,7 +41,7 @@ namespace RTSEngine.Interfaces {
         // Box Formation Will Follow The Golden Ratio Phi
         protected const float phi = 1.61803398875f;
 
-        // The Constant Used In Flow Field Calculations
+        // The Constants Used In Flow Field Calculations
         protected const float rForce =  1f;
         protected const float aForce = -10f;
 

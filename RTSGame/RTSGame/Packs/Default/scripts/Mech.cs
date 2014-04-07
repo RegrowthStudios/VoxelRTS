@@ -26,9 +26,6 @@ namespace RTS.Mech.Squad {
     }
 
     public class Movement : ACSquadMovementController {
-        /**
-         * SQUAD LOGIC SECTION
-         */ 
         // Decide Where Units In This Squad Should Go When Moving
         public override void ApplyMovementFormation(int movementOrder) {
             switch(movementOrder) {
@@ -83,12 +80,6 @@ namespace RTS.Mech.Squad {
             }
         }
 
-        /**
-         * UNIT MOVEMENT SECTION
-         */ 
-
-        const float STOP_DIST = 0.5f;
-
         // Whether Units In This Squad Have Decided To Move (Key: UUID)
         Dictionary<int, bool> doMove = new Dictionary<int, bool>();
 
@@ -97,28 +88,29 @@ namespace RTS.Mech.Squad {
             squad.RecalculateGridPosition();
             if(Waypoints == null || Waypoints.Count == 0) {
                 foreach(var unit in squad.Units) {
-                    SetNetForce(g, unit, squad.GridPosition, null);
-                    DecideMoveForUnit(unit);
+                    SetNetForceAndMove(g, unit, squad.GridPosition, null);
                 }
             }
             // Having A Target Trumps Regular Movement
             else if(squad.TargetingController != null && squad.TargetingController.Target != null) {
                 foreach(var unit in squad.Units) {
                     RTSUnit target = unit.Target as RTSUnit;
-                    switch(unit.CombatOrders) {
-                        case BehaviorFSM.UseMeleeAttack:
-                            float r = unit.CollisionGeometry.BoundingRadius + target.CollisionGeometry.BoundingRadius;
-                            r *= 1.3f;
-                            DoTargeting(g, unit, target, r);
-                            if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
-                                unit.State = BehaviorFSM.CombatMelee;
-                            break;
-                        default: // case BehaviorFSM.UseRangedAttack:
-                            r = unit.UnitData.BaseCombatData.MaxRange;
-                            DoTargeting(g, unit, target, r);
-                            if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
-                                unit.State = BehaviorFSM.CombatRanged;
-                            break;
+                    if(target != null) {
+                        switch(unit.CombatOrders) {
+                            case BehaviorFSM.UseMeleeAttack:
+                                float r = unit.CollisionGeometry.BoundingRadius + target.CollisionGeometry.BoundingRadius;
+                                r *= 1.3f;
+                                DoTargeting(g, unit, target, r);
+                                if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
+                                    unit.State = BehaviorFSM.CombatMelee;
+                                break;
+                            default: // case BehaviorFSM.UseRangedAttack:
+                                r = unit.UnitData.BaseCombatData.MaxRange;
+                                DoTargeting(g, unit, target, r);
+                                if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
+                                    unit.State = BehaviorFSM.CombatRanged;
+                                break;
+                        }
                     }
                 }
             }
@@ -127,60 +119,10 @@ namespace RTS.Mech.Squad {
                 foreach(var unit in squad.Units) {
                     if(CurrentWaypointIndices.ContainsKey(unit.UUID) && IsValid(CurrentWaypointIndices[unit.UUID])) {
                         Vector2 waypoint = squad.MovementController.Waypoints[CurrentWaypointIndices[unit.UUID]];
-                        SetNetForce(g, unit, waypoint, null);
-                        DecideMoveForUnit(unit);
+                        SetNetForceAndMove(g, unit, waypoint, null);
                     }
                 }
             }
-        }
-
-        private void SetNetForce(GameState g, RTSUnit unit, Vector2 waypoint, List<Vector2> targetFormation) {
-            Vector2 netForce = Vector2.Zero;
-            if(targetFormation == null) {
-                float a = (float)Math.Atan2(waypoint.Y, waypoint.X);
-                foreach(var post in RotateFormations(a)) {
-                    netForce += Force(unit, post + waypoint);
-                }
-            }
-            else {
-                foreach(var post in targetFormation) {
-                    netForce += Force(unit, post + waypoint);
-                }
-            }
-            CollisionGrid cg = g.CGrid;
-            Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
-            foreach(var entity in cg.EStatic[unitCell.X, unitCell.Y]) {
-                netForce += Force(unit, entity);
-            }
-            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
-                netForce += Force(unit, otherUnit);
-            }
-            NetForces[unit.UUID] = netForce;
-        }
-
-        // TODO: Make This Predict (Or Omnisciently Read) Where The Target Will Be Because It Could Be Moving
-        private void DoTargeting(GameState g, RTSUnit unit, RTSUnit target, float r) {
-            if(target != null) {
-                if(IsValid(CurrentWaypointIndices[unit.UUID])) {
-                    Vector2 waypoint = Waypoints[CurrentWaypointIndices[unit.UUID]];
-                    if(waypoint.X == target.GridPosition.X && waypoint.Y == target.GridPosition.Y) {
-                        List<Vector2> targetFormation = new List<Vector2>();
-                        float step = (float)Math.PI / 16;
-                        float angle = 0;
-                        while(angle < 2 * Math.PI) {
-                            targetFormation.Add(new Vector2((float)(r * Math.Sin(angle)), (float)(r * Math.Sin(angle))));
-                            angle += step;
-                        }
-                        SetNetForce(g, unit, waypoint, targetFormation);
-                    }
-                    else {
-                        SetNetForce(g, unit, waypoint, null);
-                    }
-
-                }
-            }
-            Vector2 udisp = target.GridPosition - unit.GridPosition;
-            doMove[unit.UUID] = udisp.LengthSquared() > (r * r);
         }
 
         public override void ApplyMoves(GameState g, float dt) {
@@ -209,13 +151,59 @@ namespace RTS.Mech.Squad {
             }
         }
 
-        private void DecideMoveForUnit(RTSUnit unit) {
-            if(!CurrentWaypointIndices.ContainsKey(unit.UUID)) return;
-            Vector2 disp = Waypoints[CurrentWaypointIndices[unit.UUID]] - unit.GridPosition;
-            if(disp.Length() < STOP_DIST) {
+        private void SetNetForceAndMove(GameState g, RTSUnit unit, Vector2 waypoint, List<Vector2> targetFormation) {
+            // Set Net Force
+            Vector2 netForce = Vector2.Zero;
+            if(targetFormation == null) {
+                float a = (float)Math.Atan2(waypoint.Y, waypoint.X);
+                foreach(var post in RotateFormations(a)) {
+                    netForce += Force(unit, post + waypoint);
+                }
+            }
+            else {
+                foreach(var post in targetFormation) {
+                    netForce += Force(unit, post + waypoint);
+                }
+            }
+            CollisionGrid cg = g.CGrid;
+            Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
+            foreach(var entity in cg.EStatic[unitCell.X, unitCell.Y]) {
+                netForce += Force(unit, entity);
+            }
+            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
+                netForce += Force(unit, otherUnit);
+            }
+            NetForces[unit.UUID] = netForce;
+
+            // Set Move
+            if(!CurrentWaypointIndices.ContainsKey(unit.UUID) || !IsValid(CurrentWaypointIndices[unit.UUID])) return;
+            Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
+            bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
+            if(inGoalCell) {
                 CurrentWaypointIndices[unit.UUID]--;
             }
             doMove[unit.UUID] = IsValid(CurrentWaypointIndices[unit.UUID]);
+        }
+
+        // TODO: Make This Predict (Or Omnisciently Read) Where The Target Will Be Because It Could Be Moving
+        private void DoTargeting(GameState g, RTSUnit unit, RTSUnit target, float r) {
+            if(CurrentWaypointIndices.ContainsKey(unit.UUID) && IsValid(CurrentWaypointIndices[unit.UUID])) {
+                Vector2 waypoint = Waypoints[CurrentWaypointIndices[unit.UUID]];
+                bool waypointIsTarget = waypoint.X == target.GridPosition.X && waypoint.Y == target.GridPosition.Y;
+                if(waypointIsTarget) {
+                    List<Vector2> targetFormation = new List<Vector2>();
+                    float step = (float)Math.PI / 16;
+                    float angle = 0;
+                    while(angle < 2 * Math.PI) {
+                        targetFormation.Add(new Vector2((float)(r * Math.Sin(angle)), (float)(r * Math.Sin(angle))));
+                        angle += step;
+                    }
+                    SetNetForceAndMove(g, unit, waypoint, targetFormation);
+                }
+                else {
+                    SetNetForceAndMove(g, unit, waypoint, null);
+                }
+            }
         }
     }
 
