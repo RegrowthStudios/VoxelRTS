@@ -16,7 +16,7 @@ using System.ComponentModel;
 namespace RTS {
     public class MenuScreen : GameScreen<App> {
         private static readonly Color PANEL_INACTIVE_COLOR = new Color(14, 14, 14, 255);
-        private static readonly Color PANEL_HIGHLIGHT_COLOR = new Color(10, 40, 100, 255);
+        private static readonly Color PANEL_HIGHLIGHT_COLOR = new Color(110, 140, 200, 255);
         private static readonly Color PANEL_TEXT_COLOR = new Color(200, 200, 200, 255);
         private const string FONT = "Chintzy CPU BRK";
         private const int FONT_SIZE = 32;

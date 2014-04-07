@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -7,6 +8,11 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSUnit : ICombatEntity {
+        public static void Serialize(BinaryWriter s, RTSUnit unit) {
+            // TODO: Implement
+        }
+
+
         // Common Data
         public RTSUnitData UnitData {
             get;

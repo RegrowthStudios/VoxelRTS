@@ -5,9 +5,14 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
+using System.IO;
 
 namespace RTSEngine.Data.Team {
     public class RTSUnitData {
+        public static void Serialize(BinaryWriter s, RTSUnitData rTSUnitData) {
+            // TODO: Implement
+        }
+
         // The Friendly Name
         public string FriendlyName;
 
@@ -20,10 +25,13 @@ namespace RTSEngine.Data.Team {
         public int PopulationCost;
 
         // Maximum Number Of These Units Supported
-        public int MaxCount;
+        public int MaxCount, CurrentCount;
 
         // Speed Of The Unit
         public float MovementSpeed;
+
+        // Environment Impact When Unit Is Produced
+        public int Impact;
 
         // How Long It Takes For The Building To Make This Unit
         public int BuildTime;

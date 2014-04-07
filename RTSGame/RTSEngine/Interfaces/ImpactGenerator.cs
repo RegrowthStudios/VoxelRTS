@@ -8,9 +8,9 @@ using System.Text;
 namespace RTSEngine.Interfaces {
 
     public interface ImpactGenerator {
-        Vector2 GridPosition { get; set; }
+        Vector2 GridPosition { get; }
         int Health { get; set; }
         event Action<Vector2, int> GenerateImpact;
-        RTSBuildingData Data { get; set; }
+        RTSBuildingData BuildingData { get; }
     }
 }

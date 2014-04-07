@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,24 @@ namespace RTSEngine.Data.Parsers {
                     OreType = 1,
                     MinionType = 0,
                     TankType = 1,
-                    TitanType = 2
+                    TitanType = 2,
+                    RecoverTime = 60,
+                    DisasterTime = 30,
+                    L1Impact = 10,
+                    L2Impact = 20,
+                    L3Impact = 30,
+                    NoLongerRecoverImpact = 25,
+                    L1SpawnCap = 10,
+                    L2SpawnCap = 20,
+                    L3SpawnCap = 30,
+                    RecoverImpact = 5, 
+                    SpawnOffset = 30,
+                    L1MinNumSpawn = new int[] {3,1,0},
+                    L2MinNumSpawn = new int[] { 6, 3, 1 },
+                    L3MinNumSpawn = new int[] { 12, 5, 2 },
+                    L1MaxNumSpawn = new int[] {6,3,1},
+                    L2MaxNumSpawn = new int[] {12,5,2},
+                    L3MaxNumSpawn = new int[] {15,10,5}
                 };
             }
         }
@@ -24,6 +42,29 @@ namespace RTSEngine.Data.Parsers {
         public int MinionType;
         public int TankType;
         public int TitanType;
+
+        public int RecoverTime;
+        public int DisasterTime;
+
+        public int L1Impact;
+        public int L2Impact;
+        public int L3Impact;
+        public int NoLongerRecoverImpact;
+
+        public int L1SpawnCap;
+        public int L2SpawnCap;
+        public int L3SpawnCap;
+
+        public int RecoverImpact;
+        public int SpawnOffset;
+
+        public int[] L1MinNumSpawn;
+        public int[] L2MinNumSpawn;
+        public int[] L3MinNumSpawn;
+        public int[] L1MaxNumSpawn;
+        public int[] L2MaxNumSpawn;
+        public int[] L3MaxNumSpawn;
+        
     }
 
     public class EnvironmentDataParser {
@@ -33,6 +74,24 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxMinion = RegexHelper.GenerateInteger("MINION");
         private static readonly Regex rgxTank = RegexHelper.GenerateInteger("TANK");
         private static readonly Regex rgxTitan = RegexHelper.GenerateInteger("TITAN");
+        private static readonly Regex rgxRecoverTime = RegexHelper.GenerateInteger("RECOVERTIME");
+        private static readonly Regex rgxDisasterTime = RegexHelper.GenerateInteger("DISASTERTIME");
+        private static readonly Regex rgxL1Impact = RegexHelper.GenerateInteger("LEVELONEIMPACT");
+        private static readonly Regex rgxL2Impact = RegexHelper.GenerateInteger("LEVELTWOIMPACT");
+        private static readonly Regex rgxL3Impact = RegexHelper.GenerateInteger("LEVELTHREEIMPACT");
+        private static readonly Regex rgxNoLongerRecoverImpact = RegexHelper.GenerateInteger("NOLONGERRECOVERIMPACT");
+        private static readonly Regex rgxL1SpawnCap = RegexHelper.GenerateInteger("LEVELONESPAWNCAP");
+        private static readonly Regex rgxL2SpawnCap = RegexHelper.GenerateInteger("LEVELTWOSPAWNCAP");
+        private static readonly Regex rgxL3SpawnCap = RegexHelper.GenerateInteger("LEVELTHREESPAWNCAP");
+        private static readonly Regex rgxRecoverImpact = RegexHelper.GenerateInteger("RECOVERIMPACT");
+        private static readonly Regex rgxSpawnOffset = RegexHelper.GenerateInteger("SPAWNOFFSET");
+        private static readonly Regex rgxL1MinNumSpawn = RegexHelper.GenerateVec3Int("L1MINNUMSPAWN");
+        private static readonly Regex rgxL2MinNumSpawn = RegexHelper.GenerateVec3Int("L2MINNUMSPAWN");
+        private static readonly Regex rgxL3MinNumSpawn = RegexHelper.GenerateVec3Int("L3MINNUMSPAWN");
+        private static readonly Regex rgxL1MaxNumSpawn = RegexHelper.GenerateVec3Int("L1MAXNUMSPAWN");
+        private static readonly Regex rgxL2MaxNumSpawn = RegexHelper.GenerateVec3Int("L2MAXNUMSPAWN");
+        private static readonly Regex rgxL3MaxNumSpawn = RegexHelper.GenerateVec3Int("L3MAXNUMSPAWN");
+        
 
         public static EnvironmentInitData Parse(FileInfo infoFile) {
             // Check File Existence
@@ -51,16 +110,50 @@ namespace RTSEngine.Data.Parsers {
                 rgxOre.Match(mStr),
                 rgxMinion.Match(mStr),
                 rgxTank.Match(mStr),
-                rgxTitan.Match(mStr)
+                rgxTitan.Match(mStr),
+                rgxRecoverTime.Match(mStr),
+                rgxDisasterTime.Match(mStr),
+                rgxL1Impact.Match(mStr),
+                rgxL2Impact.Match(mStr),
+                rgxL3Impact.Match(mStr),
+                rgxNoLongerRecoverImpact.Match(mStr),
+                rgxL1SpawnCap.Match(mStr),
+                rgxL2SpawnCap.Match(mStr),
+                rgxL3SpawnCap.Match(mStr),
+                rgxRecoverImpact.Match(mStr),
+                rgxSpawnOffset.Match(mStr),
+                rgxL1MinNumSpawn.Match(mStr),
+                rgxL1MaxNumSpawn.Match(mStr),
+                rgxL2MinNumSpawn.Match(mStr),
+                rgxL2MaxNumSpawn.Match(mStr),
+                rgxL3MinNumSpawn.Match(mStr),
+                rgxL3MaxNumSpawn.Match(mStr)
             };
             foreach(var m in mp) if(!m.Success) return EnvironmentInitData.Default;
-
+            int i = 0;
             EnvironmentInitData eid;
-            eid.FloraType = RegexHelper.ExtractInt(mp[0]);
-            eid.OreType = RegexHelper.ExtractInt(mp[1]);
-            eid.MinionType = RegexHelper.ExtractInt(mp[2]);
-            eid.TankType = RegexHelper.ExtractInt(mp[3]);
-            eid.TitanType = RegexHelper.ExtractInt(mp[4]);
+            eid.FloraType = RegexHelper.ExtractInt(mp[i++]);
+            eid.OreType = RegexHelper.ExtractInt(mp[i++]);
+            eid.MinionType = RegexHelper.ExtractInt(mp[i++]);
+            eid.TankType = RegexHelper.ExtractInt(mp[i++]);
+            eid.TitanType = RegexHelper.ExtractInt(mp[i++]);
+            eid.RecoverTime = RegexHelper.ExtractInt(mp[i++]);
+            eid.DisasterTime = RegexHelper.ExtractInt(mp[i++]);
+            eid.L1Impact = RegexHelper.ExtractInt(mp[i++]);
+            eid.L2Impact = RegexHelper.ExtractInt(mp[i++]);
+            eid.L3Impact = RegexHelper.ExtractInt(mp[i++]);
+            eid.NoLongerRecoverImpact = RegexHelper.ExtractInt(mp[i++]);
+            eid.L1SpawnCap = RegexHelper.ExtractInt(mp[i++]);
+            eid.L2SpawnCap = RegexHelper.ExtractInt(mp[i++]);
+            eid.L3SpawnCap = RegexHelper.ExtractInt(mp[i++]);
+            eid.RecoverImpact = RegexHelper.ExtractInt(mp[i++]);
+            eid.SpawnOffset = RegexHelper.ExtractInt(mp[i++]);
+            eid.L1MinNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
+            eid.L1MaxNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
+            eid.L2MinNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
+            eid.L2MaxNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
+            eid.L3MinNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
+            eid.L3MaxNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
             return eid;
         }
     }

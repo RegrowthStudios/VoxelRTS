@@ -37,7 +37,7 @@ namespace RTSEngine.Controllers {
         private int[,] heat;
 
         public FOWTask(GameState s, int tIndex)
-            : base(s.teams[tIndex].units.Count + s.teams[tIndex].buildings.Count) {
+            : base(s.teams[tIndex].Units.Count + s.teams[tIndex].Buildings.Count) {
             teamIndex = tIndex;
             state = s;
             heat = new int[s.CGrid.numCells.X, s.CGrid.numCells.Y];
@@ -107,9 +107,9 @@ namespace RTSEngine.Controllers {
 
             // Add Starting Points To The Queue
             var queue = new Queue<FOWPoint>(); // TODO: Use MinHeap Maybe
-            for(int i = 0; i < team.units.Count; i++) {
-                Point p = HashHelper.Hash(team.units[i].GridPosition, cg.numCells, cg.size);
-                int vRadius = (int)(team.units[i].UnitData.BaseCombatData.MaxRange / cg.cellSize);
+            for(int i = 0; i < team.Units.Count; i++) {
+                Point p = HashHelper.Hash(team.Units[i].GridPosition, cg.numCells, cg.size);
+                int vRadius = (int)(team.Units[i].UnitData.BaseCombatData.MaxRange / cg.cellSize);
                 if(val[p.X, p.Y] < vRadius) {
                     queue.Enqueue(new FOWPoint(p.X + 1, p.Y, TravelDirection.PX, vRadius));
                     queue.Enqueue(new FOWPoint(p.X - 1, p.Y, TravelDirection.NX, vRadius));
@@ -119,9 +119,9 @@ namespace RTSEngine.Controllers {
                     val[p.X, p.Y] = vRadius;
                 }
             }
-            for(int i = 0; i < team.buildings.Count; i++) {
-                Point p = HashHelper.Hash(team.buildings[i].GridPosition, cg.numCells, cg.size);
-                int vRadius = (int)(team.buildings[i].BuildingData.SightRadius / cg.cellSize);
+            for(int i = 0; i < team.Buildings.Count; i++) {
+                Point p = HashHelper.Hash(team.Buildings[i].GridPosition, cg.numCells, cg.size);
+                int vRadius = (int)(team.Buildings[i].BuildingData.SightRadius / cg.cellSize);
                 if(val[p.X, p.Y] < vRadius) {
                     queue.Enqueue(new FOWPoint(p.X + 1, p.Y, TravelDirection.PX, vRadius));
                     queue.Enqueue(new FOWPoint(p.X - 1, p.Y, TravelDirection.NX, vRadius));

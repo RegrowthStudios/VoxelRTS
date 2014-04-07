@@ -7,6 +7,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     public class AIInputController : InputController {
@@ -14,7 +15,7 @@ namespace RTSEngine.Controllers {
         bool running, paused;
 
         public AIInputController(GameState g, int ti)
-            : base(g, ti) {
+            : base(g, ti, InputType.AI) {
             t = new Thread(WorkThread);
             t.IsBackground = true;
             running = true;
@@ -47,12 +48,12 @@ namespace RTSEngine.Controllers {
             }
         }
         private void SpawnUnits(Random r) {
-            int ui = r.Next(Team.race.activeUnits.Length);
-            int cc = Team.units.Aggregate<RTSUnit, int>(0, (i, u) => {
-                if(u.UnitData == Team.race.activeUnits[ui].Data) return i + 1;
+            int ui = r.Next(Team.race.ActiveUnits.Length);
+            int cc = Team.Units.Aggregate<RTSUnit, int>(0, (i, u) => {
+                if(u.UnitData == Team.race.ActiveUnits[ui].Data) return i + 1;
                 else return i;
             });
-            cc = Team.race.activeUnits[ui].Data.MaxCount - cc;
+            cc = Team.race.ActiveUnits[ui].Data.MaxCount - cc;
             if(cc > 10) cc = 10;
             if(cc < 1) return;
             int uc = r.Next(1, cc);
@@ -75,7 +76,7 @@ namespace RTSEngine.Controllers {
         }
         private void MoveUnits(Random r) {
             var toMove = new List<IEntity>();
-            foreach(var unit in Team.units) {
+            foreach(var unit in Team.Units) {
                 if(r.Next(100) > 80)
                     toMove.Add(unit);
             }
@@ -87,6 +88,10 @@ namespace RTSEngine.Controllers {
                     r.Next((int)GameState.Map.Width - 20) + 10,
                     r.Next((int)GameState.Map.Depth - 20) + 10)
                 ));
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement
         }
     }
 }

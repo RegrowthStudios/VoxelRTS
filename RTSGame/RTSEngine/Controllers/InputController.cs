@@ -6,6 +6,7 @@ using RTSEngine.Data;
 using RTSEngine.Interfaces;
 using System.Collections.Concurrent;
 using RTSEngine.Data.Team;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     // Types Of Teams
@@ -17,12 +18,17 @@ namespace RTSEngine.Controllers {
     }
 
     public abstract class InputController : IDisposable {
+        public InputType Type {
+            get;
+            private set;
+        }
 
         //Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
 
         //Currently Selected Entities
         public readonly List<IEntity> selected;
+        public event Action<InputController, List<IEntity>> OnNewSelection;
 
         //The RTSTeam of the InputController
         public int TeamIndex {
@@ -40,7 +46,8 @@ namespace RTSEngine.Controllers {
         }
 
         //Creates An InputController For The Given RTSTeam
-        public InputController(GameState g, int t) {
+        public InputController(GameState g, int t, InputType it) {
+            Type = it;
             GameState = g;
             TeamIndex = t;
             eventQueue = new ConcurrentQueue<GameInputEvent>();
@@ -48,12 +55,12 @@ namespace RTSEngine.Controllers {
         }
         public abstract void Dispose();
 
-        //Adds Event To Concurrent Queue
+        // Adds Event To Concurrent Queue
         public void AddEvent(GameInputEvent e) {
             eventQueue.Enqueue(e);
         }
 
-        //Appends All Events In Concurrent Queue To Given List
+        // Appends All Events In Concurrent Queue To Given List
         public void AppendEvents(LinkedList<GameInputEvent> l) {
             int count = eventQueue.Count;
             GameInputEvent e;
@@ -64,5 +71,16 @@ namespace RTSEngine.Controllers {
                 count--;
             }
         }
+
+        // Perform Correct Logic For Selection
+        public void Select(List<IEntity> s, bool append = false) {
+            if(!append) selected.Clear();
+            if(s != null) selected.AddRange(s);
+            if(OnNewSelection != null) {
+                OnNewSelection(this, selected);
+            }
+        }
+
+        public abstract void Serialize(BinaryWriter s);
     }
 }

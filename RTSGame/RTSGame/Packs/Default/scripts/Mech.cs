@@ -7,6 +7,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
+using RTSEngine.Graphics;
 
 namespace RTS.Mech.Squad {
     public class Action : ACSquadActionController {
@@ -49,7 +50,7 @@ namespace RTS.Mech.Squad {
             for(int i = 0; i < g.activeTeams.Length; i++) {
                 RTSTeam team = g.activeTeams[i].Team;
                 if(team == squad.Team) continue;
-                foreach(var sq in team.squads) {
+                foreach(var sq in team.Squads) {
                     float d = (sq.GridPosition - squad.GridPosition).LengthSquared();
                     if(d < minDist) {
                         targetSquad = sq;
@@ -111,6 +112,23 @@ namespace RTS.Mech.Unit {
             alCombat.FrameSpeed = 30;
 
             SetAnimation(FSMState.None);
+        }
+
+        public override void SetUnit(RTSUnit u) {
+            base.SetUnit(u);
+            if(unit != null) {
+                unit.OnAttackMade += unit_OnAttackMade;
+            }
+        }
+
+        void unit_OnAttackMade(ICombatEntity arg1, IEntity arg2) {
+            Vector3 o = arg1.WorldPosition + Vector3.Up;
+            Vector3 d = arg2.WorldPosition + Vector3.Up;
+            d -= o;
+            d.Normalize();
+            BulletParticle bp = new BulletParticle(o, d, 0.05f, 1.4f, 0.1f);
+            bp.instance.Tint = Color.Red;
+            AddParticle(bp);
         }
 
         private void SetAnimation(int state) {
@@ -267,7 +285,7 @@ namespace RTS.Mech.Building {
             if (unit < 0 && unitQueue.Count > 0)
             {
                 unit = unitQueue.Dequeue();
-                buildTime = building.Team.race.units[unit].BuildTime;
+                buildTime = building.Team.race.Units[unit].BuildTime;
             }
         }
 
@@ -277,7 +295,7 @@ namespace RTS.Mech.Building {
                 buildTime -= dt;
                 // If Finished Building The Unit
                 if(buildTime < 0) {
-                    Building.Team.AddUnit(unit, building.GridPosition);
+                    building.Team.AddUnit(unit, building.GridPosition);
                     buildTime = 0;
                     unit = -1;
                 }

@@ -16,7 +16,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // Will Set Once And Then Fail On Later Occurrences
-        public void SetSquad(RTSSquad s) {
+        public virtual void SetSquad(RTSSquad s) {
             if(s == null) return;
             if(squad != null)
                 throw new ArgumentException("Cannot Rebind This Controller To Another Squad");
@@ -57,7 +57,7 @@ namespace RTSEngine.Interfaces {
             get { return targetUnit; }
             set { 
                 targetUnit = value;
-                targetSquad = value.Squad;
+                targetSquad = targetUnit != null ? targetUnit.Squad : null;
             }
         }
 

@@ -12,6 +12,7 @@ namespace RTSEngine.Data {
             "System.Xml.dll",
             "System.Xml.Linq.dll",
             @"lib\Microsoft.Xna.Framework.dll",
+            @"lib\Microsoft.Xna.Framework.Graphics.dll",
             "RTSEngine.dll"
         };
 
