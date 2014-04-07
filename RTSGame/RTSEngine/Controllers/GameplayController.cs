@@ -217,7 +217,7 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                squad.TargettingController.Target = e.Target as RTSUnit;
+                squad.TargetingController.Target = e.Target as RTSUnit;
                 AddTask(s, squad);
                 SendPathQuery(squad, e);
             }

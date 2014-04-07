@@ -88,7 +88,7 @@ namespace RTSEngine.Data.Team {
             RTSSquad squad = new RTSSquad(this);
             squad.ActionController = race.scAction.CreateInstance<ACSquadActionController>();
             squad.MovementController = race.scMovement.CreateInstance<ACSquadMovementController>();
-            squad.TargettingController = race.scTargetting.CreateInstance<ACSquadTargettingController>();
+            squad.TargetingController = race.scTargetting.CreateInstance<ACSquadTargetingController>();
             squads.Add(squad);
             if(OnSquadCreation != null)
                 OnSquadCreation(squad);
