@@ -38,25 +38,15 @@ namespace RTSEngine.Interfaces {
 
     // The Movement Controller That Dictates The General Movement Behavior Of Units In The Squad
     public abstract class ACSquadMovementController : ACSquadController {
-        // Box Formation Will Follow The Golden Ratio Phi
-        protected const float phi = 1.61803398875f;
-
         // The Constants Used In Flow Field Calculations
         protected const float rForce =  10f;
-        protected const float aForce = -100f;
+        protected const float aForce = -200f;
 
         // Waypoints That Units In This Squad Will Generally Follow
         private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {
             get { return waypoints; }
             set { waypoints = value; }
-        }
-
-        // Units' Displacements From The Squad's Waypoints At Origin
-        private List<Vector2> formation = new List<Vector2>();
-        public List<Vector2> Formation {
-            get { return formation; }
-            set { formation = value; }
         }
 
         // The Index Of The Current Waypoint Each Unit In This Squad Is Supposed To Head Toward
@@ -96,16 +86,6 @@ namespace RTSEngine.Interfaces {
             return Waypoints != null && idx >= 0 && idx < Waypoints.Count;
         }
 
-        // Given An Angle, Rotate The Formation Assignments
-        public List<Vector2> RotateFormations(float a) {
-            var rfa = new List<Vector2>();
-            Matrix mr = Matrix.CreateRotationZ(a);
-            foreach(var post in formation) {
-                rfa.Add(Vector2.TransformNormal(post, mr));
-            }
-            return rfa;
-        }
-
         // Calculate The Force Between Two Locations
         public Vector2 Force(Vector2 a, Vector2 b) {
             Vector2 diff = a - b;
@@ -122,10 +102,6 @@ namespace RTSEngine.Interfaces {
         public Vector2 Force(IEntity e, Vector2 wp) {
             return aForce*Force(e.GridPosition, wp);
         }
- 
-        // Decide Where Units In This Squad Should Tend To Go While Moving
-        // Sets Formation Field/Property
-        public abstract void ApplyMovementFormation(int movementOrder, CollisionGrid cg);
         
         // Scripted Logic For Movement
         public abstract void DecideMoves(GameState g, float dt);

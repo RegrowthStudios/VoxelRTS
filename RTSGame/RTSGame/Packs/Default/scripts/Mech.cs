@@ -26,73 +26,6 @@ namespace RTS.Mech.Squad {
     }
 
     public class Movement : ACSquadMovementController {
-        // Decide Where Units In This Squad Should Go When Moving
-        public override void ApplyMovementFormation(int movementOrder, CollisionGrid cg) {
-            switch(movementOrder) {
-                case BehaviorFSM.BoxFormation:
-                    int numUnits = squad.Units.Count;
-                    int numFullRows = (int)Math.Floor(Math.Sqrt(numUnits / phi));
-                    if(numFullRows <= 0)
-                        return;
-                    int numRows = (int)Math.Ceiling(Math.Sqrt(numUnits / phi));
-                    int unitsPerFullRow = numUnits / numFullRows;
-                    int unitsInLastRow = numUnits % numFullRows;
-
-                    // Determine Spacing Bewteen Units In Formation
-                    float spacing = float.MinValue;
-                    foreach(var unit in squad.Units) {
-                        if(unit.CollisionGeometry.BoundingRadius > spacing) {
-                            spacing = unit.CollisionGeometry.BoundingRadius;
-                        }
-                    }
-                    spacing *= 2;
-
-                    // Calculate Formation As Offsets From Squad Waypoint
-                    Formation = new List<Vector2>();
-                    float rOffset = (unitsInLastRow > 0) ? numFullRows * spacing / 2.0f : (numFullRows - 1) * spacing / 2.0f;
-                    float cOffset;
-                    rOffset += spacing;
-                    for(int r = 0; r < numFullRows; r++) {
-                        rOffset -= spacing;
-                        cOffset = -((unitsPerFullRow - 1) * spacing / 2.0f) - spacing;
-                        for(int c = 0; c < unitsPerFullRow; c++) {
-                            cOffset += spacing;
-                            Formation.Add(new Vector2(rOffset, cOffset));
-                        }
-                    }
-                    // Special Spacing For The Last Row
-                    if(unitsInLastRow > 0) {
-                        float lastRowSpacing = ((float)unitsPerFullRow) * spacing / ((float)unitsInLastRow);
-                        rOffset -= spacing;
-                        cOffset = -((unitsInLastRow - 1) * lastRowSpacing / 2.0f) - lastRowSpacing;
-                        for(int c = 0; c < unitsInLastRow; c++) {
-                            cOffset += lastRowSpacing;
-                            Formation.Add(new Vector2(rOffset, cOffset));
-                        }
-                    }
-                    break;
-                case BehaviorFSM.FreeFormation:
-                    Formation = new List<Vector2>();
-                    foreach(var unit in squad.Units) {
-                        Formation.Add(Vector2.Zero);
-                    }
-                    break;
-                case BehaviorFSM.CellFormation:
-                    float step = cg.cellSize / 2;
-                    float x = -cg.cellSize / 2 - step;
-                    float y = x;
-                    Formation = new List<Vector2>();
-                    while(x < cg.cellSize) {
-                        x += step;
-                        while(y < cg.cellSize / 2) {
-                            Formation.Add(new Vector2(x, y));
-                            y += step;
-                        }
-                    }
-                    break;
-            }
-        }
-
         // Whether Units In This Squad Have Decided To Move (Key: UUID)
         Dictionary<int, bool> doMove = new Dictionary<int, bool>();
 
@@ -167,18 +100,7 @@ namespace RTS.Mech.Squad {
 
         private void SetNetForceAndMove(GameState g, RTSUnit unit, Vector2 waypoint, List<Vector2> targetFormation) {
             // Set Net Force
-            Vector2 netForce = Vector2.Zero;
-            if(targetFormation == null) {
-                float a = (float)Math.Atan2(waypoint.Y, waypoint.X);
-                foreach(var post in RotateFormations(a)) {
-                    netForce += Force(unit, post + waypoint);
-                }
-            }
-            else {
-                foreach(var post in targetFormation) {
-                    netForce += Force(unit, post + waypoint);
-                }
-            }
+            Vector2 netForce = squad.Units.Count*Force(unit, waypoint);
             CollisionGrid cg = g.CGrid;
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
             RTSBuilding b = cg.EStatic[unitCell.X, unitCell.Y];
@@ -198,14 +120,8 @@ namespace RTS.Mech.Squad {
             if(!CurrentWaypointIndices.ContainsKey(unit.UUID) || !IsValid(CurrentWaypointIndices[unit.UUID])) return;
             Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
             bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
-            bool closerToNextWaypoint = false;
-            if(IsValid(CurrentWaypointIndices[unit.UUID]-1)) {
-                Vector2 nextWaypoint = Waypoints[CurrentWaypointIndices[unit.UUID]-1];
-                float distCurr = (unit.GridPosition - waypoint).Length();
-                float distNext = (unit.GridPosition - nextWaypoint).Length();
-                closerToNextWaypoint = distNext <= distCurr;
-            }
-            if(closerToNextWaypoint || inGoalCell || (waypoint - unit.GridPosition).Length() < cg.cellSize/4) {
+            float stopDist = cg.cellSize / 3;
+            if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < stopDist*stopDist) {
                 CurrentWaypointIndices[unit.UUID]--;
             }
             doMove[unit.UUID] = IsValid(CurrentWaypointIndices[unit.UUID]);

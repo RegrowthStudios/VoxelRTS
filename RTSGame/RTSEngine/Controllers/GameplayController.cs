@@ -294,9 +294,6 @@ namespace RTSEngine.Controllers {
                 query = new PathQuery(squad.GridPosition, ste.Target.GridPosition);
             squadQueries.Add(new SquadQuery(squad, query));
             pathfinder.Add(query);
-            // TODO: Get The Formation Order From The Input Event
-            if(squad.MovementController != null)
-                squad.MovementController.ApplyMovementFormation(BehaviorFSM.FreeFormation, s.CGrid);
         }
 
         // Apply Results Of Any Finished Pathfinding
