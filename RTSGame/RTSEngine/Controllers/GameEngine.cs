@@ -110,19 +110,20 @@ namespace RTSEngine.Controllers {
                 team = new RTSTeam();
                 RTSRaceData rd = races[res.Race];
                 team.ColorScheme = res.Colors;
-                team.race.scAction = state.SquadControllers[rd.DefaultSquadActionController];
-                team.race.scMovement = state.SquadControllers[rd.DefaultSquadMovementController];
-                team.race.scTargetting = state.SquadControllers[rd.DefaultSquadTargettingController];
+                team.race.FriendlyName = rd.Name;
+                team.race.SCAction = state.SquadControllers[rd.DefaultSquadActionController];
+                team.race.SCMovement = state.SquadControllers[rd.DefaultSquadMovementController];
+                team.race.SCTargetting = state.SquadControllers[rd.DefaultSquadTargettingController];
                 int type = 0;
                 foreach(FileInfo unitDataFile in rd.UnitTypes) {
                     RTSUnitData data = RTSUnitDataParser.ParseData(state.UnitControllers, unitDataFile);
-                    team.race.units[type++] = data;
+                    team.race.Units[type++] = data;
                 }
                 team.race.UpdateActiveUnits();
                 type = 0;
                 foreach(FileInfo buildingDataFile in rd.BuildingTypes) {
                     RTSBuildingData data = RTSBuildingDataParser.ParseData(state.BuildingControllers, buildingDataFile);
-                    team.race.buildings[type++] = data;
+                    team.race.Buildings[type++] = data;
                 }
                 team.race.UpdateActiveBuildings();
                 t.Add(new IndexedTeam(i, team));

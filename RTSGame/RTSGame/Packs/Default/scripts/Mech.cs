@@ -285,7 +285,7 @@ namespace RTS.Mech.Building {
             if (unit < 0 && unitQueue.Count > 0)
             {
                 unit = unitQueue.Dequeue();
-                buildTime = building.Team.race.units[unit].BuildTime;
+                buildTime = building.Team.race.Units[unit].BuildTime;
             }
         }
 

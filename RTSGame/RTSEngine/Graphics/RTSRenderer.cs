@@ -266,18 +266,18 @@ namespace RTSEngine.Graphics {
 
             // Create Unit Graphics
             var ums = vt.TeamIndex == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
-            for(int i = 0; i < team.race.activeUnits.Length; i++) {
+            for(int i = 0; i < team.race.ActiveUnits.Length; i++) {
                 RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, res.UnitTypes[i]);
-                uModel.Hook(this, state, vt.TeamIndex, team.race.activeUnits[i].Index);
+                uModel.Hook(this, state, vt.TeamIndex, team.race.ActiveUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
                 ums.Add(uModel);
             }
 
             // Create Building Graphics
             var bms = vt.TeamIndex == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
-            for(int i = 0; i < team.race.activeBuildings.Length; i++) {
-                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.activeBuildings[i].Index, res.BuildingTypes[i]);
-                bModel.Hook(this, state, vt.TeamIndex, team.race.activeBuildings[i].Index);
+            for(int i = 0; i < team.race.ActiveBuildings.Length; i++) {
+                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.ActiveBuildings[i].Index, res.BuildingTypes[i]);
+                bModel.Hook(this, state, vt.TeamIndex, team.race.ActiveBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);
             }
