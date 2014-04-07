@@ -27,7 +27,6 @@ namespace RTSEngine.Data.Team {
 
     public class RTSRace {
         public static void Serialize(BinaryWriter s, RTSRace race) {
-            // TODO: Implement
             s.Write(race.FriendlyName);
             s.Write(race.ActiveUnits.Length);
             foreach(var d in race.ActiveUnits) {
@@ -39,6 +38,13 @@ namespace RTSEngine.Data.Team {
                 s.Write(d.Index);
                 RTSBuildingData.Serialize(s, d.Data);
             }
+            s.Write(race.SCAction.TypeName);
+            s.Write(race.SCMovement.TypeName);
+            s.Write(race.SCTargetting.TypeName);
+        }
+        public static RTSRace Deserialize(BinaryReader s, GameState state) {
+            // TODO: Implement
+            return null;
         }
 
         public const int MAX_UNIT_TYPES = 24;
