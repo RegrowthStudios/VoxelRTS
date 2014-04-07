@@ -47,12 +47,12 @@ namespace RTSEngine.Controllers {
             }
         }
         private void SpawnUnits(Random r) {
-            int ui = r.Next(Team.race.activeUnits.Length);
+            int ui = r.Next(Team.race.ActiveUnits.Length);
             int cc = Team.units.Aggregate<RTSUnit, int>(0, (i, u) => {
-                if(u.UnitData == Team.race.activeUnits[ui].Data) return i + 1;
+                if(u.UnitData == Team.race.ActiveUnits[ui].Data) return i + 1;
                 else return i;
             });
-            cc = Team.race.activeUnits[ui].Data.MaxCount - cc;
+            cc = Team.race.ActiveUnits[ui].Data.MaxCount - cc;
             if(cc > 10) cc = 10;
             if(cc < 1) return;
             int uc = r.Next(1, cc);

@@ -65,7 +65,7 @@ namespace RTSEngine.Interfaces {
             get { return Unit; }
         }
 
-        public void SetUnit(RTSUnit u) {
+        public virtual void SetUnit(RTSUnit u) {
             if(u == null) return;
             if(unit != null)
                 throw new ArgumentException("Cannot Rebind This Controller To Another Unit");
@@ -148,7 +148,7 @@ namespace RTSEngine.Interfaces {
             get { return building; }
         }
 
-        public void SetBuilding(RTSBuilding b) {
+        public virtual void SetBuilding(RTSBuilding b) {
             if(b == null) return;
             if(building != null)
                 throw new ArgumentException("Cannot Rebind This Controller To Another Building");

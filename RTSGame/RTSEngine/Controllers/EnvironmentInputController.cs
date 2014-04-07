@@ -20,12 +20,12 @@ namespace RTSEngine.Controllers {
         private ImpactGrid grid;
         private int counter;
 
-        private Vector2[] treePositions;
+        private List<Point> treeLocations;
         public RTSBuildingData FloraData {
-            get { return Team.race.buildings[floraType]; }
+            get { return Team.race.Buildings[floraType]; }
         }
         public RTSBuildingData OreData {
-            get { return Team.race.buildings[oreType]; }
+            get { return Team.race.Buildings[oreType]; }
         }
 
         // Indices For Resources And Units
@@ -87,17 +87,31 @@ namespace RTSEngine.Controllers {
             spawnOffset = eid.SpawnOffset;
             minNumSpawn = new int[3][] { eid.L1MinNumSpawn, eid.L1MaxNumSpawn, eid.L2MinNumSpawn };
             maxNumSpawn = new int[3][] { eid.L2MaxNumSpawn, eid.L3MinNumSpawn, eid.L3MaxNumSpawn };
- 
+            treeLocations = new List<Point>();
 
-            // TODO: This Is Done When The Level Is Loaded
-            //for(int i = 0; i < treePositions.Length; i++) {
-            //    Point treeC = HashHelper.Hash(treePositions[i], GameState.CGrid.numCells, GameState.CGrid.size);
-            //    AddEvent(new SpawnBuildingEvent(TeamIndex, tree.Index, treeC));
-            //}
-            //for(int j = 0; j < orePos.Length; j++) {
-            //    Point oreC = HashHelper.Hash(orePos[j], GameState.CGrid.numCells, GameState.CGrid.size);
-            //    AddEvent(new SpawnBuildingEvent(TeamIndex, ore.Index, oreC));
-            //}
+            using (var bmp = System.Drawing.Bitmap.FromFile(spawnImage.FullName) as System.Drawing.Bitmap) {
+                int w = bmp.Width;
+                int h = bmp.Height;
+                int[] colorValues = new int[w * h];
+                System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
+                System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, colorValues, 0, colorValues.Length);
+                bmp.UnlockBits(bmpData);
+
+                int i = 0;
+                for (int y = 0; y < h; y++) {
+                    for (int x = 0; x < w; x++) {
+                        Point p = new Point(x, y);
+                        if (colorValues[i] == System.Drawing.Color.Green.ToArgb()) {
+                            AddEvent(new SpawnBuildingEvent(TeamIndex, floraType, p));
+                            treeLocations.Add(p);
+                        }
+                        else if (colorValues[i] == System.Drawing.Color.Red.ToArgb()) {
+                            AddEvent(new SpawnBuildingEvent(TeamIndex, oreType, p));
+                        }
+                        i++;
+                    }
+                }
+            }
         }
 
         private void WorkThread() {
@@ -143,10 +157,8 @@ namespace RTSEngine.Controllers {
             foreach(var r in GameState.Regions) {
                 if(r.RegionImpact < noLongerRecoverImpact && r.RegionImpact > 0) {
                     // Randomly Choose The Location Of A Starting Tree
-                    int tp = random.Next(treePositions.Length);
-                    Vector2 treePos = treePositions[tp];
-                    Point treeC = HashHelper.Hash(treePos, GameState.CGrid.numCells, GameState.CGrid.size);
-                    Point treeI = HashHelper.Hash(treePos, grid.numCells, grid.size);
+                    int tp = random.Next(treeLocations.Count);
+                    Point treeC = treeLocations[tp];
 
                     // Spawn Trees Around The Starting Tree
                     for(int x = -1; x <= 1; x += 2) {

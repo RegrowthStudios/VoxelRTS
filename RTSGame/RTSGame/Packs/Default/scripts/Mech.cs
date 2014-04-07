@@ -7,6 +7,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
+using RTSEngine.Graphics;
 
 namespace RTS.Mech.Squad {
     public class Action : ACSquadActionController {
@@ -317,6 +318,23 @@ namespace RTS.Mech.Unit {
             SetAnimation(BehaviorFSM.None);
         }
 
+        public override void SetUnit(RTSUnit u) {
+            base.SetUnit(u);
+            if(unit != null) {
+                unit.OnAttackMade += unit_OnAttackMade;
+            }
+        }
+
+        void unit_OnAttackMade(ICombatEntity arg1, IEntity arg2) {
+            Vector3 o = arg1.WorldPosition + Vector3.Up;
+            Vector3 d = arg2.WorldPosition + Vector3.Up;
+            d -= o;
+            d.Normalize();
+            BulletParticle bp = new BulletParticle(o, d, 0.05f, 1.4f, 0.1f);
+            bp.instance.Tint = Color.Red;
+            AddParticle(bp);
+        }
+
         private void SetAnimation(int state) {
             switch(state) {
                 case BehaviorFSM.Walking:
@@ -425,7 +443,7 @@ namespace RTS.Mech.Building {
             if (unit < 0 && unitQueue.Count > 0)
             {
                 unit = unitQueue.Dequeue();
-                buildTime = building.Team.race.units[unit].BuildTime;
+                buildTime = building.Team.race.Units[unit].BuildTime;
             }
         }
 

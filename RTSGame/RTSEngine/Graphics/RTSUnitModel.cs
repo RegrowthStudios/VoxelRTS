@@ -75,7 +75,7 @@ namespace RTSEngine.Graphics {
 
         public void Hook(RTSRenderer renderer, GameState s, int team, int unit) {
             // Filter For Unit Types
-            Data = s.teams[team].race.units[unit];
+            Data = s.teams[team].race.Units[unit];
 
             // Always Add A Unit To List When Spawned
             s.teams[team].OnUnitSpawn += OnUnitSpawn;

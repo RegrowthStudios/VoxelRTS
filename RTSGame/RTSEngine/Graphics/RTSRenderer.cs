@@ -78,6 +78,7 @@ namespace RTSEngine.Graphics {
         private BasicEffect fxSimple;
         private RTSFXEntity fxAnim;
         private RTSFXMap fxMap;
+        private Effect fxParticle;
 
         // The Friendly Team To Be Visualizing
         private int teamIndex;
@@ -97,7 +98,7 @@ namespace RTSEngine.Graphics {
         // Graphics Data To Dispose
         private readonly ConcurrentBag<IDisposable> toDispose;
 
-        public RTSRenderer(GraphicsDeviceManager gdm, string fxAnimFile, string fxMapFile, GameWindow w) {
+        public RTSRenderer(GraphicsDeviceManager gdm, string fxAnimFile, string fxMapFile, string fxP, GameWindow w) {
             window = w;
             gManager = gdm;
             toDispose = new ConcurrentBag<IDisposable>();
@@ -126,6 +127,8 @@ namespace RTSEngine.Graphics {
             fxAnim.CPrimary = Vector3.UnitX;
             fxAnim.CSecondary = Vector3.UnitY;
             fxAnim.CTertiary = Vector3.UnitZ;
+
+            fxParticle = LoadEffect(fxP);
 
             drawBox = false;
             MouseEventDispatcher.OnMousePress += OnMousePress;
@@ -238,10 +241,17 @@ namespace RTSEngine.Graphics {
             Map = MapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, mapFile);
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
+            fxParticle.Parameters["MapSize"].SetValue(new Vector2(map.Width, map.Depth));
 
             // Hook FOW
             state.CGrid.OnFOWChange += OnFOWChange;
             Minimap.Hook(this, state, ti);
+
+            // Load Particles
+            using(var s = File.OpenRead(ParticleRenderer.FILE_BULLET_MODEL)) {
+                pRenderer.LoadBulletModel(this, s, ParsingFlags.ConversionOpenGL);
+            }
+            pRenderer.LoadBulletTexture(this, ParticleRenderer.FILE_BULLET_TEXTURE);
 
             // Create UI
             RTSUI = new RTSUI(this, "Courier New", 32, 140);
@@ -256,18 +266,18 @@ namespace RTSEngine.Graphics {
 
             // Create Unit Graphics
             var ums = vt.TeamIndex == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
-            for(int i = 0; i < team.race.activeUnits.Length; i++) {
+            for(int i = 0; i < team.race.ActiveUnits.Length; i++) {
                 RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, res.UnitTypes[i]);
-                uModel.Hook(this, state, vt.TeamIndex, team.race.activeUnits[i].Index);
+                uModel.Hook(this, state, vt.TeamIndex, team.race.ActiveUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
                 ums.Add(uModel);
             }
 
             // Create Building Graphics
             var bms = vt.TeamIndex == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
-            for(int i = 0; i < team.race.activeBuildings.Length; i++) {
-                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.activeBuildings[i].Index, res.BuildingTypes[i]);
-                bModel.Hook(this, state, vt.TeamIndex, team.race.activeBuildings[i].Index);
+            for(int i = 0; i < team.race.ActiveBuildings.Length; i++) {
+                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.ActiveBuildings[i].Index, res.BuildingTypes[i]);
+                bModel.Hook(this, state, vt.TeamIndex, team.race.ActiveBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);
             }
@@ -295,7 +305,8 @@ namespace RTSEngine.Graphics {
         }
 
         public void UpdateAnimations(GameState s, float dt) {
-            var np = new List<Particle>();
+            var np = s.GetParticles();
+            if(np == null) np = new List<Particle>();
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 RTSTeam team = s.activeTeams[ti].Team;
                 for(int i = 0; i < team.units.Count; i++) {
@@ -325,8 +336,13 @@ namespace RTSEngine.Graphics {
             DrawMap(Camera.View * Camera.Projection);
             DrawBuildings();
             DrawUnits();
+            DrawParticles();
             DrawSelectionCircles(s.teams[teamIndex].ColorScheme.Secondary);
             if(drawBox) DrawSelectionBox();
+
+            G.Textures[0] = null;
+            G.Textures[1] = null;
+            G.Textures[2] = null;
         }
         public void UpdateVisible(CollisionGrid cg) {
             // All Team Friendly Units Are Visible
@@ -473,6 +489,7 @@ namespace RTSEngine.Graphics {
             Vector2 ss = new Vector2(G.Viewport.TitleSafeArea.Width, G.Viewport.TitleSafeArea.Height);
             fxSimple.View = Matrix.CreateLookAt(new Vector3(ss / 2, -1), new Vector3(ss / 2, 0), Vector3.Down);
             fxSimple.Projection = Matrix.CreateOrthographic(ss.X, ss.Y, 0, 2);
+            fxSimple.DiffuseColor = Vector3.One;
 
             G.DepthStencilState = DepthStencilState.None;
             G.BlendState = BlendState.NonPremultiplied;
@@ -548,6 +565,21 @@ namespace RTSEngine.Graphics {
                 inds[ii++] = vi + 3;
                 vi += 4;
             }
+        }
+
+        // Draw Particles
+        private void DrawParticles() {
+            G.DepthStencilState = DepthStencilState.DepthRead;
+            G.RasterizerState = RasterizerState.CullNone;
+            G.BlendState = BlendState.Additive;
+
+            fxParticle.Parameters["VP"].SetValue(Camera.View * Camera.Projection);
+            G.Textures[1] = Map.FogOfWarTexture;
+            G.SamplerStates[1] = SamplerState.PointClamp;
+            fxParticle.CurrentTechnique.Passes[0].Apply();
+
+            pRenderer.SetBullets(G);
+            pRenderer.DrawBullets(G);
         }
 
         // Draw The UI

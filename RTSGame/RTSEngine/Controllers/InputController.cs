@@ -17,12 +17,12 @@ namespace RTSEngine.Controllers {
     }
 
     public abstract class InputController : IDisposable {
-
         //Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
 
         //Currently Selected Entities
         public readonly List<IEntity> selected;
+        public event Action<InputController, List<IEntity>> OnNewSelection;
 
         //The RTSTeam of the InputController
         public int TeamIndex {
@@ -48,12 +48,12 @@ namespace RTSEngine.Controllers {
         }
         public abstract void Dispose();
 
-        //Adds Event To Concurrent Queue
+        // Adds Event To Concurrent Queue
         public void AddEvent(GameInputEvent e) {
             eventQueue.Enqueue(e);
         }
 
-        //Appends All Events In Concurrent Queue To Given List
+        // Appends All Events In Concurrent Queue To Given List
         public void AppendEvents(LinkedList<GameInputEvent> l) {
             int count = eventQueue.Count;
             GameInputEvent e;
@@ -62,6 +62,15 @@ namespace RTSEngine.Controllers {
                     l.AddLast(e);
                 }
                 count--;
+            }
+        }
+
+        // Perform Correct Logic For Selection
+        public void Select(List<IEntity> s, bool append = false) {
+            if(!append) selected.Clear();
+            if(s != null) selected.AddRange(s);
+            if(OnNewSelection != null) {
+                OnNewSelection(this, selected);
             }
         }
     }
