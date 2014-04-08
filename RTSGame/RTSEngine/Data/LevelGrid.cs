@@ -277,7 +277,7 @@ namespace RTSEngine.Data {
         }
 
         // Creates A Flow Grid Using The Size And Cell Size Of The Given Collision Grid
-        public FlowGrid(CollisionGrid cg) {
+        public FlowGrid(CollisionGrid cg, bool fillInStatics) {
             int granularityMultiplier = 2;
             cellSize = 1.0f / ((float)granularityMultiplier) * cg.cellSize;
             numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
@@ -285,16 +285,17 @@ namespace RTSEngine.Data {
             size = cg.size;
             FlowVectors = new Vector2[numCells.X, numCells.Y];
 
-            for(int cgX = 0; cgX < cg.numCells.X; cgX++) {
-                for(int cgY = 0; cgY < cg.numCells.Y; cgY++) {
-                    // Establish Flows Due To Static Entities
-                    if(cg.GetCollision(cgX, cgY)) {
-                        PlaceStaticEntity(cgX, cgY, cg.cellSize);
+            if(fillInStatics) {
+                for(int cgX = 0; cgX < cg.numCells.X; cgX++) {
+                    for(int cgY = 0; cgY < cg.numCells.Y; cgY++) {
+                        // Establish Flows Due To Static Entities
+                        if(cg.GetCollision(cgX, cgY)) {
+                            PlaceStaticEntity(cgX, cgY, cg.cellSize);
+                        }
                     }
                 }
             }
         }
-
 
         public void OnBuildingSpawn(RTSBuilding b) {
             b.OnDestruction += OnBuildingDestruction;

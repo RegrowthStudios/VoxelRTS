@@ -45,6 +45,22 @@ namespace RTSEngine.Interfaces {
             set { waypoints = value; }
         }
 
+        // The Flows Due To This Squad Controller's Current Waypoints
+        public FlowGrid PathFlow {
+            get;
+            private set;
+        }
+
+        //// TODO: Finish This
+        //// Update The Path Flow
+        //public void InitPathFlow(CollisionGrid cg) {
+        //    PathFlow = new FlowGrid(cg, false);
+        //    if(Waypoints == null || Waypoints.Count == 0) return;
+        //    for(int w = 1; w < Waypoints.Count; w++) {
+
+        //    }
+        //}
+
         // The Index Of The Current Waypoint Each Unit In This Squad Is Supposed To Head Toward
         // Key: UUID; Value: CurrentWaypointIndex
         private Dictionary<int, int> currentWaypointIndices = new Dictionary<int, int>();
