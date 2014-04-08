@@ -40,7 +40,7 @@ namespace RTSEngine.Data.Team {
             }
             s.Write(race.SCAction.TypeName);
             s.Write(race.SCMovement.TypeName);
-            s.Write(race.SCTargetting.TypeName);
+            s.Write(race.SCTargeting.TypeName);
         }
         public static RTSRace Deserialize(BinaryReader s, GameState state) {
             RTSRace race = new RTSRace();
@@ -59,7 +59,7 @@ namespace RTSEngine.Data.Team {
             race.UpdateActiveBuildings();
             race.SCAction = state.SquadControllers[s.ReadString()];
             race.SCMovement = state.SquadControllers[s.ReadString()];
-            race.SCTargetting = state.SquadControllers[s.ReadString()];
+            race.SCTargeting = state.SquadControllers[s.ReadString()];
             return race;
         }
 
