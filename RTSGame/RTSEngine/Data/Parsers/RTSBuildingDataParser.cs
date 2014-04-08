@@ -31,7 +31,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
         private static readonly Regex rgxColorTex = RegexHelper.GenerateFile("TEXCOLOR");
 
-        public static RTSBuildingModel ParseModel(RTSRenderer renderer, RTSTeam team, int buildingType, FileInfo infoFile) {
+        public static RTSBuildingModel ParseModel(RTSRenderer renderer, FileInfo infoFile) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -97,6 +97,7 @@ namespace RTSEngine.Data.Parsers {
             int[] buf;
             int ri = 0;
             RTSBuildingData data = new RTSBuildingData();
+            data.InfoFile = PathHelper.GetRelativePath(infoFile.FullName);
             data.FriendlyName = RegexHelper.Extract(mp[ri++]);
             data.Health = RegexHelper.ExtractInt(mp[ri++]);
             data.CapitalCost = RegexHelper.ExtractInt(mp[ri++]);

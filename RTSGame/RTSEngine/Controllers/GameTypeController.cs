@@ -16,7 +16,6 @@ namespace RTSEngine.Controllers {
 
         }
         public void Dispose() {
-
         }
         
         public void UpdateThread() {
@@ -24,8 +23,7 @@ namespace RTSEngine.Controllers {
         }
         public abstract void Tick(GameState s);
 
-        public abstract void Serialize(Stream s);
-        public abstract void Deserialize(Stream s);
-
+        public abstract void Serialize(BinaryReader s);
+        public abstract void Deserialize(BinaryWriter s, GameState state);
     }
 }

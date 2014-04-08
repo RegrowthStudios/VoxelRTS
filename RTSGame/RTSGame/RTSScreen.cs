@@ -21,6 +21,8 @@ using RTSEngine.Net;
 
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
+        const int NUM_FPS_SAMPLES = 64;
+
         private GameplayController playController;
         private GameState state;
         private RTSRenderer renderer;
@@ -35,6 +37,7 @@ namespace RTS {
         int playing;
         Thread tEngine;
         SpriteFont sfDebug;
+        int eFPS;
 
         public override int Next {
             get { return -1; }
@@ -116,14 +119,14 @@ namespace RTS {
                 dcv.Draw(SB, Vector2.Zero);
                 SB.End();
             }
-
-            // Show FPS
-            double fps = gameTime.ElapsedGameTime.TotalSeconds;
-            fps = Math.Round(1000.0 / fps) / 1000.0;
-            SB.Begin();
-            SB.DrawString(sfDebug, fps.ToString(), Vector2.One * 10, Color.White);
-            SB.End();
-
+            else {
+                // Show FPS
+                double fps = gameTime.ElapsedGameTime.TotalSeconds;
+                fps = Math.Round(1000.0 / fps) / 1000.0;
+                SB.Begin();
+                SB.DrawString(sfDebug, fps + " / " + eFPS, Vector2.One * 10, Color.White);
+                SB.End();
+            }
             game.mRenderer.BeginPass(G);
             game.mRenderer.Draw(G);
         }
@@ -199,20 +202,41 @@ namespace RTS {
             }
         }
 
+        
+        double CalcFPS(double[] fpsSamples, ref int currentSample, double dt) {
+            if(dt < 0.001) dt = 0.001;
+            fpsSamples[currentSample] = 1.0 / dt;
+            double fps = 0;
+            for(int i = 0; i < NUM_FPS_SAMPLES; i++)
+                fps += fpsSamples[i] / NUM_FPS_SAMPLES;
+            currentSample++;
+            currentSample %= NUM_FPS_SAMPLES;
+            return fps;
+        }
         void EngineThread() {
             TimeSpan tCur;
             TimeSpan tPrev = DateTime.Now.TimeOfDay;
             int milliRun = (int)(RTSConstants.GAME_DELTA_TIME * 1000);
+
+            double[] fpsSamples = new double[NUM_FPS_SAMPLES];
+            int currentSample = 0;
+            for(int i = 0; i < NUM_FPS_SAMPLES; i++) {
+                fpsSamples[i] = 60.0;
+            }
+
             while(playing != 0) {
                 if(pauseEngine) {
                     Thread.Sleep(milliRun);
                     continue;
                 }
+
                 playController.Update(state, RTSConstants.GAME_DELTA_TIME);
 
                 // Sleep For A While
                 tCur = DateTime.Now.TimeOfDay;
-                int dt = (int)(tCur.TotalMilliseconds - tPrev.TotalMilliseconds);
+                double ddt = (tCur.TotalMilliseconds - tPrev.TotalMilliseconds) / 1000.0;
+                eFPS = (int)CalcFPS(fpsSamples, ref currentSample, ddt);
+                int dt = eFPS == 0 ? milliRun : (eFPS < 0 ? 0 : (int)(1000.0 / eFPS));
                 if(dt < milliRun) Thread.Sleep(milliRun - dt);
                 tPrev = tCur;
             }

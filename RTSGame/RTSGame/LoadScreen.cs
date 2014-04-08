@@ -182,7 +182,8 @@ namespace RTS {
 
             // Build The Local Game State
             LoadedState = new GameState();
-            GameEngine.BuildLocal(LoadedState, LoadData, races);
+            //GameEngine.BuildLocal(LoadedState, LoadData, races);
+            GameEngine.Load(LoadedState, @"User\totalwar.sg");
 
             // Create Camera
             LoadedCamera = new Camera(G.Viewport);
@@ -190,19 +191,7 @@ namespace RTS {
 
             // Load The Renderer
             LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
-            LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera, game.LoadScreen.LoadData.MapFile);
-            VisualTeam vt;
-            for(int i = 0; i < loadData.Teams.Length; i++) {
-                var td = loadData.Teams[i];
-                if(td.InputType == InputType.None)
-                    continue;
-
-                // Create The Visual Data
-                vt.TeamIndex = i;
-                vt.RaceFileInfo = races[td.Race];
-                vt.ColorScheme = td.Colors;
-                LoadedRenderer.LoadTeamVisuals(LoadedState, vt);
-            }
+            LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera);
             isLoaded = true;
         }
     }

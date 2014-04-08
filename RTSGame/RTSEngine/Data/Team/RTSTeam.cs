@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Algorithms;
 using RTSEngine.Controllers;
 using RTSEngine.Interfaces;
 
@@ -26,7 +28,110 @@ namespace RTSEngine.Data.Team {
         public Vector3 Tertiary;
     }
 
+    public struct ViewedBuilding {
+        public int Team;
+        public int Type;
+        public Point CellPoint;
+        public Vector3 WorldPosition;
+        public Vector2 ViewDirection;
+    }
+
     public class RTSTeam {
+
+        public static void Serialize(BinaryWriter s, RTSTeam team) {
+            RTSRace.Serialize(s, team.Race);
+            s.Write((int)team.Input.Type);
+            team.Input.Serialize(s);
+            s.Write(team.ColorScheme.Name);
+            s.Write(team.ColorScheme.Primary);
+            s.Write(team.ColorScheme.Secondary);
+            s.Write(team.ColorScheme.Tertiary);
+            s.Write(team.Buildings.Count);
+            foreach(var building in team.Buildings) {
+                RTSBuilding.Serialize(s, building);
+            }
+            s.Write(team.Units.Count);
+            foreach(var unit in team.Units) {
+                RTSUnit.Serialize(s, unit);
+            }
+            s.Write(team.Squads.Count);
+            foreach(var squad in team.Squads) {
+                RTSSquad.Serialize(s, squad);
+            }
+        }
+        public static RTSTeam Deserialize(BinaryReader s, int index, GameState state) {
+            RTSTeam team = new RTSTeam();
+            team.Race = RTSRace.Deserialize(s, state);
+            InputType it = (InputType)s.ReadInt32();
+            switch(it) {
+                case InputType.AI:
+                    AIInputController aic = new AIInputController(state, index);
+                    team.Input = aic;
+                    team.Input.Deserialize(s);
+                    break;
+                case InputType.Environment:
+                    EnvironmentInputController eic = new EnvironmentInputController(state, index);
+                    team.Input = eic;
+                    team.Input.Deserialize(s);
+                    break;
+                case InputType.Player:
+                    PlayerInputController pic = new PlayerInputController(state, index);
+                    team.Input = pic;
+                    team.Input.Deserialize(s);
+                    break;
+                default:
+                    throw new Exception("A Team That Was Never Supposed To Be Created Was Made");
+            }
+            RTSColorScheme scheme = new RTSColorScheme();
+            scheme.Name = s.ReadString();
+            scheme.Primary = s.ReadVector3();
+            scheme.Secondary = s.ReadVector3();
+            scheme.Tertiary = s.ReadVector3();
+            team.ColorScheme = scheme;
+
+            int? target;
+            var du = new Dictionary<int, RTSUnit>();
+            List<int> su;
+
+            int c = s.ReadInt32();
+            RTSBuilding building;
+            for(int i = 0; i < c; i++) {
+                building = RTSBuilding.Deserialize(s, team, out target);
+                team.buildings.Add(building);
+                if(target.HasValue) {
+                    // TODO: Add A Target Binding
+                }
+                state.CGrid.Add(building);
+            }
+
+            c = s.ReadInt32();
+            RTSUnit unit;
+            for(int i = 0; i < c; i++) {
+                unit = RTSUnit.Deserialize(s, team, out target);
+                du.Add(unit.UUID, unit);
+                team.units.Add(unit);
+                if(target.HasValue) {
+                    // TODO: Add A Target Binding
+                }
+            }
+
+            c = s.ReadInt32();
+            RTSSquad squad;
+            for(int i = 0; i < c; i++) {
+                squad = RTSSquad.Deserialize(s, team, out su);
+                team.squads.Add(squad);
+                foreach(int uuid in su) {
+                    if(du.TryGetValue(uuid, out unit)) {
+                        squad.Add(unit);
+                    }
+                    else {
+                        throw new Exception("Could Not Find A Unit With The Specified UUID");
+                    }
+                }
+            }
+            return team;
+        }
+
         // Team Colors
         public RTSColorScheme ColorScheme {
             get;
@@ -34,7 +139,10 @@ namespace RTSEngine.Data.Team {
         }
 
         // Team Race
-        public readonly RTSRace race;
+        public RTSRace Race {
+            get;
+            private set;
+        }
 
         // Entity Data
         private List<RTSUnit> units;
@@ -55,6 +163,11 @@ namespace RTSEngine.Data.Team {
             set;
         }
 
+        public List<ViewedBuilding> ViewedEnemyBuildings {
+            get;
+            private set;
+        }
+
         // Events
         public event Action<RTSUnit> OnUnitSpawn;
         public event Action<RTSBuilding> OnBuildingSpawn;
@@ -64,10 +177,11 @@ namespace RTSEngine.Data.Team {
             ColorScheme = RTSColorScheme.Default;
 
             // Teams Starts Out Empty
-            race = new RTSRace();
+            Race = new RTSRace();
             units = new List<RTSUnit>();
             squads = new List<RTSSquad>();
             buildings = new List<RTSBuilding>();
+            ViewedEnemyBuildings = new List<ViewedBuilding>();
 
             // No Input Is Available For The Team Yet
             Input = null;
@@ -75,14 +189,14 @@ namespace RTSEngine.Data.Team {
 
         // Unit Addition And Removal
         public RTSUnit AddUnit(int type, Vector2 pos) {
-            if(race.Units[type].CurrentCount >= race.Units[type].MaxCount) return null;
+            if(Race.Units[type].CurrentCount >= Race.Units[type].MaxCount) return null;
 
-            RTSUnit unit = new RTSUnit(this, race.Units[type], pos);
+            RTSUnit unit = new RTSUnit(this, Race.Units[type], pos);
             unit.UnitData.CurrentCount++;
-            unit.ActionController = race.Units[type].DefaultActionController.CreateInstance<ACUnitActionController>();
-            unit.AnimationController = race.Units[type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
-            unit.MovementController = race.Units[type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
-            unit.CombatController = race.Units[type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
+            unit.ActionController = Race.Units[type].DefaultActionController.CreateInstance<ACUnitActionController>();
+            unit.AnimationController = Race.Units[type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
+            unit.MovementController = Race.Units[type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
+            unit.CombatController = Race.Units[type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
             Units.Add(unit);
             if(OnUnitSpawn != null)
                 OnUnitSpawn(unit);
@@ -102,10 +216,10 @@ namespace RTSEngine.Data.Team {
         // Squad Addition And Removal
         public RTSSquad AddSquad() {
             RTSSquad squad = new RTSSquad(this);
-            squad.ActionController = race.SCAction.CreateInstance<ACSquadActionController>();
-            squad.MovementController = race.SCMovement.CreateInstance<ACSquadMovementController>();
-            squad.TargetingController = race.SCTargeting.CreateInstance<ACSquadTargetingController>();
-            squads.Add(squad);
+            squad.ActionController = Race.SCAction.CreateInstance<ACSquadActionController>();
+            squad.MovementController = Race.SCMovement.CreateInstance<ACSquadMovementController>();
+            squad.TargetingController = Race.SCTargetting.CreateInstance<ACSquadTargetingController>();
+            Squads.Add(squad);
             if(OnSquadCreation != null)
                 OnSquadCreation(squad);
             return squad;
@@ -116,11 +230,11 @@ namespace RTSEngine.Data.Team {
 
         // Building Addition And Removal
         public RTSBuilding AddBuilding(int type, Vector2 pos) {
-            if(race.Buildings[type].CurrentCount >= race.Buildings[type].MaxCount) return null;
+            if(Race.Buildings[type].CurrentCount >= Race.Buildings[type].MaxCount) return null;
 
-            RTSBuilding b = new RTSBuilding(this, race.Buildings[type], pos);
+            RTSBuilding b = new RTSBuilding(this, Race.Buildings[type], pos);
             b.BuildingData.CurrentCount++;
-            b.ActionController = race.Buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
+            b.ActionController = Race.Buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
             Buildings.Add(b);
             if(OnBuildingSpawn != null)
                 OnBuildingSpawn(b);

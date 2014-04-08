@@ -120,7 +120,7 @@ namespace RTSEngine.Graphics.UI {
             int wi = 0;
             foreach(var kv in buildings) {
                 if(wi >= groups.Length) break;
-                string key = string.Join(".", ic.Team.race.FriendlyName, kv.Key.FriendlyName);
+                string key = string.Join(".", ic.Team.Race.FriendlyName, kv.Key.FriendlyName);
                 Texture2D t = IconLibrary[key];
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;
@@ -129,7 +129,7 @@ namespace RTSEngine.Graphics.UI {
             }
             foreach(var kv in units) {
                 if(wi >= groups.Length) break;
-                string key = string.Join(".", ic.Team.race.FriendlyName, kv.Key.FriendlyName);
+                string key = string.Join(".", ic.Team.Race.FriendlyName, kv.Key.FriendlyName);
                 Texture2D t = IconLibrary[key];
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;

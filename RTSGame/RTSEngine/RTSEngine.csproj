@@ -68,17 +68,17 @@
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
     <Compile Include="Data\DevCommands.cs" />
-    <Compile Include="Data\Environment.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
     <Compile Include="Data\Heightmap.cs" />
     <Compile Include="Data\Collision.cs" />
     <Compile Include="Data\Combat.cs" />
     <Compile Include="Data\GameState.cs" />
     <Compile Include="Data\LevelGrid.cs" />
+    <Compile Include="Data\Parsers\EngineLoadParser.cs" />
     <Compile Include="Data\Parsers\EnvironmentDataParser.cs" />
     <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
     <Compile Include="Data\Parsers\EntityControllerParser.cs" />
-    <Compile Include="Data\Parsers\HeightmapParser.cs" />
+    <Compile Include="Data\Parsers\MapParser.cs" />
     <Compile Include="Data\Parsers\RegexHelper.cs" />
     <Compile Include="Data\Parsers\RTSColorSchemeParser.cs" />
     <Compile Include="Data\Parsers\RTSRaceParser.cs" />
@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Coordinate Spaces.txt" />
+    <Content Include="Data\Parsers\Serialization.txt" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

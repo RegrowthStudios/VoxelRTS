@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using RTSEngine.Controllers;
@@ -25,6 +26,43 @@ namespace RTSEngine.Data.Team {
     }
 
     public class RTSRace {
+        public static void Serialize(BinaryWriter s, RTSRace race) {
+            s.Write(race.FriendlyName);
+            s.Write(race.ActiveUnits.Length);
+            foreach(var d in race.ActiveUnits) {
+                s.Write(d.Index);
+                RTSUnitData.Serialize(s, d.Data);
+            }
+            s.Write(race.ActiveBuildings.Length);
+            foreach(var d in race.ActiveBuildings) {
+                s.Write(d.Index);
+                RTSBuildingData.Serialize(s, d.Data);
+            }
+            s.Write(race.SCAction.TypeName);
+            s.Write(race.SCMovement.TypeName);
+            s.Write(race.SCTargetting.TypeName);
+        }
+        public static RTSRace Deserialize(BinaryReader s, GameState state) {
+            RTSRace race = new RTSRace();
+            race.FriendlyName = s.ReadString();
+            int c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                int ui = s.ReadInt32();
+                race.Units[ui] = RTSUnitData.Deserialize(s, state);
+            }
+            race.UpdateActiveUnits();
+            c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                int bi = s.ReadInt32();
+                race.Buildings[bi] = RTSBuildingData.Deserialize(s, state);
+            }
+            race.UpdateActiveBuildings();
+            race.SCAction = state.SquadControllers[s.ReadString()];
+            race.SCMovement = state.SquadControllers[s.ReadString()];
+            race.SCTargetting = state.SquadControllers[s.ReadString()];
+            return race;
+        }
+
         public const int MAX_UNIT_TYPES = 24;
         public const int MAX_BUILDING_TYPES = 36;
 

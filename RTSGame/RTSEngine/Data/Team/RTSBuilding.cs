@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -7,6 +9,61 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSBuilding : IEntity, ImpactGenerator {
+        public static void Serialize(BinaryWriter s, RTSBuilding e) {
+            s.Write(e.BuildingData.Index);
+            s.Write(e.UUID);
+            s.Write(e.State);
+            s.Write(e.ViewDirection);
+            s.Write(e.GridPosition);
+            s.Write(e.Height);
+            if(e.Target != null) {
+                s.Write(true);
+                s.Write(e.Target.UUID);
+            }
+            else {
+                s.Write(false);
+            }
+            s.Write(e.Health);
+            for(int i = 0; i < GameState.MAX_PLAYERS;i++) {
+                s.Write(e.viewedInfo.Get(i));
+            }
+            if(e.ActionController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+        }
+        public static RTSBuilding Deserialize(BinaryReader s, RTSTeam team, out int? target) {
+            int type = s.ReadInt32();
+            RTSBuilding e = team.AddBuilding(type, Vector2.Zero);
+            if(e == null) throw new Exception("Could Not Create A Building That Was Previously Created");
+            e.UUID = s.ReadInt32();
+            e.State = s.ReadInt32();
+            e.ViewDirection = s.ReadVector2();
+            e.GridPosition = s.ReadVector2();
+            e.CollisionGeometry.Center += e.GridPosition;
+            e.Height = s.ReadSingle();
+            if(s.ReadBoolean()) {
+                target = s.ReadInt32();
+            }
+            else {
+                target = null;
+            }
+            e.Health = s.ReadInt32();
+            for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
+                e.viewedInfo.Set(i, s.ReadBoolean());
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.ActionController = null;
+            }
+            return e;
+        }
+
         // Common Data
         public RTSBuildingData BuildingData {
             get;
@@ -75,6 +132,8 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
+        private BitArray viewedInfo;
+
         public bool IsAlive {
             get {
                 return Health > 0;
@@ -85,12 +144,6 @@ namespace RTSEngine.Data.Team {
                 else if(!IsAlive)
                     throw new InvalidOperationException("Cannot Bring Back Units From The Dead");
             }
-        }
-
-        // Default Spawn Position For Units
-        public Vector2 DefaultSpawnPos() {
-            float radius = CollisionGeometry.BoundingRadius;
-            return new Vector2(gridPos.X, gridPos.Y + radius);
         }
 
         // Damaging Events
@@ -120,19 +173,7 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        // Waypoint Of The Building
-        protected Vector2 targetPos;
-        public Vector2 TargetPos {
-            get { return targetPos; }
-            set { targetPos = value; }
-        }
-
         public event Action<Vector2, int> GenerateImpact;
-
-        public RTSBuildingData Data {
-            get;
-            set;
-        }
 
         // Constructor
         public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {
@@ -140,6 +181,8 @@ namespace RTSEngine.Data.Team {
             UUID = UUIDGenerator.GetUUID();
             Team = team;
             gridPos = position;
+            viewedInfo = new BitArray(GameState.MAX_PLAYERS);
+            viewedInfo.SetAll(false);
 
             BuildingData = data;
             height = 0;
@@ -147,6 +190,13 @@ namespace RTSEngine.Data.Team {
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
             ViewDirection = Vector2.UnitX;
             CollisionGeometry.Center += GridPosition;
+        }
+
+        public void SetViewedInfo(int p, bool b) {
+            viewedInfo.Set(p, b);
+        }
+        public bool GetViewedInfo(int p) {
+            return viewedInfo.Get(p);
         }
 
         // Applies Damage To Health
