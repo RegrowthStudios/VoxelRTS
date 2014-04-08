@@ -82,5 +82,6 @@ namespace RTSEngine.Controllers {
         }
 
         public abstract void Serialize(BinaryWriter s);
+        public abstract void Deserialize(BinaryReader s);
     }
 }

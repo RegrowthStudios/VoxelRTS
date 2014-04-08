@@ -251,7 +251,7 @@ namespace RTSEngine.Controllers {
 
             // Check If We Can Add A Building There
             Vector2 wp = new Vector2(e.GridPosition.X + 0.5f, e.GridPosition.Y + 0.5f) * s.CGrid.cellSize;
-            if(!s.CGrid.CanAddBuilding(wp, team.race.Buildings[e.Type].GridSize)) return;
+            if(!s.CGrid.CanAddBuilding(wp, team.Race.Buildings[e.Type].GridSize)) return;
 
             RTSBuilding building = team.AddBuilding(e.Type, wp);
 
@@ -380,10 +380,7 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSave c) {
-            using(var fs = File.Create(c.file.FullName)) {
-                StateSerializer.Serialize(new BinaryWriter(fs), s);
-                fs.Flush();
-            }
+            GameEngine.Save(s, c.file.FullName);
         }
 
         // Physics Stage

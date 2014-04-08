@@ -53,9 +53,48 @@ namespace RTSEngine.Data.Team {
                 s.Write(false);
             }
         }
-        public static RTSUnit Deserialize(BinaryReader s, GameState state) {
-            // TODO: Implement
-            return null;
+        public static RTSUnit Deserialize(BinaryReader s, RTSTeam team, out int? target) {
+            int type = s.ReadInt32();
+            RTSUnit e = team.AddUnit(type, Vector2.Zero);
+            if(e == null) throw new Exception("Could Not Create A Unit That Was Previously Created");
+            e.UUID = s.ReadInt32();
+            e.State = s.ReadInt32();
+            e.ViewDirection = s.ReadVector2();
+            e.GridPosition = s.ReadVector2();
+            e.Height = s.ReadSingle();
+            if(s.ReadBoolean()) {
+                target = s.ReadInt32();
+            }
+            else {
+                target = null;
+            }
+            e.Health = s.ReadInt32();
+            e.MovementMultiplier = s.ReadSingle();
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.ActionController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.CombatController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.MovementController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.AnimationController = null;
+            }
+            return e;
         }
 
         // Common Data

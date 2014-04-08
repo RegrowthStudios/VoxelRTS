@@ -22,10 +22,10 @@ namespace RTSEngine.Controllers {
 
         private List<Point> treeLocations;
         public RTSBuildingData FloraData {
-            get { return Team.race.Buildings[floraType]; }
+            get { return Team.Race.Buildings[floraType]; }
         }
         public RTSBuildingData OreData {
-            get { return Team.race.Buildings[oreType]; }
+            get { return Team.Race.Buildings[oreType]; }
         }
 
         // Indices For Resources And Units
@@ -260,6 +260,9 @@ namespace RTSEngine.Controllers {
         }
 
         public override void Serialize(BinaryWriter s) {
+            // TODO: Implement
+        }
+        public override void Deserialize(BinaryReader s) {
             // TODO: Implement
         }
     }

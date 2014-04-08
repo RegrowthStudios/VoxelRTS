@@ -156,14 +156,14 @@ namespace RTSEngine.Data.Parsers {
 
             return view;
         }
-        public static LevelGrid? ParseData(FileInfo data, out FileInfo fiEnvSpawn) {
+        public static LevelGrid? ParseData(FileInfo infoFile, out FileInfo fiEnvSpawn) {
             // Check File Existence
             fiEnvSpawn = null;
-            if(data == null || !data.Exists) return null;
+            if(infoFile == null || !infoFile.Exists) return null;
 
             // Read The Entire File
             string mStr;
-            using(FileStream fs = File.OpenRead(data.FullName)) {
+            using(FileStream fs = File.OpenRead(infoFile.FullName)) {
                 StreamReader s = new StreamReader(fs);
                 mStr = s.ReadToEnd();
             }
@@ -178,17 +178,18 @@ namespace RTSEngine.Data.Parsers {
             };
 
             if(!mp[0].Success || !mp[1].Success || !mp[2].Success) return null;
-            FileInfo hfi = RegexHelper.ExtractFile(mp[0], data.Directory.FullName);
+            FileInfo hfi = RegexHelper.ExtractFile(mp[0], infoFile.Directory.FullName);
             float height = RegexHelper.ExtractFloat(mp[1]);
-            FileInfo mfi = RegexHelper.ExtractFile(mp[2], data.Directory.FullName);
-            FileInfo rfi = RegexHelper.ExtractFile(mp[3], data.Directory.FullName);
+            FileInfo mfi = RegexHelper.ExtractFile(mp[2], infoFile.Directory.FullName);
+            FileInfo rfi = RegexHelper.ExtractFile(mp[3], infoFile.Directory.FullName);
             if(!hfi.Exists || !mfi.Exists || !rfi.Exists) return null;
 
             if(mp[4].Success)
-                fiEnvSpawn = RegexHelper.ExtractFile(mp[4], data.Directory.FullName);
+                fiEnvSpawn = RegexHelper.ExtractFile(mp[4], infoFile.Directory.FullName);
 
             // Read Height Data
             LevelGrid grid = new LevelGrid();
+            grid.InfoFile = PathHelper.GetRelativePath(infoFile.FullName);
             int w, h;
             using(var bmp = Bitmap.FromFile(hfi.FullName) as Bitmap) {
                 w = bmp.Width;

@@ -9,7 +9,6 @@ using RTSEngine.Interfaces;
 namespace RTSEngine.Data.Team {
     public class RTSSquad {
         public static void Serialize(BinaryWriter s, RTSSquad squad) {
-            // TODO: Implement
             s.Write(squad.units.Count);
             foreach(var unit in squad.units) {
                 s.Write(unit.UUID);
@@ -37,9 +36,34 @@ namespace RTSEngine.Data.Team {
                 s.Write(false);
             }
         }
-        public static RTSSquad Deserialize(BinaryReader s, GameState state) {
+        public static RTSSquad Deserialize(BinaryReader s, RTSTeam team, out List<int> units) {
             // TODO: Implement
-            return null;
+            RTSSquad squad = team.AddSquad();
+            int c = s.ReadInt32();
+            units = new List<int>();
+            for(int i = 0; i < c; i++) {
+                units.Add(s.ReadInt32());
+            }
+            squad.gridPos = s.ReadVector2();
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                squad.ActionController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                squad.MovementController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                squad.TargettingController = null;
+            }
+            return squad;
         }
 
         // This Squad's Team

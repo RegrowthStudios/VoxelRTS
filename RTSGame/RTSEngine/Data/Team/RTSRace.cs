@@ -43,8 +43,24 @@ namespace RTSEngine.Data.Team {
             s.Write(race.SCTargetting.TypeName);
         }
         public static RTSRace Deserialize(BinaryReader s, GameState state) {
-            // TODO: Implement
-            return null;
+            RTSRace race = new RTSRace();
+            race.FriendlyName = s.ReadString();
+            int c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                int ui = s.ReadInt32();
+                race.Units[ui] = RTSUnitData.Deserialize(s, state);
+            }
+            race.UpdateActiveUnits();
+            c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                int bi = s.ReadInt32();
+                race.Buildings[bi] = RTSBuildingData.Deserialize(s, state);
+            }
+            race.UpdateActiveBuildings();
+            race.SCAction = state.SquadControllers[s.ReadString()];
+            race.SCMovement = state.SquadControllers[s.ReadString()];
+            race.SCTargetting = state.SquadControllers[s.ReadString()];
+            return race;
         }
 
         public const int MAX_UNIT_TYPES = 24;

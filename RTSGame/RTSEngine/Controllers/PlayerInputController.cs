@@ -203,5 +203,8 @@ namespace RTSEngine.Controllers {
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement
         }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement
+        }
     }
 }
