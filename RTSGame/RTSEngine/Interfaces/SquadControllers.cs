@@ -72,9 +72,9 @@ namespace RTSEngine.Interfaces {
                 for(int j = 0; j < PathFlow.numCells.Y; j++) {
                     for(int w = Waypoints.Count-2; w >= 0; w--) {
                         Vector2 a = Waypoints[w + 1];
-                        Vector2 pathSegment = Waypoints[w] - a;
-                        float d = Dist(a, pathSegment, PathFlow.MakeContinuous(i, j));
-                        PathFlow.FlowVectors[i, j] += PathForce(pathSegment, d);
+                        Vector2 b = Waypoints[w];
+                        float d = Dist(a, b, PathFlow.MakeContinuous(i, j));
+                        PathFlow.FlowVectors[i, j] += PathForce(b-a, d);
                         // Add A Special Attractive Charge At The Last Waypoint
                         // TODO: Figure Out Why Everything Looks Better When Only The Goal Is Turned On
                         PathFlow.FlowVectors[i, j] += FlowGrid.pForce * FlowGrid.UnitForce(PathFlow.MakeContinuous(i, j), goal);
@@ -94,17 +94,22 @@ namespace RTSEngine.Interfaces {
                 force = new Vector2(1f / dist, dist);
                 force.Normalize();
             }
-            float a = (float)Math.Atan2(pathSegment.Y, pathSegment.X);
+            float a = (float)Math.Atan2(-pathSegment.Y, pathSegment.X);
             var mr = Matrix.CreateRotationZ(a);
             force = Vector2.TransformNormal(force, mr);
             return FlowGrid.pForce * force;
         }
 
-        // Calculate The Distance Between A Line Starting At A And A Point P
-        private float Dist(Vector2 a, Vector2 line, Vector2 p) {
-            float mag = line.Length();
-            Vector2 n = mag > 0 ? line / mag : Vector2.Zero;
-            return ((a - p) - Vector2.Dot((a - p), n) * n).Length();
+        // Calculate The Distance Between A Line Segment (A,B) And A Point P
+        private float Dist(Vector2 a, Vector2 b, Vector2 p) {
+            Vector2 seg = b - a;
+            if(seg.X == 0 && seg.Y == 0) return (p - a).LengthSquared();
+            float denom = seg.LengthSquared();
+            float t = Vector2.Dot(p - a, seg) / denom;
+            if(t < 0) return (p - a).LengthSquared();
+            else if(t > 1) return (p - b).LengthSquared();
+            Vector2 proj = a + t * seg;
+            return (proj - p).LengthSquared();
         }
 
         // The Index Of The Current Waypoint Each Unit In This Squad Is Supposed To Head Toward
