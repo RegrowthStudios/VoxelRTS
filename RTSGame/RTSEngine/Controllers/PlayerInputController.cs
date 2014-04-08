@@ -32,6 +32,8 @@ namespace RTSEngine.Controllers {
 
         public PlayerInputController(GameState g, int t)
             : base(g, t, InputType.Player) {
+        }
+        public override void Begin() {
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMousePress += OnMousePress;
         }

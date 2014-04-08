@@ -55,6 +55,9 @@ namespace RTSEngine.Controllers {
         }
         public abstract void Dispose();
 
+        // Begins The Controller
+        public abstract void Begin();
+
         // Adds Event To Concurrent Queue
         public void AddEvent(GameInputEvent e) {
             eventQueue.Enqueue(e);

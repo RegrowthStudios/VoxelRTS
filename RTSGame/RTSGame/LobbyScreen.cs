@@ -13,6 +13,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Parsers;
+using System.Text.RegularExpressions;
 
 namespace RTS {
     public class TeamInitWidget : IDisposable {
@@ -219,6 +220,8 @@ namespace RTS {
     }
 
     public class LobbyScreen : GameScreen<App> {
+        private static readonly Regex rgxLoadGame = RegexHelper.GenerateFile("load");
+
         public override int Next {
             get { return game.LoadScreen.Index; }
             protected set { }
@@ -263,6 +266,7 @@ namespace RTS {
             }
 
             // Set Init Data To Be Nothing
+            game.LoadScreen.LoadFile = null;
             eld = new EngineLoadData();
             eld.Teams = new TeamInitOption[GameState.MAX_PLAYERS];
             for(int i = 0; i < eld.Teams.Length; i++) {
@@ -271,6 +275,7 @@ namespace RTS {
                 eld.Teams[i].PlayerName = null;
                 eld.Teams[i].Colors = schemes[defScheme];
             }
+            game.LoadScreen.LoadData = eld;
 
             wr = new WidgetRenderer(G, XNASpriteFont.Compile(G, "Times New Roman", 36, out tFont));
             widgets = new TeamInitWidget[eld.Teams.Length];
@@ -286,16 +291,23 @@ namespace RTS {
                 widgets[i].TextUser.Text = "Unknown";
                 widgets[i].Set(pt, Races, schemes);
             }
+            widgets[0].TextUser.Text = UserConfig.UserName;
             widgets[0].PlayerType = "Player";
             widgets[0].Race = "Mechanica";
             widgets[1].PlayerType = "Computer";
             widgets[1].Race = "Mechanica";
 
-            KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;
+            DevConsole.OnNewCommand += DevConsole_OnNewCommand;
+            KeyboardEventDispatcher.OnKeyPressed += OnKeyPressed;
         }
         public override void OnExit(GameTime gameTime) {
-            KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
-            BuildELDFromWidgets();
+            DevConsole.OnNewCommand -= DevConsole_OnNewCommand;
+            KeyboardEventDispatcher.OnKeyPressed -= OnKeyPressed;
+            DevConsole.Deactivate();
+            if(game.LoadScreen.LoadFile == null) {
+                BuildELDFromWidgets();
+                game.LoadScreen.LoadData = eld;
+            }
 
             foreach(var w in widgets) w.Dispose();
             wr.Dispose();
@@ -318,9 +330,8 @@ namespace RTS {
 
             wr.Draw(SB);
 
-            // Draw The Mouse
-            game.mRenderer.BeginPass(G);
-            game.mRenderer.Draw(G);
+            game.DrawDevConsole();
+            game.DrawMouse();
         }
 
         private void BuildELDFromWidgets() {
@@ -346,11 +357,28 @@ namespace RTS {
             eld.MapFile = new FileInfo(@"Packs\Default\maps\0\test.map");
         }
 
-        void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
+        void OnKeyPressed(object sender, KeyEventArgs args) {
             switch(args.KeyCode) {
                 case Keys.Enter:
-                    State = ScreenState.ChangeNext;
+                    if(!DevConsole.IsActivated)
+                        State = ScreenState.ChangeNext;
                     break;
+                case DevConsole.ACTIVATION_KEY:
+                    if(DevConsole.IsActivated)
+                        DevConsole.Deactivate();
+                    else
+                        DevConsole.Activate();
+                    break;
+            }
+        }
+        void DevConsole_OnNewCommand(string obj) {
+            Match m;
+            if((m = rgxLoadGame.Match(obj)).Success) {
+                FileInfo fiLoadGame = RegexHelper.ExtractFile(m);
+                if(fiLoadGame.Exists) {
+                    game.LoadScreen.LoadFile = fiLoadGame;
+                    State = ScreenState.ChangeNext;
+                }
             }
         }
     }

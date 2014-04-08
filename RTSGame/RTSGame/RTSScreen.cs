@@ -27,7 +27,6 @@ namespace RTS {
         private GameState state;
         private RTSRenderer renderer;
         private Camera camera;
-        private DevConsoleView dcv;
         private PlayerInputController gameInput;
 
         Vector3 clickWorldPos;
@@ -58,7 +57,6 @@ namespace RTS {
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
 
-            dcv = new DevConsoleView(G);
             addUnit = false;
             team = 0;
             unit = 0;
@@ -86,8 +84,6 @@ namespace RTS {
             MouseEventDispatcher.OnMousePress -= OnMP;
             KeyboardEventDispatcher.OnKeyPressed -= OnKP;
             KeyboardEventDispatcher.OnKeyReleased -= OnKR;
-            dcv.Dispose();
-            dcv = null;
             DevConsole.Deactivate();
 
             camera.Controller.Unhook(game.Window);
@@ -114,12 +110,8 @@ namespace RTS {
                 renderer.DrawUI(SB);
             }
 
-            if(DevConsole.IsActivated) {
-                SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
-                dcv.Draw(SB, Vector2.Zero);
-                SB.End();
-            }
-            else {
+            game.DrawDevConsole();
+            if(!DevConsole.IsActivated) {
                 // Show FPS
                 double fps = gameTime.ElapsedGameTime.TotalSeconds;
                 fps = Math.Round(1000.0 / fps) / 1000.0;
@@ -127,8 +119,7 @@ namespace RTS {
                 SB.DrawString(sfDebug, fps + " / " + eFPS, Vector2.One * 10, Color.White);
                 SB.End();
             }
-            game.mRenderer.BeginPass(G);
-            game.mRenderer.Draw(G);
+            game.DrawMouse();
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
@@ -202,7 +193,6 @@ namespace RTS {
             }
         }
 
-        
         double CalcFPS(double[] fpsSamples, ref int currentSample, double dt) {
             if(dt < 0.001) dt = 0.001;
             fpsSamples[currentSample] = 1.0 / dt;
