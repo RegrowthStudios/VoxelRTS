@@ -13,22 +13,6 @@ using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Controllers {
-    // This Is How A Team Should Be Made
-    public struct TeamInitOption {
-        public string PlayerName;
-        public InputType InputType;
-        public string Race;
-        public RTSColorScheme Colors;
-    }
-
-    // The Data The Engine Needs To Know About To Properly Create A Game
-    public struct EngineLoadData {
-        // Teams In The Battle
-        public TeamInitOption[] Teams;
-
-        // Where To Load The Map
-        public FileInfo MapFile;
-    }
 
     public static class GameEngine {
         public static void SearchAllInitInfo(DirectoryInfo dir, Dictionary<string, RTSRaceData> dictRaces, Dictionary<string, RTSColorScheme> dictSchemes) {
@@ -49,6 +33,14 @@ namespace RTSEngine.Controllers {
             foreach(var subDir in dirs) {
                 SearchAllInitInfo(subDir, dictRaces, dictSchemes);
             }
+        }
+        private static DynCompiledResults CompileAllScripts() {
+            string error;
+            DirectoryInfo dir = new DirectoryInfo(@"Packs\Default\scripts"); // TODO: Get Rid Of This
+            var files = dir.GetFiles();
+            string[] toCompile = (from fi in files where fi.Extension.EndsWith("cs") select fi.FullName).ToArray();
+            DynCompiledResults res = DynControllerParser.Compile(toCompile, RTSConstants.REFERENCES, out error);
+            return res;
         }
 
         public static void BuildLocal(GameState state, EngineLoadData eld, Dictionary<string, RTSRaceData> races) {
@@ -87,12 +79,9 @@ namespace RTSEngine.Controllers {
             }
         }
         private static void BuildControllers(GameState state) {
+            DynCompiledResults res = CompileAllScripts();
+
             // Add Controllers
-            string error;
-            DirectoryInfo dir = new DirectoryInfo(@"Packs\Default\scripts");
-            var files = dir.GetFiles();
-            string[] toCompile = (from fi in files where fi.Extension.EndsWith("cs") select fi.FullName).ToArray();
-            DynCompiledResults res = DynControllerParser.Compile(toCompile, RTSConstants.REFERENCES, out error);
             foreach(KeyValuePair<string, ReflectedUnitController> kv in res.UnitControllers)
                 state.UnitControllers.Add(kv.Key, kv.Value);
             foreach(KeyValuePair<string, ReflectedSquadController> kv in res.SquadControllers)
@@ -110,22 +99,22 @@ namespace RTSEngine.Controllers {
                 team = new RTSTeam();
                 RTSRaceData rd = races[res.Race];
                 team.ColorScheme = res.Colors;
-                team.race.FriendlyName = rd.Name;
-                team.race.SCAction = state.SquadControllers[rd.DefaultSquadActionController];
-                team.race.SCMovement = state.SquadControllers[rd.DefaultSquadMovementController];
-                team.race.SCTargeting = state.SquadControllers[rd.DefaultSquadTargetingController];
+                team.Race.FriendlyName = rd.Name;
+                team.Race.SCAction = state.SquadControllers[rd.DefaultSquadActionController];
+                team.Race.SCMovement = state.SquadControllers[rd.DefaultSquadMovementController];
+                team.Race.SCTargeting = state.SquadControllers[rd.DefaultSquadTargetingController];
                 int type = 0;
                 foreach(FileInfo unitDataFile in rd.UnitTypes) {
                     RTSUnitData data = RTSUnitDataParser.ParseData(state.UnitControllers, unitDataFile);
-                    team.race.Units[type++] = data;
+                    team.Race.Units[type++] = data;
                 }
-                team.race.UpdateActiveUnits();
+                team.Race.UpdateActiveUnits();
                 type = 0;
                 foreach(FileInfo buildingDataFile in rd.BuildingTypes) {
                     RTSBuildingData data = RTSBuildingDataParser.ParseData(state.BuildingControllers, buildingDataFile);
-                    team.race.Buildings[type++] = data;
+                    team.Race.Buildings[type++] = data;
                 }
-                team.race.UpdateActiveBuildings();
+                team.Race.UpdateActiveBuildings();
                 t.Add(new IndexedTeam(i, team));
             }
             return t.ToArray();
@@ -136,6 +125,31 @@ namespace RTSEngine.Controllers {
             if(!lg.HasValue)
                 throw new ArgumentNullException("Could Not Load Heightmap");
             state.SetGrids(lg.Value);
+        }
+
+        public static void Save(GameState state, string fi) {
+            using(var s = File.Create(fi)) {
+                BinaryWriter w = new BinaryWriter(s, Encoding.ASCII);
+                w.Write(state.LevelGrid.InfoFile);
+                GameState.Serialize(w, state);
+                w.Flush();
+            }
+        }
+        public static void Load(GameState state, string fi) {
+            DynCompiledResults res = CompileAllScripts();
+            string mapFile = "";
+            using(var s = File.OpenRead(fi)) {
+                BinaryReader r = new BinaryReader(s, Encoding.ASCII);
+                mapFile = r.ReadString();
+                GameState.Deserialize(r, res, state);
+            }
+            FileInfo fiEnvSpawn;
+            BuildMap(state, new FileInfo(mapFile), out fiEnvSpawn);
+
+            // Hook Building Spawn Events To Collision Grid
+            foreach(var team in (from t in state.activeTeams select t.Team)) {
+                team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
+            }
         }
 
         public static void Dispose(GameState state) {

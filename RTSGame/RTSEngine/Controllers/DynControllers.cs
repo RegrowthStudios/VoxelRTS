@@ -14,6 +14,8 @@ namespace RTSEngine.Controllers {
         Movement
     }
     public class ReflectedUnitController {
+        public readonly string TypeName;
+
         // The Types Of Controller That This Is
         public UnitControllerType ControllerType {
             get;
@@ -24,6 +26,8 @@ namespace RTSEngine.Controllers {
         private ConstructorInfo constructor;
 
         public ReflectedUnitController(Type t) {
+            TypeName = t.FullName;
+
             // Get Constructor
             constructor = t.GetConstructor(new Type[0]);
             if(t.IsSubclassOf(typeof(ACUnitActionController)))
@@ -51,6 +55,8 @@ namespace RTSEngine.Controllers {
         Targetting
     }
     public class ReflectedSquadController {
+        public readonly string TypeName;
+
         // The Types Of Controller That This Is
         public SquadControllerType ControllerType {
             get;
@@ -61,6 +67,8 @@ namespace RTSEngine.Controllers {
         private ConstructorInfo constructor;
 
         public ReflectedSquadController(Type t) {
+            TypeName = t.FullName;
+
             // Get Constructor
             constructor = t.GetConstructor(new Type[0]);
             if(t.IsSubclassOf(typeof(ACSquadActionController)))
@@ -84,6 +92,8 @@ namespace RTSEngine.Controllers {
         Action
     }
     public class ReflectedBuildingController {
+        public readonly string TypeName;
+
         // The Types Of Controller That This Is
         public BuildingControllerType ControllerType {
             get;
@@ -94,6 +104,8 @@ namespace RTSEngine.Controllers {
         private ConstructorInfo constructor;
 
         public ReflectedBuildingController(Type t) {
+            TypeName = t.FullName;
+
             // Get Constructor
             constructor = t.GetConstructor(new Type[0]);
             if(t.IsSubclassOf(typeof(ACBuildingActionController)))

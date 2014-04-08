@@ -282,8 +282,8 @@ namespace RTS {
             GameState state = new GameState();
             state.SetTeams(new IndexedTeam[] { new IndexedTeam(0, new RTSTeam()) });
             RTSUnitData _unitData = RTSUnitDataParser.ParseData(null, fi);
-            state.teams[0].race.Units[0] = _unitData;
-            state.teams[0].race.UpdateActiveUnits();
+            state.teams[0].Race.Units[0] = _unitData;
+            state.teams[0].Race.UpdateActiveUnits();
             RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(renderer, fi);
             _unitModel.Hook(renderer, state, 0, 0);
             RTSUnit _unit = state.teams[0].AddUnit(0, Vector2.Zero);

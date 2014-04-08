@@ -9,6 +9,7 @@ using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
 using RTSEngine.Algorithms;
 using RTSEngine.Data.Parsers;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     #region Time Budgeting
@@ -240,7 +241,7 @@ namespace RTSEngine.Controllers {
 
             // Check If We Can Add A Building There
             Vector2 wp = new Vector2(e.GridPosition.X + 0.5f, e.GridPosition.Y + 0.5f) * s.CGrid.cellSize;
-            if(!s.CGrid.CanAddBuilding(wp, team.race.Buildings[e.Type].GridSize)) return;
+            if(!s.CGrid.CanAddBuilding(wp, team.Race.Buildings[e.Type].GridSize)) return;
 
             RTSBuilding building = team.AddBuilding(e.Type, wp);
 
@@ -334,6 +335,9 @@ namespace RTSEngine.Controllers {
                     case DevCommandType.Kill:
                         ApplyLogic(s, dt, comm as DevCommandKill);
                         break;
+                    case DevCommandType.Save:
+                        ApplyLogic(s, dt, comm as DevCommandSave);
+                        break;
                 }
             }
 
@@ -389,6 +393,9 @@ namespace RTSEngine.Controllers {
                     building.Damage(9001); // OVER 9000
                 }
             }
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandSave c) {
+            GameEngine.Save(s, c.file.FullName);
         }
 
         // Physics Stage
@@ -476,6 +483,10 @@ namespace RTSEngine.Controllers {
                 return;
             }
             else if(DevCommandKill.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandSave.TryParse(s, out c)) {
                 commands.Enqueue(c);
                 return;
             }

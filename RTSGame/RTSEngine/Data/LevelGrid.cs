@@ -338,6 +338,7 @@ namespace RTSEngine.Data {
     }
 
     public struct LevelGrid {
+        public string InfoFile;
         public Heightmap L0;
         public CollisionGrid L1;
         public ImpactGrid L2;

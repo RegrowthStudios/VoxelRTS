@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,7 +10,8 @@ namespace RTSEngine.Data {
     public enum DevCommandType {
         Spawn,
         StopMotion,
-        Kill
+        Kill,
+        Save
     }
     public class DevCommand {
         public DevCommandType Type {
@@ -88,6 +90,28 @@ namespace RTSEngine.Data {
             Match m = REGEX.Match(c);
             if(m.Success) {
                 command = new DevCommandKill();
+                return true;
+            }
+            command = null;
+            return false;
+        }
+    }
+    // Save Command
+    public class DevCommandSave : DevCommand {
+        public static readonly Regex REGEX = RegexHelper.GenerateFile("save");
+
+        public readonly FileInfo file;
+
+        public DevCommandSave(FileInfo f)
+            : base(DevCommandType.Save) {
+            file = f;
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m = REGEX.Match(c);
+            if(m.Success) {
+                string cwd = Directory.GetCurrentDirectory();
+                command = new DevCommandSave(RegexHelper.ExtractFile(m, cwd));
                 return true;
             }
             command = null;

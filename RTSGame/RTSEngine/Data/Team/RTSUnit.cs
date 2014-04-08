@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -7,6 +8,95 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSUnit : ICombatEntity {
+        public static void Serialize(BinaryWriter s, RTSUnit e) {
+            s.Write(e.UnitData.Index);
+            s.Write(e.UUID);
+            s.Write(e.State);
+            s.Write(e.ViewDirection);
+            s.Write(e.GridPosition);
+            s.Write(e.Height);
+            if(e.Target != null) {
+                s.Write(true);
+                s.Write(e.Target.UUID);
+            }
+            else {
+                s.Write(false);
+            }
+            s.Write(e.Health);
+            s.Write(e.MovementMultiplier);
+            if(e.ActionController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.CombatController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.MovementController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.AnimationController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+        }
+        public static RTSUnit Deserialize(BinaryReader s, RTSTeam team, out int? target) {
+            int type = s.ReadInt32();
+            RTSUnit e = team.AddUnit(type, Vector2.Zero);
+            if(e == null) throw new Exception("Could Not Create A Unit That Was Previously Created");
+            e.UUID = s.ReadInt32();
+            e.State = s.ReadInt32();
+            e.ViewDirection = s.ReadVector2();
+            e.GridPosition = s.ReadVector2();
+            e.Height = s.ReadSingle();
+            if(s.ReadBoolean()) {
+                target = s.ReadInt32();
+            }
+            else {
+                target = null;
+            }
+            e.Health = s.ReadInt32();
+            e.MovementMultiplier = s.ReadSingle();
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.ActionController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.CombatController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.MovementController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                e.AnimationController = null;
+            }
+            return e;
+        }
+
         // Common Data
         public RTSUnitData UnitData {
             get;
