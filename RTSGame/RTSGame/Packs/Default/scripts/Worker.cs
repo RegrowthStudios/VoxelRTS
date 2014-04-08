@@ -12,21 +12,28 @@ namespace RTS.Worker.Squad {
     public class Action : ACSquadActionController {
 
         public override void DecideAction(GameState g, float dt) {
-            if (squad.TargettingController != null)
-                squad.TargettingController.DecideTarget(g, dt);
+            if (squad.TargetingController != null)
+                squad.TargetingController.DecideTarget(g, dt);
         }
 
         public override void ApplyAction(GameState g, float dt) {
-            if (squad.TargettingController != null)
-                squad.TargettingController.ApplyTarget(g, dt);
+            if (squad.TargetingController != null)
+                squad.TargetingController.ApplyTarget(g, dt);
         }
     }
 
     public class Movement : ACSquadMovementController {
 
+        public override void DecideMoves(GameState g, float dt) {
+            throw new NotImplementedException();
+        }
+
+        public override void ApplyMoves(GameState g, float dt) {
+            throw new NotImplementedException();
+        }
     }
 
-    public class Target : ACSquadTargettingController {
+    public class Target : ACSquadTargetingController {
 
         // Resource that worker squad is harvesting 
         private RTSBuilding targetResource;
@@ -112,13 +119,6 @@ namespace RTS.Worker {
 
     public class Movement : ACUnitMovementController {
 
-        public override void DecideMove(GameState g, float dt) {
-            throw new NotImplementedException();
-        }
-
-        public override void ApplyMove(GameState g, float dt) {
-            throw new NotImplementedException();
-        }
     }
 
     public class Animation : ACUnitAnimationController {

@@ -28,7 +28,7 @@ namespace RTSEngine.Data.Team {
             else {
                 s.Write(false);
             }
-            if(squad.TargettingController != null) {
+            if(squad.TargetingController != null) {
                 s.Write(true);
                 // TODO: Custom Serialize
             }
@@ -61,7 +61,7 @@ namespace RTSEngine.Data.Team {
                 // TODO: Custom Deserialize
             }
             else {
-                squad.TargettingController = null;
+                squad.TargetingController = null;
             }
             return squad;
         }
