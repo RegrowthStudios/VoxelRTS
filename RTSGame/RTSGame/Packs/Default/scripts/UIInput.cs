@@ -17,7 +17,7 @@ namespace RTS.UIInput.BuildingInput
     public abstract class BuildingInput
     {
         protected RTS.Mech.Building.Action action;
-        public abstract void Apply(GameState g);
+        public abstract void Apply(GameState g, int unitType);
     }
 
     public class ProductionInput : BuildingInput
