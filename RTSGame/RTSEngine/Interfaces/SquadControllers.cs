@@ -78,7 +78,7 @@ namespace RTSEngine.Interfaces {
 
         // Calculate The Path Force At A Certain Distance Away From The Path
         private Vector2 PathForce(float dist) {
-            if(dist == 0f) return FlowGrid.pForce * new Vector2(1, 0);
+            if(dist == 0f) return 10000*FlowGrid.pForce * new Vector2(1, 0);
             else return FlowGrid.pForce * new Vector2(1f/dist, dist);
         }
 
