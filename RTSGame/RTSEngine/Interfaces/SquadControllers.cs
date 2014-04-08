@@ -70,18 +70,23 @@ namespace RTSEngine.Interfaces {
             Vector2 goal = Waypoints[0];
             for(int i = 0; i < PathFlow.numCells.X; i++) {
                 for(int j = 0; j < PathFlow.numCells.Y; j++) {
+                    float minDistSq = float.MaxValue;
+                    Vector2 seg = Vector2.Zero;
                     for(int w = Waypoints.Count-2; w >= 0; w--) {
                         Vector2 a = Waypoints[w + 1];
                         Vector2 b = Waypoints[w];
-                        float d = Dist(a, b, PathFlow.MakeContinuous(i, j));
-                        PathFlow.FlowVectors[i, j] += PathForce(b-a, d);
-                        // Add A Special Attractive Charge At The Last Waypoint
-                        // TODO: Figure Out Why Everything Looks Better When Only The Goal Is Turned On
-                        PathFlow.FlowVectors[i, j] += FlowGrid.pForce * FlowGrid.UnitForce(PathFlow.MakeContinuous(i, j), goal);
+                        seg = b - a;
+                        float d = DistSq(a, b, PathFlow.MakeContinuous(i, j));
+                    //    PathFlow.FlowVectors[i, j] += PathForce(seg, d);
+                        if(d < minDistSq) minDistSq = d;
                     }
+                    if(minDistSq < 2*cg.cellSize)
+                        PathFlow.FlowVectors[i, j] += PathForce(seg, minDistSq);
+                    // Add A Special Attractive Charge At The Last Waypoint
+                    // TODO: Figure Out Why Everything Looks Better When Only The Goal Is Turned On
+                    PathFlow.FlowVectors[i, j] += FlowGrid.pForce * FlowGrid.UnitForce(PathFlow.MakeContinuous(i, j), goal);
                 }
             }
-            
         }
 
         // Calculate The Path Force At A Certain Distance Away From The Path
@@ -92,7 +97,7 @@ namespace RTSEngine.Interfaces {
             }
             else {
                 force = new Vector2(1f / dist, dist);
-                force.Normalize();
+                //force.Normalize();
             }
             float a = (float)Math.Atan2(-pathSegment.Y, pathSegment.X);
             var mr = Matrix.CreateRotationZ(a);
@@ -100,8 +105,8 @@ namespace RTSEngine.Interfaces {
             return FlowGrid.pForce * force;
         }
 
-        // Calculate The Distance Between A Line Segment (A,B) And A Point P
-        private float Dist(Vector2 a, Vector2 b, Vector2 p) {
+        // Calculate The Distance Squared Between A Line Segment (A,B) And A Point P
+        private float DistSq(Vector2 a, Vector2 b, Vector2 p) {
             Vector2 seg = b - a;
             if(seg.X == 0 && seg.Y == 0) return (p - a).LengthSquared();
             float denom = seg.LengthSquared();

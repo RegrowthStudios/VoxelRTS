@@ -103,11 +103,12 @@ namespace RTS.Mech.Squad {
             //}
             //if(UnitHistory.ContainsKey(unit.UUID)) {
             //    foreach(var prevLocation in UnitHistory[unit.UUID]) {
-            //        netForce -= FlowGrid.pForce * FlowGrid.UnitForce(unit.GridPosition, prevLocation);
+            //        netForce -= FlowGrid.dForce * FlowGrid.UnitForce(unit.GridPosition, prevLocation);
             //    }
             //}
             Point flowCell = HashHelper.Hash(unit.GridPosition, PathFlow.numCells, PathFlow.size);
             netForce += PathFlow.GetFlow(flowCell);
+            //netForce += g.FGrid.GetFlow(flowCell);
             NetForces[unit.UUID] = netForce;
 
             // Set Move

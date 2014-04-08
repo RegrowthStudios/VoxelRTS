@@ -253,7 +253,7 @@ namespace RTSEngine.Data {
         // Static Entity Force
         public static float sForce = 20f;
         // Dynamic Entity Force
-        public static float dForce = 10f;
+        public static float dForce = 2f;
         // Path Force
         public static float pForce = -200f;
 
