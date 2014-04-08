@@ -93,6 +93,7 @@
     <Compile Include="LobbyScreen.cs" />
     <Compile Include="LoginScreen.cs" />
     <Compile Include="MenuScreen.cs" />
+    <Compile Include="Packs\Default\scripts\Worker.cs" />
     <Compile Include="PressEnterScreen.cs" />
     <Compile Include="RTSNetScreen.cs" />
     <Compile Include="RTSScreen.cs" />
