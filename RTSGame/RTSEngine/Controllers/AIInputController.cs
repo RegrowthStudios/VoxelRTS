@@ -48,12 +48,12 @@ namespace RTSEngine.Controllers {
             }
         }
         private void SpawnUnits(Random r) {
-            int ui = r.Next(Team.race.ActiveUnits.Length);
+            int ui = r.Next(Team.Race.ActiveUnits.Length);
             int cc = Team.Units.Aggregate<RTSUnit, int>(0, (i, u) => {
-                if(u.UnitData == Team.race.ActiveUnits[ui].Data) return i + 1;
+                if(u.UnitData == Team.Race.ActiveUnits[ui].Data) return i + 1;
                 else return i;
             });
-            cc = Team.race.ActiveUnits[ui].Data.MaxCount - cc;
+            cc = Team.Race.ActiveUnits[ui].Data.MaxCount - cc;
             if(cc > 10) cc = 10;
             if(cc < 1) return;
             int uc = r.Next(1, cc);
@@ -91,6 +91,9 @@ namespace RTSEngine.Controllers {
         }
 
         public override void Serialize(BinaryWriter s) {
+            // TODO: Implement
+        }
+        public override void Deserialize(BinaryReader s) {
             // TODO: Implement
         }
     }

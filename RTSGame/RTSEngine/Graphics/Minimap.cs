@@ -33,7 +33,6 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
-        private bool refreshTerrain;
         private Matrix mVP, mV, mP;
         private Plane[] mapPlanes;
 
@@ -45,7 +44,6 @@ namespace RTSEngine.Graphics {
         }
 
         public Minimap() {
-            refreshTerrain = false;
         }
 
         public void Hook(RTSRenderer renderer, GameState s, int ti) {
@@ -61,7 +59,6 @@ namespace RTSEngine.Graphics {
             mV = Matrix.CreateLookAt(center + Vector3.Up * (h + 1f), center, -Vector3.UnitZ);
             mP = Matrix.CreateOrthographic(s.CGrid.size.X, s.CGrid.size.Y, 0, h + 2f);
             mVP = mV * mP;
-            refreshTerrain = true;
 
             fxCamera = renderer.CreateEffect();
             fxCamera.LightingEnabled = false;

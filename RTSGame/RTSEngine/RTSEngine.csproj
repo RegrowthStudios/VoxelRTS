@@ -78,12 +78,11 @@
     <Compile Include="Data\Parsers\EnvironmentDataParser.cs" />
     <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
     <Compile Include="Data\Parsers\EntityControllerParser.cs" />
-    <Compile Include="Data\Parsers\HeightmapParser.cs" />
+    <Compile Include="Data\Parsers\MapParser.cs" />
     <Compile Include="Data\Parsers\RegexHelper.cs" />
     <Compile Include="Data\Parsers\RTSColorSchemeParser.cs" />
     <Compile Include="Data\Parsers\RTSRaceParser.cs" />
     <Compile Include="Data\Parsers\RTSUnitDataParser.cs" />
-    <Compile Include="Data\Parsers\StateSerializer.cs" />
     <Compile Include="Data\Region.cs" />
     <Compile Include="Data\RTSConstants.cs" />
     <Compile Include="Data\SelectionDetection.cs" />

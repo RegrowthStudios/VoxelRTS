@@ -27,8 +27,73 @@ namespace RTSEngine.Data {
         public const int MAX_NONENV_PLAYERS = 8;
         public const int MAX_PLAYERS = MAX_NONENV_PLAYERS + 1;
 
+        public static void Serialize(BinaryWriter s, GameState state) {
+            s.Write(state.CurrentFrame);
+            s.Write(state.TotalGameTime);
+            s.Write(UUIDGenerator.GetUUID());
+            s.Write(state.UnitControllers.Count);
+            foreach(var key in state.UnitControllers.Keys) {
+                s.Write(key);
+            }
+            s.Write(state.BuildingControllers.Count);
+            foreach(var key in state.BuildingControllers.Keys) {
+                s.Write(key);
+            }
+            s.Write(state.SquadControllers.Count);
+            foreach(var key in state.SquadControllers.Keys) {
+                s.Write(key);
+            }
+            s.Write(state.activeTeams.Length);
+            foreach(var at in state.activeTeams) {
+                s.Write(at.Index);
+                RTSTeam.Serialize(s, at.Team);
+            }
+        }
+        public static void Deserialize(BinaryReader s, DynCompiledResults res, GameState state) {
+            state.curFrame = s.ReadInt32();
+            state.timePlayed = s.ReadSingle();
+            UUIDGenerator.SetUUID(s.ReadInt32());
+            int c = s.ReadInt32();
+            string key;
+            ReflectedUnitController ruc;
+            for(int i = 0; i < c; i++) {
+                key = s.ReadString();
+                if(res.UnitControllers.TryGetValue(key, out ruc))
+                    state.UnitControllers.Add(ruc.TypeName, ruc);
+                else
+                    throw new Exception("Missing Unit Controller");
+            }
+            c = s.ReadInt32();
+            ReflectedBuildingController rbc;
+            for(int i = 0; i < c; i++) {
+                key = s.ReadString();
+                if(res.BuildingControllers.TryGetValue(key, out rbc))
+                    state.BuildingControllers.Add(rbc.TypeName, rbc);
+                else
+                    throw new Exception("Missing Building Controller");
+            }
+            c = s.ReadInt32();
+            ReflectedSquadController rsc;
+            for(int i = 0; i < c; i++) {
+                key = s.ReadString();
+                if(res.SquadControllers.TryGetValue(key, out rsc))
+                    state.SquadControllers.Add(rsc.TypeName, rsc);
+                else
+                    throw new Exception("Missing Squad Controller");
+            }
+            c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                int ti = s.ReadInt32();
+                state.teams[ti] = RTSTeam.Deserialize(s, ti, state);
+            }
+            state.UpdateActiveTeams();
+        }
+
         // The Grids For The Level
         private LevelGrid grid;
+        public LevelGrid LevelGrid {
+            get { return grid; }
+        }
         public Heightmap Map {
             get { return grid.L0; }
         }
@@ -79,6 +144,7 @@ namespace RTSEngine.Data {
         private List<Particle> tmpParticles;
 
         public GameState() {
+            UUIDGenerator.SetUUID(0);
             teams = new RTSTeam[MAX_PLAYERS];
             activeTeams = new IndexedTeam[0];
 
@@ -101,6 +167,7 @@ namespace RTSEngine.Data {
 
         // Create With Premade Data
         public void SetGrids(LevelGrid lg) {
+            grid.InfoFile = lg.InfoFile;
             grid.L0 = lg.L0;
             grid.L1 = lg.L1;
             grid.L2 = lg.L2;
@@ -110,6 +177,17 @@ namespace RTSEngine.Data {
             foreach(IndexedTeam it in t) {
                 if(teams[it.Index] == null) c++;
                 teams[it.Index] = it.Team;
+            }
+            activeTeams = new IndexedTeam[c];
+            c = 0;
+            for(int i = 0; i < MAX_PLAYERS; i++) {
+                if(teams[i] != null) activeTeams[c++] = new IndexedTeam(i, teams[i]);
+            }
+        }
+        public void UpdateActiveTeams() {
+            int c = 0;
+            foreach(var team in teams) {
+                if(team != null) c++;
             }
             activeTeams = new IndexedTeam[c];
             c = 0;

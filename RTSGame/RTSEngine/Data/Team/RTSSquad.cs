@@ -9,7 +9,61 @@ using RTSEngine.Interfaces;
 namespace RTSEngine.Data.Team {
     public class RTSSquad {
         public static void Serialize(BinaryWriter s, RTSSquad squad) {
+            s.Write(squad.units.Count);
+            foreach(var unit in squad.units) {
+                s.Write(unit.UUID);
+            }
+            s.Write(squad.GridPosition);
+            if(squad.ActionController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(squad.MovementController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+            if(squad.TargettingController != null) {
+                s.Write(true);
+                // TODO: Custom Serialize
+            }
+            else {
+                s.Write(false);
+            }
+        }
+        public static RTSSquad Deserialize(BinaryReader s, RTSTeam team, out List<int> units) {
             // TODO: Implement
+            RTSSquad squad = team.AddSquad();
+            int c = s.ReadInt32();
+            units = new List<int>();
+            for(int i = 0; i < c; i++) {
+                units.Add(s.ReadInt32());
+            }
+            squad.gridPos = s.ReadVector2();
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                squad.ActionController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                squad.MovementController = null;
+            }
+            if(s.ReadBoolean()) {
+                // TODO: Custom Deserialize
+            }
+            else {
+                squad.TargettingController = null;
+            }
+            return squad;
         }
 
         // This Squad's Team
@@ -124,7 +178,7 @@ namespace RTSEngine.Data.Team {
             units = nUnits;
 
             // Check Death Condition
-            if(IsDead && OnDeath != null) 
+            if(IsDead && OnDeath != null)
                 OnDeath(this);
         }
 

@@ -227,7 +227,7 @@ namespace RTSEngine.Graphics {
         }
         #endregion
 
-        public void HookToGame(GameState state, int ti, Camera camera, FileInfo mapFile) {
+        public void HookToGame(GameState state, int ti, Camera camera) {
             // Get The Team To Be Visualized
             teamIndex = ti;
             teamInput = state.teams[teamIndex].Input;
@@ -238,7 +238,7 @@ namespace RTSEngine.Graphics {
 
             // Create The Map
             Heightmap map = state.Map;
-            Map = MapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, mapFile);
+            Map = MapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, new FileInfo(state.LevelGrid.InfoFile));
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
             fxParticle.Parameters["MapSize"].SetValue(new Vector2(map.Width, map.Depth));
@@ -256,33 +256,35 @@ namespace RTSEngine.Graphics {
             // Create UI
             RTSUI = new RTSUI(this, "Courier New", 32, 140);
             RTSUI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
-        }
-        public void LoadTeamVisuals(GameState state, VisualTeam vt) {
-            RTSTeam team = state.teams[vt.TeamIndex];
-            RTSRaceData res = vt.RaceFileInfo;
 
-            // Set Color Scheme Appropriately
-            team.ColorScheme = vt.ColorScheme;
+            // Load Team Visuals
+            for(int i = 0; i < state.teams.Length; i++) {
+                if(state.teams[i] == null) continue;
+                LoadTeamVisuals(state, i);
+            }
+        }
+        private void LoadTeamVisuals(GameState state, int ti) {
+            RTSTeam team = state.teams[ti];
 
             // Create Unit Graphics
-            var ums = vt.TeamIndex == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
-            for(int i = 0; i < team.race.ActiveUnits.Length; i++) {
-                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, res.UnitTypes[i]);
-                uModel.Hook(this, state, vt.TeamIndex, team.race.ActiveUnits[i].Index);
+            var ums = ti == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
+            for(int i = 0; i < team.Race.ActiveUnits.Length; i++) {
+                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, new FileInfo(team.Race.ActiveUnits[i].Data.InfoFile));
+                uModel.Hook(this, state, ti, team.Race.ActiveUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
                 ums.Add(uModel);
             }
 
             // Create Building Graphics
-            var bms = vt.TeamIndex == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
-            for(int i = 0; i < team.race.ActiveBuildings.Length; i++) {
-                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.ActiveBuildings[i].Index, res.BuildingTypes[i]);
-                bModel.Hook(this, state, vt.TeamIndex, team.race.ActiveBuildings[i].Index);
+            var bms = ti == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
+            for(int i = 0; i < team.Race.ActiveBuildings.Length; i++) {
+                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, new FileInfo(team.Race.ActiveBuildings[i].Data.InfoFile));
+                bModel.Hook(this, state, ti, team.Race.ActiveBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);
             }
 
-            if(vt.TeamIndex != teamIndex) {
+            if(ti != teamIndex) {
                 team.OnBuildingSpawn += (b) => {
                     beenViewed.Add(b.UUID, false);
                 };

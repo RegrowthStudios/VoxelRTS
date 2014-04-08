@@ -130,6 +130,7 @@ namespace RTSEngine.Data.Parsers {
             int[] buf;
             int ri = 0;
             RTSUnitData data = new RTSUnitData();
+            data.InfoFile = PathHelper.GetRelativePath(infoFile.FullName);
             data.FriendlyName = RegexHelper.Extract(mp[ri++]);
             data.Health = RegexHelper.ExtractInt(mp[ri++]);
             data.Impact = RegexHelper.ExtractInt(mp[ri++]);
