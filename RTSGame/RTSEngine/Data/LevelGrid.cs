@@ -295,10 +295,38 @@ namespace RTSEngine.Data {
             }
         }
 
+
+        public void OnBuildingSpawn(RTSBuilding b) {
+            b.OnDestruction += OnBuildingDestruction;
+            PlaceStaticEntity(b.GridPosition);
+        }
+
+        public void OnBuildingDestruction(IEntity o) {
+            o.OnDestruction -= OnBuildingDestruction;
+            RTSBuilding b = o as RTSBuilding;
+            RemoveStaticEntity(b.GridPosition);
+        }
+
         public void PlaceStaticEntity(int cgX, int cgY, float cgSize) {
             for(int fgX = 0; fgX < numCells.X; fgX++) {
                 for(int fgY = 0; fgY < numCells.Y; fgY++) {
-                    FlowVectors[fgX, fgY] = sForce * Force(new Vector2(Center(cgX, cgSize), Center(cgY, cgSize)), new Vector2(Center(fgX, cgSize), Center(fgY, cgSize)));
+                    FlowVectors[fgX, fgY] += sForce * Force(new Vector2(Center(cgX, cgSize), Center(cgY, cgSize)), new Vector2(Center(fgX, cellSize), Center(fgY, cellSize)));
+                }
+            }
+        }
+
+        public void PlaceStaticEntity(Vector2 location) {
+            for(int fgX = 0; fgX < numCells.X; fgX++) {
+                for(int fgY = 0; fgY < numCells.Y; fgY++) {
+                    FlowVectors[fgX, fgY] += sForce * Force(location, new Vector2(Center(fgX, cellSize), Center(fgY, cellSize)));
+                }
+            }
+        }
+
+        public void RemoveStaticEntity(Vector2 location) {
+            for(int fgX = 0; fgX < numCells.X; fgX++) {
+                for(int fgY = 0; fgY < numCells.Y; fgY++) {
+                    FlowVectors[fgX, fgY] -= sForce * Force(location, new Vector2(Center(fgX, cellSize), Center(fgY, cellSize)));
                 }
             }
         }
