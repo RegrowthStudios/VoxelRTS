@@ -222,6 +222,7 @@ namespace RTSEngine.Data.Parsers {
                 // Create The Impact And Collision Grid Based Off The Image Size
                 grid.L1 = new CollisionGrid(w * 2, h * 2, RTSConstants.CGRID_SIZE);
                 grid.L2 = new ImpactGrid(grid.L1);
+                grid.L3 = new FlowGrid(grid.L1, false);
 
                 // Convert Bitmap
                 int[] ids = new int[w * h];

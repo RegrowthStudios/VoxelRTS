@@ -250,9 +250,11 @@ namespace RTSEngine.Data {
         // +: Repulsive
         // -: Attractive
         // Static Entity Force
-        public const float sForce = 10f;
+        public static float sForce = 20f;
         // Dynamic Entity Force
-        public const float dForce = 5f;
+        public static float dForce = 10f;
+        // Path Force
+        public static float pForce = -200f;
 
         // Size Of Each Cell In The Flow Grid
         public readonly float cellSize;
@@ -330,6 +332,10 @@ namespace RTSEngine.Data {
                     FlowVectors[fgX, fgY] -= sForce * Force(location, new Vector2(Center(fgX, cellSize), Center(fgY, cellSize)));
                 }
             }
+        }
+
+        public Vector2 MakeContinuous(int x, int y) {
+            return new Vector2(Center(x, cellSize), Center(y, cellSize));
         }
 
         private float Center(int i, float cellSize) {
