@@ -112,10 +112,9 @@ namespace RTSEngine.Controllers {
             }
             pathfinder = new Pathfinder(s.CGrid);
 
-            // Start The AI
+            // Start The Input Controllers
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                AIInputController aic = s.activeTeams[ti].Team.Input as AIInputController;
-                if(aic != null) aic.Start();
+                s.activeTeams[ti].Team.Input.Begin();
             }
 
             // Add All Tasks

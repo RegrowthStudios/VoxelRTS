@@ -65,7 +65,6 @@ namespace RTSEngine.Controllers {
             thread.IsBackground = true;
             running = true;
             paused = true;
-            thread.Start();
         }
 
         public void Init(FileInfo infoRace, FileInfo spawnImage) {
@@ -134,12 +133,15 @@ namespace RTSEngine.Controllers {
             }
         }
 
-        public void Start() {
+        public override void Begin() {
             counter = 0;
+            thread.Start();
             paused = false;
         }
         public override void Dispose() {
             running = false;
+            paused = false;
+            thread.Join();
         }
 
         private void UpdateUnitsInRegion() {

@@ -20,13 +20,15 @@ namespace RTSEngine.Controllers {
             t.IsBackground = true;
             running = true;
             paused = true;
-            t.Start();
         }
-        public void Start() {
+        public override void Begin() {
+            t.Start();
             paused = false;
         }
         public override void Dispose() {
             running = false;
+            paused = false;
+            t.Join();
         }
 
         private void WorkThread() {

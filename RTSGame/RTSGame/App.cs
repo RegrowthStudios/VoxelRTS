@@ -19,6 +19,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 using RTSEngine.Graphics;
+using RTSEngine.Controllers;
 
 namespace RTS {
     public static class AppSettings {
@@ -73,8 +74,11 @@ namespace RTS {
             get;
             private set;
         }
+
+
         public MouseRenderer mRenderer;
         public Texture2D tMouseMain;
+        public DevConsoleView dcv;
 
         public App()
             : base() {
@@ -108,6 +112,7 @@ namespace RTS {
             mRenderer = new MouseRenderer(GraphicsDevice, Window);
             mRenderer.Texture = tMouseMain;
             mRenderer.InnerRadius = 28f;
+            dcv = new DevConsoleView(GraphicsDevice);
         }
 
         protected override void BuildScreenList() {
@@ -136,7 +141,20 @@ namespace RTS {
         protected override void FullQuit(GameTime gameTime) {
             tMouseMain.Dispose();
             mRenderer.Dispose();
+            dcv.Dispose();
             base.FullQuit(gameTime);
+        }
+
+        public void DrawMouse() {
+            mRenderer.BeginPass(GraphicsDevice);
+            mRenderer.Draw(GraphicsDevice);
+        }
+        public void DrawDevConsole() {
+            if(DevConsole.IsActivated) {
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+                dcv.Draw(spriteBatch, Vector2.Zero);
+                spriteBatch.End();
+            }
         }
 
         #region Entry Point
