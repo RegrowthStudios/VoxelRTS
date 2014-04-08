@@ -98,14 +98,14 @@ namespace RTS.Mech.Squad {
             Vector2 netForce = Vector2.Zero;
             CollisionGrid cg = g.CGrid;
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
-            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
-                netForce += FlowGrid.dForce * FlowGrid.UnitForce(unit.GridPosition, otherUnit.GridPosition);
-            }
-            if(UnitHistory.ContainsKey(unit.UUID)) {
-                foreach(var prevLocation in UnitHistory[unit.UUID]) {
-                    netForce -= FlowGrid.pForce * FlowGrid.UnitForce(unit.GridPosition, prevLocation);
-                }
-            }
+            //foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
+            //    netForce += FlowGrid.dForce * FlowGrid.UnitForce(unit.GridPosition, otherUnit.GridPosition);
+            //}
+            //if(UnitHistory.ContainsKey(unit.UUID)) {
+            //    foreach(var prevLocation in UnitHistory[unit.UUID]) {
+            //        netForce -= FlowGrid.pForce * FlowGrid.UnitForce(unit.GridPosition, prevLocation);
+            //    }
+            //}
             Point flowCell = HashHelper.Hash(unit.GridPosition, PathFlow.numCells, PathFlow.size);
             netForce += PathFlow.GetFlow(flowCell);
             NetForces[unit.UUID] = netForce;

@@ -76,6 +76,7 @@ namespace RTSEngine.Interfaces {
                         float d = Dist(a, pathSegment, PathFlow.MakeContinuous(i, j));
                         PathFlow.FlowVectors[i, j] += PathForce(pathSegment, d);
                         // Add A Special Attractive Charge At The Last Waypoint
+                        // TODO: Figure Out Why Everything Looks Better When Only The Goal Is Turned On
                         PathFlow.FlowVectors[i, j] += FlowGrid.pForce * FlowGrid.UnitForce(PathFlow.MakeContinuous(i, j), goal);
                     }
                 }
@@ -85,15 +86,18 @@ namespace RTSEngine.Interfaces {
 
         // Calculate The Path Force At A Certain Distance Away From The Path
         private Vector2 PathForce(Vector2 pathSegment, float dist) {
-            if(dist == 0f) return FlowGrid.pForce * new Vector2(1, 0);
-            else {
-                float a = (float)Math.Atan2(pathSegment.Y, pathSegment.X);
-                var mr = Matrix.CreateRotationZ(a);
-                Vector2 force = new Vector2(1f / dist, dist);
-                force = Vector2.TransformNormal(force, mr);
-                force.Normalize();
-                return FlowGrid.pForce * force;
+            Vector2 force = Vector2.Zero;
+            if(dist == 0f) {
+                force = new Vector2(1, 0);
             }
+            else {
+                force = new Vector2(1f / dist, dist);
+                force.Normalize();
+            }
+            float a = (float)Math.Atan2(pathSegment.Y, pathSegment.X);
+            var mr = Matrix.CreateRotationZ(a);
+            force = Vector2.TransformNormal(force, mr);
+            return FlowGrid.pForce * force;
         }
 
         // Calculate The Distance Between A Line Starting At A And A Point P
