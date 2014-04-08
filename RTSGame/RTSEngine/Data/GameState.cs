@@ -38,6 +38,9 @@ namespace RTSEngine.Data {
         public ImpactGrid IGrid {
             get { return grid.L2; }
         }
+        public FlowGrid FGrid {
+            get { return grid.L3; }
+        }
 
         // Controller Dictionary
         public Dictionary<string, ReflectedUnitController> UnitControllers {
@@ -90,6 +93,7 @@ namespace RTSEngine.Data {
             grid.L0 = null;
             grid.L1 = null;
             grid.L2 = null;
+            grid.L3 = null;
 
             curFrame = 0;
             timePlayed = 0f;
@@ -104,6 +108,7 @@ namespace RTSEngine.Data {
             grid.L0 = lg.L0;
             grid.L1 = lg.L1;
             grid.L2 = lg.L2;
+            grid.L3 = lg.L3;
         }
         public void SetTeams(IndexedTeam[] t) {
             int c = 0;

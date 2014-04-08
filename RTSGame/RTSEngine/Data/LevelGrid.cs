@@ -241,10 +241,78 @@ namespace RTSEngine.Data {
         }
     }
 
+    public class FlowGrid {
+
+        // How Much More Granularity This Grid Has Compared To The Collsion Grid
+        public const int granularityMultiplier = 2;
+
+        // The Constants Used In Flow Grid Calculations
+        // +: Repulsive
+        // -: Attractive
+        // Static Entity Force
+        public const float sForce = 10f;
+        // Dynamic Entity Force
+        public const float dForce = 5f;
+
+        // Size Of Each Cell In The Flow Grid
+        public readonly float cellSize;
+
+        // Number Of Cells In The Flow Grid
+        public readonly Point numCells;
+
+        // Size Of The Flow Grid
+        public readonly Vector2 size;
+
+        // The Net Flows At Each Grid Location
+        public Vector2[,] FlowVectors {
+            get;
+            private set;
+        }
+
+        // Calculate The Force Between Two Locations
+        public Vector2 Force(Vector2 a, Vector2 b) {
+            Vector2 diff = a - b;
+            float denom = diff.LengthSquared();
+            return diff.X != 0 && diff.Y != 0 ? 1 / denom * Vector2.Normalize(diff) : Vector2.Zero;
+        }
+
+        // Creates A Flow Grid Using The Size And Cell Size Of The Given Collision Grid
+        public FlowGrid(CollisionGrid cg) {
+            int granularityMultiplier = 2;
+            cellSize = 1.0f / ((float)granularityMultiplier) * cg.cellSize;
+            numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
+            cellSize = cg.size.X / numCells.X;
+            size = cg.size;
+            FlowVectors = new Vector2[numCells.X, numCells.Y];
+
+            for(int cgX = 0; cgX < cg.numCells.X; cgX++) {
+                for(int cgY = 0; cgY < cg.numCells.Y; cgY++) {
+                    // Establish Flows Due To Static Entities
+                    if(cg.GetCollision(cgX, cgY)) {
+                        PlaceStaticEntity(cgX, cgY, cg.cellSize);
+                    }
+                }
+            }
+        }
+
+        public void PlaceStaticEntity(int cgX, int cgY, float cgSize) {
+            for(int fgX = 0; fgX < numCells.X; fgX++) {
+                for(int fgY = 0; fgY < numCells.Y; fgY++) {
+                    FlowVectors[fgX, fgY] = sForce * Force(new Vector2(Center(cgX, cgSize), Center(cgY, cgSize)), new Vector2(Center(fgX, cgSize), Center(fgY, cgSize)));
+                }
+            }
+        }
+
+        private float Center(int i, float cellSize) {
+            return ((float)i + 0.5f) * cellSize;
+        }
+    }
+
     public struct LevelGrid {
         public Heightmap L0;
         public CollisionGrid L1;
         public ImpactGrid L2;
+        public FlowGrid L3;
     }
 
     public static class HashHelper {

@@ -38,10 +38,6 @@ namespace RTSEngine.Interfaces {
 
     // The Movement Controller That Dictates The General Movement Behavior Of Units In The Squad
     public abstract class ACSquadMovementController : ACSquadController {
-        // The Constants Used In Flow Field Calculations
-        protected const float rForce =  10f;
-        protected const float aForce = -200f;
-
         // Waypoints That Units In This Squad Will Generally Follow
         private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {
@@ -84,23 +80,6 @@ namespace RTSEngine.Interfaces {
         // Does The Provided Index Point To A Valid Squad Waypoint?
         public bool IsValid(int idx) {
             return Waypoints != null && idx >= 0 && idx < Waypoints.Count;
-        }
-
-        // Calculate The Force Between Two Locations
-        public Vector2 Force(Vector2 a, Vector2 b) {
-            Vector2 diff = a - b;
-            float denom = diff.LengthSquared();
-            return diff.X != 0 && diff.Y != 0 ? 1 / denom * Vector2.Normalize(diff) : Vector2.Zero;
-        }
-
-        // Calculate The Force Between Two IEntities
-        public Vector2 Force(IEntity e1, IEntity e2) {
-            return rForce*Force(e1.GridPosition, e2.GridPosition);
-        }
-
-        // Calculate The Force Between An IEntity And A Waypoint
-        public Vector2 Force(IEntity e, Vector2 wp) {
-            return aForce*Force(e.GridPosition, wp);
         }
         
         // Scripted Logic For Movement

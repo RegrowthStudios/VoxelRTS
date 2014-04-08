@@ -101,28 +101,28 @@ namespace RTS.Mech.Squad {
 
         private void SetNetForceAndMove(GameState g, RTSUnit unit, Vector2 waypoint, List<Vector2> targetFormation) {
             // Set Net Force
-            Vector2 netForce = squad.Units.Count*Force(unit, waypoint);
+            //Vector2 netForce = squad.Units.Count * Force(unit, waypoint);
             CollisionGrid cg = g.CGrid;
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
-            foreach(Point n in Pathfinder.NeighborhoodAlign(unitCell)) {
-                RTSBuilding b = cg.EStatic[n.X, n.Y];
-                if(b != null)
-                    netForce += Force(unit, b);
-            }
-            foreach(Point n in Pathfinder.NeighborhoodDiag(unitCell)) {
-                RTSBuilding b = cg.EStatic[n.X, n.Y];
-                if(b != null)
-                    netForce += 5*Force(unit, b);
-            }
-            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
-                netForce += Force(unit, otherUnit);
-            }
-            if(UnitHistory.ContainsKey(unit.UUID)) {
-                foreach(var prevLocation in UnitHistory[unit.UUID]) {
-                    netForce -= Force(unit, prevLocation);
-                }
-            }
-            NetForces[unit.UUID] = netForce;
+            //foreach(Point n in Pathfinder.NeighborhoodAlign(unitCell)) {
+            //    RTSBuilding b = cg.EStatic[n.X, n.Y];
+            //    if(b != null)
+            //        netForce += Force(unit, b);
+            //}
+            //foreach(Point n in Pathfinder.NeighborhoodDiag(unitCell)) {
+            //    RTSBuilding b = cg.EStatic[n.X, n.Y];
+            //    if(b != null)
+            //        netForce += 5*Force(unit, b);
+            //}
+            //foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
+            //    netForce += Force(unit, otherUnit);
+            //}
+            //if(UnitHistory.ContainsKey(unit.UUID)) {
+            //    foreach(var prevLocation in UnitHistory[unit.UUID]) {
+            //        netForce -= Force(unit, prevLocation);
+            //    }
+            //}
+            //NetForces[unit.UUID] = netForce;
 
             // Set Move
             if(!CurrentWaypointIndices.ContainsKey(unit.UUID) || !IsValid(CurrentWaypointIndices[unit.UUID])) return;
