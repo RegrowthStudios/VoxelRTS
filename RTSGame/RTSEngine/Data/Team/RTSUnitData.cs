@@ -16,7 +16,6 @@ namespace RTSEngine.Data.Team {
             s.Write(data.CapitalCost);
             s.Write(data.PopulationCost);
             s.Write(data.MaxCount);
-            s.Write(data.CurrentCount);
             s.Write(data.MovementSpeed);
             s.Write(data.Impact);
             s.Write(data.BuildTime);
@@ -50,7 +49,6 @@ namespace RTSEngine.Data.Team {
             data.CapitalCost = s.ReadInt32();
             data.PopulationCost = s.ReadInt32();
             data.MaxCount = s.ReadInt32();
-            data.CurrentCount = s.ReadInt32();
             data.MovementSpeed = s.ReadSingle();
             data.Impact = s.ReadInt32();
             data.BuildTime = s.ReadInt32();

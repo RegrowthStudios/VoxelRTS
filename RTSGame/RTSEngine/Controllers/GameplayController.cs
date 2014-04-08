@@ -117,6 +117,19 @@ namespace RTSEngine.Controllers {
                 AIInputController aic = s.activeTeams[ti].Team.Input as AIInputController;
                 if(aic != null) aic.Start();
             }
+
+            // Add All Tasks
+            foreach(var at in s.activeTeams) {
+                foreach(var unit in at.Team.Units) {
+                    AddTask(s, unit);
+                }
+                foreach(var building in at.Team.Buildings) {
+                    AddTask(s, building);
+                }
+                foreach(var squad in at.Team.Squads) {
+                    AddTask(s, squad);
+                }
+            }
         }
 
         // The Update Function
@@ -248,12 +261,14 @@ namespace RTSEngine.Controllers {
             // Check If A Building Was Possible
             if(building == null) return;
 
-            // Add Building Decision Task
-            AddTask(s, building);
-
             // Set Default Height
             building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
             building.CollisionGeometry.Height = building.Height;
+            building.CollisionGeometry.Center = building.GridPosition;
+            s.CGrid.Add(building);
+
+            // Add Building Decision Task
+            AddTask(s, building, e.Team, e.Type);
             s.IGrid.AddImpactGenerator(building);
         }
         private void AddTask(GameState s, RTSUnit unit) {
@@ -276,6 +291,20 @@ namespace RTSEngine.Controllers {
                 tbEntityDecisions.RemoveTask(btu);
             };
             tbEntityDecisions.AddTask(btu);
+        }
+        private void AddTask(GameState s, RTSBuilding building, int fTeam, int type) {
+            AddTask(s, building);
+            ViewedBuilding vb = new ViewedBuilding();
+            vb.Team = fTeam;
+            vb.Type = type;
+            vb.ViewDirection = building.ViewDirection;
+            vb.WorldPosition = building.WorldPosition;
+            vb.CellPoint = HashHelper.Hash(building.GridPosition, s.CGrid.numCells, s.CGrid.size);
+            for(int i = 0; i < s.teams.Length; i++) {
+                if(i == fTeam || s.teams[i] == null) continue;
+                var ebu = new EnemyBuildingUpdater(s, i, vb, building);
+                s.tbMemBuildings.AddTask(ebu);
+            }
         }
 
         // Setup And Send Pathfinding Query
@@ -365,6 +394,11 @@ namespace RTSEngine.Controllers {
 
             // Calculate FOW
             tbFOWCalculations.DoTasks(dt);
+
+            // Calculate Memorizations
+            if(s.CurrentFrame % GameState.BUILDING_MEMORIZATION_LATENCY == 0)
+                s.tbMemBuildings.ResortBins();
+            s.tbMemBuildings.DoTasks(dt);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSpawn c) {
             // Multiple Spawn Events

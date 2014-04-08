@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -347,6 +348,41 @@ namespace RTSEngine.Data {
     }
 
     public struct LevelGrid {
+        public static void Serialize(BinaryWriter s, GameState state) {
+            LevelGrid g = state.LevelGrid;
+            for(int y = 0; y < g.L1.numCells.Y; y++) {
+                for(int x = 0; x < g.L1.numCells.X; x++) {
+                    s.Write(g.L1.Fog[x, y]);
+                }
+            }
+            for(int y = 0; y < g.L2.numCells.Y; y++) {
+                for(int x = 0; x < g.L2.numCells.X; x++) {
+                    s.Write(g.L2.ImpactGenerators[x, y].Count);
+                    for(int i = 0; i < g.L2.ImpactGenerators[x, y].Count; i++) {
+                        // TODO: Custom Serialization
+                    }
+                    s.Write(g.L2.CellImpact[x, y]);
+                }
+            }
+        }
+        public static void Deserialize(BinaryReader s, GameState state) {
+            LevelGrid g = state.LevelGrid;
+            for(int y = 0; y < g.L1.numCells.Y; y++) {
+                for(int x = 0; x < g.L1.numCells.X; x++) {
+                    g.L1.Fog[x, y] = s.ReadUInt32();
+                }
+            }
+            for(int y = 0; y < g.L2.numCells.Y; y++) {
+                for(int x = 0; x < g.L2.numCells.X; x++) {
+                    int c = s.ReadInt32();
+                    for(int i = 0; i < c; i++) {
+                        // TODO: Custom Deserialization
+                    }
+                    g.L2.CellImpact[x, y] = s.ReadInt32();
+                }
+            }
+        }
+
         public string InfoFile;
         public Heightmap L0;
         public CollisionGrid L1;

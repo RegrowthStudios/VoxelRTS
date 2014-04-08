@@ -6,6 +6,8 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Algorithms;
+using RTSEngine.Interfaces;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     public enum TravelDirection {
@@ -162,6 +164,136 @@ namespace RTSEngine.Controllers {
                 }
             }
             heat = val;
+        }
+    }
+
+    public class EnemyBuildingUpdater : ACBudgetedTask {
+        public static void Serialize(BinaryWriter s, EnemyBuildingUpdater t) {
+            s.Write(t.teamIndex);
+            s.Write(t.vb.Team);
+            s.Write(t.vb.Type);
+            s.Write(t.vb.CellPoint);
+            s.Write(t.vb.WorldPosition);
+            s.Write(t.vb.ViewDirection);
+            s.Write(t.EnemyUUID);
+
+            s.Write(t.added);
+            s.Write(t.isDead);
+        }
+        public static EnemyBuildingUpdater Deserialize(BinaryReader s, GameState state) {
+            int ti = s.ReadInt32();
+            ViewedBuilding vb = new ViewedBuilding();
+            vb.Team = s.ReadInt32();
+            vb.Type = s.ReadInt32();
+            vb.CellPoint = s.ReadPoint();
+            vb.WorldPosition = s.ReadVector3();
+            vb.ViewDirection = s.ReadVector2();
+            int uuid = s.ReadInt32();
+            RTSBuilding b = null;
+            foreach(var building in state.teams[vb.Team].Buildings) {
+                if(building.UUID == uuid) {
+                    b = building;
+                    break;
+                }
+            }
+            EnemyBuildingUpdater ebu = new EnemyBuildingUpdater(state, ti, vb, b);
+            ebu.added = s.ReadBoolean();
+            ebu.isDead = s.ReadBoolean();
+            return ebu;
+        }
+
+        private int teamIndex;
+        private GameState state;
+        private ViewedBuilding vb;
+        public int EnemyUUID {
+            get;
+            private set;
+        }
+        private Point[] grids;
+        private bool added;
+        private bool isDead;
+        private RTSBuildingData Data {
+            get { return state.teams[vb.Team].Race.Buildings[vb.Type]; }
+        }
+
+        public EnemyBuildingUpdater(GameState s, int tIndex, ViewedBuilding _vb, RTSBuilding b)
+            : base(1) {
+            state = s;
+            teamIndex = tIndex;
+            added = false;
+            isDead = false;
+            vb = _vb;
+
+            if(b != null) b.OnDestruction += OnBuildingDeath;
+            else isDead = true;
+            
+            RTSBuildingData data = state.teams[vb.Team].Race.Buildings[vb.Type];
+            grids = new Point[data.GridSize.X * data.GridSize.Y];
+            Point p = vb.CellPoint;
+            int pi = 0;
+            for(int y = 0; y < data.GridSize.Y; y++) {
+                for(int x = 0; x < data.GridSize.X; x++) {
+                    grids[pi++] = new Point(p.X + x, p.Y + y);
+                }
+            }
+        }
+
+        private void OnBuildingDeath(IEntity o) {
+            isDead = true;
+            o.OnDestruction -= OnBuildingDeath;
+        }
+
+        public override void DoWork(float dt) {
+            if(IsFinished) return;
+
+            if(!added) {
+                if(isDead) {
+                    // Early Work Escape
+                    Finish();
+                    return;
+                }
+                // Check If We Can Memorize
+                foreach(var p in grids) {
+                    FogOfWar f = state.CGrid.GetFogOfWar(p.X, p.Y, teamIndex);
+                    switch(f) {
+                        case FogOfWar.Active:
+                            state.teams[teamIndex].ViewedEnemyBuildings.Add(vb);
+                            added = true;
+                            break;
+                    }
+                }
+            }
+            else {
+                int fActive = 0, fNothing = 0;
+                foreach(var p in grids) {
+                    FogOfWar f = state.CGrid.GetFogOfWar(p.X, p.Y, teamIndex);
+                    switch(f) {
+                        case FogOfWar.Active:
+                            fActive++;
+                            break;
+                        case FogOfWar.Nothing:
+                            fNothing++;
+                            break;
+                    }
+                }
+                if(fActive > 0 && isDead) {
+                    // Know Building Is Dead Now
+                    state.teams[teamIndex].ViewedEnemyBuildings.Remove(vb);
+                    added = false;
+                    Finish();
+                    return;
+                }
+                else if(fNothing == Data.GridSize.X * Data.GridSize.Y) {
+                    // Not To Be Seen Anymore
+                    state.teams[teamIndex].ViewedEnemyBuildings.Remove(vb);
+                    added = false;
+                    if(isDead) {
+                        // Early Exit
+                        Finish();
+                        return;
+                    }
+                }
+            }
         }
     }
 }

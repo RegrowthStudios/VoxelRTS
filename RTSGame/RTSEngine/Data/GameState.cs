@@ -10,6 +10,7 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Graphics;
+using RTSEngine.Algorithms;
 
 namespace RTSEngine.Data {
     public struct IndexedTeam {
@@ -26,6 +27,7 @@ namespace RTSEngine.Data {
     public class GameState {
         public const int MAX_NONENV_PLAYERS = 8;
         public const int MAX_PLAYERS = MAX_NONENV_PLAYERS + 1;
+        public const int BUILDING_MEMORIZATION_LATENCY = MAX_PLAYERS * 2;
 
         public static void Serialize(BinaryWriter s, GameState state) {
             s.Write(state.CurrentFrame);
@@ -48,6 +50,12 @@ namespace RTSEngine.Data {
                 s.Write(at.Index);
                 RTSTeam.Serialize(s, at.Team);
             }
+            s.Write(state.tbMemBuildings.TotalTasks);
+            foreach(var task in state.tbMemBuildings.Tasks) {
+                var ebu = task as EnemyBuildingUpdater;
+                EnemyBuildingUpdater.Serialize(s, ebu);
+            }
+            LevelGrid.Serialize(s, state);
         }
         public static void Deserialize(BinaryReader s, DynCompiledResults res, GameState state) {
             state.curFrame = s.ReadInt32();
@@ -87,6 +95,12 @@ namespace RTSEngine.Data {
                 state.teams[ti] = RTSTeam.Deserialize(s, ti, state);
             }
             state.UpdateActiveTeams();
+            c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                var ebu = EnemyBuildingUpdater.Deserialize(s, state);
+                state.tbMemBuildings.AddTask(ebu);
+            }
+            LevelGrid.Deserialize(s, state);
         }
 
         // The Grids For The Level
@@ -131,6 +145,9 @@ namespace RTSEngine.Data {
             private set;
         }
 
+        // Memorized Buildings Information
+        public readonly TimeBudget tbMemBuildings;
+
         // Keeping Track Of Time
         private int curFrame;
         public int CurrentFrame {
@@ -163,6 +180,8 @@ namespace RTSEngine.Data {
 
             curFrame = 0;
             timePlayed = 0f;
+
+            tbMemBuildings = new TimeBudget(BUILDING_MEMORIZATION_LATENCY);
 
             lckParticles = new object();
             particles = new List<Particle>();

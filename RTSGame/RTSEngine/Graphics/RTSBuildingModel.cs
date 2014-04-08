@@ -10,6 +10,11 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 
 namespace RTSEngine.Graphics {
+    public struct VisibleBuilding {
+        public Vector3 Position;
+        public Vector2 View;
+    }
+
     public class RTSBuildingModel {
         public const ParsingFlags MODEL_READ_FLAGS = ParsingFlags.ConversionOpenGL;
 
@@ -39,11 +44,13 @@ namespace RTSEngine.Graphics {
         private DynamicVertexBuffer dvbInstances;
         private bool rebuildDVB;
         private VertexRTSAnimInst[] instVerts;
-        private List<RTSBuilding> instances;
-        private List<RTSBuilding> visible;
+        private List<VisibleBuilding> visible;
         public int VisibleInstanceCount {
             get { return visible.Count; }
         }
+
+        private RTSTeam fTeam;
+        private int fTeamIndex, eTeamIndex, bType;
 
         public RTSBuildingModel(RTSRenderer renderer, Stream sModel) {
             // Parse The Model File
@@ -62,17 +69,19 @@ namespace RTSEngine.Graphics {
             ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
         }
 
-        public void Hook(RTSRenderer renderer, GameState s, int team, int building) {
+        public void Hook(RTSRenderer renderer, GameState s, int ti, int fti, int building) {
             // Filter For Unit Types
-            Data = s.teams[team].Race.Buildings[building];
-
-            // Always Add A Unit To List When Spawned
-            s.teams[team].OnBuildingSpawn += OnBuildingSpawn;
+            RTSTeam team = s.teams[ti];
+            Data = team.Race.Buildings[building];
+            fTeam = s.teams[fti];
+            eTeamIndex = ti;
+            fTeamIndex = fti;
+            bType = building;
 
             // Create Instance Buffer
-            visible = new List<RTSBuilding>();
+            visible = new List<VisibleBuilding>();
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
-            instances = new List<RTSBuilding>(Data.MaxCount);
+
             for(int i = 0; i < instVerts.Length; i++)
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = renderer.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
@@ -81,19 +90,45 @@ namespace RTSEngine.Graphics {
             rebuildDVB = false;
         }
 
-        public void UpdateInstances(GraphicsDevice g, Predicate<RTSBuilding> fRemoval, Predicate<RTSBuilding> fVisible) {
-            instances.RemoveAll(fRemoval);
-            visible = new List<RTSBuilding>();
-            for(int i = 0; i < instances.Count; i++) {
-                if(fVisible(instances[i]))
-                    visible.Add(instances[i]);
+        public void UpdateInstances(GraphicsDevice g, Predicate<BoundingBox> fVisible) {
+            visible = new List<VisibleBuilding>();
+            if(fTeamIndex == eTeamIndex) {
+                // Always Show Friendly Buildings
+                for(int i = 0; i < fTeam.Buildings.Count; i++) {
+                    if(fTeam.Buildings[i].BuildingData != Data) continue;
+                    if(fVisible(fTeam.Buildings[i].BBox)) {
+                        VisibleBuilding vb = new VisibleBuilding();
+                        vb.Position = fTeam.Buildings[i].WorldPosition;
+                        vb.View = fTeam.Buildings[i].ViewDirection;
+                        visible.Add(vb);
+                    }
+                }
             }
+            else {
+                for(int i = 0; i < fTeam.ViewedEnemyBuildings.Count; i++) {
+                    ViewedBuilding bv = fTeam.ViewedEnemyBuildings[i];
+                    if(bv.Team != eTeamIndex || bv.Type != bType) continue;
+
+                    BoundingBox bb = new BoundingBox(
+                        Data.BBox.Min + bv.WorldPosition,
+                        Data.BBox.Max + bv.WorldPosition
+                        );
+                    if(fVisible(bb)) {
+                        VisibleBuilding vb = new VisibleBuilding();
+                        vb.Position = bv.WorldPosition;
+                        vb.View = bv.ViewDirection;
+                        visible.Add(vb);
+                    }
+                }
+            }
+
+
             for(int i = 0; i < VisibleInstanceCount; i++) {
                 instVerts[i].World =
                     Matrix.CreateRotationY(
-                        (float)Math.Atan2(-visible[i].ViewDirection.Y, visible[i].ViewDirection.X)
+                        (float)Math.Atan2(-visible[i].View.Y, visible[i].View.X)
                     ) *
-                    Matrix.CreateTranslation(visible[i].WorldPosition)
+                    Matrix.CreateTranslation(visible[i].Position)
                     ;
             }
             if(rebuildDVB) {
@@ -112,11 +147,6 @@ namespace RTSEngine.Graphics {
         public void DrawInstances(GraphicsDevice g) {
             if(VisibleInstanceCount > 0)
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, VisibleInstanceCount);
-        }
-
-        private void OnBuildingSpawn(RTSBuilding b) {
-            if(b.BuildingData == Data)
-                instances.Add(b);
         }
     }
 }

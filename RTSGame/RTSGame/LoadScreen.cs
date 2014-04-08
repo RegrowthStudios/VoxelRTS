@@ -182,8 +182,8 @@ namespace RTS {
 
             // Build The Local Game State
             LoadedState = new GameState();
-            GameEngine.BuildLocal(LoadedState, LoadData, races);
-            //GameEngine.Load(LoadedState, "test1.sg");
+            //GameEngine.BuildLocal(LoadedState, LoadData, races);
+            GameEngine.Load(LoadedState, @"User\totalwar.sg");
 
             // Create Camera
             LoadedCamera = new Camera(G.Viewport);

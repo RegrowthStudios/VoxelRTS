@@ -141,10 +141,10 @@ namespace RTSEngine.Controllers {
             using(var s = File.OpenRead(fi)) {
                 BinaryReader r = new BinaryReader(s, Encoding.ASCII);
                 mapFile = r.ReadString();
+                FileInfo fiEnvSpawn;
+                BuildMap(state, new FileInfo(mapFile), out fiEnvSpawn);
                 GameState.Deserialize(r, res, state);
             }
-            FileInfo fiEnvSpawn;
-            BuildMap(state, new FileInfo(mapFile), out fiEnvSpawn);
 
             // Hook Building Spawn Events To Collision Grid
             foreach(var team in (from t in state.activeTeams select t.Team)) {

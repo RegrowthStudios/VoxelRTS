@@ -15,7 +15,6 @@ namespace RTSEngine.Data.Team {
             s.Write(data.Health);
             s.Write(data.CapitalCost);
             s.Write(data.MaxCount);
-            s.Write(data.CurrentCount);
             s.Write(data.Impact);
             s.Write(data.BuildTime);
             s.Write(data.SightRadius);
@@ -45,7 +44,6 @@ namespace RTSEngine.Data.Team {
             data.Health = s.ReadInt32();
             data.CapitalCost = s.ReadInt32();
             data.MaxCount = s.ReadInt32();
-            data.CurrentCount = s.ReadInt32();
             data.Impact = s.ReadInt32();
             data.BuildTime = s.ReadInt32();
             data.SightRadius = s.ReadInt32();
