@@ -33,9 +33,10 @@ namespace RTS.Mech.Squad {
         public override void DecideMoves(GameState g, float dt) {
             // Pathfinding Has Not Finished: Make The Formation At The Average Squad Position
             if(Waypoints == null || Waypoints.Count == 0) {
-                foreach(var unit in squad.Units) {
-                    SetNetForceAndMove(g, unit, squad.GridPosition, null);
-                }
+                //foreach(var unit in squad.Units) {
+                //    SetNetForceAndMove(g, unit, squad.GridPosition, null);
+                //}
+                return;
             }
             // Having A Target Trumps Regular Movement
             else if(squad.TargetingController != null && squad.TargetingController.Target != null) {
@@ -101,28 +102,20 @@ namespace RTS.Mech.Squad {
 
         private void SetNetForceAndMove(GameState g, RTSUnit unit, Vector2 waypoint, List<Vector2> targetFormation) {
             // Set Net Force
-            //Vector2 netForce = squad.Units.Count * Force(unit, waypoint);
+            Vector2 netForce = Vector2.Zero;
             CollisionGrid cg = g.CGrid;
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
-            //foreach(Point n in Pathfinder.NeighborhoodAlign(unitCell)) {
-            //    RTSBuilding b = cg.EStatic[n.X, n.Y];
-            //    if(b != null)
-            //        netForce += Force(unit, b);
-            //}
-            //foreach(Point n in Pathfinder.NeighborhoodDiag(unitCell)) {
-            //    RTSBuilding b = cg.EStatic[n.X, n.Y];
-            //    if(b != null)
-            //        netForce += 5*Force(unit, b);
-            //}
-            //foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
-            //    netForce += Force(unit, otherUnit);
-            //}
-            //if(UnitHistory.ContainsKey(unit.UUID)) {
-            //    foreach(var prevLocation in UnitHistory[unit.UUID]) {
-            //        netForce -= Force(unit, prevLocation);
-            //    }
-            //}
-            //NetForces[unit.UUID] = netForce;
+            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
+                netForce += FlowGrid.dForce * FlowGrid.Force(unit.GridPosition, otherUnit.GridPosition);
+            }
+            if(UnitHistory.ContainsKey(unit.UUID)) {
+                foreach(var prevLocation in UnitHistory[unit.UUID]) {
+                    netForce -= FlowGrid.pForce * FlowGrid.Force(unit.GridPosition, prevLocation);
+                }
+            }
+            Point flowCell = HashHelper.Hash(unit.GridPosition, PathFlow.numCells, PathFlow.size);
+            netForce += PathFlow.GetFlow(flowCell);
+            NetForces[unit.UUID] = netForce;
 
             // Set Move
             if(!CurrentWaypointIndices.ContainsKey(unit.UUID) || !IsValid(CurrentWaypointIndices[unit.UUID])) return;

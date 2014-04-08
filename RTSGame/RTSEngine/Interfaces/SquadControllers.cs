@@ -51,32 +51,42 @@ namespace RTSEngine.Interfaces {
             private set;
         }
 
+        public void Init(CollisionGrid cg, List<Vector2> waypoints) {
+            this.waypoints = waypoints;
+            InitPathFlow(cg);
+        }
+
         // Update The Path Flow With This Controller's Waypoints
         public void InitPathFlow(CollisionGrid cg) {
             PathFlow = new FlowGrid(cg, false);
             if(Waypoints == null || Waypoints.Count == 0) return;
+            Vector2 goal = Waypoints[0];
             for(int i = 0; i < PathFlow.numCells.X; i++) {
                 for(int j = 0; j < PathFlow.numCells.Y; j++) {
-                    for(int w = 1; w < Waypoints.Count; w++) {
-                        Vector2 a = Waypoints[w - 1];
+                    for(int w = Waypoints.Count-2; w >= 0; w--) {
+                        Vector2 a = Waypoints[w + 1];
                         Vector2 pathSegment = Waypoints[w] - a;
                         float d = Dist(a, pathSegment, PathFlow.MakeContinuous(i, j));
-                        PathFlow.FlowVectors[i, j] = PathForce(d);
+                        PathFlow.FlowVectors[i, j] += PathForce(d);
+                        // Add A Special Attractive Charge At The Last Waypoint
+                        PathFlow.FlowVectors[i, j] += FlowGrid.pForce * FlowGrid.Force(PathFlow.MakeContinuous(i, j), goal);
                     }
                 }
             }
+            
         }
 
         // Calculate The Path Force At A Certain Distance Away From The Path
         private Vector2 PathForce(float dist) {
-            return FlowGrid.pForce * new Vector2(1f/dist, dist);
+            if(dist == 0f) return FlowGrid.pForce * new Vector2(1, 0);
+            else return FlowGrid.pForce * new Vector2(1f/dist, dist);
         }
 
         // Calculate The Distance Between A Line Starting At A And A Point P
         private float Dist(Vector2 a, Vector2 line, Vector2 p) {
             float mag = line.Length();
             Vector2 n = mag > 0 ? line / mag : Vector2.Zero;
-            return ((a - p) - ((a - p) * n) * n).Length();
+            return ((a - p) - Vector2.Dot((a - p), n) * n).Length();
         }
 
         // The Index Of The Current Waypoint Each Unit In This Squad Is Supposed To Head Toward

@@ -128,7 +128,7 @@ namespace RTSEngine.Controllers {
             ApplyInput(s, dt);
 
             // Pathfinding Pass
-            ApplyFinishedPathQueries();
+            ApplyFinishedPathQueries(s.CGrid);
 
             // Logic Pass
             ApplyLogic(s, dt);
@@ -298,13 +298,13 @@ namespace RTSEngine.Controllers {
         }
 
         // Apply Results Of Any Finished Pathfinding
-        private void ApplyFinishedPathQueries() {
+        private void ApplyFinishedPathQueries(CollisionGrid cg) {
             List<SquadQuery> newQueries = new List<SquadQuery>();
             foreach(var squadQuery in squadQueries) {
                 RTSSquad squad = squadQuery.squad;
                 PathQuery query = squadQuery.query;
                 if(!query.IsOld && query.IsComplete) {
-                    squad.MovementController.Waypoints = query.waypoints;
+                    squad.MovementController.Init(cg, query.waypoints);
                     // Tell All The Units In The Squad To Head To The First Waypoint
                     foreach(var unit in squad.Units) {
                         squad.MovementController.CurrentWaypointIndices[unit.UUID] = query.waypoints.Count - 1;

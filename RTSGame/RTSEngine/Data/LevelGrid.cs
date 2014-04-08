@@ -266,13 +266,13 @@ namespace RTSEngine.Data {
         public readonly Vector2 size;
 
         // The Net Flows At Each Grid Location
+        private Vector2[,] flowVectors;
         public Vector2[,] FlowVectors {
-            get;
-            private set;
+            get { return flowVectors; }
         }
 
         // Calculate The Force Between Two Locations
-        public Vector2 Force(Vector2 a, Vector2 b) {
+        public static Vector2 Force(Vector2 a, Vector2 b) {
             Vector2 diff = a - b;
             float denom = diff.LengthSquared();
             return diff.X != 0 && diff.Y != 0 ? 1 / denom * Vector2.Normalize(diff) : Vector2.Zero;
@@ -280,12 +280,11 @@ namespace RTSEngine.Data {
 
         // Creates A Flow Grid Using The Size And Cell Size Of The Given Collision Grid
         public FlowGrid(CollisionGrid cg, bool fillInStatics) {
-            int granularityMultiplier = 2;
             cellSize = 1.0f / ((float)granularityMultiplier) * cg.cellSize;
             numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
             cellSize = cg.size.X / numCells.X;
             size = cg.size;
-            FlowVectors = new Vector2[numCells.X, numCells.Y];
+            flowVectors = new Vector2[numCells.X, numCells.Y];
 
             if(fillInStatics) {
                 for(int cgX = 0; cgX < cg.numCells.X; cgX++) {
@@ -297,6 +296,10 @@ namespace RTSEngine.Data {
                     }
                 }
             }
+        }
+
+        public Vector2 GetFlow(Point gridPoint) {
+            return flowVectors[gridPoint.X, gridPoint.Y];
         }
 
         public void OnBuildingSpawn(RTSBuilding b) {
