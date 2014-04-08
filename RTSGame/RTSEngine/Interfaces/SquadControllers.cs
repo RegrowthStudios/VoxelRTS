@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
 
@@ -26,6 +27,12 @@ namespace RTSEngine.Interfaces {
         public T SetSquad<T>(RTSSquad s) where T : ACSquadController {
             SetSquad(s);
             return this as T;
+        }
+
+        // Need This Reference For Sending Pathfinding Queries
+        private GameplayController GameController;
+        public void Init(GameplayController gpc) {
+            GameController = gpc;
         }
     }
 
@@ -67,9 +74,9 @@ namespace RTSEngine.Interfaces {
                         Vector2 a = Waypoints[w + 1];
                         Vector2 pathSegment = Waypoints[w] - a;
                         float d = Dist(a, pathSegment, PathFlow.MakeContinuous(i, j));
-                        PathFlow.FlowVectors[i, j] += PathForce(d);
+                        PathFlow.FlowVectors[i, j] += PathForce(pathSegment, d);
                         // Add A Special Attractive Charge At The Last Waypoint
-                        PathFlow.FlowVectors[i, j] += FlowGrid.pForce * FlowGrid.Force(PathFlow.MakeContinuous(i, j), goal);
+                        PathFlow.FlowVectors[i, j] += FlowGrid.pForce * FlowGrid.UnitForce(PathFlow.MakeContinuous(i, j), goal);
                     }
                 }
             }
@@ -77,9 +84,16 @@ namespace RTSEngine.Interfaces {
         }
 
         // Calculate The Path Force At A Certain Distance Away From The Path
-        private Vector2 PathForce(float dist) {
-            if(dist == 0f) return 10000*FlowGrid.pForce * new Vector2(1, 0);
-            else return FlowGrid.pForce * new Vector2(1f/dist, dist);
+        private Vector2 PathForce(Vector2 pathSegment, float dist) {
+            if(dist == 0f) return FlowGrid.pForce * new Vector2(1, 0);
+            else {
+                float a = (float)Math.Atan2(pathSegment.Y, pathSegment.X);
+                var mr = Matrix.CreateRotationZ(a);
+                Vector2 force = new Vector2(1f / dist, dist);
+                force = Vector2.TransformNormal(force, mr);
+                force.Normalize();
+                return FlowGrid.pForce * force;
+            }
         }
 
         // Calculate The Distance Between A Line Starting At A And A Point P

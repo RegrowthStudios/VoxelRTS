@@ -271,8 +271,8 @@ namespace RTSEngine.Data {
             get { return flowVectors; }
         }
 
-        // Calculate The Force Between Two Locations
-        public static Vector2 Force(Vector2 a, Vector2 b) {
+        // Calculate The Unit Force Between Two Locations
+        public static Vector2 UnitForce(Vector2 a, Vector2 b) {
             Vector2 diff = a - b;
             float denom = diff.LengthSquared();
             return diff.X != 0 && diff.Y != 0 ? 1 / denom * Vector2.Normalize(diff) : Vector2.Zero;
@@ -316,7 +316,7 @@ namespace RTSEngine.Data {
         public void PlaceStaticEntity(int cgX, int cgY, float cgSize) {
             for(int fgX = 0; fgX < numCells.X; fgX++) {
                 for(int fgY = 0; fgY < numCells.Y; fgY++) {
-                    FlowVectors[fgX, fgY] += sForce * Force(new Vector2(Center(cgX, cgSize), Center(cgY, cgSize)), new Vector2(Center(fgX, cellSize), Center(fgY, cellSize)));
+                    FlowVectors[fgX, fgY] += sForce * UnitForce(new Vector2(Center(cgX, cgSize), Center(cgY, cgSize)), MakeContinuous(fgX, fgY));
                 }
             }
         }
@@ -324,7 +324,7 @@ namespace RTSEngine.Data {
         public void PlaceStaticEntity(Vector2 location) {
             for(int fgX = 0; fgX < numCells.X; fgX++) {
                 for(int fgY = 0; fgY < numCells.Y; fgY++) {
-                    FlowVectors[fgX, fgY] += sForce * Force(location, new Vector2(Center(fgX, cellSize), Center(fgY, cellSize)));
+                    FlowVectors[fgX, fgY] += sForce * UnitForce(location, MakeContinuous(fgX, fgY));
                 }
             }
         }
@@ -332,7 +332,7 @@ namespace RTSEngine.Data {
         public void RemoveStaticEntity(Vector2 location) {
             for(int fgX = 0; fgX < numCells.X; fgX++) {
                 for(int fgY = 0; fgY < numCells.Y; fgY++) {
-                    FlowVectors[fgX, fgY] -= sForce * Force(location, new Vector2(Center(fgX, cellSize), Center(fgY, cellSize)));
+                    FlowVectors[fgX, fgY] -= sForce * UnitForce(location, MakeContinuous(fgX, fgY));
                 }
             }
         }
