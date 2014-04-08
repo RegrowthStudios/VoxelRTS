@@ -72,7 +72,6 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
-        private Dictionary<int, bool> beenViewed;
 
         // Effects
         private BasicEffect fxSimple;
@@ -107,7 +106,6 @@ namespace RTSEngine.Graphics {
             FriendlyUnitModels = new List<RTSUnitModel>();
             NonFriendlyBuildingModels = new List<RTSBuildingModel>();
             FriendlyBuildingModels = new List<RTSBuildingModel>();
-            beenViewed = new Dictionary<int, bool>();
 
             tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
@@ -262,6 +260,24 @@ namespace RTSEngine.Graphics {
                 if(state.teams[i] == null) continue;
                 LoadTeamVisuals(state, i);
             }
+
+            // Set FOW
+            for(int y = 0; y < Map.FogOfWarTexture.Height; y++) {
+                for(int x = 0; x < Map.FogOfWarTexture.Width; x++) {
+                    switch(state.CGrid.GetFogOfWar(x, y, teamIndex)) {
+                        case FogOfWar.All:
+                        case FogOfWar.Active:
+                            Map.SetFOW(x, y, 1f);
+                            break;
+                        case FogOfWar.Passive:
+                            Map.SetFOW(x, y, 0.5f);
+                            break;
+                        case FogOfWar.Nothing:
+                            Map.SetFOW(x, y, 0f);
+                            break;
+                    }
+                }
+            }
         }
         private void LoadTeamVisuals(GameState state, int ti) {
             RTSTeam team = state.teams[ti];
@@ -269,7 +285,9 @@ namespace RTSEngine.Graphics {
             // Create Unit Graphics
             var ums = ti == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
             for(int i = 0; i < team.Race.ActiveUnits.Length; i++) {
-                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, new FileInfo(team.Race.ActiveUnits[i].Data.InfoFile));
+                int ui = team.Race.ActiveUnits[i].Index;
+                RTSUnitData uData = team.Race.Units[ui];
+                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, new FileInfo(uData.InfoFile));
                 uModel.Hook(this, state, ti, team.Race.ActiveUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
                 ums.Add(uModel);
@@ -279,15 +297,9 @@ namespace RTSEngine.Graphics {
             var bms = ti == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
             for(int i = 0; i < team.Race.ActiveBuildings.Length; i++) {
                 RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, new FileInfo(team.Race.ActiveBuildings[i].Data.InfoFile));
-                bModel.Hook(this, state, ti, team.Race.ActiveBuildings[i].Index);
+                bModel.Hook(this, state, ti, teamIndex, team.Race.ActiveBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);
-            }
-
-            if(ti != teamIndex) {
-                team.OnBuildingSpawn += (b) => {
-                    beenViewed.Add(b.UUID, false);
-                };
             }
         }
         private void OnFOWChange(int x, int y, int p, FogOfWar f) {
@@ -367,30 +379,13 @@ namespace RTSEngine.Graphics {
                 um.UpdateInstances(G, GameplayController.IsUnitDead, fNFVU);
 
             // Update Buildings
-            Predicate<RTSBuilding> fFVB = (b) => {
-                return frustum.Intersects(b.BBox);
+            Predicate<BoundingBox> fFVB = (b) => {
+                return frustum.Intersects(b);
             };
             foreach(var bm in FriendlyBuildingModels)
-                bm.UpdateInstances(G, GameplayController.IsBuildingDead, fFVB);
-
-            Predicate<RTSBuilding> fNFVB = (b) => {
-                Point up = HashHelper.Hash(b.GridPosition, cg.numCells, cg.size);
-                switch(cg.GetFogOfWar(up.X, up.Y, teamIndex)) {
-                    case FogOfWar.Passive:
-                        return beenViewed[b.UUID];
-                    case FogOfWar.Active:
-                        beenViewed[b.UUID] = true;
-                        return frustum.Intersects(b.BBox);
-                    default:
-                        return false;
-                }
-            };
-            Predicate<RTSBuilding> fNFRB = (b) => {
-                Point up = HashHelper.Hash(b.GridPosition, cg.numCells, cg.size);
-                return cg.GetFogOfWar(up.X, up.Y, teamIndex) == FogOfWar.Active && GameplayController.IsBuildingDead(b);
-            };
+                bm.UpdateInstances(G, fFVB);
             foreach(var bm in NonFriendlyBuildingModels)
-                bm.UpdateInstances(G, fNFRB, fNFVB);
+                bm.UpdateInstances(G, fFVB);
         }
 
         // Draw The Map
@@ -431,6 +426,7 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
             foreach(RTSBuildingModel buildingModel in NonFriendlyBuildingModels) {
+                if(buildingModel.VisibleInstanceCount < 1) continue;
                 fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
                 fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
                 fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
@@ -440,6 +436,7 @@ namespace RTSEngine.Graphics {
                 buildingModel.DrawInstances(G);
             }
             foreach(RTSBuildingModel buildingModel in FriendlyBuildingModels) {
+                if(buildingModel.VisibleInstanceCount < 1) continue;
                 fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
                 fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
                 fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;

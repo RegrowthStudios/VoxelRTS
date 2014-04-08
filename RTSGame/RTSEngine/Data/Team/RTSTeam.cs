@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Algorithms;
 using RTSEngine.Controllers;
 using RTSEngine.Interfaces;
 
@@ -27,7 +28,16 @@ namespace RTSEngine.Data.Team {
         public Vector3 Tertiary;
     }
 
+    public struct ViewedBuilding {
+        public int Team;
+        public int Type;
+        public Point CellPoint;
+        public Vector3 WorldPosition;
+        public Vector2 ViewDirection;
+    }
+
     public class RTSTeam {
+
         public static void Serialize(BinaryWriter s, RTSTeam team) {
             RTSRace.Serialize(s, team.Race);
             s.Write((int)team.Input.Type);
@@ -91,6 +101,7 @@ namespace RTSEngine.Data.Team {
                 if(target.HasValue) {
                     // TODO: Add A Target Binding
                 }
+                state.CGrid.Add(building);
             }
 
             c = s.ReadInt32();
@@ -152,6 +163,11 @@ namespace RTSEngine.Data.Team {
             set;
         }
 
+        public List<ViewedBuilding> ViewedEnemyBuildings {
+            get;
+            private set;
+        }
+
         // Events
         public event Action<RTSUnit> OnUnitSpawn;
         public event Action<RTSBuilding> OnBuildingSpawn;
@@ -165,6 +181,7 @@ namespace RTSEngine.Data.Team {
             units = new List<RTSUnit>();
             squads = new List<RTSSquad>();
             buildings = new List<RTSBuilding>();
+            ViewedEnemyBuildings = new List<ViewedBuilding>();
 
             // No Input Is Available For The Team Yet
             Input = null;

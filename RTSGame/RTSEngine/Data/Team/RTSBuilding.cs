@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,6 +24,9 @@ namespace RTSEngine.Data.Team {
                 s.Write(false);
             }
             s.Write(e.Health);
+            for(int i = 0; i < GameState.MAX_PLAYERS;i++) {
+                s.Write(e.viewedInfo.Get(i));
+            }
             if(e.ActionController != null) {
                 s.Write(true);
                 // TODO: Custom Serialize
@@ -39,6 +43,7 @@ namespace RTSEngine.Data.Team {
             e.State = s.ReadInt32();
             e.ViewDirection = s.ReadVector2();
             e.GridPosition = s.ReadVector2();
+            e.CollisionGeometry.Center += e.GridPosition;
             e.Height = s.ReadSingle();
             if(s.ReadBoolean()) {
                 target = s.ReadInt32();
@@ -47,6 +52,9 @@ namespace RTSEngine.Data.Team {
                 target = null;
             }
             e.Health = s.ReadInt32();
+            for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
+                e.viewedInfo.Set(i, s.ReadBoolean());
+            }
             if(s.ReadBoolean()) {
                 // TODO: Custom Deserialize
             }
@@ -124,6 +132,8 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
+        private BitArray viewedInfo;
+
         public bool IsAlive {
             get {
                 return Health > 0;
@@ -171,6 +181,8 @@ namespace RTSEngine.Data.Team {
             UUID = UUIDGenerator.GetUUID();
             Team = team;
             gridPos = position;
+            viewedInfo = new BitArray(GameState.MAX_PLAYERS);
+            viewedInfo.SetAll(false);
 
             BuildingData = data;
             height = 0;
@@ -178,6 +190,13 @@ namespace RTSEngine.Data.Team {
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
             ViewDirection = Vector2.UnitX;
             CollisionGeometry.Center += GridPosition;
+        }
+
+        public void SetViewedInfo(int p, bool b) {
+            viewedInfo.Set(p, b);
+        }
+        public bool GetViewedInfo(int p) {
+            return viewedInfo.Get(p);
         }
 
         // Applies Damage To Health

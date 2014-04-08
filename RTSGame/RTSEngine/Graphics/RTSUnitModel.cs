@@ -73,17 +73,22 @@ namespace RTSEngine.Graphics {
             ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
         }
 
-        public void Hook(RTSRenderer renderer, GameState s, int team, int unit) {
+        public void Hook(RTSRenderer renderer, GameState s, int ti, int unit) {
             // Filter For Unit Types
-            Data = s.teams[team].Race.Units[unit];
+            RTSTeam team = s.teams[ti];
+            Data = team.Race.Units[unit];
 
             // Always Add A Unit To List When Spawned
-            s.teams[team].OnUnitSpawn += OnUnitSpawn;
+            team.OnUnitSpawn += OnUnitSpawn;
 
             // Create Instance Buffer
             visible = new List<RTSUnit>();
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
             instances = new List<RTSUnit>(Data.MaxCount);
+            for(int i = 0; i < team.Units.Count; i++) {
+                OnUnitSpawn(team.Units[i]);
+            }
+
             for(int i = 0; i < instVerts.Length; i++)
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = renderer.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
