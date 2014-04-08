@@ -144,6 +144,12 @@ namespace RTSEngine.Data.Team {
             private set;
         }
 
+        // Team Capital
+        public int Capital {
+            get;
+            set;
+        }
+
         // Entity Data
         private List<RTSUnit> units;
         public List<RTSUnit> Units {
@@ -182,6 +188,7 @@ namespace RTSEngine.Data.Team {
             squads = new List<RTSSquad>();
             buildings = new List<RTSBuilding>();
             ViewedEnemyBuildings = new List<ViewedBuilding>();
+            Capital = 1000;
 
             // No Input Is Available For The Team Yet
             Input = null;

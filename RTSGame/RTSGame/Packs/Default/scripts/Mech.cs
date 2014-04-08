@@ -380,7 +380,7 @@ namespace RTS.Mech.Unit {
 // TODO: Verify
 namespace RTS.Mech.Building {
     public class Action : ACBuildingActionController {
-        private Queue<int> unitQueue = new Queue<int>();
+        public Queue<int> unitQueue = new Queue<int>();
         public Queue<EventType> eventQueue = new Queue<EventType>();
         private EventType currentEvent = EventType.None;
         public float buildTime; // How Long It Takes To Finish Producing The Unit
@@ -388,7 +388,7 @@ namespace RTS.Mech.Building {
 
         public override void DecideAction(GameState g, float dt)
         {
-            // Process event queue if any
+            // Process event queue if there is any
             if (eventQueue.Count > 0 && currentEvent == EventType.None)
             {
                 currentEvent = eventQueue.Dequeue();

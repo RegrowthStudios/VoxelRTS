@@ -22,9 +22,11 @@ namespace RTS.UIInput.BuildingInput
 
     public class ProductionInput : BuildingInput
     {
-        public override void Apply(GameState g)
+        public override void Apply(GameState g, int unitType)
         {
             action.eventQueue.Enqueue(EventType.Production);
+            action.unitQueue.Enqueue(unitType);
+            action.Building.Team.Capital -= action.Building.Team.Race.Units[unitType].CapitalCost;
         }
     }
 
