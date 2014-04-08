@@ -30,8 +30,14 @@ namespace RTS.Mech.Squad {
         // Whether Units In This Squad Have Decided To Move (Key: UUID)
         Dictionary<int, bool> doMove = new Dictionary<int, bool>();
 
+        float a = 0f;
+
         public override void DecideMoves(GameState g, float dt) {
             // Pathfinding Has Not Finished: Make The Formation At The Average Squad Position
+            a = 0f;
+            foreach(var unit in squad.Units) {
+                a += unit.CollisionGeometry.BoundingRadius * unit.CollisionGeometry.BoundingRadius * MathHelper.Pi;
+            }
             if(Waypoints == null || Waypoints.Count == 0) {
                 foreach(var unit in squad.Units) {
                     SetNetForceAndMove(g, unit, squad.GridPosition, null);
@@ -128,7 +134,7 @@ namespace RTS.Mech.Squad {
             if(!CurrentWaypointIndices.ContainsKey(unit.UUID) || !IsValid(CurrentWaypointIndices[unit.UUID])) return;
             Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
             bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
-            float stopDist = cg.cellSize / 3;
+            float stopDist = (float)Math.Sqrt(a / Math.PI) * 1.5f;// cg.cellSize / 3;
             if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < stopDist*stopDist) {
                 CurrentWaypointIndices[unit.UUID]--;
             }
