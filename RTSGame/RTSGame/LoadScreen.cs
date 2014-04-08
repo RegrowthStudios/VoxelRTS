@@ -115,11 +115,12 @@ namespace RTS {
             tWork.Start();
         }
         public override void OnExit(GameTime gameTime) {
-            button.Dispose();
-            text.Dispose();
-            wr.Dispose();
-            wr = null;
-
+            if(wr != null) {
+                button.Dispose();
+                text.Dispose();
+                wr.Dispose();
+                wr = null;
+            }
             tFont.Dispose();
             font = null;
             tLoad.Dispose();

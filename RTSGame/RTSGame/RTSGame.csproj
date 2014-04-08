@@ -94,10 +94,10 @@
     <Compile Include="LoginScreen.cs" />
     <Compile Include="MenuScreen.cs" />
     <Compile Include="Packs\Default\scripts\UIInput.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Packs\Default\scripts\Worker.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="PressEnterScreen.cs" />
     <Compile Include="RTSNetScreen.cs" />
@@ -246,7 +246,7 @@
     </None>
     <Compile Include="LoadScreen.cs" />
     <Compile Include="Packs\Default\scripts\Mech.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Packs\Default\levels\0.dat" />

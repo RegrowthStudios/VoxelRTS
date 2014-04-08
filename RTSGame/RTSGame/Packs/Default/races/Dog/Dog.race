@@ -2,7 +2,7 @@
 NAME            [Dog]
 
 // Default Squad Controllers
-CTRLACTION      [RTS.Squad.Action]
+CTRLACTION      [RTS.Mech.Squad.Action]
 CTRLMOVEMENT    [RTS.Mech.Squad.Movement]
 CTRLTARGET      [RTS.Mech.Squad.Target]
 

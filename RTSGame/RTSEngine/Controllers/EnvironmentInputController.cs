@@ -88,26 +88,28 @@ namespace RTSEngine.Controllers {
             maxNumSpawn = new int[3][] { eid.L2MaxNumSpawn, eid.L3MinNumSpawn, eid.L3MaxNumSpawn };
             treeLocations = new List<Point>();
 
-            using (var bmp = System.Drawing.Bitmap.FromFile(spawnImage.FullName) as System.Drawing.Bitmap) {
-                int w = bmp.Width;
-                int h = bmp.Height;
-                int[] colorValues = new int[w * h];
-                System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
-                System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, colorValues, 0, colorValues.Length);
-                bmp.UnlockBits(bmpData);
+            if(spawnImage != null) {
+                using(var bmp = System.Drawing.Bitmap.FromFile(spawnImage.FullName) as System.Drawing.Bitmap) {
+                    int w = bmp.Width;
+                    int h = bmp.Height;
+                    int[] colorValues = new int[w * h];
+                    System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
+                    System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, colorValues, 0, colorValues.Length);
+                    bmp.UnlockBits(bmpData);
 
-                int i = 0;
-                for (int y = 0; y < h; y++) {
-                    for (int x = 0; x < w; x++) {
-                        Point p = new Point(x, y);
-                        if (colorValues[i] == System.Drawing.Color.Green.ToArgb()) {
-                            AddEvent(new SpawnBuildingEvent(TeamIndex, floraType, p));
-                            treeLocations.Add(p);
+                    int i = 0;
+                    for(int y = 0; y < h; y++) {
+                        for(int x = 0; x < w; x++) {
+                            Point p = new Point(x, y);
+                            if(colorValues[i] == System.Drawing.Color.Green.ToArgb()) {
+                                AddEvent(new SpawnBuildingEvent(TeamIndex, floraType, p));
+                                treeLocations.Add(p);
+                            }
+                            else if(colorValues[i] == System.Drawing.Color.Red.ToArgb()) {
+                                AddEvent(new SpawnBuildingEvent(TeamIndex, oreType, p));
+                            }
+                            i++;
                         }
-                        else if (colorValues[i] == System.Drawing.Color.Red.ToArgb()) {
-                            AddEvent(new SpawnBuildingEvent(TeamIndex, oreType, p));
-                        }
-                        i++;
                     }
                 }
             }
