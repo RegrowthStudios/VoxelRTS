@@ -8,6 +8,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
 using RTSEngine.Graphics;
+using RTS.UIInput.BuildingInput;
 
 namespace RTS.Mech.Squad {
     public class Action : ACSquadActionController {
@@ -278,27 +279,56 @@ namespace RTS.Mech.Unit {
 namespace RTS.Mech.Building {
     public class Action : ACBuildingActionController {
         private Queue<int> unitQueue = new Queue<int>();
-
+        public Queue<EventType> eventQueue = new Queue<EventType>();
+        private EventType currentEvent = EventType.None;
         public float buildTime; // How Long It Takes To Finish Producing The Unit
         private int unit = -1; // Unit To Be Produced
-        public override void DecideAction(GameState g, float dt) {
-            if (unit < 0 && unitQueue.Count > 0)
+
+        public override void DecideAction(GameState g, float dt)
+        {
+            // Process event queue if any
+            if (eventQueue.Count > 0 && currentEvent == EventType.None)
             {
-                unit = unitQueue.Dequeue();
-                buildTime = building.Team.Race.Units[unit].BuildTime;
+                currentEvent = eventQueue.Dequeue();
+
+                switch (currentEvent)
+                {
+                    // Production event
+                    case EventType.Production:
+                        if (unit < 0 && unitQueue.Count > 0)
+                        {
+                            unit = unitQueue.Dequeue();
+                            buildTime = building.Team.Race.Units[unit].BuildTime;
+                        }
+                        break;
+                    // TODO: Implement
+                    case EventType.Research:
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
-        public override void ApplyAction(GameState g, float dt) {
-            // If The Unit Is Still Being Produced
-            if (unit >= 0) {
-                buildTime -= dt;
-                // If Finished Building The Unit
-                if(buildTime < 0) {
-                    building.Team.AddUnit(unit, building.GridPosition);
-                    buildTime = 0;
-                    unit = -1;
-                }
+        public override void ApplyAction(GameState g, float dt)
+        {
+            switch (currentEvent)
+            {
+                case EventType.Production:
+                    // If The Unit Is Still Being Produced
+                    if (unit >= 0)
+                    {
+                        buildTime -= dt;
+                        // If Finished Building The Unit
+                        if (buildTime < 0)
+                        {
+                            building.Team.AddUnit(unit, building.GridPosition);
+                            buildTime = 0;
+                            unit = -1;
+                            currentEvent = EventType.None;
+                        }
+                    }
+                    break;
             }
         }
     }
