@@ -17,12 +17,17 @@ namespace RTS.UIInput.BuildingInput
     public abstract class BuildingInput
     {
         protected RTS.Mech.Building.Action action;
-        public abstract void Apply(GameState g, int unitType);
+        public abstract void Apply(GameState g);
     }
 
     public class ProductionInput : BuildingInput
     {
-        public override void Apply(GameState g, int unitType)
+        public override void Apply(GameState g)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Apply(GameState g, int unitType)
         {
             action.eventQueue.Enqueue(EventType.Production);
             action.unitQueue.Enqueue(unitType);
