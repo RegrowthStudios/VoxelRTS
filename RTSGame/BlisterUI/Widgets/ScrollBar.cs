@@ -29,7 +29,7 @@ namespace BlisterUI.Widgets {
         public event Action<ScrollBar, float> OnScrollValueChanged;
 
         public int ScrollAmount {
-            get { return IsVertical ? ScrollButton.Height - Height : ScrollButton.Width - Width; }
+            get { return IsVertical ? Height - ScrollButton.Height : Width - ScrollButton.Width; }
         }
 
         private bool isVertical;

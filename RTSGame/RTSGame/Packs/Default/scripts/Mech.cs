@@ -14,14 +14,14 @@ using RTS.UIInput.BuildingInput;
 namespace RTS.Mech.Squad {
     public class Action : ACSquadActionController {
         public override void DecideAction(GameState g, float dt) {
-            //if(squad.TargetingController != null)
-            //    squad.TargetingController.DecideTarget(g, dt);
+            if(squad.TargetingController != null)
+                squad.TargetingController.DecideTarget(g, dt);
             if(squad.MovementController != null)
                 squad.MovementController.DecideMoves(g, dt);
         }
         public override void ApplyAction(GameState g, float dt) {
-            //if(squad.TargetingController != null)
-            //    squad.TargetingController.ApplyTarget(g, dt);
+            if(squad.TargetingController != null)
+                squad.TargetingController.ApplyTarget(g, dt);
             if(squad.MovementController != null)
                 squad.MovementController.ApplyMoves(g, dt);
         }

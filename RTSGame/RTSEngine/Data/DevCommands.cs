@@ -10,7 +10,9 @@ namespace RTSEngine.Data {
     public enum DevCommandType {
         Spawn,
         StopMotion,
-        Kill,
+        KillUnits,
+        KillBuildings,
+        FOW,
         Save
     }
     public class DevCommand {
@@ -79,17 +81,53 @@ namespace RTSEngine.Data {
         }
     }
     // Kill Command
-    public class DevCommandKill : DevCommand {
+    public class DevCommandKillUnits : DevCommand {
         public static readonly Regex REGEX = new Regex(@"avada\s+kedavra");
 
-        public DevCommandKill()
-            : base(DevCommandType.Kill) {
+        public DevCommandKillUnits()
+            : base(DevCommandType.KillUnits) {
         }
 
         public static bool TryParse(string c, out DevCommand command) {
             Match m = REGEX.Match(c);
             if(m.Success) {
-                command = new DevCommandKill();
+                command = new DevCommandKillUnits();
+                return true;
+            }
+            command = null;
+            return false;
+        }
+    }
+    // Kill Command
+    public class DevCommandKillBuildings : DevCommand {
+        public static readonly Regex REGEX = new Regex(@"i\s+am\s+god");
+
+        public DevCommandKillBuildings()
+            : base(DevCommandType.KillBuildings) {
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m = REGEX.Match(c);
+            if(m.Success) {
+                command = new DevCommandKillBuildings();
+                return true;
+            }
+            command = null;
+            return false;
+        }
+    }
+    // FOW Command
+    public class DevCommandFOW : DevCommand {
+        public static readonly Regex REGEX = new Regex(@"franz\s+ferdinand");
+
+        public DevCommandFOW()
+            : base(DevCommandType.FOW) {
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m = REGEX.Match(c);
+            if(m.Success) {
+                command = new DevCommandFOW();
                 return true;
             }
             command = null;

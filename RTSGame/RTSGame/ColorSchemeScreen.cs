@@ -16,9 +16,15 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework.Input;
 using RTSEngine.Controllers;
+using System.Text.RegularExpressions;
 
 namespace RTS {
     public class ColorSchemeScreen : GameScreen<App> {
+        private static readonly Regex rgxSetFile = RegexHelper.GenerateFile("file");
+        private static readonly Regex rgxSetName = RegexHelper.GenerateString("name");
+        private static readonly Regex rgxSave = new Regex(@"save");
+        private static readonly Regex rgxLoad = new Regex(@"load");
+
         private const string FX_FILE_PATH = @"Content\FX\RTS.fx";
         private static readonly Color BACK_COLOR = new Color(10, 10, 10, 255);
 
@@ -64,6 +70,9 @@ namespace RTS {
         RectWidget wBackPanel;
         ColorSwatch sP, sS, sT;
 
+        public FileInfo file;
+        public string name;
+
         public override void Build() {
             input = new InputManager();
             wr = new WidgetRenderer(G, XNASpriteFont.Compile(G, "Arial", 16, out fontDisp));
@@ -92,16 +101,21 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            DevConsole.OnNewCommand += DevConsole_OnNewCommand;
+            KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;
             input.Refresh();
-            MouseEventDispatcher.OnMousePress += sP.OnMousePress;
-            MouseEventDispatcher.OnMouseMotion += sP.OnMouseMovement;
-            MouseEventDispatcher.OnMouseRelease += sP.OnMouseRelease;
-            MouseEventDispatcher.OnMousePress += sS.OnMousePress;
-            MouseEventDispatcher.OnMouseMotion += sS.OnMouseMovement;
-            MouseEventDispatcher.OnMouseRelease += sS.OnMouseRelease;
-            MouseEventDispatcher.OnMousePress += sT.OnMousePress;
-            MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
-            MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
+            sP.Hook();
+            sS.Hook();
+            sT.Hook();
+            //MouseEventDispatcher.OnMousePress += sP.OnMousePress;
+            //MouseEventDispatcher.OnMouseMotion += sP.OnMouseMovement;
+            //MouseEventDispatcher.OnMouseRelease += sP.OnMouseRelease;
+            //MouseEventDispatcher.OnMousePress += sS.OnMousePress;
+            //MouseEventDispatcher.OnMouseMotion += sS.OnMouseMovement;
+            //MouseEventDispatcher.OnMouseRelease += sS.OnMouseRelease;
+            //MouseEventDispatcher.OnMousePress += sT.OnMousePress;
+            //MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
+            //MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
 
             renderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
 
@@ -127,18 +141,24 @@ namespace RTS {
             curUnit = 0;
         }
         public override void OnExit(GameTime gameTime) {
+            DevConsole.OnNewCommand -= DevConsole_OnNewCommand;
+            KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
+            DevConsole.Deactivate();
             if(unitModel != null) DisposeUnit();
             renderer.Dispose();
             camera = null;
-            MouseEventDispatcher.OnMousePress -= sP.OnMousePress;
-            MouseEventDispatcher.OnMouseMotion -= sP.OnMouseMovement;
-            MouseEventDispatcher.OnMouseRelease -= sP.OnMouseRelease;
-            MouseEventDispatcher.OnMousePress -= sS.OnMousePress;
-            MouseEventDispatcher.OnMouseMotion -= sS.OnMouseMovement;
-            MouseEventDispatcher.OnMouseRelease -= sS.OnMouseRelease;
-            MouseEventDispatcher.OnMousePress -= sT.OnMousePress;
-            MouseEventDispatcher.OnMouseMotion -= sT.OnMouseMovement;
-            MouseEventDispatcher.OnMouseRelease -= sT.OnMouseRelease;
+            sP.Unhook();
+            sS.Unhook();
+            sT.Unhook();
+            //MouseEventDispatcher.OnMousePress -= sP.OnMousePress;
+            //MouseEventDispatcher.OnMouseMotion -= sP.OnMouseMovement;
+            //MouseEventDispatcher.OnMouseRelease -= sP.OnMouseRelease;
+            //MouseEventDispatcher.OnMousePress -= sS.OnMousePress;
+            //MouseEventDispatcher.OnMouseMotion -= sS.OnMouseMovement;
+            //MouseEventDispatcher.OnMouseRelease -= sS.OnMouseRelease;
+            //MouseEventDispatcher.OnMousePress -= sT.OnMousePress;
+            //MouseEventDispatcher.OnMouseMotion -= sT.OnMouseMovement;
+            //MouseEventDispatcher.OnMouseRelease -= sT.OnMouseRelease;
         }
 
         public override void Update(GameTime gameTime) {
@@ -152,19 +172,6 @@ namespace RTS {
             if(searchDone) {
                 tSearch = null;
             }
-
-            if(tSearch == null) {
-                if(input.Keyboard.IsKeyJustPressed(Keys.N)) {
-                    LoadUnit(unitDataFiles[curUnit]);
-                    curUnit = (curUnit + 1) % unitDataFiles.Count;
-                }
-            }
-
-            if(input.Keyboard.IsKeyJustPressed(Keys.P))
-                State = ScreenState.ChangePrevious;
-            if(input.Keyboard.IsKeyJustPressed(Keys.Escape))
-                State = ScreenState.ExitApplication;
-
             input.Refresh();
         }
         private void ControlCamera(float dt) {
@@ -265,6 +272,9 @@ namespace RTS {
             G.Indices = null;
 
             wr.Draw(SB);
+            if(DevConsole.IsActivated) {
+                game.DrawDevConsole();
+            }
 
             game.mRenderer.BeginPass(G);
             game.mRenderer.Draw(G);
@@ -286,8 +296,9 @@ namespace RTS {
             state.teams[0].Race.UpdateActiveUnits();
             RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(renderer, fi);
             _unitModel.Hook(renderer, state, 0, 0);
-            RTSUnit _unit = state.teams[0].AddUnit(0, Vector2.Zero);
+            RTSUnit _unit = new RTSUnit(state.teams[0], state.teams[0].Race.Units[0], Vector2.Zero);
             _unit.Height = 0;
+            _unitModel.OnUnitSpawn(_unit);
 
             // Create The Full Animation Loop
             _unit.AnimationController = new BlankAnimController(0, (_unitModel.AnimationTexture.Height / 3) - 1, 30f);
@@ -333,6 +344,77 @@ namespace RTS {
             }
             searchDone = true;
         }
+
+        void DevConsole_OnNewCommand(string obj) {
+            Match m;
+            if((m = rgxSetFile.Match(obj)).Success) {
+                file = RegexHelper.ExtractFile(m);
+            }
+            else if((m = rgxSetName.Match(obj)).Success) {
+                name = RegexHelper.Extract(m);
+            }
+            else if((m = rgxSave.Match(obj)).Success) {
+                if(file == null) {
+                    DevConsole.AddCommand("No File Specified");
+                }
+                else if(string.IsNullOrWhiteSpace(name)) {
+                    DevConsole.AddCommand("No Name Specified");
+                }
+                else {
+                    using(var s = file.Create()) {
+                        StreamWriter w = new StreamWriter(s);
+                        w.WriteLine("NAME [{0}]", name);
+                        w.WriteLine("PRIMARY [{0}, {1}, {2}]", colorScheme.Primary.X, colorScheme.Primary.Y, colorScheme.Primary.Z);
+                        w.WriteLine("SECONDARY [{0}, {1}, {2}]", colorScheme.Secondary.X, colorScheme.Secondary.Y, colorScheme.Secondary.Z);
+                        w.WriteLine("TERTIARY [{0}, {1}, {2}]", colorScheme.Tertiary.X, colorScheme.Tertiary.Y, colorScheme.Tertiary.Z);
+                        w.Flush();
+                    }
+                }
+            }
+            else if((m = rgxLoad.Match(obj)).Success) {
+                if(file == null) {
+                    DevConsole.AddCommand("No File Specified");
+                }
+                else if(!file.Exists) {
+                    DevConsole.AddCommand("File Does Not Exist");
+                }
+                var cs = RTSColorSchemeParser.Parse(file);
+                if(!cs.HasValue) {
+                    DevConsole.AddCommand("Incorrect File Format");
+                }
+                else {
+                    colorScheme = cs.Value;
+                    name = colorScheme.Name;
+                    sP.Color = colorScheme.Primary;
+                    sS.Color = colorScheme.Secondary;
+                    sT.Color = colorScheme.Tertiary;
+                }
+            }
+        }
+        void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
+            switch(args.KeyCode) {
+                case DevConsole.ACTIVATION_KEY:
+                    if(DevConsole.IsActivated)
+                        DevConsole.Deactivate();
+                    else
+                        DevConsole.Activate();
+                    break;
+                case Keys.N:
+                    if(!DevConsole.IsActivated) {
+                        LoadUnit(unitDataFiles[curUnit]);
+                        curUnit = (curUnit + 1) % unitDataFiles.Count;
+                    }
+                    break;
+                case Keys.P:
+                    if(!DevConsole.IsActivated) {
+                        State = ScreenState.ChangePrevious;
+                    }
+                    break;
+                case Keys.Escape:
+                    State = ScreenState.ExitApplication;
+                    break;
+            }
+        }
     }
 
     #region Color Swatch Widget
@@ -343,9 +425,9 @@ namespace RTS {
             get { return col; }
             set {
                 col = value;
-                wR.Color = new Color(col.X, 0f, 0f);
-                wG.Color = new Color(0f, col.Y, 0f);
-                wB.Color = new Color(0f, 0f, col.Z);
+                sbR.ScrollRatio = col.X;
+                sbG.ScrollRatio = col.Y;
+                sbB.ScrollRatio = col.Z;
                 wCol.Color = new Color(col.X, col.Y, col.Z);
                 if(OnColorChange != null)
                     OnColorChange(col);
@@ -354,6 +436,7 @@ namespace RTS {
         public event Action<Vector3> OnColorChange;
 
         RectWidget wBorder, wR, wG, wB, wCol;
+        ScrollBar sbR, sbG, sbB;
 
         public ColorSwatch(int x, int y, int w, int hPart, int hFull, int border, Color bColor, float lD, WidgetRenderer r) {
             wBorder = new RectWidget(r);
@@ -366,26 +449,111 @@ namespace RTS {
             x += border;
             y += border;
 
+            int sw = w - border;
+            int sh = hPart - border;
+            var csbb = new Microsoft.Xna.Framework.Color(28, 28, 28);
+
             wR = new RectWidget(r);
             wR.Anchor = new Point(x, y);
             wR.Width = w;
             wR.Height = hPart;
             wR.LayerDepth = lD;
+            wR.Color = Microsoft.Xna.Framework.Color.Red;
             y += hPart;
+            sbR = new ScrollBar(r);
+            sbR.Color = csbb;
+            sbR.Width = sw;
+            sbR.Height = sh;
+            sbR.LayerDepth = lD - 0.01f;
+            sbR.ScrollButton.ActiveWidth = sw / 5;
+            sbR.ScrollButton.ActiveHeight = sh;
+            sbR.ScrollButton.InactiveWidth = sw / 5;
+            sbR.ScrollButton.InactiveHeight = sh;
+            sbR.ScrollButton.InactiveColor = Microsoft.Xna.Framework.Color.Black;
+            sbR.ScrollButton.ActiveColor = Microsoft.Xna.Framework.Color.White;
+            sbR.ScrollButton.LayerDepth = lD - 0.02f;
+            sbR.Parent = wR;
+            sbR.OffsetAlignX = Alignment.MID;
+            sbR.OffsetAlignY = Alignment.MID;
+            sbR.AlignX = Alignment.MID;
+            sbR.AlignY = Alignment.MID;
+            sbR.IsVertical = false;
+            sbR.OnScrollValueChanged += (sb, v) => {
+                col.X = v;
+                sbR.ScrollButton.InactiveColor = new Color(col.X, 0f, 0f);
+                wCol.Color = new Color(col.X, col.Y, col.Z);
+                if(OnColorChange != null)
+                    OnColorChange(col);
+            };
+            sbR.ScrollRatio = 0;
 
             wG = new RectWidget(r);
             wG.Anchor = new Point(x, y);
             wG.Width = w;
             wG.Height = hPart;
             wG.LayerDepth = lD;
+            wG.Color = Microsoft.Xna.Framework.Color.Green;
             y += hPart;
+            sbG = new ScrollBar(r);
+            sbG.Color = csbb;
+            sbG.Width = sw;
+            sbG.Height = sh;
+            sbG.LayerDepth = lD - 0.01f;
+            sbG.ScrollButton.ActiveWidth = sw / 5;
+            sbG.ScrollButton.ActiveHeight = sh;
+            sbG.ScrollButton.InactiveWidth = sw / 5;
+            sbG.ScrollButton.InactiveHeight = sh;
+            sbG.ScrollButton.InactiveColor = Microsoft.Xna.Framework.Color.Black;
+            sbG.ScrollButton.ActiveColor = Microsoft.Xna.Framework.Color.White;
+            sbG.ScrollButton.LayerDepth = lD - 0.02f;
+            sbG.Parent = wG;
+            sbG.OffsetAlignX = Alignment.MID;
+            sbG.OffsetAlignY = Alignment.MID;
+            sbG.AlignX = Alignment.MID;
+            sbG.AlignY = Alignment.MID;
+            sbG.IsVertical = false;
+            sbG.OnScrollValueChanged += (sb, v) => {
+                col.Y = v;
+                sbG.ScrollButton.InactiveColor = new Color(0f, col.Y, 0f);
+                wCol.Color = new Color(col.X, col.Y, col.Z);
+                if(OnColorChange != null)
+                    OnColorChange(col);
+            };
+            sbG.ScrollRatio = 0;
 
             wB = new RectWidget(r);
             wB.Anchor = new Point(x, y);
             wB.Width = w;
             wB.Height = hPart;
             wB.LayerDepth = lD;
+            wB.Color = Microsoft.Xna.Framework.Color.Blue;
             y += hPart;
+            sbB = new ScrollBar(r);
+            sbB.Color = csbb;
+            sbB.Width = sw;
+            sbB.Height = sh;
+            sbB.LayerDepth = lD - 0.01f;
+            sbB.ScrollButton.ActiveWidth = sw / 5;
+            sbB.ScrollButton.ActiveHeight = sh;
+            sbB.ScrollButton.InactiveWidth = sw / 5;
+            sbB.ScrollButton.InactiveHeight = sh;
+            sbB.ScrollButton.InactiveColor = Microsoft.Xna.Framework.Color.Black;
+            sbB.ScrollButton.ActiveColor = Microsoft.Xna.Framework.Color.White;
+            sbB.ScrollButton.LayerDepth = lD - 0.02f;
+            sbB.Parent = wB;
+            sbB.OffsetAlignX = Alignment.MID;
+            sbB.OffsetAlignY = Alignment.MID;
+            sbB.AlignX = Alignment.MID;
+            sbB.AlignY = Alignment.MID;
+            sbB.IsVertical = false;
+            sbB.OnScrollValueChanged += (sb, v) => {
+                col.Z = v;
+                sbB.ScrollButton.InactiveColor = new Color(0f, 0f, col.Z);
+                wCol.Color = new Color(col.X, col.Y, col.Z);
+                if(OnColorChange != null)
+                    OnColorChange(col);
+            };
+            sbB.ScrollRatio = 0;
 
             wCol = new RectWidget(r);
             wCol.Anchor = new Point(x, y);
@@ -396,60 +564,78 @@ namespace RTS {
             Color = Vector3.One;
             active = -1;
         }
+
+        private void OnScrollValueChanged(ScrollBar arg1, float arg2) {
+
+        }
         public void Dispose() {
             wBorder.Dispose();
             wR.Dispose();
+            sbR.Dispose();
             wG.Dispose();
+            sbG.Dispose();
             wB.Dispose();
+            sbB.Dispose();
             wCol.Dispose();
         }
 
-        public void OnMousePress(Vector2 pos, MouseButton b) {
-            int x = (int)pos.X;
-            int y = (int)pos.Y;
-            Vector2 ratio;
-            if(wBorder.Inside(x, y, out ratio)) {
-                if(wR.Inside(x, y, out ratio)) {
-                    Color = new Vector3(ratio.X, col.Y, col.Z);
-                    active = 0;
-                }
-                else if(wG.Inside(x, y, out ratio)) {
-                    Color = new Vector3(col.X, ratio.X, col.Z);
-                    active = 1;
-                }
-                else if(wB.Inside(x, y, out ratio)) {
-                    Color = new Vector3(col.X, col.Y, ratio.X);
-                    active = 2;
-                }
-            }
+        public void Hook() {
+            sbR.Hook();
+            sbG.Hook();
+            sbB.Hook();
         }
-        public void OnMouseMovement(Vector2 pos, Vector2 d) {
-            if(active < 0) return;
-            Vector2 r;
-            int x = (int)pos.X;
-            int y = (int)pos.Y;
-            float v;
-            switch(active) {
-                case 0:
-                    wR.Inside(x, y, out r);
-                    v = MathHelper.Clamp(r.X, 0, 1);
-                    Color = new Vector3(v, col.Y, col.Z);
-                    break;
-                case 1:
-                    wG.Inside(x, y, out r);
-                    v = MathHelper.Clamp(r.X, 0, 1);
-                    Color = new Vector3(col.X, v, col.Z);
-                    break;
-                case 2:
-                    wB.Inside(x, y, out r);
-                    v = MathHelper.Clamp(r.X, 0, 1);
-                    Color = new Vector3(col.X, col.Y, v);
-                    break;
-            }
+        public void Unhook() {
+            sbR.Unhook();
+            sbG.Unhook();
+            sbB.Unhook();
         }
-        public void OnMouseRelease(Vector2 pos, MouseButton b) {
-            if(b == MouseButton.Left && active >= 0) active = -1;
-        }
+
+        //public void OnMousePress(Vector2 pos, MouseButton b) {
+        //    int x = (int)pos.X;
+        //    int y = (int)pos.Y;
+        //    Vector2 ratio;
+        //    if(wBorder.Inside(x, y, out ratio)) {
+        //        if(wR.Inside(x, y, out ratio)) {
+        //            Color = new Vector3(ratio.X, col.Y, col.Z);
+        //            active = 0;
+        //        }
+        //        else if(wG.Inside(x, y, out ratio)) {
+        //            Color = new Vector3(col.X, ratio.X, col.Z);
+        //            active = 1;
+        //        }
+        //        else if(wB.Inside(x, y, out ratio)) {
+        //            Color = new Vector3(col.X, col.Y, ratio.X);
+        //            active = 2;
+        //        }
+        //    }
+        //}
+        //public void OnMouseMovement(Vector2 pos, Vector2 d) {
+        //    if(active < 0) return;
+        //    Vector2 r;
+        //    int x = (int)pos.X;
+        //    int y = (int)pos.Y;
+        //    float v;
+        //    switch(active) {
+        //        case 0:
+        //            wR.Inside(x, y, out r);
+        //            v = MathHelper.Clamp(r.X, 0, 1);
+        //            Color = new Vector3(v, col.Y, col.Z);
+        //            break;
+        //        case 1:
+        //            wG.Inside(x, y, out r);
+        //            v = MathHelper.Clamp(r.X, 0, 1);
+        //            Color = new Vector3(col.X, v, col.Z);
+        //            break;
+        //        case 2:
+        //            wB.Inside(x, y, out r);
+        //            v = MathHelper.Clamp(r.X, 0, 1);
+        //            Color = new Vector3(col.X, col.Y, v);
+        //            break;
+        //    }
+        //}
+        //public void OnMouseRelease(Vector2 pos, MouseButton b) {
+        //    if(b == MouseButton.Left && active >= 0) active = -1;
+        //}
     }
     #endregion
 
