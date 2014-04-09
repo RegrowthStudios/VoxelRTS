@@ -273,9 +273,9 @@ namespace RTS {
                 // Build The Local Game State
                 LoadedState = new GameState();
                 if(LoadFile == null)
-                    GameEngine.BuildLocal(LoadedState, LoadData, game.LobbyScreen.Races);
+                    GameEngine.BuildLocal(LoadedState, LoadData, new DirectoryInfo(@"Packs"), game.LobbyScreen.Races);
                 else
-                    GameEngine.Load(LoadedState, LoadFile.FullName);
+                    GameEngine.Load(LoadedState, new DirectoryInfo(@"Packs"), LoadFile.FullName);
 
                 // Create Camera
                 LoadedCamera = new Camera(G.Viewport);

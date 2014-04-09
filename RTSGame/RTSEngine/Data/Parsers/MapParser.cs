@@ -27,9 +27,8 @@ namespace RTSEngine.Data.Parsers {
         static readonly Regex rgxRegions = RegexHelper.GenerateFile("REGIONS");
         static readonly Regex rgxSpawn = RegexHelper.GenerateFile("SPAWNS");
 
-        private static void ConvertPixel(byte[] cols, int ci, float[] h, byte[] d, int i) {
+        private static void ConvertPixel(byte[] cols, int ci, float[] h, int i) {
             h[i] = 1f - (cols[ci + 2] / 255f);
-            d[i] = cols[ci + 1] > 128 ? (byte)0x01u : (byte)0x00u;
         }
 
         public static HeightmapModel ParseModel(RTSRenderer ge, Vector3 size, int fWidth, int fHeight, FileInfo infoFile) {
@@ -195,7 +194,6 @@ namespace RTSEngine.Data.Parsers {
                 w = bmp.Width;
                 h = bmp.Height;
                 float[] hd = new float[w * h];
-                byte[] cd = new byte[w * h];
                 byte[] col = new byte[w * h * 4];
                 int i = 0, ci = 0;
 
@@ -203,14 +201,14 @@ namespace RTSEngine.Data.Parsers {
                 System.Drawing.Imaging.BitmapData bd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
                 System.Runtime.InteropServices.Marshal.Copy(bd.Scan0, col, 0, bd.Stride * bd.Height);
                 bmp.UnlockBits(bd);
-
+                // TODO: Make Pixels As Floating Point Values
                 for(int y = 0; y < h; y++) {
                     for(int x = 0; x < w; x++) {
-                        ConvertPixel(col, ci, hd, cd, i++);
+                        ConvertPixel(col, ci, hd, i++);
                         ci += 4;
                     }
                 }
-                grid.L0 = new Heightmap(hd, cd, w, h);
+                grid.L0 = new Heightmap(hd, w, h);
             }
 
             // Read Regions

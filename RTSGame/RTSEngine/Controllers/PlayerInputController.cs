@@ -97,12 +97,15 @@ namespace RTSEngine.Controllers {
 
             // Loop Through All The Teams
             for(int i = 0; i < GameState.activeTeams.Length; i++) {
+                int ti = GameState.activeTeams[i].Index;
                 RTSTeam team = GameState.activeTeams[i].Team;
 
-                // TODO: Check FOW As Well
-
                 // Loop Through All The Units
-                foreach(RTSUnit unit in team.Units) {
+                for(int ui = 0; ui < team.Units.Count; ui++) {
+                    RTSUnit unit = team.Units[ui];
+                    FogOfWar f = GameState.CGrid.GetFogOfWar(unit.GridPosition, TeamIndex);
+                    if(f != FogOfWar.Active) continue;
+
                     box = unit.BBox;
                     dist = r.Intersects(box);
                     if(dist != null && dist.Value < closest) {
@@ -112,7 +115,19 @@ namespace RTSEngine.Controllers {
                 }
 
                 // Loop Through All The Buildings
-                foreach(RTSBuilding building in team.Buildings) {
+                for(int bi = 0; bi < team.Buildings.Count; bi++) {
+                    RTSBuilding building = team.Buildings[bi];
+                    FogOfWar f = FogOfWar.Nothing;
+                    Point p = HashHelper.Hash(building.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
+                    for(int y = 0; y < building.BuildingData.GridSize.Y; y++) {
+                        for(int x = 0; x < building.BuildingData.GridSize.X; x++) {
+                            f = GameState.CGrid.GetFogOfWar(p.X + x, p.Y + y, TeamIndex);
+                            if(f == FogOfWar.Active) break;
+                        }
+                        if(f == FogOfWar.Active) break;
+                    }
+                    if(f != FogOfWar.Active) continue;
+
                     box = building.BBox;
                     dist = r.Intersects(box);
                     if(dist != null && dist.Value < closest) {

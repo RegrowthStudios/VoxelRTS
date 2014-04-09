@@ -318,9 +318,9 @@ namespace RTSEngine.Controllers {
             var swe = e as SetWayPointEvent;
             var ste = e as SetTargetEvent;
             if(swe != null)
-                query = new PathQuery(squad.GridPosition, swe.Waypoint);
+                query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
             else if(ste != null)
-                query = new PathQuery(squad.GridPosition, ste.Target.GridPosition);
+                query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
             squadQueries.Add(new SquadQuery(squad, query));
             pathfinder.Add(query);
         }
@@ -440,7 +440,6 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyLogic(GameState s, float dt, DevCommandFOW c) {
-            RTSTeam team;
             for(int y = 0; y < s.CGrid.numCells.Y; y++) {
                 for(int x = 0; x < s.CGrid.numCells.Y; x++) {
                     for(int ti = 0; ti < s.activeTeams.Length; ti++) {

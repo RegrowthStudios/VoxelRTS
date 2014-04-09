@@ -11,8 +11,7 @@ namespace RTSEngine.Data {
     public enum FogOfWar : uint {
         Nothing = 0x00,
         Passive = 0x01,
-        Active = 0x02,
-        All = 0x03
+        Active = 0x02
     }
 
     public static class FogOfWarHelper {
@@ -163,12 +162,20 @@ namespace RTSEngine.Data {
         public FogOfWar GetFogOfWar(int x, int y, int p) {
             return FogOfWarHelper.GetFogOfWar(Fog[x, y], p);
         }
+        public FogOfWar GetFogOfWar(Vector2 pos, int p) {
+            Point c = HashHelper.Hash(pos, numCells, size);
+            return GetFogOfWar(c.X, c.Y, p);
+        }
 
         public void SetCollision(int x, int y, bool c) {
             Collision[x, y] = c;
         }
         public bool GetCollision(int x, int y) {
             return Collision[x, y] || EStatic[x, y] != null;
+        }
+        public bool GetCollision(Vector2 pos) {
+            Point c = HashHelper.Hash(pos, numCells, size);
+            return GetCollision(c.X, c.Y);
         }
 
         public void OnBuildingSpawn(RTSBuilding b) {

@@ -22,40 +22,78 @@ namespace RTSEngine.Controllers {
 
         private List<Point> treeLocations;
         public RTSBuildingData FloraData {
-            get { return Team.Race.Buildings[floraType]; }
+            get { return Team.Race.Buildings[FloraType]; }
         }
         public RTSBuildingData OreData {
-            get { return Team.Race.Buildings[oreType]; }
+            get { return Team.Race.Buildings[OreType]; }
         }
 
         // Indices For Resources And Units
-        private int floraType;
-        private int oreType;
-        private int minionType;
-        private int tankType;
-        private int titanType;
+        private EnvironmentData eData;
+        private int FloraType {
+            get { return eData.FloraType; }
+        }
+        private int OreType {
+            get { return eData.OreType; }
+        }
+        private int MinionType {
+            get { return eData.MinionType; }
+        }
+        private int TankType {
+            get { return eData.TankType; }
+        }
+        private int TitanType {
+            get { return eData.TitanType; }
+        }
         // Time Intervals At Which Recovery And Spawning Happens (In Seconds)
-        private int recoverTime;
-        private int disasterTime;
+        private int RecoverTime {
+            get { return eData.RecoverTime; }
+        }
+        private int DisasterTime {
+            get { return eData.DisasterTime; }
+        }
         // Impact Levels For Level One, Level Two, Level Three
-        private int L1Impact;
-        private int L2Impact;
-        private int L3Impact;
+        private int L1Impact {
+            get { return eData.L1Impact; }
+        }
+        private int L2Impact {
+            get { return eData.L2Impact; }
+        }
+        private int L3Impact {
+            get { return eData.L3Impact; }
+        }
         // Impact Level At Which Region Will No Longer Recover
-        private int noLongerRecoverImpact;
+        private int PointOfNoReturn {
+            get { return eData.NoLongerRecoverImpact; }
+        }
         // Maximum Number Of Units Per Region For Each Level
-        private int[] spawnCaps;
+        private IEnumerable<int> SpawnCaps {
+            get {
+                yield return eData.L1SpawnCap;
+                yield return eData.L2SpawnCap;
+                yield return eData.L3SpawnCap;
+            }
+        }
         // Impact Recovered Per Region Per Recovery Phase
-        private int recoverImpact;
+        private int RecoverImpact {
+            get { return eData.RecoverImpact; }
+        }
         // Environment Unit Spawn Offset
-        private int spawnOffset;
+        private int SpawnOffset {
+            get { return eData.SpawnOffset; }
+        }
         // Minimum Number Of Units Spawned For Each Level
         private int[][] minNumSpawn;
         // Maximum Number Of Units Spawned For Each Level
         private int[][] maxNumSpawn;
         // Array Of Possible Spawn Types
-        private int[] spawns;
-        
+        private IEnumerable<int> Spawns {
+            get {
+                yield return MinionType;
+                yield return TankType;
+                yield return TitanType;
+            }
+        }
 
         public EnvironmentInputController(GameState g, int ti)
             : base(g, ti, InputType.Environment) {
@@ -66,26 +104,16 @@ namespace RTSEngine.Controllers {
             running = true;
             paused = true;
         }
+        public EnvironmentInputController(GameState g, int ti, FileInfo infoRace, FileInfo spawnImage)
+            : this(g, ti) {
+            Init(infoRace, spawnImage);
+        }
 
-        public void Init(FileInfo infoRace, FileInfo spawnImage) {
-            EnvironmentInitData eid = EnvironmentDataParser.Parse(infoRace);
-            floraType = eid.FloraType;
-            oreType = eid.OreType;
-            minionType = eid.MinionType;
-            tankType = eid.TankType;
-            titanType = eid.TitanType;
-            spawns = new int[] { minionType, tankType, titanType };
-            recoverTime = eid.RecoverTime;
-            disasterTime = eid.DisasterTime;
-            L1Impact = eid.L1Impact;
-            L2Impact = eid.L2Impact;
-            L3Impact = eid.L3Impact;
-            noLongerRecoverImpact = eid.NoLongerRecoverImpact;
-            spawnCaps = new int[] { eid.L1SpawnCap, eid.L2SpawnCap, eid.L3SpawnCap };
-            recoverImpact = eid.RecoverImpact;
-            spawnOffset = eid.SpawnOffset;
-            minNumSpawn = new int[3][] { eid.L1MinNumSpawn, eid.L1MaxNumSpawn, eid.L2MinNumSpawn };
-            maxNumSpawn = new int[3][] { eid.L2MaxNumSpawn, eid.L3MinNumSpawn, eid.L3MaxNumSpawn };
+        // Only Called When Game Is Being Built And Not Deserialized
+        private void Init(FileInfo infoRace, FileInfo spawnImage) {
+            eData = EnvironmentDataParser.Parse(infoRace);
+            minNumSpawn = new int[3][] { eData.L1MinNumSpawn, eData.L1MaxNumSpawn, eData.L2MinNumSpawn };
+            maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
             treeLocations = new List<Point>();
 
             if(spawnImage != null) {
@@ -102,11 +130,11 @@ namespace RTSEngine.Controllers {
                         for(int x = 0; x < w; x++) {
                             Point p = new Point(x, y);
                             if(colorValues[i] == System.Drawing.Color.Green.ToArgb()) {
-                                AddEvent(new SpawnBuildingEvent(TeamIndex, floraType, p));
+                                AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, p));
                                 treeLocations.Add(p);
                             }
                             else if(colorValues[i] == System.Drawing.Color.Red.ToArgb()) {
-                                AddEvent(new SpawnBuildingEvent(TeamIndex, oreType, p));
+                                AddEvent(new SpawnBuildingEvent(TeamIndex, OreType, p));
                             }
                             i++;
                         }
@@ -122,15 +150,15 @@ namespace RTSEngine.Controllers {
                     continue;
                 }
                 UpdateUnitsInRegion();
-                if(counter % disasterTime == 0) {
+                if(counter % DisasterTime == 0) {
                     SpawnUnits();
                     SetInitTarget();
                 }
-                if(counter % recoverTime == 0) {
+                if(counter % RecoverTime == 0) {
                     Recover();
                 }
                 counter++;
-                counter = counter % (disasterTime + recoverTime);
+                counter = counter % (DisasterTime + RecoverTime);
                 Thread.Sleep(1000);
             }
         }
@@ -159,7 +187,7 @@ namespace RTSEngine.Controllers {
         // Recovery Phase
         private void Recover() {
             foreach(var r in GameState.Regions) {
-                if(r.RegionImpact < noLongerRecoverImpact && r.RegionImpact > 0) {
+                if(r.RegionImpact < PointOfNoReturn && r.RegionImpact > 0) {
                     // Randomly Choose The Location Of A Starting Tree
                     int tp = random.Next(treeLocations.Count);
                     Point treeC = treeLocations[tp];
@@ -173,7 +201,7 @@ namespace RTSEngine.Controllers {
                             foreach(var t in GameState.IGrid.ImpactGenerators[newTreeI.X, newTreeI.Y]) {
                                 Point tc = HashHelper.Hash(t.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
                                 if(!Point.Equals(tc, newTreeC) && tc.X > -1 && tc.Y > -1 && tc.X < GameState.CGrid.numCells.X && tc.Y < GameState.CGrid.numCells.Y) {
-                                    AddEvent(new SpawnBuildingEvent(TeamIndex, floraType, newTreeC));
+                                    AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
                                     r.AddToRegionImpact(-FloraData.Impact);
                                 }
                             }
@@ -184,8 +212,8 @@ namespace RTSEngine.Controllers {
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
                             if(o.BuildingData.FriendlyName.Equals(OreData.FriendlyName)) {
-                                o.Health += recoverImpact;
-                                r.AddToRegionImpact(-(OreData.Impact / recoverImpact));
+                                o.Health += RecoverImpact;
+                                r.AddToRegionImpact(-(OreData.Impact / RecoverImpact));
                             }
                         }
                     }
@@ -218,23 +246,25 @@ namespace RTSEngine.Controllers {
                     // Randomly Choose An Impact Generator In That Cell
                     ImpactGenerator g = null;
                     while(g == null || !g.BuildingData.FriendlyName.Equals(OreData.FriendlyName) || !g.BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
-                        int i = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
-                        g = grid.ImpactGenerators[p.X, p.Y][i];
+                        int igi = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
+                        g = grid.ImpactGenerators[p.X, p.Y][igi];
                     }
 
                     // Spawn Environmental Units
                     Vector2 spawnPos = g.GridPosition;
                     Vector2 offset;
                     int numSpawn;
-                  //FIX
-                    for(int i = 0; i < spawns.GetLength(1) && r.units.Count < spawnCaps[level - 1]; i++) {
+                    //FIX
+                    int i = 0;
+                    foreach(var spawnType in Spawns) {
                         numSpawn = random.Next(minNumSpawn[level - 1][i], maxNumSpawn[level - 1][i]);
-                        offset.X = random.Next(spawnOffset);
-                        offset.Y = random.Next(spawnOffset);
+                        offset.X = random.Next(SpawnOffset);
+                        offset.Y = random.Next(SpawnOffset);
                         for(int j = 0; j < numSpawn; j++) {
-                            AddEvent(new SpawnUnitEvent(TeamIndex, spawns[i], spawnPos + offset));
+                            AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos + offset));
                         }
-                    }        
+                    }
+                    i++;
                 }
             }
         }
@@ -264,10 +294,10 @@ namespace RTSEngine.Controllers {
         }
 
         public override void Serialize(BinaryWriter s) {
-            // TODO: Implement
+            // TODO: Implement Serialize
         }
         public override void Deserialize(BinaryReader s) {
-            // TODO: Implement
+            // TODO: Implement Deserialize
         }
     }
 }

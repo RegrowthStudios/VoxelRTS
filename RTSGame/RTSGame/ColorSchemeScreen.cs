@@ -419,7 +419,6 @@ namespace RTS {
 
     #region Color Swatch Widget
     class ColorSwatch : IDisposable {
-        private int active;
         private Vector3 col;
         public Vector3 Color {
             get { return col; }
@@ -562,7 +561,6 @@ namespace RTS {
             wCol.LayerDepth = lD;
 
             Color = Vector3.One;
-            active = -1;
         }
 
         private void OnScrollValueChanged(ScrollBar arg1, float arg2) {

@@ -34,17 +34,23 @@ namespace RTSEngine.Controllers {
                 SearchAllInitInfo(subDir, dictRaces, dictSchemes);
             }
         }
-        private static DynCompiledResults CompileAllScripts() {
+        private static DynCompiledResults? CompileAllScripts(DirectoryInfo root) {
             string error;
-            DirectoryInfo dir = new DirectoryInfo(@"Packs\Default\scripts"); // TODO: Get Rid Of This
-            var files = dir.GetFiles();
-            string[] toCompile = (from fi in files where fi.Extension.EndsWith("cs") select fi.FullName).ToArray();
-            DynCompiledResults res = DynControllerParser.Compile(toCompile, RTSConstants.REFERENCES, out error);
-            return res;
+            List<string> files = new List<string>();
+            FindAllScripts(root, files);
+            DynCompiledResults res = DynControllerParser.Compile(files.ToArray(), RTSConstants.REFERENCES, out error);
+            return string.IsNullOrEmpty(error) ? new DynCompiledResults?(res) : null;
+        }
+        private static void FindAllScripts(DirectoryInfo dir, List<string> files) {
+            var f = dir.GetFiles();
+            if(f != null && f.Length > 0)
+                files.AddRange(from fi in f where fi.Extension.EndsWith("cs") select fi.FullName);
+            foreach(var d in dir.GetDirectories())
+                FindAllScripts(d, files);
         }
 
-        public static void BuildLocal(GameState state, EngineLoadData eld, Dictionary<string, RTSRaceData> races) {
-            BuildControllers(state);
+        public static void BuildLocal(GameState state, EngineLoadData eld, DirectoryInfo root, Dictionary<string, RTSRaceData> races) {
+            BuildControllers(state, root);
 
             // Load The Map
             FileInfo fiEnvSpawn;
@@ -55,18 +61,14 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < state.teams.Length; ti++) {
                 switch(eld.Teams[ti].InputType) {
                     case InputType.Player:
-                        var pic = new PlayerInputController(state, ti);
-                        state.teams[ti].Input = pic;
+                        state.teams[ti].Input = new PlayerInputController(state, ti);
                         break;
                     case InputType.AI:
                         // TODO: Make This Class
                         state.teams[ti].Input = new AIInputController(state, ti);
                         break;
                     case InputType.Environment:
-                        // TODO: Make This Class
-                        EnvironmentInputController envController = new EnvironmentInputController(state, ti);
-                        envController.Init(races[eld.Teams[ti].Race].InfoFile, fiEnvSpawn);
-                        state.teams[ti].Input = envController;
+                        state.teams[ti].Input = new EnvironmentInputController(state, ti, races[eld.Teams[ti].Race].InfoFile, fiEnvSpawn);
                         break;
                     default:
                         break;
@@ -78,8 +80,13 @@ namespace RTSEngine.Controllers {
                 team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
             }
         }
-        private static void BuildControllers(GameState state) {
-            DynCompiledResults res = CompileAllScripts();
+        private static void BuildControllers(GameState state, DirectoryInfo root) {
+            DynCompiledResults res = new DynCompiledResults();
+            DynCompiledResults? cres = CompileAllScripts(root);
+            if(cres.HasValue)
+                res = cres.Value;
+            else
+                throw new Exception("Bro, You Fucked Up The Scripts.\nDon't Mod It If You Don't Know It");
 
             // Add Controllers
             foreach(KeyValuePair<string, ReflectedUnitController> kv in res.UnitControllers)
@@ -135,8 +142,14 @@ namespace RTSEngine.Controllers {
                 w.Flush();
             }
         }
-        public static void Load(GameState state, string fi) {
-            DynCompiledResults res = CompileAllScripts();
+        public static void Load(GameState state, DirectoryInfo root, string fi) {
+            DynCompiledResults res = new DynCompiledResults();
+            DynCompiledResults? cres = CompileAllScripts(root);
+            if(cres.HasValue)
+                res = cres.Value;
+            else
+                throw new Exception("Bro, You Fucked Up The Scripts.\nDon't Mod It If You Don't Know It");
+
             string mapFile = "";
             using(var s = File.OpenRead(fi)) {
                 BinaryReader r = new BinaryReader(s, Encoding.ASCII);

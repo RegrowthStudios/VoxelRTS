@@ -23,12 +23,16 @@ namespace RTSEngine.Algorithms {
         // Where To Store The Data
         public readonly List<Vector2> waypoints;
 
-        public PathQuery(Vector2 s, Vector2 e) {
+        // Which Fog Of War Is To Be Read
+        public readonly int FOWIndex;
+
+        public PathQuery(Vector2 s, Vector2 e, int fowI) {
             Start = s;
             End = e;
             IsComplete = false;
             IsOld = false;
             waypoints = new List<Vector2>();
+            FOWIndex = fowI;
         }
     }
 
@@ -133,13 +137,56 @@ namespace RTSEngine.Algorithms {
             }
         }
 
-        private void BuildPath(List<Point> p) {
-            Point cur = end;
+        private void BuildPath(List<Point> p, Point cur) {
             while(cur.X != start.X || cur.Y != start.Y) {
                 p.Add(cur);
                 cur = prev[cur.X, cur.Y];
             }
             p.Add(cur);
+        }
+
+        private bool CanMove(Point n, int fowI) {
+            if(!InGrid(n)) return false;
+
+            FogOfWar f = world.GetFogOfWar(n.X, n.Y, fowI);
+            switch(f) {
+                case FogOfWar.Nothing:
+                    return true;
+                case FogOfWar.Passive:
+                    // TODO: Solve Omniscience
+                    //return !world.GetCollision(n.X, n.Y) || world.EStatic[n.X, n.Y] != null;
+                case FogOfWar.Active:
+                    return !world.GetCollision(n.X, n.Y);
+            }
+            return false;
+        }
+
+        private Point FindClosestGoal(Point e, int[,] f, bool[,] c, out int s) {
+            if(InGrid(e) && c[e.X, e.Y] == false) {
+                c[e.X, e.Y] = true;
+
+                if(f[e.X, e.Y] != int.MaxValue) {
+                    s = Estimate(e.X, e.Y);
+                    return e;
+                }
+
+                s = int.MaxValue;
+                Point p = e;
+
+                int ns;
+                foreach(var n in NeighborhoodAlign(e)) {
+                    Point np = FindClosestGoal(n, f, c, out ns);
+                    if(ns != int.MaxValue && ns < s) {
+                        s = ns;
+                        p = np;
+                    }
+                }
+                return p;
+            }
+            else {
+                s = int.MaxValue;
+                return new Point(-1, -1);
+            }
         }
 
         // Run A* Search, Given This Pathfinder's World And A Query
@@ -159,19 +206,19 @@ namespace RTSEngine.Algorithms {
             openSet.Insert(start);
 
             // A* Loop
-            // TODO: Add Fog Awareness
+            // TODO: Check Fog Awareness
             List<Point> path = null;
             while(openSet.Count > 0) {
                 Point p = openSet.Pop();
                 if(p.X == end.X && p.Y == end.Y) {
                     path = new List<Point>();
-                    BuildPath(path);
+                    BuildPath(path, end);
                     break;
                 }
                 bool canMove = false;
                 foreach(Point n in NeighborhoodAlign(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 10;
-                    canMove = InGrid(n) && !world.GetCollision(n.X, n.Y);
+                    canMove = CanMove(n, q.FOWIndex);
                     if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
@@ -184,9 +231,9 @@ namespace RTSEngine.Algorithms {
                 foreach(Point n in NeighborhoodDiag(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 14;
                     // To Move Diagonally, Destination Must Be Reachable By Horizontal & Vertical Moves As Well
-                    canMove = InGrid(n) && !world.GetCollision(n.X, n.Y);
+                    canMove = CanMove(n, q.FOWIndex);
                     foreach(Point d in DiagDecomp(p, n)) {
-                        canMove &= InGrid(d) && !world.GetCollision(d.X, d.Y);
+                        canMove &= CanMove(d, q.FOWIndex);
                     }
                     if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
@@ -198,6 +245,22 @@ namespace RTSEngine.Algorithms {
                     }
                 }
             }
+
+            // Check If We Need To Find The Nearest Point
+            if(path == null) {
+                int s;
+                bool[,] ch = new bool[world.numCells.X, world.numCells.Y];
+                Array.Clear(ch, 0, ch.Length);
+                Point cg = FindClosestGoal(end, fScore, ch, out s);
+                if(s == int.MaxValue) {
+                    // Impossible
+                }
+                else {
+                    path = new List<Point>();
+                    BuildPath(path, cg);
+                }
+            }
+
             // A* Conclusion
             if(path != null) {
                 foreach(Point wp in path) {

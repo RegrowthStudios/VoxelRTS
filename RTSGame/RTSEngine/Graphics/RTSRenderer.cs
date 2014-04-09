@@ -265,7 +265,6 @@ namespace RTSEngine.Graphics {
             for(int y = 0; y < Map.FogOfWarTexture.Height; y++) {
                 for(int x = 0; x < Map.FogOfWarTexture.Width; x++) {
                     switch(state.CGrid.GetFogOfWar(x, y, teamIndex)) {
-                        case FogOfWar.All:
                         case FogOfWar.Active:
                             Map.SetFOW(x, y, 1f);
                             break;
@@ -305,7 +304,6 @@ namespace RTSEngine.Graphics {
         private void OnFOWChange(int x, int y, int p, FogOfWar f) {
             if(p != teamIndex) return;
             switch(f) {
-                case FogOfWar.All:
                 case FogOfWar.Active:
                     Map.SetFOW(x, y, 1f);
                     break;

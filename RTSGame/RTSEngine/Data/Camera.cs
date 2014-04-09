@@ -177,7 +177,6 @@ namespace RTSEngine.Data {
         }
 
         public BoundingFrustum GetSelectionBox(Vector2 screenMin, Vector2 screenMax) {
-            // TODO: Verify.
             Vector2 ss = new Vector2(camController.WindowWidth, camController.WindowHeight);
             screenMin /= ss;
             screenMax /= ss;

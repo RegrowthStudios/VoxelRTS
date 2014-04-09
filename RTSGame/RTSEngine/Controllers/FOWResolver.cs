@@ -108,7 +108,7 @@ namespace RTSEngine.Controllers {
             }
 
             // Add Starting Points To The Queue
-            var queue = new Queue<FOWPoint>(); // TODO: Use MinHeap Maybe
+            var queue = new Queue<FOWPoint>();
             for(int i = 0; i < team.Units.Count; i++) {
                 Point p = HashHelper.Hash(team.Units[i].GridPosition, cg.numCells, cg.size);
                 int vRadius = (int)(team.Units[i].UnitData.BaseCombatData.MaxRange / cg.cellSize);
