@@ -271,6 +271,12 @@ namespace RTSEngine.Controllers {
             s.IGrid.AddImpactGenerator(building);
         }
         private void AddTask(GameState s, RTSUnit unit) {
+            // Init The Unit
+            if(unit.ActionController != null) unit.ActionController.Init(s, this);
+            if(unit.CombatController != null) unit.CombatController.Init(s, this);
+            if(unit.MovementController != null) unit.MovementController.Init(s, this);
+            if(unit.AnimationController != null) unit.AnimationController.Init(s, this);
+
             var btu = new BTaskUnitDecision(s, unit);
             unit.OnDestruction += (o) => {
                 tbEntityDecisions.RemoveTask(btu);
@@ -278,6 +284,11 @@ namespace RTSEngine.Controllers {
             tbEntityDecisions.AddTask(btu);
         }
         private void AddTask(GameState s, RTSSquad squad) {
+            // Init The Squad
+            if(squad.ActionController != null) squad.ActionController.Init(s, this);
+            if(squad.MovementController != null) squad.MovementController.Init(s, this);
+            if(squad.TargetingController != null) squad.TargetingController.Init(s, this);
+
             var bts = new BTaskSquadDecision(s, squad);
             squad.OnDeath += (o) => {
                 tbSquadDecisions.RemoveTask(bts);
@@ -285,6 +296,9 @@ namespace RTSEngine.Controllers {
             tbSquadDecisions.AddTask(bts);
         }
         private void AddTask(GameState s, RTSBuilding building) {
+            // Init The Building
+            if(building.ActionController != null) building.ActionController.Init(s, this);
+
             var btu = new BTaskBuildingDecision(s, building);
             building.OnDestruction += (o) => {
                 tbEntityDecisions.RemoveTask(btu);
@@ -496,18 +510,13 @@ namespace RTSEngine.Controllers {
 
         // Cleanup Stage
         private void Cleanup(GameState s, float dt) {
-            RTSTeam team;
-
             // Remove All Dead Entities
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                team = s.activeTeams[ti].Team;
+                RTSTeam team = s.activeTeams[ti].Team;
                 team.RemoveAll(IsUnitDead);
                 team.RemoveAll(IsBuildingDead);
                 team.RemoveAll(IsSquadEmpty);
             }
-
-            // Add Newly Created Instances
-            AddInstantiatedData(s);
         }
         public static bool IsEntityDead(IEntity e) {
             return !e.IsAlive;
@@ -520,9 +529,6 @@ namespace RTSEngine.Controllers {
         }
         private static bool IsSquadEmpty(RTSSquad s) {
             return s.IsDead;
-        }
-        public void AddInstantiatedData(GameState s) {
-
         }
 
         // Dev Callback

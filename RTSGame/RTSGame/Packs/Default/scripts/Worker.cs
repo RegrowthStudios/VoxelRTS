@@ -6,10 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RTSEngine.Controllers;
+using System.IO;
 
 namespace RTS.Worker.Squad {
     
     public class Action : ACSquadActionController {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
 
         public override void DecideAction(GameState g, float dt) {
             if (squad.TargetingController != null)
@@ -20,9 +25,19 @@ namespace RTS.Worker.Squad {
             if (squad.TargetingController != null)
                 squad.TargetingController.ApplyTarget(g, dt);
         }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
     public class Movement : ACSquadMovementController {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
 
         public override void DecideMoves(GameState g, float dt) {
             throw new NotImplementedException();
@@ -30,6 +45,13 @@ namespace RTS.Worker.Squad {
 
         public override void ApplyMoves(GameState g, float dt) {
             throw new NotImplementedException();
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
         }
     }
 
@@ -39,6 +61,10 @@ namespace RTS.Worker.Squad {
         private RTSBuilding targetResource;
         // The Region that the resource is located in
         private Region targetRegion;
+
+        public override void Init(GameState s, GameplayController c) {
+
+        }
 
         public void setTargetUnit(RTSUnit u) {
             // Worker squad is given unit to attack
@@ -92,6 +118,12 @@ namespace RTS.Worker.Squad {
             }
         }
 
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
 }
@@ -99,6 +131,9 @@ namespace RTS.Worker.Squad {
 namespace RTS.Worker {
 
     public class Action : ACUnitActionController {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
 
         public override void DecideAction(GameState g, float dt) {
             throw new NotImplementedException();
@@ -107,25 +142,60 @@ namespace RTS.Worker {
         public override void ApplyAction(GameState g, float dt) {
             throw new NotImplementedException();
         }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
     public class Combat : ACUnitCombatController {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
 
         public override void Attack(GameState g, float dt) {
             throw new NotImplementedException();
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
         }
     }
 
 
     public class Movement : ACUnitMovementController {
+        public override void Init(GameState s, GameplayController c) {
 
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
     public class Animation : ACUnitAnimationController {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
 
         public override void Update(GameState s, float dt) {
             throw new NotImplementedException();
         }
-    }
 
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
+    }
 }

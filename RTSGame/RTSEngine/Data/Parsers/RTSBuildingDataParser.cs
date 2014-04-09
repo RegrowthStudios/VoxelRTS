@@ -65,7 +65,7 @@ namespace RTSEngine.Data.Parsers {
             model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
             return model;
         }
-        public static RTSBuildingData ParseData(Dictionary<string, ReflectedBuildingController> controllers, FileInfo infoFile) {
+        public static RTSBuildingData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 

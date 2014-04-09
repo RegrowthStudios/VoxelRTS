@@ -5,14 +5,12 @@ using System.Text;
 
 namespace RTSEngine.Data {
     public static class RTSConstants {
-        public static readonly string[] REFERENCES = {
+        public static readonly string[] ENGINE_LIBRARIES = {
             "System.dll",
             "System.Core.dll",
             "System.Data.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",
-            @"lib\Microsoft.Xna.Framework.dll",
-            @"lib\Microsoft.Xna.Framework.Graphics.dll",
             "RTSEngine.dll"
         };
 

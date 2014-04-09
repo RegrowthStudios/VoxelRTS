@@ -16,28 +16,27 @@ namespace RTSEngine.Data.Team {
             s.Write(squad.GridPosition);
             if(squad.ActionController != null) {
                 s.Write(true);
-                // TODO: Custom Serialize
+                squad.ActionController.Serialize(s);
             }
             else {
                 s.Write(false);
             }
             if(squad.MovementController != null) {
                 s.Write(true);
-                // TODO: Custom Serialize
+                squad.MovementController.Serialize(s);
             }
             else {
                 s.Write(false);
             }
             if(squad.TargetingController != null) {
                 s.Write(true);
-                // TODO: Custom Serialize
+                squad.TargetingController.Serialize(s);
             }
             else {
                 s.Write(false);
             }
         }
         public static RTSSquad Deserialize(BinaryReader s, RTSTeam team, out List<int> units) {
-            // TODO: Implement
             RTSSquad squad = team.AddSquad();
             int c = s.ReadInt32();
             units = new List<int>();
@@ -46,19 +45,19 @@ namespace RTSEngine.Data.Team {
             }
             squad.gridPos = s.ReadVector2();
             if(s.ReadBoolean()) {
-                // TODO: Custom Deserialize
+                if(squad.ActionController != null) squad.ActionController.Deserialize(s);
             }
             else {
                 squad.ActionController = null;
             }
             if(s.ReadBoolean()) {
-                // TODO: Custom Deserialize
+                if(squad.MovementController != null) squad.MovementController.Deserialize(s);
             }
             else {
                 squad.MovementController = null;
             }
             if(s.ReadBoolean()) {
-                // TODO: Custom Deserialize
+                if(squad.TargetingController != null) squad.TargetingController.Deserialize(s);
             }
             else {
                 squad.TargetingController = null;

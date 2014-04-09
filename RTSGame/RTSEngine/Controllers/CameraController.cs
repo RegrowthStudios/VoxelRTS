@@ -18,6 +18,7 @@ namespace RTSEngine.Controllers {
         public const Keys KEY_MOVE_RIGHT_ALT = Keys.Right;
         public const Keys KEY_MOVE_UP_ALT = Keys.Up;
         public const Keys KEY_MOVE_DOWN_ALT = Keys.Down;
+        public const Keys KEY_RESET_DEFAULT = Keys.OemQuotes;
         public const int SCROLL_PANE_WIDTH = 12;
 
         // How To Calculate The Window Input Locations
@@ -89,6 +90,7 @@ namespace RTSEngine.Controllers {
             }
         }
         private int zoom;
+        private bool resetDefault;
 
         // Input Context
         private bool useOrbit;
@@ -130,6 +132,11 @@ namespace RTSEngine.Controllers {
             zoom = 0;
             return;
         }
+        public void GetResetDefault(out bool b) {
+            b = resetDefault;
+            resetDefault = false;
+            return;
+        }
 
         // Event Hooks
         public void OnMouseMovement(Vector2 pos, Vector2 disp) {
@@ -155,6 +162,7 @@ namespace RTSEngine.Controllers {
                 case KEY_MOVE_UP_ALT: moveKeys[5] = true; return;
                 case KEY_MOVE_DOWN: moveKeys[6] = true; return;
                 case KEY_MOVE_DOWN_ALT: moveKeys[7] = true; return;
+                case KEY_RESET_DEFAULT: resetDefault = true; return;
             }
         }
         public void OnKeyRelease(object sender, KeyEventArgs args) {

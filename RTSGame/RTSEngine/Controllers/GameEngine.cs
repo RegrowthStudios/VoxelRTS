@@ -34,23 +34,28 @@ namespace RTSEngine.Controllers {
                 SearchAllInitInfo(subDir, dictRaces, dictSchemes);
             }
         }
-        private static DynCompiledResults? CompileAllScripts(DirectoryInfo root) {
+        private static Dictionary<string, ReflectedScript> CompileAllScripts(DirectoryInfo root) {
             string error;
             List<string> files = new List<string>();
-            FindAllScripts(root, files);
-            DynCompiledResults res = DynControllerParser.Compile(files.ToArray(), RTSConstants.REFERENCES, out error);
-            return string.IsNullOrEmpty(error) ? new DynCompiledResults?(res) : null;
+            List<string> libs = new List<string>(RTSConstants.ENGINE_LIBRARIES);
+            FindAllInitData(root, files, libs);
+            return ScriptParser.Compile(files.ToArray(), libs.ToArray(), out error);
         }
-        private static void FindAllScripts(DirectoryInfo dir, List<string> files) {
+        private static void FindAllInitData(DirectoryInfo dir, List<string> files, List<string> libs) {
             var f = dir.GetFiles();
             if(f != null && f.Length > 0)
-                files.AddRange(from fi in f where fi.Extension.EndsWith("cs") select fi.FullName);
+                foreach(var fi in f) {
+                    if(fi.Extension.EndsWith("cs"))
+                        files.Add(fi.FullName);
+                    else if(fi.Extension.EndsWith("dll"))
+                        libs.Add(fi.FullName);
+                }
             foreach(var d in dir.GetDirectories())
-                FindAllScripts(d, files);
+                FindAllInitData(d, files, libs);
         }
 
         public static void BuildLocal(GameState state, EngineLoadData eld, DirectoryInfo root, Dictionary<string, RTSRaceData> races) {
-            BuildControllers(state, root);
+            BuildScripts(state, root);
 
             // Load The Map
             FileInfo fiEnvSpawn;
@@ -64,7 +69,6 @@ namespace RTSEngine.Controllers {
                         state.teams[ti].Input = new PlayerInputController(state, ti);
                         break;
                     case InputType.AI:
-                        // TODO: Make This Class
                         state.teams[ti].Input = new AIInputController(state, ti);
                         break;
                     case InputType.Environment:
@@ -80,21 +84,14 @@ namespace RTSEngine.Controllers {
                 team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
             }
         }
-        private static void BuildControllers(GameState state, DirectoryInfo root) {
-            DynCompiledResults res = new DynCompiledResults();
-            DynCompiledResults? cres = CompileAllScripts(root);
-            if(cres.HasValue)
-                res = cres.Value;
-            else
+        private static void BuildScripts(GameState state, DirectoryInfo root) {
+            var res = CompileAllScripts(root);
+            if(res == null)
                 throw new Exception("Bro, You Fucked Up The Scripts.\nDon't Mod It If You Don't Know It");
 
-            // Add Controllers
-            foreach(KeyValuePair<string, ReflectedUnitController> kv in res.UnitControllers)
-                state.UnitControllers.Add(kv.Key, kv.Value);
-            foreach(KeyValuePair<string, ReflectedSquadController> kv in res.SquadControllers)
-                state.SquadControllers.Add(kv.Key, kv.Value);
-            foreach(KeyValuePair<string, ReflectedBuildingController> kv in res.BuildingControllers)
-                state.BuildingControllers.Add(kv.Key, kv.Value);
+            // Add Scripts
+            foreach(KeyValuePair<string, ReflectedScript> kv in res)
+                state.Scripts.Add(kv.Key, kv.Value);
         }
         private static IndexedTeam[] BuildTeams(GameState state, EngineLoadData eld, Dictionary<string, RTSRaceData> races) {
             var t = new List<IndexedTeam>();
@@ -107,18 +104,18 @@ namespace RTSEngine.Controllers {
                 RTSRaceData rd = races[res.Race];
                 team.ColorScheme = res.Colors;
                 team.Race.FriendlyName = rd.Name;
-                team.Race.SCAction = state.SquadControllers[rd.DefaultSquadActionController];
-                team.Race.SCMovement = state.SquadControllers[rd.DefaultSquadMovementController];
-                team.Race.SCTargeting = state.SquadControllers[rd.DefaultSquadTargetingController];
+                team.Race.SCAction = state.Scripts[rd.DefaultSquadActionController];
+                team.Race.SCMovement = state.Scripts[rd.DefaultSquadMovementController];
+                team.Race.SCTargeting = state.Scripts[rd.DefaultSquadTargetingController];
                 int type = 0;
                 foreach(FileInfo unitDataFile in rd.UnitTypes) {
-                    RTSUnitData data = RTSUnitDataParser.ParseData(state.UnitControllers, unitDataFile);
+                    RTSUnitData data = RTSUnitDataParser.ParseData(state.Scripts, unitDataFile);
                     team.Race.Units[type++] = data;
                 }
                 team.Race.UpdateActiveUnits();
                 type = 0;
                 foreach(FileInfo buildingDataFile in rd.BuildingTypes) {
-                    RTSBuildingData data = RTSBuildingDataParser.ParseData(state.BuildingControllers, buildingDataFile);
+                    RTSBuildingData data = RTSBuildingDataParser.ParseData(state.Scripts, buildingDataFile);
                     team.Race.Buildings[type++] = data;
                 }
                 team.Race.UpdateActiveBuildings();
@@ -143,11 +140,8 @@ namespace RTSEngine.Controllers {
             }
         }
         public static void Load(GameState state, DirectoryInfo root, string fi) {
-            DynCompiledResults res = new DynCompiledResults();
-            DynCompiledResults? cres = CompileAllScripts(root);
-            if(cres.HasValue)
-                res = cres.Value;
-            else
+            var res = CompileAllScripts(root);
+            if(res == null)
                 throw new Exception("Bro, You Fucked Up The Scripts.\nDon't Mod It If You Don't Know It");
 
             string mapFile = "";

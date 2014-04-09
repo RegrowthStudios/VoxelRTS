@@ -26,28 +26,28 @@ namespace RTSEngine.Data.Team {
             s.Write(e.MovementMultiplier);
             if(e.ActionController != null) {
                 s.Write(true);
-                // TODO: Custom Serialize
+                e.ActionController.Serialize(s);
             }
             else {
                 s.Write(false);
             }
             if(e.CombatController != null) {
                 s.Write(true);
-                // TODO: Custom Serialize
+                e.CombatController.Serialize(s);
             }
             else {
                 s.Write(false);
             }
             if(e.MovementController != null) {
                 s.Write(true);
-                // TODO: Custom Serialize
+                e.MovementController.Serialize(s);
             }
             else {
                 s.Write(false);
             }
             if(e.AnimationController != null) {
                 s.Write(true);
-                // TODO: Custom Serialize
+                e.AnimationController.Serialize(s);
             }
             else {
                 s.Write(false);
@@ -71,25 +71,25 @@ namespace RTSEngine.Data.Team {
             e.Health = s.ReadInt32();
             e.MovementMultiplier = s.ReadSingle();
             if(s.ReadBoolean()) {
-                // TODO: Custom Deserialize
+                if(e.ActionController != null) e.ActionController.Deserialize(s);
             }
             else {
                 e.ActionController = null;
             }
             if(s.ReadBoolean()) {
-                // TODO: Custom Deserialize
+                if(e.CombatController != null) e.CombatController.Deserialize(s);
             }
             else {
                 e.CombatController = null;
             }
             if(s.ReadBoolean()) {
-                // TODO: Custom Deserialize
+                if(e.MovementController != null) e.MovementController.Deserialize(s);
             }
             else {
                 e.MovementController = null;
             }
             if(s.ReadBoolean()) {
-                // TODO: Custom Deserialize
+                if(e.AnimationController != null) e.AnimationController.Deserialize(s);
             }
             else {
                 e.AnimationController = null;

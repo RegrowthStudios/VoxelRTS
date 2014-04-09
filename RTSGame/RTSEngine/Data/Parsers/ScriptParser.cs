@@ -9,17 +9,11 @@ using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Parsers {
-    public struct DynCompiledResults {
-        public Dictionary<string, ReflectedUnitController> UnitControllers;
-        public Dictionary<string, ReflectedSquadController> SquadControllers;
-        public Dictionary<string, ReflectedBuildingController> BuildingControllers;
-    }
-
-    public static class DynControllerParser {
+    public static class ScriptParser {
         // Create The Compiler
         private static readonly CSharpCodeProvider compiler = new CSharpCodeProvider();
 
-        public static DynCompiledResults Compile(string[] files, string[] references, out string error) {
+        public static Dictionary<string, ReflectedScript> Compile(string[] files, string[] references, out string error) {
             // No Error Default
             error = null;
 
@@ -36,14 +30,11 @@ namespace RTSEngine.Data.Parsers {
                 error = "";
                 foreach(var e in cr.Errors)
                     error += e + "\n";
-                return new DynCompiledResults();
+                return null;
             }
 
             // Dictionaries
-            DynCompiledResults res = new DynCompiledResults();
-            res.UnitControllers = new Dictionary<string, ReflectedUnitController>();
-            res.SquadControllers = new Dictionary<string, ReflectedSquadController>();
-            res.BuildingControllers = new Dictionary<string, ReflectedBuildingController>();
+            var res = new Dictionary<string, ReflectedScript>();
 
             // Loop Through All Visible Types
             Assembly a = cr.CompiledAssembly;
@@ -53,12 +44,10 @@ namespace RTSEngine.Data.Parsers {
                 if(t.IsAbstract || t.IsInterface) continue;
 
                 // Check For The Superclass
-                if(t.IsSubclassOf(typeof(ACUnitController)))
-                    res.UnitControllers.Add(t.FullName, new ReflectedUnitController(t));
-                else if(t.IsSubclassOf(typeof(ACSquadController)))
-                    res.SquadControllers.Add(t.FullName, new ReflectedSquadController(t));
-                else if(t.IsSubclassOf(typeof(ACBuildingController)))
-                    res.BuildingControllers.Add(t.FullName, new ReflectedBuildingController(t));
+                if(t.IsSubclassOf(typeof(ACScript))) {
+                    var rs = new ReflectedScript(t);
+                    res.Add(rs.TypeName, rs);
+                }
             }
             return res;
         }

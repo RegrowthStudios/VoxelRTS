@@ -10,7 +10,6 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 
 namespace RTSEngine.Graphics {
-    // TODO: Animations Applied By A Controller From A Check On A Frame (Specified In File)
     public class RTSUnitModel {
         public const ParsingFlags MODEL_READ_FLAGS = ParsingFlags.ConversionOpenGL;
 

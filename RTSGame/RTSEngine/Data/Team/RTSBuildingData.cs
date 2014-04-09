@@ -66,7 +66,7 @@ namespace RTSEngine.Data.Team {
             }
             data.BBox.Min = s.ReadVector3();
             data.BBox.Max = s.ReadVector3();
-            data.DefaultActionController = state.BuildingControllers[s.ReadString()];
+            data.DefaultActionController = state.Scripts[s.ReadString()];
             return data;
         }
 
@@ -98,6 +98,6 @@ namespace RTSEngine.Data.Team {
         public ICollidable ICollidableShape;
         public BoundingBox BBox;
 
-        public ReflectedBuildingController DefaultActionController;
+        public ReflectedScript DefaultActionController;
     }
 }

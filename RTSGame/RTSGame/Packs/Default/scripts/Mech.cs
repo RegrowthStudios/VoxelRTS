@@ -10,9 +10,14 @@ using RTSEngine.Controllers;
 using RTSEngine.Graphics;
 using RTSEngine.Algorithms;
 using RTS.UIInput.BuildingInput;
+using System.IO;
 
 namespace RTS.Mech.Squad {
     public class Action : ACSquadActionController {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
+
         public override void DecideAction(GameState g, float dt) {
             if(squad.TargetingController != null)
                 squad.TargetingController.DecideTarget(g, dt);
@@ -25,6 +30,13 @@ namespace RTS.Mech.Squad {
             if(squad.MovementController != null)
                 squad.MovementController.ApplyMoves(g, dt);
         }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
     public class Movement : ACSquadMovementController {
@@ -32,6 +44,10 @@ namespace RTS.Mech.Squad {
         Dictionary<int, bool> doMove = new Dictionary<int, bool>();
 
         float a = 0f;
+        
+        public override void Init(GameState s, GameplayController c) {
+
+        }
 
         public override void DecideMoves(GameState g, float dt) {
             // Pathfinding Has Not Finished: Make The Formation At The Average Squad Position
@@ -162,9 +178,20 @@ namespace RTS.Mech.Squad {
                 }
             }
         }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
     public class Target : ACSquadTargetingController {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
+
         public override void DecideTarget(GameState g, float dt) {
             if(targetSquad == null) {
                 FindTargetSquad(g);
@@ -214,11 +241,22 @@ namespace RTS.Mech.Squad {
                 unit.Target = targetUnit;
             }
         }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 }
 
 namespace RTS.Mech.Unit {
     public class Action : ACUnitActionController {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
+
         public override void DecideAction(GameState g, float dt) {
             // TODO: The Real FSM
             switch(unit.State) {
@@ -241,6 +279,13 @@ namespace RTS.Mech.Unit {
             if(unit.CombatController != null)
                 unit.CombatController.Attack(g, dt);
         }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
     public class Animation : ACUnitAnimationController {
@@ -261,6 +306,10 @@ namespace RTS.Mech.Unit {
             alCombat.FrameSpeed = 30;
 
             SetAnimation(BehaviorFSM.None);
+        }
+
+        public override void Init(GameState s, GameplayController c) {
+
         }
 
         public override void SetUnit(RTSUnit u) {
@@ -336,6 +385,13 @@ namespace RTS.Mech.Unit {
                 }
             }
         }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
     public class Combat : ACUnitCombatController {
@@ -344,6 +400,10 @@ namespace RTS.Mech.Unit {
 
         // The Amount Of Time Remaining Before This Controller's Entity Can Attack Again
         private float attackCooldown;
+
+        public override void Init(GameState s, GameplayController c) {
+
+        }
 
         public override void Attack(GameState g, float dt) {
             if(attackCooldown > 0)
@@ -370,10 +430,26 @@ namespace RTS.Mech.Unit {
                 }
             }
         }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 
     public class Movement : ACUnitMovementController {
-    
+        public override void Init(GameState s, GameplayController c) {
+
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
     }
 }
 
@@ -386,19 +462,19 @@ namespace RTS.Mech.Building {
         public float buildTime; // How Long It Takes To Finish Producing The Unit
         private int unit = -1; // Unit To Be Produced
 
-        public override void DecideAction(GameState g, float dt)
-        {
+        public override void Init(GameState s, GameplayController c) {
+
+        }
+
+        public override void DecideAction(GameState g, float dt) {
             // Process event queue if there is any
-            if (eventQueue.Count > 0 && currentEvent == EventType.None)
-            {
+            if(eventQueue.Count > 0 && currentEvent == EventType.None) {
                 currentEvent = eventQueue.Dequeue();
 
-                switch (currentEvent)
-                {
+                switch(currentEvent) {
                     // Production event
                     case EventType.Production:
-                        if (unit < 0 && unitQueue.Count > 0)
-                        {
+                        if(unit < 0 && unitQueue.Count > 0) {
                             unit = unitQueue.Dequeue();
                             buildTime = building.Team.Race.Units[unit].BuildTime;
                         }
@@ -412,18 +488,14 @@ namespace RTS.Mech.Building {
             }
         }
 
-        public override void ApplyAction(GameState g, float dt)
-        {
-            switch (currentEvent)
-            {
+        public override void ApplyAction(GameState g, float dt) {
+            switch(currentEvent) {
                 case EventType.Production:
                     // If The Unit Is Still Being Produced
-                    if (unit >= 0)
-                    {
+                    if(unit >= 0) {
                         buildTime -= dt;
                         // If Finished Building The Unit
-                        if (buildTime < 0)
-                        {
+                        if(buildTime < 0) {
                             building.Team.AddUnit(unit, building.GridPosition);
                             buildTime = 0;
                             unit = -1;
@@ -432,6 +504,13 @@ namespace RTS.Mech.Building {
                     }
                     break;
             }
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
         }
     }
 }

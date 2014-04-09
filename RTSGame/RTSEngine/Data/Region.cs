@@ -6,10 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace RTSEngine.Data
-{
-    public class Region
-    {
+namespace RTSEngine.Data {
+    public class Region {
         public int RegionImpact { get; private set; }
         public List<Point> Cells { get; private set; }
         public List<IEntity> units { get; set; }
@@ -20,7 +18,7 @@ namespace RTSEngine.Data
         }
 
         public void AddToRegionImpact(int amount) {
-            RegionImpact += amount; 
+            RegionImpact += amount;
         }
     }
 }

@@ -28,6 +28,7 @@ namespace RTSEngine.Algorithms {
         // The Task's Work Function
         public abstract void DoWork(float dt);
 
+        // This Task Is Complete And Should Not Be Executed
         public void Finish() {
             WorkAmount = -1;
         }
@@ -133,8 +134,13 @@ namespace RTSEngine.Algorithms {
 
         public void DoTasks(float dt) {
             var tasks = taskBins[curBin];
-            for(int i = 0; i < tasks.Count; i++)
+            for(int i = 0; i < tasks.Count; i++) {
+                // Check For Task Viability
+                if(tasks[i].IsFinished) continue;
                 tasks[i].DoWork(dt);
+            }
+
+            // Increment The Task Bin
             curBin = (curBin + 1) % taskBins.Length;
         }
     }

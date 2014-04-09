@@ -105,8 +105,6 @@ namespace RTS {
                 camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
                 renderer.Update(state);
                 renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
-
-                // TODO: Draw UI
                 renderer.DrawUI(SB);
             }
 

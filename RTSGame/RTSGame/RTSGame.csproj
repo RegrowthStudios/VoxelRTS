@@ -100,7 +100,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="PressEnterScreen.cs" />
-    <Compile Include="RTSNetScreen.cs" />
     <Compile Include="RTSScreen.cs" />
     <Content Include="Content\Audio\btnClick.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -364,22 +363,22 @@
     <Content Include="Content\Textures\InduZtry.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="lib\Microsoft.Xna.Framework.Content.Pipeline.dll">
+    <Content Include="Packs\lib\Microsoft.Xna.Framework.Content.Pipeline.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="lib\Microsoft.Xna.Framework.Content.Pipeline.EffectImporter.dll">
+    <Content Include="Packs\lib\Microsoft.Xna.Framework.Content.Pipeline.EffectImporter.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="lib\Microsoft.Xna.Framework.dll">
+    <Content Include="Packs\lib\Microsoft.Xna.Framework.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="lib\Microsoft.Xna.Framework.Game.dll">
+    <Content Include="Packs\lib\Microsoft.Xna.Framework.Game.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="lib\Microsoft.Xna.Framework.Graphics.dll">
+    <Content Include="Packs\lib\Microsoft.Xna.Framework.Graphics.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="lib\Microsoft.Xna.Framework.Net.dll">
+    <Content Include="Packs\lib\Microsoft.Xna.Framework.Net.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

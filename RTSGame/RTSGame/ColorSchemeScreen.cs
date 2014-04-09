@@ -650,9 +650,18 @@ namespace RTS {
             animLoop.FrameSpeed = sp;
         }
 
+        public override void Init(GameState s, GameplayController c) {
+        }
+
         public override void Update(GameState s, float dt) {
             animLoop.Step(dt);
             AnimationFrame = animLoop.CurrentFrame;
+        }
+
+
+        public override void Serialize(BinaryWriter s) {
+        }
+        public override void Deserialize(BinaryReader s) {
         }
     }
     #endregion

@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using System.IO;
 
 namespace RTSEngine.Controllers {
+    // TODO: Make This A Better AI
     public class AIInputController : InputController {
         Thread t;
         bool running, paused;

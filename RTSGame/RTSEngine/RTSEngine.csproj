@@ -56,15 +56,13 @@
     <Compile Include="Controllers\AIInputController.cs" />
     <Compile Include="Controllers\CameraController.cs" />
     <Compile Include="Controllers\DevConsole.cs" />
-    <Compile Include="Controllers\DynControllers.cs" />
+    <Compile Include="Controllers\ReflectedScript.cs" />
     <Compile Include="Controllers\EnvironmentInputController.cs" />
     <Compile Include="Controllers\FOWResolver.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
-    <Compile Include="Controllers\GameTypeController.cs" />
     <Compile Include="Controllers\InputController.cs" />
     <Compile Include="Controllers\PlayerInputController.cs" />
-    <Compile Include="Controllers\RTSButton.cs" />
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
     <Compile Include="Data\DevCommands.cs" />
@@ -77,7 +75,7 @@
     <Compile Include="Data\Parsers\EngineLoadParser.cs" />
     <Compile Include="Data\Parsers\EnvironmentDataParser.cs" />
     <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
-    <Compile Include="Data\Parsers\EntityControllerParser.cs" />
+    <Compile Include="Data\Parsers\ScriptParser.cs" />
     <Compile Include="Data\Parsers\MapParser.cs" />
     <Compile Include="Data\Parsers\RegexHelper.cs" />
     <Compile Include="Data\Parsers\RTSColorSchemeParser.cs" />
@@ -110,16 +108,16 @@
     <Compile Include="Graphics\UI\RTSUI.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
     <Compile Include="Graphics\UI\RTSUISelectionPanel.cs" />
+    <Compile Include="Interfaces\BehaviorFSM.cs" />
     <Compile Include="Interfaces\ImpactGenerator.cs" />
     <Compile Include="Net\NetSerializer.cs" />
     <Compile Include="Net\NetStreamMultiReceiver.cs" />
     <Compile Include="Net\NetStreamMultiSender.cs" />
     <Compile Include="Net\NetStateController.cs" />
-    <Compile Include="Interfaces\EntityControllers.cs" />
+    <Compile Include="Interfaces\Scripts.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />
     <Compile Include="Interfaces\IEntity.cs" />
     <Compile Include="Data\Parsers\ObjParser.cs" />
-    <Compile Include="Interfaces\SquadControllers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\RTSEffect.cs" />
   </ItemGroup>

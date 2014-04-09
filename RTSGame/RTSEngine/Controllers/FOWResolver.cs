@@ -39,7 +39,7 @@ namespace RTSEngine.Controllers {
         private int[,] heat;
 
         public FOWTask(GameState s, int tIndex)
-            : base(s.teams[tIndex].Units.Count + s.teams[tIndex].Buildings.Count) {
+            : base(1) {
             teamIndex = tIndex;
             state = s;
             heat = new int[s.CGrid.numCells.X, s.CGrid.numCells.Y];

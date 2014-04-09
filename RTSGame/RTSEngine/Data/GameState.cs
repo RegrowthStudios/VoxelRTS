@@ -33,18 +33,6 @@ namespace RTSEngine.Data {
             s.Write(state.CurrentFrame);
             s.Write(state.TotalGameTime);
             s.Write(UUIDGenerator.GetUUID());
-            s.Write(state.UnitControllers.Count);
-            foreach(var key in state.UnitControllers.Keys) {
-                s.Write(key);
-            }
-            s.Write(state.BuildingControllers.Count);
-            foreach(var key in state.BuildingControllers.Keys) {
-                s.Write(key);
-            }
-            s.Write(state.SquadControllers.Count);
-            foreach(var key in state.SquadControllers.Keys) {
-                s.Write(key);
-            }
             s.Write(state.activeTeams.Length);
             foreach(var at in state.activeTeams) {
                 s.Write(at.Index);
@@ -57,39 +45,12 @@ namespace RTSEngine.Data {
             }
             LevelGrid.Serialize(s, state);
         }
-        public static void Deserialize(BinaryReader s, DynCompiledResults res, GameState state) {
+        public static void Deserialize(BinaryReader s, Dictionary<string, ReflectedScript> res, GameState state) {
             state.curFrame = s.ReadInt32();
             state.timePlayed = s.ReadSingle();
             UUIDGenerator.SetUUID(s.ReadInt32());
+            state.Scripts = new Dictionary<string,ReflectedScript>(res);
             int c = s.ReadInt32();
-            string key;
-            ReflectedUnitController ruc;
-            for(int i = 0; i < c; i++) {
-                key = s.ReadString();
-                if(res.UnitControllers.TryGetValue(key, out ruc))
-                    state.UnitControllers.Add(ruc.TypeName, ruc);
-                else
-                    throw new Exception("Missing Unit Controller");
-            }
-            c = s.ReadInt32();
-            ReflectedBuildingController rbc;
-            for(int i = 0; i < c; i++) {
-                key = s.ReadString();
-                if(res.BuildingControllers.TryGetValue(key, out rbc))
-                    state.BuildingControllers.Add(rbc.TypeName, rbc);
-                else
-                    throw new Exception("Missing Building Controller");
-            }
-            c = s.ReadInt32();
-            ReflectedSquadController rsc;
-            for(int i = 0; i < c; i++) {
-                key = s.ReadString();
-                if(res.SquadControllers.TryGetValue(key, out rsc))
-                    state.SquadControllers.Add(rsc.TypeName, rsc);
-                else
-                    throw new Exception("Missing Squad Controller");
-            }
-            c = s.ReadInt32();
             for(int i = 0; i < c; i++) {
                 int ti = s.ReadInt32();
                 state.teams[ti] = RTSTeam.Deserialize(s, ti, state);
@@ -119,15 +80,7 @@ namespace RTSEngine.Data {
         }
 
         // Controller Dictionary
-        public Dictionary<string, ReflectedUnitController> UnitControllers {
-            get;
-            private set;
-        }
-        public Dictionary<string, ReflectedSquadController> SquadControllers {
-            get;
-            private set;
-        }
-        public Dictionary<string, ReflectedBuildingController> BuildingControllers {
+        public Dictionary<string, ReflectedScript> Scripts {
             get;
             private set;
         }
@@ -167,9 +120,7 @@ namespace RTSEngine.Data {
             Regions = new List<Region>();
 
             // No Data Yet Available
-            UnitControllers = new Dictionary<string, ReflectedUnitController>();
-            SquadControllers = new Dictionary<string, ReflectedSquadController>();
-            BuildingControllers = new Dictionary<string, ReflectedBuildingController>();
+            Scripts = new Dictionary<string, ReflectedScript>();
             grid = new LevelGrid();
             grid.L0 = null;
             grid.L1 = null;

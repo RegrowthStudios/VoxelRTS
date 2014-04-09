@@ -71,10 +71,10 @@ namespace RTSEngine.Data.Team {
             }
             data.BBox.Min = s.ReadVector3();
             data.BBox.Max = s.ReadVector3();
-            data.DefaultActionController = state.UnitControllers[s.ReadString()];
-            data.DefaultCombatController = state.UnitControllers[s.ReadString()];
-            data.DefaultMoveController = state.UnitControllers[s.ReadString()];
-            data.DefaultAnimationController = state.UnitControllers[s.ReadString()];
+            data.DefaultActionController = state.Scripts[s.ReadString()];
+            data.DefaultCombatController = state.Scripts[s.ReadString()];
+            data.DefaultMoveController = state.Scripts[s.ReadString()];
+            data.DefaultAnimationController = state.Scripts[s.ReadString()];
             return data;
         }
 
@@ -110,9 +110,9 @@ namespace RTSEngine.Data.Team {
         public ICollidable ICollidableShape;
         public BoundingBox BBox;
 
-        public ReflectedUnitController DefaultActionController;
-        public ReflectedUnitController DefaultCombatController;
-        public ReflectedUnitController DefaultMoveController;
-        public ReflectedUnitController DefaultAnimationController;
+        public ReflectedScript DefaultActionController;
+        public ReflectedScript DefaultCombatController;
+        public ReflectedScript DefaultMoveController;
+        public ReflectedScript DefaultAnimationController;
     }
 }

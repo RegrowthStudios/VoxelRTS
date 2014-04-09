@@ -91,7 +91,7 @@ namespace RTSEngine.Data.Parsers {
             model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
             return model;
         }
-        public static RTSUnitData ParseData(Dictionary<string, ReflectedUnitController> controllers, FileInfo infoFile) {
+        public static RTSUnitData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 

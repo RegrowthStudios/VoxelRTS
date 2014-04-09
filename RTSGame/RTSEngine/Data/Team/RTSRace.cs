@@ -57,9 +57,9 @@ namespace RTSEngine.Data.Team {
                 race.Buildings[bi] = RTSBuildingData.Deserialize(s, state);
             }
             race.UpdateActiveBuildings();
-            race.SCAction = state.SquadControllers[s.ReadString()];
-            race.SCMovement = state.SquadControllers[s.ReadString()];
-            race.SCTargeting = state.SquadControllers[s.ReadString()];
+            race.SCAction = state.Scripts[s.ReadString()];
+            race.SCMovement = state.Scripts[s.ReadString()];
+            race.SCTargeting = state.Scripts[s.ReadString()];
             return race;
         }
 
@@ -74,9 +74,9 @@ namespace RTSEngine.Data.Team {
         public readonly RTSBuildingData[] Buildings;
         public IndexedBuildingType[] ActiveBuildings;
 
-        public ReflectedSquadController SCAction;
-        public ReflectedSquadController SCMovement;
-        public ReflectedSquadController SCTargeting;
+        public ReflectedScript SCAction;
+        public ReflectedScript SCMovement;
+        public ReflectedScript SCTargeting;
 
         public RTSRace() {
             Units = new RTSUnitData[MAX_UNIT_TYPES];

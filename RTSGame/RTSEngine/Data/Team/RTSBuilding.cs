@@ -29,7 +29,7 @@ namespace RTSEngine.Data.Team {
             }
             if(e.ActionController != null) {
                 s.Write(true);
-                // TODO: Custom Serialize
+                e.ActionController.Serialize(s);
             }
             else {
                 s.Write(false);
@@ -56,7 +56,7 @@ namespace RTSEngine.Data.Team {
                 e.viewedInfo.Set(i, s.ReadBoolean());
             }
             if(s.ReadBoolean()) {
-                // TODO: Custom Deserialize
+                if(e.ActionController != null) e.ActionController.Deserialize(s);
             }
             else {
                 e.ActionController = null;
