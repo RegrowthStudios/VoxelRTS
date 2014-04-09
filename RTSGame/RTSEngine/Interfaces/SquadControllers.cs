@@ -58,29 +58,27 @@ namespace RTSEngine.Interfaces {
             private set;
         }
 
-        public void Init(CollisionGrid cg, List<Vector2> waypoints) {
-            this.waypoints = waypoints;
-            InitPathFlow(cg);
-        }
-
-        // Update The Path Flow With This Controller's Waypoints
         public void InitPathFlow(CollisionGrid cg) {
             PathFlow = new FlowGrid(cg, false);
+        }
+
+        // Update The Path Flow With A List Of Waypoints
+        public void UpdatePathFlow(List<Vector2> waypoints) {
             if(Waypoints == null || Waypoints.Count == 0) return;
             Vector2 goal = Waypoints[0];
             for(int i = 0; i < PathFlow.numCells.X; i++) {
                 for(int j = 0; j < PathFlow.numCells.Y; j++) {
                     float minDistSq = float.MaxValue;
                     Vector2 seg = Vector2.Zero;
-                    for(int w = Waypoints.Count-2; w >= 0; w--) {
+                    for(int w = Waypoints.Count - 2; w >= 0; w--) {
                         Vector2 a = Waypoints[w + 1];
                         Vector2 b = Waypoints[w];
                         seg = b - a;
                         float d = DistSq(a, b, PathFlow.MakeContinuous(i, j));
-                    //    PathFlow.FlowVectors[i, j] += PathForce(seg, d);
+                        //    PathFlow.FlowVectors[i, j] += PathForce(seg, d);
                         if(d < minDistSq) minDistSq = d;
                     }
-                    if(minDistSq < 2*cg.cellSize)
+                    if(minDistSq < 2 * PathFlow.cellSize)
                         PathFlow.FlowVectors[i, j] += PathForce(seg, minDistSq);
                     // Add A Special Attractive Charge At The Last Waypoint
                     // TODO: Figure Out Why Everything Looks Better When Only The Goal Is Turned On

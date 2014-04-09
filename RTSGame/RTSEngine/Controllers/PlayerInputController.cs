@@ -102,7 +102,9 @@ namespace RTSEngine.Controllers {
                 // TODO: Check FOW As Well
 
                 // Loop Through All The Units
-                foreach(RTSUnit unit in team.Units) {
+                // TODO: Remove This Temp Var (Prevents A Crash)
+                List<RTSUnit> temp = new List<RTSUnit>(team.Units);
+                foreach(RTSUnit unit in temp) {
                     box = unit.BBox;
                     dist = r.Intersects(box);
                     if(dist != null && dist.Value < closest) {

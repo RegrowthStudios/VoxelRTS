@@ -332,7 +332,9 @@ namespace RTSEngine.Controllers {
                 RTSSquad squad = squadQuery.squad;
                 PathQuery query = squadQuery.query;
                 if(!query.IsOld && query.IsComplete) {
-                    squad.MovementController.Init(cg, query.waypoints);
+                    squad.MovementController.InitPathFlow(cg);
+                    squad.MovementController.Waypoints = query.waypoints;
+                    squad.MovementController.UpdatePathFlow(query.waypoints);
                     // Tell All The Units In The Squad To Head To The First Waypoint
                     foreach(var unit in squad.Units) {
                         squad.MovementController.CurrentWaypointIndices[unit.UUID] = query.waypoints.Count - 1;
