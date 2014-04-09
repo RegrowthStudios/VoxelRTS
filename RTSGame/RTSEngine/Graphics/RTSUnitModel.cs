@@ -131,7 +131,7 @@ namespace RTSEngine.Graphics {
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, VisibleInstanceCount);
         }
 
-        private void OnUnitSpawn(RTSUnit u) {
+        public void OnUnitSpawn(RTSUnit u) {
             if(u.UnitData == Data)
                 instances.Add(u);
         }

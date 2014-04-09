@@ -9,6 +9,7 @@ using BlisterUI;
 using BlisterUI.Input;
 using BlisterUI.Widgets;
 using RTSEngine.Data;
+using Microsoft.Xna.Framework.Input;
 
 namespace RTS {
     public class LoginScreen : GameScreen<App> {
@@ -35,11 +36,15 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;
+
             font = XNASpriteFont.Compile(G, "Courier New", 32, out tFont);
             wr = new WidgetRenderer(G, font);
 
             wUsername = new TextWidget(wr);
-            wUsername.Anchor = new Point(10, 10);
+            wUsername.Anchor = new Point(G.Viewport.Width / 2, G.Viewport.Height / 2);
+            wUsername.AlignY = Alignment.BOTTOM;
+            wUsername.AlignX = Alignment.MID;
             wUsername.Color = Color.White;
             wUsername.Height = 32;
 
@@ -47,6 +52,8 @@ namespace RTS {
             ButtonHighlightOptions h2 = new ButtonHighlightOptions(100, 30, Color.Green);
             bFinish = new RectButton(wr, h1, h2);
             bFinish.OffsetAlignY = Alignment.BOTTOM;
+            bFinish.OffsetAlignX = Alignment.MID;
+            bFinish.AlignX = Alignment.MID;
             bFinish.Offset = new Point(0, 0);
             bFinish.Parent = wUsername;
             bFinish.OnButtonPress += bFinish_OnButtonPress;
@@ -63,6 +70,8 @@ namespace RTS {
             }
         }
         public override void OnExit(GameTime gameTime) {
+            KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
+
             bFinish.OnButtonPress -= bFinish_OnButtonPress;
             tInput.OnTextChanged -= tInput_OnTextChanged;
 
@@ -82,6 +91,17 @@ namespace RTS {
         }
         void tInput_OnTextChanged(TextInput arg1, string arg2) {
             wUsername.Text = arg2;
+        }
+        void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
+            switch(args.KeyCode) {
+                case Keys.Enter:
+                    string n = tInput.Text;
+                    if(!n.Equals(UserConfig.DEFAULT_USER_NAME) && !string.IsNullOrWhiteSpace(n)) {
+                        UserConfig.UserName = n;
+                        State = ScreenState.ChangeNext;
+                    }
+                    break;
+            }
         }
 
         public override void Update(GameTime gameTime) {

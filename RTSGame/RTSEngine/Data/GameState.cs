@@ -167,6 +167,7 @@ namespace RTSEngine.Data {
             UUIDGenerator.SetUUID(0);
             teams = new RTSTeam[MAX_PLAYERS];
             activeTeams = new IndexedTeam[0];
+            Regions = new List<Region>();
 
             // No Data Yet Available
             UnitControllers = new Dictionary<string, ReflectedUnitController>();

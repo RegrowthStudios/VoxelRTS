@@ -112,11 +112,13 @@ namespace BlisterUI.Widgets {
 
         public void Hook() {
             if(isHooked) return;
+            isHooked = true;
             MouseEventDispatcher.OnMouseMotion += OnMouseMotion;
             MouseEventDispatcher.OnMousePress += OnMousePress;
         }
         public void Unhook() {
             if(!isHooked) return;
+            isHooked = false;
             MouseEventDispatcher.OnMouseMotion -= OnMouseMotion;
             MouseEventDispatcher.OnMousePress -= OnMousePress;
         }

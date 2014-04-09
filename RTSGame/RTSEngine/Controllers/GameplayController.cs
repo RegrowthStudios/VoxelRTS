@@ -112,10 +112,9 @@ namespace RTSEngine.Controllers {
             }
             pathfinder = new Pathfinder(s.CGrid);
 
-            // Start The AI
+            // Start The Input Controllers
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                AIInputController aic = s.activeTeams[ti].Team.Input as AIInputController;
-                if(aic != null) aic.Start();
+                s.activeTeams[ti].Team.Input.Begin();
             }
 
             // Add All Tasks
@@ -361,8 +360,14 @@ namespace RTSEngine.Controllers {
                     case DevCommandType.StopMotion:
                         ApplyLogic(s, dt, comm as DevCommandStopMotion);
                         break;
-                    case DevCommandType.Kill:
-                        ApplyLogic(s, dt, comm as DevCommandKill);
+                    case DevCommandType.KillUnits:
+                        ApplyLogic(s, dt, comm as DevCommandKillUnits);
+                        break;
+                    case DevCommandType.KillBuildings:
+                        ApplyLogic(s, dt, comm as DevCommandKillBuildings);
+                        break;
+                    case DevCommandType.FOW:
+                        ApplyLogic(s, dt, comm as DevCommandFOW);
                         break;
                     case DevCommandType.Save:
                         ApplyLogic(s, dt, comm as DevCommandSave);
@@ -416,15 +421,31 @@ namespace RTSEngine.Controllers {
                 }
             }
         }
-        private void ApplyLogic(GameState s, float dt, DevCommandKill c) {
+        private void ApplyLogic(GameState s, float dt, DevCommandKillUnits c) {
             RTSTeam team;
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
                 foreach(var unit in team.Units) {
                     unit.Damage(9001); // OVER 9000
                 }
+            }
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandKillBuildings c) {
+            RTSTeam team;
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                team = s.activeTeams[ti].Team;
                 foreach(var building in team.Buildings) {
                     building.Damage(9001); // OVER 9000
+                }
+            }
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandFOW c) {
+            RTSTeam team;
+            for(int y = 0; y < s.CGrid.numCells.Y; y++) {
+                for(int x = 0; x < s.CGrid.numCells.Y; x++) {
+                    for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                        s.CGrid.SetFogOfWar(x, y, s.activeTeams[ti].Index, FogOfWar.Active);
+                    }
                 }
             }
         }
@@ -516,7 +537,15 @@ namespace RTSEngine.Controllers {
                 commands.Enqueue(c);
                 return;
             }
-            else if(DevCommandKill.TryParse(s, out c)) {
+            else if(DevCommandKillUnits.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandKillBuildings.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandFOW.TryParse(s, out c)) {
                 commands.Enqueue(c);
                 return;
             }

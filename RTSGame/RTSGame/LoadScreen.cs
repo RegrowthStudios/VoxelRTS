@@ -15,15 +15,16 @@ using RTSEngine.Data;
 using RTSEngine.Graphics;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
+using BlisterUI.Widgets;
 
 namespace RTS {
     public class LoadScreen : GameScreen<App> {
         // Constants For Loading Bar
         const string IMAGE_DIR = @"Content\LoadImages";
         const int BOUNDS_OFFSET = 20;
-        const int BAR_HEIGHT = 10;
+        const int BAR_HEIGHT = 20;
         const int BAR_WIDTH = 180;
-        const int BACK_SIZE = 3;
+        const int BACK_SIZE = 8;
 
         const string TIPS_FILE = @"Content\UI\tips.txt";
         const string TIPS_FONT = @"Courier New";
@@ -53,6 +54,10 @@ namespace RTS {
         SpriteFont font;
         IDisposable tFont;
 
+        private WidgetRenderer wr;
+        private RectButton button;
+        private TextWidget text;
+
         // Engine Data
         private EngineLoadData loadData;
         public EngineLoadData LoadData {
@@ -71,9 +76,14 @@ namespace RTS {
             get;
             private set;
         }
+        public FileInfo LoadFile {
+            get;
+            set;
+        }
 
         // Loading Information
         private bool isLoaded;
+        private Exception loadException;
 
         public override void Build() {
             FindAllImages();
@@ -105,6 +115,12 @@ namespace RTS {
             tWork.Start();
         }
         public override void OnExit(GameTime gameTime) {
+            if(wr != null) {
+                button.Dispose();
+                text.Dispose();
+                wr.Dispose();
+                wr = null;
+            }
             tFont.Dispose();
             font = null;
             tLoad.Dispose();
@@ -115,43 +131,112 @@ namespace RTS {
             percent += 0.01f;
             while(percent > 1) percent -= 1;
 
-            if(isLoaded) State = ScreenState.ChangeNext;
+            if(isLoaded && wr == null) {
+                if(loadException == null)
+                    BuildWidgetsSuccess();
+                else
+                    BuildWidgetsFailure();
+            }
         }
         public override void Draw(GameTime gameTime) {
             G.Clear(Color.Transparent);
 
-            int minX = BOUNDS_OFFSET - BAR_WIDTH;
-            int maxX = G.Viewport.Bounds.Width - BOUNDS_OFFSET;
+            if(wr != null) {
+                SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+                SB.Draw(tLoad, G.Viewport.Bounds, Color.White);
+                SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
+                SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
+                SB.End();
 
-            // Calculate Progress Bar
-            Rectangle rBar = G.Viewport.Bounds;
-            rBar.X = (int)(percent * (maxX - minX)) + minX;
-            rBar.Y = G.Viewport.Height - BOUNDS_OFFSET - BAR_HEIGHT;
-            rBar.Height = BAR_HEIGHT;
-            rBar.Width = BAR_WIDTH;
-            if(rBar.Width + rBar.X > maxX)
-                rBar.Width = maxX - rBar.X;
-            else if(rBar.X < BOUNDS_OFFSET) {
-                rBar.Width = rBar.X + rBar.Width - BOUNDS_OFFSET;
-                rBar.X = BOUNDS_OFFSET;
+                wr.Draw(SB);
+
+                game.DrawMouse();
             }
+            else {
+                int minX = BOUNDS_OFFSET - BAR_WIDTH;
+                int maxX = G.Viewport.Bounds.Width - BOUNDS_OFFSET;
 
-            Rectangle rBack = G.Viewport.Bounds;
-            rBack.X = BOUNDS_OFFSET - BACK_SIZE;
-            rBack.Y = G.Viewport.Bounds.Height - BOUNDS_OFFSET - BAR_HEIGHT - BACK_SIZE;
-            rBack.Width -= (BOUNDS_OFFSET - BACK_SIZE) * 2;
-            rBack.Height = BAR_HEIGHT + BACK_SIZE * 2;
+                // Calculate Progress Bar
+                Rectangle rBar = G.Viewport.Bounds;
+                rBar.X = (int)(percent * (maxX - minX)) + minX;
+                rBar.Y = G.Viewport.Height - BOUNDS_OFFSET - BAR_HEIGHT;
+                rBar.Height = BAR_HEIGHT;
+                rBar.Width = BAR_WIDTH;
+                if(rBar.Width + rBar.X > maxX)
+                    rBar.Width = maxX - rBar.X;
+                else if(rBar.X < BOUNDS_OFFSET) {
+                    rBar.Width = rBar.X + rBar.Width - BOUNDS_OFFSET;
+                    rBar.X = BOUNDS_OFFSET;
+                }
 
-            SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
-            // Draw A Background Image
-            SB.Draw(tLoad, G.Viewport.Bounds, Color.White);
-            // Draw The Progress Bar
-            SB.Draw(tPixel, rBack, COLOR_BACK);
-            SB.Draw(tPixel, rBar, Color.Lerp(COLOR_LOW, COLOR_HIGH, percent));
+                Rectangle rBack = G.Viewport.Bounds;
+                rBack.X = BOUNDS_OFFSET - BACK_SIZE;
+                rBack.Y = G.Viewport.Bounds.Height - BOUNDS_OFFSET - BAR_HEIGHT - BACK_SIZE;
+                rBack.Width -= (BOUNDS_OFFSET - BACK_SIZE) * 2;
+                rBack.Height = BAR_HEIGHT + BACK_SIZE * 2;
 
-            SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
-            SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
-            SB.End();
+                SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+                // Draw A Background Image
+                SB.Draw(tLoad, G.Viewport.Bounds, Color.White);
+                // Draw The Progress Bar
+                SB.Draw(tPixel, rBack, COLOR_BACK);
+                SB.Draw(tPixel, rBar, Color.Lerp(COLOR_LOW, COLOR_HIGH, percent));
+
+                SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
+                SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
+                SB.End();
+            }
+        }
+
+        public void BuildWidgetsSuccess() {
+            wr = new WidgetRenderer(G, font);
+
+            button = new RectButton(wr, G.Viewport.Bounds.Width - (BOUNDS_OFFSET - BACK_SIZE) * 2, BAR_HEIGHT + BACK_SIZE * 2, COLOR_BACK, Color.Green);
+            button.Anchor = new Point(G.Viewport.Bounds.Width / 2, G.Viewport.Bounds.Height - BOUNDS_OFFSET + BACK_SIZE);
+            button.AlignY = Alignment.BOTTOM;
+            button.AlignX = Alignment.MID;
+            button.OnButtonPress += (b, p) => {
+                State = ScreenState.ChangeNext;
+            };
+            button.Hook();
+            button.LayerDepth = 1f;
+
+            text = new TextWidget(wr, font);
+            text.Parent = button;
+            text.AlignX = Alignment.MID;
+            text.AlignY = Alignment.MID;
+            text.OffsetAlignX = Alignment.MID;
+            text.OffsetAlignY = Alignment.MID;
+            text.Height = button.Height;
+            text.Color = Color.White;
+            text.Text = "Play Game";
+            text.LayerDepth = 0.5f;
+        }
+        public void BuildWidgetsFailure() {
+            tip = "Error Occured:\n" + loadException.Message + "\nStack Trace:\n" + loadException.StackTrace;
+
+            wr = new WidgetRenderer(G, font);
+
+            button = new RectButton(wr, G.Viewport.Bounds.Width - (BOUNDS_OFFSET - BACK_SIZE) * 2, BAR_HEIGHT + BACK_SIZE * 2, COLOR_BACK, Color.Red);
+            button.Anchor = new Point(G.Viewport.Bounds.Width / 2, G.Viewport.Bounds.Height - BOUNDS_OFFSET + BACK_SIZE);
+            button.AlignY = Alignment.BOTTOM;
+            button.AlignX = Alignment.MID;
+            button.OnButtonPress += (b, p) => {
+                State = ScreenState.ChangePrevious;
+            };
+            button.Hook();
+            button.LayerDepth = 1f;
+
+            text = new TextWidget(wr, font);
+            text.Parent = button;
+            text.AlignX = Alignment.MID;
+            text.AlignY = Alignment.MID;
+            text.OffsetAlignX = Alignment.MID;
+            text.OffsetAlignY = Alignment.MID;
+            text.Height = button.Height;
+            text.Color = Color.White;
+            text.Text = "Back To Menu";
+            text.LayerDepth = 0.5f;
         }
 
         private void FindAllImages() {
@@ -176,22 +261,35 @@ namespace RTS {
             }
         }
         private void WorkThread() {
-            // Grab The Initialization Info
-            loadData = game.LobbyScreen.InitInfo;
-            var races = game.LobbyScreen.Races;
+            try {
+                // Start With Default Values
+                isLoaded = false;
+                loadException = null;
+                LoadedRenderer = null;
 
-            // Build The Local Game State
-            LoadedState = new GameState();
-            //GameEngine.BuildLocal(LoadedState, LoadData, races);
-            GameEngine.Load(LoadedState, @"User\totalwar.sg");
+                // Grab The Initialization Info
+                loadData = game.LobbyScreen.InitInfo;
 
-            // Create Camera
-            LoadedCamera = new Camera(G.Viewport);
-            LoadedCamera.Controller.Hook(game.Window);
+                // Build The Local Game State
+                LoadedState = new GameState();
+                if(LoadFile == null)
+                    GameEngine.BuildLocal(LoadedState, LoadData, game.LobbyScreen.Races);
+                else
+                    GameEngine.Load(LoadedState, LoadFile.FullName);
 
-            // Load The Renderer
-            LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
-            LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera);
+                // Create Camera
+                LoadedCamera = new Camera(G.Viewport);
+                LoadedCamera.Controller.Hook(game.Window);
+
+                // Load The Renderer
+                LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
+                LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera);
+            }
+            catch(Exception e) {
+                if(LoadedRenderer != null)
+                    LoadedRenderer.Dispose();
+                loadException = e;
+            }
             isLoaded = true;
         }
     }
