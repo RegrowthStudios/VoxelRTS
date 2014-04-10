@@ -12,8 +12,12 @@ using System.IO;
 namespace RTSEngine.Controllers {
     // TODO: Make This A Better AI
     public class AIInputController : InputController {
+        private static readonly Random AI_SEEDER = new Random();
+
         Thread t;
         bool running, paused;
+
+        Random r = new Random(AI_SEEDER.Next());
 
         public AIInputController(GameState g, int ti)
             : base(g, ti, InputType.AI) {
@@ -33,7 +37,6 @@ namespace RTSEngine.Controllers {
         }
 
         private void WorkThread() {
-            Random r = new Random();
             while(running) {
                 if(paused) {
                     Thread.Sleep(1000);

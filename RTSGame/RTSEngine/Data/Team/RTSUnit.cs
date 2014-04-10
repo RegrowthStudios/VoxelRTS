@@ -338,5 +338,13 @@ namespace RTSEngine.Data.Team {
                 ViewDirection = Vector2.Normalize(change);
             }
         }
+
+        public void TurnToFace(Vector2 pos) {
+            Vector2 dir = pos - GridPosition;
+            float dl = dir.Length();
+            if(dl > 0.001) {
+                ViewDirection = dir / dl;
+            }
+        }
     }
 }

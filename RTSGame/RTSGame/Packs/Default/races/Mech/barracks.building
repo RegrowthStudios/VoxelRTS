@@ -12,7 +12,7 @@ HEALTH          [120]
 COST            [20]
 IMPACT          [10]
 BUILDTIME       [20]
-SIGHTRADIUS     [14]
+SIGHTRADIUS     [34]
 GRIDSIZE        [1 , 1]
 
 // Collision Data

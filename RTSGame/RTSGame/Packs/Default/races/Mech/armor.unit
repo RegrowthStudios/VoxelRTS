@@ -27,7 +27,7 @@ TIMER           [0.5]
 DAMAGE          [30 , 45]
 CRITCHANCE      [0.05]
 
-CTRLACTION      [RTS.Mech.Unit.Action]
+CTRLACTION      [RTS.Default.Unit.Action]
 CTRLANIM        [RTS.Mech.Unit.Animation]
 CTRLCOMBAT      [RTS.Mech.Unit.Combat]
 CTRLMOVE        [RTS.Mech.Unit.Movement]

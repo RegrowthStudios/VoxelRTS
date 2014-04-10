@@ -17,7 +17,8 @@ namespace RTSEngine.Interfaces {
         public const int Special1 = Special0 + 1;
 
         // Targeting Order Codes - Will Influence Targeting Behavior
-        public const int TargetPassively = 0;
+        public const int TargetNone = 0;
+        public const int TargetPassively = TargetNone + 1;
         public const int TargetAggressively = TargetPassively + 1;
         public const int TargetOmnisciently = TargetAggressively + 1;
 
