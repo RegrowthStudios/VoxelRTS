@@ -18,6 +18,7 @@ using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
 using RTSEngine.Net;
+using System.Text.RegularExpressions;
 
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
@@ -30,7 +31,7 @@ namespace RTS {
         private PlayerInputController gameInput;
 
         Vector3 clickWorldPos;
-        int team, unit;
+        int team, type;
         bool pauseEngine, pauseRender;
         bool addUnit, addBuilding;
         int playing;
@@ -56,14 +57,16 @@ namespace RTS {
             MouseEventDispatcher.OnMousePress += OnMP;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
+            DevConsole.OnNewCommand += DevConsole_OnNewCommand;
 
             addUnit = false;
             team = 0;
-            unit = 0;
+            type = 0;
 
             state = game.LoadScreen.LoadedState;
             camera = game.LoadScreen.LoadedCamera;
             renderer = game.LoadScreen.LoadedRenderer;
+            renderer.UseFOW = true;
             playController = new GameplayController();
             gameInput = state.teams[0].Input as PlayerInputController;
             gameInput.Camera = camera;
@@ -84,6 +87,7 @@ namespace RTS {
             MouseEventDispatcher.OnMousePress -= OnMP;
             KeyboardEventDispatcher.OnKeyPressed -= OnKP;
             KeyboardEventDispatcher.OnKeyReleased -= OnKR;
+            DevConsole.OnNewCommand -= DevConsole_OnNewCommand;
             DevConsole.Deactivate();
 
             camera.Controller.Unhook(game.Window);
@@ -118,6 +122,10 @@ namespace RTS {
                 SB.End();
             }
             game.DrawMouse();
+
+            //if(state.gtC.VictoriousTeam.HasValue) {
+            //    State = ScreenState.ChangePrevious;
+            //}
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
@@ -128,11 +136,11 @@ namespace RTS {
                     clickWorldPos = r.Position + r.Direction * rec.T;
                     if(addUnit)
                         gameInput.AddEvent(new SpawnUnitEvent(
-                            team, unit, new Vector2(clickWorldPos.X, clickWorldPos.Z)
+                            team, type, new Vector2(clickWorldPos.X, clickWorldPos.Z)
                             ));
                     else if(addBuilding)
                         gameInput.AddEvent(new SpawnBuildingEvent(
-                            team, 0,
+                            team, type,
                             HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size)
                             ));
                 }
@@ -147,13 +155,13 @@ namespace RTS {
                     team = 1;
                     break;
                 case Keys.D8:
-                    unit = 0;
+                    type = 0;
                     break;
                 case Keys.D9:
-                    unit = 1;
+                    type = 1;
                     break;
                 case Keys.D0:
-                    unit = 2;
+                    type = 2;
                     break;
                 case Keys.E:
                     addUnit = true;
@@ -227,6 +235,18 @@ namespace RTS {
                 int dt = eFPS == 0 ? milliRun : (eFPS < 0 ? 0 : (int)(1000.0 / eFPS));
                 if(dt < milliRun) Thread.Sleep(milliRun - dt);
                 tPrev = tCur;
+            }
+        }
+
+        Regex r1 = RegexHelper.GenerateInteger("setteam");
+        Regex r2 = RegexHelper.GenerateInteger("settype");
+        private void DevConsole_OnNewCommand(string obj) {
+            Match m;
+            if((m = r1.Match(obj)).Success) {
+                team = RegexHelper.ExtractInt(m);
+            }
+            else if((m = r2.Match(obj)).Success) {
+                type = RegexHelper.ExtractInt(m);
             }
         }
     }

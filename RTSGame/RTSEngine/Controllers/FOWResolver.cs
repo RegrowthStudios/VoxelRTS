@@ -45,6 +45,16 @@ namespace RTSEngine.Controllers {
             heat = new int[s.CGrid.numCells.X, s.CGrid.numCells.Y];
         }
 
+        public void SetAllFOW(FogOfWar f, CollisionGrid cg) {
+            int i = f == FogOfWar.Nothing ? HEAT_NONE : (f == FogOfWar.Passive ? HEAT_PASSIVE : HEAT_PASSIVE + 1);
+            for(int y = 0; y < cg.numCells.Y; y++) {
+                for(int x = 0; x < cg.numCells.X; x++) {
+                    heat[x, y] = i;
+                    cg.SetFogOfWar(x, y, teamIndex, f);
+                }
+            }
+        }
+
         private bool InBounds(int gx, int gy, ref FOWPoint p) {
             return p.X >= 0 && p.X < gx && p.Y >= 0 && p.Y < gy;
         }
@@ -177,7 +187,7 @@ namespace RTSEngine.Controllers {
             s.Write(t.vb.ViewDirection);
             s.Write(t.EnemyUUID);
 
-            s.Write(t.added);
+            s.Write(t.Added);
             s.Write(t.isDead);
         }
         public static EnemyBuildingUpdater Deserialize(BinaryReader s, GameState state) {
@@ -197,8 +207,11 @@ namespace RTSEngine.Controllers {
                 }
             }
             EnemyBuildingUpdater ebu = new EnemyBuildingUpdater(state, ti, vb, b);
-            ebu.added = s.ReadBoolean();
+            ebu.Added = s.ReadBoolean();
             ebu.isDead = s.ReadBoolean();
+            if(ebu.Added) {
+                state.teams[ebu.teamIndex].ViewedEnemyBuildings.Add(vb);
+            }
             return ebu;
         }
 
@@ -210,7 +223,10 @@ namespace RTSEngine.Controllers {
             private set;
         }
         private Point[] grids;
-        private bool added;
+        public bool Added {
+            get;
+            private set;
+        }
         private bool isDead;
         private RTSBuildingData Data {
             get { return state.teams[vb.Team].Race.Buildings[vb.Type]; }
@@ -220,7 +236,7 @@ namespace RTSEngine.Controllers {
             : base(1) {
             state = s;
             teamIndex = tIndex;
-            added = false;
+            Added = false;
             isDead = false;
             vb = _vb;
 
@@ -246,7 +262,7 @@ namespace RTSEngine.Controllers {
         public override void DoWork(float dt) {
             if(IsFinished) return;
 
-            if(!added) {
+            if(!Added) {
                 if(isDead) {
                     // Early Work Escape
                     Finish();
@@ -258,7 +274,7 @@ namespace RTSEngine.Controllers {
                     switch(f) {
                         case FogOfWar.Active:
                             state.teams[teamIndex].ViewedEnemyBuildings.Add(vb);
-                            added = true;
+                            Added = true;
                             break;
                     }
                 }
@@ -279,14 +295,14 @@ namespace RTSEngine.Controllers {
                 if(fActive > 0 && isDead) {
                     // Know Building Is Dead Now
                     state.teams[teamIndex].ViewedEnemyBuildings.Remove(vb);
-                    added = false;
+                    Added = false;
                     Finish();
                     return;
                 }
                 else if(fNothing == Data.GridSize.X * Data.GridSize.Y) {
                     // Not To Be Seen Anymore
                     state.teams[teamIndex].ViewedEnemyBuildings.Remove(vb);
-                    added = false;
+                    Added = false;
                     if(isDead) {
                         // Early Exit
                         Finish();

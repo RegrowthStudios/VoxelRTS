@@ -118,16 +118,24 @@ namespace RTSEngine.Data {
     }
     // FOW Command
     public class DevCommandFOW : DevCommand {
-        public static readonly Regex REGEX = new Regex(@"franz\s+ferdinand");
+        public static readonly Regex REGEX1 = new Regex(@"franz\s+ferdinand");
+        public static readonly Regex REGEX2 = new Regex(@"marco\s+polo");
 
-        public DevCommandFOW()
+        public FogOfWar fow;
+
+        public DevCommandFOW(FogOfWar f)
             : base(DevCommandType.FOW) {
+            fow = f;
         }
 
         public static bool TryParse(string c, out DevCommand command) {
-            Match m = REGEX.Match(c);
-            if(m.Success) {
-                command = new DevCommandFOW();
+            Match m;
+            if((m = REGEX1.Match(c)).Success) {
+                command = new DevCommandFOW(FogOfWar.Active);
+                return true;
+            }
+            if((m = REGEX2.Match(c)).Success) {
+                command = new DevCommandFOW(FogOfWar.Nothing);
                 return true;
             }
             command = null;

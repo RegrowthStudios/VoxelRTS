@@ -15,6 +15,7 @@ namespace RTSEngine.Data {
         public Region(List<Point> cellList) {
             Cells = cellList;
             RegionImpact = 0;
+            units = new List<IEntity>();
         }
 
         public void AddToRegionImpact(int amount) {

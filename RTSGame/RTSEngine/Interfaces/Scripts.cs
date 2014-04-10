@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
@@ -279,19 +280,38 @@ namespace RTSEngine.Interfaces {
 
     #region Game Type
     public abstract class ACGameTypeController : ACScript, IDisposable {
+        private GameState state;
+        private Thread t;
+        private bool running;
+
+        public int? VictoriousTeam {
+            get;
+            private set;
+        }
+
         // The Same File As The Map File
         public abstract void Load(GameState s, FileInfo infoFile);
 
         public abstract int? GetVictoriousTeam(GameState s);
 
         public void Start(GameState s) {
-
+            state = s;
+            running = true;
+            t = new Thread(UpdateThread);
+            t.IsBackground = true;
+            t.Start();
         }
         public void Dispose() {
+            running = false;
+            t.Join();
         }
 
         public void UpdateThread() {
-
+            while(running) {
+                Tick(state);
+                VictoriousTeam = GetVictoriousTeam(state);
+                Thread.Sleep(100);
+            }
         }
         public abstract void Tick(GameState s);
 

@@ -11,6 +11,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Graphics;
 using RTSEngine.Algorithms;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data {
     public struct IndexedTeam {
@@ -107,6 +108,10 @@ namespace RTSEngine.Data {
         public float TotalGameTime {
             get { return timePlayed; }
         }
+
+        // The Game Type Controller
+        public ReflectedScript scrGTC;
+        public ACGameTypeController gtC;
 
         // Particle Events
         private object lckParticles;

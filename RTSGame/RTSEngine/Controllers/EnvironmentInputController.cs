@@ -103,6 +103,8 @@ namespace RTSEngine.Controllers {
             thread.IsBackground = true;
             running = true;
             paused = true;
+            eData.DisasterTime = 1;
+            eData.RecoverTime = 1;
         }
         public EnvironmentInputController(GameState g, int ti, FileInfo infoRace, FileInfo spawnImage)
             : this(g, ti) {

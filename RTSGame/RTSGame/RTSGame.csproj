@@ -96,11 +96,17 @@
     <Compile Include="Packs\Default\scripts\Default.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Packs\Default\scripts\GameTypes.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Packs\Default\scripts\Scenarios.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="Packs\Default\scripts\UIInput.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Packs\Default\scripts\Worker.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="PressEnterScreen.cs" />
     <Compile Include="RTSScreen.cs" />
@@ -248,7 +254,7 @@
     </None>
     <Compile Include="LoadScreen.cs" />
     <Compile Include="Packs\Default\scripts\Mech.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Packs\Default\levels\0.dat" />
@@ -271,6 +277,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Packs\Default\models\Tree.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\Mech\tree.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Packs\Default\races\Cat\Cat.race">

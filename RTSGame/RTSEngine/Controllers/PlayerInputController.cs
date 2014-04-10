@@ -36,10 +36,12 @@ namespace RTSEngine.Controllers {
         public override void Begin() {
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMousePress += OnMousePress;
+            KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
         }
         public override void Dispose() {
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
             MouseEventDispatcher.OnMousePress -= OnMousePress;
+            KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
         }
 
         private static bool UseSelectionRect(Vector2 min, Vector2 max) {
@@ -214,6 +216,18 @@ namespace RTSEngine.Controllers {
                 else if(b == BUTTON_SELECT) {
                     selectionRectStart = location;
                 }
+            }
+        }
+        public void OnKeyPress(object sender, KeyEventArgs args) {
+            switch(args.KeyCode) {
+                case Keys.Delete:
+                    if(selected != null) {
+                        foreach(var unit in selected) {
+                            unit.Destroy();
+                        }
+                        selected.Clear();
+                    }
+                    break;
             }
         }
 

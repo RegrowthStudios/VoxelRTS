@@ -38,18 +38,18 @@ namespace RTSEngine.Controllers {
 
         private void WorkThread() {
             while(running) {
-                if(paused) {
-                    Thread.Sleep(1000);
-                    continue;
-                }
-                switch(r.Next(12)) {
-                    case 0:
-                        SpawnUnits(r);
-                        break;
-                    case 1:
-                        MoveUnits(r);
-                        break;
-                }
+                //if(paused) {
+                //    Thread.Sleep(1000);
+                //    continue;
+                //}
+                //switch(r.Next(12)) {
+                //    case 0:
+                //        SpawnUnits(r);
+                //        break;
+                //    case 1:
+                //        MoveUnits(r);
+                //        break;
+                //}
                 Thread.Sleep(1000);
             }
         }

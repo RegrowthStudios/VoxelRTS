@@ -3,8 +3,8 @@ NAME            [Dog]
 
 // Default Squad Controllers
 CTRLACTION      [RTS.Mech.Squad.Action]
-CTRLMOVEMENT    [RTS.Mech.Squad.Movement]
-CTRLTARGET      [RTS.Mech.Squad.Target]
+CTRLMOVEMENT    [RTS.Default.Squad.Movement]
+CTRLTARGET      [RTS.Default.Squad.Targetting]
 
 // List Of All Unit Types Belonging To Team
 UNIT            [soldier.unit]

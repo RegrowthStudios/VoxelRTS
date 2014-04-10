@@ -117,6 +117,12 @@ namespace RTSEngine.Controllers {
                 s.activeTeams[ti].Team.Input.Begin();
             }
 
+            // Start The Game Type Controller
+            s.scrGTC = s.Scripts["RTS.Default.Scenarios.Tutorial"];
+            s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
+            s.gtC.Load(s, null);
+            s.gtC.Start(s);
+
             // Add All Tasks
             foreach(var at in s.activeTeams) {
                 foreach(var unit in at.Team.Units) {
@@ -454,12 +460,9 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyLogic(GameState s, float dt, DevCommandFOW c) {
-            for(int y = 0; y < s.CGrid.numCells.Y; y++) {
-                for(int x = 0; x < s.CGrid.numCells.Y; x++) {
-                    for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                        s.CGrid.SetFogOfWar(x, y, s.activeTeams[ti].Index, FogOfWar.Active);
-                    }
-                }
+            foreach(var task in tbFOWCalculations.Tasks) {
+                var t = task as FOWTask;
+                t.SetAllFOW(c.fow, s.CGrid);
             }
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSave c) {

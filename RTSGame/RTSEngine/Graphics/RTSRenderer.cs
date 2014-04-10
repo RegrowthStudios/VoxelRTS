@@ -87,11 +87,21 @@ namespace RTSEngine.Graphics {
             set;
         }
 
+        // Whether To Draw FOW
+        public bool UseFOW {
+            get;
+            set;
+        }
+
         // Particle Effects
         private ParticleRenderer pRenderer;
         public RTSUI RTSUI {
             get;
             private set;
+        }
+
+        public Texture2D FOWTexture {
+            get { return UseFOW ? Map.FogOfWarTexture : tPixel; }
         }
 
         // Graphics Data To Dispose
@@ -127,6 +137,7 @@ namespace RTSEngine.Graphics {
             fxAnim.CTertiary = Vector3.UnitZ;
 
             fxParticle = LoadEffect(fxP);
+            UseFOW = true;
 
             drawBox = false;
             MouseEventDispatcher.OnMousePress += OnMousePress;
@@ -374,7 +385,7 @@ namespace RTSEngine.Graphics {
                 return frustum.Intersects(u.BBox);
             };
             foreach(var um in NonFriendlyUnitModels)
-                um.UpdateInstances(G, GameplayController.IsUnitDead, fNFVU);
+                um.UpdateInstances(G, GameplayController.IsUnitDead, UseFOW ? fNFVU : fFVU);
 
             // Update Buildings
             Predicate<BoundingBox> fFVB = (b) => {
@@ -399,7 +410,7 @@ namespace RTSEngine.Graphics {
 
             // Primary Map Model
             if(Map.TrianglesPrimary > 0) {
-                fxMap.SetTextures(G, Map.PrimaryTexture, Map.FogOfWarTexture);
+                fxMap.SetTextures(G, Map.PrimaryTexture, FOWTexture);
                 G.SetVertexBuffer(Map.VBPrimary);
                 G.Indices = Map.IBPrimary;
                 fxMap.ApplyPassPrimary();
@@ -407,7 +418,7 @@ namespace RTSEngine.Graphics {
             }
             // Secondary Map Model
             if(Map.TrianglesSecondary > 0) {
-                fxMap.SetTextures(G, Map.SecondaryTexture, Map.FogOfWarTexture);
+                fxMap.SetTextures(G, Map.SecondaryTexture, FOWTexture);
                 G.SetVertexBuffer(Map.VBSecondary);
                 G.Indices = Map.IBSecondary;
                 fxMap.ApplyPassSecondary();
@@ -571,7 +582,7 @@ namespace RTSEngine.Graphics {
             G.BlendState = BlendState.Additive;
 
             fxParticle.Parameters["VP"].SetValue(Camera.View * Camera.Projection);
-            G.Textures[1] = Map.FogOfWarTexture;
+            G.Textures[1] = FOWTexture;
             G.SamplerStates[1] = SamplerState.PointClamp;
             fxParticle.CurrentTechnique.Passes[0].Apply();
 

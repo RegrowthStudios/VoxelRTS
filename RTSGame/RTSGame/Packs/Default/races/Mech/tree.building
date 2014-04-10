@@ -1,10 +1,10 @@
 ﻿// Friendly Unit Name
-NAME            [Barracks]
+NAME            [Tree]
 
 // Unit Model
-MODEL           [..\..\models\Barracks.obj]
-TEXMAIN         [..\..\textures\BarracksMain.png]
-TEXCOLOR        [..\..\textures\BarracksKey.png]
+MODEL           [..\..\models\Tree.obj]
+TEXMAIN         [..\..\textures\Tree.png]
+TEXCOLOR        [..\..\textures\NoKey.png]
 MAXCOUNT        [1000]
 
 // Unit Data
@@ -12,8 +12,8 @@ HEALTH          [120]
 COST            [20]
 IMPACT          [10]
 BUILDTIME       [20]
-SIGHTRADIUS     [54]
-GRIDSIZE        [1 , 1]
+SIGHTRADIUS     [8]
+GRIDSIZE        [1, 1]
 
 // Collision Data
 BBOXMIN         [-1 , 0.0 , -1]

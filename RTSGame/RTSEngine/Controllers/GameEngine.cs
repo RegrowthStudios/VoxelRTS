@@ -164,6 +164,7 @@ namespace RTSEngine.Controllers {
                 if(state.teams[ti] != null)
                     state.teams[ti].Input.Dispose();
             }
+            state.gtC.Dispose();
         }
     }
 }
