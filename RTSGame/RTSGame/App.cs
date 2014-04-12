@@ -79,6 +79,7 @@ namespace RTS {
         public MouseRenderer mRenderer;
         public Texture2D tMouseMain;
         public DevConsoleView dcv;
+        public BasicEffect fx;
 
         public App()
             : base() {
@@ -104,6 +105,7 @@ namespace RTS {
 
         protected override void FullInitialize() {
             BlisterUI.Input.WMHookInput.Initialize(Window);
+            fx = new BasicEffect(GraphicsDevice);
         }
         protected override void FullLoad() {
             using(var s = System.IO.File.OpenRead(@"Content\UI\Mouse\Main.png")) {

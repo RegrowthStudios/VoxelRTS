@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Net;
 using System.Net.Sockets;
+using RTSEngine.Net;
+using Lidgren.Network;
 
 namespace BandWidthTest {
     class Program {
@@ -55,12 +57,12 @@ namespace BandWidthTest {
 
             if(isListener) {
                 while(true) {
-                    RunServer();
+                    SendMCL();
                 }
             }
             else {
                 message = null;
-                Thread tc = new Thread(RunClient);
+                Thread tc = new Thread(SendMCS);
                 tc.Start();
                 while(message == null) Thread.Sleep(100);
                 while(true) {
@@ -142,6 +144,123 @@ namespace BandWidthTest {
                 Console.WriteLine(e.Message);
             }
             Console.WriteLine("Ended");
+        }
+
+        static NetPeer peer;
+        static NetConnection peerConnect;
+        public static void SendMCL() {
+            Console.WriteLine("Port: ");
+            int port = int.Parse(Console.ReadLine());
+
+            NetPeerConfiguration config = new NetPeerConfiguration("InduZtry");
+            config.Port = port;
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+            config.EnableMessageType(NetIncomingMessageType.Data);
+            config.AcceptIncomingConnections = true;
+            config.EnableUPnP = true;
+            peer = new NetPeer(config);
+            peer.Start();
+
+            Thread t = new Thread(RecvMCL);
+            t.IsBackground = true;
+            t.Start();
+
+            //while(true) {
+            Thread.Sleep(10);
+            Console.WriteLine("Port: ");
+            int rport = int.Parse(Console.ReadLine());
+            peer.DiscoverLocalPeers(rport);
+            //}
+
+
+        }
+        public static void RecvMCL() {
+            while(true) {
+                Thread.Sleep(10);
+                NetIncomingMessage msg;
+                while((msg = peer.ReadMessage()) != null) {
+                    switch(msg.MessageType) {
+                        case NetIncomingMessageType.VerboseDebugMessage:
+                        case NetIncomingMessageType.DebugMessage:
+                        case NetIncomingMessageType.WarningMessage:
+                        case NetIncomingMessageType.ErrorMessage:
+                            Console.WriteLine(msg.ReadString());
+                            break;
+                        case NetIncomingMessageType.StatusChanged:
+                            Console.WriteLine(((NetConnectionStatus)msg.ReadByte()).ToString());
+                            break;
+                        case NetIncomingMessageType.DiscoveryResponse:
+                            Console.WriteLine("Found server at " + msg.SenderEndPoint + " name: " + msg.ReadString());
+                            peerConnect = peer.Connect(msg.SenderEndPoint);
+                            break;
+                        case NetIncomingMessageType.Data:
+                            Console.WriteLine(msg.LengthBytes);
+                            break;
+                        default:
+                            Console.WriteLine("Unhandled type: " + msg.MessageType);
+                            break;
+                    }
+                }
+            }
+        }
+
+        static NetConnection recipient;
+        static NetServer server;
+        public static void SendMCS() {
+            Console.WriteLine("Port: ");
+            int port = int.Parse(Console.ReadLine());
+
+            NetPeerConfiguration config = new NetPeerConfiguration("InduZtry");
+            config.Port = port;
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
+            config.EnableMessageType(NetIncomingMessageType.Data);
+            config.EnableUPnP = true;
+            server = new NetServer(config);
+            server.Start();
+
+            Thread t = new Thread(RecvMCS);
+            t.IsBackground = true;
+            t.Start();
+
+            message = "NULL";
+
+            while(true) {
+                Thread.Sleep(10);
+                if(recipient != null) {
+                    NetOutgoingMessage sendMsg = server.CreateMessage();
+                    sendMsg.Write(message);
+                    server.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+                }
+            }
+        }
+        public static void RecvMCS() {
+            while(true) {
+                Thread.Sleep(10);
+                NetIncomingMessage msg;
+                while((msg = server.ReadMessage()) != null) {
+                    switch(msg.MessageType) {
+                        case NetIncomingMessageType.VerboseDebugMessage:
+                        case NetIncomingMessageType.DebugMessage:
+                        case NetIncomingMessageType.WarningMessage:
+                        case NetIncomingMessageType.ErrorMessage:
+                            Console.WriteLine(msg.ReadString());
+                            break;
+                        case NetIncomingMessageType.StatusChanged:
+                            Console.WriteLine(((NetConnectionStatus)msg.ReadByte()).ToString());
+                            break;
+                        case NetIncomingMessageType.DiscoveryRequest:
+                            NetOutgoingMessage response = server.CreateMessage();
+                            response.Write("Server InduZtry");
+                            server.SendDiscoveryResponse(response, msg.SenderEndPoint);
+                            recipient = server.Connect(msg.SenderEndPoint);
+                            break;
+                        default:
+                            Console.WriteLine("Unhandled type: " + msg.MessageType);
+                            break;
+                    }
+                    server.Recycle(msg);
+                }
+            }
         }
     }
 }

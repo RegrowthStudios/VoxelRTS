@@ -16,6 +16,7 @@ using RTSEngine.Graphics;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 using BlisterUI.Widgets;
+using Nova.Screens;
 
 namespace RTS {
     public class LoadScreen : GameScreen<App> {
@@ -85,11 +86,18 @@ namespace RTS {
         private bool isLoaded;
         private Exception loadException;
 
+        PlayScreen ps;
+
         public override void Build() {
             FindAllImages();
             ReadAllTips();
+            ps = new PlayScreen(@"Content\Nova", 0);
+            ps.SetParentGame(game, 0);
+            ps.Build();
         }
         public override void Destroy(GameTime gameTime) {
+            ps.Destroy(gameTime);
+            ps = null;
         }
 
         public override void OnEntry(GameTime gameTime) {
@@ -113,6 +121,13 @@ namespace RTS {
             tWork.Priority = ThreadPriority.AboveNormal;
             tWork.IsBackground = true;
             tWork.Start();
+
+            ps.GameBounds = new Rectangle(
+                TIPS_OFFSET,
+                TIPS_OFFSET + TIPS_HEIGHT + 10,
+                G.Viewport.Width - TIPS_OFFSET * 2,
+                G.Viewport.Height / 2);
+            ps.OnEntry(gameTime);
         }
         public override void OnExit(GameTime gameTime) {
             if(wr != null) {
@@ -125,6 +140,8 @@ namespace RTS {
             font = null;
             tLoad.Dispose();
             tPixel.Dispose();
+
+            ps.OnExit(gameTime);
         }
 
         public override void Update(GameTime gameTime) {
@@ -137,6 +154,8 @@ namespace RTS {
                 else
                     BuildWidgetsFailure();
             }
+
+            ps.Update(gameTime);
         }
         public override void Draw(GameTime gameTime) {
             G.Clear(Color.Transparent);
@@ -149,8 +168,6 @@ namespace RTS {
                 SB.End();
 
                 wr.Draw(SB);
-
-                game.DrawMouse();
             }
             else {
                 int minX = BOUNDS_OFFSET - BAR_WIDTH;
@@ -186,6 +203,10 @@ namespace RTS {
                 SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
                 SB.End();
             }
+
+            ps.Draw(gameTime);
+
+            game.DrawMouse();
         }
 
         public void BuildWidgetsSuccess() {
