@@ -149,7 +149,7 @@ namespace BandWidthTest {
         static NetPeer peer;
         static NetConnection peerConnect;
         public static void SendMCL() {
-            Console.WriteLine("Port: ");
+            Console.WriteLine("Enter Port: ");
             int port = int.Parse(Console.ReadLine());
 
             NetPeerConfiguration config = new NetPeerConfiguration("InduZtry");
@@ -160,16 +160,23 @@ namespace BandWidthTest {
             config.EnableUPnP = true;
             peer = new NetPeer(config);
             peer.Start();
+            Console.WriteLine("UPnP IP: " + peer.UPnP.GetExternalIP());
 
             Thread t = new Thread(RecvMCL);
             t.IsBackground = true;
             t.Start();
 
+            Console.WriteLine("Enter Server IP: ");
+            string sip = Console.ReadLine();
+            Console.WriteLine("Enter Server Port: ");
+            port = int.Parse(Console.ReadLine());
+            peer.DiscoverKnownPeer(sip, port);
+
             //while(true) {
-            Thread.Sleep(10);
-            Console.WriteLine("Port: ");
-            int rport = int.Parse(Console.ReadLine());
-            peer.DiscoverLocalPeers(rport);
+            //Thread.Sleep(10);
+            //Console.WriteLine("Port: ");
+            //int rport = int.Parse(Console.ReadLine());
+            //peer.DiscoverLocalPeers(rport);
             //}
 
 
@@ -205,9 +212,9 @@ namespace BandWidthTest {
         }
 
         static NetConnection recipient;
-        static NetServer server;
+        static NetPeer server;
         public static void SendMCS() {
-            Console.WriteLine("Port: ");
+            Console.WriteLine("Enter Port: ");
             int port = int.Parse(Console.ReadLine());
 
             NetPeerConfiguration config = new NetPeerConfiguration("InduZtry");
@@ -215,8 +222,12 @@ namespace BandWidthTest {
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
             config.EnableMessageType(NetIncomingMessageType.Data);
             config.EnableUPnP = true;
-            server = new NetServer(config);
+            server = new NetPeer(config);
             server.Start();
+            Console.WriteLine(server.UPnP.Status);
+            server.UPnP.ForwardPort(port, "InduZtry");
+            Console.WriteLine(server.UPnP.Status);
+            Console.WriteLine("UPnP IP: " + server.UPnP.GetExternalIP());
 
             Thread t = new Thread(RecvMCS);
             t.IsBackground = true;
