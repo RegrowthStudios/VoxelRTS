@@ -9,7 +9,7 @@ ANIMATION       [..\..\animations\Mech1.png]
 MAXCOUNT        [1000]
 
 // Unit Data
-HEALTH          [60]
+HEALTH          [600]
 SPEED           [3]
 COST            [5 , 1]
 BUILDTIME       [10]
@@ -23,7 +23,7 @@ BBOXMAX         [0.4 , 1.0 , 0.4]
 // Combat Data
 ARMOR           [0]
 RANGE           [0 , 10]
-TIMER           [0.33]
+TIMER           [0.5]
 DAMAGE          [10 , 15]
 CRITCHANCE      [0.05]
 

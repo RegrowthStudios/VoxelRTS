@@ -9,8 +9,8 @@ ANIMATION       [..\..\animations\Dog.png]
 MAXCOUNT        [1000]
 
 // Unit Data
-HEALTH          [120]
-SPEED           [3.3]
+HEALTH          [800]
+SPEED           [2.0]
 COST            [20 , 2]
 BUILDTIME       [20]
 IMPACT          [10]
@@ -23,8 +23,8 @@ BBOXMAX         [0.4 , 1.0 , 0.4]
 // Combat Data
 ARMOR           [8]
 RANGE           [0 , 8]
-TIMER           [0.5]
-DAMAGE          [30 , 45]
+TIMER           [1.5]
+DAMAGE          [13 , 20]
 CRITCHANCE      [0.05]
 
 CTRLACTION      [RTS.Default.Unit.Action]
