@@ -37,8 +37,8 @@ namespace BlisterUI {
         protected abstract void FullLoad();
 
         protected override void Initialize() {
-            base.Initialize();
             FullInitialize();
+            base.Initialize();
         }
         protected override void LoadContent() {
             spriteBatch = new SpriteBatch(GraphicsDevice);

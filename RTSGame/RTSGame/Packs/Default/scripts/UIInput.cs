@@ -22,12 +22,9 @@ namespace RTS.UIInput.BuildingInput
 
     public class ProductionInput : BuildingInput
     {
-        public override void Apply(GameState g)
-        {
-            throw new NotImplementedException();
-        }
+        public int unitType;
 
-        public void Apply(GameState g, int unitType)
+        public override void Apply(GameState g)
         {
             action.eventQueue.Enqueue(EventType.Production);
             action.unitQueue.Enqueue(unitType);
