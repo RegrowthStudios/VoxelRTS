@@ -2,9 +2,9 @@
 NAME            [Cat]
 
 // Default Squad Controllers
-CTRLACTION      [RTS.Mech.Squad.Action]
-CTRLMOVEMENT    [RTS.Mech.Squad.Movement]
-CTRLTARGET      [RTS.Default.Squad.Targetting]
+CTRLACTION      [RTS.Default.Squad.Action]
+CTRLMOVEMENT    [RTS.Default.Squad.Movement]
+CTRLTARGET      [RTS.Default.Squad.Targeting]
 
 // List Of All Unit Types Belonging To Team
 UNIT            [soldier.unit]

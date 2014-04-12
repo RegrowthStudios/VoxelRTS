@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RTSEngine.Data;
-using RTS.Mech.Building;
+using RTS.Default.Building;
 
 namespace RTS.UIInput.BuildingInput
 {
@@ -16,7 +16,7 @@ namespace RTS.UIInput.BuildingInput
 
     public abstract class BuildingInput
     {
-        protected RTS.Mech.Building.Action action;
+        protected RTS.Default.Building.Action action;
         public abstract void Apply(GameState g);
     }
 
