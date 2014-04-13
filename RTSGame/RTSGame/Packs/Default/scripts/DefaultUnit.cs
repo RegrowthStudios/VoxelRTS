@@ -105,6 +105,9 @@ namespace RTS.Default.Unit {
                             break;
                     }
                     break;
+                case FogOfWar.Passive:
+                    // TODO: Add Support For Targeting Buildings
+                    break;
             }
         }
         void ASFollowTarget(GameState g, float dt) {

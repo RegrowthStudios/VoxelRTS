@@ -39,11 +39,11 @@ namespace RTS.Worker.Squad {
 
         }
 
-        public override void DecideMoves(GameState g, float dt) {
+        public override void DecideMove(GameState g, float dt, RTSUnit unit) {
             throw new NotImplementedException();
         }
 
-        public override void ApplyMoves(GameState g, float dt) {
+        public override void ApplyMove(GameState g, float dt, RTSUnit unit) {
             throw new NotImplementedException();
         }
 

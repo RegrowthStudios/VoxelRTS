@@ -252,9 +252,13 @@ namespace RTSEngine.Interfaces {
             return aForce * Force(e.GridPosition, wp);
         }
 
+        //// Scripted Logic For Movement
+        //public abstract void DecideMoves(GameState g, float dt);
+        //public abstract void ApplyMoves(GameState g, float dt);
+
         // Scripted Logic For Movement
-        public abstract void DecideMoves(GameState g, float dt);
-        public abstract void ApplyMoves(GameState g, float dt);
+        public abstract void DecideMove(GameState g, float dt, RTSUnit unit);
+        public abstract void ApplyMove(GameState g, float dt, RTSUnit unit);
     }
 
     // Controls The Targetting That A Squad Performs
