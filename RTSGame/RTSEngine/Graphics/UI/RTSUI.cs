@@ -44,6 +44,10 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        public RTSUISelectionPanel SelectionPanel {
+            get;
+            private set;
+        }
 
         public int ButtonRows {
             get;
@@ -66,6 +70,8 @@ namespace RTSEngine.Graphics {
 
             BuildBounds(renderer, ph, new Color(20, 20, 20));
             BuildMinimap(renderer, 5);
+            BuildSelectionPanel(renderer);
+            SelectionPanel.IconLibrary = renderer.IconLibrary;
         }
         public void Dispose() {
             foreach(var b in btnPanel)
@@ -114,6 +120,13 @@ namespace RTSEngine.Graphics {
             Minimap.OffsetAlignY = Alignment.BOTTOM;
             Minimap.Parent = PanelBottom;
             Minimap.LayerDepth = PanelBottom.LayerDepth - LAYER_DELTA;
+        }
+        private void BuildSelectionPanel(RTSRenderer renderer) {
+            SelectionPanel = new RTSUISelectionPanel(wrMain, 2, 4, 32, 4);
+            SelectionPanel.BackPanel.Parent = Minimap;
+            SelectionPanel.BackPanel.AlignX = Alignment.RIGHT;
+            SelectionPanel.BackPanel.Offset = new Point(-4, 0);
+            SelectionPanel.LayerDepth = PanelBottom.LayerDepth - 0.01f;
         }
 
         public void BuildButtonPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {

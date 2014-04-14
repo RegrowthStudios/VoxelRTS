@@ -48,6 +48,18 @@ namespace RTSEngine.Controllers {
             get;
             private set;
         }
+        private bool isActive;
+        public bool IsActive {
+            get { return isActive; }
+            set {
+                isActive = value;
+                if(!IsActive) {
+                    mx = 0;
+                    my = 0;
+                    zoom = 0;
+                }
+            }
+        }
 
         // Output Values
         private int mx, my;
@@ -104,6 +116,7 @@ namespace RTSEngine.Controllers {
             useOrbit = false;
             moveKeys = new bool[8];
             Array.Clear(moveKeys, 0, moveKeys.Length);
+            IsActive = true;
         }
 
         public void Hook(GameWindow w) {
@@ -140,6 +153,8 @@ namespace RTSEngine.Controllers {
 
         // Event Hooks
         public void OnMouseMovement(Vector2 pos, Vector2 disp) {
+            if(!IsActive) return;
+
             if(pos.X < MinX) mx = -1;
             else if(pos.X > MaxX) mx = 1;
             else mx = 0;
@@ -149,6 +164,8 @@ namespace RTSEngine.Controllers {
             else my = 0;
         }
         public void OnMouseScroll(int v, int d) {
+            if(!IsActive) return;
+
             zoom = d > 0 ? -1 : 1;
         }
         public void OnKeyPress(object sender, KeyEventArgs args) {

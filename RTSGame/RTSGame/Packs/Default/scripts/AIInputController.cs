@@ -11,7 +11,7 @@ using System.IO;
 
 namespace RTSEngine.Controllers {
     // TODO: Make This A Better AI
-    public class AIInputController : InputController {
+    public class AIInputController : ACInputController {
         private static readonly Random AI_SEEDER = new Random();
 
         Thread t;
@@ -19,13 +19,20 @@ namespace RTSEngine.Controllers {
 
         Random r = new Random(AI_SEEDER.Next());
 
-        public AIInputController(GameState g, int ti)
-            : base(g, ti, InputType.AI) {
+        public AIInputController()
+            : base() {
+            Type = RTSInputType.AI;
+        }
+
+        public override void Init(GameState s, int ti) {
+            base.Init(s, ti);
+
             t = new Thread(WorkThread);
             t.IsBackground = true;
             running = true;
             paused = true;
         }
+
         public override void Begin() {
             t.Start();
             paused = false;

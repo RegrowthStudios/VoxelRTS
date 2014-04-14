@@ -12,6 +12,7 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Data.Parsers;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Graphics {
     public struct VisualTeam {
@@ -81,7 +82,7 @@ namespace RTSEngine.Graphics {
 
         // The Friendly Team To Be Visualizing
         private int teamIndex;
-        private InputController teamInput;
+        private ACInputController teamInput;
         public Texture2D SelectionCircleTexture {
             get;
             set;
@@ -92,6 +93,9 @@ namespace RTSEngine.Graphics {
             get;
             set;
         }
+        public Texture2D FOWTexture {
+            get { return UseFOW ? Map.FogOfWarTexture : tPixel; }
+        }
 
         // Particle Effects
         private ParticleRenderer pRenderer;
@@ -100,8 +104,10 @@ namespace RTSEngine.Graphics {
             private set;
         }
 
-        public Texture2D FOWTexture {
-            get { return UseFOW ? Map.FogOfWarTexture : tPixel; }
+        // Icons
+        public Dictionary<string, Texture2D> IconLibrary {
+            get;
+            private set;
         }
 
         // Graphics Data To Dispose
@@ -116,9 +122,11 @@ namespace RTSEngine.Graphics {
             FriendlyUnitModels = new List<RTSUnitModel>();
             NonFriendlyBuildingModels = new List<RTSBuildingModel>();
             FriendlyBuildingModels = new List<RTSBuildingModel>();
+            IconLibrary = new Dictionary<string, Texture2D>();
 
             tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
+            IconLibrary.Add("None", tPixel);
 
             fxMap = new RTSFXMap(LoadEffect(fxMapFile));
 
@@ -256,15 +264,15 @@ namespace RTSEngine.Graphics {
             state.CGrid.OnFOWChange += OnFOWChange;
             Minimap.Hook(this, state, ti);
 
+            // Create UI
+            RTSUI = new RTSUI(this, "Courier New", 32, 140);
+            RTSUI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
+
             // Load Particles
             using(var s = File.OpenRead(ParticleRenderer.FILE_BULLET_MODEL)) {
                 pRenderer.LoadBulletModel(this, s, ParsingFlags.ConversionOpenGL);
             }
             pRenderer.LoadBulletTexture(this, ParticleRenderer.FILE_BULLET_TEXTURE);
-
-            // Create UI
-            RTSUI = new RTSUI(this, "Courier New", 32, 140);
-            RTSUI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
 
             // Load Team Visuals
             for(int i = 0; i < state.teams.Length; i++) {
@@ -297,7 +305,7 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < team.Race.ActiveUnits.Length; i++) {
                 int ui = team.Race.ActiveUnits[i].Index;
                 RTSUnitData uData = team.Race.Units[ui];
-                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, new FileInfo(uData.InfoFile));
+                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, new FileInfo(uData.InfoFile), team.Race);
                 uModel.Hook(this, state, ti, team.Race.ActiveUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
                 ums.Add(uModel);
@@ -311,6 +319,10 @@ namespace RTSEngine.Graphics {
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);
             }
+
+            // Hook To Selection Panel
+            if(ti == teamIndex && team.Input != null)
+                team.Input.OnNewSelection += RTSUI.SelectionPanel.OnNewSelection;
         }
         private void OnFOWChange(int x, int y, int p, FogOfWar f) {
             if(p != teamIndex) return;

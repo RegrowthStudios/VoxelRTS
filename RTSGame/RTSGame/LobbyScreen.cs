@@ -14,6 +14,7 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Parsers;
 using System.Text.RegularExpressions;
+using RTSEngine.Interfaces;
 
 namespace RTS {
     public class TeamInitWidget : IDisposable {
@@ -22,23 +23,12 @@ namespace RTS {
                 BackRect.Parent = value;
             }
         }
-        public string Race {
-            get { return TextRace.Text; }
-            set { TextRace.Text = value; }
-        }
-        public string PlayerType {
-            get { return TextPlayerType.Text; }
-            set { TextPlayerType.Text = value; }
-        }
-        public string Scheme {
-            get { return TextScheme.Text; }
-            set { TextScheme.Text = value; }
-        }
 
         public RectWidget BackRect {
             get;
             private set;
         }
+
         public TextWidget TextIndex {
             get;
             private set;
@@ -47,6 +37,7 @@ namespace RTS {
             get;
             private set;
         }
+
         public RectButton ButtonPlayerType {
             get;
             private set;
@@ -55,6 +46,11 @@ namespace RTS {
             get;
             private set;
         }
+        public string PlayerType {
+            get { return TextPlayerType.Text; }
+            set { TextPlayerType.Text = value; }
+        }
+
         public RectButton ButtonRace {
             get;
             private set;
@@ -63,6 +59,11 @@ namespace RTS {
             get;
             private set;
         }
+        public string Race {
+            get { return TextRace.Text; }
+            set { TextRace.Text = value; }
+        }
+
         public RectButton ButtonScheme {
             get;
             private set;
@@ -70,6 +71,10 @@ namespace RTS {
         public TextWidget TextScheme {
             get;
             private set;
+        }
+        public string Scheme {
+            get { return TextScheme.Text; }
+            set { TextScheme.Text = value; }
         }
 
         private string[] lRaces, lSchemes, lTypes;
@@ -205,7 +210,7 @@ namespace RTS {
             TextScheme.Dispose();
         }
 
-        public void Set(string[] pTypes, Dictionary<string, RTSRaceData> races, Dictionary<string, RTSColorScheme> schemes) {
+        public void Set(string[] pTypes, Dictionary<string, FileInfo> races, Dictionary<string, RTSColorScheme> schemes) {
             lRaces = races.Keys.ToArray();
             lSchemes = schemes.Keys.ToArray();
             lTypes = pTypes;
@@ -232,7 +237,7 @@ namespace RTS {
         }
 
         // Init Info Helper
-        public Dictionary<string, RTSRaceData> Races {
+        public Dictionary<string, FileInfo> Races {
             get;
             private set;
         }
@@ -254,7 +259,7 @@ namespace RTS {
 
         public override void OnEntry(GameTime gameTime) {
             // Load All The Races And Schemes
-            Races = new Dictionary<string, RTSRaceData>();
+            Races = new Dictionary<string, FileInfo>();
             schemes = new Dictionary<string, RTSColorScheme>();
             GameEngine.SearchAllInitInfo(new DirectoryInfo("Packs"), Races, schemes);
             if(schemes.Count < 1)
@@ -270,7 +275,7 @@ namespace RTS {
             eld = new EngineLoadData();
             eld.Teams = new TeamInitOption[GameState.MAX_PLAYERS];
             for(int i = 0; i < eld.Teams.Length; i++) {
-                eld.Teams[i].InputType = InputType.None;
+                eld.Teams[i].InputType = RTSInputType.None;
                 eld.Teams[i].Race = null;
                 eld.Teams[i].PlayerName = null;
                 eld.Teams[i].Colors = schemes[defScheme];
@@ -341,16 +346,16 @@ namespace RTS {
                 eld.Teams[i].PlayerName = widgets[i].TextUser.Text;
                 switch(widgets[i].TextPlayerType.Text.ToLower()) {
                     case "player":
-                        eld.Teams[i].InputType = InputType.Player;
+                        eld.Teams[i].InputType = RTSInputType.Player;
                         break;
                     case "computer":
-                        eld.Teams[i].InputType = InputType.AI;
+                        eld.Teams[i].InputType = RTSInputType.AI;
                         break;
                     case "environment":
-                        eld.Teams[i].InputType = InputType.Environment;
+                        eld.Teams[i].InputType = RTSInputType.Environment;
                         break;
                     default:
-                        eld.Teams[i].InputType = InputType.None;
+                        eld.Teams[i].InputType = RTSInputType.None;
                         break;
                 }
             }

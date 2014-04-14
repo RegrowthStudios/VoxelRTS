@@ -67,6 +67,7 @@ namespace RTSEngine.Data.Team {
         public const int MAX_BUILDING_TYPES = 36;
 
         public string FriendlyName;
+        public FileInfo InfoFile;
 
         public readonly RTSUnitData[] Units;
         public IndexedUnitType[] ActiveUnits;

@@ -161,10 +161,10 @@ namespace RTSEngine.Controllers {
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
             events = new LinkedList<GameInputEvent>();
-            foreach(var active in s.activeTeams) {
-                if(active.Team.Input != null) {
-                    active.Team.Input.AppendEvents(events);
-                }
+            for(int i = 0; i < s.activeTeams.Length; i++) {
+                var team = s.activeTeams[i].Team;
+                if(team.Input != null)
+                    team.Input.AppendEvents(events);
             }
         }
         private void ApplyInput(GameState s, float dt) {

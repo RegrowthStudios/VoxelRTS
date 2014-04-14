@@ -11,7 +11,7 @@ using System.Threading;
 using System.IO;
 
 namespace RTSEngine.Controllers {
-    public class EnvironmentInputController : InputController {
+    public class EnvironmentInputController : ACInputController {
         Thread thread;
         private bool running;
         private bool paused;
@@ -95,54 +95,22 @@ namespace RTSEngine.Controllers {
             }
         }
 
-        public EnvironmentInputController(GameState g, int ti)
-            : base(g, ti, InputType.Environment) {
-            grid = g.IGrid;
+        public EnvironmentInputController()
+            : base() {
+            Type = RTSInputType.Environment;
+        }
+
+        public override void Init(GameState s, int ti) {
+            base.Init(s, ti);
+            grid = GameState.IGrid;
             random = new Random();
             thread = new Thread(WorkThread);
             thread.IsBackground = true;
             running = true;
             paused = true;
-            eData.DisasterTime = 1;
-            eData.RecoverTime = 1;
-        }
-        public EnvironmentInputController(GameState g, int ti, FileInfo infoRace, FileInfo spawnImage)
-            : this(g, ti) {
-            Init(infoRace, spawnImage);
-        }
-
-        // Only Called When Game Is Being Built And Not Deserialized
-        private void Init(FileInfo infoRace, FileInfo spawnImage) {
-            eData = EnvironmentDataParser.Parse(infoRace);
+            eData = EnvironmentDataParser.Parse(Team.Race.InfoFile);
             minNumSpawn = new int[3][] { eData.L1MinNumSpawn, eData.L1MaxNumSpawn, eData.L2MinNumSpawn };
             maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
-            treeLocations = new List<Point>();
-
-            if(spawnImage != null) {
-                using(var bmp = System.Drawing.Bitmap.FromFile(spawnImage.FullName) as System.Drawing.Bitmap) {
-                    int w = bmp.Width;
-                    int h = bmp.Height;
-                    int[] colorValues = new int[w * h];
-                    System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
-                    System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, colorValues, 0, colorValues.Length);
-                    bmp.UnlockBits(bmpData);
-
-                    int i = 0;
-                    for(int y = 0; y < h; y++) {
-                        for(int x = 0; x < w; x++) {
-                            Point p = new Point(x, y);
-                            if(colorValues[i] == System.Drawing.Color.Green.ToArgb()) {
-                                AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, p));
-                                treeLocations.Add(p);
-                            }
-                            else if(colorValues[i] == System.Drawing.Color.Red.ToArgb()) {
-                                AddEvent(new SpawnBuildingEvent(TeamIndex, OreType, p));
-                            }
-                            i++;
-                        }
-                    }
-                }
-            }
         }
 
         private void WorkThread() {

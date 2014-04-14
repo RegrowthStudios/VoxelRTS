@@ -19,6 +19,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
         private static readonly Regex rgxColorTex = RegexHelper.GenerateFile("TEXCOLOR");
         private static readonly Regex rgxAnimation = RegexHelper.GenerateFile("ANIMATION");
+        private static readonly Regex rgxIcon = RegexHelper.GenerateFile("ICON");
         private static readonly Regex rgxMaxCount = RegexHelper.GenerateInteger("MAXCOUNT");
         private static readonly Regex rgxHealth = RegexHelper.GenerateInteger("HEALTH");
         private static readonly Regex rgxSpeed = RegexHelper.GenerateNumber("SPEED");
@@ -54,7 +55,7 @@ namespace RTSEngine.Data.Parsers {
             t.SetData(sData);
             return t;
         }
-        public static RTSUnitModel ParseModel(RTSRenderer renderer, FileInfo infoFile) {
+        public static RTSUnitModel ParseModel(RTSRenderer renderer, FileInfo infoFile, RTSRace race) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -70,7 +71,9 @@ namespace RTSEngine.Data.Parsers {
                 rgxModel.Match(mStr),
                 rgxAnimation.Match(mStr),
                 rgxMainTex.Match(mStr),
-                rgxColorTex.Match(mStr)
+                rgxColorTex.Match(mStr),
+                rgxIcon.Match(mStr),
+                rgxName.Match(mStr)
             };
 
             // Check Existence
@@ -79,7 +82,8 @@ namespace RTSEngine.Data.Parsers {
             FileInfo fiAnim = RegexHelper.ExtractFile(mp[1], infoFile.Directory.FullName);
             FileInfo fiTexMain = RegexHelper.ExtractFile(mp[2], infoFile.Directory.FullName);
             FileInfo fiTexKey = RegexHelper.ExtractFile(mp[3], infoFile.Directory.FullName);
-            if(!fiModel.Exists || !fiAnim.Exists || !fiTexMain.Exists || !fiTexKey.Exists)
+            FileInfo fiIcon = RegexHelper.ExtractFile(mp[4], infoFile.Directory.FullName);
+            if(!fiModel.Exists || !fiAnim.Exists || !fiTexMain.Exists || !fiTexKey.Exists || !fiIcon.Exists)
                 return null;
 
             RTSUnitModel model;
@@ -89,6 +93,13 @@ namespace RTSEngine.Data.Parsers {
             }
             model.ModelTexture = renderer.LoadTexture2D(fiTexMain.FullName);
             model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
+
+            if(race != null) {
+                string key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mp[5]));
+                if(!renderer.IconLibrary.ContainsKey(key))
+                    renderer.IconLibrary.Add(key, renderer.LoadTexture2D(fiIcon.FullName));
+            }
+
             return model;
         }
         public static RTSUnitData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile) {

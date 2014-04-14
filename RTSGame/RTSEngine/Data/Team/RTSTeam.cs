@@ -37,11 +37,16 @@ namespace RTSEngine.Data.Team {
     }
 
     public class RTSTeam {
-
         public static void Serialize(BinaryWriter s, RTSTeam team) {
             RTSRace.Serialize(s, team.Race);
-            s.Write((int)team.Input.Type);
-            team.Input.Serialize(s);
+            if(team.Input != null) {
+                s.Write(true);
+                s.Write(ReflectedScript.GetKey(team.Input));
+                team.Input.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
             s.Write(team.ColorScheme.Name);
             s.Write(team.ColorScheme.Primary);
             s.Write(team.ColorScheme.Secondary);
@@ -62,26 +67,13 @@ namespace RTSEngine.Data.Team {
         public static RTSTeam Deserialize(BinaryReader s, int index, GameState state) {
             RTSTeam team = new RTSTeam();
             team.Race = RTSRace.Deserialize(s, state);
-            InputType it = (InputType)s.ReadInt32();
-            switch(it) {
-                case InputType.AI:
-                    AIInputController aic = new AIInputController(state, index);
-                    team.Input = aic;
-                    team.Input.Deserialize(s);
-                    break;
-                case InputType.Environment:
-                    EnvironmentInputController eic = new EnvironmentInputController(state, index);
-                    team.Input = eic;
-                    team.Input.Deserialize(s);
-                    break;
-                case InputType.Player:
-                    PlayerInputController pic = new PlayerInputController(state, index);
-                    team.Input = pic;
-                    team.Input.Deserialize(s);
-                    break;
-                default:
-                    throw new Exception("A Team That Was Never Supposed To Be Created Was Made");
+            if(s.ReadBoolean()) {
+                string it = s.ReadString();
+                team.Input = state.Scripts[it].CreateInstance<ACInputController>();
+                team.Input.Deserialize(s);
+                team.Input.Init(state, index);
             }
+
             RTSColorScheme scheme = new RTSColorScheme();
             scheme.Name = s.ReadString();
             scheme.Primary = s.ReadVector3();
@@ -141,7 +133,7 @@ namespace RTSEngine.Data.Team {
         // Team Race
         public RTSRace Race {
             get;
-            private set;
+            set;
         }
 
         // Team Capital
@@ -164,7 +156,7 @@ namespace RTSEngine.Data.Team {
             get { return buildings; }
         }
 
-        public InputController Input {
+        public ACInputController Input {
             get;
             set;
         }

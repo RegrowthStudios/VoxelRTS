@@ -23,12 +23,14 @@ using System.Text.RegularExpressions;
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
         const int NUM_FPS_SAMPLES = 64;
+        static readonly Regex rgxTeam = RegexHelper.GenerateInteger("setteam");
+        static readonly Regex rgxType = RegexHelper.GenerateInteger("settype");
 
         private GameplayController playController;
         private GameState state;
         private RTSRenderer renderer;
         private Camera camera;
-        private PlayerInputController gameInput;
+        private ACInputController gameInput;
 
         Vector3 clickWorldPos;
         int team, type;
@@ -68,9 +70,10 @@ namespace RTS {
             renderer = game.LoadScreen.LoadedRenderer;
             renderer.UseFOW = true;
             playController = new GameplayController();
-            gameInput = state.teams[0].Input as PlayerInputController;
-            gameInput.Camera = camera;
-            gameInput.UI = renderer.RTSUI;
+            gameInput = state.teams[0].Input;
+            var vi = gameInput as IVisualInputController;
+            vi.Camera = camera;
+            vi.UI = renderer.RTSUI;
             playController.Init(state);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
@@ -238,14 +241,12 @@ namespace RTS {
             }
         }
 
-        Regex r1 = RegexHelper.GenerateInteger("setteam");
-        Regex r2 = RegexHelper.GenerateInteger("settype");
         private void DevConsole_OnNewCommand(string obj) {
             Match m;
-            if((m = r1.Match(obj)).Success) {
+            if((m = rgxTeam.Match(obj)).Success) {
                 team = RegexHelper.ExtractInt(m);
             }
-            else if((m = r2.Match(obj)).Success) {
+            else if((m = rgxType.Match(obj)).Success) {
                 type = RegexHelper.ExtractInt(m);
             }
         }

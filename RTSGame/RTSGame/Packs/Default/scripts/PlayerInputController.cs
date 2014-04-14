@@ -13,12 +13,13 @@ using RTSEngine.Data.Team;
 using System.IO;
 
 namespace RTSEngine.Controllers {
-    public class PlayerInputController : InputController {
+    public class PlayerInputController : ACInputController, IVisualInputController {
         private const float MIN_RECT_SIZE = 20f;
         private const MouseButton BUTTON_SELECT = MouseButton.Left;
         private const MouseButton BUTTON_ACTION = MouseButton.Right;
 
         private Vector2 selectionRectStart;
+        private bool useSelectRect;
 
         // Visual Elements That Are Used By The Controller
         public Camera Camera {
@@ -30,10 +31,17 @@ namespace RTSEngine.Controllers {
             set;
         }
 
-        public PlayerInputController(GameState g, int t)
-            : base(g, t, InputType.Player) {
+        public bool HasSelectedEnemy {
+            get { return selected.Count == 1 && selected[0].Team != Team; }
         }
+
+        public PlayerInputController()
+            : base() {
+            Type = RTSInputType.Player;
+        }
+
         public override void Begin() {
+            useSelectRect = false;
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMousePress += OnMousePress;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
@@ -142,9 +150,12 @@ namespace RTSEngine.Controllers {
         }
 
         public void OnMouseRelease(Vector2 location, MouseButton b) {
-            if(b == BUTTON_SELECT) {
-                // Check If Camera Available
-                if(Camera == null) return;
+            // Check If Camera Available
+            if(Camera == null) return;
+            Camera.Controller.IsActive = true;
+
+            if(b == BUTTON_SELECT && useSelectRect) {
+                useSelectRect = false;
 
                 // Order Mouse Positions
                 Vector2 mMin = Vector2.Min(location, selectionRectStart);
@@ -173,24 +184,13 @@ namespace RTSEngine.Controllers {
             }
         }
         public void OnMousePress(Vector2 location, MouseButton b) {
+            if(Camera == null) return;
+            Camera.Controller.IsActive = false;
+
             Point pl = new Point((int)location.X, (int)location.Y);
-            if(UI.PanelBottom.Inside(pl.X, pl.Y)) {
+            if(UI != null && UI.PanelBottom.Inside(pl.X, pl.Y)) {
                 // Check UI Actions
-                Vector2 r;
-                if(UI.Minimap.Inside(pl.X, pl.Y, out r)) {
-                    // Use The Minimap
-                    Vector2 mapPos = r * GameState.CGrid.size;
-                    if(b == BUTTON_SELECT) {
-                        // Move To The Minimap Spot
-                        Camera.MoveTo(mapPos.X, mapPos.Y);
-                    }
-                    else if(b == BUTTON_ACTION) {
-                        // Try To Move Selected Units There
-                        if(selected.Count > 0) {
-                            AddEvent(new SetWayPointEvent(TeamIndex, mapPos));
-                        }
-                    }
-                }
+                OnUIPress(pl, b);
             }
             else {
                 // Action In The World
@@ -204,7 +204,7 @@ namespace RTSEngine.Controllers {
                         // Use Entity As A Target
                         AddEvent(new SetTargetEvent(TeamIndex, se));
                     }
-                    else {
+                    else if(!HasSelectedEnemy) {
                         // Add A Waypoint Event
                         IntersectionRecord rec = new IntersectionRecord();
                         if(GameState.Map.BVH.Intersect(ref rec, ray)) {
@@ -214,6 +214,7 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 else if(b == BUTTON_SELECT) {
+                    useSelectRect = true;
                     selectionRectStart = location;
                 }
             }
@@ -228,6 +229,30 @@ namespace RTSEngine.Controllers {
                         selected.Clear();
                     }
                     break;
+            }
+        }
+
+        public void OnUIPress(Point p, MouseButton b) {
+            Vector2 r;
+            if(UI.Minimap.Inside(p.X, p.Y, out r)) {
+                // Use The Minimap
+                Vector2 mapPos = r * GameState.CGrid.size;
+                if(b == BUTTON_SELECT) {
+                    // Move To The Minimap Spot
+                    if(Camera == null) return;
+                    Camera.MoveTo(mapPos.X, mapPos.Y);
+                }
+                else if(b == BUTTON_ACTION) {
+                    // Try To Move Selected Units There
+                    if(selected.Count > 0)
+                        AddEvent(new SetWayPointEvent(TeamIndex, mapPos));
+                }
+            }
+            else if(UI.SelectionPanel.BackPanel.Inside(p.X, p.Y)) {
+                var ug = UI.SelectionPanel.GetSelection(p.X, p.Y);
+                if(ug != null && ug.Selection != null) {
+                    AddEvent(new SelectEvent(TeamIndex, ug.Selection));
+                }
             }
         }
 

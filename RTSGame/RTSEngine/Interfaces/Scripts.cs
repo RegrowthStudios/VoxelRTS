@@ -320,4 +320,9 @@ namespace RTSEngine.Interfaces {
     }
 
     #endregion
+
+    public interface IVisualInputController {
+        Camera Camera { get; set; }
+        RTSUI UI { get; set; }
+    }
 }

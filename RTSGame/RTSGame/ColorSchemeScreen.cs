@@ -246,7 +246,7 @@ namespace RTS {
 
             // Try To Draw The Model
             G.DepthStencilState = DepthStencilState.Default;
-            G.RasterizerState = RasterizerState.CullCounterClockwise;
+            G.RasterizerState = RasterizerState.CullNone;
             G.BlendState = BlendState.Opaque;
             lock(drawLock) {
                 if(unitModel != null) {
@@ -290,18 +290,19 @@ namespace RTS {
             FileInfo fi = _fi as FileInfo;
 
             GameState state = new GameState();
-            state.SetTeams(new IndexedTeam[] { new IndexedTeam(0, new RTSTeam()) });
+            state.teams[0] = new RTSTeam();
+            state.UpdateActiveTeams();
             RTSUnitData _unitData = RTSUnitDataParser.ParseData(null, fi);
             state.teams[0].Race.Units[0] = _unitData;
             state.teams[0].Race.UpdateActiveUnits();
-            RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(renderer, fi);
+            RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(renderer, fi, null);
             _unitModel.Hook(renderer, state, 0, 0);
             RTSUnit _unit = new RTSUnit(state.teams[0], state.teams[0].Race.Units[0], Vector2.Zero);
             _unit.Height = 0;
             _unitModel.OnUnitSpawn(_unit);
 
             // Create The Full Animation Loop
-            _unit.AnimationController = new BlankAnimController(0, (_unitModel.AnimationTexture.Height / 3) - 1, 30f);
+            _unit.AnimationController = new BlankAnimController(0, (_unitModel.AnimationTexture.Height / 3) - 1, 1f);
 
             // Make Sure To Only Modify At A Specific Point
             lock(drawLock) {
