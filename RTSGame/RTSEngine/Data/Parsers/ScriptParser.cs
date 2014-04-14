@@ -23,6 +23,9 @@ namespace RTSEngine.Data.Parsers {
             compParams.GenerateExecutable = false;
             compParams.GenerateInMemory = true;
             compParams.TreatWarningsAsErrors = false;
+#if DEBUG
+            compParams.IncludeDebugInformation = true;
+#endif
             CompilerResults cr = compiler.CompileAssemblyFromFile(compParams, files);
 
             // Check For Errors

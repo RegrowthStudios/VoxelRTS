@@ -218,7 +218,6 @@ namespace RTSEngine.Controllers {
                 SendPathQuery(s, squad, e);
             }
         }
-
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
             RTSTeam team = s.teams[e.Team];
             List<IEntity> selected = team.Input.selected;
@@ -233,7 +232,7 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                squad.TargetingController.Target = e.Target as RTSUnit;
+                squad.TargetingController.Target = e.Target;
                 AddTask(s, squad);
                 SendPathQuery(s, squad, e);
             }
@@ -338,8 +337,10 @@ namespace RTSEngine.Controllers {
             var ste = e as SetTargetEvent;
             if(swe != null)
                 query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
-            else if(ste != null)
+            else if(ste != null && ste.Target != null)
                 query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
+            else
+                return;
             squadQueries.Add(new SquadQuery(squad, query));
             pathfinder.Add(query);
         }

@@ -195,8 +195,13 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void Draw(SpriteBatch batch) {
+        public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             wrMain.Draw(batch);
+            Rectangle rMap = new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height);
+            batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+            batch.Draw(renderer.Minimap.TeamMap, rMap, Color.White);
+            batch.End();
+            renderer.Minimap.DrawCamera(renderer, new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height));
         }
 
         private void OnWindowResize() {

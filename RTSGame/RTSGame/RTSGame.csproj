@@ -96,21 +96,21 @@
     <Content Include="Packs\Default\scripts\input\AIInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\scripts\DefaultBuilding.cs">
+    <Compile Include="Packs\Default\scripts\DefaultBuilding.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\scripts\DefaultSquad.cs">
+    </Compile>
+    <Compile Include="Packs\Default\scripts\DefaultSquad.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\scripts\DefaultUnit.cs">
+    </Compile>
+    <Compile Include="Packs\Default\scripts\DefaultUnit.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\scripts\input\EnvironmentInputController.cs">
+    </Compile>
+    <Compile Include="Packs\Default\scripts\input\EnvironmentInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\scripts\GameTypes.cs">
+    </Compile>
+    <Compile Include="Packs\Default\scripts\GameTypes.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Content Include="Packs\Default\scripts\input\PlayerInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -120,15 +120,12 @@
     <Content Include="Packs\Default\scripts\input\RTSUISelectionPanel.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\scripts\Scenarios.cs">
+    <Compile Include="Packs\Default\scripts\Scenarios.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\scripts\UIInput.cs">
+    </Compile>
+    <Compile Include="Packs\Default\scripts\UIInput.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\scripts\Worker.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Compile Include="PressEnterScreen.cs" />
     <Compile Include="RTSScreen.cs" />
     <Content Include="Content\Audio\btnClick.wav">
@@ -328,9 +325,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="LoadScreen.cs" />
-    <Content Include="Packs\Default\scripts\Mech.cs">
+    <Compile Include="Packs\Default\scripts\Mech.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Packs\Default\levels\0.dat" />
     <None Include="Packs\Default\maps\0\map.obj">

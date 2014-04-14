@@ -79,7 +79,7 @@ namespace RTSEngine.Controllers {
         }
         private static void BuildMap(GameState state, FileInfo infoFile) {
             // Parse Map Data
-            var lg = MapParser.ParseData(infoFile);
+            var lg = MapParser.ParseData(infoFile, state.Regions);
             if(!lg.HasValue)
                 throw new ArgumentNullException("Could Not Load Heightmap");
             state.SetGrids(lg.Value);

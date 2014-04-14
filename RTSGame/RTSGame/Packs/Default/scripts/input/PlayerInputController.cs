@@ -265,8 +265,8 @@ namespace RTS.Input {
             }
         }
 
-        public void Draw(SpriteBatch batch) {
-            UI.Draw(batch);
+        public void Draw(RTSRenderer renderer, SpriteBatch batch) {
+            UI.Draw(renderer, batch);
         }
 
         public override void Serialize(BinaryWriter s) {

@@ -116,7 +116,7 @@ namespace RTS {
             else {
                 G.Clear(Color.Black);
             }
-            (gameInput as IVisualInputController).Draw(SB);
+            (gameInput as IVisualInputController).Draw(renderer, SB);
 
             game.DrawDevConsole();
             if(!DevConsole.IsActivated) {

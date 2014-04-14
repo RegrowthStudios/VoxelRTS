@@ -155,7 +155,7 @@ namespace RTSEngine.Data.Parsers {
 
             return view;
         }
-        public static LevelGrid? ParseData(FileInfo infoFile) {
+        public static LevelGrid? ParseData(FileInfo infoFile, List<Region> regions) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -243,6 +243,7 @@ namespace RTSEngine.Data.Parsers {
             // Create The Regions
             foreach(var kv in regionCells) {
                 Region r = new Region(kv.Value);
+                regions.Add(r);
                 foreach(var p in r.Cells) {
                     grid.L2.Region[p.X, p.Y] = r;
                 }
