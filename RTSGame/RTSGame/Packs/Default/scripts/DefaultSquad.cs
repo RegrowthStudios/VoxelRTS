@@ -98,6 +98,52 @@ namespace RTS.Default.Squad {
         // The Centroid Of The Squad
         Vector2 centroid;
 
+        // Get The Force Between A Unit And A Path Made Of Waypoints 
+        private Vector2 GetForce(RTSUnit unit, List<Vector2> waypoints) {
+            if(Waypoints == null || Waypoints.Count == 0) return Vector2.Zero;
+            Vector2 goal = Waypoints[0];
+            float minDistSq = float.MaxValue;
+            Vector2 seg = Vector2.Zero;
+            for(int w = Waypoints.Count - 2; w >= 0; w--) {
+                Vector2 a = Waypoints[w + 1];
+                Vector2 b = Waypoints[w];
+                float d = DistSq(a, b, unit.GridPosition);
+                if(d < minDistSq) {
+                    seg = b - a;
+                    minDistSq = d;
+                }
+            }
+            return PathForce(seg, minDistSq);
+        }
+
+        // Calculate The Path Force At A Certain Distance Away From The Path
+        private Vector2 PathForce(Vector2 pathSegment, float dist) {
+            Vector2 force = Vector2.Zero;
+            if(dist == 0f) {
+                force = new Vector2(1, 0);
+            }
+            else {
+                force = new Vector2(1f / dist, dist);
+                force.Normalize();
+            }
+            float a = (float)Math.Atan2(pathSegment.Y, pathSegment.X) + (float)Math.PI/2;
+            var mr = Matrix.CreateRotationZ(a);
+            force = Vector2.TransformNormal(force, mr);
+            return aForce*force;
+        }
+
+        // Calculate The Distance Squared Between A Line Segment (A,B) And A Point P
+        private float DistSq(Vector2 a, Vector2 b, Vector2 p) {
+            Vector2 seg = b - a;
+            if(seg.X == 0 && seg.Y == 0) return (p - a).LengthSquared();
+            float mag = seg.LengthSquared();
+            float t = Vector2.Dot(p - a, seg) / mag;
+            if(t < 0) return (p - a).LengthSquared();
+            else if(t > mag) return (p - b).LengthSquared();
+            Vector2 proj = a + t * seg/mag;
+            return (proj - p).LengthSquared();
+        }
+
         private void UpdateCentroid() {
             centroid = Vector2.Zero;
             foreach(var unit in squad.Units) {
@@ -148,6 +194,7 @@ namespace RTS.Default.Squad {
 
         private void SetNetForceAndWaypoint(GameState g, RTSUnit unit, Vector2 waypoint, List<Vector2> targetFormation) {
             // Set Net Force...
+            //Vector2 netForce = GetForce(unit, Waypoints);
             Vector2 netForce = squad.Units.Count * Force(unit, waypoint);
             CollisionGrid cg = g.CGrid;
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
