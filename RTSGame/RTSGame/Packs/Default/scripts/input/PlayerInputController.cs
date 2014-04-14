@@ -11,9 +11,10 @@ using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
 using RTSEngine.Data.Team;
 using System.IO;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace RTSEngine.Controllers {
-    public class PlayerInputController : ACInputController, IVisualInputController {
+namespace RTS.Input {
+    public class Player : ACInputController, IVisualInputController {
         private const float MIN_RECT_SIZE = 20f;
         private const MouseButton BUTTON_SELECT = MouseButton.Left;
         private const MouseButton BUTTON_ACTION = MouseButton.Right;
@@ -35,11 +36,16 @@ namespace RTSEngine.Controllers {
             get { return selected.Count == 1 && selected[0].Team != Team; }
         }
 
-        public PlayerInputController()
+        public Player()
             : base() {
             Type = RTSInputType.Player;
         }
-
+        public void Build(RTSRenderer renderer) {
+            // Create UI
+            UI = new RTSUI(renderer, "Courier New", 32, 140);
+            UI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
+            OnNewSelection += UI.SelectionPanel.OnNewSelection;
+        }
         public override void Begin() {
             useSelectRect = false;
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
@@ -50,6 +56,9 @@ namespace RTSEngine.Controllers {
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
             MouseEventDispatcher.OnMousePress -= OnMousePress;
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
+            if(UI != null) {
+                UI.Dispose();
+            }
         }
 
         private static bool UseSelectionRect(Vector2 min, Vector2 max) {
@@ -254,6 +263,10 @@ namespace RTSEngine.Controllers {
                     AddEvent(new SelectEvent(TeamIndex, ug.Selection));
                 }
             }
+        }
+
+        public void Draw(SpriteBatch batch) {
+            UI.Draw(batch);
         }
 
         public override void Serialize(BinaryWriter s) {

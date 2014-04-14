@@ -233,8 +233,6 @@ namespace RTS {
             text.Color = Color.White;
             text.Text = "Play Game";
             text.LayerDepth = 0.5f;
-
-            LoadedRenderer.RTSUI.WindowSize = G.Viewport.Bounds;
         }
         public void BuildWidgetsFailure() {
             tip = "Error Occured:\n" + loadException.Message + "\nStack Trace:\n" + loadException.StackTrace;
@@ -305,13 +303,13 @@ namespace RTS {
                 for(int ti = 0; ti < LoadedState.teams.Length; ti++) {
                     switch(LoadData.Teams[ti].InputType) {
                         case RTSInputType.Player:
-                            GameEngine.SetInput(LoadedState, ti, new PlayerInputController());
+                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.Player"].CreateInstance<ACInputController>());
                             break;
                         case RTSInputType.AI:
-                            GameEngine.SetInput(LoadedState, ti, new AIInputController());
+                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.AI"].CreateInstance<ACInputController>());
                             break;
                         case RTSInputType.Environment:
-                            GameEngine.SetInput(LoadedState, ti, new EnvironmentInputController());
+                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.Environment"].CreateInstance<ACInputController>());
                             break;
                         default:
                             continue;

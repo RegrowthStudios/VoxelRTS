@@ -72,8 +72,8 @@ namespace RTS {
             playController = new GameplayController();
             gameInput = state.teams[0].Input;
             var vi = gameInput as IVisualInputController;
+            vi.Build(renderer);
             vi.Camera = camera;
-            vi.UI = renderer.RTSUI;
             playController.Init(state);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
@@ -112,8 +112,11 @@ namespace RTS {
                 camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
                 renderer.Update(state);
                 renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
-                renderer.DrawUI(SB);
             }
+            else {
+                G.Clear(Color.Black);
+            }
+            (gameInput as IVisualInputController).Draw(SB);
 
             game.DrawDevConsole();
             if(!DevConsole.IsActivated) {

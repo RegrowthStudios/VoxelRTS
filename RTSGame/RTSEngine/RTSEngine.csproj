@@ -102,9 +102,7 @@
     <Compile Include="Graphics\Particles\Particles.cs" />
     <Compile Include="Graphics\RTSBuildingModel.cs" />
     <Compile Include="Graphics\RTSRenderer.cs" />
-    <Compile Include="Graphics\UI\RTSUI.cs" />
     <Compile Include="Graphics\RTSUnitModel.cs" />
-    <Compile Include="Graphics\UI\RTSUISelectionPanel.cs" />
     <Compile Include="Interfaces\BehaviorFSM.cs" />
     <Compile Include="Interfaces\ImpactGenerator.cs" />
     <Compile Include="Net\NetSerializer.cs" />

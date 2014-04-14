@@ -9,9 +9,9 @@ using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework;
 using System.IO;
 
-namespace RTSEngine.Controllers {
+namespace RTS.Input {
     // TODO: Make This A Better AI
-    public class AIInputController : ACInputController {
+    public class AI : ACInputController {
         private static readonly Random AI_SEEDER = new Random();
 
         Thread t;
@@ -19,7 +19,7 @@ namespace RTSEngine.Controllers {
 
         Random r = new Random(AI_SEEDER.Next());
 
-        public AIInputController()
+        public AI()
             : base() {
             Type = RTSInputType.AI;
         }

@@ -99,10 +99,6 @@ namespace RTSEngine.Graphics {
 
         // Particle Effects
         private ParticleRenderer pRenderer;
-        public RTSUI RTSUI {
-            get;
-            private set;
-        }
 
         // Icons
         public Dictionary<string, Texture2D> IconLibrary {
@@ -166,9 +162,6 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < td.Length; i++) {
                 td[i].Dispose();
                 td[i] = null;
-            }
-            if(RTSUI != null) {
-                RTSUI.Dispose();
             }
         }
 
@@ -264,9 +257,6 @@ namespace RTSEngine.Graphics {
             state.CGrid.OnFOWChange += OnFOWChange;
             Minimap.Hook(this, state, ti);
 
-            // Create UI
-            RTSUI = new RTSUI(this, "Courier New", 32, 140);
-            RTSUI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
 
             // Load Particles
             using(var s = File.OpenRead(ParticleRenderer.FILE_BULLET_MODEL)) {
@@ -319,10 +309,6 @@ namespace RTSEngine.Graphics {
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);
             }
-
-            // Hook To Selection Panel
-            if(ti == teamIndex && team.Input != null)
-                team.Input.OnNewSelection += RTSUI.SelectionPanel.OnNewSelection;
         }
         private void OnFOWChange(int x, int y, int p, FogOfWar f) {
             if(p != teamIndex) return;
@@ -357,7 +343,6 @@ namespace RTSEngine.Graphics {
         }
 
         public void Update(GameState state) {
-            RTSUI.UpdateButtons(state);
             if(Map.Reset) Map.ApplyFOW();
             Minimap.Refresh(this);
         }
@@ -600,11 +585,6 @@ namespace RTSEngine.Graphics {
 
             pRenderer.SetBullets(G);
             pRenderer.DrawBullets(G);
-        }
-
-        // Draw The UI
-        public void DrawUI(SpriteBatch batch) {
-            RTSUI.Draw(batch);
         }
 
         // Selection Box Handling

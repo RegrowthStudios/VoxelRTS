@@ -10,8 +10,8 @@ using System.Text;
 using System.Threading;
 using System.IO;
 
-namespace RTSEngine.Controllers {
-    public class EnvironmentInputController : ACInputController {
+namespace RTS.Input {
+    public class Environment : ACInputController {
         Thread thread;
         private bool running;
         private bool paused;
@@ -95,7 +95,7 @@ namespace RTSEngine.Controllers {
             }
         }
 
-        public EnvironmentInputController()
+        public Environment()
             : base() {
             Type = RTSInputType.Environment;
         }

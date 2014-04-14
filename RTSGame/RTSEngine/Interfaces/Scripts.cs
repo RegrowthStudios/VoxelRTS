@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
@@ -323,6 +324,8 @@ namespace RTSEngine.Interfaces {
 
     public interface IVisualInputController {
         Camera Camera { get; set; }
-        RTSUI UI { get; set; }
+
+        void Build(RTSRenderer renderer);
+        void Draw(SpriteBatch batch);
     }
 }
