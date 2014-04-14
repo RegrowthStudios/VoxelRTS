@@ -53,7 +53,7 @@ namespace RTSEngine.Graphics {
                 foreach(var ug in groups) ug.Widget.LayerDepth = BackPanel.LayerDepth - GROUPS_LAYER_OFF;
             }
         }
-        
+
         public Dictionary<string, Texture2D> IconLibrary {
             get;
             set;
@@ -165,7 +165,7 @@ namespace RTSEngine.Graphics {
             int wi = 0;
             foreach(var kv in buildings) {
                 if(wi >= groups.Length) break;
-                string key = "None"; // string.Join(".", ic.Team.Race.FriendlyName, kv.Key.FriendlyName);
+                string key = string.Join(".", ic.Team.Race.FriendlyName, kv.Key.FriendlyName);
                 Texture2D t = IconLibrary[key];
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;

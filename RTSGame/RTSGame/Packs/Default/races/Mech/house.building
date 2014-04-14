@@ -1,10 +1,11 @@
 ﻿// Friendly Unit Name
-NAME            [Barracks]
+NAME            [House]
 
 // Unit Model
-MODEL           [..\..\models\Tree.obj]
-TEXMAIN         [..\..\textures\Tree.png]
-TEXCOLOR        [..\..\textures\NoKey.png]
+MODEL           [..\..\models\House.obj]
+TEXMAIN         [..\..\textures\HouseMain.png]
+TEXCOLOR        [..\..\textures\HouseKey.png]
+ICON            [..\..\icons\House.png]
 MAXCOUNT        [1000]
 
 // Unit Data
@@ -12,8 +13,8 @@ HEALTH          [120]
 COST            [20]
 IMPACT          [10]
 BUILDTIME       [20]
-SIGHTRADIUS     [3]
-GRIDSIZE        [1, 1]
+SIGHTRADIUS     [24]
+GRIDSIZE        [1 , 1]
 
 // Collision Data
 BBOXMIN         [-1 , 0.0 , -1]

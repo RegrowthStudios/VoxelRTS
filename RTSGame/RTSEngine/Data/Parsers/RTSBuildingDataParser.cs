@@ -30,8 +30,9 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxModel = RegexHelper.GenerateFile("MODEL");
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
         private static readonly Regex rgxColorTex = RegexHelper.GenerateFile("TEXCOLOR");
+        private static readonly Regex rgxIcon = RegexHelper.GenerateFile("ICON");
 
-        public static RTSBuildingModel ParseModel(RTSRenderer renderer, FileInfo infoFile) {
+        public static RTSBuildingModel ParseModel(RTSRenderer renderer, FileInfo infoFile, RTSRace race) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -46,7 +47,9 @@ namespace RTSEngine.Data.Parsers {
             Match[] mp = {
                 rgxModel.Match(mStr),
                 rgxMainTex.Match(mStr),
-                rgxColorTex.Match(mStr)
+                rgxColorTex.Match(mStr),
+                rgxIcon.Match(mStr),
+                rgxName.Match(mStr)
             };
 
             // Check Existence
@@ -54,7 +57,8 @@ namespace RTSEngine.Data.Parsers {
             FileInfo fiModel = RegexHelper.ExtractFile(mp[0], infoFile.Directory.FullName);
             FileInfo fiTexMain = RegexHelper.ExtractFile(mp[1], infoFile.Directory.FullName);
             FileInfo fiTexKey = RegexHelper.ExtractFile(mp[2], infoFile.Directory.FullName);
-            if(!fiModel.Exists || !fiTexMain.Exists || !fiTexKey.Exists)
+            FileInfo fiIcon = RegexHelper.ExtractFile(mp[3], infoFile.Directory.FullName);
+            if(!fiModel.Exists || !fiTexMain.Exists || !fiTexKey.Exists || !fiIcon.Exists)
                 return null;
 
             RTSBuildingModel model;
@@ -63,6 +67,13 @@ namespace RTSEngine.Data.Parsers {
             }
             model.ModelTexture = renderer.LoadTexture2D(fiTexMain.FullName);
             model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
+
+            if(race != null) {
+                string key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mp[4]));
+                if(!renderer.IconLibrary.ContainsKey(key))
+                    renderer.IconLibrary.Add(key, renderer.LoadTexture2D(fiIcon.FullName));
+            }
+
             return model;
         }
         public static RTSBuildingData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile) {

@@ -29,6 +29,13 @@ namespace RTSEngine.Graphics {
 
         private WidgetRenderer wrButtonPanel, wrMain;
 
+        public Rectangle WindowSize {
+            set {
+                rectBounds.Width = value.Width;
+                rectBounds.Height = value.Height;
+                OnWindowResize();
+            }
+        }
         private RectWidget rectBounds;
         public RectWidget PanelBottom {
             get;

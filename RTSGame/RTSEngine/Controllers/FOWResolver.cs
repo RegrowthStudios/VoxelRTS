@@ -14,18 +14,53 @@ namespace RTSEngine.Controllers {
         PX,
         NX,
         PY,
-        NY
+        NY,
+        PXPY,
+        PXNY,
+        NXPY,
+        NXNY
     }
     public struct FOWPoint {
         public int X, Y;
         public TravelDirection PreviousDirection;
         public int TravelAmount;
 
-        public FOWPoint(int x, int y, TravelDirection t, int ptAmount) {
-            X = x;
-            Y = y;
+        public FOWPoint(int px, int py, TravelDirection t, int ptAmount) {
+            X = px;
+            Y = py;
             PreviousDirection = t;
-            TravelAmount = ptAmount - 1;
+            bool isDiag = false;
+            switch(PreviousDirection) {
+                case TravelDirection.PX:
+                    X++;
+                    break;
+                case TravelDirection.NX:
+                    X--;
+                    break;
+                case TravelDirection.PY:
+                    Y++;
+                    break;
+                case TravelDirection.NY:
+                    Y--;
+                    break;
+                case TravelDirection.PXPY:
+                    X++; Y++;
+                    isDiag = true;
+                    break;
+                case TravelDirection.PXNY:
+                    X++; Y--;
+                    isDiag = true;
+                    break;
+                case TravelDirection.NXPY:
+                    X--; Y++;
+                    isDiag = true;
+                    break;
+                case TravelDirection.NXNY:
+                    X--; Y--;
+                    isDiag = true;
+                    break;
+            }
+            TravelAmount = ptAmount - (isDiag ? 14 : 10);
         }
     }
 
@@ -68,35 +103,67 @@ namespace RTSEngine.Controllers {
             FOWPoint fp;
             switch(prev.PreviousDirection) {
                 case TravelDirection.PX:
-                    fp = new FOWPoint(prev.X + 1, prev.Y, TravelDirection.PX, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PXPY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
-                    fp = new FOWPoint(prev.X, prev.Y + 1, TravelDirection.PY, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PXNY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
-                    fp = new FOWPoint(prev.X, prev.Y - 1, TravelDirection.NY, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PX, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
                     break;
                 case TravelDirection.NX:
-                    fp = new FOWPoint(prev.X - 1, prev.Y, TravelDirection.NX, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NXPY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
-                    fp = new FOWPoint(prev.X, prev.Y + 1, TravelDirection.PY, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NXNY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
-                    fp = new FOWPoint(prev.X, prev.Y - 1, TravelDirection.NY, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NX, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
                     break;
                 case TravelDirection.PY:
-                    fp = new FOWPoint(prev.X + 1, prev.Y, TravelDirection.PX, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PXPY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
-                    fp = new FOWPoint(prev.X - 1, prev.Y, TravelDirection.NX, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NXPY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
-                    fp = new FOWPoint(prev.X, prev.Y + 1, TravelDirection.PY, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
                     break;
                 case TravelDirection.NY:
-                    fp = new FOWPoint(prev.X + 1, prev.Y, TravelDirection.PX, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PXNY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
-                    fp = new FOWPoint(prev.X - 1, prev.Y, TravelDirection.NX, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NXNY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
-                    fp = new FOWPoint(prev.X, prev.Y - 1, TravelDirection.NY, prev.TravelAmount);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NY, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    break;
+                case TravelDirection.PXPY:
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PXPY, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PX, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PY, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    break;
+                case TravelDirection.PXNY:
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PXNY, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PX, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NY, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    break;
+                case TravelDirection.NXNY:
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NXNY, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NY, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NX, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    break;
+                case TravelDirection.NXPY:
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NXPY, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.NX, prev.TravelAmount);
+                    if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
+                    fp = new FOWPoint(prev.X, prev.Y, TravelDirection.PY, prev.TravelAmount);
                     if(IsGood(gx, gy, val, ref fp)) q.Enqueue(fp);
                     break;
             }
@@ -111,7 +178,7 @@ namespace RTSEngine.Controllers {
                 for(int x = 0; x < cg.numCells.X; x++) {
                     // Set To Passive If There Was Some Visibility
                     if(heat[x, y] > HEAT_NONE)
-                        val[x, y] = HEAT_PASSIVE;
+                        val[x, y] = HEAT_PASSIVE * 10;
                     else
                         val[x, y] = 0;
                 }
@@ -122,11 +189,16 @@ namespace RTSEngine.Controllers {
             for(int i = 0; i < team.Units.Count; i++) {
                 Point p = HashHelper.Hash(team.Units[i].GridPosition, cg.numCells, cg.size);
                 int vRadius = (int)(team.Units[i].UnitData.BaseCombatData.MaxRange / cg.cellSize);
+                vRadius *= 10;
                 if(val[p.X, p.Y] < vRadius) {
-                    queue.Enqueue(new FOWPoint(p.X + 1, p.Y, TravelDirection.PX, vRadius));
-                    queue.Enqueue(new FOWPoint(p.X - 1, p.Y, TravelDirection.NX, vRadius));
-                    queue.Enqueue(new FOWPoint(p.X, p.Y + 1, TravelDirection.PY, vRadius));
-                    queue.Enqueue(new FOWPoint(p.X, p.Y - 1, TravelDirection.NY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PXPY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NXNY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NXPY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PXNY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PX, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NX, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NY, vRadius));
                     cg.SetFogOfWar(p.X, p.Y, teamIndex, FogOfWar.Active);
                     val[p.X, p.Y] = vRadius;
                 }
@@ -134,11 +206,16 @@ namespace RTSEngine.Controllers {
             for(int i = 0; i < team.Buildings.Count; i++) {
                 Point p = HashHelper.Hash(team.Buildings[i].GridPosition, cg.numCells, cg.size);
                 int vRadius = (int)(team.Buildings[i].BuildingData.SightRadius / cg.cellSize);
+                vRadius *= 10;
                 if(val[p.X, p.Y] < vRadius) {
-                    queue.Enqueue(new FOWPoint(p.X + 1, p.Y, TravelDirection.PX, vRadius));
-                    queue.Enqueue(new FOWPoint(p.X - 1, p.Y, TravelDirection.NX, vRadius));
-                    queue.Enqueue(new FOWPoint(p.X, p.Y + 1, TravelDirection.PY, vRadius));
-                    queue.Enqueue(new FOWPoint(p.X, p.Y - 1, TravelDirection.NY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PXPY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NXNY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NXPY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PXNY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PX, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NX, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PY, vRadius));
+                    queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.NY, vRadius));
                     cg.SetFogOfWar(p.X, p.Y, teamIndex, FogOfWar.Active);
                     val[p.X, p.Y] = vRadius;
                 }
@@ -157,6 +234,7 @@ namespace RTSEngine.Controllers {
             for(int y = 0; y < cg.numCells.Y; y++) {
                 for(int x = 0; x < cg.numCells.X; x++) {
                     FogOfWar f = cg.GetFogOfWar(x, y, teamIndex);
+                    val[x, y] /= 10;
                     switch(val[x, y]) {
                         case HEAT_PASSIVE:
                             if(f != FogOfWar.Passive)

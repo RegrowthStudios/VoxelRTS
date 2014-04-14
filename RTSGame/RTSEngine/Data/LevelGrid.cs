@@ -98,7 +98,7 @@ namespace RTSEngine.Data {
             b.OnDestruction += OnBuildingDestruction;
 
             // Add To All The Cells
-            Point p = HashHelper.Hash(b.CollisionGeometry.Center, numCells, size);
+            Point p = HashHelper.Hash(b.GridStartPos, numCells, size);
             for(int y = 0; y < b.BuildingData.GridSize.Y; y++) {
                 for(int x = 0; x < b.BuildingData.GridSize.X; x++) {
                     EStatic[p.X + x, p.Y + y] = b;
@@ -186,7 +186,7 @@ namespace RTSEngine.Data {
             RTSBuilding b = o as RTSBuilding;
 
             // Add To All The Cells
-            Point p = HashHelper.Hash(b.CollisionGeometry.Center, numCells, size);
+            Point p = HashHelper.Hash(b.GridStartPos, numCells, size);
             for(int y = 0; y < b.BuildingData.GridSize.Y; y++) {
                 for(int x = 0; x < b.BuildingData.GridSize.X; x++) {
                     EStatic[p.X + x, p.Y + y] = null;

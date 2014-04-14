@@ -269,7 +269,6 @@ namespace RTSEngine.Controllers {
             // Set Default Height
             building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
             building.CollisionGeometry.Height = building.Height;
-            building.CollisionGeometry.Center = building.GridPosition;
             s.CGrid.Add(building);
 
             // Add Building Decision Task

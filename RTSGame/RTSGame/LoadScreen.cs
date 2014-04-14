@@ -233,6 +233,8 @@ namespace RTS {
             text.Color = Color.White;
             text.Text = "Play Game";
             text.LayerDepth = 0.5f;
+
+            LoadedRenderer.RTSUI.WindowSize = G.Viewport.Bounds;
         }
         public void BuildWidgetsFailure() {
             tip = "Error Occured:\n" + loadException.Message + "\nStack Trace:\n" + loadException.StackTrace;

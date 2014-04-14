@@ -24,7 +24,7 @@ namespace RTSEngine.Data.Team {
                 s.Write(false);
             }
             s.Write(e.Health);
-            for(int i = 0; i < GameState.MAX_PLAYERS;i++) {
+            for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
                 s.Write(e.viewedInfo.Get(i));
             }
             if(e.ActionController != null) {
@@ -43,7 +43,6 @@ namespace RTSEngine.Data.Team {
             e.State = s.ReadInt32();
             e.ViewDirection = s.ReadVector2();
             e.GridPosition = s.ReadVector2();
-            e.CollisionGeometry.Center += e.GridPosition;
             e.Height = s.ReadSingle();
             if(s.ReadBoolean()) {
                 target = s.ReadInt32();
@@ -87,7 +86,7 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
-        
+
         // View Direction
         public Vector2 ViewDirection {
             get;
@@ -98,7 +97,18 @@ namespace RTSEngine.Data.Team {
         private Vector2 gridPos;
         public Vector2 GridPosition {
             get { return gridPos; }
-            set { gridPos = value; }
+            set {
+                gridPos = value;
+                CollisionGeometry.Center = BuildingData.ICollidableShape.Center + gridPos;
+            }
+        }
+        public Vector2 GridStartPos {
+            get {
+                Vector2 gs = GridPosition;
+                gs.X -= (BuildingData.GridSize.X / 2);
+                gs.Y -= (BuildingData.GridSize.Y / 2);
+                return gs;
+            }
         }
 
         // 3D Position
@@ -185,6 +195,8 @@ namespace RTSEngine.Data.Team {
             viewedInfo.SetAll(false);
 
             BuildingData = data;
+            gridPos.X += (BuildingData.GridSize.X / 2);
+            gridPos.Y += (BuildingData.GridSize.Y / 2);
             height = 0;
             Health = BuildingData.Health;
             CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;

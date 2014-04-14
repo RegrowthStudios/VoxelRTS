@@ -1,10 +1,11 @@
 ﻿// Friendly Unit Name
-NAME            [Barracks]
+NAME            [Tree]
 
 // Unit Model
 MODEL           [..\..\models\Tree.obj]
 TEXMAIN         [..\..\textures\Tree.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
+ICON            [..\..\icons\Tree.png]
 MAXCOUNT        [1000]
 
 // Unit Data
