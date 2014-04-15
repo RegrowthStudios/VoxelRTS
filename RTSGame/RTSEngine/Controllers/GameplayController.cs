@@ -190,6 +190,12 @@ namespace RTSEngine.Controllers {
                     case GameEventType.SpawnBuilding:
                         ApplyInput(s, dt, e as SpawnBuildingEvent);
                         break;
+                    case GameEventType.Impact:
+                        ApplyInput(s, dt, e as ImpactEvent);
+                        break;
+                    case GameEventType.Capital:
+                        ApplyInput(s, dt, e as CapitalEvent);
+                        break;
                     default:
                         throw new Exception("Event does not exist.");
                 }
@@ -261,6 +267,8 @@ namespace RTSEngine.Controllers {
             if(!s.CGrid.CanAddBuilding(wp, team.Race.Buildings[e.Type].GridSize)) return;
 
             RTSBuilding building = team.AddBuilding(e.Type, wp);
+            if(building == null) return;
+ 
             building.BuildAmountLeft = 0;
 
             // Check If A Building Was Possible
@@ -273,6 +281,15 @@ namespace RTSEngine.Controllers {
 
             // Add Building Decision Task
             AddTask(s, building, e.Team, e.Type);
+        }
+        private void ApplyInput(GameState s, float dt, ImpactEvent e) {
+            Point p = HashHelper.Hash(e.Position, s.IGrid.numCells, s.IGrid.size);
+            s.IGrid.Region[p.X, p.Y].AddToRegionImpact(e.ChangeAmount);
+        }
+        private void ApplyInput(GameState s, float dt, CapitalEvent e) {
+            RTSTeam team = s.teams[e.Team];
+
+            team.Capital += e.ChangeAmount;
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
@@ -473,7 +490,7 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandCapital c) {
             foreach(var t in s.activeTeams) {
-                t.Team.Capital += c.change;
+                t.Team.Input.AddEvent(new CapitalEvent(t.Team.Index, c.change));
             }
         }
 

@@ -225,7 +225,7 @@ namespace RTSEngine.Data.Team {
             squads = new List<RTSSquad>();
             buildings = new List<RTSBuilding>();
             ViewedEnemyBuildings = new List<ViewedBuilding>();
-            Capital = 1000;
+            Capital = 0;
             Population = 0;
             PopulationCap = 0;
 
