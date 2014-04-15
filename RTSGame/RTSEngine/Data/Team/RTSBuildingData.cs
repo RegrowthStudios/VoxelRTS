@@ -14,6 +14,7 @@ namespace RTSEngine.Data.Team {
             s.Write(data.InfoFile);
             s.Write(data.Health);
             s.Write(data.CapitalCost);
+            s.Write(data.PopCapChange);
             s.Write(data.MaxCount);
             s.Write(data.Impact);
             s.Write(data.BuildAmount);
@@ -43,6 +44,7 @@ namespace RTSEngine.Data.Team {
             data.InfoFile = s.ReadString();
             data.Health = s.ReadInt32();
             data.CapitalCost = s.ReadInt32();
+            data.PopCapChange = s.ReadInt32();
             data.MaxCount = s.ReadInt32();
             data.Impact = s.ReadInt32();
             data.BuildAmount = s.ReadInt32();

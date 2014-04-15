@@ -261,6 +261,7 @@ namespace RTSEngine.Controllers {
             if(!s.CGrid.CanAddBuilding(wp, team.Race.Buildings[e.Type].GridSize)) return;
 
             RTSBuilding building = team.AddBuilding(e.Type, wp);
+            building.BuildAmountLeft = 0;
 
             // Check If A Building Was Possible
             if(building == null) return;
@@ -391,6 +392,9 @@ namespace RTSEngine.Controllers {
                     case DevCommandType.Save:
                         ApplyLogic(s, dt, comm as DevCommandSave);
                         break;
+                    case DevCommandType.Capital:
+                        ApplyLogic(s, dt, comm as DevCommandCapital);
+                        break;
                 }
             }
 
@@ -466,6 +470,11 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSave c) {
             GameEngine.Save(s, c.file.FullName);
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandCapital c) {
+            foreach(var t in s.activeTeams) {
+                t.Team.Capital += c.change;
+            }
         }
 
         // Physics Stage
@@ -557,6 +566,10 @@ namespace RTSEngine.Controllers {
                 return;
             }
             else if(DevCommandSave.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandCapital.TryParse(s, out c)) {
                 commands.Enqueue(c);
                 return;
             }

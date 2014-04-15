@@ -11,8 +11,9 @@ MAXCOUNT        [1000]
 // Unit Data
 HEALTH          [120]
 COST            [20]
+POPCAPCHANGE    [10]
 IMPACT          [10]
-BUILDTIME       [20]
+BUILDAMOUNT     [20]
 SIGHTRADIUS     [24]
 GRIDSIZE        [1 , 1]
 

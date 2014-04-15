@@ -157,7 +157,7 @@ namespace RTSEngine.Data.Team {
 
         // Building Information
         private int bAmount;
-        public int BuildAmount {
+        public int BuildAmountLeft {
             get { return bAmount; }
             set {
                 if(!IsBuilt) {
@@ -169,10 +169,10 @@ namespace RTSEngine.Data.Team {
             }
         }
         public bool IsBuilt {
-            get { return BuildAmount <= 0; }
+            get { return BuildAmountLeft <= 0; }
         }
         private float BuildRatio {
-            get { return IsBuilt ? 1f : ((float)(Data.BuildAmount - BuildAmount) / (float)Data.BuildAmount); }
+            get { return IsBuilt ? 1f : ((float)(Data.BuildAmount - BuildAmountLeft) / (float)Data.BuildAmount); }
         }
 
         // Damaging Events

@@ -13,7 +13,8 @@ namespace RTSEngine.Data {
         KillUnits,
         KillBuildings,
         FOW,
-        Save
+        Save,
+        Capital
     }
     public class DevCommand {
         public DevCommandType Type {
@@ -158,6 +159,27 @@ namespace RTSEngine.Data {
             if(m.Success) {
                 string cwd = Directory.GetCurrentDirectory();
                 command = new DevCommandSave(RegexHelper.ExtractFile(m, cwd));
+                return true;
+            }
+            command = null;
+            return false;
+        }
+    }
+    // Capital Command
+    public class DevCommandCapital : DevCommand {
+        public static readonly Regex REGEX = RegexHelper.GenerateInteger("l'herbe verte");
+
+        public readonly int change;
+
+        public DevCommandCapital(int c)
+            : base(DevCommandType.Capital) {
+            change = c;
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m = REGEX.Match(c);
+            if(m.Success) {
+                command = new DevCommandCapital(RegexHelper.ExtractInt(m));
                 return true;
             }
             command = null;
