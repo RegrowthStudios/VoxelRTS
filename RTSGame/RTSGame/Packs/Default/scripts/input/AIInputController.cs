@@ -63,10 +63,10 @@ namespace RTS.Input {
         private void SpawnUnits(Random r) {
             int ui = r.Next(Team.Race.ActiveUnits.Length);
             int cc = Team.Units.Aggregate<RTSUnit, int>(0, (i, u) => {
-                if(u.Data == Team.Race.ActiveUnits[ui].Data) return i + 1;
+                if(u.Data == Team.Race.ActiveUnits[ui]) return i + 1;
                 else return i;
             });
-            cc = Team.Race.ActiveUnits[ui].Data.MaxCount - cc;
+            cc = Team.Race.ActiveUnits[ui].MaxCount - cc;
             if(cc > 10) cc = 10;
             if(cc < 1) return;
             int uc = r.Next(1, cc);

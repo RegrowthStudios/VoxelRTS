@@ -4,7 +4,7 @@ NAME            [Barracks]
 // Unit Model
 MODEL           [..\..\models\Barracks.obj]
 TEXMAIN         [..\..\textures\BarracksMain.png]
-TEXCOLOR        [..\..\textures\NoKey.png]
+TEXCOLOR        [..\..\textures\BarracksKey.png]
 ICON            [..\..\icons\Barracks.png]
 MAXCOUNT        [1000]
 
