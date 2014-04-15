@@ -114,7 +114,7 @@ namespace RTSEngine.Data.Parsers {
             data.CapitalCost = RegexHelper.ExtractInt(mp[ri++]);
             data.MaxCount = RegexHelper.ExtractInt(mp[ri++]);
             data.Impact = RegexHelper.ExtractInt(mp[ri++]);
-            data.BuildTime = RegexHelper.ExtractInt(mp[ri++]);
+            data.BuildAmount = RegexHelper.ExtractInt(mp[ri++]);
             data.SightRadius = RegexHelper.ExtractInt(mp[ri++]);
             buf = RegexHelper.ExtractVec2I(mp[ri++]);
             data.GridSize.X = buf[0];

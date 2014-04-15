@@ -151,7 +151,32 @@ namespace RTSEngine.Data.Team {
                 if(capital != value) {
                     capital = value;
                     if(OnCapitalChange != null)
-                        OnCapitalChange(this, capital);
+                        OnCapitalChange(this, Capital);
+                }
+            }
+        }
+
+        // Population Information
+        private int population, populationCap;
+        public int Population {
+            get { return population; }
+            set {
+                if(value < 0) value = 0;
+                if(population != value) {
+                    population = value;
+                    if(OnPopulationChange != null)
+                        OnPopulationChange(this, Population);
+                }
+            }
+        }
+        public int PopulationCap {
+            get { return populationCap; }
+            set {
+                if(value < 0) value = 0;
+                if(populationCap != value) {
+                    populationCap = value;
+                    if(OnPopulationCapChange != null)
+                        OnPopulationCapChange(this, PopulationCap);
                 }
             }
         }
@@ -187,6 +212,8 @@ namespace RTSEngine.Data.Team {
         public event Action<RTSBuilding> OnBuildingSpawn;
         public event Action<RTSSquad> OnSquadCreation;
         public event Action<RTSTeam, int> OnCapitalChange;
+        public event Action<RTSTeam, int> OnPopulationChange;
+        public event Action<RTSTeam, int> OnPopulationCapChange;
 
         public RTSTeam(int i) {
             Index = i;
@@ -199,6 +226,8 @@ namespace RTSEngine.Data.Team {
             buildings = new List<RTSBuilding>();
             ViewedEnemyBuildings = new List<ViewedBuilding>();
             Capital = 0;
+            Population = 0;
+            PopulationCap = 0;
 
             // No Input Is Available For The Team Yet
             Input = null;
@@ -206,14 +235,30 @@ namespace RTSEngine.Data.Team {
 
         // Unit Addition And Removal
         public RTSUnit AddUnit(int type, Vector2 pos) {
-            if(Race.Units[type].CurrentCount >= Race.Units[type].MaxCount) return null;
+            // Check For Unit Type Existence
+            RTSUnitData data = Race.Units[type];
+            if(data == null) return null;
 
-            RTSUnit unit = new RTSUnit(this, Race.Units[type], pos);
-            unit.Data.CurrentCount++;
-            unit.ActionController = Race.Units[type].DefaultActionController.CreateInstance<ACUnitActionController>();
-            unit.AnimationController = Race.Units[type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
-            unit.MovementController = Race.Units[type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
-            unit.CombatController = Race.Units[type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
+            // Check For Unit Cap
+            if(data.CurrentCount >= data.MaxCount) return null;
+
+            // Check For Population Cap
+            if(data.PopulationCost + Population > PopulationCap) return null;
+
+            // Check For Capital Cost
+            if(data.CapitalCost > Capital) return null;
+
+            // Produce Unit
+            Capital -= data.CapitalCost;
+            Population += data.PopulationCost;
+            data.CurrentCount++;
+
+            // Create Unit
+            RTSUnit unit = new RTSUnit(this, data, pos);
+            unit.ActionController = data.DefaultActionController.CreateInstance<ACUnitActionController>();
+            unit.AnimationController = data.DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
+            unit.MovementController = data.DefaultMoveController.CreateInstance<ACUnitMovementController>();
+            unit.CombatController = data.DefaultCombatController.CreateInstance<ACUnitCombatController>();
             Units.Add(unit);
             if(OnUnitSpawn != null)
                 OnUnitSpawn(unit);
@@ -221,12 +266,16 @@ namespace RTSEngine.Data.Team {
         }
         public void RemoveAll(Predicate<RTSUnit> f) {
             var nu = new List<RTSUnit>(units.Count);
+            int pc = 0;
             for(int i = 0; i < units.Count; i++) {
-                if(f(units[i]))
+                if(f(units[i])) {
+                    pc += units[i].Data.PopulationCost;
                     units[i].Data.CurrentCount--;
+                }
                 else
                     nu.Add(units[i]);
             }
+            if(pc != 0) Population -= pc;
             System.Threading.Interlocked.Exchange(ref units, nu);
         }
 
@@ -247,10 +296,21 @@ namespace RTSEngine.Data.Team {
 
         // Building Addition And Removal
         public RTSBuilding AddBuilding(int type, Vector2 pos) {
-            if(Race.Buildings[type].CurrentCount >= Race.Buildings[type].MaxCount) return null;
+            // Check For Building Type Existence
+            RTSBuildingData data = Race.Buildings[type];
+            if(data == null) return null;
 
-            RTSBuilding b = new RTSBuilding(this, Race.Buildings[type], pos);
-            b.Data.CurrentCount++;
+            // Check For Building Cap
+            if(data.CurrentCount >= data.MaxCount) return null;
+
+            // Check For Capital Cost
+            if(data.CapitalCost > Capital) return null;
+
+            // Produce Building
+            Capital -= data.CapitalCost;
+            data.CurrentCount++;
+
+            RTSBuilding b = new RTSBuilding(this, data, pos);
             b.ActionController = Race.Buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
             Buildings.Add(b);
             if(OnBuildingSpawn != null)
@@ -260,8 +320,9 @@ namespace RTSEngine.Data.Team {
         public void RemoveAll(Predicate<RTSBuilding> f) {
             var nb = new List<RTSBuilding>(buildings.Count);
             for(int i = 0; i < buildings.Count; i++) {
-                if(f(buildings[i]))
+                if(f(buildings[i])) {
                     buildings[i].Data.CurrentCount--;
+                }
                 else
                     nb.Add(buildings[i]);
             }

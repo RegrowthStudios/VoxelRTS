@@ -16,7 +16,7 @@ namespace RTSEngine.Data.Team {
             s.Write(data.CapitalCost);
             s.Write(data.MaxCount);
             s.Write(data.Impact);
-            s.Write(data.BuildTime);
+            s.Write(data.BuildAmount);
             s.Write(data.SightRadius);
             s.Write(data.GridSize);
             s.Write((int)data.ICollidableShape.CollisionType);
@@ -45,7 +45,7 @@ namespace RTSEngine.Data.Team {
             data.CapitalCost = s.ReadInt32();
             data.MaxCount = s.ReadInt32();
             data.Impact = s.ReadInt32();
-            data.BuildTime = s.ReadInt32();
+            data.BuildAmount = s.ReadInt32();
             data.SightRadius = s.ReadInt32();
             data.GridSize = s.ReadPoint();
             CollisionType ct = (CollisionType)s.ReadInt32();
@@ -80,6 +80,7 @@ namespace RTSEngine.Data.Team {
 
         // The Capital Cost Of The Building
         public int CapitalCost;
+        public int PopCapChange;
 
         // Maximum Number Of These Buildings Supported
         public int MaxCount, CurrentCount;
@@ -88,7 +89,7 @@ namespace RTSEngine.Data.Team {
         public int Impact;
 
         // Time To Build The Building
-        public int BuildTime;
+        public int BuildAmount;
 
         // View Radius
         public int SightRadius;

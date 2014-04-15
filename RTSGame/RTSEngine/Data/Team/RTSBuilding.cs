@@ -86,6 +86,7 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
+        private BitArray viewedInfo;
 
         // View Direction
         public Vector2 ViewDirection {
@@ -142,8 +143,6 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
-        private BitArray viewedInfo;
-
         public bool IsAlive {
             get {
                 return Health > 0;
@@ -156,9 +155,30 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // Building Information
+        private int bAmount;
+        public int BuildAmount {
+            get { return bAmount; }
+            set {
+                if(!IsBuilt) {
+                    bAmount = value;
+                    if(IsBuilt && OnBuildingFinished != null) {
+                        OnBuildingFinished(this);
+                    }
+                }
+            }
+        }
+        public bool IsBuilt {
+            get { return BuildAmount <= 0; }
+        }
+        private float BuildRatio {
+            get { return IsBuilt ? 1f : ((float)(Data.BuildAmount - BuildAmount) / (float)Data.BuildAmount); }
+        }
+
         // Damaging Events
         public event Action<IEntity, int> OnDamage;
         public event Action<IEntity> OnDestruction;
+        public event Action<RTSBuilding> OnBuildingFinished;
 
         // Collision Geometry
         public ICollidable CollisionGeometry {
@@ -197,6 +217,7 @@ namespace RTSEngine.Data.Team {
             gridPos.Y += (Data.GridSize.Y / 2);
             height = 0;
             Health = Data.Health;
+            bAmount = Data.BuildAmount;
             CollisionGeometry = Data.ICollidableShape.Clone() as ICollidable;
             ViewDirection = Vector2.UnitX;
             CollisionGeometry.Center += GridPosition;
