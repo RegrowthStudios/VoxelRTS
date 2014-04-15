@@ -37,8 +37,8 @@ namespace RTSEngine.Data.Team {
             s.Write(data.BBox.Max);
             s.Write(data.DefaultActionController.TypeName);
         }
-        public static RTSBuildingData Deserialize(BinaryReader s, GameState state) {
-            RTSBuildingData data = new RTSBuildingData();
+        public static RTSBuildingData Deserialize(BinaryReader s, GameState state, int index) {
+            RTSBuildingData data = new RTSBuildingData(index);
             data.FriendlyName = s.ReadString();
             data.InfoFile = s.ReadString();
             data.Health = s.ReadInt32();
@@ -73,7 +73,7 @@ namespace RTSEngine.Data.Team {
         // The Friendly Name
         public string FriendlyName;
         public string InfoFile;
-        public int Index;
+        public readonly int Index;
 
         // Health Of The Building
         public int Health;
@@ -99,5 +99,9 @@ namespace RTSEngine.Data.Team {
         public BoundingBox BBox;
 
         public ReflectedScript DefaultActionController;
+
+        public RTSBuildingData(int i) {
+            Index = i;
+        }
     }
 }

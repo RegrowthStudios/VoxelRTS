@@ -188,7 +188,7 @@ namespace RTSEngine.Controllers {
             var queue = new Queue<FOWPoint>();
             for(int i = 0; i < team.Units.Count; i++) {
                 Point p = HashHelper.Hash(team.Units[i].GridPosition, cg.numCells, cg.size);
-                int vRadius = (int)(team.Units[i].UnitData.BaseCombatData.MaxRange / cg.cellSize);
+                int vRadius = (int)(team.Units[i].Data.BaseCombatData.MaxRange / cg.cellSize);
                 vRadius *= 10;
                 if(val[p.X, p.Y] < vRadius) {
                     queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PXPY, vRadius));
@@ -205,7 +205,7 @@ namespace RTSEngine.Controllers {
             }
             for(int i = 0; i < team.Buildings.Count; i++) {
                 Point p = HashHelper.Hash(team.Buildings[i].GridPosition, cg.numCells, cg.size);
-                int vRadius = (int)(team.Buildings[i].BuildingData.SightRadius / cg.cellSize);
+                int vRadius = (int)(team.Buildings[i].Data.SightRadius / cg.cellSize);
                 vRadius *= 10;
                 if(val[p.X, p.Y] < vRadius) {
                     queue.Enqueue(new FOWPoint(p.X, p.Y, TravelDirection.PXPY, vRadius));

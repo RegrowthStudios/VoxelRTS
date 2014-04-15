@@ -65,7 +65,7 @@ namespace RTSEngine.Data.Team {
             }
         }
         public static RTSTeam Deserialize(BinaryReader s, int index, GameState state) {
-            RTSTeam team = new RTSTeam();
+            RTSTeam team = new RTSTeam(index);
             team.Race = RTSRace.Deserialize(s, state);
             if(s.ReadBoolean()) {
                 string it = s.ReadString();
@@ -124,6 +124,12 @@ namespace RTSEngine.Data.Team {
             return team;
         }
 
+        // Index Into Game State
+        public int Index {
+            get;
+            private set;
+        }
+
         // Team Colors
         public RTSColorScheme ColorScheme {
             get;
@@ -136,10 +142,18 @@ namespace RTSEngine.Data.Team {
             set;
         }
 
-        // Team Capital
+        // Team Capital (Always Non-negative)
+        private int capital;
         public int Capital {
-            get;
-            set;
+            get { return capital; }
+            set {
+                if(value < 0) value = 0;
+                if(capital != value) {
+                    capital = value;
+                    if(OnCapitalChange != null)
+                        OnCapitalChange(this, capital);
+                }
+            }
         }
 
         // Entity Data
@@ -156,11 +170,13 @@ namespace RTSEngine.Data.Team {
             get { return buildings; }
         }
 
+        // Input Controller
         public ACInputController Input {
             get;
             set;
         }
 
+        // Used For Visuals And Input Logic
         public List<ViewedBuilding> ViewedEnemyBuildings {
             get;
             private set;
@@ -170,8 +186,10 @@ namespace RTSEngine.Data.Team {
         public event Action<RTSUnit> OnUnitSpawn;
         public event Action<RTSBuilding> OnBuildingSpawn;
         public event Action<RTSSquad> OnSquadCreation;
+        public event Action<RTSTeam, int> OnCapitalChange;
 
-        public RTSTeam() {
+        public RTSTeam(int i) {
+            Index = i;
             ColorScheme = RTSColorScheme.Default;
 
             // Teams Starts Out Empty
@@ -180,7 +198,7 @@ namespace RTSEngine.Data.Team {
             squads = new List<RTSSquad>();
             buildings = new List<RTSBuilding>();
             ViewedEnemyBuildings = new List<ViewedBuilding>();
-            Capital = 1000;
+            Capital = 0;
 
             // No Input Is Available For The Team Yet
             Input = null;
@@ -191,7 +209,7 @@ namespace RTSEngine.Data.Team {
             if(Race.Units[type].CurrentCount >= Race.Units[type].MaxCount) return null;
 
             RTSUnit unit = new RTSUnit(this, Race.Units[type], pos);
-            unit.UnitData.CurrentCount++;
+            unit.Data.CurrentCount++;
             unit.ActionController = Race.Units[type].DefaultActionController.CreateInstance<ACUnitActionController>();
             unit.AnimationController = Race.Units[type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
             unit.MovementController = Race.Units[type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
@@ -205,7 +223,7 @@ namespace RTSEngine.Data.Team {
             var nu = new List<RTSUnit>(units.Count);
             for(int i = 0; i < units.Count; i++) {
                 if(f(units[i]))
-                    units[i].UnitData.CurrentCount--;
+                    units[i].Data.CurrentCount--;
                 else
                     nu.Add(units[i]);
             }
@@ -232,7 +250,7 @@ namespace RTSEngine.Data.Team {
             if(Race.Buildings[type].CurrentCount >= Race.Buildings[type].MaxCount) return null;
 
             RTSBuilding b = new RTSBuilding(this, Race.Buildings[type], pos);
-            b.BuildingData.CurrentCount++;
+            b.Data.CurrentCount++;
             b.ActionController = Race.Buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
             Buildings.Add(b);
             if(OnBuildingSpawn != null)
@@ -243,7 +261,7 @@ namespace RTSEngine.Data.Team {
             var nb = new List<RTSBuilding>(buildings.Count);
             for(int i = 0; i < buildings.Count; i++) {
                 if(f(buildings[i]))
-                    buildings[i].BuildingData.CurrentCount--;
+                    buildings[i].Data.CurrentCount--;
                 else
                     nb.Add(buildings[i]);
             }

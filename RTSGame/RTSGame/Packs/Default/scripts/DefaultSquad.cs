@@ -76,7 +76,7 @@ namespace RTS.Default.Squad {
                                     unit.State = BehaviorFSM.CombatMelee;
                                 break;
                             default: // case BehaviorFSM.UseRangedAttack:
-                                r = unit.UnitData.BaseCombatData.MaxRange;
+                                r = unit.Data.BaseCombatData.MaxRange;
                                 DoTargeting(g, dt, unit, target, r);
                                 if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
                                     unit.State = BehaviorFSM.CombatRanged;
@@ -194,7 +194,7 @@ namespace RTS.Default.Squad {
     public class Targeting : ACSquadTargetingController {
         int teamIndex;
         public override void Init(GameState s, GameplayController c) {
-            teamIndex = squad.Team.Input.TeamIndex;
+            teamIndex = squad.Team.Index;
         }
 
         public override void DecideTarget(GameState g, float dt) {

@@ -40,7 +40,7 @@ namespace RTSEngine.Graphics {
             }
 
             lastAdded = 0;
-            for(int xi = xs; xi < xs; xi++) {
+            for(int xi = xs; xi < xe; xi++) {
                 for(int y = 0; y < cg.numCells.Y; y++) {
                     var ae = cg.EDynamic[xi, y];
                     SeenEntity se = new SeenEntity();
@@ -53,7 +53,7 @@ namespace RTSEngine.Graphics {
                     // Check For Units
                     if(ae != null) {
                         for(int i = 0; i < ae.Count; i++) {
-                            se.TeamIndex = ae[i].Team.Input.TeamIndex;
+                            se.TeamIndex = ae[i].Team.Index;
                             use = true;
                             // Enemy Trumps Friendly Visuals
                             if(ae[i].Team != team) break;
@@ -62,7 +62,7 @@ namespace RTSEngine.Graphics {
 
                     // Building Overrides Units
                     if(cg.EStatic[xi, y] != null) {
-                        se.TeamIndex = cg.EStatic[xi, y].Team.Input.TeamIndex;
+                        se.TeamIndex = cg.EStatic[xi, y].Team.Index;
                         se.IsBuilding = true;
                         use = true;
                     }

@@ -130,7 +130,7 @@ namespace RTSEngine.Graphics {
         }
 
         public void OnUnitSpawn(RTSUnit u) {
-            if(u.UnitData == Data)
+            if(u.Data == Data)
                 instances.Add(u);
         }
     }

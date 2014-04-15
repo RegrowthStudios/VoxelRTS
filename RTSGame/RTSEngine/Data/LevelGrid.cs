@@ -99,8 +99,8 @@ namespace RTSEngine.Data {
 
             // Add To All The Cells
             Point p = HashHelper.Hash(b.GridStartPos, numCells, size);
-            for(int y = 0; y < b.BuildingData.GridSize.Y; y++) {
-                for(int x = 0; x < b.BuildingData.GridSize.X; x++) {
+            for(int y = 0; y < b.Data.GridSize.Y; y++) {
+                for(int x = 0; x < b.Data.GridSize.X; x++) {
                     EStatic[p.X + x, p.Y + y] = b;
                 }
             }
@@ -187,8 +187,8 @@ namespace RTSEngine.Data {
 
             // Add To All The Cells
             Point p = HashHelper.Hash(b.GridStartPos, numCells, size);
-            for(int y = 0; y < b.BuildingData.GridSize.Y; y++) {
-                for(int x = 0; x < b.BuildingData.GridSize.X; x++) {
+            for(int y = 0; y < b.Data.GridSize.Y; y++) {
+                for(int x = 0; x < b.Data.GridSize.X; x++) {
                     EStatic[p.X + x, p.Y + y] = null;
                 }
             }

@@ -290,9 +290,9 @@ namespace RTS {
             FileInfo fi = _fi as FileInfo;
 
             GameState state = new GameState();
-            state.teams[0] = new RTSTeam();
+            state.teams[0] = new RTSTeam(0);
             state.UpdateActiveTeams();
-            RTSUnitData _unitData = RTSUnitDataParser.ParseData(null, fi);
+            RTSUnitData _unitData = RTSUnitDataParser.ParseData(null, fi, 0);
             state.teams[0].Race.Units[0] = _unitData;
             state.teams[0].Race.UpdateActiveUnits();
             RTSUnitModel _unitModel = RTSUnitDataParser.ParseModel(renderer, fi, null);

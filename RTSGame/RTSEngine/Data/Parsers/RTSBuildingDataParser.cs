@@ -76,7 +76,7 @@ namespace RTSEngine.Data.Parsers {
 
             return model;
         }
-        public static RTSBuildingData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile) {
+        public static RTSBuildingData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile, int index) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -107,7 +107,7 @@ namespace RTSEngine.Data.Parsers {
             // Read Data
             int[] buf;
             int ri = 0;
-            RTSBuildingData data = new RTSBuildingData();
+            RTSBuildingData data = new RTSBuildingData(index);
             data.InfoFile = PathHelper.GetRelativePath(infoFile.FullName);
             data.FriendlyName = RegexHelper.Extract(mp[ri++]);
             data.Health = RegexHelper.ExtractInt(mp[ri++]);

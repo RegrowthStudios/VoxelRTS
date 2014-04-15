@@ -142,22 +142,22 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < entities.Count; i++) {
                 RTSUnit u = entities[i] as RTSUnit;
                 if(u != null) {
-                    if(units.ContainsKey(u.UnitData))
-                        units[u.UnitData].Add(u);
+                    if(units.ContainsKey(u.Data))
+                        units[u.Data].Add(u);
                     else {
                         var lu = new List<IEntity>();
                         lu.Add(u);
-                        units.Add(u.UnitData, lu);
+                        units.Add(u.Data, lu);
                     }
                 }
                 else {
                     RTSBuilding b = entities[i] as RTSBuilding;
-                    if(buildings.ContainsKey(b.BuildingData))
-                        buildings[b.BuildingData].Add(b);
+                    if(buildings.ContainsKey(b.Data))
+                        buildings[b.Data].Add(b);
                     else {
                         var lb = new List<IEntity>();
                         lb.Add(b);
-                        buildings.Add(b.BuildingData, lb);
+                        buildings.Add(b.Data, lb);
                     }
                 }
             }

@@ -90,7 +90,7 @@ namespace RTSEngine.Controllers {
                 TeamInitOption res = eld.Teams[i];
                 if(res.InputType == RTSInputType.None)
                     continue;
-                team = new RTSTeam();
+                team = new RTSTeam(i);
                 team.ColorScheme = res.Colors;
                 team.Race = RTSRaceParser.Parse(races[res.Race], state.Scripts);
                 state.teams[i] = team;

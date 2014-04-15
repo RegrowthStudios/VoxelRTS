@@ -8,9 +8,9 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
-    public class RTSBuilding : IEntity, ImpactGenerator {
+    public class RTSBuilding : IEntity {
         public static void Serialize(BinaryWriter s, RTSBuilding e) {
-            s.Write(e.BuildingData.Index);
+            s.Write(e.Data.Index);
             s.Write(e.UUID);
             s.Write(e.State);
             s.Write(e.ViewDirection);
@@ -64,7 +64,7 @@ namespace RTSEngine.Data.Team {
         }
 
         // Common Data
-        public RTSBuildingData BuildingData {
+        public RTSBuildingData Data {
             get;
             private set;
         }
@@ -99,14 +99,14 @@ namespace RTSEngine.Data.Team {
             get { return gridPos; }
             set {
                 gridPos = value;
-                CollisionGeometry.Center = BuildingData.ICollidableShape.Center + gridPos;
+                CollisionGeometry.Center = Data.ICollidableShape.Center + gridPos;
             }
         }
         public Vector2 GridStartPos {
             get {
                 Vector2 gs = GridPosition;
-                gs.X -= (BuildingData.GridSize.X / 2);
-                gs.Y -= (BuildingData.GridSize.Y / 2);
+                gs.X -= (Data.GridSize.X / 2);
+                gs.Y -= (Data.GridSize.Y / 2);
                 return gs;
             }
         }
@@ -168,8 +168,8 @@ namespace RTSEngine.Data.Team {
         public BoundingBox BBox {
             get {
                 return new BoundingBox(
-                    BuildingData.BBox.Min + WorldPosition,
-                    BuildingData.BBox.Max + WorldPosition
+                    Data.BBox.Min + WorldPosition,
+                    Data.BBox.Max + WorldPosition
                     );
             }
         }
@@ -183,8 +183,6 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        public event Action<Vector2, int> GenerateImpact;
-
         // Constructor
         public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {
             // Identification
@@ -194,12 +192,12 @@ namespace RTSEngine.Data.Team {
             viewedInfo = new BitArray(GameState.MAX_PLAYERS);
             viewedInfo.SetAll(false);
 
-            BuildingData = data;
-            gridPos.X += (BuildingData.GridSize.X / 2);
-            gridPos.Y += (BuildingData.GridSize.Y / 2);
+            Data = data;
+            gridPos.X += (Data.GridSize.X / 2);
+            gridPos.Y += (Data.GridSize.Y / 2);
             height = 0;
-            Health = BuildingData.Health;
-            CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
+            Health = Data.Health;
+            CollisionGeometry = Data.ICollidableShape.Clone() as ICollidable;
             ViewDirection = Vector2.UnitX;
             CollisionGeometry.Center += GridPosition;
         }

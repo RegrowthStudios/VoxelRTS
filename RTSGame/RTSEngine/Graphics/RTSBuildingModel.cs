@@ -95,7 +95,7 @@ namespace RTSEngine.Graphics {
             if(fTeamIndex == eTeamIndex) {
                 // Always Show Friendly Buildings
                 for(int i = 0; i < fTeam.Buildings.Count; i++) {
-                    if(fTeam.Buildings[i].BuildingData != Data) continue;
+                    if(fTeam.Buildings[i].Data != Data) continue;
                     if(fVisible(fTeam.Buildings[i].BBox)) {
                         VisibleBuilding vb = new VisibleBuilding();
                         vb.Position = fTeam.Buildings[i].WorldPosition;

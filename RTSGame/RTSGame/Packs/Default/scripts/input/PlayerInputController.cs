@@ -138,8 +138,8 @@ namespace RTS.Input {
                     RTSBuilding building = team.Buildings[bi];
                     FogOfWar f = FogOfWar.Nothing;
                     Point p = HashHelper.Hash(building.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
-                    for(int y = 0; y < building.BuildingData.GridSize.Y; y++) {
-                        for(int x = 0; x < building.BuildingData.GridSize.X; x++) {
+                    for(int y = 0; y < building.Data.GridSize.Y; y++) {
+                        for(int x = 0; x < building.Data.GridSize.X; x++) {
                             f = GameState.CGrid.GetFogOfWar(p.X + x, p.Y + y, TeamIndex);
                             if(f == FogOfWar.Active) break;
                         }

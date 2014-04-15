@@ -302,7 +302,7 @@ namespace RTS.Input {
         private void OnBuildingDamage(IEntity e, int d) {
             RTSBuilding building = e as RTSBuilding;
             Point p = HashHelper.Hash(e.GridPosition, grid.numCells, grid.size);
-            int imp = building.BuildingData.Impact * d;
+            int imp = building.Data.Impact * d;
             grid.Region[p.X, p.Y].AddToRegionImpact(imp);
             DevConsole.AddCommand("Impact Added " + imp);
         }

@@ -9,7 +9,7 @@ using RTSEngine.Interfaces;
 namespace RTSEngine.Data.Team {
     public class RTSUnit : ICombatEntity {
         public static void Serialize(BinaryWriter s, RTSUnit e) {
-            s.Write(e.UnitData.Index);
+            s.Write(e.Data.Index);
             s.Write(e.UUID);
             s.Write(e.State);
             s.Write(e.ViewDirection);
@@ -98,7 +98,7 @@ namespace RTSEngine.Data.Team {
         }
 
         // Common Data
-        public RTSUnitData UnitData {
+        public RTSUnitData Data {
             get;
             private set;
         }
@@ -214,15 +214,15 @@ namespace RTSEngine.Data.Team {
         public BoundingBox BBox {
             get {
                 return new BoundingBox(
-                    UnitData.BBox.Min + WorldPosition,
-                    UnitData.BBox.Max + WorldPosition
+                    Data.BBox.Min + WorldPosition,
+                    Data.BBox.Max + WorldPosition
                     );
             }
         }
 
         // Speed Of Movement For The Entity
         public float MovementSpeed {
-            get { return UnitData.MovementSpeed * MovementMultiplier; }
+            get { return Data.MovementSpeed * MovementMultiplier; }
         }
         public float MovementMultiplier {
             get;
@@ -285,21 +285,21 @@ namespace RTSEngine.Data.Team {
             gridPos = position;
 
             // Set From Common Data
-            UnitData = data;
-            Health = UnitData.Health;
+            Data = data;
+            Health = Data.Health;
 
             // Default Information
             height = 0;
             ViewDirection = Vector2.UnitX;
-            CollisionGeometry = UnitData.ICollidableShape.Clone() as ICollidable;
+            CollisionGeometry = Data.ICollidableShape.Clone() as ICollidable;
             MovementMultiplier = 1f;
         }
 
         // Computes The Damage To Deal With Access To A Random Number And A Target
         public int ComputeDamage(double rand) {
             RTSUnit t = Target as RTSUnit;
-            int dmg = UnitData.BaseCombatData.ComputeDamageDealt(rand);
-            if(t != null) dmg = t.UnitData.BaseCombatData.ComputeDamageReceived(dmg);
+            int dmg = Data.BaseCombatData.ComputeDamageDealt(rand);
+            if(t != null) dmg = t.Data.BaseCombatData.ComputeDamageReceived(dmg);
             return dmg;
         }
 

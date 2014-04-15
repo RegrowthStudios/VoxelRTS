@@ -48,13 +48,13 @@ namespace RTSEngine.Data.Team {
             int c = s.ReadInt32();
             for(int i = 0; i < c; i++) {
                 int ui = s.ReadInt32();
-                race.Units[ui] = RTSUnitData.Deserialize(s, state);
+                race.Units[ui] = RTSUnitData.Deserialize(s, state, ui);
             }
             race.UpdateActiveUnits();
             c = s.ReadInt32();
             for(int i = 0; i < c; i++) {
                 int bi = s.ReadInt32();
-                race.Buildings[bi] = RTSBuildingData.Deserialize(s, state);
+                race.Buildings[bi] = RTSBuildingData.Deserialize(s, state, bi);
             }
             race.UpdateActiveBuildings();
             race.SCAction = state.Scripts[s.ReadString()];

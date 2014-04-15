@@ -272,7 +272,6 @@ namespace RTSEngine.Controllers {
 
             // Add Building Decision Task
             AddTask(s, building, e.Team, e.Type);
-            s.IGrid.AddImpactGenerator(building);
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit

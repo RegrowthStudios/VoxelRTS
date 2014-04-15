@@ -63,7 +63,7 @@ namespace RTSEngine.Data.Parsers {
             Match m = rgxUnit.Match(mStr);
             int type = 0;
             while(m.Success) {
-                RTSUnitData data = RTSUnitDataParser.ParseData(scripts, RegexHelper.ExtractFile(m, fi.Directory.FullName));
+                RTSUnitData data = RTSUnitDataParser.ParseData(scripts, RegexHelper.ExtractFile(m, fi.Directory.FullName), type);
                 res.Units[type++] = data;
                 m = m.NextMatch();
             }
@@ -73,7 +73,7 @@ namespace RTSEngine.Data.Parsers {
             m = rgxBuilding.Match(mStr);
             type = 0;
             while(m.Success) {
-                RTSBuildingData data = RTSBuildingDataParser.ParseData(scripts, RegexHelper.ExtractFile(m, fi.Directory.FullName));
+                RTSBuildingData data = RTSBuildingDataParser.ParseData(scripts, RegexHelper.ExtractFile(m, fi.Directory.FullName), type);
                 res.Buildings[type++] = data;
                 m = m.NextMatch();
             }
