@@ -16,16 +16,15 @@ namespace RTSEngine.Data.Parsers {
                     MinionType = 0,
                     TankType = 1,
                     TitanType = 2,
-                    RecoverTime = 60,
-                    DisasterTime = 30,
-                    L1Impact = 10,
-                    L2Impact = 20,
-                    L3Impact = 30,
-                    NoLongerRecoverImpact = 25,
+                    DisasterTime = 5,
+                    L1Impact = 1000,
+                    L2Impact = 2000,
+                    L3Impact = 3000,
+                    NoLongerRecoverImpact = 2500,
                     L1SpawnCap = 10,
                     L2SpawnCap = 20,
                     L3SpawnCap = 30,
-                    RecoverImpact = 5, 
+                    RecoverImpact = 500,
                     SpawnOffset = 30,
                     L1MinNumSpawn = new int[] {3,1,0},
                     L2MinNumSpawn = new int[] { 6, 3, 1 },
@@ -43,7 +42,6 @@ namespace RTSEngine.Data.Parsers {
         public int TankType;
         public int TitanType;
 
-        public int RecoverTime;
         public int DisasterTime;
 
         public int L1Impact;
@@ -137,7 +135,6 @@ namespace RTSEngine.Data.Parsers {
             eid.MinionType = RegexHelper.ExtractInt(mp[i++]);
             eid.TankType = RegexHelper.ExtractInt(mp[i++]);
             eid.TitanType = RegexHelper.ExtractInt(mp[i++]);
-            eid.RecoverTime = RegexHelper.ExtractInt(mp[i++]);
             eid.DisasterTime = RegexHelper.ExtractInt(mp[i++]);
             eid.L1Impact = RegexHelper.ExtractInt(mp[i++]);
             eid.L2Impact = RegexHelper.ExtractInt(mp[i++]);

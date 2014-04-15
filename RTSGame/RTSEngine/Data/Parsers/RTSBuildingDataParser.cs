@@ -18,8 +18,9 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxHealth = RegexHelper.GenerateInteger("HEALTH");
         private static readonly Regex rgxCost = RegexHelper.GenerateInteger("COST");
         private static readonly Regex rgxMaxCount = RegexHelper.GenerateInteger("MAXCOUNT");
+        private static readonly Regex rgxPPC = RegexHelper.GenerateInteger("POPCAPCHANGE");
         private static readonly Regex rgxImpact = RegexHelper.GenerateInteger("IMPACT");
-        private static readonly Regex rgxBuildTime = RegexHelper.GenerateInteger("BUILDTIME");
+        private static readonly Regex rgxBuildAmount = RegexHelper.GenerateInteger("BUILDAMOUNT");
         private static readonly Regex rgxSightRadius = RegexHelper.GenerateInteger("SIGHTRADIUS");
         private static readonly Regex rgxGridSize = RegexHelper.GenerateVec2Int("GRIDSIZE");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
@@ -30,8 +31,9 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxModel = RegexHelper.GenerateFile("MODEL");
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
         private static readonly Regex rgxColorTex = RegexHelper.GenerateFile("TEXCOLOR");
+        private static readonly Regex rgxIcon = RegexHelper.GenerateFile("ICON");
 
-        public static RTSBuildingModel ParseModel(RTSRenderer renderer, FileInfo infoFile) {
+        public static RTSBuildingModel ParseModel(RTSRenderer renderer, FileInfo infoFile, RTSRace race) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -46,7 +48,9 @@ namespace RTSEngine.Data.Parsers {
             Match[] mp = {
                 rgxModel.Match(mStr),
                 rgxMainTex.Match(mStr),
-                rgxColorTex.Match(mStr)
+                rgxColorTex.Match(mStr),
+                rgxIcon.Match(mStr),
+                rgxName.Match(mStr)
             };
 
             // Check Existence
@@ -54,7 +58,8 @@ namespace RTSEngine.Data.Parsers {
             FileInfo fiModel = RegexHelper.ExtractFile(mp[0], infoFile.Directory.FullName);
             FileInfo fiTexMain = RegexHelper.ExtractFile(mp[1], infoFile.Directory.FullName);
             FileInfo fiTexKey = RegexHelper.ExtractFile(mp[2], infoFile.Directory.FullName);
-            if(!fiModel.Exists || !fiTexMain.Exists || !fiTexKey.Exists)
+            FileInfo fiIcon = RegexHelper.ExtractFile(mp[3], infoFile.Directory.FullName);
+            if(!fiModel.Exists || !fiTexMain.Exists || !fiTexKey.Exists || !fiIcon.Exists)
                 return null;
 
             RTSBuildingModel model;
@@ -63,9 +68,16 @@ namespace RTSEngine.Data.Parsers {
             }
             model.ModelTexture = renderer.LoadTexture2D(fiTexMain.FullName);
             model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
+
+            if(race != null) {
+                string key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mp[4]));
+                if(!renderer.IconLibrary.ContainsKey(key))
+                    renderer.IconLibrary.Add(key, renderer.LoadTexture2D(fiIcon.FullName));
+            }
+
             return model;
         }
-        public static RTSBuildingData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile) {
+        public static RTSBuildingData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile, int index) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
@@ -82,8 +94,9 @@ namespace RTSEngine.Data.Parsers {
                 rgxHealth.Match(mStr),
                 rgxCost.Match(mStr),
                 rgxMaxCount.Match(mStr),
+                rgxPPC.Match(mStr),
                 rgxImpact.Match(mStr),
-                rgxBuildTime.Match(mStr),
+                rgxBuildAmount.Match(mStr),
                 rgxSightRadius.Match(mStr),
                 rgxGridSize.Match(mStr),
                 rgxBBMin.Match(mStr),
@@ -96,14 +109,15 @@ namespace RTSEngine.Data.Parsers {
             // Read Data
             int[] buf;
             int ri = 0;
-            RTSBuildingData data = new RTSBuildingData();
+            RTSBuildingData data = new RTSBuildingData(index);
             data.InfoFile = PathHelper.GetRelativePath(infoFile.FullName);
             data.FriendlyName = RegexHelper.Extract(mp[ri++]);
             data.Health = RegexHelper.ExtractInt(mp[ri++]);
             data.CapitalCost = RegexHelper.ExtractInt(mp[ri++]);
             data.MaxCount = RegexHelper.ExtractInt(mp[ri++]);
+            data.PopCapChange = RegexHelper.ExtractInt(mp[ri++]);
             data.Impact = RegexHelper.ExtractInt(mp[ri++]);
-            data.BuildTime = RegexHelper.ExtractInt(mp[ri++]);
+            data.BuildAmount = RegexHelper.ExtractInt(mp[ri++]);
             data.SightRadius = RegexHelper.ExtractInt(mp[ri++]);
             buf = RegexHelper.ExtractVec2I(mp[ri++]);
             data.GridSize.X = buf[0];

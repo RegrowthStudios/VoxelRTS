@@ -6,37 +6,18 @@ using System.Text;
 using RTSEngine.Controllers;
 
 namespace RTSEngine.Data.Team {
-    public struct IndexedUnitType {
-        public readonly int Index;
-        public readonly RTSUnitData Data;
-
-        public IndexedUnitType(int i, RTSUnitData d) {
-            Index = i;
-            Data = d;
-        }
-    }
-    public struct IndexedBuildingType {
-        public readonly int Index;
-        public readonly RTSBuildingData Data;
-
-        public IndexedBuildingType(int i, RTSBuildingData d) {
-            Index = i;
-            Data = d;
-        }
-    }
-
     public class RTSRace {
         public static void Serialize(BinaryWriter s, RTSRace race) {
             s.Write(race.FriendlyName);
             s.Write(race.ActiveUnits.Length);
             foreach(var d in race.ActiveUnits) {
                 s.Write(d.Index);
-                RTSUnitData.Serialize(s, d.Data);
+                RTSUnitData.Serialize(s, d);
             }
             s.Write(race.ActiveBuildings.Length);
             foreach(var d in race.ActiveBuildings) {
                 s.Write(d.Index);
-                RTSBuildingData.Serialize(s, d.Data);
+                RTSBuildingData.Serialize(s, d);
             }
             s.Write(race.SCAction.TypeName);
             s.Write(race.SCMovement.TypeName);
@@ -48,13 +29,13 @@ namespace RTSEngine.Data.Team {
             int c = s.ReadInt32();
             for(int i = 0; i < c; i++) {
                 int ui = s.ReadInt32();
-                race.Units[ui] = RTSUnitData.Deserialize(s, state);
+                race.Units[ui] = RTSUnitData.Deserialize(s, state, ui);
             }
             race.UpdateActiveUnits();
             c = s.ReadInt32();
             for(int i = 0; i < c; i++) {
                 int bi = s.ReadInt32();
-                race.Buildings[bi] = RTSBuildingData.Deserialize(s, state);
+                race.Buildings[bi] = RTSBuildingData.Deserialize(s, state, bi);
             }
             race.UpdateActiveBuildings();
             race.SCAction = state.Scripts[s.ReadString()];
@@ -67,12 +48,13 @@ namespace RTSEngine.Data.Team {
         public const int MAX_BUILDING_TYPES = 36;
 
         public string FriendlyName;
+        public FileInfo InfoFile;
 
         public readonly RTSUnitData[] Units;
-        public IndexedUnitType[] ActiveUnits;
+        public RTSUnitData[] ActiveUnits;
 
         public readonly RTSBuildingData[] Buildings;
-        public IndexedBuildingType[] ActiveBuildings;
+        public RTSBuildingData[] ActiveBuildings;
 
         public ReflectedScript SCAction;
         public ReflectedScript SCMovement;
@@ -80,9 +62,9 @@ namespace RTSEngine.Data.Team {
 
         public RTSRace() {
             Units = new RTSUnitData[MAX_UNIT_TYPES];
-            ActiveUnits = new IndexedUnitType[0];
+            ActiveUnits = new RTSUnitData[0];
             Buildings = new RTSBuildingData[MAX_BUILDING_TYPES];
-            ActiveBuildings = new IndexedBuildingType[0];
+            ActiveBuildings = new RTSBuildingData[0];
         }
 
         public void UpdateActiveUnits() {
@@ -90,10 +72,10 @@ namespace RTSEngine.Data.Team {
             for(int i = 0; i < MAX_UNIT_TYPES; i++) {
                 if(Units[i] != null) c++;
             }
-            ActiveUnits = new IndexedUnitType[c];
+            ActiveUnits = new RTSUnitData[c];
             c = 0;
             for(int i = 0; i < MAX_UNIT_TYPES; i++) {
-                if(Units[i] != null) ActiveUnits[c++] = new IndexedUnitType(i, Units[i]);
+                if(Units[i] != null) ActiveUnits[c++] = Units[i];
             }
         }
         public void UpdateActiveBuildings() {
@@ -101,10 +83,10 @@ namespace RTSEngine.Data.Team {
             for(int i = 0; i < MAX_BUILDING_TYPES; i++) {
                 if(Buildings[i] != null) c++;
             }
-            ActiveBuildings = new IndexedBuildingType[c];
+            ActiveBuildings = new RTSBuildingData[c];
             c = 0;
             for(int i = 0; i < MAX_BUILDING_TYPES; i++) {
-                if(Buildings[i] != null) ActiveBuildings[c++] = new IndexedBuildingType(i, Buildings[i]);
+                if(Buildings[i] != null) ActiveBuildings[c++] = Buildings[i];
             }
         }
     }

@@ -161,10 +161,10 @@ namespace RTSEngine.Controllers {
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
             events = new LinkedList<GameInputEvent>();
-            foreach(var active in s.activeTeams) {
-                if(active.Team.Input != null) {
-                    active.Team.Input.AppendEvents(events);
-                }
+            for(int i = 0; i < s.activeTeams.Length; i++) {
+                var team = s.activeTeams[i].Team;
+                if(team.Input != null)
+                    team.Input.AppendEvents(events);
             }
         }
         private void ApplyInput(GameState s, float dt) {
@@ -218,7 +218,6 @@ namespace RTSEngine.Controllers {
                 SendPathQuery(s, squad, e);
             }
         }
-
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
             RTSTeam team = s.teams[e.Team];
             List<IEntity> selected = team.Input.selected;
@@ -233,7 +232,7 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                squad.TargetingController.Target = e.Target as RTSUnit;
+                squad.TargetingController.Target = e.Target;
                 AddTask(s, squad);
                 SendPathQuery(s, squad, e);
             }
@@ -262,6 +261,7 @@ namespace RTSEngine.Controllers {
             if(!s.CGrid.CanAddBuilding(wp, team.Race.Buildings[e.Type].GridSize)) return;
 
             RTSBuilding building = team.AddBuilding(e.Type, wp);
+            building.BuildAmountLeft = 0;
 
             // Check If A Building Was Possible
             if(building == null) return;
@@ -269,12 +269,10 @@ namespace RTSEngine.Controllers {
             // Set Default Height
             building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
             building.CollisionGeometry.Height = building.Height;
-            building.CollisionGeometry.Center = building.GridPosition;
             s.CGrid.Add(building);
 
             // Add Building Decision Task
             AddTask(s, building, e.Team, e.Type);
-            s.IGrid.AddImpactGenerator(building);
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
@@ -339,8 +337,10 @@ namespace RTSEngine.Controllers {
             var ste = e as SetTargetEvent;
             if(swe != null)
                 query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
-            else if(ste != null)
+            else if(ste != null && ste.Target != null)
                 query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
+            else
+                return;
             squadQueries.Add(new SquadQuery(squad, query));
             pathfinder.Add(query);
         }
@@ -391,6 +391,9 @@ namespace RTSEngine.Controllers {
                         break;
                     case DevCommandType.Save:
                         ApplyLogic(s, dt, comm as DevCommandSave);
+                        break;
+                    case DevCommandType.Capital:
+                        ApplyLogic(s, dt, comm as DevCommandCapital);
                         break;
                 }
             }
@@ -467,6 +470,11 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSave c) {
             GameEngine.Save(s, c.file.FullName);
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandCapital c) {
+            foreach(var t in s.activeTeams) {
+                t.Team.Capital += c.change;
+            }
         }
 
         // Physics Stage
@@ -558,6 +566,10 @@ namespace RTSEngine.Controllers {
                 return;
             }
             else if(DevCommandSave.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandCapital.TryParse(s, out c)) {
                 commands.Enqueue(c);
                 return;
             }

@@ -9,9 +9,9 @@ using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework;
 using System.IO;
 
-namespace RTSEngine.Controllers {
+namespace RTS.Input {
     // TODO: Make This A Better AI
-    public class AIInputController : InputController {
+    public class AI : ACInputController {
         private static readonly Random AI_SEEDER = new Random();
 
         Thread t;
@@ -19,13 +19,20 @@ namespace RTSEngine.Controllers {
 
         Random r = new Random(AI_SEEDER.Next());
 
-        public AIInputController(GameState g, int ti)
-            : base(g, ti, InputType.AI) {
+        public AI()
+            : base() {
+            Type = RTSInputType.AI;
+        }
+
+        public override void Init(GameState s, int ti) {
+            base.Init(s, ti);
+
             t = new Thread(WorkThread);
             t.IsBackground = true;
             running = true;
             paused = true;
         }
+
         public override void Begin() {
             t.Start();
             paused = false;
@@ -56,10 +63,10 @@ namespace RTSEngine.Controllers {
         private void SpawnUnits(Random r) {
             int ui = r.Next(Team.Race.ActiveUnits.Length);
             int cc = Team.Units.Aggregate<RTSUnit, int>(0, (i, u) => {
-                if(u.UnitData == Team.Race.ActiveUnits[ui].Data) return i + 1;
+                if(u.Data == Team.Race.ActiveUnits[ui]) return i + 1;
                 else return i;
             });
-            cc = Team.Race.ActiveUnits[ui].Data.MaxCount - cc;
+            cc = Team.Race.ActiveUnits[ui].MaxCount - cc;
             if(cc > 10) cc = 10;
             if(cc < 1) return;
             int uc = r.Next(1, cc);

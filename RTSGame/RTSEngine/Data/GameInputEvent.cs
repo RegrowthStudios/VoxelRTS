@@ -12,7 +12,9 @@ namespace RTSEngine.Data {
         SetWaypoint,
         SetTarget,
         SpawnUnit,
-        SpawnBuilding
+        SpawnBuilding,
+        Impact,
+        Capital
     }
 
     public class GameInputEvent {
@@ -101,6 +103,35 @@ namespace RTSEngine.Data {
             : base(GameEventType.SpawnBuilding, t) {
             Type = type;
             GridPosition = gPos;
+        }
+    }
+
+    public class ImpactEvent : GameInputEvent {
+        public Vector2 Position {
+            get;
+            private set;
+        }
+        public int ChangeAmount {
+            get;
+            private set;
+        }
+
+        public ImpactEvent(int t, Vector2 p, int amount)
+            : base(GameEventType.Impact, t) {
+            Position = p;
+            ChangeAmount = amount;
+        }
+    }
+
+    public class CapitalEvent : GameInputEvent {
+        public int ChangeAmount {
+            get;
+            private set;
+        }
+
+        public CapitalEvent(int t, int amount)
+            : base(GameEventType.Capital, t) {
+            ChangeAmount = amount;
         }
     }
 }

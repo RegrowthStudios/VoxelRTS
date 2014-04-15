@@ -37,11 +37,16 @@ namespace RTSEngine.Data.Team {
     }
 
     public class RTSTeam {
-
         public static void Serialize(BinaryWriter s, RTSTeam team) {
             RTSRace.Serialize(s, team.Race);
-            s.Write((int)team.Input.Type);
-            team.Input.Serialize(s);
+            if(team.Input != null) {
+                s.Write(true);
+                s.Write(ReflectedScript.GetKey(team.Input));
+                team.Input.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
             s.Write(team.ColorScheme.Name);
             s.Write(team.ColorScheme.Primary);
             s.Write(team.ColorScheme.Secondary);
@@ -60,28 +65,15 @@ namespace RTSEngine.Data.Team {
             }
         }
         public static RTSTeam Deserialize(BinaryReader s, int index, GameState state) {
-            RTSTeam team = new RTSTeam();
+            RTSTeam team = new RTSTeam(index);
             team.Race = RTSRace.Deserialize(s, state);
-            InputType it = (InputType)s.ReadInt32();
-            switch(it) {
-                case InputType.AI:
-                    AIInputController aic = new AIInputController(state, index);
-                    team.Input = aic;
-                    team.Input.Deserialize(s);
-                    break;
-                case InputType.Environment:
-                    EnvironmentInputController eic = new EnvironmentInputController(state, index);
-                    team.Input = eic;
-                    team.Input.Deserialize(s);
-                    break;
-                case InputType.Player:
-                    PlayerInputController pic = new PlayerInputController(state, index);
-                    team.Input = pic;
-                    team.Input.Deserialize(s);
-                    break;
-                default:
-                    throw new Exception("A Team That Was Never Supposed To Be Created Was Made");
+            if(s.ReadBoolean()) {
+                string it = s.ReadString();
+                team.Input = state.Scripts[it].CreateInstance<ACInputController>();
+                team.Input.Deserialize(s);
+                team.Input.Init(state, index);
             }
+
             RTSColorScheme scheme = new RTSColorScheme();
             scheme.Name = s.ReadString();
             scheme.Primary = s.ReadVector3();
@@ -132,6 +124,12 @@ namespace RTSEngine.Data.Team {
             return team;
         }
 
+        // Index Into Game State
+        public int Index {
+            get;
+            private set;
+        }
+
         // Team Colors
         public RTSColorScheme ColorScheme {
             get;
@@ -141,13 +139,46 @@ namespace RTSEngine.Data.Team {
         // Team Race
         public RTSRace Race {
             get;
-            private set;
+            set;
         }
 
-        // Team Capital
+        // Team Capital (Always Non-negative)
+        private int capital;
         public int Capital {
-            get;
-            set;
+            get { return capital; }
+            set {
+                if(value < 0) value = 0;
+                if(capital != value) {
+                    capital = value;
+                    if(OnCapitalChange != null)
+                        OnCapitalChange(this, Capital);
+                }
+            }
+        }
+
+        // Population Information
+        private int population, populationCap;
+        public int Population {
+            get { return population; }
+            set {
+                if(value < 0) value = 0;
+                if(population != value) {
+                    population = value;
+                    if(OnPopulationChange != null)
+                        OnPopulationChange(this, Population);
+                }
+            }
+        }
+        public int PopulationCap {
+            get { return populationCap; }
+            set {
+                if(value < 0) value = 0;
+                if(populationCap != value) {
+                    populationCap = value;
+                    if(OnPopulationCapChange != null)
+                        OnPopulationCapChange(this, PopulationCap);
+                }
+            }
         }
 
         // Entity Data
@@ -164,11 +195,13 @@ namespace RTSEngine.Data.Team {
             get { return buildings; }
         }
 
-        public InputController Input {
+        // Input Controller
+        public ACInputController Input {
             get;
             set;
         }
 
+        // Used For Visuals And Input Logic
         public List<ViewedBuilding> ViewedEnemyBuildings {
             get;
             private set;
@@ -178,8 +211,12 @@ namespace RTSEngine.Data.Team {
         public event Action<RTSUnit> OnUnitSpawn;
         public event Action<RTSBuilding> OnBuildingSpawn;
         public event Action<RTSSquad> OnSquadCreation;
+        public event Action<RTSTeam, int> OnCapitalChange;
+        public event Action<RTSTeam, int> OnPopulationChange;
+        public event Action<RTSTeam, int> OnPopulationCapChange;
 
-        public RTSTeam() {
+        public RTSTeam(int i) {
+            Index = i;
             ColorScheme = RTSColorScheme.Default;
 
             // Teams Starts Out Empty
@@ -189,6 +226,8 @@ namespace RTSEngine.Data.Team {
             buildings = new List<RTSBuilding>();
             ViewedEnemyBuildings = new List<ViewedBuilding>();
             Capital = 1000;
+            Population = 0;
+            PopulationCap = 0;
 
             // No Input Is Available For The Team Yet
             Input = null;
@@ -196,14 +235,30 @@ namespace RTSEngine.Data.Team {
 
         // Unit Addition And Removal
         public RTSUnit AddUnit(int type, Vector2 pos) {
-            if(Race.Units[type].CurrentCount >= Race.Units[type].MaxCount) return null;
+            // Check For Unit Type Existence
+            RTSUnitData data = Race.Units[type];
+            if(data == null) return null;
 
-            RTSUnit unit = new RTSUnit(this, Race.Units[type], pos);
-            unit.UnitData.CurrentCount++;
-            unit.ActionController = Race.Units[type].DefaultActionController.CreateInstance<ACUnitActionController>();
-            unit.AnimationController = Race.Units[type].DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
-            unit.MovementController = Race.Units[type].DefaultMoveController.CreateInstance<ACUnitMovementController>();
-            unit.CombatController = Race.Units[type].DefaultCombatController.CreateInstance<ACUnitCombatController>();
+            // Check For Unit Cap
+            if(data.CurrentCount >= data.MaxCount) return null;
+
+            // Check For Population Cap
+            if(data.PopulationCost + Population > PopulationCap) return null;
+
+            // Check For Capital Cost
+            if(data.CapitalCost > Capital) return null;
+
+            // Produce Unit
+            Capital -= data.CapitalCost;
+            Population += data.PopulationCost;
+            data.CurrentCount++;
+
+            // Create Unit
+            RTSUnit unit = new RTSUnit(this, data, pos);
+            unit.ActionController = data.DefaultActionController.CreateInstance<ACUnitActionController>();
+            unit.AnimationController = data.DefaultAnimationController.CreateInstance<ACUnitAnimationController>();
+            unit.MovementController = data.DefaultMoveController.CreateInstance<ACUnitMovementController>();
+            unit.CombatController = data.DefaultCombatController.CreateInstance<ACUnitCombatController>();
             Units.Add(unit);
             if(OnUnitSpawn != null)
                 OnUnitSpawn(unit);
@@ -211,12 +266,16 @@ namespace RTSEngine.Data.Team {
         }
         public void RemoveAll(Predicate<RTSUnit> f) {
             var nu = new List<RTSUnit>(units.Count);
+            int pc = 0;
             for(int i = 0; i < units.Count; i++) {
-                if(f(units[i]))
-                    units[i].UnitData.CurrentCount--;
+                if(f(units[i])) {
+                    pc += units[i].Data.PopulationCost;
+                    units[i].Data.CurrentCount--;
+                }
                 else
                     nu.Add(units[i]);
             }
+            if(pc != 0) Population -= pc;
             System.Threading.Interlocked.Exchange(ref units, nu);
         }
 
@@ -237,10 +296,22 @@ namespace RTSEngine.Data.Team {
 
         // Building Addition And Removal
         public RTSBuilding AddBuilding(int type, Vector2 pos) {
-            if(Race.Buildings[type].CurrentCount >= Race.Buildings[type].MaxCount) return null;
+            // Check For Building Type Existence
+            RTSBuildingData data = Race.Buildings[type];
+            if(data == null) return null;
 
-            RTSBuilding b = new RTSBuilding(this, Race.Buildings[type], pos);
-            b.BuildingData.CurrentCount++;
+            // Check For Building Cap
+            if(data.CurrentCount >= data.MaxCount) return null;
+
+            // Check For Capital Cost
+            if(data.CapitalCost > Capital) return null;
+
+            // Produce Building
+            Capital -= data.CapitalCost;
+            data.CurrentCount++;
+
+            RTSBuilding b = new RTSBuilding(this, data, pos);
+            b.OnBuildingFinished += OnBuildingFinished;
             b.ActionController = Race.Buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
             Buildings.Add(b);
             if(OnBuildingSpawn != null)
@@ -249,15 +320,21 @@ namespace RTSEngine.Data.Team {
         }
         public void RemoveAll(Predicate<RTSBuilding> f) {
             var nb = new List<RTSBuilding>(buildings.Count);
+            int pc = 0;
             for(int i = 0; i < buildings.Count; i++) {
-                if(f(buildings[i]))
-                    buildings[i].BuildingData.CurrentCount--;
+                if(f(buildings[i])) {
+                    pc += buildings[i].Data.PopCapChange;
+                    buildings[i].Data.CurrentCount--;
+                }
                 else
                     nb.Add(buildings[i]);
             }
+            if(pc != 0) PopulationCap -= pc;
             System.Threading.Interlocked.Exchange(ref buildings, nb);
-
-            Buildings.RemoveAll(f);
+        }
+        private void OnBuildingFinished(RTSBuilding b) {
+            if(b.Data.PopCapChange != 0)
+                PopulationCap += b.Data.PopCapChange;
         }
     }
 }

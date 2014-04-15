@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
@@ -267,12 +268,28 @@ namespace RTSEngine.Interfaces {
         protected RTSSquad targetSquad;
 
         // A Unit Target
-        protected RTSUnit targetUnit;
-        public RTSUnit Target {
-            get { return targetUnit; }
+        protected IEntity target;
+        public IEntity Target {
+            get { return target; }
             set {
-                targetUnit = value;
-                targetSquad = targetUnit != null ? targetUnit.Squad : null;
+                target = value;
+                var unit = target as RTSUnit;
+                if(unit != null) targetSquad = unit.Squad;
+                else targetSquad = null;
+            }
+        }
+        public RTSUnit TargetUnit {
+            get { return target as RTSUnit; }
+            set {
+                target = value;
+                targetSquad = target != null ? value.Squad : null;
+            }
+        }
+        public RTSBuilding TargetBuilding {
+            get { return target as RTSBuilding; }
+            set {
+                target = value;
+                targetSquad = null;
             }
         }
 
@@ -324,4 +341,11 @@ namespace RTSEngine.Interfaces {
     }
 
     #endregion
+
+    public interface IVisualInputController {
+        Camera Camera { get; set; }
+
+        void Build(RTSRenderer renderer);
+        void Draw(RTSRenderer renderer, SpriteBatch batch);
+    }
 }

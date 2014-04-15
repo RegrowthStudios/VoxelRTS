@@ -50,7 +50,7 @@ namespace RTSEngine.Data {
             state.curFrame = s.ReadInt32();
             state.timePlayed = s.ReadSingle();
             UUIDGenerator.SetUUID(s.ReadInt32());
-            state.Scripts = new Dictionary<string,ReflectedScript>(res);
+            state.Scripts = new Dictionary<string, ReflectedScript>(res);
             int c = s.ReadInt32();
             for(int i = 0; i < c; i++) {
                 int ti = s.ReadInt32();
@@ -148,18 +148,6 @@ namespace RTSEngine.Data {
             grid.L1 = lg.L1;
             grid.L2 = lg.L2;
         }
-        public void SetTeams(IndexedTeam[] t) {
-            int c = 0;
-            foreach(IndexedTeam it in t) {
-                if(teams[it.Index] == null) c++;
-                teams[it.Index] = it.Team;
-            }
-            activeTeams = new IndexedTeam[c];
-            c = 0;
-            for(int i = 0; i < MAX_PLAYERS; i++) {
-                if(teams[i] != null) activeTeams[c++] = new IndexedTeam(i, teams[i]);
-            }
-        }
         public void UpdateActiveTeams() {
             int c = 0;
             foreach(var team in teams) {
@@ -184,6 +172,7 @@ namespace RTSEngine.Data {
             }
         }
 
+        // Particle Effects
         public List<Particle> GetParticles() {
             if(particles.Count > 0) {
                 List<Particle> p;

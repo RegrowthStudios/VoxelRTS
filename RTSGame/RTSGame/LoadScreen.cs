@@ -17,6 +17,7 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 using BlisterUI.Widgets;
 using Nova.Screens;
+using RTSEngine.Interfaces;
 
 namespace RTS {
     public class LoadScreen : GameScreen<App> {
@@ -297,6 +298,24 @@ namespace RTS {
                     GameEngine.BuildLocal(LoadedState, LoadData, new DirectoryInfo(@"Packs"), game.LobbyScreen.Races);
                 else
                     GameEngine.Load(LoadedState, new DirectoryInfo(@"Packs"), LoadFile.FullName);
+
+                // Create The Input Controllers
+                for(int ti = 0; ti < LoadedState.teams.Length; ti++) {
+                    switch(LoadData.Teams[ti].InputType) {
+                        case RTSInputType.Player:
+                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.Player"].CreateInstance<ACInputController>());
+                            break;
+                        case RTSInputType.AI:
+                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.AI"].CreateInstance<ACInputController>());
+                            break;
+                        case RTSInputType.Environment:
+                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.Environment"].CreateInstance<ACInputController>());
+                            break;
+                        default:
+                            continue;
+                    }
+                }
+
 
                 // Create Camera
                 LoadedCamera = new Camera(G.Viewport);

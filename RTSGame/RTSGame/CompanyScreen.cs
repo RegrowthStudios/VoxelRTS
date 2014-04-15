@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 using BlisterUI;
 using BlisterUI.Input;
+using System.Net;
 
 namespace RTS {
     public class CompanyScreen : GameScreen<App> {

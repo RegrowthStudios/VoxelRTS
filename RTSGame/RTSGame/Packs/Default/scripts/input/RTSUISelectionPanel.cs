@@ -9,10 +9,10 @@ using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Team;
 
-namespace RTSEngine.Graphics.UI {
+namespace RTSEngine.Graphics {
     public class RTSUIUnitGroup : IDisposable {
-        private static Color COLOR_INACTIVE = new Color(0.7f, 0.7f, 0.7f);
-        private static Color COLOR_ACTIVE = new Color(1f, 1f, 1f);
+        public static Color COLOR_INACTIVE = new Color(0.7f, 0.7f, 0.7f);
+        public static Color COLOR_ACTIVE = new Color(1f, 1f, 1f);
 
         public RectButton Widget {
             get;
@@ -40,13 +40,23 @@ namespace RTSEngine.Graphics.UI {
     }
 
     public class RTSUISelectionPanel : IDisposable {
+        public const float GROUPS_LAYER_OFF = 0.01f;
+
         public RectWidget BackPanel {
             get;
             private set;
         }
+        public float LayerDepth {
+            get { return BackPanel.LayerDepth; }
+            set {
+                BackPanel.LayerDepth = value;
+                foreach(var ug in groups) ug.Widget.LayerDepth = BackPanel.LayerDepth - GROUPS_LAYER_OFF;
+            }
+        }
+
         public Dictionary<string, Texture2D> IconLibrary {
             get;
-            private set;
+            set;
         }
 
         public readonly RTSUIUnitGroup[] groups;
@@ -59,9 +69,30 @@ namespace RTSEngine.Graphics.UI {
             int i = 0;
             for(int y = 0; y < Rows; y++) {
                 for(int x = 0; x < Columns; x++) {
-                    groups[i++] = new RTSUIUnitGroup(wr, s);
+                    groups[i] = new RTSUIUnitGroup(wr, s);
+                    if(x > 0) {
+                        groups[i].Widget.Parent = groups[i - 1].Widget;
+                        groups[i].Widget.Offset = new Point(buf, 0);
+                        groups[i].Widget.OffsetAlignX = Alignment.RIGHT;
+                    }
+                    i++;
+                }
+                if(y > 0) {
+                    int yi = y * Columns;
+                    groups[yi].Widget.Parent = groups[yi - Columns].Widget;
+                    groups[yi].Widget.Offset = new Point(0, buf);
+                    groups[yi].Widget.OffsetAlignY = Alignment.BOTTOM;
                 }
             }
+
+            BackPanel = new RectWidget(wr);
+            BackPanel.Width = Columns * s + (Columns + 1) * buf;
+            BackPanel.Height = Rows * s + (Rows + 1) * buf;
+            groups[0].Widget.Parent = BackPanel;
+            groups[0].Widget.Offset = new Point(buf, buf);
+
+            LayerDepth = 1f;
+            Clear();
         }
 
         public void Dispose() {
@@ -77,6 +108,19 @@ namespace RTSEngine.Graphics.UI {
             foreach(var ug in groups) ug.Unhook();
         }
 
+        private void Clear() {
+            foreach(var ug in groups) {
+                ug.Widget.ActiveColor = Color.Transparent;
+                ug.Widget.InactiveColor = Color.Transparent;
+                ug.Widget.Texture = null;
+                ug.Selection = null;
+            }
+        }
+        private void Show(RTSUIUnitGroup ug) {
+            ug.Widget.ActiveColor = RTSUIUnitGroup.COLOR_ACTIVE;
+            ug.Widget.InactiveColor = RTSUIUnitGroup.COLOR_INACTIVE;
+        }
+
         public RTSUIUnitGroup GetSelection(int x, int y) {
             if(BackPanel.Inside(x, y)) {
                 foreach(var ug in groups) {
@@ -88,7 +132,8 @@ namespace RTSEngine.Graphics.UI {
             return null;
         }
 
-        public void OnNewSelection(InputController ic, List<IEntity> entities) {
+        public void OnNewSelection(ACInputController ic, List<IEntity> entities) {
+            Clear();
             if(IconLibrary == null)
                 return;
 
@@ -97,22 +142,22 @@ namespace RTSEngine.Graphics.UI {
             for(int i = 0; i < entities.Count; i++) {
                 RTSUnit u = entities[i] as RTSUnit;
                 if(u != null) {
-                    if(units.ContainsKey(u.UnitData))
-                        units[u.UnitData].Add(u);
+                    if(units.ContainsKey(u.Data))
+                        units[u.Data].Add(u);
                     else {
                         var lu = new List<IEntity>();
                         lu.Add(u);
-                        units.Add(u.UnitData, lu);
+                        units.Add(u.Data, lu);
                     }
                 }
                 else {
                     RTSBuilding b = entities[i] as RTSBuilding;
-                    if(buildings.ContainsKey(b.BuildingData))
-                        buildings[b.BuildingData].Add(b);
+                    if(buildings.ContainsKey(b.Data))
+                        buildings[b.Data].Add(b);
                     else {
                         var lb = new List<IEntity>();
                         lb.Add(b);
-                        buildings.Add(b.BuildingData, lb);
+                        buildings.Add(b.Data, lb);
                     }
                 }
             }
@@ -125,6 +170,7 @@ namespace RTSEngine.Graphics.UI {
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;
                 groups[wi].Selection = kv.Value;
+                Show(groups[wi]);
                 wi++;
             }
             foreach(var kv in units) {
@@ -134,6 +180,7 @@ namespace RTSEngine.Graphics.UI {
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;
                 groups[wi].Selection = kv.Value;
+                Show(groups[wi]);
                 wi++;
             }
         }

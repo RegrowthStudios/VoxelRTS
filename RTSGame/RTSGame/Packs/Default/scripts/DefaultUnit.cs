@@ -34,7 +34,7 @@ namespace RTS.Default.Unit {
             fDecide = DSRest;
             fApply = ASRest;
 
-            teamIndex = unit.Team.Input.TeamIndex;
+            teamIndex = unit.Team.Index;
         }
 
         void DSRest(GameState g, float dt) {
@@ -52,7 +52,7 @@ namespace RTS.Default.Unit {
                         fDecide(g, dt);
                         break;
                     case BehaviorFSM.TargetPassively:
-                        float mr = unit.UnitData.BaseCombatData.MaxRange;
+                        float mr = unit.Data.BaseCombatData.MaxRange;
                         float d2 = (unit.Target.GridPosition - unit.GridPosition).LengthSquared();
                         if(d2 <= mr * mr) {
                             origin = unit.Target.GridPosition;
@@ -81,7 +81,7 @@ namespace RTS.Default.Unit {
             switch(f) {
                 case FogOfWar.Active:
                     targetLast = unit.Target.GridPosition;
-                    float mr = unit.UnitData.BaseCombatData.MaxRange;
+                    float mr = unit.Data.BaseCombatData.MaxRange;
                     float d = (unit.Target.GridPosition - unit.GridPosition).Length();
                     float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
                     switch(unit.CombatOrders) {
@@ -134,7 +134,7 @@ namespace RTS.Default.Unit {
         void DSPassiveTarget(GameState g, float dt) {
             unit.State = BehaviorFSM.Rest;
             Vector2 d = unit.GridPosition - origin;
-            float mr = unit.UnitData.BaseCombatData.MaxRange;
+            float mr = unit.Data.BaseCombatData.MaxRange;
             if(d.LengthSquared() > mr * mr) {
                 moveToOrigin = true;
             }
@@ -174,7 +174,7 @@ namespace RTS.Default.Unit {
                 return;
             }
 
-            float mr = unit.UnitData.BaseCombatData.MaxRange;
+            float mr = unit.Data.BaseCombatData.MaxRange;
             float d = (unit.Target.GridPosition - unit.GridPosition).Length();
             if(d > mr) {
                 unit.State = BehaviorFSM.Rest;
@@ -186,11 +186,11 @@ namespace RTS.Default.Unit {
         void ASCombatRanged(GameState g, float dt) {
             if(unit.Target == null || unit.CombatOrders != BehaviorFSM.CombatRanged) return;
 
-            float mr = unit.UnitData.BaseCombatData.MaxRange;
+            float mr = unit.Data.BaseCombatData.MaxRange;
             float d = (unit.Target.GridPosition - unit.GridPosition).Length();
             etCombat += dt;
             if(d < mr) {
-                if(etCombat > unit.UnitData.BaseCombatData.AttackTimer) {
+                if(etCombat > unit.Data.BaseCombatData.AttackTimer) {
                     unit.DamageTarget(r.NextDouble());
                     etCombat = 0;
                 }
@@ -240,13 +240,13 @@ namespace RTS.Default.Unit {
                     unit.Target = null;
                     return;
                 }
-                float minDistSquared = unit.UnitData.BaseCombatData.MinRange * unit.UnitData.BaseCombatData.MinRange;
+                float minDistSquared = unit.Data.BaseCombatData.MinRange * unit.Data.BaseCombatData.MinRange;
                 float distSquared = (unit.Target.WorldPosition - unit.WorldPosition).LengthSquared();
-                float maxDistSquared = unit.UnitData.BaseCombatData.MaxRange * unit.UnitData.BaseCombatData.MaxRange;
+                float maxDistSquared = unit.Data.BaseCombatData.MaxRange * unit.Data.BaseCombatData.MaxRange;
                 if(distSquared > maxDistSquared) return;
 
                 if(attackCooldown <= 0) {
-                    attackCooldown = unit.UnitData.BaseCombatData.AttackTimer;
+                    attackCooldown = unit.Data.BaseCombatData.AttackTimer;
                     unit.State = BehaviorFSM.CombatMelee;
                     if(minDistSquared <= distSquared) {
                         unit.DamageTarget(critRoller.NextDouble());

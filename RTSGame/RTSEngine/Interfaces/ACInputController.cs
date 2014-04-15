@@ -8,32 +8,33 @@ using System.Collections.Concurrent;
 using RTSEngine.Data.Team;
 using System.IO;
 
-namespace RTSEngine.Controllers {
+namespace RTSEngine.Interfaces {
     // Types Of Teams
-    public enum InputType {
-        None,
-        Player,
-        AI,
-        Environment
+    public static class RTSInputType {
+        public const int None = 0;
+        public const int Player = 1;
+        public const int AI = 2;
+        public const int Environment = 3;
     }
 
-    public abstract class InputController : IDisposable {
-        public InputType Type {
+    public abstract class ACInputController : ACScript, IDisposable {
+        // Input Type Metadata
+        public int Type {
             get;
-            private set;
+            set;
         }
 
-        //Stores The Team's Events
+        // Stores The Team's Events
         private ConcurrentQueue<GameInputEvent> eventQueue;
 
-        //Currently Selected Entities
+        // Currently Selected Entities
         public readonly List<IEntity> selected;
-        public event Action<InputController, List<IEntity>> OnNewSelection;
+        public event Action<ACInputController, List<IEntity>> OnNewSelection;
 
-        //The RTSTeam of the InputController
+        // The RTSTeam of the InputController
         public int TeamIndex {
             get;
-            private set;
+            set;
         }
         public RTSTeam Team {
             get { return GameState.teams[TeamIndex]; }
@@ -46,14 +47,21 @@ namespace RTSEngine.Controllers {
         }
 
         //Creates An InputController For The Given RTSTeam
-        public InputController(GameState g, int t, InputType it) {
-            Type = it;
-            GameState = g;
-            TeamIndex = t;
+        public ACInputController() {
             eventQueue = new ConcurrentQueue<GameInputEvent>();
             selected = new List<IEntity>();
+
+            Type = RTSInputType.None;
+            TeamIndex = -1;
+            GameState = null;
         }
         public abstract void Dispose();
+
+        // Called After Controller Is Created
+        public virtual void Init(GameState s, int t) {
+            GameState = s;
+            TeamIndex = t;
+        }
 
         // Begins The Controller
         public abstract void Begin();
@@ -78,7 +86,7 @@ namespace RTSEngine.Controllers {
         // Perform Correct Logic For Selection
         public void Select(List<IEntity> s, bool append = false) {
             if(!append) selected.Clear();
-            if(s != null) selected.AddRange(s);
+            if(s != null && s.Count > 0) selected.AddRange(s);
             if(OnNewSelection != null) {
                 OnNewSelection(this, selected);
             }

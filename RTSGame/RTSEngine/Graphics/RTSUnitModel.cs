@@ -52,7 +52,6 @@ namespace RTSEngine.Graphics {
         public RTSUnitModel(RTSRenderer renderer, Stream sModel, Texture2D tAnim) {
             // Create With The Animation Texture
             AnimationTexture = tAnim;
-            Vector2 texelSize = new Vector2(1f / (AnimationTexture.Width), 1f / (AnimationTexture.Height));
 
             // Parse The Model File
             VertexPositionNormalTexture[] pVerts;
@@ -64,7 +63,7 @@ namespace RTSEngine.Graphics {
             // Reformat Vertices
             verts = new VertexPositionTexture[pVerts.Length];
             for(int i = 0; i < verts.Length; i++) {
-                verts[i].Position = new Vector3((i + 0.5f) / AnimationTexture.Width, 0, 0);
+                verts[i].Position = new Vector3((float)((i + 0.1) / AnimationTexture.Width), 0, 0);
                 verts[i].TextureCoordinate = pVerts[i].TextureCoordinate;
             }
 
@@ -131,7 +130,7 @@ namespace RTSEngine.Graphics {
         }
 
         public void OnUnitSpawn(RTSUnit u) {
-            if(u.UnitData == Data)
+            if(u.Data == Data)
                 instances.Add(u);
         }
     }

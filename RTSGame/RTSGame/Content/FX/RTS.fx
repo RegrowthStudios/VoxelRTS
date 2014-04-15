@@ -42,12 +42,12 @@ VSO VS_Anim(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD
     VSO output;
 
     // Get The UV Coordinates In The Model Texture
-    float2 animUV = float2(input.Position.x, input.Position.y + (InstAnim * TexelSize.y * 3.0) + TexelSize.y * 0.5);
+    float2 animUV = float2(input.Position.x, (InstAnim * TexelSize.y * 3.0) + TexelSize.y * 0.5);
     
     // Sample The Model Position
-    float x = tex2Dlod(Model, float4(animUV.x, animUV.y, 0, 0)).x;
-    float y = tex2Dlod(Model, float4(animUV.x, animUV.y + TexelSize.y, 0, 0)).x;
-    float z = tex2Dlod(Model, float4(animUV.x, animUV.y + (TexelSize.y * 2.0), 0, 0)).x;
+    float x = tex2Dlod(Model, float4(animUV.x, animUV.y, 0, 0));
+    float y = tex2Dlod(Model, float4(animUV.x, animUV.y + TexelSize.y, 0, 0));
+    float z = tex2Dlod(Model, float4(animUV.x, animUV.y + TexelSize.y + TexelSize.y, 0, 0));
 
     float4 worldPosition = mul(InstWorld, float4(x, y, z, 1));
     output.Position = mul(worldPosition, VP);

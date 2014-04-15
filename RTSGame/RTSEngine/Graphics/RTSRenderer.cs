@@ -12,13 +12,9 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Data.Parsers;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Graphics {
-    public struct VisualTeam {
-        public int TeamIndex;
-        public RTSColorScheme ColorScheme;
-        public RTSRaceData RaceFileInfo;
-    }
 
     public class RTSRenderer : IDisposable {
         private const float SELECTION_RADIUS_MODIFIER = 1.1f;
@@ -81,7 +77,7 @@ namespace RTSEngine.Graphics {
 
         // The Friendly Team To Be Visualizing
         private int teamIndex;
-        private InputController teamInput;
+        private ACInputController teamInput;
         public Texture2D SelectionCircleTexture {
             get;
             set;
@@ -92,16 +88,17 @@ namespace RTSEngine.Graphics {
             get;
             set;
         }
+        public Texture2D FOWTexture {
+            get { return UseFOW ? Map.FogOfWarTexture : tPixel; }
+        }
 
         // Particle Effects
         private ParticleRenderer pRenderer;
-        public RTSUI RTSUI {
+
+        // Icons
+        public Dictionary<string, Texture2D> IconLibrary {
             get;
             private set;
-        }
-
-        public Texture2D FOWTexture {
-            get { return UseFOW ? Map.FogOfWarTexture : tPixel; }
         }
 
         // Graphics Data To Dispose
@@ -116,9 +113,11 @@ namespace RTSEngine.Graphics {
             FriendlyUnitModels = new List<RTSUnitModel>();
             NonFriendlyBuildingModels = new List<RTSBuildingModel>();
             FriendlyBuildingModels = new List<RTSBuildingModel>();
+            IconLibrary = new Dictionary<string, Texture2D>();
 
             tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
+            IconLibrary.Add("None", tPixel);
 
             fxMap = new RTSFXMap(LoadEffect(fxMapFile));
 
@@ -158,9 +157,6 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < td.Length; i++) {
                 td[i].Dispose();
                 td[i] = null;
-            }
-            if(RTSUI != null) {
-                RTSUI.Dispose();
             }
         }
 
@@ -256,15 +252,12 @@ namespace RTSEngine.Graphics {
             state.CGrid.OnFOWChange += OnFOWChange;
             Minimap.Hook(this, state, ti);
 
+
             // Load Particles
             using(var s = File.OpenRead(ParticleRenderer.FILE_BULLET_MODEL)) {
                 pRenderer.LoadBulletModel(this, s, ParsingFlags.ConversionOpenGL);
             }
             pRenderer.LoadBulletTexture(this, ParticleRenderer.FILE_BULLET_TEXTURE);
-
-            // Create UI
-            RTSUI = new RTSUI(this, "Courier New", 32, 140);
-            RTSUI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
 
             // Load Team Visuals
             for(int i = 0; i < state.teams.Length; i++) {
@@ -297,7 +290,7 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < team.Race.ActiveUnits.Length; i++) {
                 int ui = team.Race.ActiveUnits[i].Index;
                 RTSUnitData uData = team.Race.Units[ui];
-                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, new FileInfo(uData.InfoFile));
+                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, new FileInfo(uData.InfoFile), team.Race);
                 uModel.Hook(this, state, ti, team.Race.ActiveUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
                 ums.Add(uModel);
@@ -306,7 +299,7 @@ namespace RTSEngine.Graphics {
             // Create Building Graphics
             var bms = ti == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
             for(int i = 0; i < team.Race.ActiveBuildings.Length; i++) {
-                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, new FileInfo(team.Race.ActiveBuildings[i].Data.InfoFile));
+                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, new FileInfo(team.Race.ActiveBuildings[i].InfoFile), team.Race);
                 bModel.Hook(this, state, ti, teamIndex, team.Race.ActiveBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);
@@ -345,7 +338,6 @@ namespace RTSEngine.Graphics {
         }
 
         public void Update(GameState state) {
-            RTSUI.UpdateButtons(state);
             if(Map.Reset) Map.ApplyFOW();
             Minimap.Refresh(this);
         }
@@ -588,11 +580,6 @@ namespace RTSEngine.Graphics {
 
             pRenderer.SetBullets(G);
             pRenderer.DrawBullets(G);
-        }
-
-        // Draw The UI
-        public void DrawUI(SpriteBatch batch) {
-            RTSUI.Draw(batch);
         }
 
         // Selection Box Handling

@@ -11,7 +11,8 @@ namespace RTSEngine.Data {
             "System.Data.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",
-            "RTSEngine.dll"
+            "RTSEngine.dll",
+            "BlisterUI.dll"
         };
 
         public const float GAME_DELTA_TIME = 1f / 60f;

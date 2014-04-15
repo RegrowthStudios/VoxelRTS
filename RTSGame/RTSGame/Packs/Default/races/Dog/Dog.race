@@ -12,4 +12,4 @@ UNIT            [heavy.unit]
 UNIT            [armor.unit]
 
 // List Of All Building Types Belonging To Team
-BUILDING        [barracks.building]
+BUILDING        [tree.building]

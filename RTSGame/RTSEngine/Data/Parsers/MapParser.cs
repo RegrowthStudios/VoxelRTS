@@ -155,9 +155,8 @@ namespace RTSEngine.Data.Parsers {
 
             return view;
         }
-        public static LevelGrid? ParseData(FileInfo infoFile, out FileInfo fiEnvSpawn) {
+        public static LevelGrid? ParseData(FileInfo infoFile, List<Region> regions) {
             // Check File Existence
-            fiEnvSpawn = null;
             if(infoFile == null || !infoFile.Exists) return null;
 
             // Read The Entire File
@@ -182,9 +181,6 @@ namespace RTSEngine.Data.Parsers {
             FileInfo mfi = RegexHelper.ExtractFile(mp[2], infoFile.Directory.FullName);
             FileInfo rfi = RegexHelper.ExtractFile(mp[3], infoFile.Directory.FullName);
             if(!hfi.Exists || !mfi.Exists || !rfi.Exists) return null;
-
-            if(mp[4].Success)
-                fiEnvSpawn = RegexHelper.ExtractFile(mp[4], infoFile.Directory.FullName);
 
             // Read Height Data
             LevelGrid grid = new LevelGrid();
@@ -247,6 +243,7 @@ namespace RTSEngine.Data.Parsers {
             // Create The Regions
             foreach(var kv in regionCells) {
                 Region r = new Region(kv.Value);
+                regions.Add(r);
                 foreach(var p in r.Cells) {
                     grid.L2.Region[p.X, p.Y] = r;
                 }

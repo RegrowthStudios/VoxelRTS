@@ -41,8 +41,8 @@ namespace RTSEngine.Data.Team {
             s.Write(data.DefaultMoveController.TypeName);
             s.Write(data.DefaultAnimationController.TypeName);
         }
-        public static RTSUnitData Deserialize(BinaryReader s, GameState state) {
-            RTSUnitData data = new RTSUnitData();
+        public static RTSUnitData Deserialize(BinaryReader s, GameState state, int index) {
+            RTSUnitData data = new RTSUnitData(index);
             data.FriendlyName = s.ReadString();
             data.InfoFile = s.ReadString();
             data.Health = s.ReadInt32();
@@ -81,7 +81,7 @@ namespace RTSEngine.Data.Team {
         // The Friendly Name
         public string FriendlyName;
         public string InfoFile;
-        public int Index;
+        public readonly int Index;
 
         // Health Of The Unit
         public int Health;
@@ -114,5 +114,9 @@ namespace RTSEngine.Data.Team {
         public ReflectedScript DefaultCombatController;
         public ReflectedScript DefaultMoveController;
         public ReflectedScript DefaultAnimationController;
+
+        public RTSUnitData(int i) {
+            Index = i;
+        }
     }
 }

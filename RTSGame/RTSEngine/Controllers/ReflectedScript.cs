@@ -11,7 +11,8 @@ namespace RTSEngine.Controllers {
         Squad,
         Building,
         Button,
-        GameType
+        GameType,
+        Input
     }
     public enum ControllerType {
         Action,
@@ -22,6 +23,10 @@ namespace RTSEngine.Controllers {
     }
 
     public class ReflectedScript {
+        public static string GetKey(ACScript s) {
+            return s.GetType().FullName;
+        }
+
         public readonly string TypeName;
 
         // The Types Of Controller That This Is
@@ -80,6 +85,9 @@ namespace RTSEngine.Controllers {
             }
             else if(t.IsSubclassOf(typeof(ACGameTypeController))) {
                 ScriptType = ScriptType.Button;
+            }
+            else if(t.IsSubclassOf(typeof(ACInputController))) {
+                ScriptType = ScriptType.Input;
             }
             else {
                 throw new ArgumentException("This Script Is Not A Script...");

@@ -75,7 +75,7 @@ namespace RTS.Default.Squad {
                     }
                 }
             }
-                                        }
+        }
 
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize
@@ -259,30 +259,18 @@ namespace RTS.Default.Squad {
     public class Targeting : ACSquadTargetingController {
         int teamIndex;
         public override void Init(GameState s, GameplayController c) {
-            teamIndex = squad.Team.Input.TeamIndex;
+            teamIndex = squad.Team.Index;
         }
 
         public override void DecideTarget(GameState g, float dt) {
-            //if(targetSquad == null) {
-            //    FindTargetSquad(g);
-            //    return;
-            //}
-            //else {
-            //    if(targetSquad.IsDead) {
-            //        targetSquad = null;
-            //        return;
-            //    }
-            //    else 
-            //}
-
-            if(targetUnit == null) {
+            if(target == null) {
                 FindTargetUnit(g);
             }
-            else if(!targetUnit.IsAlive) {
-                targetUnit = null;
+            else if(!target.IsAlive) {
+                target = null;
             }
-            else if(g.CGrid.GetFogOfWar(targetUnit.GridPosition, teamIndex) != FogOfWar.Active) {
-                targetUnit = null;
+            else if(g.CGrid.GetFogOfWar(target.GridPosition, teamIndex) != FogOfWar.Active) {
+                target = null;
             }
         }
         private void FindTargetSquad(GameState g) {
@@ -301,7 +289,7 @@ namespace RTS.Default.Squad {
             }
         }
         private void FindTargetUnit(GameState g) {
-            targetUnit = null;
+            target = null;
             float minDist = float.MaxValue;
             for(int ti = 0; ti < g.activeTeams.Length; ti++) {
                 // Don't Automatically Self-Target
@@ -314,7 +302,7 @@ namespace RTS.Default.Squad {
                         continue;
                     float d = (team.Units[i].GridPosition - squad.GridPosition).LengthSquared();
                     if(d < minDist) {
-                        targetUnit = team.Units[i];
+                        TargetUnit = team.Units[i];
                         minDist = d;
                     }
                 }
@@ -322,7 +310,7 @@ namespace RTS.Default.Squad {
         }
         public override void ApplyTarget(GameState g, float dt) {
             foreach(var unit in squad.Units) {
-                unit.Target = targetUnit;
+                unit.Target = target;
             }
         }
 

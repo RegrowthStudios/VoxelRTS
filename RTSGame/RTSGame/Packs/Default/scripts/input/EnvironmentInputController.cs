@@ -9,9 +9,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.IO;
+using RTSEngine.Controllers;
 
-namespace RTSEngine.Controllers {
-    public class EnvironmentInputController : InputController {
+namespace RTS.Input {
+    public class Environment : ACInputController {
         Thread thread;
         private bool running;
         private bool paused;
@@ -47,7 +48,7 @@ namespace RTSEngine.Controllers {
         }
         // Time Intervals At Which Recovery And Spawning Happens (In Seconds)
         private int RecoverTime {
-            get { return eData.RecoverTime; }
+            get { return eData.DisasterTime * 2; }
         }
         private int DisasterTime {
             get { return eData.DisasterTime; }
@@ -95,62 +96,40 @@ namespace RTSEngine.Controllers {
             }
         }
 
-        public EnvironmentInputController(GameState g, int ti)
-            : base(g, ti, InputType.Environment) {
-            grid = g.IGrid;
+        public Environment()
+            : base() {
+            Type = RTSInputType.Environment;
+        }
+
+        public override void Init(GameState s, int ti) {
+            base.Init(s, ti);
+            grid = GameState.IGrid;
             random = new Random();
             thread = new Thread(WorkThread);
             thread.IsBackground = true;
             running = true;
             paused = true;
-            eData.DisasterTime = 1;
-            eData.RecoverTime = 1;
-        }
-        public EnvironmentInputController(GameState g, int ti, FileInfo infoRace, FileInfo spawnImage)
-            : this(g, ti) {
-            Init(infoRace, spawnImage);
-        }
-
-        // Only Called When Game Is Being Built And Not Deserialized
-        private void Init(FileInfo infoRace, FileInfo spawnImage) {
-            eData = EnvironmentDataParser.Parse(infoRace);
+            eData = EnvironmentDataParser.Parse(Team.Race.InfoFile);
             minNumSpawn = new int[3][] { eData.L1MinNumSpawn, eData.L1MaxNumSpawn, eData.L2MinNumSpawn };
             maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
-            treeLocations = new List<Point>();
 
-            if(spawnImage != null) {
-                using(var bmp = System.Drawing.Bitmap.FromFile(spawnImage.FullName) as System.Drawing.Bitmap) {
-                    int w = bmp.Width;
-                    int h = bmp.Height;
-                    int[] colorValues = new int[w * h];
-                    System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
-                    System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, colorValues, 0, colorValues.Length);
-                    bmp.UnlockBits(bmpData);
-
-                    int i = 0;
-                    for(int y = 0; y < h; y++) {
-                        for(int x = 0; x < w; x++) {
-                            Point p = new Point(x, y);
-                            if(colorValues[i] == System.Drawing.Color.Green.ToArgb()) {
-                                AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, p));
-                                treeLocations.Add(p);
-                            }
-                            else if(colorValues[i] == System.Drawing.Color.Red.ToArgb()) {
-                                AddEvent(new SpawnBuildingEvent(TeamIndex, OreType, p));
-                            }
-                            i++;
-                        }
-                    }
-                }
+            for(int i = 0; i < Team.Buildings.Count; i++) {
+                Team.Buildings[i].OnDamage += OnBuildingDamage;
             }
+            Team.OnBuildingSpawn += (b) => {
+                b.OnDamage += OnBuildingDamage;
+            };
         }
 
         private void WorkThread() {
+            DevConsole.AddCommand("Began");
             while(running) {
                 if(paused) {
                     Thread.Sleep(1000);
                     continue;
                 }
+                DevConsole.AddCommand("Tick");
+                DevConsole.AddCommand("DT: " + (counter % DisasterTime));
                 UpdateUnitsInRegion();
                 if(counter % DisasterTime == 0) {
                     SpawnUnits();
@@ -160,9 +139,10 @@ namespace RTSEngine.Controllers {
                     Recover();
                 }
                 counter++;
-                counter = counter % (DisasterTime + RecoverTime);
+                counter = counter % (RecoverTime);
                 Thread.Sleep(1000);
             }
+            DevConsole.AddCommand("Exited");
         }
 
         public override void Begin() {
@@ -188,6 +168,8 @@ namespace RTSEngine.Controllers {
 
         // Recovery Phase
         private void Recover() {
+            if(treeLocations == null || treeLocations.Count < 1) return;
+
             foreach(var r in GameState.Regions) {
                 if(r.RegionImpact < PointOfNoReturn && r.RegionImpact > 0) {
                     // Randomly Choose The Location Of A Starting Tree
@@ -238,6 +220,8 @@ namespace RTSEngine.Controllers {
                 else
                     level = 0;
                 if(level > 0) {
+                    DevConsole.AddCommand("Has Level");
+
                     // Find The Cell With The Largest Impact
                     Point p = r.Cells.First();
                     foreach(var c in r.Cells) {
@@ -247,26 +231,39 @@ namespace RTSEngine.Controllers {
                     }
                     // Randomly Choose An Impact Generator In That Cell
                     ImpactGenerator g = null;
-                    while(g == null || !g.BuildingData.FriendlyName.Equals(OreData.FriendlyName) || !g.BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
-                        int igi = random.Next(grid.ImpactGenerators[p.X, p.Y].Count);
-                        g = grid.ImpactGenerators[p.X, p.Y][igi];
+
+                    // TODO: Choose Random
+                    int rpi = random.Next(r.Cells.Count);
+                    Vector2 spawnPos = new Vector2(r.Cells[rpi].X, r.Cells[rpi].Y) * grid.cellSize + Vector2.One;
+
+                    if(grid.ImpactGenerators[p.X, p.Y].Count != 0) {
+                        var ig = grid.ImpactGenerators[p.X, p.Y];
+                        int igi = random.Next(ig.Count);
+                        for(int i = 0; i < ig.Count; i++) {
+                            if(ig[i].BuildingData.FriendlyName.Equals(OreData.FriendlyName) ||
+                                ig[i].BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
+                                igi--;
+                                if(igi == 0)
+                                    g = ig[i];
+                            }
+                        }
+                        spawnPos = g.GridPosition;
                     }
 
                     // Spawn Environmental Units
-                    Vector2 spawnPos = g.GridPosition;
                     Vector2 offset;
                     int numSpawn;
                     //FIX
-                    int i = 0;
+                    int ti = 0;
                     foreach(var spawnType in Spawns) {
-                        numSpawn = random.Next(minNumSpawn[level - 1][i], maxNumSpawn[level - 1][i]);
+                        numSpawn = random.Next(minNumSpawn[level - 1][ti], maxNumSpawn[level - 1][ti]);
                         offset.X = random.Next(SpawnOffset);
                         offset.Y = random.Next(SpawnOffset);
                         for(int j = 0; j < numSpawn; j++) {
                             AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos + offset));
                         }
+                        ti++;
                     }
-                    i++;
                 }
             }
         }
@@ -300,6 +297,14 @@ namespace RTSEngine.Controllers {
         }
         public override void Deserialize(BinaryReader s) {
             // TODO: Implement Deserialize
+        }
+
+        private void OnBuildingDamage(IEntity e, int d) {
+            RTSBuilding building = e as RTSBuilding;
+            Point p = HashHelper.Hash(e.GridPosition, grid.numCells, grid.size);
+            int imp = building.Data.Impact * d;
+            grid.Region[p.X, p.Y].AddToRegionImpact(imp);
+            DevConsole.AddCommand("Impact Added " + imp);
         }
     }
 }

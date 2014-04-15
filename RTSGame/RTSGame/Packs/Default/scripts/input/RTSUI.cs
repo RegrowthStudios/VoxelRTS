@@ -29,6 +29,13 @@ namespace RTSEngine.Graphics {
 
         private WidgetRenderer wrButtonPanel, wrMain;
 
+        public Rectangle WindowSize {
+            set {
+                rectBounds.Width = value.Width;
+                rectBounds.Height = value.Height;
+                OnWindowResize();
+            }
+        }
         private RectWidget rectBounds;
         public RectWidget PanelBottom {
             get;
@@ -41,6 +48,10 @@ namespace RTSEngine.Graphics {
         private LinkedList<Point> pressed;
 
         public RectWidget Minimap {
+            get;
+            private set;
+        }
+        public RTSUISelectionPanel SelectionPanel {
             get;
             private set;
         }
@@ -66,6 +77,8 @@ namespace RTSEngine.Graphics {
 
             BuildBounds(renderer, ph, new Color(20, 20, 20));
             BuildMinimap(renderer, 5);
+            BuildSelectionPanel(renderer);
+            SelectionPanel.IconLibrary = renderer.IconLibrary;
         }
         public void Dispose() {
             foreach(var b in btnPanel)
@@ -114,6 +127,13 @@ namespace RTSEngine.Graphics {
             Minimap.OffsetAlignY = Alignment.BOTTOM;
             Minimap.Parent = PanelBottom;
             Minimap.LayerDepth = PanelBottom.LayerDepth - LAYER_DELTA;
+        }
+        private void BuildSelectionPanel(RTSRenderer renderer) {
+            SelectionPanel = new RTSUISelectionPanel(wrMain, 2, 4, 32, 4);
+            SelectionPanel.BackPanel.Parent = Minimap;
+            SelectionPanel.BackPanel.AlignX = Alignment.RIGHT;
+            SelectionPanel.BackPanel.Offset = new Point(-4, 0);
+            SelectionPanel.LayerDepth = PanelBottom.LayerDepth - 0.01f;
         }
 
         public void BuildButtonPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {
@@ -175,8 +195,13 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void Draw(SpriteBatch batch) {
+        public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             wrMain.Draw(batch);
+            Rectangle rMap = new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height);
+            batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+            batch.Draw(renderer.Minimap.TeamMap, rMap, Color.White);
+            batch.End();
+            renderer.Minimap.DrawCamera(renderer, new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height));
         }
 
         private void OnWindowResize() {

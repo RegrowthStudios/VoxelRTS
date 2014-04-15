@@ -6,6 +6,7 @@ MODEL           [..\..\models\MechBase.obj]
 TEXMAIN         [..\..\textures\Main.png]
 TEXCOLOR        [..\..\textures\Key.png]
 ANIMATION       [..\..\animations\Mech2.png]
+ICON            [..\..\icons\Heavy.png]
 MAXCOUNT        [1000]
 
 // Unit Data
