@@ -18,23 +18,28 @@ using RTSEngine.Controllers;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
 using RTSEngine.Net;
+using System.Text.RegularExpressions;
 
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
+        const int NUM_FPS_SAMPLES = 64;
+        static readonly Regex rgxTeam = RegexHelper.GenerateInteger("setteam");
+        static readonly Regex rgxType = RegexHelper.GenerateInteger("settype");
+
         private GameplayController playController;
         private GameState state;
         private RTSRenderer renderer;
         private Camera camera;
-        private DevConsoleView dcv;
-        private PlayerInputController gameInput;
+        private ACInputController gameInput;
 
         Vector3 clickWorldPos;
-        int team, unit;
+        int team, type;
         bool pauseEngine, pauseRender;
         bool addUnit, addBuilding;
         int playing;
         Thread tEngine;
         SpriteFont sfDebug;
+        int eFPS;
 
         public override int Next {
             get { return -1; }
@@ -54,19 +59,21 @@ namespace RTS {
             MouseEventDispatcher.OnMousePress += OnMP;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
+            DevConsole.OnNewCommand += DevConsole_OnNewCommand;
 
-            dcv = new DevConsoleView(G);
             addUnit = false;
             team = 0;
-            unit = 0;
+            type = 0;
 
             state = game.LoadScreen.LoadedState;
             camera = game.LoadScreen.LoadedCamera;
             renderer = game.LoadScreen.LoadedRenderer;
+            renderer.UseFOW = true;
             playController = new GameplayController();
-            gameInput = state.teams[0].Input as PlayerInputController;
-            gameInput.Camera = camera;
-            gameInput.UI = renderer.RTSUI;
+            gameInput = state.teams[0].Input;
+            var vi = gameInput as IVisualInputController;
+            vi.Build(renderer);
+            vi.Camera = camera;
             playController.Init(state);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
@@ -83,8 +90,7 @@ namespace RTS {
             MouseEventDispatcher.OnMousePress -= OnMP;
             KeyboardEventDispatcher.OnKeyPressed -= OnKP;
             KeyboardEventDispatcher.OnKeyReleased -= OnKR;
-            dcv.Dispose();
-            dcv = null;
+            DevConsole.OnNewCommand -= DevConsole_OnNewCommand;
             DevConsole.Deactivate();
 
             camera.Controller.Unhook(game.Window);
@@ -106,26 +112,26 @@ namespace RTS {
                 camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
                 renderer.Update(state);
                 renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
-
-                // TODO: Draw UI
-                renderer.DrawUI(SB);
             }
+            else {
+                G.Clear(Color.Black);
+            }
+            (gameInput as IVisualInputController).Draw(renderer, SB);
 
-            if(DevConsole.IsActivated) {
-                SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
-                dcv.Draw(SB, Vector2.Zero);
+            game.DrawDevConsole();
+            if(!DevConsole.IsActivated) {
+                // Show FPS
+                double fps = gameTime.ElapsedGameTime.TotalSeconds;
+                fps = Math.Round(1000.0 / fps) / 1000.0;
+                SB.Begin();
+                SB.DrawString(sfDebug, fps + " / " + eFPS, Vector2.One * 10, Color.White);
                 SB.End();
             }
+            game.DrawMouse();
 
-            // Show FPS
-            double fps = gameTime.ElapsedGameTime.TotalSeconds;
-            fps = Math.Round(1000.0 / fps) / 1000.0;
-            SB.Begin();
-            SB.DrawString(sfDebug, fps.ToString(), Vector2.One * 10, Color.White);
-            SB.End();
-
-            game.mRenderer.BeginPass(G);
-            game.mRenderer.Draw(G);
+            //if(state.gtC.VictoriousTeam.HasValue) {
+            //    State = ScreenState.ChangePrevious;
+            //}
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
@@ -136,11 +142,11 @@ namespace RTS {
                     clickWorldPos = r.Position + r.Direction * rec.T;
                     if(addUnit)
                         gameInput.AddEvent(new SpawnUnitEvent(
-                            team, unit, new Vector2(clickWorldPos.X, clickWorldPos.Z)
+                            team, type, new Vector2(clickWorldPos.X, clickWorldPos.Z)
                             ));
                     else if(addBuilding)
                         gameInput.AddEvent(new SpawnBuildingEvent(
-                            team, 0,
+                            team, type,
                             HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size)
                             ));
                 }
@@ -155,13 +161,13 @@ namespace RTS {
                     team = 1;
                     break;
                 case Keys.D8:
-                    unit = 0;
+                    type = 0;
                     break;
                 case Keys.D9:
-                    unit = 1;
+                    type = 1;
                     break;
                 case Keys.D0:
-                    unit = 2;
+                    type = 2;
                     break;
                 case Keys.E:
                     addUnit = true;
@@ -186,13 +192,6 @@ namespace RTS {
                 case Keys.Escape:
                     State = ScreenState.ChangePrevious;
                     break;
-                case Keys.F2:
-                    using(var fileStream = File.Create("game.sg")) {
-                        BinaryWriter bw = new BinaryWriter(fileStream);
-                        StateSerializer.Serialize(bw, state);
-                        bw.Flush();
-                    }
-                    break;
             }
         }
         public void OnKR(object s, KeyEventArgs a) {
@@ -206,22 +205,52 @@ namespace RTS {
             }
         }
 
+        double CalcFPS(double[] fpsSamples, ref int currentSample, double dt) {
+            if(dt < 0.001) dt = 0.001;
+            fpsSamples[currentSample] = 1.0 / dt;
+            double fps = 0;
+            for(int i = 0; i < NUM_FPS_SAMPLES; i++)
+                fps += fpsSamples[i] / NUM_FPS_SAMPLES;
+            currentSample++;
+            currentSample %= NUM_FPS_SAMPLES;
+            return fps;
+        }
         void EngineThread() {
             TimeSpan tCur;
             TimeSpan tPrev = DateTime.Now.TimeOfDay;
             int milliRun = (int)(RTSConstants.GAME_DELTA_TIME * 1000);
+
+            double[] fpsSamples = new double[NUM_FPS_SAMPLES];
+            int currentSample = 0;
+            for(int i = 0; i < NUM_FPS_SAMPLES; i++) {
+                fpsSamples[i] = 60.0;
+            }
+
             while(playing != 0) {
                 if(pauseEngine) {
                     Thread.Sleep(milliRun);
                     continue;
                 }
+
                 playController.Update(state, RTSConstants.GAME_DELTA_TIME);
 
                 // Sleep For A While
                 tCur = DateTime.Now.TimeOfDay;
-                int dt = (int)(tCur.TotalMilliseconds - tPrev.TotalMilliseconds);
+                double ddt = (tCur.TotalMilliseconds - tPrev.TotalMilliseconds) / 1000.0;
+                eFPS = (int)CalcFPS(fpsSamples, ref currentSample, ddt);
+                int dt = eFPS == 0 ? milliRun : (eFPS < 0 ? 0 : (int)(1000.0 / eFPS));
                 if(dt < milliRun) Thread.Sleep(milliRun - dt);
                 tPrev = tCur;
+            }
+        }
+
+        private void DevConsole_OnNewCommand(string obj) {
+            Match m;
+            if((m = rgxTeam.Match(obj)).Success) {
+                team = RegexHelper.ExtractInt(m);
+            }
+            else if((m = rgxType.Match(obj)).Success) {
+                type = RegexHelper.ExtractInt(m);
             }
         }
     }

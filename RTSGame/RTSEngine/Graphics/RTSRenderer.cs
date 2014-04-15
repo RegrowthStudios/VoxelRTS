@@ -12,6 +12,7 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Data.Parsers;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Graphics {
     public struct VisualTeam {
@@ -72,7 +73,6 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
-        private Dictionary<int, bool> beenViewed;
 
         // Effects
         private BasicEffect fxSimple;
@@ -82,15 +82,26 @@ namespace RTSEngine.Graphics {
 
         // The Friendly Team To Be Visualizing
         private int teamIndex;
-        private InputController teamInput;
+        private ACInputController teamInput;
         public Texture2D SelectionCircleTexture {
             get;
             set;
         }
 
+        // Whether To Draw FOW
+        public bool UseFOW {
+            get;
+            set;
+        }
+        public Texture2D FOWTexture {
+            get { return UseFOW ? Map.FogOfWarTexture : tPixel; }
+        }
+
         // Particle Effects
         private ParticleRenderer pRenderer;
-        public RTSUI RTSUI {
+
+        // Icons
+        public Dictionary<string, Texture2D> IconLibrary {
             get;
             private set;
         }
@@ -107,10 +118,11 @@ namespace RTSEngine.Graphics {
             FriendlyUnitModels = new List<RTSUnitModel>();
             NonFriendlyBuildingModels = new List<RTSBuildingModel>();
             FriendlyBuildingModels = new List<RTSBuildingModel>();
-            beenViewed = new Dictionary<int, bool>();
+            IconLibrary = new Dictionary<string, Texture2D>();
 
             tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
+            IconLibrary.Add("None", tPixel);
 
             fxMap = new RTSFXMap(LoadEffect(fxMapFile));
 
@@ -129,6 +141,7 @@ namespace RTSEngine.Graphics {
             fxAnim.CTertiary = Vector3.UnitZ;
 
             fxParticle = LoadEffect(fxP);
+            UseFOW = true;
 
             drawBox = false;
             MouseEventDispatcher.OnMousePress += OnMousePress;
@@ -149,9 +162,6 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < td.Length; i++) {
                 td[i].Dispose();
                 td[i] = null;
-            }
-            if(RTSUI != null) {
-                RTSUI.Dispose();
             }
         }
 
@@ -227,7 +237,7 @@ namespace RTSEngine.Graphics {
         }
         #endregion
 
-        public void HookToGame(GameState state, int ti, Camera camera, FileInfo mapFile) {
+        public void HookToGame(GameState state, int ti, Camera camera) {
             // Get The Team To Be Visualized
             teamIndex = ti;
             teamInput = state.teams[teamIndex].Input;
@@ -238,7 +248,7 @@ namespace RTSEngine.Graphics {
 
             // Create The Map
             Heightmap map = state.Map;
-            Map = MapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, mapFile);
+            Map = MapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, new FileInfo(state.LevelGrid.InfoFile));
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
             fxParticle.Parameters["MapSize"].SetValue(new Vector2(map.Width, map.Depth));
@@ -247,51 +257,62 @@ namespace RTSEngine.Graphics {
             state.CGrid.OnFOWChange += OnFOWChange;
             Minimap.Hook(this, state, ti);
 
+
             // Load Particles
             using(var s = File.OpenRead(ParticleRenderer.FILE_BULLET_MODEL)) {
                 pRenderer.LoadBulletModel(this, s, ParsingFlags.ConversionOpenGL);
             }
             pRenderer.LoadBulletTexture(this, ParticleRenderer.FILE_BULLET_TEXTURE);
 
-            // Create UI
-            RTSUI = new RTSUI(this, "Courier New", 32, 140);
-            RTSUI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
-        }
-        public void LoadTeamVisuals(GameState state, VisualTeam vt) {
-            RTSTeam team = state.teams[vt.TeamIndex];
-            RTSRaceData res = vt.RaceFileInfo;
+            // Load Team Visuals
+            for(int i = 0; i < state.teams.Length; i++) {
+                if(state.teams[i] == null) continue;
+                LoadTeamVisuals(state, i);
+            }
 
-            // Set Color Scheme Appropriately
-            team.ColorScheme = vt.ColorScheme;
+            // Set FOW
+            for(int y = 0; y < Map.FogOfWarTexture.Height; y++) {
+                for(int x = 0; x < Map.FogOfWarTexture.Width; x++) {
+                    switch(state.CGrid.GetFogOfWar(x, y, teamIndex)) {
+                        case FogOfWar.Active:
+                            Map.SetFOW(x, y, 1f);
+                            break;
+                        case FogOfWar.Passive:
+                            Map.SetFOW(x, y, 0.5f);
+                            break;
+                        case FogOfWar.Nothing:
+                            Map.SetFOW(x, y, 0f);
+                            break;
+                    }
+                }
+            }
+        }
+        private void LoadTeamVisuals(GameState state, int ti) {
+            RTSTeam team = state.teams[ti];
 
             // Create Unit Graphics
-            var ums = vt.TeamIndex == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
-            for(int i = 0; i < team.race.ActiveUnits.Length; i++) {
-                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, res.UnitTypes[i]);
-                uModel.Hook(this, state, vt.TeamIndex, team.race.ActiveUnits[i].Index);
+            var ums = ti == teamIndex ? FriendlyUnitModels : NonFriendlyUnitModels;
+            for(int i = 0; i < team.Race.ActiveUnits.Length; i++) {
+                int ui = team.Race.ActiveUnits[i].Index;
+                RTSUnitData uData = team.Race.Units[ui];
+                RTSUnitModel uModel = RTSUnitDataParser.ParseModel(this, new FileInfo(uData.InfoFile), team.Race);
+                uModel.Hook(this, state, ti, team.Race.ActiveUnits[i].Index);
                 uModel.ColorScheme = team.ColorScheme;
                 ums.Add(uModel);
             }
 
             // Create Building Graphics
-            var bms = vt.TeamIndex == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
-            for(int i = 0; i < team.race.ActiveBuildings.Length; i++) {
-                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, team, team.race.ActiveBuildings[i].Index, res.BuildingTypes[i]);
-                bModel.Hook(this, state, vt.TeamIndex, team.race.ActiveBuildings[i].Index);
+            var bms = ti == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
+            for(int i = 0; i < team.Race.ActiveBuildings.Length; i++) {
+                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, new FileInfo(team.Race.ActiveBuildings[i].Data.InfoFile), team.Race);
+                bModel.Hook(this, state, ti, teamIndex, team.Race.ActiveBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);
-            }
-
-            if(vt.TeamIndex != teamIndex) {
-                team.OnBuildingSpawn += (b) => {
-                    beenViewed.Add(b.UUID, false);
-                };
             }
         }
         private void OnFOWChange(int x, int y, int p, FogOfWar f) {
             if(p != teamIndex) return;
             switch(f) {
-                case FogOfWar.All:
                 case FogOfWar.Active:
                     Map.SetFOW(x, y, 1f);
                     break;
@@ -322,7 +343,6 @@ namespace RTSEngine.Graphics {
         }
 
         public void Update(GameState state) {
-            RTSUI.UpdateButtons(state);
             if(Map.Reset) Map.ApplyFOW();
             Minimap.Refresh(this);
         }
@@ -362,33 +382,16 @@ namespace RTSEngine.Graphics {
                 return frustum.Intersects(u.BBox);
             };
             foreach(var um in NonFriendlyUnitModels)
-                um.UpdateInstances(G, GameplayController.IsUnitDead, fNFVU);
+                um.UpdateInstances(G, GameplayController.IsUnitDead, UseFOW ? fNFVU : fFVU);
 
             // Update Buildings
-            Predicate<RTSBuilding> fFVB = (b) => {
-                return frustum.Intersects(b.BBox);
+            Predicate<BoundingBox> fFVB = (b) => {
+                return frustum.Intersects(b);
             };
             foreach(var bm in FriendlyBuildingModels)
-                bm.UpdateInstances(G, GameplayController.IsBuildingDead, fFVB);
-
-            Predicate<RTSBuilding> fNFVB = (b) => {
-                Point up = HashHelper.Hash(b.GridPosition, cg.numCells, cg.size);
-                switch(cg.GetFogOfWar(up.X, up.Y, teamIndex)) {
-                    case FogOfWar.Passive:
-                        return beenViewed[b.UUID];
-                    case FogOfWar.Active:
-                        beenViewed[b.UUID] = true;
-                        return frustum.Intersects(b.BBox);
-                    default:
-                        return false;
-                }
-            };
-            Predicate<RTSBuilding> fNFRB = (b) => {
-                Point up = HashHelper.Hash(b.GridPosition, cg.numCells, cg.size);
-                return cg.GetFogOfWar(up.X, up.Y, teamIndex) == FogOfWar.Active && GameplayController.IsBuildingDead(b);
-            };
+                bm.UpdateInstances(G, fFVB);
             foreach(var bm in NonFriendlyBuildingModels)
-                bm.UpdateInstances(G, fNFRB, fNFVB);
+                bm.UpdateInstances(G, fFVB);
         }
 
         // Draw The Map
@@ -404,7 +407,7 @@ namespace RTSEngine.Graphics {
 
             // Primary Map Model
             if(Map.TrianglesPrimary > 0) {
-                fxMap.SetTextures(G, Map.PrimaryTexture, Map.FogOfWarTexture);
+                fxMap.SetTextures(G, Map.PrimaryTexture, FOWTexture);
                 G.SetVertexBuffer(Map.VBPrimary);
                 G.Indices = Map.IBPrimary;
                 fxMap.ApplyPassPrimary();
@@ -412,7 +415,7 @@ namespace RTSEngine.Graphics {
             }
             // Secondary Map Model
             if(Map.TrianglesSecondary > 0) {
-                fxMap.SetTextures(G, Map.SecondaryTexture, Map.FogOfWarTexture);
+                fxMap.SetTextures(G, Map.SecondaryTexture, FOWTexture);
                 G.SetVertexBuffer(Map.VBSecondary);
                 G.Indices = Map.IBSecondary;
                 fxMap.ApplyPassSecondary();
@@ -429,6 +432,7 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
             foreach(RTSBuildingModel buildingModel in NonFriendlyBuildingModels) {
+                if(buildingModel.VisibleInstanceCount < 1) continue;
                 fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
                 fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
                 fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
@@ -438,6 +442,7 @@ namespace RTSEngine.Graphics {
                 buildingModel.DrawInstances(G);
             }
             foreach(RTSBuildingModel buildingModel in FriendlyBuildingModels) {
+                if(buildingModel.VisibleInstanceCount < 1) continue;
                 fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
                 fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
                 fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
@@ -574,17 +579,12 @@ namespace RTSEngine.Graphics {
             G.BlendState = BlendState.Additive;
 
             fxParticle.Parameters["VP"].SetValue(Camera.View * Camera.Projection);
-            G.Textures[1] = Map.FogOfWarTexture;
+            G.Textures[1] = FOWTexture;
             G.SamplerStates[1] = SamplerState.PointClamp;
             fxParticle.CurrentTechnique.Passes[0].Apply();
 
             pRenderer.SetBullets(G);
             pRenderer.DrawBullets(G);
-        }
-
-        // Draw The UI
-        public void DrawUI(SpriteBatch batch) {
-            RTSUI.Draw(batch);
         }
 
         // Selection Box Handling

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,13 +8,63 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
-    public class RTSBuilding : IEntity, ImpactGenerator {
-        public static void Serialize(BinaryWriter s, RTSBuilding building) {
-            // TODO: Implement
+    public class RTSBuilding : IEntity {
+        public static void Serialize(BinaryWriter s, RTSBuilding e) {
+            s.Write(e.Data.Index);
+            s.Write(e.UUID);
+            s.Write(e.State);
+            s.Write(e.ViewDirection);
+            s.Write(e.GridPosition);
+            s.Write(e.Height);
+            if(e.Target != null) {
+                s.Write(true);
+                s.Write(e.Target.UUID);
+            }
+            else {
+                s.Write(false);
+            }
+            s.Write(e.Health);
+            for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
+                s.Write(e.viewedInfo.Get(i));
+            }
+            if(e.ActionController != null) {
+                s.Write(true);
+                e.ActionController.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
+        }
+        public static RTSBuilding Deserialize(BinaryReader s, RTSTeam team, out int? target) {
+            int type = s.ReadInt32();
+            RTSBuilding e = team.AddBuilding(type, Vector2.Zero);
+            if(e == null) throw new Exception("Could Not Create A Building That Was Previously Created");
+            e.UUID = s.ReadInt32();
+            e.State = s.ReadInt32();
+            e.ViewDirection = s.ReadVector2();
+            e.GridPosition = s.ReadVector2();
+            e.Height = s.ReadSingle();
+            if(s.ReadBoolean()) {
+                target = s.ReadInt32();
+            }
+            else {
+                target = null;
+            }
+            e.Health = s.ReadInt32();
+            for(int i = 0; i < GameState.MAX_PLAYERS; i++) {
+                e.viewedInfo.Set(i, s.ReadBoolean());
+            }
+            if(s.ReadBoolean()) {
+                if(e.ActionController != null) e.ActionController.Deserialize(s);
+            }
+            else {
+                e.ActionController = null;
+            }
+            return e;
         }
 
         // Common Data
-        public RTSBuildingData BuildingData {
+        public RTSBuildingData Data {
             get;
             private set;
         }
@@ -35,6 +86,7 @@ namespace RTSEngine.Data.Team {
             get;
             set;
         }
+        private BitArray viewedInfo;
 
         // View Direction
         public Vector2 ViewDirection {
@@ -46,7 +98,18 @@ namespace RTSEngine.Data.Team {
         private Vector2 gridPos;
         public Vector2 GridPosition {
             get { return gridPos; }
-            set { gridPos = value; }
+            set {
+                gridPos = value;
+                CollisionGeometry.Center = Data.ICollidableShape.Center + gridPos;
+            }
+        }
+        public Vector2 GridStartPos {
+            get {
+                Vector2 gs = GridPosition;
+                gs.X -= (Data.GridSize.X / 2);
+                gs.Y -= (Data.GridSize.Y / 2);
+                return gs;
+            }
         }
 
         // 3D Position
@@ -92,9 +155,30 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // Building Information
+        private int bAmount;
+        public int BuildAmount {
+            get { return bAmount; }
+            set {
+                if(!IsBuilt) {
+                    bAmount = value;
+                    if(IsBuilt && OnBuildingFinished != null) {
+                        OnBuildingFinished(this);
+                    }
+                }
+            }
+        }
+        public bool IsBuilt {
+            get { return BuildAmount <= 0; }
+        }
+        private float BuildRatio {
+            get { return IsBuilt ? 1f : ((float)(Data.BuildAmount - BuildAmount) / (float)Data.BuildAmount); }
+        }
+
         // Damaging Events
         public event Action<IEntity, int> OnDamage;
         public event Action<IEntity> OnDestruction;
+        public event Action<RTSBuilding> OnBuildingFinished;
 
         // Collision Geometry
         public ICollidable CollisionGeometry {
@@ -104,8 +188,8 @@ namespace RTSEngine.Data.Team {
         public BoundingBox BBox {
             get {
                 return new BoundingBox(
-                    BuildingData.BBox.Min + WorldPosition,
-                    BuildingData.BBox.Max + WorldPosition
+                    Data.BBox.Min + WorldPosition,
+                    Data.BBox.Max + WorldPosition
                     );
             }
         }
@@ -119,21 +203,31 @@ namespace RTSEngine.Data.Team {
             }
         }
 
-        public event Action<Vector2, int> GenerateImpact;
-
         // Constructor
         public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {
             // Identification
             UUID = UUIDGenerator.GetUUID();
             Team = team;
             gridPos = position;
+            viewedInfo = new BitArray(GameState.MAX_PLAYERS);
+            viewedInfo.SetAll(false);
 
-            BuildingData = data;
+            Data = data;
+            gridPos.X += (Data.GridSize.X / 2);
+            gridPos.Y += (Data.GridSize.Y / 2);
             height = 0;
-            Health = BuildingData.Health;
-            CollisionGeometry = BuildingData.ICollidableShape.Clone() as ICollidable;
+            Health = Data.Health;
+            bAmount = Data.BuildAmount;
+            CollisionGeometry = Data.ICollidableShape.Clone() as ICollidable;
             ViewDirection = Vector2.UnitX;
             CollisionGeometry.Center += GridPosition;
+        }
+
+        public void SetViewedInfo(int p, bool b) {
+            viewedInfo.Set(p, b);
+        }
+        public bool GetViewedInfo(int p) {
+            return viewedInfo.Get(p);
         }
 
         // Applies Damage To Health

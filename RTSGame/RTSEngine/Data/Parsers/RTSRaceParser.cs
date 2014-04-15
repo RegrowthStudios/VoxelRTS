@@ -15,7 +15,7 @@ namespace RTSEngine.Data.Parsers {
         static readonly Regex rgxName = RegexHelper.GenerateString("NAME");
         private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlMovement = RegexHelper.Generate("CTRLMOVEMENT", @"[\w\s\.]+");
-        private static readonly Regex rgxCtrlTargetting = RegexHelper.Generate("CTRLTARGET", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlTargeting = RegexHelper.Generate("CTRLTARGET", @"[\w\s\.]+");
         static readonly Regex rgxUnit = RegexHelper.GenerateFile("UNIT");
         static readonly Regex rgxBuilding = RegexHelper.GenerateFile("BUILDING");
 
@@ -23,11 +23,11 @@ namespace RTSEngine.Data.Parsers {
             return fi.Extension.EndsWith(EXTENSION);
         }
 
-        public static List<RTSRaceData> ParseAll(DirectoryInfo dirPacks) {
+        public static List<RTSRace> ParseAll(DirectoryInfo dirPacks, Dictionary<string, ReflectedScript> scripts) {
             if(!dirPacks.Exists)
                 throw new DirectoryNotFoundException("Packs Directory Doesn't Exist");
 
-            var res = new List<RTSRaceData>();
+            var res = new List<RTSRace>();
             foreach(var dir in dirPacks.GetDirectories()) {
                 // Check For A Race Directory
                 DirectoryInfo dt = new DirectoryInfo(Path.Combine(dir.FullName, DIRECTORY));
@@ -35,48 +35,61 @@ namespace RTSEngine.Data.Parsers {
 
                 // Read All Races
                 foreach(FileInfo fi in dt.GetFiles().Where(IsFile)) {
-                    using(FileStream s = File.OpenRead(fi.FullName)) {
-                        res.Add(Parse(s, dt.FullName));
-                    }
+                    res.Add(Parse(fi, null));
                 }
             }
             return res;
         }
-        public static RTSRaceData Parse(FileInfo fi) {
+        public static RTSRace Parse(FileInfo fi, Dictionary<string, ReflectedScript> scripts) {
             if(fi == null || !fi.Exists) return null;
 
-            RTSRaceData res = null;
+            string mStr = null;
             using(FileStream s = File.OpenRead(fi.FullName)) {
-                res = Parse(s, fi.Directory.FullName);
-                res.InfoFile = fi;
+                mStr = new StreamReader(s).ReadToEnd();
             }
-            return res;
-        }
-        private static RTSRaceData Parse(Stream s, string rootDir) {
-            RTSRaceData res = new RTSRaceData();
-            string mStr = new StreamReader(s).ReadToEnd();
+
+            RTSRace res = new RTSRace();
+            res.InfoFile = fi;
 
             // Read Name
-            res.Name = RegexHelper.Extract(rgxName.Match(mStr));
-            res.DefaultSquadActionController = RegexHelper.Extract(rgxCtrlAction.Match(mStr));
-            res.DefaultSquadMovementController = RegexHelper.Extract(rgxCtrlMovement.Match(mStr));
-            res.DefaultSquadTargettingController = RegexHelper.Extract(rgxCtrlTargetting.Match(mStr));
+            res.FriendlyName = RegexHelper.Extract(rgxName.Match(mStr));
+            if(scripts != null) {
+                res.SCAction = scripts[RegexHelper.Extract(rgxCtrlAction.Match(mStr))];
+                res.SCMovement = scripts[RegexHelper.Extract(rgxCtrlMovement.Match(mStr))];
+                res.SCTargeting = scripts[RegexHelper.Extract(rgxCtrlTargeting.Match(mStr))];
+            }
 
             // Read All Units
             Match m = rgxUnit.Match(mStr);
+            int type = 0;
             while(m.Success) {
-                res.UnitTypes.Add(RegexHelper.ExtractFile(m, rootDir));
+                RTSUnitData data = RTSUnitDataParser.ParseData(scripts, RegexHelper.ExtractFile(m, fi.Directory.FullName), type);
+                res.Units[type++] = data;
                 m = m.NextMatch();
             }
+            res.UpdateActiveUnits();
 
             // Read All Buildings
             m = rgxBuilding.Match(mStr);
+            type = 0;
             while(m.Success) {
-                res.BuildingTypes.Add(RegexHelper.ExtractFile(m, rootDir));
+                RTSBuildingData data = RTSBuildingDataParser.ParseData(scripts, RegexHelper.ExtractFile(m, fi.Directory.FullName), type);
+                res.Buildings[type++] = data;
                 m = m.NextMatch();
             }
+            res.UpdateActiveBuildings();
 
             return res;
+        }
+        public static string ParseName(FileInfo fi) {
+            if(fi == null || !fi.Exists) return null;
+
+            string mStr = null;
+            using(FileStream s = File.OpenRead(fi.FullName)) {
+                mStr = new StreamReader(s).ReadToEnd();
+            }
+
+            return RegexHelper.Extract(rgxName.Match(mStr));
         }
     }
 }

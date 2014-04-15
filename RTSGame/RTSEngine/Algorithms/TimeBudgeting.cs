@@ -16,6 +16,9 @@ namespace RTSEngine.Algorithms {
             get;
             private set;
         }
+        public bool IsFinished {
+            get { return WorkAmount <= 0; }
+        }
 
         public ACBudgetedTask(int workAmount) {
             CurrentBin = -1;
@@ -24,6 +27,11 @@ namespace RTSEngine.Algorithms {
 
         // The Task's Work Function
         public abstract void DoWork(float dt);
+
+        // This Task Is Complete And Should Not Be Executed
+        public void Finish() {
+            WorkAmount = -1;
+        }
     }
 
     public class TimeBudget {
@@ -32,6 +40,22 @@ namespace RTSEngine.Algorithms {
         private int curBin;
         // For Sorting By Relative Work
         private readonly int[] totalWork;
+
+        public IEnumerable<ACBudgetedTask> Tasks {
+            get {
+                for(int bin = 0; bin < taskBins.Length; bin++)
+                    for(int ti = 0; ti < taskBins[bin].Count; ti++)
+                        yield return taskBins[bin][ti];
+            }
+        }
+        public IEnumerable<ACBudgetedTask> WorkingTasks {
+            get {
+                for(int bin = 0; bin < taskBins.Length; bin++)
+                    for(int ti = 0; ti < taskBins[bin].Count; ti++)
+                        if(!taskBins[bin][ti].IsFinished)
+                            yield return taskBins[bin][ti];
+            }
+        }
 
         public int Bins {
             get { return taskBins.Length; }
@@ -43,9 +67,13 @@ namespace RTSEngine.Algorithms {
 
         public TimeBudget(int bins) {
             taskBins = new List<ACBudgetedTask>[bins];
+            for(int i = 0; i < taskBins.Length; i++) {
+                taskBins[i] = new List<ACBudgetedTask>();
+            }
+            TotalTasks = 0;
             totalWork = new int[bins];
+            Array.Clear(totalWork, 0, totalWork.Length);
             curBin = 0;
-            ClearTasks();
         }
 
         private int FindEasiestBin() {
@@ -82,26 +110,37 @@ namespace RTSEngine.Algorithms {
 
         public void ClearTasks() {
             TotalTasks = 0;
-            for(int i = 0; i < taskBins.Length; i++)
+            for(int i = 0; i < taskBins.Length; i++) {
+                for(int ti = 0; ti < taskBins[i].Count; ti++) {
+                    taskBins[i][ti].CurrentBin = -1;
+                }
                 taskBins[i] = new List<ACBudgetedTask>();
+            }
             Array.Clear(totalWork, 0, totalWork.Length);
         }
         public void ResortBins() {
             ACBudgetedTask[] tasks = new ACBudgetedTask[TotalTasks];
-            int i = 0;
+            int c = 0;
             for(int bin = 0; bin < taskBins.Length; bin++)
                 for(int ti = 0; ti < taskBins[bin].Count; ti++)
-                    tasks[i++] = taskBins[bin][ti];
+                    // Check For Finished Tasks
+                    if(!taskBins[bin][ti].IsFinished)
+                        tasks[c++] = taskBins[bin][ti];
 
             // Re-Add Tasks
             ClearTasks();
-            for(i = 0; i < tasks.Length; i++) AddTask(tasks[i]);
+            for(int i = 0; i < c; i++) AddTask(tasks[i]);
         }
 
         public void DoTasks(float dt) {
             var tasks = taskBins[curBin];
-            for(int i = 0; i < tasks.Count; i++)
+            for(int i = 0; i < tasks.Count; i++) {
+                // Check For Task Viability
+                if(tasks[i].IsFinished) continue;
                 tasks[i].DoWork(dt);
+            }
+
+            // Increment The Task Bin
             curBin = (curBin + 1) % taskBins.Length;
         }
     }

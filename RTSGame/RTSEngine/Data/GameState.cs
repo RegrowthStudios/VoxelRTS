@@ -10,6 +10,8 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Graphics;
+using RTSEngine.Algorithms;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data {
     public struct IndexedTeam {
@@ -26,9 +28,48 @@ namespace RTSEngine.Data {
     public class GameState {
         public const int MAX_NONENV_PLAYERS = 8;
         public const int MAX_PLAYERS = MAX_NONENV_PLAYERS + 1;
+        public const int BUILDING_MEMORIZATION_LATENCY = MAX_PLAYERS * 2;
+
+        public static void Serialize(BinaryWriter s, GameState state) {
+            s.Write(state.CurrentFrame);
+            s.Write(state.TotalGameTime);
+            s.Write(UUIDGenerator.GetUUID());
+            s.Write(state.activeTeams.Length);
+            foreach(var at in state.activeTeams) {
+                s.Write(at.Index);
+                RTSTeam.Serialize(s, at.Team);
+            }
+            s.Write(state.tbMemBuildings.TotalTasks);
+            foreach(var task in state.tbMemBuildings.Tasks) {
+                var ebu = task as EnemyBuildingUpdater;
+                EnemyBuildingUpdater.Serialize(s, ebu);
+            }
+            LevelGrid.Serialize(s, state);
+        }
+        public static void Deserialize(BinaryReader s, Dictionary<string, ReflectedScript> res, GameState state) {
+            state.curFrame = s.ReadInt32();
+            state.timePlayed = s.ReadSingle();
+            UUIDGenerator.SetUUID(s.ReadInt32());
+            state.Scripts = new Dictionary<string, ReflectedScript>(res);
+            int c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                int ti = s.ReadInt32();
+                state.teams[ti] = RTSTeam.Deserialize(s, ti, state);
+            }
+            state.UpdateActiveTeams();
+            c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                var ebu = EnemyBuildingUpdater.Deserialize(s, state);
+                state.tbMemBuildings.AddTask(ebu);
+            }
+            LevelGrid.Deserialize(s, state);
+        }
 
         // The Grids For The Level
         private LevelGrid grid;
+        public LevelGrid LevelGrid {
+            get { return grid; }
+        }
         public Heightmap Map {
             get { return grid.L0; }
         }
@@ -40,15 +81,7 @@ namespace RTSEngine.Data {
         }
 
         // Controller Dictionary
-        public Dictionary<string, ReflectedUnitController> UnitControllers {
-            get;
-            private set;
-        }
-        public Dictionary<string, ReflectedSquadController> SquadControllers {
-            get;
-            private set;
-        }
-        public Dictionary<string, ReflectedBuildingController> BuildingControllers {
+        public Dictionary<string, ReflectedScript> Scripts {
             get;
             private set;
         }
@@ -63,6 +96,9 @@ namespace RTSEngine.Data {
             private set;
         }
 
+        // Memorized Buildings Information
+        public readonly TimeBudget tbMemBuildings;
+
         // Keeping Track Of Time
         private int curFrame;
         public int CurrentFrame {
@@ -73,19 +109,23 @@ namespace RTSEngine.Data {
             get { return timePlayed; }
         }
 
+        // The Game Type Controller
+        public ReflectedScript scrGTC;
+        public ACGameTypeController gtC;
+
         // Particle Events
         private object lckParticles;
         private List<Particle> particles;
         private List<Particle> tmpParticles;
 
         public GameState() {
+            UUIDGenerator.SetUUID(0);
             teams = new RTSTeam[MAX_PLAYERS];
             activeTeams = new IndexedTeam[0];
+            Regions = new List<Region>();
 
             // No Data Yet Available
-            UnitControllers = new Dictionary<string, ReflectedUnitController>();
-            SquadControllers = new Dictionary<string, ReflectedSquadController>();
-            BuildingControllers = new Dictionary<string, ReflectedBuildingController>();
+            Scripts = new Dictionary<string, ReflectedScript>();
             grid = new LevelGrid();
             grid.L0 = null;
             grid.L1 = null;
@@ -94,6 +134,8 @@ namespace RTSEngine.Data {
             curFrame = 0;
             timePlayed = 0f;
 
+            tbMemBuildings = new TimeBudget(BUILDING_MEMORIZATION_LATENCY);
+
             lckParticles = new object();
             particles = new List<Particle>();
             tmpParticles = new List<Particle>();
@@ -101,15 +143,15 @@ namespace RTSEngine.Data {
 
         // Create With Premade Data
         public void SetGrids(LevelGrid lg) {
+            grid.InfoFile = lg.InfoFile;
             grid.L0 = lg.L0;
             grid.L1 = lg.L1;
             grid.L2 = lg.L2;
         }
-        public void SetTeams(IndexedTeam[] t) {
+        public void UpdateActiveTeams() {
             int c = 0;
-            foreach(IndexedTeam it in t) {
-                if(teams[it.Index] == null) c++;
-                teams[it.Index] = it.Team;
+            foreach(var team in teams) {
+                if(team != null) c++;
             }
             activeTeams = new IndexedTeam[c];
             c = 0;
@@ -130,6 +172,7 @@ namespace RTSEngine.Data {
             }
         }
 
+        // Particle Effects
         public List<Particle> GetParticles() {
             if(particles.Count > 0) {
                 List<Particle> p;

@@ -27,7 +27,6 @@ namespace RTSEngine.Data.Team {
 
     public class RTSRace {
         public static void Serialize(BinaryWriter s, RTSRace race) {
-            // TODO: Implement
             s.Write(race.FriendlyName);
             s.Write(race.ActiveUnits.Length);
             foreach(var d in race.ActiveUnits) {
@@ -39,12 +38,36 @@ namespace RTSEngine.Data.Team {
                 s.Write(d.Index);
                 RTSBuildingData.Serialize(s, d.Data);
             }
+            s.Write(race.SCAction.TypeName);
+            s.Write(race.SCMovement.TypeName);
+            s.Write(race.SCTargeting.TypeName);
+        }
+        public static RTSRace Deserialize(BinaryReader s, GameState state) {
+            RTSRace race = new RTSRace();
+            race.FriendlyName = s.ReadString();
+            int c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                int ui = s.ReadInt32();
+                race.Units[ui] = RTSUnitData.Deserialize(s, state, ui);
+            }
+            race.UpdateActiveUnits();
+            c = s.ReadInt32();
+            for(int i = 0; i < c; i++) {
+                int bi = s.ReadInt32();
+                race.Buildings[bi] = RTSBuildingData.Deserialize(s, state, bi);
+            }
+            race.UpdateActiveBuildings();
+            race.SCAction = state.Scripts[s.ReadString()];
+            race.SCMovement = state.Scripts[s.ReadString()];
+            race.SCTargeting = state.Scripts[s.ReadString()];
+            return race;
         }
 
         public const int MAX_UNIT_TYPES = 24;
         public const int MAX_BUILDING_TYPES = 36;
 
         public string FriendlyName;
+        public FileInfo InfoFile;
 
         public readonly RTSUnitData[] Units;
         public IndexedUnitType[] ActiveUnits;
@@ -52,9 +75,9 @@ namespace RTSEngine.Data.Team {
         public readonly RTSBuildingData[] Buildings;
         public IndexedBuildingType[] ActiveBuildings;
 
-        public ReflectedSquadController SCAction;
-        public ReflectedSquadController SCMovement;
-        public ReflectedSquadController SCTargetting;
+        public ReflectedScript SCAction;
+        public ReflectedScript SCMovement;
+        public ReflectedScript SCTargeting;
 
         public RTSRace() {
             Units = new RTSUnitData[MAX_UNIT_TYPES];

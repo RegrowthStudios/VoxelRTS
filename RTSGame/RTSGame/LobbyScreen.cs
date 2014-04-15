@@ -13,6 +13,8 @@ using RTSEngine.Data.Team;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Parsers;
+using System.Text.RegularExpressions;
+using RTSEngine.Interfaces;
 
 namespace RTS {
     public class TeamInitWidget : IDisposable {
@@ -21,23 +23,12 @@ namespace RTS {
                 BackRect.Parent = value;
             }
         }
-        public string Race {
-            get { return TextRace.Text; }
-            set { TextRace.Text = value; }
-        }
-        public string PlayerType {
-            get { return TextPlayerType.Text; }
-            set { TextPlayerType.Text = value; }
-        }
-        public string Scheme {
-            get { return TextScheme.Text; }
-            set { TextScheme.Text = value; }
-        }
 
         public RectWidget BackRect {
             get;
             private set;
         }
+
         public TextWidget TextIndex {
             get;
             private set;
@@ -46,6 +37,7 @@ namespace RTS {
             get;
             private set;
         }
+
         public RectButton ButtonPlayerType {
             get;
             private set;
@@ -54,6 +46,11 @@ namespace RTS {
             get;
             private set;
         }
+        public string PlayerType {
+            get { return TextPlayerType.Text; }
+            set { TextPlayerType.Text = value; }
+        }
+
         public RectButton ButtonRace {
             get;
             private set;
@@ -62,6 +59,11 @@ namespace RTS {
             get;
             private set;
         }
+        public string Race {
+            get { return TextRace.Text; }
+            set { TextRace.Text = value; }
+        }
+
         public RectButton ButtonScheme {
             get;
             private set;
@@ -69,6 +71,10 @@ namespace RTS {
         public TextWidget TextScheme {
             get;
             private set;
+        }
+        public string Scheme {
+            get { return TextScheme.Text; }
+            set { TextScheme.Text = value; }
         }
 
         private string[] lRaces, lSchemes, lTypes;
@@ -204,7 +210,7 @@ namespace RTS {
             TextScheme.Dispose();
         }
 
-        public void Set(string[] pTypes, Dictionary<string, RTSRaceData> races, Dictionary<string, RTSColorScheme> schemes) {
+        public void Set(string[] pTypes, Dictionary<string, FileInfo> races, Dictionary<string, RTSColorScheme> schemes) {
             lRaces = races.Keys.ToArray();
             lSchemes = schemes.Keys.ToArray();
             lTypes = pTypes;
@@ -219,6 +225,8 @@ namespace RTS {
     }
 
     public class LobbyScreen : GameScreen<App> {
+        private static readonly Regex rgxLoadGame = RegexHelper.GenerateFile("load");
+
         public override int Next {
             get { return game.LoadScreen.Index; }
             protected set { }
@@ -229,7 +237,7 @@ namespace RTS {
         }
 
         // Init Info Helper
-        public Dictionary<string, RTSRaceData> Races {
+        public Dictionary<string, FileInfo> Races {
             get;
             private set;
         }
@@ -251,7 +259,7 @@ namespace RTS {
 
         public override void OnEntry(GameTime gameTime) {
             // Load All The Races And Schemes
-            Races = new Dictionary<string, RTSRaceData>();
+            Races = new Dictionary<string, FileInfo>();
             schemes = new Dictionary<string, RTSColorScheme>();
             GameEngine.SearchAllInitInfo(new DirectoryInfo("Packs"), Races, schemes);
             if(schemes.Count < 1)
@@ -263,14 +271,16 @@ namespace RTS {
             }
 
             // Set Init Data To Be Nothing
+            game.LoadScreen.LoadFile = null;
             eld = new EngineLoadData();
             eld.Teams = new TeamInitOption[GameState.MAX_PLAYERS];
             for(int i = 0; i < eld.Teams.Length; i++) {
-                eld.Teams[i].InputType = InputType.None;
+                eld.Teams[i].InputType = RTSInputType.None;
                 eld.Teams[i].Race = null;
                 eld.Teams[i].PlayerName = null;
                 eld.Teams[i].Colors = schemes[defScheme];
             }
+            game.LoadScreen.LoadData = eld;
 
             wr = new WidgetRenderer(G, XNASpriteFont.Compile(G, "Times New Roman", 36, out tFont));
             widgets = new TeamInitWidget[eld.Teams.Length];
@@ -286,16 +296,23 @@ namespace RTS {
                 widgets[i].TextUser.Text = "Unknown";
                 widgets[i].Set(pt, Races, schemes);
             }
+            widgets[0].TextUser.Text = UserConfig.UserName;
             widgets[0].PlayerType = "Player";
             widgets[0].Race = "Mechanica";
             widgets[1].PlayerType = "Computer";
             widgets[1].Race = "Mechanica";
 
-            KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;
+            DevConsole.OnNewCommand += DevConsole_OnNewCommand;
+            KeyboardEventDispatcher.OnKeyPressed += OnKeyPressed;
         }
         public override void OnExit(GameTime gameTime) {
-            KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
-            BuildELDFromWidgets();
+            DevConsole.OnNewCommand -= DevConsole_OnNewCommand;
+            KeyboardEventDispatcher.OnKeyPressed -= OnKeyPressed;
+            DevConsole.Deactivate();
+            if(game.LoadScreen.LoadFile == null) {
+                BuildELDFromWidgets();
+                game.LoadScreen.LoadData = eld;
+            }
 
             foreach(var w in widgets) w.Dispose();
             wr.Dispose();
@@ -318,9 +335,8 @@ namespace RTS {
 
             wr.Draw(SB);
 
-            // Draw The Mouse
-            game.mRenderer.BeginPass(G);
-            game.mRenderer.Draw(G);
+            game.DrawDevConsole();
+            game.DrawMouse();
         }
 
         private void BuildELDFromWidgets() {
@@ -330,27 +346,44 @@ namespace RTS {
                 eld.Teams[i].PlayerName = widgets[i].TextUser.Text;
                 switch(widgets[i].TextPlayerType.Text.ToLower()) {
                     case "player":
-                        eld.Teams[i].InputType = InputType.Player;
+                        eld.Teams[i].InputType = RTSInputType.Player;
                         break;
                     case "computer":
-                        eld.Teams[i].InputType = InputType.AI;
+                        eld.Teams[i].InputType = RTSInputType.AI;
                         break;
                     case "environment":
-                        eld.Teams[i].InputType = InputType.Environment;
+                        eld.Teams[i].InputType = RTSInputType.Environment;
                         break;
                     default:
-                        eld.Teams[i].InputType = InputType.None;
+                        eld.Teams[i].InputType = RTSInputType.None;
                         break;
                 }
             }
             eld.MapFile = new FileInfo(@"Packs\Default\maps\0\test.map");
         }
 
-        void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
+        void OnKeyPressed(object sender, KeyEventArgs args) {
             switch(args.KeyCode) {
                 case Keys.Enter:
-                    State = ScreenState.ChangeNext;
+                    if(!DevConsole.IsActivated)
+                        State = ScreenState.ChangeNext;
                     break;
+                case DevConsole.ACTIVATION_KEY:
+                    if(DevConsole.IsActivated)
+                        DevConsole.Deactivate();
+                    else
+                        DevConsole.Activate();
+                    break;
+            }
+        }
+        void DevConsole_OnNewCommand(string obj) {
+            Match m;
+            if((m = rgxLoadGame.Match(obj)).Success) {
+                FileInfo fiLoadGame = RegexHelper.ExtractFile(m);
+                if(fiLoadGame.Exists) {
+                    game.LoadScreen.LoadFile = fiLoadGame;
+                    State = ScreenState.ChangeNext;
+                }
             }
         }
     }

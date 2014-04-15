@@ -9,6 +9,7 @@ using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
 using RTSEngine.Algorithms;
 using RTSEngine.Data.Parsers;
+using System.IO;
 
 namespace RTSEngine.Controllers {
     #region Time Budgeting
@@ -111,10 +112,28 @@ namespace RTSEngine.Controllers {
             }
             pathfinder = new Pathfinder(s.CGrid);
 
-            // Start The AI
+            // Start The Input Controllers
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                AIInputController aic = s.activeTeams[ti].Team.Input as AIInputController;
-                if(aic != null) aic.Start();
+                s.activeTeams[ti].Team.Input.Begin();
+            }
+
+            // Start The Game Type Controller
+            s.scrGTC = s.Scripts["RTS.Default.Scenarios.Tutorial"];
+            s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
+            s.gtC.Load(s, null);
+            s.gtC.Start(s);
+
+            // Add All Tasks
+            foreach(var at in s.activeTeams) {
+                foreach(var unit in at.Team.Units) {
+                    AddTask(s, unit);
+                }
+                foreach(var building in at.Team.Buildings) {
+                    AddTask(s, building);
+                }
+                foreach(var squad in at.Team.Squads) {
+                    AddTask(s, squad);
+                }
             }
         }
 
@@ -142,10 +161,10 @@ namespace RTSEngine.Controllers {
         // Input Stage
         private void ResolveInput(GameState s, float dt) {
             events = new LinkedList<GameInputEvent>();
-            foreach(var active in s.activeTeams) {
-                if(active.Team.Input != null) {
-                    active.Team.Input.AppendEvents(events);
-                }
+            for(int i = 0; i < s.activeTeams.Length; i++) {
+                var team = s.activeTeams[i].Team;
+                if(team.Input != null)
+                    team.Input.AppendEvents(events);
             }
         }
         private void ApplyInput(GameState s, float dt) {
@@ -182,8 +201,6 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
             RTSTeam team = s.teams[e.Team];
-            List<Vector2> wp = new List<Vector2>();
-            wp.Add(e.Waypoint);
             List<IEntity> selected = team.Input.selected;
             RTSSquad squad = null;
             if(selected != null && selected.Count > 0) {
@@ -191,7 +208,6 @@ namespace RTSEngine.Controllers {
                     RTSUnit u = unit as RTSUnit;
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
-                        u.MovementController.Waypoints = wp;
                         u.Target = null;
                         squad.Add(u);
                     }
@@ -199,16 +215,7 @@ namespace RTSEngine.Controllers {
             }
             if(squad != null) {
                 AddTask(s, squad);
-                // Setup Pathfinding Query
-                foreach(var squadQuery in squadQueries) {
-                    if(squadQuery.squad == squad) {
-                        squadQuery.query.IsOld = true;
-                    }
-                }
-                squad.RecalculateGridPosition();
-                PathQuery query = new PathQuery(squad.GridPosition, e.Waypoint);
-                squadQueries.Add(new SquadQuery(squad, query));
-                pathfinder.Add(query);
+                SendPathQuery(s, squad, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
@@ -225,8 +232,9 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                squad.TargettingController.Target = e.Target as RTSUnit;
+                squad.TargetingController.Target = e.Target;
                 AddTask(s, squad);
+                SendPathQuery(s, squad, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
@@ -250,23 +258,28 @@ namespace RTSEngine.Controllers {
 
             // Check If We Can Add A Building There
             Vector2 wp = new Vector2(e.GridPosition.X + 0.5f, e.GridPosition.Y + 0.5f) * s.CGrid.cellSize;
-            if(!s.CGrid.CanAddBuilding(wp, team.race.Buildings[e.Type].GridSize)) return;
+            if(!s.CGrid.CanAddBuilding(wp, team.Race.Buildings[e.Type].GridSize)) return;
 
             RTSBuilding building = team.AddBuilding(e.Type, wp);
 
             // Check If A Building Was Possible
             if(building == null) return;
 
-            // Add Building Decision Task
-            AddTask(s, building);
-
             // Set Default Height
             building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
             building.CollisionGeometry.Height = building.Height;
+            s.CGrid.Add(building);
 
-            s.IGrid.AddImpactGenerator(building);
+            // Add Building Decision Task
+            AddTask(s, building, e.Team, e.Type);
         }
         private void AddTask(GameState s, RTSUnit unit) {
+            // Init The Unit
+            if(unit.ActionController != null) unit.ActionController.Init(s, this);
+            if(unit.CombatController != null) unit.CombatController.Init(s, this);
+            if(unit.MovementController != null) unit.MovementController.Init(s, this);
+            if(unit.AnimationController != null) unit.AnimationController.Init(s, this);
+
             var btu = new BTaskUnitDecision(s, unit);
             unit.OnDestruction += (o) => {
                 tbEntityDecisions.RemoveTask(btu);
@@ -274,6 +287,11 @@ namespace RTSEngine.Controllers {
             tbEntityDecisions.AddTask(btu);
         }
         private void AddTask(GameState s, RTSSquad squad) {
+            // Init The Squad
+            if(squad.ActionController != null) squad.ActionController.Init(s, this);
+            if(squad.MovementController != null) squad.MovementController.Init(s, this);
+            if(squad.TargetingController != null) squad.TargetingController.Init(s, this);
+
             var bts = new BTaskSquadDecision(s, squad);
             squad.OnDeath += (o) => {
                 tbSquadDecisions.RemoveTask(bts);
@@ -281,11 +299,49 @@ namespace RTSEngine.Controllers {
             tbSquadDecisions.AddTask(bts);
         }
         private void AddTask(GameState s, RTSBuilding building) {
+            // Init The Building
+            if(building.ActionController != null) building.ActionController.Init(s, this);
+
             var btu = new BTaskBuildingDecision(s, building);
             building.OnDestruction += (o) => {
                 tbEntityDecisions.RemoveTask(btu);
             };
             tbEntityDecisions.AddTask(btu);
+        }
+        private void AddTask(GameState s, RTSBuilding building, int fTeam, int type) {
+            AddTask(s, building);
+            ViewedBuilding vb = new ViewedBuilding();
+            vb.Team = fTeam;
+            vb.Type = type;
+            vb.ViewDirection = building.ViewDirection;
+            vb.WorldPosition = building.WorldPosition;
+            vb.CellPoint = HashHelper.Hash(building.GridPosition, s.CGrid.numCells, s.CGrid.size);
+            for(int i = 0; i < s.teams.Length; i++) {
+                if(i == fTeam || s.teams[i] == null) continue;
+                var ebu = new EnemyBuildingUpdater(s, i, vb, building);
+                s.tbMemBuildings.AddTask(ebu);
+            }
+        }
+
+        // Setup And Send Pathfinding Query
+        private void SendPathQuery(GameState s, RTSSquad squad, GameInputEvent e) {
+            foreach(var squadQuery in squadQueries) {
+                if(squadQuery.squad.Equals(squad)) {
+                    squadQuery.query.IsOld = true;
+                }
+            }
+            squad.RecalculateGridPosition();
+            PathQuery query = null;
+            var swe = e as SetWayPointEvent;
+            var ste = e as SetTargetEvent;
+            if(swe != null)
+                query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
+            else if(ste != null && ste.Target != null)
+                query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
+            else
+                return;
+            squadQueries.Add(new SquadQuery(squad, query));
+            pathfinder.Add(query);
         }
 
         // Apply Results Of Any Finished Pathfinding
@@ -296,6 +352,10 @@ namespace RTSEngine.Controllers {
                 PathQuery query = squadQuery.query;
                 if(!query.IsOld && query.IsComplete) {
                     squad.MovementController.Waypoints = query.waypoints;
+                    // Tell All The Units In The Squad To Head To The First Waypoint
+                    foreach(var unit in squad.Units) {
+                        squad.MovementController.CurrentWaypointIndices[unit.UUID] = query.waypoints.Count - 1;
+                    }
                 }
                 else if(!query.IsOld) {
                     newQueries.Add(squadQuery);
@@ -319,8 +379,17 @@ namespace RTSEngine.Controllers {
                     case DevCommandType.StopMotion:
                         ApplyLogic(s, dt, comm as DevCommandStopMotion);
                         break;
-                    case DevCommandType.Kill:
-                        ApplyLogic(s, dt, comm as DevCommandKill);
+                    case DevCommandType.KillUnits:
+                        ApplyLogic(s, dt, comm as DevCommandKillUnits);
+                        break;
+                    case DevCommandType.KillBuildings:
+                        ApplyLogic(s, dt, comm as DevCommandKillBuildings);
+                        break;
+                    case DevCommandType.FOW:
+                        ApplyLogic(s, dt, comm as DevCommandFOW);
+                        break;
+                    case DevCommandType.Save:
+                        ApplyLogic(s, dt, comm as DevCommandSave);
                         break;
                 }
             }
@@ -349,6 +418,11 @@ namespace RTSEngine.Controllers {
 
             // Calculate FOW
             tbFOWCalculations.DoTasks(dt);
+
+            // Calculate Memorizations
+            if(s.CurrentFrame % GameState.BUILDING_MEMORIZATION_LATENCY == 0)
+                s.tbMemBuildings.ResortBins();
+            s.tbMemBuildings.DoTasks(dt);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandSpawn c) {
             // Multiple Spawn Events
@@ -357,23 +431,41 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                foreach(var unit in s.activeTeams[ti].Team.Units) {
-                    if(unit.MovementController != null)
-                        unit.MovementController.Waypoints = null;
+                foreach(var squad in s.activeTeams[ti].Team.Squads) {
+                    if(squad.MovementController != null) {
+                        foreach(var unit in squad.Units) {
+                            squad.MovementController.CurrentWaypointIndices[unit.UUID] = -1;
+                        }
+                    }
                 }
             }
         }
-        private void ApplyLogic(GameState s, float dt, DevCommandKill c) {
+        private void ApplyLogic(GameState s, float dt, DevCommandKillUnits c) {
             RTSTeam team;
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
                 foreach(var unit in team.Units) {
                     unit.Damage(9001); // OVER 9000
                 }
+            }
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandKillBuildings c) {
+            RTSTeam team;
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                team = s.activeTeams[ti].Team;
                 foreach(var building in team.Buildings) {
                     building.Damage(9001); // OVER 9000
                 }
             }
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandFOW c) {
+            foreach(var task in tbFOWCalculations.Tasks) {
+                var t = task as FOWTask;
+                t.SetAllFOW(c.fow, s.CGrid);
+            }
+        }
+        private void ApplyLogic(GameState s, float dt, DevCommandSave c) {
+            GameEngine.Save(s, c.file.FullName);
         }
 
         // Physics Stage
@@ -420,18 +512,13 @@ namespace RTSEngine.Controllers {
 
         // Cleanup Stage
         private void Cleanup(GameState s, float dt) {
-            RTSTeam team;
-
             // Remove All Dead Entities
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                team = s.activeTeams[ti].Team;
+                RTSTeam team = s.activeTeams[ti].Team;
                 team.RemoveAll(IsUnitDead);
                 team.RemoveAll(IsBuildingDead);
                 team.RemoveAll(IsSquadEmpty);
             }
-
-            // Add Newly Created Instances
-            AddInstantiatedData(s);
         }
         public static bool IsEntityDead(IEntity e) {
             return !e.IsAlive;
@@ -445,9 +532,6 @@ namespace RTSEngine.Controllers {
         private static bool IsSquadEmpty(RTSSquad s) {
             return s.IsDead;
         }
-        public void AddInstantiatedData(GameState s) {
-
-        }
 
         // Dev Callback
         public void OnDevCommand(string s) {
@@ -460,7 +544,19 @@ namespace RTSEngine.Controllers {
                 commands.Enqueue(c);
                 return;
             }
-            else if(DevCommandKill.TryParse(s, out c)) {
+            else if(DevCommandKillUnits.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandKillBuildings.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandFOW.TryParse(s, out c)) {
+                commands.Enqueue(c);
+                return;
+            }
+            else if(DevCommandSave.TryParse(s, out c)) {
                 commands.Enqueue(c);
                 return;
             }

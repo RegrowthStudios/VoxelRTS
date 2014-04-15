@@ -10,7 +10,6 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 
 namespace RTSEngine.Graphics {
-    // TODO: Animations Applied By A Controller From A Check On A Frame (Specified In File)
     public class RTSUnitModel {
         public const ParsingFlags MODEL_READ_FLAGS = ParsingFlags.ConversionOpenGL;
 
@@ -53,7 +52,6 @@ namespace RTSEngine.Graphics {
         public RTSUnitModel(RTSRenderer renderer, Stream sModel, Texture2D tAnim) {
             // Create With The Animation Texture
             AnimationTexture = tAnim;
-            Vector2 texelSize = new Vector2(1f / (AnimationTexture.Width), 1f / (AnimationTexture.Height));
 
             // Parse The Model File
             VertexPositionNormalTexture[] pVerts;
@@ -65,7 +63,7 @@ namespace RTSEngine.Graphics {
             // Reformat Vertices
             verts = new VertexPositionTexture[pVerts.Length];
             for(int i = 0; i < verts.Length; i++) {
-                verts[i].Position = new Vector3((i + 0.5f) / AnimationTexture.Width, 0, 0);
+                verts[i].Position = new Vector3((float)((i + 0.1) / AnimationTexture.Width), 0, 0);
                 verts[i].TextureCoordinate = pVerts[i].TextureCoordinate;
             }
 
@@ -73,17 +71,22 @@ namespace RTSEngine.Graphics {
             ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
         }
 
-        public void Hook(RTSRenderer renderer, GameState s, int team, int unit) {
+        public void Hook(RTSRenderer renderer, GameState s, int ti, int unit) {
             // Filter For Unit Types
-            Data = s.teams[team].race.Units[unit];
+            RTSTeam team = s.teams[ti];
+            Data = team.Race.Units[unit];
 
             // Always Add A Unit To List When Spawned
-            s.teams[team].OnUnitSpawn += OnUnitSpawn;
+            team.OnUnitSpawn += OnUnitSpawn;
 
             // Create Instance Buffer
             visible = new List<RTSUnit>();
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
             instances = new List<RTSUnit>(Data.MaxCount);
+            for(int i = 0; i < team.Units.Count; i++) {
+                OnUnitSpawn(team.Units[i]);
+            }
+
             for(int i = 0; i < instVerts.Length; i++)
                 instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
             dvbInstances = renderer.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
@@ -126,8 +129,8 @@ namespace RTSEngine.Graphics {
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbModel.VertexCount, 0, ibModel.IndexCount / 3, VisibleInstanceCount);
         }
 
-        private void OnUnitSpawn(RTSUnit u) {
-            if(u.UnitData == Data)
+        public void OnUnitSpawn(RTSUnit u) {
+            if(u.Data == Data)
                 instances.Add(u);
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,7 +10,10 @@ namespace RTSEngine.Data {
     public enum DevCommandType {
         Spawn,
         StopMotion,
-        Kill
+        KillUnits,
+        KillBuildings,
+        FOW,
+        Save
     }
     public class DevCommand {
         public DevCommandType Type {
@@ -77,17 +81,83 @@ namespace RTSEngine.Data {
         }
     }
     // Kill Command
-    public class DevCommandKill : DevCommand {
+    public class DevCommandKillUnits : DevCommand {
         public static readonly Regex REGEX = new Regex(@"avada\s+kedavra");
 
-        public DevCommandKill()
-            : base(DevCommandType.Kill) {
+        public DevCommandKillUnits()
+            : base(DevCommandType.KillUnits) {
         }
 
         public static bool TryParse(string c, out DevCommand command) {
             Match m = REGEX.Match(c);
             if(m.Success) {
-                command = new DevCommandKill();
+                command = new DevCommandKillUnits();
+                return true;
+            }
+            command = null;
+            return false;
+        }
+    }
+    // Kill Command
+    public class DevCommandKillBuildings : DevCommand {
+        public static readonly Regex REGEX = new Regex(@"i\s+am\s+god");
+
+        public DevCommandKillBuildings()
+            : base(DevCommandType.KillBuildings) {
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m = REGEX.Match(c);
+            if(m.Success) {
+                command = new DevCommandKillBuildings();
+                return true;
+            }
+            command = null;
+            return false;
+        }
+    }
+    // FOW Command
+    public class DevCommandFOW : DevCommand {
+        public static readonly Regex REGEX1 = new Regex(@"franz\s+ferdinand");
+        public static readonly Regex REGEX2 = new Regex(@"marco\s+polo");
+
+        public FogOfWar fow;
+
+        public DevCommandFOW(FogOfWar f)
+            : base(DevCommandType.FOW) {
+            fow = f;
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m;
+            if((m = REGEX1.Match(c)).Success) {
+                command = new DevCommandFOW(FogOfWar.Active);
+                return true;
+            }
+            if((m = REGEX2.Match(c)).Success) {
+                command = new DevCommandFOW(FogOfWar.Nothing);
+                return true;
+            }
+            command = null;
+            return false;
+        }
+    }
+    // Save Command
+    public class DevCommandSave : DevCommand {
+        public static readonly Regex REGEX = RegexHelper.GenerateFile("save");
+
+        public readonly FileInfo file;
+
+        public DevCommandSave(FileInfo f)
+            : base(DevCommandType.Save) {
+            file = f;
+        }
+
+        public static bool TryParse(string c, out DevCommand command) {
+            Match m = REGEX.Match(c);
+            if(m.Success) {
+                string cwd = Directory.GetCurrentDirectory();
+                command = new DevCommandSave(RegexHelper.ExtractFile(m, cwd));
                 return true;
             }
             command = null;

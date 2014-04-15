@@ -8,13 +8,97 @@ using RTSEngine.Interfaces;
 
 namespace RTSEngine.Data.Team {
     public class RTSUnit : ICombatEntity {
-        public static void Serialize(BinaryWriter s, RTSUnit unit) {
-            // TODO: Implement
+        public static void Serialize(BinaryWriter s, RTSUnit e) {
+            s.Write(e.Data.Index);
+            s.Write(e.UUID);
+            s.Write(e.State);
+            s.Write(e.ViewDirection);
+            s.Write(e.GridPosition);
+            s.Write(e.Height);
+            if(e.Target != null) {
+                s.Write(true);
+                s.Write(e.Target.UUID);
+            }
+            else {
+                s.Write(false);
+            }
+            s.Write(e.Health);
+            s.Write(e.MovementMultiplier);
+            if(e.ActionController != null) {
+                s.Write(true);
+                e.ActionController.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.CombatController != null) {
+                s.Write(true);
+                e.CombatController.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.MovementController != null) {
+                s.Write(true);
+                e.MovementController.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
+            if(e.AnimationController != null) {
+                s.Write(true);
+                e.AnimationController.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
+        }
+        public static RTSUnit Deserialize(BinaryReader s, RTSTeam team, out int? target) {
+            int type = s.ReadInt32();
+            RTSUnit e = team.AddUnit(type, Vector2.Zero);
+            if(e == null) throw new Exception("Could Not Create A Unit That Was Previously Created");
+            e.UUID = s.ReadInt32();
+            e.State = s.ReadInt32();
+            e.ViewDirection = s.ReadVector2();
+            e.GridPosition = s.ReadVector2();
+            e.Height = s.ReadSingle();
+            if(s.ReadBoolean()) {
+                target = s.ReadInt32();
+            }
+            else {
+                target = null;
+            }
+            e.Health = s.ReadInt32();
+            e.MovementMultiplier = s.ReadSingle();
+            if(s.ReadBoolean()) {
+                if(e.ActionController != null) e.ActionController.Deserialize(s);
+            }
+            else {
+                e.ActionController = null;
+            }
+            if(s.ReadBoolean()) {
+                if(e.CombatController != null) e.CombatController.Deserialize(s);
+            }
+            else {
+                e.CombatController = null;
+            }
+            if(s.ReadBoolean()) {
+                if(e.MovementController != null) e.MovementController.Deserialize(s);
+            }
+            else {
+                e.MovementController = null;
+            }
+            if(s.ReadBoolean()) {
+                if(e.AnimationController != null) e.AnimationController.Deserialize(s);
+            }
+            else {
+                e.AnimationController = null;
+            }
+            return e;
         }
 
-
         // Common Data
-        public RTSUnitData UnitData {
+        public RTSUnitData Data {
             get;
             private set;
         }
@@ -35,10 +119,31 @@ namespace RTSEngine.Data.Team {
             set;
         }
 
-        // State Information
+        // The Unit's Behavior Code
+        private int BehaviorCode;
+
+        // The Unit's State
         public int State {
-            get;
-            set;
+            get { return BehaviorFSM.GetByte(BehaviorCode, 0); }
+            set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 0); }
+        }
+
+        // The Unit's Targeting Orders
+        public int TargetingOrders {
+            get { return BehaviorFSM.GetByte(BehaviorCode, 1); }
+            set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 1); }
+        }
+
+        // The Unit's Combat Orders
+        public int CombatOrders {
+            get { return BehaviorFSM.GetByte(BehaviorCode, 2); }
+            set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 2); }
+        }
+
+        // The Unit's Movement Orders
+        public int MovementOrders {
+            get { return BehaviorFSM.GetByte(BehaviorCode, 3); }
+            set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 3); }
         }
 
         // View Direction
@@ -109,15 +214,15 @@ namespace RTSEngine.Data.Team {
         public BoundingBox BBox {
             get {
                 return new BoundingBox(
-                    UnitData.BBox.Min + WorldPosition,
-                    UnitData.BBox.Max + WorldPosition
+                    Data.BBox.Min + WorldPosition,
+                    Data.BBox.Max + WorldPosition
                     );
             }
         }
 
         // Speed Of Movement For The Entity
         public float MovementSpeed {
-            get { return UnitData.MovementSpeed * MovementMultiplier; }
+            get { return Data.MovementSpeed * MovementMultiplier; }
         }
         public float MovementMultiplier {
             get;
@@ -180,21 +285,21 @@ namespace RTSEngine.Data.Team {
             gridPos = position;
 
             // Set From Common Data
-            UnitData = data;
-            Health = UnitData.Health;
+            Data = data;
+            Health = Data.Health;
 
             // Default Information
             height = 0;
             ViewDirection = Vector2.UnitX;
-            CollisionGeometry = UnitData.ICollidableShape.Clone() as ICollidable;
+            CollisionGeometry = Data.ICollidableShape.Clone() as ICollidable;
             MovementMultiplier = 1f;
         }
 
         // Computes The Damage To Deal With Access To A Random Number And A Target
         public int ComputeDamage(double rand) {
             RTSUnit t = Target as RTSUnit;
-            int dmg = UnitData.BaseCombatData.ComputeDamageDealt(rand);
-            if(t != null) dmg = t.UnitData.BaseCombatData.ComputeDamageReceived(dmg);
+            int dmg = Data.BaseCombatData.ComputeDamageDealt(rand);
+            if(t != null) dmg = t.Data.BaseCombatData.ComputeDamageReceived(dmg);
             return dmg;
         }
 
@@ -231,6 +336,14 @@ namespace RTSEngine.Data.Team {
             if(change.X != 0 || change.Y != 0) {
                 gridPos += change;
                 ViewDirection = Vector2.Normalize(change);
+            }
+        }
+
+        public void TurnToFace(Vector2 pos) {
+            Vector2 dir = pos - GridPosition;
+            float dl = dir.Length();
+            if(dl > 0.001) {
+                ViewDirection = dir / dl;
             }
         }
     }

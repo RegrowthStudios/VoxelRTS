@@ -9,7 +9,60 @@ using RTSEngine.Interfaces;
 namespace RTSEngine.Data.Team {
     public class RTSSquad {
         public static void Serialize(BinaryWriter s, RTSSquad squad) {
-            // TODO: Implement
+            s.Write(squad.units.Count);
+            foreach(var unit in squad.units) {
+                s.Write(unit.UUID);
+            }
+            s.Write(squad.GridPosition);
+            if(squad.ActionController != null) {
+                s.Write(true);
+                squad.ActionController.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
+            if(squad.MovementController != null) {
+                s.Write(true);
+                squad.MovementController.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
+            if(squad.TargetingController != null) {
+                s.Write(true);
+                squad.TargetingController.Serialize(s);
+            }
+            else {
+                s.Write(false);
+            }
+        }
+        public static RTSSquad Deserialize(BinaryReader s, RTSTeam team, out List<int> units) {
+            RTSSquad squad = team.AddSquad();
+            int c = s.ReadInt32();
+            units = new List<int>();
+            for(int i = 0; i < c; i++) {
+                units.Add(s.ReadInt32());
+            }
+            squad.gridPos = s.ReadVector2();
+            if(s.ReadBoolean()) {
+                if(squad.ActionController != null) squad.ActionController.Deserialize(s);
+            }
+            else {
+                squad.ActionController = null;
+            }
+            if(s.ReadBoolean()) {
+                if(squad.MovementController != null) squad.MovementController.Deserialize(s);
+            }
+            else {
+                squad.MovementController = null;
+            }
+            if(s.ReadBoolean()) {
+                if(squad.TargetingController != null) squad.TargetingController.Deserialize(s);
+            }
+            else {
+                squad.TargetingController = null;
+            }
+            return squad;
         }
 
         // This Squad's Team
@@ -63,8 +116,8 @@ namespace RTSEngine.Data.Team {
         }
 
         // The Targetting Controller For This Squad
-        private ACSquadTargettingController tController;
-        public ACSquadTargettingController TargettingController {
+        private ACSquadTargetingController tController;
+        public ACSquadTargetingController TargetingController {
             get { return tController; }
             set {
                 tController = value;
@@ -124,7 +177,7 @@ namespace RTSEngine.Data.Team {
             units = nUnits;
 
             // Check Death Condition
-            if(IsDead && OnDeath != null) 
+            if(IsDead && OnDeath != null)
                 OnDeath(this);
         }
 

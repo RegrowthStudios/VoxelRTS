@@ -41,6 +41,7 @@ namespace RTSEngine.Data {
         public const float ZOOM_OFFSET = 0.3f;
         public const float INITIAL_CAMERA_YAW = -0.7f;
         public const float INITIAL_CAMERA_PITCH = 0.8f;
+        public const float INITIAL_ZOOM_RATIO = 0.5f;
         public const float MIN_PITCH = 0.1f;
         public const float MAX_PITCH = 1.5f;
         public const float PITCH_RANGE = MAX_PITCH - MIN_PITCH;
@@ -102,7 +103,7 @@ namespace RTSEngine.Data {
             camOrigin = INITIAL_CAMERA_ORIGIN;
             Yaw = INITIAL_CAMERA_YAW;
             Pitch = INITIAL_CAMERA_PITCH;
-            ZoomRatio = 0.5f;
+            ZoomRatio = INITIAL_ZOOM_RATIO;
             lowSettings = INITIAL_LOW_SETTINGS;
             highSettings = INITIAL_HIGH_SETTINGS;
             ZoomSpeed = INITIAL_ZOOM_SPEED;
@@ -142,6 +143,15 @@ namespace RTSEngine.Data {
             camOrigin.X = MathHelper.Clamp(camOrigin.X, 0, map.Width);
             camOrigin.Z = MathHelper.Clamp(camOrigin.Z, 0, map.Depth);
             camOrigin.Y = map.HeightAt(camOrigin.X, camOrigin.Z);
+
+            bool reset;
+            camController.GetResetDefault(out reset);
+            if(reset) {
+                Yaw = INITIAL_CAMERA_YAW;
+                Pitch = INITIAL_CAMERA_PITCH;
+                ZoomRatio = INITIAL_ZOOM_RATIO;
+            }
+
             RecalculateView(map, MathHelper.Lerp(cms.MinDistance, cms.MaxDistance, ZoomRatio));
         }
         private void Scroll(int x, int y, CameraMotionSettings cms, float dt) {
@@ -177,7 +187,6 @@ namespace RTSEngine.Data {
         }
 
         public BoundingFrustum GetSelectionBox(Vector2 screenMin, Vector2 screenMax) {
-            // TODO: Verify.
             Vector2 ss = new Vector2(camController.WindowWidth, camController.WindowHeight);
             screenMin /= ss;
             screenMax /= ss;

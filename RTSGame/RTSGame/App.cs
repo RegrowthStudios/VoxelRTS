@@ -19,6 +19,7 @@ using RTSEngine.Data;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Data.Team;
 using RTSEngine.Graphics;
+using RTSEngine.Controllers;
 
 namespace RTS {
     public static class AppSettings {
@@ -65,16 +66,20 @@ namespace RTS {
             get;
             private set;
         }
-        public RTSNetScreen RTSNetScreen {
-            get;
-            private set;
-        }
+        //public RTSNetScreen RTSNetScreen {
+        //    get;
+        //    private set;
+        //}
         public ColorSchemeScreen ColorSchemeScreen {
             get;
             private set;
         }
+
+
         public MouseRenderer mRenderer;
         public Texture2D tMouseMain;
+        public DevConsoleView dcv;
+        public BasicEffect fx;
 
         public App()
             : base() {
@@ -94,12 +99,13 @@ namespace RTS {
             LobbyScreen = new RTS.LobbyScreen();
             LoadScreen = new RTS.LoadScreen();
             RTSScreen = new RTS.RTSScreen();
-            RTSNetScreen = new RTS.RTSNetScreen();
+            //RTSNetScreen = new RTS.RTSNetScreen();
             ColorSchemeScreen = new RTS.ColorSchemeScreen();
         }
 
         protected override void FullInitialize() {
             BlisterUI.Input.WMHookInput.Initialize(Window);
+            fx = new BasicEffect(GraphicsDevice);
         }
         protected override void FullLoad() {
             using(var s = System.IO.File.OpenRead(@"Content\UI\Mouse\Main.png")) {
@@ -108,6 +114,7 @@ namespace RTS {
             mRenderer = new MouseRenderer(GraphicsDevice, Window);
             mRenderer.Texture = tMouseMain;
             mRenderer.InnerRadius = 28f;
+            dcv = new DevConsoleView(GraphicsDevice);
         }
 
         protected override void BuildScreenList() {
@@ -121,7 +128,7 @@ namespace RTS {
                 LobbyScreen,
                 LoadScreen,
                 RTSScreen,
-                RTSNetScreen,
+                //RTSNetScreen,
                 ColorSchemeScreen
                 );
         }
@@ -136,7 +143,20 @@ namespace RTS {
         protected override void FullQuit(GameTime gameTime) {
             tMouseMain.Dispose();
             mRenderer.Dispose();
+            dcv.Dispose();
             base.FullQuit(gameTime);
+        }
+
+        public void DrawMouse() {
+            mRenderer.BeginPass(GraphicsDevice);
+            mRenderer.Draw(GraphicsDevice);
+        }
+        public void DrawDevConsole() {
+            if(DevConsole.IsActivated) {
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+                dcv.Draw(spriteBatch, Vector2.Zero);
+                spriteBatch.End();
+            }
         }
 
         #region Entry Point

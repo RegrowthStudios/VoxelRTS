@@ -11,7 +11,7 @@ namespace RTSEngine.Data.Parsers {
     // This Is How A Team Should Be Made
     public struct TeamInitOption {
         public string PlayerName;
-        public InputType InputType;
+        public int InputType;
         public string Race;
         public RTSColorScheme Colors;
     }

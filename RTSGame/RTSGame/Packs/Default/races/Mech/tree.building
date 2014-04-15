@@ -1,0 +1,24 @@
+﻿// Friendly Unit Name
+NAME            [Tree]
+
+// Unit Model
+MODEL           [..\..\models\Tree.obj]
+TEXMAIN         [..\..\textures\Tree.png]
+TEXCOLOR        [..\..\textures\NoKey.png]
+ICON            [..\..\icons\Tree.png]
+MAXCOUNT        [1000]
+
+// Unit Data
+HEALTH          [120]
+COST            [20]
+IMPACT          [10]
+BUILDTIME       [20]
+SIGHTRADIUS     [8]
+GRIDSIZE        [1, 1]
+
+// Collision Data
+BBOXMIN         [-1 , 0.0 , -1]
+BBOXMAX         [1 , 3.0 , 1]
+CRECT           [2 , 2 , 0 , 0]
+
+CTRLACTION      [RTS.Default.Building.Action]

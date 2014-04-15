@@ -10,7 +10,6 @@ namespace RTSEngine.Data {
     public class Heightmap {
         // Height Values
         private float[] heights;
-        private byte[] data; // TODO: remove
 
         // The BVH (Yay)
         public BVH BVH {
@@ -67,13 +66,11 @@ namespace RTSEngine.Data {
         }
 
         // Constructor With Heightmap Data Passed In
-        public Heightmap(float[] v, byte[] d, int w, int h) {
+        public Heightmap(float[] v, int w, int h) {
             HValueWidth = w;
             HValueDepth = h;
             heights = new float[HValueWidth * HValueDepth];
             v.CopyTo(heights, 0);
-            data = new byte[HValueWidth * HValueDepth];
-            d.CopyTo(data, 0);
             GridWidth = HValueWidth - 1;
             GridDepth = HValueDepth - 1;
             BVH = new BVH();

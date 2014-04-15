@@ -14,9 +14,9 @@ namespace RTSEngine.Net {
         public NetStreamMultiSender(string ip, int port) {
             client = new UdpClient();
             IPAddress multicastaddress = IPAddress.Parse(ip);
-            client.JoinMulticastGroup(multicastaddress);
+            client.JoinMulticastGroup(multicastaddress, 3);
             ipeRemote = new IPEndPoint(multicastaddress, port);
-            client.Connect(ipeRemote);
+            //client.Connect(ipeRemote);
         }
         public void Dispose() {
             client.Close();

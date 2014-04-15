@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -10,8 +11,7 @@ namespace RTSEngine.Data {
     public enum FogOfWar : uint {
         Nothing = 0x00,
         Passive = 0x01,
-        Active = 0x02,
-        All = 0x03
+        Active = 0x02
     }
 
     public static class FogOfWarHelper {
@@ -98,9 +98,9 @@ namespace RTSEngine.Data {
             b.OnDestruction += OnBuildingDestruction;
 
             // Add To All The Cells
-            Point p = HashHelper.Hash(b.CollisionGeometry.Center, numCells, size);
-            for(int y = 0; y < b.BuildingData.GridSize.Y; y++) {
-                for(int x = 0; x < b.BuildingData.GridSize.X; x++) {
+            Point p = HashHelper.Hash(b.GridStartPos, numCells, size);
+            for(int y = 0; y < b.Data.GridSize.Y; y++) {
+                for(int x = 0; x < b.Data.GridSize.X; x++) {
                     EStatic[p.X + x, p.Y + y] = b;
                 }
             }
@@ -162,12 +162,20 @@ namespace RTSEngine.Data {
         public FogOfWar GetFogOfWar(int x, int y, int p) {
             return FogOfWarHelper.GetFogOfWar(Fog[x, y], p);
         }
+        public FogOfWar GetFogOfWar(Vector2 pos, int p) {
+            Point c = HashHelper.Hash(pos, numCells, size);
+            return GetFogOfWar(c.X, c.Y, p);
+        }
 
         public void SetCollision(int x, int y, bool c) {
             Collision[x, y] = c;
         }
         public bool GetCollision(int x, int y) {
             return Collision[x, y] || EStatic[x, y] != null;
+        }
+        public bool GetCollision(Vector2 pos) {
+            Point c = HashHelper.Hash(pos, numCells, size);
+            return GetCollision(c.X, c.Y);
         }
 
         public void OnBuildingSpawn(RTSBuilding b) {
@@ -178,9 +186,9 @@ namespace RTSEngine.Data {
             RTSBuilding b = o as RTSBuilding;
 
             // Add To All The Cells
-            Point p = HashHelper.Hash(b.CollisionGeometry.Center, numCells, size);
-            for(int y = 0; y < b.BuildingData.GridSize.Y; y++) {
-                for(int x = 0; x < b.BuildingData.GridSize.X; x++) {
+            Point p = HashHelper.Hash(b.GridStartPos, numCells, size);
+            for(int y = 0; y < b.Data.GridSize.Y; y++) {
+                for(int x = 0; x < b.Data.GridSize.X; x++) {
                     EStatic[p.X + x, p.Y + y] = null;
                 }
             }
@@ -242,6 +250,42 @@ namespace RTSEngine.Data {
     }
 
     public struct LevelGrid {
+        public static void Serialize(BinaryWriter s, GameState state) {
+            LevelGrid g = state.LevelGrid;
+            for(int y = 0; y < g.L1.numCells.Y; y++) {
+                for(int x = 0; x < g.L1.numCells.X; x++) {
+                    s.Write(g.L1.Fog[x, y]);
+                }
+            }
+            for(int y = 0; y < g.L2.numCells.Y; y++) {
+                for(int x = 0; x < g.L2.numCells.X; x++) {
+                    s.Write(g.L2.ImpactGenerators[x, y].Count);
+                    for(int i = 0; i < g.L2.ImpactGenerators[x, y].Count; i++) {
+                        // TODO: Custom Serialization
+                    }
+                    s.Write(g.L2.CellImpact[x, y]);
+                }
+            }
+        }
+        public static void Deserialize(BinaryReader s, GameState state) {
+            LevelGrid g = state.LevelGrid;
+            for(int y = 0; y < g.L1.numCells.Y; y++) {
+                for(int x = 0; x < g.L1.numCells.X; x++) {
+                    g.L1.Fog[x, y] = s.ReadUInt32();
+                }
+            }
+            for(int y = 0; y < g.L2.numCells.Y; y++) {
+                for(int x = 0; x < g.L2.numCells.X; x++) {
+                    int c = s.ReadInt32();
+                    for(int i = 0; i < c; i++) {
+                        // TODO: Custom Deserialization
+                    }
+                    g.L2.CellImpact[x, y] = s.ReadInt32();
+                }
+            }
+        }
+
+        public string InfoFile;
         public Heightmap L0;
         public CollisionGrid L1;
         public ImpactGrid L2;

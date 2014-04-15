@@ -18,6 +18,7 @@ namespace RTSEngine.Controllers {
         public const Keys KEY_MOVE_RIGHT_ALT = Keys.Right;
         public const Keys KEY_MOVE_UP_ALT = Keys.Up;
         public const Keys KEY_MOVE_DOWN_ALT = Keys.Down;
+        public const Keys KEY_RESET_DEFAULT = Keys.OemQuotes;
         public const int SCROLL_PANE_WIDTH = 12;
 
         // How To Calculate The Window Input Locations
@@ -46,6 +47,18 @@ namespace RTSEngine.Controllers {
         public bool IsHooked {
             get;
             private set;
+        }
+        private bool isActive;
+        public bool IsActive {
+            get { return isActive; }
+            set {
+                isActive = value;
+                if(!IsActive) {
+                    mx = 0;
+                    my = 0;
+                    zoom = 0;
+                }
+            }
         }
 
         // Output Values
@@ -89,6 +102,7 @@ namespace RTSEngine.Controllers {
             }
         }
         private int zoom;
+        private bool resetDefault;
 
         // Input Context
         private bool useOrbit;
@@ -102,6 +116,7 @@ namespace RTSEngine.Controllers {
             useOrbit = false;
             moveKeys = new bool[8];
             Array.Clear(moveKeys, 0, moveKeys.Length);
+            IsActive = true;
         }
 
         public void Hook(GameWindow w) {
@@ -130,9 +145,16 @@ namespace RTSEngine.Controllers {
             zoom = 0;
             return;
         }
+        public void GetResetDefault(out bool b) {
+            b = resetDefault;
+            resetDefault = false;
+            return;
+        }
 
         // Event Hooks
         public void OnMouseMovement(Vector2 pos, Vector2 disp) {
+            if(!IsActive) return;
+
             if(pos.X < MinX) mx = -1;
             else if(pos.X > MaxX) mx = 1;
             else mx = 0;
@@ -142,6 +164,8 @@ namespace RTSEngine.Controllers {
             else my = 0;
         }
         public void OnMouseScroll(int v, int d) {
+            if(!IsActive) return;
+
             zoom = d > 0 ? -1 : 1;
         }
         public void OnKeyPress(object sender, KeyEventArgs args) {
@@ -155,6 +179,7 @@ namespace RTSEngine.Controllers {
                 case KEY_MOVE_UP_ALT: moveKeys[5] = true; return;
                 case KEY_MOVE_DOWN: moveKeys[6] = true; return;
                 case KEY_MOVE_DOWN_ALT: moveKeys[7] = true; return;
+                case KEY_RESET_DEFAULT: resetDefault = true; return;
             }
         }
         public void OnKeyRelease(object sender, KeyEventArgs args) {

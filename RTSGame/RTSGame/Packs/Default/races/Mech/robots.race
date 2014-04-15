@@ -2,9 +2,9 @@
 NAME            [Mechanica]
 
 // Default Squad Controllers
-CTRLACTION      [RTS.Mech.Squad.Action]
-CTRLMOVEMENT    [RTS.Mech.Squad.Movement]
-CTRLTARGET      [RTS.Mech.Squad.Target]
+CTRLACTION      [RTS.Default.Squad.Action]
+CTRLMOVEMENT    [RTS.Default.Squad.Movement]
+CTRLTARGET      [RTS.Default.Squad.Targeting]
 
 // List Of All Unit Types Belonging To Team
 UNIT            [soldier.unit]
@@ -12,4 +12,6 @@ UNIT            [heavy.unit]
 UNIT            [armor.unit]
 
 // List Of All Building Types Belonging To Team
+BUILDING        [house.building]
 BUILDING        [barracks.building]
+BUILDING        [tree.building]

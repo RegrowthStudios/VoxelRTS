@@ -22,6 +22,6 @@ namespace RTSEngine.Interfaces {
         float BoundingRadius { get; }
 
         // Collision Controller Won't Move The Geometry If It Is Static
-        bool IsStatic { get; }
+        bool IsStatic { get; set; }
     }
 }

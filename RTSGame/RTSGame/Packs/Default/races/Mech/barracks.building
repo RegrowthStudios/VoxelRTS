@@ -4,7 +4,8 @@ NAME            [Barracks]
 // Unit Model
 MODEL           [..\..\models\Barracks.obj]
 TEXMAIN         [..\..\textures\BarracksMain.png]
-TEXCOLOR        [..\..\textures\BarracksKey.png]
+TEXCOLOR        [..\..\textures\NoKey.png]
+ICON            [..\..\icons\Barracks.png]
 MAXCOUNT        [1000]
 
 // Unit Data
@@ -12,12 +13,12 @@ HEALTH          [120]
 COST            [20]
 IMPACT          [10]
 BUILDTIME       [20]
-SIGHTRADIUS     [14]
-GRIDSIZE        [1 , 1]
+SIGHTRADIUS     [54]
+GRIDSIZE        [2 , 2]
 
 // Collision Data
-BBOXMIN         [-1 , 0.0 , -1]
-BBOXMAX         [1 , 3.0 , 1]
-CRECT           [2 , 2 , 0 , 0]
+BBOXMIN         [-2 , 0.0 , -2]
+BBOXMAX         [2 , 3.0 , 2]
+CRECT           [4 , 4 , 0 , 0]
 
-CTRLACTION      [RTS.Mech.Building.Action]
+CTRLACTION      [RTS.Default.Building.Action]

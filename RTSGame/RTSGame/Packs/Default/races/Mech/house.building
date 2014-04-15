@@ -1,0 +1,24 @@
+﻿// Friendly Unit Name
+NAME            [House]
+
+// Unit Model
+MODEL           [..\..\models\House.obj]
+TEXMAIN         [..\..\textures\HouseMain.png]
+TEXCOLOR        [..\..\textures\HouseKey.png]
+ICON            [..\..\icons\House.png]
+MAXCOUNT        [1000]
+
+// Unit Data
+HEALTH          [120]
+COST            [20]
+IMPACT          [10]
+BUILDTIME       [20]
+SIGHTRADIUS     [24]
+GRIDSIZE        [1 , 1]
+
+// Collision Data
+BBOXMIN         [-1 , 0.0 , -1]
+BBOXMAX         [1 , 3.0 , 1]
+CRECT           [2 , 2 , 0 , 0]
+
+CTRLACTION      [RTS.Default.Building.Action]

@@ -23,12 +23,16 @@ namespace RTSEngine.Algorithms {
         // Where To Store The Data
         public readonly List<Vector2> waypoints;
 
-        public PathQuery(Vector2 s, Vector2 e) {
+        // Which Fog Of War Is To Be Read
+        public readonly int FOWIndex;
+
+        public PathQuery(Vector2 s, Vector2 e, int fowI) {
             Start = s;
             End = e;
             IsComplete = false;
             IsOld = false;
             waypoints = new List<Vector2>();
+            FOWIndex = fowI;
         }
     }
 
@@ -99,22 +103,41 @@ namespace RTSEngine.Algorithms {
             return p.X >= 0 && p.X < world.numCells.X && p.Y >= 0 && p.Y < world.numCells.Y;
         }
 
-        private IEnumerable<Point> NeighborhoodDiag(Point p) {
+        public static IEnumerable<Point> NeighborhoodDiag(Point p) {
             yield return new Point(p.X + 1, p.Y + 1);
             yield return new Point(p.X + 1, p.Y - 1);
             yield return new Point(p.X - 1, p.Y + 1);
             yield return new Point(p.X - 1, p.Y - 1);
         }
 
-        private IEnumerable<Point> NeighborhoodAlign(Point p) {
+        public static IEnumerable<Point> NeighborhoodAlign(Point p) {
             yield return new Point(p.X + 1, p.Y);
             yield return new Point(p.X - 1, p.Y);
             yield return new Point(p.X, p.Y + 1);
             yield return new Point(p.X, p.Y - 1);
         }
 
-        private void BuildPath(List<Point> p) {
-            Point cur = end;
+        // Return The Two Aligned Locations One Could Cross Instead Of Moving Diagonally From P to N
+        private IEnumerable<Point> DiagDecomp(Point p, Point n) {
+            if(n.X < p.X && n.Y < p.Y) {
+                yield return new Point(p.X - 1, p.Y);
+                yield return new Point(p.X, p.Y - 1);
+            }
+            else if(n.X < p.X) {
+                yield return new Point(p.X - 1, p.Y);
+                yield return new Point(p.X, p.Y + 1);
+            }
+            else if(n.Y < p.Y) {
+                yield return new Point(p.X + 1, p.Y);
+                yield return new Point(p.X, p.Y - 1);
+            }
+            else {
+                yield return new Point(p.X + 1, p.Y);
+                yield return new Point(p.X, p.Y + 1);
+            }
+        }
+
+        private void BuildPath(List<Point> p, Point cur) {
             while(cur.X != start.X || cur.Y != start.Y) {
                 p.Add(cur);
                 cur = prev[cur.X, cur.Y];
@@ -122,12 +145,52 @@ namespace RTSEngine.Algorithms {
             p.Add(cur);
         }
 
+        private bool CanMove(Point n, int fowI) {
+            if(!InGrid(n)) return false;
+
+            FogOfWar f = world.GetFogOfWar(n.X, n.Y, fowI);
+            switch(f) {
+                case FogOfWar.Nothing:
+                    return true;
+                case FogOfWar.Passive:
+                    // TODO: Solve Omniscience
+                    //return !world.GetCollision(n.X, n.Y) || world.EStatic[n.X, n.Y] != null;
+                case FogOfWar.Active:
+                    return !world.GetCollision(n.X, n.Y);
+            }
+            return false;
+        }
+
+        private Point FindClosestGoal(Point e, int[,] f, bool[,] c, out int s) {
+            if(InGrid(e) && c[e.X, e.Y] == false) {
+                c[e.X, e.Y] = true;
+
+                if(f[e.X, e.Y] != int.MaxValue) {
+                    s = Estimate(e.X, e.Y);
+                    return e;
+                }
+
+                s = int.MaxValue;
+                Point p = e;
+
+                int ns;
+                foreach(var n in NeighborhoodAlign(e)) {
+                    Point np = FindClosestGoal(n, f, c, out ns);
+                    if(ns != int.MaxValue && ns < s) {
+                        s = ns;
+                        p = np;
+                    }
+                }
+                return p;
+            }
+            else {
+                s = int.MaxValue;
+                return new Point(-1, -1);
+            }
+        }
+
         // Run A* Search, Given This Pathfinder's World And A Query
         private void Pathfind(PathQuery q) {
-#if DEBUG
-            DevConsole.AddCommand("Pathfinding...");
-#endif
-
             // Initialization
             start = HashHelper.Hash(q.Start, world.numCells, world.size);
             end = HashHelper.Hash(q.End, world.numCells, world.size); ;
@@ -143,17 +206,20 @@ namespace RTSEngine.Algorithms {
             openSet.Insert(start);
 
             // A* Loop
+            // TODO: Check Fog Awareness
             List<Point> path = null;
             while(openSet.Count > 0) {
                 Point p = openSet.Pop();
                 if(p.X == end.X && p.Y == end.Y) {
                     path = new List<Point>();
-                    BuildPath(path);
+                    BuildPath(path, end);
                     break;
                 }
+                bool canMove = false;
                 foreach(Point n in NeighborhoodAlign(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 10;
-                    if(tgs < gScore[n.X, n.Y]) {
+                    canMove = CanMove(n, q.FOWIndex);
+                    if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
                         fScore[n.X, n.Y] = gScore[n.X, n.Y] + Estimate(n.X, n.Y);
@@ -164,7 +230,12 @@ namespace RTSEngine.Algorithms {
                 }
                 foreach(Point n in NeighborhoodDiag(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 14;
-                    if(tgs < gScore[n.X, n.Y]) {
+                    // To Move Diagonally, Destination Must Be Reachable By Horizontal & Vertical Moves As Well
+                    canMove = CanMove(n, q.FOWIndex);
+                    foreach(Point d in DiagDecomp(p, n)) {
+                        canMove &= CanMove(d, q.FOWIndex);
+                    }
+                    if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
                         fScore[n.X, n.Y] = gScore[n.X, n.Y] + Estimate(n.X, n.Y);
@@ -174,22 +245,30 @@ namespace RTSEngine.Algorithms {
                     }
                 }
             }
+
+            // Check If We Need To Find The Nearest Point
+            if(path == null) {
+                int s;
+                bool[,] ch = new bool[world.numCells.X, world.numCells.Y];
+                Array.Clear(ch, 0, ch.Length);
+                Point cg = FindClosestGoal(end, fScore, ch, out s);
+                if(s == int.MaxValue) {
+                    // Impossible
+                }
+                else {
+                    path = new List<Point>();
+                    BuildPath(path, cg);
+                }
+            }
+
             // A* Conclusion
             if(path != null) {
                 foreach(Point wp in path) {
-                    q.waypoints.Add(new Vector2(wp.X * world.cellSize, wp.Y * world.cellSize));
+                    q.waypoints.Add(new Vector2(((float)wp.X + 0.5f) * world.cellSize, ((float)wp.Y + 0.5f) * world.cellSize));
                 }
             }
             q.IsComplete = true;
             // TODO: Add Path Smoothing
-#if DEBUG
-            if(path != null) {
-                DevConsole.AddCommand("Path found with size " + q.waypoints.Count);
-            }
-            else {
-                DevConsole.AddCommand("Pathfinding failed :(");
-            }
-#endif
         }
     }
 }
