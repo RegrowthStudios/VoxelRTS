@@ -19,10 +19,12 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
 using RTSEngine.Net;
 using System.Text.RegularExpressions;
+using Microsoft.Xna.Framework.Audio;
 
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
         const int NUM_FPS_SAMPLES = 64;
+        const string BG_SOUND_FILE = @"Content\Audio\BG\Defiant Planet BGM.wav";
         static readonly Regex rgxTeam = RegexHelper.GenerateInteger("setteam");
         static readonly Regex rgxType = RegexHelper.GenerateInteger("settype");
 
@@ -40,6 +42,9 @@ namespace RTS {
         Thread tEngine;
         SpriteFont sfDebug;
         int eFPS;
+
+        SoundEffect seBG;
+        SoundEffectInstance seiBG;
 
         public override int Next {
             get { return -1; }
@@ -85,6 +90,13 @@ namespace RTS {
             pauseEngine = false;
             pauseRender = false;
             tEngine.Start();
+
+            using(var fs = File.OpenRead(BG_SOUND_FILE)) {
+                seBG = SoundEffect.FromStream(fs);
+            }
+            seiBG = seBG.CreateInstance();
+            seiBG.IsLooped = true;
+            seiBG.Play();
         }
         public override void OnExit(GameTime gameTime) {
             MouseEventDispatcher.OnMousePress -= OnMP;
@@ -100,6 +112,9 @@ namespace RTS {
             tEngine.Join();
             GameEngine.Dispose(state);
             state = null;
+
+            seiBG.Dispose();
+            seBG.Dispose();
         }
 
         public override void Update(GameTime gameTime) {
