@@ -310,7 +310,8 @@ namespace RTS.Default.Squad {
         }
         public override void ApplyTarget(GameState g, float dt) {
             foreach(var unit in squad.Units) {
-                unit.Target = target;
+                if(unit.TargetingOrders != BehaviorFSM.TargetNone)
+                    unit.Target = target;
             }
         }
 
