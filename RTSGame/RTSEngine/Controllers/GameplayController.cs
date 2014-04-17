@@ -118,9 +118,9 @@ namespace RTSEngine.Controllers {
             }
 
             // Start The Game Type Controller
-            s.scrGTC = s.Scripts["RTS.Default.Scenarios.Tutorial"];
+            s.scrGTC = s.Scripts["RTS.Default.GameTypes.SPSurvival"];
             s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
-            s.gtC.Load(s, null);
+            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
             s.gtC.Start(s);
 
             // Add All Tasks
@@ -268,8 +268,9 @@ namespace RTSEngine.Controllers {
 
             RTSBuilding building = team.AddBuilding(e.Type, wp);
             if(building == null) return;
- 
-            building.BuildAmountLeft = 0;
+
+            // Check For Instant Building
+            if(e.InstantBuild) building.BuildAmountLeft = 0;
 
             // Check If A Building Was Possible
             if(building == null) return;

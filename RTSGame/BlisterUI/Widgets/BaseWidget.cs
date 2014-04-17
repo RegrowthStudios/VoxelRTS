@@ -18,6 +18,9 @@ namespace BlisterUI.Widgets {
     }
 
     public abstract class BaseWidget : IDisposable {
+        public const float LAYER_DELTA = -0.01f;
+        public const float LAYER_DEFAULT = 1f;
+
         // Parent Hierarchy (Should Not Have Cycles)
         private BaseWidget parent;
         public BaseWidget Parent {
@@ -42,6 +45,16 @@ namespace BlisterUI.Widgets {
             set {
                 offset = value;
                 Recompute();
+            }
+        }
+        protected float offLayer;
+        public float LayerOffset {
+            get { return offLayer; }
+            set {
+                if(offLayer != value) {
+                    offLayer = value;
+                    Recompute();
+                }
             }
         }
 
@@ -91,32 +104,57 @@ namespace BlisterUI.Widgets {
 
         // Where To Draw To Screen
         private WidgetRenderer renderer;
-        public abstract int X {
-            get;
-            protected set;
+        protected Rectangle widgetRect;
+        public virtual int X {
+            get { return widgetRect.X; }
+            set {
+                if(X == value) return;
+                widgetRect.X = value;
+                Recompute();
+            }
         }
-        public abstract int Y {
-            get;
-            protected set;
+        public virtual int Y {
+            get { return widgetRect.Y; }
+            set {
+                if(Y == value) return;
+                widgetRect.Y = value;
+                Recompute();
+            }
         }
-        public abstract int Width {
-            get;
-            set;
+        public virtual int Width {
+            get { return widgetRect.Width; }
+            set {
+                if(Width == value) return;
+                widgetRect.Width = value;
+                Recompute();
+            }
         }
-        public abstract int Height {
-            get;
-            set;
+        public virtual int Height {
+            get { return widgetRect.Height; }
+            set {
+                if(Height == value) return;
+                widgetRect.Height = value;
+                Recompute();
+            }
         }
-        public abstract float LayerDepth {
-            get;
-            set;
+        protected float layer;
+        public virtual float LayerDepth {
+            get { return layer; }
+            set {
+                if(LayerDepth == value) return;
+                layer = value;
+                Recompute();
+            }
         }
 
         public BaseWidget(WidgetRenderer r) {
+            offLayer = LAYER_DELTA;
+
             renderer = r;
             anchor = new Point(0, 0);
             align = new Point(Alignment.LEFT, Alignment.TOP);
             PreInit();
+            LayerDepth = LAYER_DEFAULT;
             Recompute();
             AddAllDrawables(renderer);
         }
@@ -148,6 +186,7 @@ namespace BlisterUI.Widgets {
                 // Get Anchor Via The Parent
                 anchor.X = parent.X + ((offAlign.X * parent.Width) / 2) + offset.X;
                 anchor.Y = parent.Y + ((offAlign.Y * parent.Height) / 2) + offset.Y;
+                LayerDepth = parent.LayerDepth + LayerOffset;
             }
 
             // Use Alignment For Computation

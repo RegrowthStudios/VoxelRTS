@@ -129,9 +129,9 @@ namespace RTS {
             }
             game.DrawMouse();
 
-            //if(state.gtC.VictoriousTeam.HasValue) {
-            //    State = ScreenState.ChangePrevious;
-            //}
+            if(state.gtC.VictoriousTeam.HasValue) {
+                State = ScreenState.ChangePrevious;
+            }
         }
 
         public void OnMP(Vector2 p, MouseButton b) {

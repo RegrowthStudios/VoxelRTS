@@ -7,34 +7,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BlisterUI.Widgets {
     public class TextWidget : BaseWidget {
-
         protected DrawableText drawText;
-        private Point textLocation;
-        public override int X {
-            get { return textLocation.X; }
-            protected set {
-                textLocation.X = value;
-                drawText.location.X = value;
-            }
-        }
-        public override int Y {
-            get { return textLocation.Y; }
-            protected set {
-                textLocation.Y = value;
-                drawText.location.Y = value;
-            }
-        }
+
         public override int Width {
             get { return (int)drawText.TextWidth; }
             set { throw new NotImplementedException(); }
-        }
-        public override int Height {
-            get { return (int)drawText.TextHeight; }
-            set { drawText.TextHeight = value; }
-        }
-        public override float LayerDepth {
-            get { return drawText.layerDepth; }
-            set { drawText.layerDepth = value; }
         }
 
         public SpriteFont Font {
@@ -64,6 +41,7 @@ namespace BlisterUI.Widgets {
         public override void PreInit() {
             drawText = new DrawableText();
             drawText.Text = "";
+            OnRecompute += OnSelfCompute;
         }
         protected override void DisposeOther() {
         }
@@ -73,6 +51,12 @@ namespace BlisterUI.Widgets {
         }
         public override void RemoveAllDrawables(WidgetRenderer r) {
             r.Remove(drawText);
+        }
+
+        private void OnSelfCompute(BaseWidget w) {
+            drawText.TextHeight = Height;
+            drawText.location = new Vector2(X, Y);
+            drawText.layerDepth = layer;
         }
     }
 }

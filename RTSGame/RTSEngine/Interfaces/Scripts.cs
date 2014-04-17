@@ -307,7 +307,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // The Same File As The Map File
-        public abstract void Load(GameState s, FileInfo infoFile);
+        public abstract void Load(GameState s, FileInfo mapFile);
 
         public abstract int? GetVictoriousTeam(GameState s);
 

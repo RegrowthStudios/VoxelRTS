@@ -10,3 +10,6 @@ HEIGHT      [5]
 
 // Region Key Information
 REGIONS     [Region5x5.png]
+
+// Survival Team Spawn Location
+SURVIVALSPAWN   [100, 100]
