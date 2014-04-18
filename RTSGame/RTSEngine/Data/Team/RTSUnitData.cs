@@ -103,6 +103,12 @@ namespace RTSEngine.Data.Team {
         // How Long It Takes For The Building To Make This Unit
         public int BuildTime;
 
+        // Carrying Capacity For This Worker
+        public int CarryingCapacity;
+
+        // Flag To Tell This Is A Worker
+        public bool IsWorker;
+
         // BaseCombatData of The Unit
         public BaseCombatData BaseCombatData;
 

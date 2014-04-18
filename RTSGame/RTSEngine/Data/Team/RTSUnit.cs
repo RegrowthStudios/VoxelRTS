@@ -229,6 +229,9 @@ namespace RTSEngine.Data.Team {
             set;
         }
 
+        // How Much Resources This Worker Is Carrying
+        public int Resources { get; set; }
+
         // Action Controller
         private ACUnitActionController aController;
         public ACUnitActionController ActionController {
@@ -293,6 +296,7 @@ namespace RTSEngine.Data.Team {
             ViewDirection = Vector2.UnitX;
             CollisionGeometry = Data.ICollidableShape.Clone() as ICollidable;
             MovementMultiplier = 1f;
+            Resources = 0;
         }
 
         // Computes The Damage To Deal With Access To A Random Number And A Target
