@@ -1,17 +1,17 @@
 ﻿// Friendly Unit Name
-NAME            [Tree]
+NAME            [Ore]
 
 // Unit Model
 MODEL           [..\..\models\Tree.obj]
 TEXMAIN         [..\..\textures\Tree.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
-ICON            [..\..\icons\Tree.png]
-MAXCOUNT        [1000]
+ICON            [..\..\icons\Ore.png]
+MAXCOUNT        [400]
 
 // Unit Data
-HEALTH          [120]
+HEALTH          [2000]
 COST            [20]
-POPCAPCHANGE    [100]
+POPCAPCHANGE    [20]
 IMPACT          [5]
 BUILDAMOUNT     [20]
 SIGHTRADIUS     [8]

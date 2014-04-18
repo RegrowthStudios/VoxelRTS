@@ -352,7 +352,7 @@
     <Content Include="Packs\Default\models\Dog.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\races\Cat\armor.unit">
+    <Content Include="Packs\Default\races\Animals\armor.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\models\Barracks.obj">
@@ -364,52 +364,37 @@
     <Content Include="Packs\Default\models\Tree.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Dog\tree.building">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Cat\Cat.race">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="Packs\Default\races\Cat\heavy.unit">
+    <Content Include="Packs\Default\races\Animals\heavy.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\races\Cat\soldier.unit">
+    <None Include="Packs\Default\races\Animals\barracks.building">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\Animals\headquarters.building">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\Animals\house.building">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\Gaia\ore.building">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\Gaia\tree.building">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Packs\Default\races\Animals\Animals.race">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="Packs\Default\races\Animals\soldier.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Cat\tree.building">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="Packs\Default\races\Dog\armor.unit">
+    <Content Include="Packs\Default\races\Gaia\tank.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\races\Dog\heavy.unit">
+    <Content Include="Packs\Default\races\Gaia\minion.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\races\Dog\soldier.unit">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="Packs\Default\races\Dog\Dog.race">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\armor.unit">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\barracks.building">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\headquarters.building">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\house.building">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\heavy.unit">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\robots.race">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\soldier.unit">
+    <None Include="Packs\Default\races\Gaia\Gaia.race">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="Packs\Default\models\MechBase.obj">

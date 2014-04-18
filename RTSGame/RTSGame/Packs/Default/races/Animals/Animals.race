@@ -1,5 +1,5 @@
 ﻿// Friendly Team Name
-NAME            [Dog]
+NAME            [Animals]
 
 // Default Squad Controllers
 CTRLACTION      [RTS.Default.Squad.Action]
@@ -12,4 +12,6 @@ UNIT            [heavy.unit]
 UNIT            [armor.unit]
 
 // List Of All Building Types Belonging To Team
-BUILDING        [tree.building]
+BUILDING        [headquarters.building]
+BUILDING        [barracks.building]
+BUILDING        [house.building]
