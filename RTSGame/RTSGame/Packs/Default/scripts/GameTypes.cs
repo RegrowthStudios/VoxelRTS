@@ -46,6 +46,10 @@ namespace RTS.Default {
             }
 
             public override int? GetVictoriousTeam(GameState s) {
+                // Mercy Time
+                if(s.CurrentFrame < 100) return null;
+             
+                // If All The Buildings And Units Are Destroyed
                 if(pTeam.Buildings.Count < 1 && pTeam.Units.Count < 1)
                     return -1;
                 return null;

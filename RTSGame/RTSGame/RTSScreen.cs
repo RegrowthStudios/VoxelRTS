@@ -133,8 +133,7 @@ namespace RTS {
                 G.Clear(Color.Black);
             }
             (gameInput as IVisualInputController).Draw(renderer, SB);
-
-            game.DrawDevConsole();
+#if DEBUG
             if(!DevConsole.IsActivated) {
                 // Show FPS
                 double fps = gameTime.ElapsedGameTime.TotalSeconds;
@@ -143,6 +142,8 @@ namespace RTS {
                 SB.DrawString(sfDebug, fps + " / " + eFPS, Vector2.One * 10, Color.White);
                 SB.End();
             }
+#endif
+            game.DrawDevConsole();
             game.DrawMouse();
 
             if(state.gtC.VictoriousTeam.HasValue) {

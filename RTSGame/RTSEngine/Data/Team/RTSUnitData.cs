@@ -19,6 +19,8 @@ namespace RTSEngine.Data.Team {
             s.Write(data.MovementSpeed);
             s.Write(data.Impact);
             s.Write(data.BuildTime);
+            s.Write(data.CarryingCapacity);
+            s.Write(data.IsWorker);
             BaseCombatData.Serialize(s, ref data.BaseCombatData);
             s.Write((int)data.ICollidableShape.CollisionType);
             s.Write(data.ICollidableShape.Center);
@@ -52,6 +54,8 @@ namespace RTSEngine.Data.Team {
             data.MovementSpeed = s.ReadSingle();
             data.Impact = s.ReadInt32();
             data.BuildTime = s.ReadInt32();
+            data.CarryingCapacity = s.ReadInt32();
+            data.IsWorker = s.ReadBoolean();
             BaseCombatData.Deserialize(s, ref data.BaseCombatData);
             CollisionType ct = (CollisionType)s.ReadInt32();
             Vector2 cc = s.ReadVector2();

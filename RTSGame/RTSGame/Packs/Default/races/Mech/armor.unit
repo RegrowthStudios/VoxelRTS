@@ -15,6 +15,9 @@ SPEED           [1.5]
 COST            [20 , 2]
 BUILDTIME       [20]
 IMPACT          [10]
+WORKER          [0]
+CARRYCAPACITY   [0]
+
 
 // Collision Data
 RADIUS          [0.4]
