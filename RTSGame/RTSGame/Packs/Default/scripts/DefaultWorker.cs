@@ -59,17 +59,69 @@ namespace RTS.Default.Worker
             }
 
         }
+        public override void Deserialize(System.IO.BinaryReader s)
+        {
+            throw new NotImplementedException();
+        }
+        public override void Serialize(System.IO.BinaryWriter s)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Combat : ACUnitCombatController {
+        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c)
+        {
+            throw new NotImplementedException();
+        }
+        public override void Attack(GameState g, float dt)
+        {
+            throw new NotImplementedException();
+        }
+        public override void Deserialize(System.IO.BinaryReader s)
+        {
+            throw new NotImplementedException();
+        }
 
+        public override void Serialize(System.IO.BinaryWriter s)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Animation : ACUnitAnimationController {
+        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c)
+        {
+            throw new NotImplementedException();
+        }
+        public override void Update(GameState s, float dt)
+        {
+            throw new NotImplementedException();
+        }
+        public override void Deserialize(System.IO.BinaryReader s)
+        {
+            throw new NotImplementedException();
+        }
 
+        public override void Serialize(System.IO.BinaryWriter s)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Movement : ACUnitMovementController {
+        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c)
+        {
+            throw new NotImplementedException();
+        }
+        public override void Deserialize(System.IO.BinaryReader s)
+        {
+            throw new NotImplementedException();
+        }
 
+        public override void Serialize(System.IO.BinaryWriter s)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
