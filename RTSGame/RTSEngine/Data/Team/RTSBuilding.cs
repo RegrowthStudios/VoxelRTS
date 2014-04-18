@@ -155,6 +155,11 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // Is It A Resource?
+        public bool IsResource {
+            get { return Data.IsResource; }
+        }
+
         // Building Information
         private int bAmount;
         public int BuildAmountLeft {

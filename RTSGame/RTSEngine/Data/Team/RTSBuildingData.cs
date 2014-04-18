@@ -16,6 +16,7 @@ namespace RTSEngine.Data.Team {
             s.Write(data.CapitalCost);
             s.Write(data.PopCapChange);
             s.Write(data.MaxCount);
+            s.Write(data.IsResource);
             s.Write(data.Impact);
             s.Write(data.BuildAmount);
             s.Write(data.SightRadius);
@@ -46,6 +47,7 @@ namespace RTSEngine.Data.Team {
             data.CapitalCost = s.ReadInt32();
             data.PopCapChange = s.ReadInt32();
             data.MaxCount = s.ReadInt32();
+            data.IsResource = s.ReadBoolean();
             data.Impact = s.ReadInt32();
             data.BuildAmount = s.ReadInt32();
             data.SightRadius = s.ReadInt32();
@@ -86,6 +88,9 @@ namespace RTSEngine.Data.Team {
 
         // Maximum Number Of These Buildings Supported
         public int MaxCount, CurrentCount;
+
+        // Checking For If It Is A Resource
+        public bool IsResource;
 
         // Environment Impact
         public int Impact;
