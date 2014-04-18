@@ -396,6 +396,9 @@
     <None Include="Packs\Default\races\Mech\barracks.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Packs\Default\races\Mech\headquarters.building">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Packs\Default\races\Mech\house.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

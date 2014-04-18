@@ -14,7 +14,7 @@ COST            [20]
 POPCAPCHANGE    [10]
 IMPACT          [10]
 BUILDAMOUNT     [20]
-SIGHTRADIUS     [24]
+SIGHTRADIUS     [14]
 GRIDSIZE        [1 , 1]
 RESOURCE        [0]
 

@@ -27,6 +27,7 @@ namespace RTS {
         const string BG_SOUND_FILE = @"Content\Audio\BG\Defiant Planet BGM.wav";
         static readonly Regex rgxTeam = RegexHelper.GenerateInteger("setteam");
         static readonly Regex rgxType = RegexHelper.GenerateInteger("settype");
+        static readonly Regex rgxSpawn = RegexHelper.GenerateVec2Int("setspawn");
 
         private GameplayController playController;
         private GameState state;
@@ -162,28 +163,13 @@ namespace RTS {
                     else if(addBuilding)
                         gameInput.AddEvent(new SpawnBuildingEvent(
                             team, type,
-                            HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size)
-                            ));
+                            HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size),
+                            true));
                 }
             }
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
-                case Keys.D1:
-                    team = 0;
-                    break;
-                case Keys.D2:
-                    team = 1;
-                    break;
-                case Keys.D8:
-                    type = 0;
-                    break;
-                case Keys.D9:
-                    type = 1;
-                    break;
-                case Keys.D0:
-                    type = 2;
-                    break;
                 case Keys.E:
                     addUnit = true;
                     break;
@@ -266,6 +252,11 @@ namespace RTS {
             }
             else if((m = rgxType.Match(obj)).Success) {
                 type = RegexHelper.ExtractInt(m);
+            }
+            else if((m = rgxSpawn.Match(obj)).Success) {
+                int[] buf = RegexHelper.ExtractVec2I(m);
+                team = buf[0];
+                type = buf[1];
             }
         }
     }
