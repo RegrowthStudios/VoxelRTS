@@ -112,10 +112,15 @@ namespace RTS.Input {
             eData = EnvironmentDataParser.Parse(Team.Race.InfoFile);
             minNumSpawn = new int[3][] { eData.L1MinNumSpawn, eData.L1MaxNumSpawn, eData.L2MinNumSpawn };
             maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
+            treeLocations = new List<Point>();
 
             for(int i = 0; i < Team.Buildings.Count; i++) {
                 Team.Buildings[i].OnDamage += OnBuildingDamage;
                 grid.AddImpactGenerator(Team.Buildings[i]);
+                if (Team.Buildings[i].Data.FriendlyName.Equals(FloraData.FriendlyName)) {
+                    Point treeC = HashHelper.Hash(Team.Buildings[i].GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
+                    treeLocations.Add(treeC);
+                }
             }
             Team.OnBuildingSpawn += (b) => {
                 b.OnDamage += OnBuildingDamage;
@@ -171,14 +176,11 @@ namespace RTS.Input {
                     for(int x = -1; x <= 1; x += 2) {
                         for(int y = -1; y <= 1; y += 2) {
                             Point newTreeC = new Point(treeC.X + x, treeC.Y + y);
-                            Vector2 newTreePos = new Vector2(newTreeC.X * GameState.CGrid.size.X, newTreeC.Y * GameState.CGrid.size.Y);
-                            Point newTreeI = HashHelper.Hash(newTreePos, grid.numCells, grid.size);
-                            foreach(var t in GameState.IGrid.ImpactGenerators[newTreeI.X, newTreeI.Y]) {
-                                Point tc = HashHelper.Hash(t.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
-                                if(!Point.Equals(tc, newTreeC) && tc.X > -1 && tc.Y > -1 && tc.X < GameState.CGrid.numCells.X && tc.Y < GameState.CGrid.numCells.Y) {
-                                    AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
-                                    r.AddToRegionImpact(-FloraData.Impact);
-                                }
+                            bool inbounds = (newTreeC.X > -1 && newTreeC.Y > -1 && newTreeC.X < GameState.CGrid.numCells.X && newTreeC.Y < GameState.CGrid.numCells.Y);
+                            if (inbounds && GameState.CGrid.EStatic[newTreeC.X, newTreeC.Y] == null) {
+                                AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
+                                Vector2 newTreePos = new Vector2(newTreeC.X * GameState.CGrid.size.X, newTreeC.Y * GameState.CGrid.size.Y);
+                                grid.AddImpact(newTreePos, FloraData.Impact);
                             }
                         }
                     }
@@ -199,6 +201,7 @@ namespace RTS.Input {
 
         // Disaster Phase
         private void CreateDisaster() {
+            
             foreach(var r in GameState.Regions) {
                 // Decide Level
                 int level;
@@ -239,13 +242,25 @@ namespace RTS.Input {
         private void CreateFire(Region r) {
 
 
+
         }
 
         // Natural Disaster That Damages Units
         private void CreateLightning(Region r) {
             foreach (var c in r.Cells) {
-
-                
+                for (int x = 0; x < 2; x++) {
+                    for (int y = 0; y < 2; y++) {
+                        foreach (var u in GameState.CGrid.EDynamic[c.X + x, c.Y + y]) {
+                            if (u.Team.Index != Team.Index) {
+                                bool takeDamage = (random.Next(1) == 0);
+                                int damageAmount = 0;
+                                if (takeDamage) {
+                                    u.Damage(damageAmount);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

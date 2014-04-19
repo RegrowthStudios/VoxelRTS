@@ -246,6 +246,11 @@ namespace RTSEngine.Data {
             CellImpact[p.X, p.Y] += amount;
             Region[p.X, p.Y].AddToRegionImpact(amount);
         }
+
+        public void AddImpact(Point p, int amount) {
+            CellImpact[p.X, p.Y] += amount;
+            Region[p.X, p.Y].AddToRegionImpact(amount);
+        }
     }
 
     public struct LevelGrid {
