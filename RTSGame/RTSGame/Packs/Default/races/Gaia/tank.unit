@@ -12,7 +12,7 @@ MAXCOUNT        [1000]
 // Unit Data
 HEALTH          [800]
 SPEED           [2.0]
-COST            [20 , 2]
+COST            [0 , 2]
 BUILDTIME       [20]
 IMPACT          [10]
 WORKER          [0]
