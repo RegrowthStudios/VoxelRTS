@@ -132,8 +132,8 @@ namespace RTS.Input {
                 DevConsole.AddCommand("DT: " + (counter % DisasterTime));
                 UpdateUnitsInRegion();
                 if(counter % DisasterTime == 0) {
-                    SpawnUnits();
-                    SetInitTarget();
+                    CreateDisaster();
+                    
                 }
                 if(counter % RecoverTime == 0) {
                     Recover();
@@ -207,7 +207,7 @@ namespace RTS.Input {
         }
 
         // Disaster Phase
-        private void SpawnUnits() {
+        private void CreateDisaster() {
             foreach(var r in GameState.Regions) {
                 // Decide Level
                 int level;
@@ -222,51 +222,94 @@ namespace RTS.Input {
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
 
-                    // Find The Cell With The Largest Impact
-                    Point p = r.Cells.First();
-                    foreach(var c in r.Cells) {
-                        if(grid.CellImpact[c.X, c.Y] > grid.CellImpact[p.X, p.Y]) {
-                            p = c;
-                        }
+                    // Decide disaster type
+                    int type = random.Next(2);
+                    
+                    // Create the appropriate disaster
+                    if (type == 0) {
+                        SpawnUnits(r, level);
                     }
-                    // Randomly Choose An Impact Generator In That Cell
-                    ImpactGenerator g = null;
-
-                    // TODO: Choose Random
-                    int rpi = random.Next(r.Cells.Count);
-                    Vector2 spawnPos = new Vector2(r.Cells[rpi].X, r.Cells[rpi].Y) * grid.cellSize + Vector2.One;
-
-                    if(grid.ImpactGenerators[p.X, p.Y].Count != 0) {
-                        var ig = grid.ImpactGenerators[p.X, p.Y];
-                        int igi = random.Next(ig.Count);
-                        for(int i = 0; i < ig.Count; i++) {
-                            if(ig[i].BuildingData.FriendlyName.Equals(OreData.FriendlyName) ||
-                                ig[i].BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
-                                igi--;
-                                if(igi == 0)
-                                    g = ig[i];
-                            }
+                    else {
+                        if (level == 1) {
+                            CreateLightning(r);
                         }
-                        spawnPos = g.GridPosition;
-                    }
-
-                    // Spawn Environmental Units
-                    Vector2 offset;
-                    int numSpawn;
-                    //FIX
-                    int ti = 0;
-                    foreach(var spawnType in Spawns) {
-                        numSpawn = random.Next(minNumSpawn[level - 1][ti], maxNumSpawn[level - 1][ti]);
-                        offset.X = random.Next(SpawnOffset);
-                        offset.Y = random.Next(SpawnOffset);
-                        for(int j = 0; j < numSpawn; j++) {
-                            AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos + offset));
+                        else if (level == 2) {
+                            CreateEarthquake(r);
                         }
-                        ti++;
+                        else {
+                            CreateFire(r);
+                        }
                     }
                 }
             }
         }
+
+        // Natural Disasters
+        private void CreateFire(Region r) {
+
+        }
+
+        private void CreateLightning(Region r) {
+
+        }
+
+        private void CreateEarthquake(Region r) {
+            foreach (var c in r.Cells) {
+                foreach (var ig in grid.ImpactGenerators[c.X,c.Y]) {
+                    
+                        
+                }
+            }
+        }
+
+
+        private void SpawnUnits(Region r, int level) {
+            // Find The Cell With The Largest Impact
+            Point p = r.Cells.First();
+            foreach (var c in r.Cells) {
+                if (grid.CellImpact[c.X, c.Y] > grid.CellImpact[p.X, p.Y]) {
+                    p = c;
+                }
+            }
+            // Randomly Choose An Impact Generator In That Cell
+            ImpactGenerator g = null;
+
+            // TODO: Choose Random
+            int rpi = random.Next(r.Cells.Count);
+            Vector2 spawnPos = new Vector2(r.Cells[rpi].X, r.Cells[rpi].Y) * grid.cellSize + Vector2.One;
+
+            if (grid.ImpactGenerators[p.X, p.Y].Count != 0) {
+                var ig = grid.ImpactGenerators[p.X, p.Y];
+                int igi = random.Next(ig.Count);
+                for (int i = 0; i < ig.Count; i++) {
+                    if (ig[i].BuildingData.FriendlyName.Equals(OreData.FriendlyName) ||
+                        ig[i].BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
+                        igi--;
+                        if (igi == 0)
+                            g = ig[i];
+                    }
+                }
+                spawnPos = g.GridPosition;
+            }
+
+            // Spawn Environmental Units
+            Vector2 offset;
+            int numSpawn;
+            //FIX
+            int ti = 0;
+            foreach (var spawnType in Spawns) {
+                numSpawn = random.Next(minNumSpawn[level - 1][ti], maxNumSpawn[level - 1][ti]);
+                offset.X = random.Next(SpawnOffset);
+                offset.Y = random.Next(SpawnOffset);
+                for (int j = 0; j < numSpawn; j++) {
+                    AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos + offset));
+                }
+                ti++;
+            }
+
+            SetInitTarget();
+        }
+
 
         private void SetInitTarget() {
             foreach(var r in GameState.Regions) {
