@@ -6,7 +6,7 @@ MODEL           [..\..\models\Cat.obj]
 TEXMAIN         [..\..\textures\Cat.png]
 TEXCOLOR        [..\..\textures\CatKey.png]
 ANIMATION       [..\..\animations\Cat.png]
-ICON            [..\..\icons\Soldier Button.png]
+ICON            [..\..\icons\SoldierButton.png]
 MAXCOUNT        [1000]
 
 // Unit Data

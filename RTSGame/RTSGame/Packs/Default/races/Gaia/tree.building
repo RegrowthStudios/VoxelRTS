@@ -5,7 +5,7 @@ NAME            [Tree]
 MODEL           [..\..\models\Tree.obj]
 TEXMAIN         [..\..\textures\Tree.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
-ICON            [..\..\icons\Tree Button.png]
+ICON            [..\..\icons\TreeButton.png]
 MAXCOUNT        [2000]
 
 // Unit Data
