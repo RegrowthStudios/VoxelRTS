@@ -83,6 +83,24 @@ namespace RTS.Input {
         private int SpawnOffset {
             get { return eData.SpawnOffset; }
         }
+
+        // Probability That Lightning Hits A Unit
+        private int LightningHitP {
+            get { return eData.LightningHitP; }
+        }
+        // Probability That Earthquake Hits A Building
+        private int EarthquakeHitP {
+            get { return eData.EarthquakeHitP; }
+        }
+        // Damage Done Per Hit By Lightning
+        private int LightningDamage {
+            get { return eData.LightningDamage; }
+        }
+        // Damage Done Per Hit By Earthquakes
+        private int EarthquakeDamage {
+            get { return eData.EarthquakeDamage; }
+        }
+
         // Minimum Number Of Units Spawned For Each Level
         private int[][] minNumSpawn;
         // Maximum Number Of Units Spawned For Each Level
@@ -252,10 +270,9 @@ namespace RTS.Input {
                     for (int y = 0; y < 2; y++) {
                         foreach (var u in GameState.CGrid.EDynamic[c.X + x, c.Y + y]) {
                             if (u.Team.Index != Team.Index) {
-                                bool takeDamage = (random.Next(1) == 0);
-                                int damageAmount = 0;
+                                bool takeDamage = (random.Next(100) <= LightningHitP);
                                 if (takeDamage) {
-                                    u.Damage(damageAmount);
+                                    u.Damage(LightningDamage);
                                 }
                             }
                         }
@@ -270,10 +287,9 @@ namespace RTS.Input {
             foreach (var c in r.Cells) {
                 foreach (var b in grid.ImpactGenerators[c.X,c.Y]) {
                     if (b.Team != Team) {
-                        bool takeDamage = (random.Next(1) == 0);
-                        int damageAmount = 0;
+                        bool takeDamage = (random.Next(1) <= EarthquakeHitP);
                         if (takeDamage) {
-                            b.Damage(damageAmount);
+                            b.Damage(EarthquakeDamage);
                         }
                     }   
                 }

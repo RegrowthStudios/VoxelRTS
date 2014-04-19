@@ -31,7 +31,11 @@ namespace RTSEngine.Data.Parsers {
                     L3MinNumSpawn = new int[] { 12, 5, 2 },
                     L1MaxNumSpawn = new int[] {6,3,1},
                     L2MaxNumSpawn = new int[] {12,5,2},
-                    L3MaxNumSpawn = new int[] {15,10,5}
+                    L3MaxNumSpawn = new int[] {15,10,5},
+                    LightningHitP = 70,
+                    LightningDamage = 10,
+                    EarthquakeHitP = 40,
+                    EarthquakeDamage = 20
                 };
             }
         }
@@ -62,6 +66,11 @@ namespace RTSEngine.Data.Parsers {
         public int[] L1MaxNumSpawn;
         public int[] L2MaxNumSpawn;
         public int[] L3MaxNumSpawn;
+
+        public int LightningHitP;
+        public int LightningDamage;
+        public int EarthquakeHitP;
+        public int EarthquakeDamage;
         
     }
 
@@ -89,6 +98,10 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxL1MaxNumSpawn = RegexHelper.GenerateVec3Int("L1MAXNUMSPAWN");
         private static readonly Regex rgxL2MaxNumSpawn = RegexHelper.GenerateVec3Int("L2MAXNUMSPAWN");
         private static readonly Regex rgxL3MaxNumSpawn = RegexHelper.GenerateVec3Int("L3MAXNUMSPAWN");
+        private static readonly Regex rgxLightningHitP = RegexHelper.GenerateInteger("LIGHTNINGHITP");
+        private static readonly Regex rgxLightningDamage = RegexHelper.GenerateInteger("LIGHTNINGDAMAGE");
+        private static readonly Regex rgxEarthquakeHitP = RegexHelper.GenerateInteger("EARTHQUAKEHITP");
+        private static readonly Regex rgxEarthquakeDamage = RegexHelper.GenerateInteger("EARTHQUAKEDAMAGE");
         
 
         public static EnvironmentData Parse(FileInfo infoFile) {
@@ -125,7 +138,11 @@ namespace RTSEngine.Data.Parsers {
                 rgxL2MinNumSpawn.Match(mStr),
                 rgxL2MaxNumSpawn.Match(mStr),
                 rgxL3MinNumSpawn.Match(mStr),
-                rgxL3MaxNumSpawn.Match(mStr)
+                rgxL3MaxNumSpawn.Match(mStr),
+                rgxLightningHitP.Match(mStr),
+                rgxLightningDamage.Match(mStr),
+                rgxEarthquakeHitP.Match(mStr),
+                rgxEarthquakeDamage.Match(mStr)
             };
             foreach(var m in mp) if(!m.Success) return EnvironmentData.Default;
             int i = 0;
@@ -151,6 +168,10 @@ namespace RTSEngine.Data.Parsers {
             eid.L2MaxNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
             eid.L3MinNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
             eid.L3MaxNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
+            eid.LightningHitP = RegexHelper.ExtractInt(mp[i++]);
+            eid.LightningDamage = RegexHelper.ExtractInt(mp[i++]);
+            eid.EarthquakeHitP = RegexHelper.ExtractInt(mp[i++]);
+            eid.EarthquakeDamage = RegexHelper.ExtractInt(mp[i++]);
             return eid;
         }
     }
