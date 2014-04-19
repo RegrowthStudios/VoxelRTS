@@ -298,9 +298,9 @@ namespace RTS {
             }
             widgets[0].TextUser.Text = UserConfig.UserName;
             widgets[0].PlayerType = "Player";
-            widgets[0].Race = "Mechanica";
+            widgets[0].Race = "Animals";
             widgets[1].PlayerType = "Computer";
-            widgets[1].Race = "Mechanica";
+            widgets[1].Race = "Animals";
 
             DevConsole.OnNewCommand += DevConsole_OnNewCommand;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPressed;

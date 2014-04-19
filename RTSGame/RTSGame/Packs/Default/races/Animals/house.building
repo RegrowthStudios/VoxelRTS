@@ -5,7 +5,7 @@ NAME            [House]
 MODEL           [..\..\models\House.obj]
 TEXMAIN         [..\..\textures\HouseMain.png]
 TEXCOLOR        [..\..\textures\HouseKey.png]
-ICON            [..\..\icons\House.png]
+ICON            [..\..\icons\FactoryButton.png]
 MAXCOUNT        [1000]
 
 // Unit Data

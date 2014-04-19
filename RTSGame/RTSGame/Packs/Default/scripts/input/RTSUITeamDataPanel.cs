@@ -72,6 +72,7 @@ namespace RTSEngine.Graphics {
             rectCapital.Color = Color.Transparent;
 
             textPopCur = new TextWidget(wr);
+            textPopCur.Offset = new Point(5, 0);
             textPopCur.OffsetAlignX = Alignment.RIGHT;
             textPopCur.AlignY = Alignment.BOTTOM;
             textPopCur.OffsetAlignY = Alignment.MID;
@@ -79,6 +80,7 @@ namespace RTSEngine.Graphics {
             textPopCur.Parent = rectPopPic;
 
             textPopCap = new TextWidget(wr);
+            textPopCap.Offset = new Point(5, 0);
             textPopCap.OffsetAlignX = Alignment.RIGHT;
             textPopCap.AlignY = Alignment.TOP;
             textPopCap.OffsetAlignY = Alignment.MID;
@@ -90,7 +92,7 @@ namespace RTSEngine.Graphics {
             textCapital.AlignY = Alignment.MID;
             textCapital.OffsetAlignX = Alignment.MID;
             textCapital.OffsetAlignY = Alignment.MID;
-            textCapital.Height = rectCapital.Height;
+            textCapital.Height = (int)(rectCapital.Height * 0.9);
             textCapital.Parent = rectCapital;
 
             textVictory = new TextWidget(wr);
@@ -98,7 +100,7 @@ namespace RTSEngine.Graphics {
             textVictory.AlignY = Alignment.TOP;
             textVictory.OffsetAlignX = Alignment.MID;
             textVictory.OffsetAlignY = Alignment.BOTTOM;
-            textVictory.Height = rectCapital.Height;
+            textVictory.Height = (int)(rectCapital.Height * 0.9);
             textVictory.Parent = rectCapital;
 
             Width = 400;
