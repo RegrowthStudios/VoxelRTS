@@ -9,32 +9,6 @@ namespace BlisterUI.Widgets {
     public class RectWidget : BaseWidget {
         // Where To Draw To Screen
         protected DrawableRect drawRect;
-        public override int X {
-            get { return drawRect.location.X; }
-            protected set { drawRect.location.X = value; }
-        }
-        public override int Y {
-            get { return drawRect.location.Y; }
-            protected set { drawRect.location.Y = value; }
-        }
-        public override int Width {
-            get { return drawRect.location.Width; }
-            set {
-                drawRect.location.Width = value;
-                Recompute();
-            }
-        }
-        public override int Height {
-            get { return drawRect.location.Height; }
-            set {
-                drawRect.location.Height = value;
-                Recompute();
-            }
-        }
-        public override float LayerDepth {
-            get { return drawRect.layerDepth; }
-            set { drawRect.layerDepth = value; }
-        }
 
         public Texture2D Texture {
             get { return drawRect.texture; }
@@ -52,6 +26,7 @@ namespace BlisterUI.Widgets {
 
         public override void PreInit() {
             drawRect = new DrawableRect();
+            OnRecompute += OnSelfCompute;
         }
         protected override void DisposeOther() {
         }
@@ -63,5 +38,9 @@ namespace BlisterUI.Widgets {
             r.Remove(drawRect);
         }
 
+        private void OnSelfCompute(BaseWidget w) {
+            drawRect.location = widgetRect;
+            drawRect.layerDepth = layer;
+        }
     }
 }

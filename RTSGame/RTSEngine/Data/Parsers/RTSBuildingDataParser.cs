@@ -18,8 +18,10 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxHealth = RegexHelper.GenerateInteger("HEALTH");
         private static readonly Regex rgxCost = RegexHelper.GenerateInteger("COST");
         private static readonly Regex rgxMaxCount = RegexHelper.GenerateInteger("MAXCOUNT");
+        private static readonly Regex rgxResource = RegexHelper.GenerateInteger("RESOURCE");
+        private static readonly Regex rgxPPC = RegexHelper.GenerateInteger("POPCAPCHANGE");
         private static readonly Regex rgxImpact = RegexHelper.GenerateInteger("IMPACT");
-        private static readonly Regex rgxBuildTime = RegexHelper.GenerateInteger("BUILDTIME");
+        private static readonly Regex rgxBuildAmount = RegexHelper.GenerateInteger("BUILDAMOUNT");
         private static readonly Regex rgxSightRadius = RegexHelper.GenerateInteger("SIGHTRADIUS");
         private static readonly Regex rgxGridSize = RegexHelper.GenerateVec2Int("GRIDSIZE");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
@@ -93,8 +95,10 @@ namespace RTSEngine.Data.Parsers {
                 rgxHealth.Match(mStr),
                 rgxCost.Match(mStr),
                 rgxMaxCount.Match(mStr),
+                rgxResource.Match(mStr),
+                rgxPPC.Match(mStr),
                 rgxImpact.Match(mStr),
-                rgxBuildTime.Match(mStr),
+                rgxBuildAmount.Match(mStr),
                 rgxSightRadius.Match(mStr),
                 rgxGridSize.Match(mStr),
                 rgxBBMin.Match(mStr),
@@ -113,6 +117,8 @@ namespace RTSEngine.Data.Parsers {
             data.Health = RegexHelper.ExtractInt(mp[ri++]);
             data.CapitalCost = RegexHelper.ExtractInt(mp[ri++]);
             data.MaxCount = RegexHelper.ExtractInt(mp[ri++]);
+            data.IsResource = RegexHelper.ExtractInt(mp[ri++]) == 0 ? false : true;
+            data.PopCapChange = RegexHelper.ExtractInt(mp[ri++]);
             data.Impact = RegexHelper.ExtractInt(mp[ri++]);
             data.BuildAmount = RegexHelper.ExtractInt(mp[ri++]);
             data.SightRadius = RegexHelper.ExtractInt(mp[ri++]);
@@ -122,7 +128,6 @@ namespace RTSEngine.Data.Parsers {
             data.BBox.Min = RegexHelper.ExtractVec3(mp[ri++]);
             data.BBox.Max = RegexHelper.ExtractVec3(mp[ri++]);
             Vector4 cr = RegexHelper.ExtractVec4(mp[ri++]);
-            //data.ICollidableShape = new CollisionCircle(cr.Length() * 0.5f, Vector2.Zero, true);
             data.ICollidableShape = new CollisionRect(cr.X, cr.Y, new Vector2(cr.Z, cr.W), true);
 
             // Get The Controllers From The Controller Dictionary

@@ -15,11 +15,6 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Graphics {
-    public struct VisualTeam {
-        public int TeamIndex;
-        public RTSColorScheme ColorScheme;
-        public RTSRaceData RaceFileInfo;
-    }
 
     public class RTSRenderer : IDisposable {
         private const float SELECTION_RADIUS_MODIFIER = 1.1f;
@@ -304,7 +299,7 @@ namespace RTSEngine.Graphics {
             // Create Building Graphics
             var bms = ti == teamIndex ? FriendlyBuildingModels : NonFriendlyBuildingModels;
             for(int i = 0; i < team.Race.ActiveBuildings.Length; i++) {
-                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, new FileInfo(team.Race.ActiveBuildings[i].Data.InfoFile), team.Race);
+                RTSBuildingModel bModel = RTSBuildingDataParser.ParseModel(this, new FileInfo(team.Race.ActiveBuildings[i].InfoFile), team.Race);
                 bModel.Hook(this, state, ti, teamIndex, team.Race.ActiveBuildings[i].Index);
                 bModel.ColorScheme = team.ColorScheme;
                 bms.Add(bModel);

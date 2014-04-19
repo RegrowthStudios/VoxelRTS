@@ -84,7 +84,6 @@
     <Compile Include="Data\Team\RTSBuilding.cs" />
     <Compile Include="Data\Team\RTSBuildingData.cs" />
     <Compile Include="Data\Team\RTSRace.cs" />
-    <Compile Include="Data\Team\RTSRaceData.cs" />
     <Compile Include="Data\Team\RTSSquad.cs" />
     <Compile Include="Data\Team\RTSUnit.cs" />
     <Compile Include="Data\Team\RTSTeam.cs" />

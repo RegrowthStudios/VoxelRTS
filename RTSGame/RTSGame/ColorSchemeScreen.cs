@@ -290,7 +290,7 @@ namespace RTS {
             FileInfo fi = _fi as FileInfo;
 
             GameState state = new GameState();
-            state.teams[0] = new RTSTeam(0);
+            state.teams[0] = new RTSTeam(0, RTSInputType.None);
             state.UpdateActiveTeams();
             RTSUnitData _unitData = RTSUnitDataParser.ParseData(null, fi, 0);
             state.teams[0].Race.Units[0] = _unitData;
@@ -302,7 +302,7 @@ namespace RTS {
             _unitModel.OnUnitSpawn(_unit);
 
             // Create The Full Animation Loop
-            _unit.AnimationController = new BlankAnimController(0, (_unitModel.AnimationTexture.Height / 3) - 1, 1f);
+            _unit.AnimationController = new BlankAnimController(0, (_unitModel.AnimationTexture.Height / 3) - 1, 30f);
 
             // Make Sure To Only Modify At A Specific Point
             lock(drawLock) {

@@ -45,6 +45,10 @@ namespace RTS.Input {
             UI = new RTSUI(renderer, "Courier New", 32, 140);
             UI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
+
+            Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
+            Team.OnPopulationCapChange += (t, c) => { UI.TeamDataPanel.PopulationCap = Team.PopulationCap; };
+            Team.OnCapitalChange += (t, c) => { UI.TeamDataPanel.Capital = Team.Capital; };
         }
         public override void Begin() {
             useSelectRect = false;

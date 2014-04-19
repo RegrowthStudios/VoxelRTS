@@ -24,6 +24,7 @@ namespace RTSEngine.Data.Team {
             }
             s.Write(e.Health);
             s.Write(e.MovementMultiplier);
+            s.Write(e.Resources);
             if(e.ActionController != null) {
                 s.Write(true);
                 e.ActionController.Serialize(s);
@@ -70,6 +71,7 @@ namespace RTSEngine.Data.Team {
             }
             e.Health = s.ReadInt32();
             e.MovementMultiplier = s.ReadSingle();
+            e.Resources = s.ReadInt32();
             if(s.ReadBoolean()) {
                 if(e.ActionController != null) e.ActionController.Deserialize(s);
             }
@@ -121,26 +123,18 @@ namespace RTSEngine.Data.Team {
 
         // The Unit's Behavior Code
         private int BehaviorCode;
-
-        // The Unit's State
         public int State {
             get { return BehaviorFSM.GetByte(BehaviorCode, 0); }
             set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 0); }
         }
-
-        // The Unit's Targeting Orders
         public int TargetingOrders {
             get { return BehaviorFSM.GetByte(BehaviorCode, 1); }
             set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 1); }
         }
-
-        // The Unit's Combat Orders
         public int CombatOrders {
             get { return BehaviorFSM.GetByte(BehaviorCode, 2); }
             set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 2); }
         }
-
-        // The Unit's Movement Orders
         public int MovementOrders {
             get { return BehaviorFSM.GetByte(BehaviorCode, 3); }
             set { BehaviorCode = BehaviorFSM.SetByte(BehaviorCode, value, 3); }
@@ -229,6 +223,12 @@ namespace RTSEngine.Data.Team {
             set;
         }
 
+        // How Much Resources This Worker Is Carrying
+        public int Resources {
+            get;
+            set;
+        }
+
         // Action Controller
         private ACUnitActionController aController;
         public ACUnitActionController ActionController {
@@ -293,6 +293,7 @@ namespace RTSEngine.Data.Team {
             ViewDirection = Vector2.UnitX;
             CollisionGeometry = Data.ICollidableShape.Clone() as ICollidable;
             MovementMultiplier = 1f;
+            Resources = 0;
         }
 
         // Computes The Damage To Deal With Access To A Random Number And A Target

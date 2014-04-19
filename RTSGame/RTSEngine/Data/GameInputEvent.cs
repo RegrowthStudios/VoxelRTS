@@ -98,11 +98,16 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
+        public bool InstantBuild {
+            get;
+            private set;
+        }
 
-        public SpawnBuildingEvent(int t, int type, Point gPos)
+        public SpawnBuildingEvent(int t, int type, Point gPos, bool ib = false)
             : base(GameEventType.SpawnBuilding, t) {
             Type = type;
             GridPosition = gPos;
+            InstantBuild = ib;
         }
     }
 

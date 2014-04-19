@@ -38,6 +38,7 @@ namespace RTSEngine.Data.Team {
 
     public class RTSTeam {
         public static void Serialize(BinaryWriter s, RTSTeam team) {
+            s.Write(team.Type);
             RTSRace.Serialize(s, team.Race);
             if(team.Input != null) {
                 s.Write(true);
@@ -65,7 +66,8 @@ namespace RTSEngine.Data.Team {
             }
         }
         public static RTSTeam Deserialize(BinaryReader s, int index, GameState state) {
-            RTSTeam team = new RTSTeam(index);
+            int t = s.ReadInt32();
+            RTSTeam team = new RTSTeam(index, t);
             team.Race = RTSRace.Deserialize(s, state);
             if(s.ReadBoolean()) {
                 string it = s.ReadString();
@@ -126,6 +128,10 @@ namespace RTSEngine.Data.Team {
 
         // Index Into Game State
         public int Index {
+            get;
+            private set;
+        }
+        public int Type {
             get;
             private set;
         }
@@ -215,9 +221,10 @@ namespace RTSEngine.Data.Team {
         public event Action<RTSTeam, int> OnPopulationChange;
         public event Action<RTSTeam, int> OnPopulationCapChange;
 
-        public RTSTeam(int i) {
+        public RTSTeam(int i, int t) {
             Index = i;
             ColorScheme = RTSColorScheme.Default;
+            Type = t;
 
             // Teams Starts Out Empty
             Race = new RTSRace();
@@ -311,6 +318,7 @@ namespace RTSEngine.Data.Team {
             data.CurrentCount++;
 
             RTSBuilding b = new RTSBuilding(this, data, pos);
+            b.OnBuildingFinished += OnBuildingFinished;
             b.ActionController = Race.Buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
             Buildings.Add(b);
             if(OnBuildingSpawn != null)
@@ -319,16 +327,21 @@ namespace RTSEngine.Data.Team {
         }
         public void RemoveAll(Predicate<RTSBuilding> f) {
             var nb = new List<RTSBuilding>(buildings.Count);
+            int pc = 0;
             for(int i = 0; i < buildings.Count; i++) {
                 if(f(buildings[i])) {
+                    pc += buildings[i].Data.PopCapChange;
                     buildings[i].Data.CurrentCount--;
                 }
                 else
                     nb.Add(buildings[i]);
             }
+            if(pc != 0) PopulationCap -= pc;
             System.Threading.Interlocked.Exchange(ref buildings, nb);
-
-            Buildings.RemoveAll(f);
+        }
+        private void OnBuildingFinished(RTSBuilding b) {
+            if(b.Data.PopCapChange != 0)
+                PopulationCap += b.Data.PopCapChange;
         }
     }
 }

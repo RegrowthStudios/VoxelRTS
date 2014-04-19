@@ -41,16 +41,9 @@ namespace RTSEngine.Net {
             return s;
         }
 
-        public static void Serialize(ref byte[] buf, ref int off, VisualTeam vt) {
-            // Write Header
-            Write(ref buf, ref off, HEADER_VISUAL_TEAM);
-
+        public static void Serialize(ref byte[] buf, ref int off) {
         }
-
-        public static void Deserialize(ref byte[] buf, ref int off, out VisualTeam vt) {
-            vt = new VisualTeam();
-
-
+        public static void Deserialize(ref byte[] buf, ref int off) {
         }
     }
 }

@@ -25,8 +25,6 @@ namespace RTSEngine.Graphics {
      * When Building Selected: Building/Profile
      */
     public class RTSUI : IDisposable {
-        private const float LAYER_DELTA = 0.05f;
-
         private WidgetRenderer wrButtonPanel, wrMain;
 
         public Rectangle WindowSize {
@@ -55,6 +53,10 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        public RTSUITeamDataPanel TeamDataPanel {
+            get;
+            private set;
+        }
 
         public int ButtonRows {
             get;
@@ -78,6 +80,7 @@ namespace RTSEngine.Graphics {
             BuildBounds(renderer, ph, new Color(20, 20, 20));
             BuildMinimap(renderer, 5);
             BuildSelectionPanel(renderer);
+            BuildTeamDataPanel();
             SelectionPanel.IconLibrary = renderer.IconLibrary;
         }
         public void Dispose() {
@@ -86,6 +89,8 @@ namespace RTSEngine.Graphics {
             tTransparent.Dispose();
             wrButtonPanel.Dispose();
             wrMain.Dispose();
+            TeamDataPanel.Dispose();
+            SelectionPanel.Dispose();
         }
 
         private void BuildBounds(RTSRenderer renderer, int ph, Color c) {
@@ -112,7 +117,6 @@ namespace RTSEngine.Graphics {
             PanelBottom.AlignX = Alignment.MID;
             PanelBottom.AlignY = Alignment.BOTTOM;
             PanelBottom.Parent = rectBounds;
-            PanelBottom.LayerDepth = rectBounds.LayerDepth - LAYER_DELTA;
         }
         private void BuildMinimap(RTSRenderer renderer, int buf) {
             int s = PanelBottom.Height - buf * 2;
@@ -126,7 +130,6 @@ namespace RTSEngine.Graphics {
             Minimap.OffsetAlignX = Alignment.RIGHT;
             Minimap.OffsetAlignY = Alignment.BOTTOM;
             Minimap.Parent = PanelBottom;
-            Minimap.LayerDepth = PanelBottom.LayerDepth - LAYER_DELTA;
         }
         private void BuildSelectionPanel(RTSRenderer renderer) {
             SelectionPanel = new RTSUISelectionPanel(wrMain, 2, 4, 32, 4);
@@ -134,6 +137,10 @@ namespace RTSEngine.Graphics {
             SelectionPanel.BackPanel.AlignX = Alignment.RIGHT;
             SelectionPanel.BackPanel.Offset = new Point(-4, 0);
             SelectionPanel.LayerDepth = PanelBottom.LayerDepth - 0.01f;
+        }
+        private void BuildTeamDataPanel() {
+            TeamDataPanel = new RTSUITeamDataPanel(wrMain);
+            TeamDataPanel.Width = (rectBounds.Width * 5) / 7;
         }
 
         public void BuildButtonPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {
