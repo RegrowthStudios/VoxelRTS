@@ -5,7 +5,7 @@ NAME            [Headquarters]
 MODEL           [..\..\models\Barracks.obj]
 TEXMAIN         [..\..\textures\BarracksMain.png]
 TEXCOLOR        [..\..\textures\BarracksKey.png]
-ICON            [..\..\icons\Barracks.png]
+ICON            [..\..\icons\HQ Button.png]
 MAXCOUNT        [100]
 
 // Unit Data
