@@ -10,7 +10,7 @@ MAXCOUNT        [2000]
 
 // Unit Data
 HEALTH          [120]
-COST            [20]
+COST            [0]
 POPCAPCHANGE    [2]
 IMPACT          [5]
 BUILDAMOUNT     [20]

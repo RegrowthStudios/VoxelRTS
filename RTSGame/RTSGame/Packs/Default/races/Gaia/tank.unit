@@ -3,8 +3,8 @@ NAME            [Golem]
 
 // Unit Model
 MODEL           [..\..\models\RockGolem.obj]
-TEXMAIN         [..\..\textures\Dog.png]
-TEXCOLOR        [..\..\textures\DogKey.png]
+TEXMAIN         [..\..\textures\Golem.png]
+TEXCOLOR        [..\..\textures\NoKey.png]
 ANIMATION       [..\..\animations\RockGolem.png]
 ICON            [..\..\icons\Armored.png]
 MAXCOUNT        [1000]

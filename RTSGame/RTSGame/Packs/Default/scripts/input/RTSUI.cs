@@ -132,7 +132,7 @@ namespace RTSEngine.Graphics {
             Minimap.Parent = PanelBottom;
         }
         private void BuildSelectionPanel(RTSRenderer renderer) {
-            SelectionPanel = new RTSUISelectionPanel(wrMain, 2, 4, 32, 4);
+            SelectionPanel = new RTSUISelectionPanel(wrMain, 2, 4, 64, 4);
             SelectionPanel.BackPanel.Parent = Minimap;
             SelectionPanel.BackPanel.AlignX = Alignment.RIGHT;
             SelectionPanel.BackPanel.Offset = new Point(-4, 0);
