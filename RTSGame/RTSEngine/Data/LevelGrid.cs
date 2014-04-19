@@ -210,7 +210,7 @@ namespace RTSEngine.Data {
         public Region[,] Region { get; set; }
 
         // Stores The ImpactGenerators Of Each Cell Of The Impact Grid
-        public List<ImpactGenerator>[,] ImpactGenerators { get; set; }
+        public List<RTSBuilding>[,] ImpactGenerators { get; set; }
 
         // Stores The Impact of Each Cell Of The Impact Grid
         public int[,] CellImpact { get; private set; }
@@ -222,27 +222,26 @@ namespace RTSEngine.Data {
             cellSize = cg.size.X / numCells.X;
             size = cg.size;
             Region = new Region[numCells.X, numCells.Y];
-            ImpactGenerators = new List<ImpactGenerator>[numCells.X, numCells.Y];
+            ImpactGenerators = new List<RTSBuilding>[numCells.X, numCells.Y];
             CellImpact = new int[numCells.X, numCells.Y];
 
             for(int x = 0; x < numCells.X; x++) {
                 for(int y = 0; y < numCells.Y; y++) {
                     Region[x, y] = null;
-                    ImpactGenerators[x, y] = new List<ImpactGenerator>();
+                    ImpactGenerators[x, y] = new List<RTSBuilding>();
                     CellImpact[x, y] = 0;
                 }
             }
         }
 
         // Adds An Impact Generator To The Appropriate Cell In The Impact Grid
-        public void AddImpactGenerator(ImpactGenerator g) {
-            Point p = HashHelper.Hash(g.GridPosition, numCells, size);
-            ImpactGenerators[p.X, p.Y].Add(g);
-            g.GenerateImpact += AddToCellImpact;
+        public void AddImpactGenerator(RTSBuilding b) {
+            Point p = HashHelper.Hash(b.GridPosition, numCells, size);
+            ImpactGenerators[p.X, p.Y].Add(b);
         }
 
-        // Listens To GenerateImpact Events And Adds Impact To The Appropriate Cell And Region 
-        public void AddToCellImpact(Vector2 pos, int amount) {
+        // Adds Impact To The Appropriate Cell And Region 
+        public void AddImpact(Vector2 pos, int amount) {
             Point p = HashHelper.Hash(pos, numCells, size);
             CellImpact[p.X, p.Y] += amount;
             Region[p.X, p.Y].AddToRegionImpact(amount);

@@ -115,9 +115,11 @@ namespace RTS.Input {
 
             for(int i = 0; i < Team.Buildings.Count; i++) {
                 Team.Buildings[i].OnDamage += OnBuildingDamage;
+                grid.AddImpactGenerator(Team.Buildings[i]);
             }
             Team.OnBuildingSpawn += (b) => {
                 b.OnDamage += OnBuildingDamage;
+                grid.AddImpactGenerator(b);
             };
         }
 
@@ -130,10 +132,9 @@ namespace RTS.Input {
                 }
                 DevConsole.AddCommand("Tick");
                 DevConsole.AddCommand("DT: " + (counter % DisasterTime));
-                UpdateUnitsInRegion();
+                
                 if(counter % DisasterTime == 0) {
                     CreateDisaster();
-                    
                 }
                 if(counter % RecoverTime == 0) {
                     Recover();
@@ -154,16 +155,6 @@ namespace RTS.Input {
             running = false;
             paused = false;
             thread.Join();
-        }
-
-        private void UpdateUnitsInRegion() {
-            foreach(var r in GameState.Regions) {
-                r.units = new List<IEntity>();
-            }
-            foreach(var u in Team.Units) {
-                Point unitI = HashHelper.Hash(u.GridPosition, grid.numCells, grid.size);
-                grid.Region[unitI.X, unitI.Y].units.Add(u);
-            }
         }
 
         // Recovery Phase
@@ -195,7 +186,7 @@ namespace RTS.Input {
                     // Regenerate Ore Health
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
-                            if(o.BuildingData.FriendlyName.Equals(OreData.FriendlyName)) {
+                            if(o.Data.FriendlyName.Equals(OreData.FriendlyName)) {
                                 o.Health += RecoverImpact;
                                 r.AddToRegionImpact(-(OreData.Impact / RecoverImpact));
                             }
@@ -227,7 +218,7 @@ namespace RTS.Input {
                     
                     // Create the appropriate disaster
                     if (type == 0) {
-                        SpawnUnits(r, level);
+                        //SpawnUnits(r, level);
                     }
                     else {
                         if (level == 1) {
@@ -244,25 +235,38 @@ namespace RTS.Input {
             }
         }
 
-        // Natural Disasters
+        // Natural Disaster That Damages Both Units And Buildings
         private void CreateFire(Region r) {
 
+
         }
 
+        // Natural Disaster That Damages Units
         private void CreateLightning(Region r) {
-
-        }
-
-        private void CreateEarthquake(Region r) {
             foreach (var c in r.Cells) {
-                foreach (var ig in grid.ImpactGenerators[c.X,c.Y]) {
-                    
-                        
-                }
+
+                
             }
         }
 
 
+        // Natural Disaster That Damages Buildings
+        private void CreateEarthquake(Region r) {
+            foreach (var c in r.Cells) {
+                foreach (var b in grid.ImpactGenerators[c.X,c.Y]) {
+                    if (b.Team != Team) {
+                        bool takeDamage = (random.Next(1) == 0);
+                        int damageAmount = 0;
+                        if (takeDamage) {
+                            b.Damage(damageAmount);
+                        }
+                    }   
+                }
+            }
+        }
+
+        /*
+        //FIX THIS
         private void SpawnUnits(Region r, int level) {
             // Find The Cell With The Largest Impact
             Point p = r.Cells.First();
@@ -282,8 +286,8 @@ namespace RTS.Input {
                 var ig = grid.ImpactGenerators[p.X, p.Y];
                 int igi = random.Next(ig.Count);
                 for (int i = 0; i < ig.Count; i++) {
-                    if (ig[i].BuildingData.FriendlyName.Equals(OreData.FriendlyName) ||
-                        ig[i].BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
+                    if (ig[i].Data.FriendlyName.Equals(OreData.FriendlyName) ||
+                        ig[i].Data.FriendlyName.Equals(FloraData.FriendlyName)) {
                         igi--;
                         if (igi == 0)
                             g = ig[i];
@@ -334,7 +338,8 @@ namespace RTS.Input {
                 AddEvent(new SetTargetEvent(TeamIndex, target));
             }
         }
-
+        */
+         
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize
         }
@@ -344,9 +349,8 @@ namespace RTS.Input {
 
         private void OnBuildingDamage(IEntity e, int d) {
             RTSBuilding building = e as RTSBuilding;
-            Point p = HashHelper.Hash(e.GridPosition, grid.numCells, grid.size);
             int imp = building.Data.Impact * d;
-            grid.Region[p.X, p.Y].AddToRegionImpact(imp);
+            grid.AddImpact(e.GridPosition, imp);
             DevConsole.AddCommand("Impact Added " + imp);
         }
     }
