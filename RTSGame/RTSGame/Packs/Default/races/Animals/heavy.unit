@@ -6,7 +6,7 @@ MODEL           [..\..\models\Dog.obj]
 TEXMAIN         [..\..\textures\Dog.png]
 TEXCOLOR        [..\..\textures\DogKey.png]
 ANIMATION       [..\..\animations\Dog.png]
-ICON            [..\..\icons\Heavy.png]
+ICON            [..\..\icons\Heavy Soldier Button.png]
 MAXCOUNT        [1000]
 
 // Unit Data
