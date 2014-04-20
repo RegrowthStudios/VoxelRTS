@@ -98,6 +98,9 @@ namespace RTSEngine.Data.Team {
         // Time To Build The Building
         public int BuildAmount;
 
+        // Can deposit resources
+        public bool Depositable;
+
         // View Radius
         public int SightRadius;
 
