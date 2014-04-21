@@ -2,9 +2,9 @@
 NAME            [Headquarters]
 
 // Unit Model
-MODEL           [..\..\models\Barracks.obj]
-TEXMAIN         [..\..\textures\BarracksMain.png]
-TEXCOLOR        [..\..\textures\BarracksKey.png]
+MODEL           [..\..\models\HQ.model]
+TEXMAIN         [..\..\textures\HQMain.png]
+TEXCOLOR        [..\..\textures\NoKey.png]
 ICON            [..\..\icons\HQButton.png]
 MAXCOUNT        [100]
 
