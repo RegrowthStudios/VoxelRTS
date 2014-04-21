@@ -110,7 +110,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 tbFOWCalculations.AddTask(new FOWTask(s, s.activeTeams[ti].Index));
             }
-            pathfinder = new Pathfinder(s.CGrid);
+            pathfinder = new Pathfinder(s);
 
             // Start The Input Controllers
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
@@ -276,10 +276,10 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
-            if(unit.ActionController != null) unit.ActionController.Init(s, this);
             if(unit.CombatController != null) unit.CombatController.Init(s, this);
             if(unit.MovementController != null) unit.MovementController.Init(s, this);
             if(unit.AnimationController != null) unit.AnimationController.Init(s, this);
+            if(unit.ActionController != null) unit.ActionController.Init(s, this);
 
             var btu = new BTaskUnitDecision(s, unit);
             unit.OnDestruction += (o) => {
@@ -289,9 +289,9 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSSquad squad) {
             // Init The Squad
-            if(squad.ActionController != null) squad.ActionController.Init(s, this);
-            if(squad.MovementController != null) squad.MovementController.Init(s, this);
             if(squad.TargetingController != null) squad.TargetingController.Init(s, this);
+            if(squad.MovementController != null) squad.MovementController.Init(s, this);
+            if(squad.ActionController != null) squad.ActionController.Init(s, this);
 
             var bts = new BTaskSquadDecision(s, squad);
             squad.OnDeath += (o) => {
@@ -341,6 +341,7 @@ namespace RTSEngine.Controllers {
                 query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
             else
                 return;
+            squad.MovementController.Query = query;
             squadQueries.Add(new SquadQuery(squad, query));
             pathfinder.Add(query);
         }

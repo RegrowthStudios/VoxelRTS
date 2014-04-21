@@ -14,59 +14,36 @@ namespace RTS.Default.Squad {
     public class Action : ACSquadActionController {
         Targeting tc;
         Movement mc;
-        Dictionary<int, int> origTargetOrders = new Dictionary<int, int>();
 
         public override void Init(GameState s, GameplayController c) {
             tc = squad.TargetingController as Targeting;
             mc = squad.MovementController as Movement;
-            for(int i = 0; i < squad.Units.Count; i++) {
-                RTSUnit unit = squad.Units[i];
-                origTargetOrders[unit.UUID] = unit.TargetingOrders;
-            }
         }
 
         public override void DecideAction(GameState g, float dt) {
-            // // Having A Target Trumps Regular Movement
-            //else if(squad.TargetingController != null && squad.TargetingController.Target != null) {
-            //    RTSUnit target = unit.Target as RTSUnit;
-            //    if(target != null) {
-            //        switch(unit.CombatOrders) {
-            //            case BehaviorFSM.UseMeleeAttack:
-            //                float r = unit.CollisionGeometry.BoundingRadius + target.CollisionGeometry.BoundingRadius;
-            //                r *= 1.3f;
-            //                DoTargeting(g, dt, unit, target, r);
-            //                if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
-            //                    unit.State = BehaviorFSM.CombatMelee;
-            //                break;
-            //            default: // case BehaviorFSM.UseRangedAttack:
-            //                r = unit.UnitData.BaseCombatData.MaxRange;
-            //                DoTargeting(g, dt, unit, target, r);
-            //                if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
-            //                    unit.State = BehaviorFSM.CombatRanged;
-            //                break;
-            //        }
-            //    }
-            //}
-            if(tc != null)
+            if(tc != null) { 
                 tc.DecideTarget(g, dt);
+            }
             if(mc != null) {
+                var doMove = mc.doMove;
                 foreach(var unit in squad.Units) {
                     mc.DecideMove(g, dt, unit);
-                    var doMove = mc.doMove;
                     if(doMove.ContainsKey(unit.UUID) && (doMove[unit.UUID])) {
                         unit.State = BehaviorFSM.Walking;
+                        // TODO: Change This To Allow A-Move
                         unit.TargetingOrders = BehaviorFSM.TargetNone;
                     }
                     else if(!(unit.State == BehaviorFSM.CombatMelee || unit.State == BehaviorFSM.CombatRanged)) {
                         unit.State = BehaviorFSM.Rest;
-                        unit.TargetingOrders = origTargetOrders[unit.UUID];
+                        unit.TargetingOrders = tc.origTargetOrders[unit.UUID];
                     }
                 }
             }
         }
         public override void ApplyAction(GameState g, float dt) {
-            if(tc != null)
-                squad.TargetingController.ApplyTarget(g, dt);
+            if(tc != null) {
+                tc.ApplyTarget(g, dt);
+            }
             if(mc != null) {
                 var doMove = mc.doMove;
                 foreach(var unit in squad.Units) {
@@ -85,71 +62,140 @@ namespace RTS.Default.Squad {
         }
     }
 
+    public class Targeting : ACSquadTargetingController {
+        int teamIndex;
+        public readonly Dictionary<int, int> origTargetOrders = new Dictionary<int, int>();
+
+        public override void Init(GameState s, GameplayController c) {
+            teamIndex = squad.Team.Index;
+            for(int i = 0; i < squad.Units.Count; i++) {
+                RTSUnit unit = squad.Units[i];
+                origTargetOrders[unit.UUID] = unit.TargetingOrders;
+            }
+        }
+        public override void DecideTarget(GameState g, float dt) {
+            if(target == null) {
+                FindTargetUnit(g);
+                if(target == null) // No Units Found
+                    FindTargetBuilding(g);
+            }
+            else {
+                bool inFog = g.CGrid.GetFogOfWar(target.GridPosition, teamIndex) != FogOfWar.Active;
+                if(!target.IsAlive || inFog)
+                    target = null;
+            }
+        }
+        private void FindTargetUnit(GameState g) {
+            target = null;
+            float minDist = float.MaxValue;
+            for(int ti = 0; ti < g.activeTeams.Length; ti++) {
+                // Don't Automatically Self-Target
+                if(g.activeTeams[ti].Index == teamIndex)
+                    continue;
+                RTSTeam team = g.activeTeams[ti].Team;
+                for(int i = 0; i < team.Units.Count; i++) {
+                    // This Check Makes Sure The Candidate Target Is In Range Of The Squad
+                    if(g.CGrid.GetFogOfWar(team.Units[i].GridPosition, teamIndex) != FogOfWar.Active)
+                        continue;
+                    float d = (team.Units[i].GridPosition - squad.GridPosition).LengthSquared();
+                    if(d < minDist) {
+                        TargetUnit = team.Units[i];
+                        minDist = d;
+                    }
+                }
+            }
+        }
+        private void FindTargetBuilding(GameState g) {
+            target = null;
+            float minDist = float.MaxValue;
+            for(int ti = 0; ti < g.activeTeams.Length; ti++) {
+                // Don't Automatically Self-Target
+                if(g.activeTeams[ti].Index == teamIndex)
+                    continue;
+                RTSTeam team = g.activeTeams[ti].Team;
+                for(int i = 0; i < team.Units.Count; i++) {
+                    // This Check Makes Sure The Candidate Target Is In Range Of The Squad
+                    if(g.CGrid.GetFogOfWar(team.Buildings[i].GridPosition, teamIndex) != FogOfWar.Active)
+                        continue;
+                    float d = (team.Buildings[i].GridPosition - squad.GridPosition).LengthSquared();
+                    if(d < minDist) {
+                        TargetBuilding = team.Buildings[i];
+                        minDist = d;
+                    }
+                }
+            }
+        }
+
+        public override void ApplyTarget(GameState g, float dt) {
+            // TODO: Think About Targeting Buildings. Melee Units
+            for(int u = 0; u < squad.Units.Count; u++) {
+                RTSUnit unit = squad.Units[u];
+                if(unit.TargetingOrders != BehaviorFSM.TargetNone)
+                    unit.Target = target;
+            }
+        }
+
+        public override void Serialize(BinaryWriter s) {
+            // TODO: Implement Serialize
+        }
+        public override void Deserialize(BinaryReader s) {
+            // TODO: Implement Deserialize
+        }
+    }
+
     public class Movement : ACSquadMovementController {
-        // Whether Units In This Squad Have Decided To Move (Key: UUID)
-        public readonly Dictionary<int, bool> doMove = new Dictionary<int, bool>();
+        // The Constants Used In Flow Field Calculations
+        protected const float rForce = 10f;
+        protected const float aForce = -200f;
 
         // The Whole Squad Will Move At The Min Default Movespeed
         float minDefaultMoveSpeed;
 
-        // Squad Radius Squared
+        // Used For Movement Halting Logic
         float squadRadiusSquared = 0f;
 
-        // The Centroid Of The Squad
-        Vector2 centroid;
-
-        // Get The Force Between A Unit And A Path Made Of Waypoints 
-        private Vector2 GetForce(RTSUnit unit, List<Vector2> waypoints) {
-            if(Waypoints == null || Waypoints.Count == 0) return Vector2.Zero;
-            Vector2 goal = Waypoints[0];
-            float minDistSq = float.MaxValue;
-            Vector2 seg = Vector2.Zero;
-            for(int w = Waypoints.Count - 2; w >= 0; w--) {
-                Vector2 a = Waypoints[w + 1];
-                Vector2 b = Waypoints[w];
-                float d = DistSq(a, b, unit.GridPosition);
-                if(d < minDistSq) {
-                    seg = b - a;
-                    minDistSq = d;
-                }
-            }
-            return PathForce(seg, minDistSq);
+        // The Net Force On Each Unit In This Squad
+        // Key: UUID; Value: Net Force
+        private Dictionary<int, Vector2> netForces = new Dictionary<int, Vector2>();
+        public Dictionary<int, Vector2> NetForces {
+            get { return netForces; }
+            set { netForces = value; }
         }
 
-        // Calculate The Path Force At A Certain Distance Away From The Path
-        private Vector2 PathForce(Vector2 pathSegment, float dist) {
-            Vector2 force = Vector2.Zero;
-            if(dist == 0f) {
-                force = new Vector2(1, 0);
-            }
-            else {
-                force = new Vector2(1f / dist, dist);
-                force.Normalize();
-            }
-            float a = (float)Math.Atan2(pathSegment.Y, pathSegment.X) + (float)Math.PI/2;
-            var mr = Matrix.CreateRotationZ(a);
-            force = Vector2.TransformNormal(force, mr);
-            return aForce*force;
+        // Whether Units In This Squad Have Decided To Move (Key: UUID)
+        public readonly Dictionary<int, bool> doMove = new Dictionary<int, bool>();
+
+        // Calculate The Force Between Two Locations
+        public Vector2 Force(Vector2 a, Vector2 b) {
+            Vector2 diff = a - b;
+            float denom = diff.LengthSquared();
+            return diff.X != 0 && diff.Y != 0 ? 1 / denom * Vector2.Normalize(diff) : Vector2.Zero;
         }
 
-        // Calculate The Distance Squared Between A Line Segment (A,B) And A Point P
-        private float DistSq(Vector2 a, Vector2 b, Vector2 p) {
-            Vector2 seg = b - a;
-            if(seg.X == 0 && seg.Y == 0) return (p - a).LengthSquared();
-            float mag = seg.LengthSquared();
-            float t = Vector2.Dot(p - a, seg) / mag;
-            if(t < 0) return (p - a).LengthSquared();
-            else if(t > mag) return (p - b).LengthSquared();
-            Vector2 proj = a + t * seg/mag;
-            return (proj - p).LengthSquared();
+        // Calculate The Force Between Two IEntities
+        public Vector2 Force(IEntity e1, IEntity e2) {
+            return rForce * Force(e1.GridPosition, e2.GridPosition);
         }
 
-        private void UpdateCentroid() {
-            centroid = Vector2.Zero;
-            foreach(var unit in squad.Units) {
-                centroid += unit.GridPosition;
+        // Calculate The Force Between An IEntity And A Waypoint
+        public Vector2 Force(IEntity e, Vector2 wp) {
+            return aForce * Force(e.GridPosition, wp);
+        }
+
+        protected const int historySize = 20;
+        // The Last Few Locations Each Unit Has Been To
+        private Dictionary<int, Queue<Vector2>> unitHistory = new Dictionary<int, Queue<Vector2>>();
+        public Dictionary<int, Queue<Vector2>> UnitHistory {
+            get { return unitHistory; }
+            set { unitHistory = value; }
+        }
+
+        public void AddToHistory(RTSUnit unit, Vector2 location) {
+            if(UnitHistory.ContainsKey(unit.UUID)) {
+                if(UnitHistory[unit.UUID].Count >= historySize)
+                    UnitHistory[unit.UUID].Dequeue();
+                UnitHistory[unit.UUID].Enqueue(location);
             }
-            centroid /= squad.Units.Count;
         }
 
         public override void Init(GameState s, GameplayController c) {
@@ -164,37 +210,27 @@ namespace RTS.Default.Squad {
         }
 
         public override void DecideMove(GameState g, float dt, RTSUnit unit) {
-            //UpdateCentroid();
             doMove[unit.UUID] = CurrentWaypointIndices.ContainsKey(unit.UUID) && IsValid(CurrentWaypointIndices[unit.UUID]);
             if(!doMove[unit.UUID]) return;
-            // Pathfinding Has Not Finished: Make The Formation At The Average Squad Position
-            if(Waypoints == null || Waypoints.Count == 0) {
-                SetNetForceAndWaypoint(g, unit, squad.GridPosition, null);
-            }
-            // Regular Movement 
-            else {
-                if(CurrentWaypointIndices.ContainsKey(unit.UUID) && IsValid(CurrentWaypointIndices[unit.UUID])) {
-                    Vector2 waypoint = squad.MovementController.Waypoints[CurrentWaypointIndices[unit.UUID]];
-                    SetNetForceAndWaypoint(g, unit, waypoint, null);
-                }
-            }
+            Vector2 waypoint = squad.MovementController.Waypoints[CurrentWaypointIndices[unit.UUID]];
+            SetNetForceAndWaypoint(g, unit, waypoint);
         }
         public override void ApplyMove(GameState g, float dt, RTSUnit unit) {
             AddToHistory(unit, unit.GridPosition);
-            Vector2 change = NetForces.ContainsKey(unit.UUID) ? NetForces[unit.UUID] : Vector2.Zero;
-            if(change != Vector2.Zero) {
-                float magnitude = change.Length();
-                Vector2 scaledChange = (change / magnitude) * minDefaultMoveSpeed * dt;
+            Vector2 netForce = NetForces.ContainsKey(unit.UUID) ? NetForces[unit.UUID] : Vector2.Zero;
+            if(netForce != Vector2.Zero) {
+                float magnitude = netForce.Length();
+                Vector2 scaledChange = (netForce / magnitude) * minDefaultMoveSpeed * dt;
+                // TODO: Make Sure We Don't Overshoot The Goal But Otherwise Move At Max Speed
                 if(scaledChange.LengthSquared() > magnitude * magnitude)
-                    unit.Move(change);
+                    unit.Move(netForce);
                 else
                     unit.Move(scaledChange);
             }
         }
 
-        private void SetNetForceAndWaypoint(GameState g, RTSUnit unit, Vector2 waypoint, List<Vector2> targetFormation) {
+        private void SetNetForceAndWaypoint(GameState g, RTSUnit unit, Vector2 waypoint) {
             // Set Net Force...
-            //Vector2 netForce = GetForce(unit, Waypoints);
             Vector2 netForce = squad.Units.Count * Force(unit, waypoint);
             CollisionGrid cg = g.CGrid;
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
@@ -203,8 +239,7 @@ namespace RTS.Default.Squad {
                 netForce += Force(unit, otherUnit);
             }
             // Apply Forces From Buildings And Other Units Near This One
-            IEnumerable<Point> neighborhood = Pathfinder.NeighborhoodAlign(unitCell).Concat<Point>(Pathfinder.NeighborhoodDiag(unitCell));
-            foreach(Point n in neighborhood) {
+            foreach(Point n in Pathfinder.Neighborhood(unitCell)) {
                 RTSBuilding b = cg.EStatic[n.X, n.Y];
                 if(b != null)
                     netForce += Force(unit, b);
@@ -212,109 +247,20 @@ namespace RTS.Default.Squad {
                     netForce += Force(unit, otherUnit);
                 }
             }
+            // Apply Forces From Units Recent Locations To Push It Forward
             if(UnitHistory.ContainsKey(unit.UUID)) {
                 foreach(var prevLocation in UnitHistory[unit.UUID]) {
                     netForce -= Force(unit, prevLocation);
                 }
             }
             NetForces[unit.UUID] = netForce;
-
             // Set Waypoint...
             Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
             bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
-            if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < 1.5*squadRadiusSquared) {
+            if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < 1.5 * squadRadiusSquared) {
                 CurrentWaypointIndices[unit.UUID]--;
             }
         }
-
-        // TODO: Make This Predict (Or Omnisciently Read) Where The Target Will Be Because It Could Be Moving
-        private void DoTargeting(GameState g, float dt, RTSUnit unit, RTSUnit target, float r) {
-            if(CurrentWaypointIndices.ContainsKey(unit.UUID) && IsValid(CurrentWaypointIndices[unit.UUID])) {
-                Vector2 waypoint = Waypoints[CurrentWaypointIndices[unit.UUID]];
-                bool waypointIsTarget = waypoint.X == target.GridPosition.X && waypoint.Y == target.GridPosition.Y;
-                if(waypointIsTarget) {
-                    List<Vector2> targetFormation = new List<Vector2>();
-                    float step = (float)Math.PI / 16;
-                    float angle = 0;
-                    while(angle < 2 * Math.PI) {
-                        targetFormation.Add(new Vector2((float)(r * Math.Sin(angle)), (float)(r * Math.Sin(angle))));
-                        angle += step;
-                    }
-                    SetNetForceAndWaypoint(g, unit, waypoint, targetFormation);
-                }
-                else {
-                    SetNetForceAndWaypoint(g, unit, waypoint, null);
-                }
-            }
-        }
-
-        public override void Serialize(BinaryWriter s) {
-            // TODO: Implement Serialize
-        }
-        public override void Deserialize(BinaryReader s) {
-            // TODO: Implement Deserialize
-        }
-    }
-
-    public class Targeting : ACSquadTargetingController {
-        int teamIndex;
-        public override void Init(GameState s, GameplayController c) {
-            teamIndex = squad.Team.Index;
-        }
-
-        public override void DecideTarget(GameState g, float dt) {
-            if(target == null) {
-                FindTargetUnit(g);
-            }
-            else if(!target.IsAlive) {
-                target = null;
-            }
-            else if(g.CGrid.GetFogOfWar(target.GridPosition, teamIndex) != FogOfWar.Active) {
-                target = null;
-            }
-        }
-        private void FindTargetSquad(GameState g) {
-            targetSquad = null;
-            float minDist = float.MaxValue;
-            for(int i = 0; i < g.activeTeams.Length; i++) {
-                RTSTeam team = g.activeTeams[i].Team;
-                if(team == squad.Team) continue;
-                foreach(var sq in team.Squads) {
-                    float d = (sq.GridPosition - squad.GridPosition).LengthSquared();
-                    if(d < minDist) {
-                        targetSquad = sq;
-                        minDist = d;
-                    }
-                }
-            }
-        }
-        private void FindTargetUnit(GameState g) {
-            target = null;
-            float minDist = float.MaxValue;
-            for(int ti = 0; ti < g.activeTeams.Length; ti++) {
-                // Don't Automatically Self-Target
-                if(g.activeTeams[ti].Index == teamIndex)
-                    continue;
-
-                RTSTeam team = g.activeTeams[ti].Team;
-                for(int i = 0; i < team.Units.Count; i++) {
-                    if(g.CGrid.GetFogOfWar(team.Units[i].GridPosition, teamIndex) != FogOfWar.Active)
-                        continue;
-                    float d = (team.Units[i].GridPosition - squad.GridPosition).LengthSquared();
-                    if(d < minDist) {
-                        TargetUnit = team.Units[i];
-                        minDist = d;
-                    }
-                }
-            }
-        }
-        public override void ApplyTarget(GameState g, float dt) {
-            foreach(var unit in squad.Units) {
-                if(unit.TargetingOrders != BehaviorFSM.TargetNone)
-                    unit.Target = target;
-            }
-        }
-
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize
         }
@@ -323,3 +269,102 @@ namespace RTS.Default.Squad {
         }
     }
 }
+
+// // Having A Target Trumps Regular Movement
+//else if(squad.TargetingController != null && squad.TargetingController.Target != null) {
+//    RTSUnit target = unit.Target as RTSUnit;
+//    if(target != null) {
+//        switch(unit.CombatOrders) {
+//            case BehaviorFSM.UseMeleeAttack:
+//                float r = unit.CollisionGeometry.BoundingRadius + target.CollisionGeometry.BoundingRadius;
+//                r *= 1.3f;
+//                DoTargeting(g, dt, unit, target, r);
+//                if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
+//                    unit.State = BehaviorFSM.CombatMelee;
+//                break;
+//            default: // case BehaviorFSM.UseRangedAttack:
+//                r = unit.UnitData.BaseCombatData.MaxRange;
+//                DoTargeting(g, dt, unit, target, r);
+//                if(!doMove[unit.UUID] && unit.State == BehaviorFSM.Walking)
+//                    unit.State = BehaviorFSM.CombatRanged;
+//                break;
+//        }
+//    }
+//}
+
+ //// There Is A Straigt-Line Path From A To B That Intersects No Collidable Objects
+ //       private bool CoastIsClear(Vector2 a, Vector2 b, float stepSize, float radius, CollisionGrid cg) {
+ //           Vector2 dist = b - a;
+ //           float slope = dist.Y / dist.X;
+ //           float x = a.X;
+ //           float y = a.Y;
+ //           float rSq = (float)Math.Sqrt(radius);
+ //           while(x < b.X && y < b.Y) {
+ //               // TODO: Check Collisions Based On Radius
+ //               bool collision = cg.GetCollision(new Vector2(x, y));
+ //               // Cardinal Stuff
+ //               collision |= cg.GetCollision(new Vector2(x + radius, y));
+ //               collision |= cg.GetCollision(new Vector2(x + radius / 2.0f, y));
+ //               collision |= cg.GetCollision(new Vector2(x - radius, y));
+ //               collision |= cg.GetCollision(new Vector2(x - radius / 2.0f, y));
+ //               collision |= cg.GetCollision(new Vector2(x, y + radius));
+ //               collision |= cg.GetCollision(new Vector2(x, y + radius / 2.0f));
+ //               collision |= cg.GetCollision(new Vector2(x, y - radius));
+ //               collision |= cg.GetCollision(new Vector2(x, y - radius / 2.0f));
+ //               collision |= cg.GetCollision(new Vector2(x + rSq, y + rSq));
+ //               collision |= cg.GetCollision(new Vector2(x + rSq, y - rSq));
+ //               collision |= cg.GetCollision(new Vector2(x - rSq, y + rSq));
+ //               collision |= cg.GetCollision(new Vector2(x - rSq, y - rSq));
+ //               if(collision)
+ //                   return false;
+ //               x += stepSize;
+ //               y += stepSize;
+ //           }
+ //           return true;
+ //       }
+
+//// Get The Force Between A Unit And A Path Made Of Waypoints 
+//private Vector2 GetForce(RTSUnit unit, List<Vector2> waypoints) {
+//    if(Waypoints == null || Waypoints.Count == 0) return Vector2.Zero;
+//    Vector2 goal = Waypoints[0];
+//    float minDistSq = float.MaxValue;
+//    Vector2 seg = Vector2.Zero;
+//    for(int w = Waypoints.Count - 2; w >= 0; w--) {
+//        Vector2 a = Waypoints[w + 1];
+//        Vector2 b = Waypoints[w];
+//        float d = DistSq(a, b, unit.GridPosition);
+//        if(d < minDistSq) {
+//            seg = b - a;
+//            minDistSq = d;
+//        }
+//    }
+//    return PathForce(seg, minDistSq);
+//}
+
+//// Calculate The Path Force At A Certain Distance Away From The Path
+//private Vector2 PathForce(Vector2 pathSegment, float dist) {
+//    Vector2 force = Vector2.Zero;
+//    if(dist == 0f) {
+//        force = new Vector2(1, 0);
+//    }
+//    else {
+//        force = new Vector2(1f / dist, dist);
+//        force.Normalize();
+//    }
+//    float a = (float)Math.Atan2(pathSegment.Y, pathSegment.X) + (float)Math.PI/2;
+//    var mr = Matrix.CreateRotationZ(a);
+//    force = Vector2.TransformNormal(force, mr);
+//    return aForce*force;
+//}
+
+//// Calculate The Distance Squared Between A Line Segment (A,B) And A Point P
+//private float DistSq(Vector2 a, Vector2 b, Vector2 p) {
+//    Vector2 seg = b - a;
+//    if(seg.X == 0 && seg.Y == 0) return (p - a).LengthSquared();
+//    float mag = seg.LengthSquared();
+//    float t = Vector2.Dot(p - a, seg) / mag;
+//    if(t < 0) return (p - a).LengthSquared();
+//    else if(t > mag) return (p - b).LengthSquared();
+//    Vector2 proj = a + t * seg/mag;
+//    return (proj - p).LengthSquared();
+//}
