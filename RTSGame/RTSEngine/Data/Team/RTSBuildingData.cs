@@ -19,6 +19,7 @@ namespace RTSEngine.Data.Team {
             s.Write(data.IsResource);
             s.Write(data.Impact);
             s.Write(data.BuildAmount);
+            s.Write(data.Depositable);
             s.Write(data.SightRadius);
             s.Write(data.GridSize);
             s.Write((int)data.ICollidableShape.CollisionType);
@@ -50,6 +51,7 @@ namespace RTSEngine.Data.Team {
             data.IsResource = s.ReadBoolean();
             data.Impact = s.ReadInt32();
             data.BuildAmount = s.ReadInt32();
+            data.Depositable = s.ReadBoolean();
             data.SightRadius = s.ReadInt32();
             data.GridSize = s.ReadPoint();
             CollisionType ct = (CollisionType)s.ReadInt32();

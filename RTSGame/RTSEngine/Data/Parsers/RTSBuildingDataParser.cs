@@ -22,6 +22,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxPPC = RegexHelper.GenerateInteger("POPCAPCHANGE");
         private static readonly Regex rgxImpact = RegexHelper.GenerateInteger("IMPACT");
         private static readonly Regex rgxBuildAmount = RegexHelper.GenerateInteger("BUILDAMOUNT");
+        private static readonly Regex rgxDepositable = RegexHelper.GenerateInteger("DEPOSITABLE");
         private static readonly Regex rgxSightRadius = RegexHelper.GenerateInteger("SIGHTRADIUS");
         private static readonly Regex rgxGridSize = RegexHelper.GenerateVec2Int("GRIDSIZE");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
@@ -99,6 +100,7 @@ namespace RTSEngine.Data.Parsers {
                 rgxPPC.Match(mStr),
                 rgxImpact.Match(mStr),
                 rgxBuildAmount.Match(mStr),
+                rgxDepositable.Match(mStr),
                 rgxSightRadius.Match(mStr),
                 rgxGridSize.Match(mStr),
                 rgxBBMin.Match(mStr),
@@ -121,6 +123,7 @@ namespace RTSEngine.Data.Parsers {
             data.PopCapChange = RegexHelper.ExtractInt(mp[ri++]);
             data.Impact = RegexHelper.ExtractInt(mp[ri++]);
             data.BuildAmount = RegexHelper.ExtractInt(mp[ri++]);
+            data.Depositable = RegexHelper.ExtractInt(mp[ri++]) == 0 ? false : true;
             data.SightRadius = RegexHelper.ExtractInt(mp[ri++]);
             buf = RegexHelper.ExtractVec2I(mp[ri++]);
             data.GridSize.X = buf[0];

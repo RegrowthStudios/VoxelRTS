@@ -17,6 +17,7 @@ BUILDAMOUNT     [20]
 SIGHTRADIUS     [8]
 GRIDSIZE        [1, 1]
 RESOURCE        [1]
+DEPOSITABLE		[0]
 
 // Collision Data
 BBOXMIN         [-1 , 0.0 , -1]
