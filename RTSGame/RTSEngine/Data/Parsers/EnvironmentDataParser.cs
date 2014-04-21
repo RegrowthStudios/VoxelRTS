@@ -24,7 +24,7 @@ namespace RTSEngine.Data.Parsers {
                     L1SpawnCap = 10,
                     L2SpawnCap = 20,
                     L3SpawnCap = 30,
-                    RecoverImpact = 500,
+                    OreRecoverHealth = 50,
                     SpawnOffset = 30,
                     L1MinNumSpawn = new int[] {3,1,0},
                     L2MinNumSpawn = new int[] { 6, 3, 1 },
@@ -35,7 +35,11 @@ namespace RTSEngine.Data.Parsers {
                     LightningHitP = 70,
                     LightningDamage = 10,
                     EarthquakeHitP = 40,
-                    EarthquakeDamage = 20
+                    EarthquakeDamage = 20,
+                    FireHitUnitP = 80,
+                    FireUnitDamage = 15,
+                    FireHitBuildingP = 60,
+                    FireBuildingDamage = 40
                 };
             }
         }
@@ -57,7 +61,7 @@ namespace RTSEngine.Data.Parsers {
         public int L2SpawnCap;
         public int L3SpawnCap;
 
-        public int RecoverImpact;
+        public int OreRecoverHealth;
         public int SpawnOffset;
 
         public int[] L1MinNumSpawn;
@@ -71,6 +75,10 @@ namespace RTSEngine.Data.Parsers {
         public int LightningDamage;
         public int EarthquakeHitP;
         public int EarthquakeDamage;
+        public int FireHitUnitP;
+        public int FireUnitDamage; 
+        public int FireHitBuildingP;  
+        public int FireBuildingDamage;
         
     }
 
@@ -90,7 +98,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxL1SpawnCap = RegexHelper.GenerateInteger("LEVELONESPAWNCAP");
         private static readonly Regex rgxL2SpawnCap = RegexHelper.GenerateInteger("LEVELTWOSPAWNCAP");
         private static readonly Regex rgxL3SpawnCap = RegexHelper.GenerateInteger("LEVELTHREESPAWNCAP");
-        private static readonly Regex rgxRecoverImpact = RegexHelper.GenerateInteger("RECOVERIMPACT");
+        private static readonly Regex rgxOreRecoverHealth = RegexHelper.GenerateInteger("ORERECOVERHEALTH");
         private static readonly Regex rgxSpawnOffset = RegexHelper.GenerateInteger("SPAWNOFFSET");
         private static readonly Regex rgxL1MinNumSpawn = RegexHelper.GenerateVec3Int("L1MINNUMSPAWN");
         private static readonly Regex rgxL2MinNumSpawn = RegexHelper.GenerateVec3Int("L2MINNUMSPAWN");
@@ -102,6 +110,10 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxLightningDamage = RegexHelper.GenerateInteger("LIGHTNINGDAMAGE");
         private static readonly Regex rgxEarthquakeHitP = RegexHelper.GenerateInteger("EARTHQUAKEHITP");
         private static readonly Regex rgxEarthquakeDamage = RegexHelper.GenerateInteger("EARTHQUAKEDAMAGE");
+        private static readonly Regex rgxFireHitUnitP = RegexHelper.GenerateInteger("FIREHITUNITP");
+        private static readonly Regex rgxFireUnitDamage = RegexHelper.GenerateInteger("FIREUNITDAMAGE");
+        private static readonly Regex rgxFireHitBuildingP = RegexHelper.GenerateInteger("FIREHITBUILDINGP");
+        private static readonly Regex rgxFireBuildingDamage = RegexHelper.GenerateInteger("FIREBUILDINGDAMAGE");
         
 
         public static EnvironmentData Parse(FileInfo infoFile) {
@@ -131,7 +143,7 @@ namespace RTSEngine.Data.Parsers {
                 rgxL1SpawnCap.Match(mStr),
                 rgxL2SpawnCap.Match(mStr),
                 rgxL3SpawnCap.Match(mStr),
-                rgxRecoverImpact.Match(mStr),
+                rgxOreRecoverHealth.Match(mStr),
                 rgxSpawnOffset.Match(mStr),
                 rgxL1MinNumSpawn.Match(mStr),
                 rgxL1MaxNumSpawn.Match(mStr),
@@ -142,7 +154,11 @@ namespace RTSEngine.Data.Parsers {
                 rgxLightningHitP.Match(mStr),
                 rgxLightningDamage.Match(mStr),
                 rgxEarthquakeHitP.Match(mStr),
-                rgxEarthquakeDamage.Match(mStr)
+                rgxEarthquakeDamage.Match(mStr),
+                rgxFireHitUnitP.Match(mStr),
+                rgxFireUnitDamage.Match(mStr),
+                rgxFireHitBuildingP.Match(mStr),
+                rgxFireBuildingDamage.Match(mStr)
             };
             foreach(var m in mp) if(!m.Success) return EnvironmentData.Default;
             int i = 0;
@@ -160,7 +176,7 @@ namespace RTSEngine.Data.Parsers {
             eid.L1SpawnCap = RegexHelper.ExtractInt(mp[i++]);
             eid.L2SpawnCap = RegexHelper.ExtractInt(mp[i++]);
             eid.L3SpawnCap = RegexHelper.ExtractInt(mp[i++]);
-            eid.RecoverImpact = RegexHelper.ExtractInt(mp[i++]);
+            eid.OreRecoverHealth = RegexHelper.ExtractInt(mp[i++]);
             eid.SpawnOffset = RegexHelper.ExtractInt(mp[i++]);
             eid.L1MinNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
             eid.L1MaxNumSpawn = RegexHelper.ExtractVec3I(mp[i++]);
@@ -172,6 +188,10 @@ namespace RTSEngine.Data.Parsers {
             eid.LightningDamage = RegexHelper.ExtractInt(mp[i++]);
             eid.EarthquakeHitP = RegexHelper.ExtractInt(mp[i++]);
             eid.EarthquakeDamage = RegexHelper.ExtractInt(mp[i++]);
+            eid.FireHitUnitP = RegexHelper.ExtractInt(mp[i++]);
+            eid.FireUnitDamage = RegexHelper.ExtractInt(mp[i++]);
+            eid.FireHitBuildingP = RegexHelper.ExtractInt(mp[i++]);
+            eid.FireBuildingDamage = RegexHelper.ExtractInt(mp[i++]);
             return eid;
         }
     }

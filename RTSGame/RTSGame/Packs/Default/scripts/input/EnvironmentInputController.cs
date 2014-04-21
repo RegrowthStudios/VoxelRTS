@@ -75,9 +75,9 @@ namespace RTS.Input {
                 yield return eData.L3SpawnCap;
             }
         }
-        // Impact Recovered Per Region Per Recovery Phase
-        private int RecoverImpact {
-            get { return eData.RecoverImpact; }
+        // Amount Of Health Ore Recovers Per Recovery Phase
+        private int OreRecoverHealth {
+            get { return eData.OreRecoverHealth; }
         }
         // Environment Unit Spawn Offset
         private int SpawnOffset {
@@ -92,15 +92,30 @@ namespace RTS.Input {
         private int EarthquakeHitP {
             get { return eData.EarthquakeHitP; }
         }
-        // Damage Done Per Hit By Lightning
+        // Probability That Fire Hits An Unit
+        private int FireHitUnitP {
+            get { return eData.FireHitUnitP; }
+        }
+        //Probability That Fire Hits A Building
+        private int FireHitBuildingP {
+            get { return eData.FireHitBuildingP; }
+        }
+        // Damage Done By Lightning
         private int LightningDamage {
             get { return eData.LightningDamage; }
         }
-        // Damage Done Per Hit By Earthquakes
+        // Damage Done By Earthquakes
         private int EarthquakeDamage {
             get { return eData.EarthquakeDamage; }
         }
-
+        //Damage Done To Units By Fire
+        private int FireUnitDamage {
+            get { return eData.FireUnitDamage; }
+        }
+        //Damage Done To Buildings By Fire
+        private int FireBuildingDamage {
+            get { return eData.FireBuildingDamage; }
+        }
         // Minimum Number Of Units Spawned For Each Level
         private int[][] minNumSpawn;
         // Maximum Number Of Units Spawned For Each Level
@@ -198,7 +213,7 @@ namespace RTS.Input {
                             if (inbounds && GameState.CGrid.EStatic[newTreeC.X, newTreeC.Y] == null) {
                                 AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
                                 Vector2 newTreePos = new Vector2(newTreeC.X * GameState.CGrid.size.X, newTreeC.Y * GameState.CGrid.size.Y);
-                                grid.AddImpact(newTreePos, FloraData.Impact);
+                                grid.AddImpact(newTreePos, FloraData.Impact * FloraData.Health);
                             }
                         }
                     }
@@ -207,8 +222,8 @@ namespace RTS.Input {
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
                             if(o.Data.FriendlyName.Equals(OreData.FriendlyName)) {
-                                o.Health += RecoverImpact;
-                                r.AddToRegionImpact(-(OreData.Impact / RecoverImpact));
+                                o.Health += OreRecoverHealth;
+                                r.AddToRegionImpact(-(OreData.Impact * OreRecoverHealth));
                             }
                         }
                     }
@@ -258,16 +273,43 @@ namespace RTS.Input {
 
         // Natural Disaster That Damages Both Units And Buildings
         private void CreateFire(Region r) {
-
-
-
+            List<Point> hitCells = new List<Point>();
+            // Choose Subareas In The Region To Hit
+            foreach (var c in r.Cells) {
+                for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
+                    for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
+                        bool isHit = (random.Next(100) <= 100);
+                        if (isHit) {
+                            hitCells.Add(new Point(c.X + x, c.Y + y));
+                        }
+                    }
+                }
+            }
+            // Apply Fire Damage To Chosen Subareas
+            foreach (var c in hitCells) {
+               foreach (var u in GameState.CGrid.EDynamic[c.X, c.Y]) {
+                   if (u.Team.Index != Team.Index) {
+                        bool takeDamage = (random.Next(100) <= FireHitUnitP);
+                        if (takeDamage) {
+                            u.Damage(FireUnitDamage);
+                        }
+                   }
+               }
+               RTSBuilding b = GameState.CGrid.EStatic[c.X, c.Y];
+               if (b.Team.Index != Team.Index) {
+                   bool takeDamage = (random.Next(100) <= FireHitBuildingP);
+                   if (takeDamage) {
+                       b.Damage(FireBuildingDamage);
+                   }
+                }
+            }    
         }
 
         // Natural Disaster That Damages Units
         private void CreateLightning(Region r) {
             foreach (var c in r.Cells) {
-                for (int x = 0; x < 2; x++) {
-                    for (int y = 0; y < 2; y++) {
+                for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
+                    for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
                         foreach (var u in GameState.CGrid.EDynamic[c.X + x, c.Y + y]) {
                             if (u.Team.Index != Team.Index) {
                                 bool takeDamage = (random.Next(100) <= LightningHitP);
@@ -285,19 +327,22 @@ namespace RTS.Input {
         // Natural Disaster That Damages Buildings
         private void CreateEarthquake(Region r) {
             foreach (var c in r.Cells) {
-                foreach (var b in grid.ImpactGenerators[c.X,c.Y]) {
-                    if (b.Team != Team) {
-                        bool takeDamage = (random.Next(1) <= EarthquakeHitP);
-                        if (takeDamage) {
-                            b.Damage(EarthquakeDamage);
+                for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
+                    for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
+                        RTSBuilding b = GameState.CGrid.EStatic[c.X + x, c.Y + y];
+                        if (b.Team.Index != Team.Index) {
+                            bool takeDamage = (random.Next(100) <= EarthquakeHitP);
+                            if (takeDamage) {
+                                b.Damage(EarthquakeDamage);
+                            }
                         }
-                    }   
+                        
+                    }
                 }
             }
         }
 
-        /*
-        //FIX THIS
+       /*
         private void SpawnUnits(Region r, int level) {
             // Find The Cell With The Largest Impact
             Point p = r.Cells.First();
@@ -369,7 +414,7 @@ namespace RTS.Input {
                 AddEvent(new SetTargetEvent(TeamIndex, target));
             }
         }
-        */
+       */
          
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize
