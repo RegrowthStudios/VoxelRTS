@@ -148,6 +148,9 @@ namespace RTS.Default.Squad {
         protected const float rForce = 10f;
         protected const float aForce = -200f;
 
+        // How Many Waypoints This Squad Should Lookahead When Updating
+        protected const int lookahead = 2;
+
         // The Whole Squad Will Move At The Min Default Movespeed
         float minDefaultMoveSpeed;
 
@@ -199,6 +202,7 @@ namespace RTS.Default.Squad {
         }
 
         public override void Init(GameState s, GameplayController c) {
+            pathfinder = c.pathfinder;
             minDefaultMoveSpeed = float.MaxValue;
             squadRadiusSquared = 0f;
             foreach(var unit in squad.Units) {
@@ -209,11 +213,40 @@ namespace RTS.Default.Squad {
             }
         }
 
+        private void UpdatePathQuery() {
+            if(Query != null && !Query.IsOld && Query.IsComplete) {
+                Query.IsOld = true; // Only Do This Once Per Query
+                Waypoints = Query.waypoints;
+                foreach(var unit in squad.Units) {
+                    CurrentWaypointIndices[unit.UUID] = Query.waypoints.Count - 1;
+                }
+            }
+        }
+
         public override void DecideMove(GameState g, float dt, RTSUnit unit) {
+            UpdatePathQuery();
             doMove[unit.UUID] = CurrentWaypointIndices.ContainsKey(unit.UUID) && IsValid(CurrentWaypointIndices[unit.UUID]);
             if(!doMove[unit.UUID]) return;
-            Vector2 waypoint = squad.MovementController.Waypoints[CurrentWaypointIndices[unit.UUID]];
-            SetNetForceAndWaypoint(g, unit, waypoint);
+            // If The Old Path Has Become Invalidated, Send A New Query
+            bool invalid = false;
+            int start = CurrentWaypointIndices[unit.UUID];
+            int end = Math.Max(start - lookahead, 0);
+            for(int i = CurrentWaypointIndices[unit.UUID]; i > end; i--) {
+                Vector2 wp = Waypoints[i];
+                Point wpCell = HashHelper.Hash(wp, g.CGrid.numCells, g.CGrid.size);
+                if(g.CGrid.GetCollision(wpCell.X, wpCell.Y)) {
+                    invalid = true;
+                    break;
+                }
+            }
+            if(invalid) {
+                Vector2 goal = Waypoints[0];
+                SendPathQuery(g, new SetWayPointEvent(squad.Team.Index, goal));
+            }
+            else {
+                Vector2 waypoint = squad.MovementController.Waypoints[CurrentWaypointIndices[unit.UUID]];
+                SetNetForceAndWaypoint(g, unit, waypoint);
+            }
         }
         public override void ApplyMove(GameState g, float dt, RTSUnit unit) {
             AddToHistory(unit, unit.GridPosition);

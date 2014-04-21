@@ -189,6 +189,9 @@ namespace RTSEngine.Interfaces {
 
     // The Movement Controller That Dictates The General Movement Behavior Of Units In The Squad
     public abstract class ACSquadMovementController : ACSquadController {
+        // Pathfinder To Be Run On A Separate Thread         
+        protected Pathfinder pathfinder;
+        
         // Waypoints That Units In This Squad Will Generally Follow
         private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {
@@ -206,6 +209,24 @@ namespace RTSEngine.Interfaces {
 
         // This Squad Movement Controller's Current PathQuery
         public PathQuery Query { get; set; }
+
+        // Setup And Send Pathfinding Query
+        public void SendPathQuery(GameState s, GameInputEvent e) {
+            if(Query != null)
+                Query.IsOld = true;
+            squad.RecalculateGridPosition();
+            PathQuery query = null;
+            var swe = e as SetWayPointEvent;
+            var ste = e as SetTargetEvent;
+            if(swe != null)
+                query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
+            else if(ste != null && ste.Target != null)
+                query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
+            else
+                return;
+            Query = query;
+            pathfinder.Add(query);
+        }
 
         // Does The Provided Index Point To A Valid Squad Waypoint?
         public bool IsValid(int idx) {

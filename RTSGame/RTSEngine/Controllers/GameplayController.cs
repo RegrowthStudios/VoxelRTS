@@ -78,17 +78,7 @@ namespace RTSEngine.Controllers {
         private TimeBudget tbFOWCalculations;
 
         // Pathfinding
-        private Pathfinder pathfinder;
-        private List<SquadQuery> squadQueries;
-
-        struct SquadQuery {
-            public RTSSquad squad;
-            public PathQuery query;
-            public SquadQuery(RTSSquad s, PathQuery q) {
-                squad = s;
-                query = q;
-            }
-        }
+        public Pathfinder pathfinder;
 
         public GameplayController() {
             commands = new Queue<DevCommand>();
@@ -96,8 +86,6 @@ namespace RTSEngine.Controllers {
             tbSquadDecisions = new TimeBudget(SQUAD_BUDGET_BINS);
             tbEntityDecisions = new TimeBudget(ENTITY_BUDGET_BINS);
             tbFOWCalculations = new TimeBudget(FOW_BUDGET_BINS);
-
-            squadQueries = new List<SquadQuery>();
         }
         public void Dispose() {
             DevConsole.OnNewCommand -= OnDevCommand;
@@ -144,9 +132,6 @@ namespace RTSEngine.Controllers {
             // Input Pass
             ResolveInput(s, dt);
             ApplyInput(s, dt);
-
-            // Pathfinding Pass
-            ApplyFinishedPathQueries();
 
             // Logic Pass
             ApplyLogic(s, dt);
@@ -215,7 +200,7 @@ namespace RTSEngine.Controllers {
             }
             if(squad != null) {
                 AddTask(s, squad);
-                SendPathQuery(s, squad, e);
+                squad.MovementController.SendPathQuery(s, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
@@ -234,7 +219,7 @@ namespace RTSEngine.Controllers {
                 if(squad == null) return;
                 squad.TargetingController.Target = e.Target;
                 AddTask(s, squad);
-                SendPathQuery(s, squad, e);
+                squad.MovementController.SendPathQuery(s, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
@@ -322,48 +307,6 @@ namespace RTSEngine.Controllers {
                 var ebu = new EnemyBuildingUpdater(s, i, vb, building);
                 s.tbMemBuildings.AddTask(ebu);
             }
-        }
-
-        // Setup And Send Pathfinding Query
-        private void SendPathQuery(GameState s, RTSSquad squad, GameInputEvent e) {
-            foreach(var squadQuery in squadQueries) {
-                if(squadQuery.squad.Equals(squad)) {
-                    squadQuery.query.IsOld = true;
-                }
-            }
-            squad.RecalculateGridPosition();
-            PathQuery query = null;
-            var swe = e as SetWayPointEvent;
-            var ste = e as SetTargetEvent;
-            if(swe != null)
-                query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
-            else if(ste != null && ste.Target != null)
-                query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
-            else
-                return;
-            squad.MovementController.Query = query;
-            squadQueries.Add(new SquadQuery(squad, query));
-            pathfinder.Add(query);
-        }
-
-        // Apply Results Of Any Finished Pathfinding
-        private void ApplyFinishedPathQueries() {
-            List<SquadQuery> newQueries = new List<SquadQuery>();
-            foreach(var squadQuery in squadQueries) {
-                RTSSquad squad = squadQuery.squad;
-                PathQuery query = squadQuery.query;
-                if(!query.IsOld && query.IsComplete) {
-                    squad.MovementController.Waypoints = query.waypoints;
-                    // Tell All The Units In The Squad To Head To The First Waypoint
-                    foreach(var unit in squad.Units) {
-                        squad.MovementController.CurrentWaypointIndices[unit.UUID] = query.waypoints.Count - 1;
-                    }
-                }
-                else if(!query.IsOld) {
-                    newQueries.Add(squadQuery);
-                }
-            }
-            squadQueries = newQueries;
         }
 
         // Logic Stage
