@@ -140,7 +140,7 @@ namespace RTS.Default.Squad {
             }
         }
 
-        private void UpdatePathQuery() {
+        private void UpdateWaypoints() {
             if(Query != null && !Query.IsOld && Query.IsComplete) {
                 Query.IsOld = true; // Only Do This Once Per Query
                 Waypoints = Query.waypoints;
@@ -159,7 +159,7 @@ namespace RTS.Default.Squad {
             // TODO: Decide Whether To Send A New Path Query
         }
         public override void ApplyMove(GameState g, float dt) {
-            UpdatePathQuery();
+            UpdateWaypoints();
         }
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize

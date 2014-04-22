@@ -298,35 +298,35 @@ namespace RTS.Default.Unit {
             return diff.X != 0 && diff.Y != 0 ? diff / mag : Vector2.Zero;
         }
 
-        //// How Many Waypoints This Unit Should Lookahead When Updating Its PF Query
-        //protected const int lookahead = 2;
+        // How Many Waypoints This Unit Should Lookahead When Updating Its PF Query
+        protected const int lookahead = 2;
 
         public override void Init(GameState s, GameplayController c) {
             pathfinder = c.pathfinder;
             NetForce = Vector2.Zero;
         }
 
-        //// This Unit Movement Controller's Current PathQuery
-        //public PathQuery Query { get; set; }
+        // This Unit Movement Controller's Current PathQuery
+        public PathQuery Query { get; set; }
 
         public override void DecideMove(GameState g, float dt) {
-            doMove = IsValid(CurrentWaypointIndex);
+            doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
             if(!doMove) return;
-            //// If The Old Path Has Become Invalidated, Send A New Query
-            //bool invalid = false;
-            //int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
-            //for(int i = CurrentWaypointIndex; i > end; i--) {
-            //    Vector2 wp = Waypoints[i];
-            //    Point wpCell = HashHelper.Hash(wp, g.CGrid.numCells, g.CGrid.size);
-            //    if(g.CGrid.GetCollision(wpCell.X, wpCell.Y)) {
-            //        invalid = true;
-            //        break;
-            //    }
-            //}
-            //if(invalid) {
-            //    Vector2 goal = Waypoints[0];
-            //    SendPathQuery(g, new SetWayPointEvent(unit.Team.Index, goal));
-            //}
+            // If The Old Path Has Become Invalidated, Send A New Query
+            bool invalid = false;
+            int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
+            for(int i = CurrentWaypointIndex; i > end; i--) {
+                Vector2 wp = Waypoints[i];
+                Point wpCell = HashHelper.Hash(wp, g.CGrid.numCells, g.CGrid.size);
+                if(g.CGrid.GetCollision(wpCell.X, wpCell.Y)) {
+                    invalid = true;
+                    break;
+                }
+            }
+            if(invalid && (Query == null || Query != null && Query.IsOld)) {
+                Vector2 goal = Waypoints[0];
+                Query = pathfinder.ReissuePathQuery(Query, unit.GridPosition, new SetWayPointEvent(unit.Team.Index, goal));
+            }
             SetNetForceAndWaypoint(g);
         }
         public override void ApplyMove(GameState g, float dt) {
@@ -344,7 +344,7 @@ namespace RTS.Default.Unit {
         private void SetNetForceAndWaypoint(GameState g) {
             CollisionGrid cg = g.CGrid;
             //int tempIdx = 0;
-            //Vector2 waypoint = Waypoints[tempIdx];
+            //waypoint = Waypoints[tempIdx];
             //float r = unit.CollisionGeometry.BoundingRadius;
             //while(IsValid(tempIdx)) {
             //    DevConsole.AddCommand("t: " + tempIdx);
@@ -355,6 +355,11 @@ namespace RTS.Default.Unit {
             //    tempIdx++;
             //}
             Vector2 waypoint = Waypoints[CurrentWaypointIndex];
+            if(Query != null && !Query.IsOld && Query.IsComplete) {
+                Query.IsOld = true; // Only Do This Once Per Query
+                Waypoints = Query.waypoints;
+                CurrentWaypointIndex = Waypoints.Count - 1;
+            }
             // Set Net Force...
             NetForce = pForce*UnitForce(unit.GridPosition, waypoint);
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
@@ -380,7 +385,7 @@ namespace RTS.Default.Unit {
             }
         }
 
-        // There Is A Straigt-Line Path From A To B That Intersects No Collidable Objects (Ignores Dynamic Entities)
+        // There Is A Straight-Line Path From A To B That Intersects No Collidable Objects (Ignores Dynamic Entities)
         private bool CoastIsClear(Vector2 a, Vector2 b, float stepSize, float radius, CollisionGrid cg) {
             Vector2 diff = b - a;
             float mag = diff.X != 0 && diff.Y != 0 ? diff.LengthSquared() : 1.0f;
