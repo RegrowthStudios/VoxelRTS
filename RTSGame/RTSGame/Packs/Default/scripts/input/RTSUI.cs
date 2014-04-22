@@ -229,6 +229,5 @@ namespace RTSEngine.Graphics {
         private void OnWindowResize() {
             PanelBottom.Width = rectBounds.Width;
         }
-
     }
 }

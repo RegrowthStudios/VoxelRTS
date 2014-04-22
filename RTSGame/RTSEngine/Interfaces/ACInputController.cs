@@ -95,9 +95,10 @@ namespace RTSEngine.Interfaces {
 
             // Add New Units
             if(s != null && s.Count > 0) {
-                selected.AddRange(s);
                 for(int i = 0; i < s.Count; i++) {
+                    if(selected.Contains(s[i])) continue;
                     s[i].OnDestruction += OnEntityDestruction;
+                    selected.Add(s[i]);
                 }
             }
 

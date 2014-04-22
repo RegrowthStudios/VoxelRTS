@@ -330,7 +330,9 @@ namespace RTSEngine.Data.Team {
             int pc = 0;
             for(int i = 0; i < buildings.Count; i++) {
                 if(f(buildings[i])) {
-                    pc += buildings[i].Data.PopCapChange;
+                    if(buildings[i].IsBuilt) {
+                        pc += buildings[i].Data.PopCapChange;
+                    }
                     buildings[i].Data.CurrentCount--;
                 }
                 else

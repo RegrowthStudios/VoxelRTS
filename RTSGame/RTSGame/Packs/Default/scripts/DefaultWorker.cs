@@ -7,10 +7,8 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 
-namespace RTS.Default.Worker
-{
-    public class Action : ACUnitActionController
-    {
+namespace RTS.Default.Worker {
+    public class Action : ACUnitActionController {
         int teamIndex;
         Action<GameState, float> fDecide, fApply;
         private RTSBuilding targetResource;
@@ -18,10 +16,9 @@ namespace RTS.Default.Worker
         public override void DecideAction(GameState g, float dt) {
             fDecide(g, dt);
         }
-
         public override void ApplyAction(GameState g, float dt) {
             fApply(g, dt);
-            if (unit.Target != null)
+            if(unit.Target != null)
                 unit.TurnToFace(unit.Target.GridPosition);
         }
 
@@ -39,26 +36,26 @@ namespace RTS.Default.Worker
 
         void DSRest(GameState g, float dt) {
             unit.State = BehaviorFSM.Rest;
-            if (unit.Target != null) {
+            if(unit.Target != null) {
                 Vector2 dir = unit.Target.GridPosition - unit.GridPosition;
                 float dl = dir.Length();
-                
-                if (unit.Target.Team.Index == unit.Team.Index) {
-                    if (unit.Target is RTSBuilding) {
+
+                if(unit.Target.Team.Index == unit.Team.Index) {
+                    if(unit.Target is RTSBuilding) {
                         RTSBuilding target = (RTSBuilding)unit.Target;
                         // If target is resource, enter harvest mode
-                        if (target.IsResource) {
+                        if(target.IsResource) {
                             unit.State = BehaviorFSM.Harvest;
                             targetResource = target;
                             // If the unit is far away from target resource, walk there
-                            if (dl > 0.001) {
+                            if(dl > 0.001) {
                                 fDecide = DSFollowTarget;
                                 fApply = ASFollowTarget;
                             }
                             // If the unit is near target resource
                             else {
                                 // If the unit can still carry resources, harvest 
-                                if (unit.Resources < unit.Data.CarryingCapacity) {
+                                if(unit.Resources < unit.Data.CarryingCapacity) {
                                     unit.CombatController.Attack(g, dt);
                                 }
                                 // If the unit cannot carry resources anymore,
@@ -70,9 +67,9 @@ namespace RTS.Default.Worker
                             }
                         }
                         // If target is player's depositable building
-                        else if (target.Data.Depositable) {
+                        else if(target.Data.Depositable) {
                             // If unit is far away from building, walk there
-                            if (dl > 0.001) {
+                            if(dl > 0.001) {
                                 fDecide = DSFollowTarget;
                                 fApply = ASFollowTarget;
                             }
@@ -90,10 +87,10 @@ namespace RTS.Default.Worker
                 }
                 // If target is on different team and is a unit, initiate combat
                 else {
-                    if (unit.Target is RTSUnit) {
+                    if(unit.Target is RTSUnit) {
                         RTSUnit target = (RTSUnit)unit.Target;
                         // If target unit is far away, walk there
-                        if (dl > unit.Data.BaseCombatData.MaxRange) {
+                        if(dl > unit.Data.BaseCombatData.MaxRange) {
                             fDecide = DSFollowTarget;
                             fApply = ASFollowTarget;
                         }
@@ -104,16 +101,14 @@ namespace RTS.Default.Worker
                 }
             }
         }
+        void ASRest(GameState g, float dt) { }
 
-        void ASRest(GameState g, float dt) {}
-
-        void DSFollowTarget(GameState g, float dt) {}
-
+        void DSFollowTarget(GameState g, float dt) { }
         void ASFollowTarget(GameState g, float dt) {
             // If target does not exist anymore
-            if (unit.Target == null) {
+            if(unit.Target == null) {
                 // If unit is in depository searching mode, find another depository if any
-                if (unit.State == BehaviorFSM.FindDepository){
+                if(unit.State == BehaviorFSM.FindDepository) {
                     DSFindDepository(g, dt);
                 }
                 else
@@ -125,10 +120,10 @@ namespace RTS.Default.Worker
                 // Move unit to target
                 Vector2 dir = unit.Target.GridPosition - unit.GridPosition;
                 float dl = dir.Length();
-                if (dl > 0.001) {
+                if(dl > 0.001) {
                     dir /= dl;
                     float m = unit.MovementSpeed * dt;
-                    if (m > dl)
+                    if(m > dl)
                         unit.Move(dir * dl);
                     else
                         unit.Move(dir * m);
@@ -144,9 +139,9 @@ namespace RTS.Default.Worker
         void DSDeposit(GameState g, float dt) {
             unit.Team.Capital += unit.Resources;
             unit.Resources = 0;
-            if (unit.State == BehaviorFSM.FindDepository)
+            if(unit.State == BehaviorFSM.FindDepository)
                 unit.State = BehaviorFSM.Harvest;
-            if (unit.State == BehaviorFSM.Harvest && targetResource != null && targetResource.IsAlive) {
+            if(unit.State == BehaviorFSM.Harvest && targetResource != null && targetResource.IsAlive) {
                 unit.Target = targetResource;
             }
             else {
@@ -154,7 +149,6 @@ namespace RTS.Default.Worker
                 unit.State = BehaviorFSM.Rest;
             }
         }
-
         void ASDeposit(GameState g, float dt) {
             fDecide = DSRest;
             fApply = ASRest;
@@ -176,19 +170,16 @@ namespace RTS.Default.Worker
             }
             unit.Target = depository;
         }
-
         void ASFindDepository(GameState g, float dt) {
             fDecide = DSRest;
             fApply = ASRest;
         }
 
-        public override void Deserialize(System.IO.BinaryReader s)
-        {
-            throw new NotImplementedException();
+        public override void Deserialize(System.IO.BinaryReader s) {
+            // TODO
         }
-        public override void Serialize(System.IO.BinaryWriter s)
-        {
-            throw new NotImplementedException();
+        public override void Serialize(System.IO.BinaryWriter s) {
+            // TODO
         }
     }
 
@@ -198,36 +189,37 @@ namespace RTS.Default.Worker
         private static Random critRoller = new Random();
         private float attackCooldown;
 
-        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c) {}
+        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c) {
+        }
 
         public override void Attack(GameState g, float dt) {
-            if (attackCooldown > 0)
+            if(attackCooldown > 0)
                 attackCooldown -= dt;
-            if (unit.State != BehaviorFSM.None)
+            if(unit.State != BehaviorFSM.None)
                 return;
-            if (unit.Target != null){
-                if (!unit.Target.IsAlive) {
+            if(unit.Target != null) {
+                if(!unit.Target.IsAlive) {
                     unit.Target = null;
                     return;
                 }
                 float minDistSquared = unit.Data.BaseCombatData.MinRange * unit.Data.BaseCombatData.MinRange;
                 float distSquared = (unit.Target.WorldPosition - unit.WorldPosition).LengthSquared();
                 float maxDistSquared = unit.Data.BaseCombatData.MaxRange * unit.Data.BaseCombatData.MaxRange;
-                if (distSquared > maxDistSquared) return;
+                if(distSquared > maxDistSquared) return;
 
-                if (attackCooldown <= 0) {
+                if(attackCooldown <= 0) {
                     attackCooldown = unit.Data.BaseCombatData.AttackTimer;
                     // Harvest
                     RTSBuilding target = (RTSBuilding)unit.Target;
-                    if (target.IsResource) {
+                    if(target.IsResource) {
                         unit.Target.Damage(unit.Data.BaseCombatData.AttackDamage);
                         unit.Team.Capital += unit.Data.BaseCombatData.AttackDamage;
-                        if (!unit.Target.IsAlive) unit.Target = null;
+                        if(!unit.Target.IsAlive) unit.Target = null;
                     }
                     // Repair
-                    else if (target.Team.Index == unit.Team.Index) {
+                    else if(target.Team.Index == unit.Team.Index) {
                         // Negative damage = heal
-                        if (unit.Team.Capital > 0) {
+                        if(unit.Team.Capital > 0) {
                             target.Damage(-unit.Data.BaseCombatData.AttackDamage);
                             unit.Team.Capital -= unit.Data.BaseCombatData.AttackDamage;
                         }
@@ -235,57 +227,49 @@ namespace RTS.Default.Worker
                     // Combat
                     else {
                         unit.State = BehaviorFSM.CombatMelee;
-                        if (minDistSquared <= distSquared)
-                        {
+                        if(minDistSquared <= distSquared) {
                             unit.DamageTarget(critRoller.NextDouble());
-                            if (!unit.Target.IsAlive) unit.Target = null;
+                            if(!unit.Target.IsAlive) unit.Target = null;
                         }
                     }
                 }
             }
         }
-
         public void Harvest(GameState g, float dt) {
-           
-            if (!unit.Target.IsAlive)
+
+            if(!unit.Target.IsAlive)
                 unit.Target = null;
-            if (unit.State == BehaviorFSM.None || unit.Target != null)
+            if(unit.State == BehaviorFSM.None || unit.Target != null)
                 return;
 
-            if (attackCooldown > 0)
+            if(attackCooldown > 0)
                 attackCooldown -= dt;
 
-            
+
         }
 
-        public override void Deserialize(System.IO.BinaryReader s)
-        {
-            throw new NotImplementedException();
+        public override void Deserialize(System.IO.BinaryReader s) {
+            // TODO
         }
-
-        public override void Serialize(System.IO.BinaryWriter s)
-        {
-            throw new NotImplementedException();
+        public override void Serialize(System.IO.BinaryWriter s) {
+            // TODO
         }
     }
 
     public class Animation : ACUnitAnimationController {
-        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c)
-        {
-            throw new NotImplementedException();
-        }
-        public override void Update(GameState s, float dt)
-        {
-            throw new NotImplementedException();
-        }
-        public override void Deserialize(System.IO.BinaryReader s)
-        {
-            throw new NotImplementedException();
+        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c) {
+            // TODO
         }
 
-        public override void Serialize(System.IO.BinaryWriter s)
-        {
-            throw new NotImplementedException();
+        public override void Update(GameState s, float dt) {
+            // TODO
+        }
+
+        public override void Deserialize(System.IO.BinaryReader s) {
+            // TODO
+        }
+        public override void Serialize(System.IO.BinaryWriter s) {
+            // TODO
         }
     }
 }

@@ -37,7 +37,7 @@ namespace RTS.Input {
         }
 
         private RTSBuildingData buildingToPlace;
-        private bool shiftPressed;
+        private bool isShiftPressed;
 
         public Player()
             : base() {
@@ -60,16 +60,20 @@ namespace RTS.Input {
             MouseEventDispatcher.OnMousePress += OnMousePress;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
             KeyboardEventDispatcher.OnKeyReleased += OnKeyRelease;
-            System.Windows.Forms.Form.ActiveForm.KeyDown += ActiveForm_KeyPress;
-            System.Windows.Forms.Form.ActiveForm.KeyUp += ActiveForm_KeyPress;
+            if(System.Windows.Forms.Form.ActiveForm != null) {
+                System.Windows.Forms.Form.ActiveForm.KeyDown += ActiveForm_KeyPress;
+                System.Windows.Forms.Form.ActiveForm.KeyUp += ActiveForm_KeyPress;
+            }
         }
         public override void Dispose() {
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
             MouseEventDispatcher.OnMousePress -= OnMousePress;
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
             KeyboardEventDispatcher.OnKeyReleased -= OnKeyRelease;
-            System.Windows.Forms.Form.ActiveForm.KeyDown -= ActiveForm_KeyPress;
-            System.Windows.Forms.Form.ActiveForm.KeyUp -= ActiveForm_KeyPress;
+            if(System.Windows.Forms.Form.ActiveForm != null) {
+                System.Windows.Forms.Form.ActiveForm.KeyDown -= ActiveForm_KeyPress;
+                System.Windows.Forms.Form.ActiveForm.KeyUp -= ActiveForm_KeyPress;
+            }
             if(UI != null) {
                 UI.Dispose();
             }
@@ -110,15 +114,15 @@ namespace RTS.Input {
             if(selectedUnits.Count > 0) {
                 // Only Select Units
                 sb.AddRange(selectedUnits);
-                AddEvent(new SelectEvent(TeamIndex, sb));
+                AddEvent(new SelectEvent(TeamIndex, sb, isShiftPressed));
             }
             else if(selectedBuildings.Count > 0) {
                 // Choose The Closest Building
                 selectedBuildings.Sort(ClosestBuilding);
                 sb.Add(selectedBuildings[0]);
-                AddEvent(new SelectEvent(TeamIndex, sb));
+                AddEvent(new SelectEvent(TeamIndex, sb, isShiftPressed));
             }
-            else {
+            else if(!isShiftPressed) {
                 AddEvent(new SelectEvent(TeamIndex, null));
             }
         }
@@ -198,9 +202,9 @@ namespace RTS.Input {
                     if(se != null) {
                         List<IEntity> le = new List<IEntity>();
                         le.Add(se);
-                        AddEvent(new SelectEvent(TeamIndex, le));
+                        AddEvent(new SelectEvent(TeamIndex, le, isShiftPressed));
                     }
-                    else {
+                    else if(!isShiftPressed) {
                         AddEvent(new SelectEvent(TeamIndex, null));
                     }
                 }
@@ -229,7 +233,7 @@ namespace RTS.Input {
                             Point bp = HashHelper.Hash(new Vector2(rh.X, rh.Z), GameState.CGrid.numCells, GameState.CGrid.size);
                             AddEvent(new SpawnBuildingEvent(TeamIndex, buildingToPlace.Index, bp));
                         }
-                        if(!shiftPressed) buildingToPlace = null;
+                        if(!isShiftPressed) buildingToPlace = null;
                         return;
                     }
 
@@ -257,16 +261,12 @@ namespace RTS.Input {
         public void OnKeyPress(object sender, KeyEventArgs args) {
             switch(args.KeyCode) {
                 case Keys.Delete:
-                    if(selected != null) {
-                        for(int i = selected.Count - 1; i >= 0; i--) {
-                            selected[i].Destroy();
-                        }
-                        selected.Clear();
-                    }
+                    var arr = selected.ToArray();
+                    foreach(var e in arr) e.Destroy();
                     break;
                 case Keys.LeftShift:
                 case Keys.RightShift:
-                    shiftPressed = true;
+                    isShiftPressed = true;
                     break;
                 case Keys.Escape:
                     buildingToPlace = null;
@@ -277,13 +277,12 @@ namespace RTS.Input {
             switch(args.KeyCode) {
                 case Keys.LeftShift:
                 case Keys.RightShift:
-                    shiftPressed = false;
+                    isShiftPressed = false;
                     break;
             }
         }
-
         void ActiveForm_KeyPress(object sender, System.Windows.Forms.KeyEventArgs e) {
-            shiftPressed = (System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Shift) == System.Windows.Forms.Keys.Shift;
+            isShiftPressed = (System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Shift) == System.Windows.Forms.Keys.Shift;
         }
 
         public void OnUIPress(Point p, MouseButton b) {

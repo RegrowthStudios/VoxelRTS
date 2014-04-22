@@ -93,7 +93,9 @@
     <Compile Include="LobbyScreen.cs" />
     <Compile Include="LoginScreen.cs" />
     <Compile Include="MenuScreen.cs" />
-    <Compile Include="Packs\Default\scripts\DefaultWorker.cs" />
+    <Compile Include="Packs\Default\scripts\DefaultWorker.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="Packs\Default\scripts\input\AIInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
@@ -411,6 +413,9 @@
     <None Include="Packs\Default\races\Animals\barracks.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Packs\Default\races\Animals\worker.unit">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Packs\Default\races\Animals\headquarters.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
