@@ -145,7 +145,11 @@ namespace RTS.Default.Squad {
                 Query.IsOld = true; // Only Do This Once Per Query
                 Waypoints = Query.waypoints;
                 foreach(var unit in squad.Units) {
-                    unit.MovementController.Waypoints = Waypoints;
+                    List<Vector2> waypoints = new List<Vector2>();
+                    foreach(var wp in Waypoints) {
+                        waypoints.Add(wp);
+                    }
+                    unit.MovementController.Waypoints = waypoints;
                     unit.MovementController.CurrentWaypointIndex = Waypoints.Count - 1;
                 }
             }
@@ -187,37 +191,6 @@ namespace RTS.Default.Squad {
 //        }
 //    }
 //}
-
- //// There Is A Straigt-Line Path From A To B That Intersects No Collidable Objects
- //       private bool CoastIsClear(Vector2 a, Vector2 b, float stepSize, float radius, CollisionGrid cg) {
- //           Vector2 dist = b - a;
- //           float slope = dist.Y / dist.X;
- //           float x = a.X;
- //           float y = a.Y;
- //           float rSq = (float)Math.Sqrt(radius);
- //           while(x < b.X && y < b.Y) {
- //               // TODO: Check Collisions Based On Radius
- //               bool collision = cg.GetCollision(new Vector2(x, y));
- //               // Cardinal Stuff
- //               collision |= cg.GetCollision(new Vector2(x + radius, y));
- //               collision |= cg.GetCollision(new Vector2(x + radius / 2.0f, y));
- //               collision |= cg.GetCollision(new Vector2(x - radius, y));
- //               collision |= cg.GetCollision(new Vector2(x - radius / 2.0f, y));
- //               collision |= cg.GetCollision(new Vector2(x, y + radius));
- //               collision |= cg.GetCollision(new Vector2(x, y + radius / 2.0f));
- //               collision |= cg.GetCollision(new Vector2(x, y - radius));
- //               collision |= cg.GetCollision(new Vector2(x, y - radius / 2.0f));
- //               collision |= cg.GetCollision(new Vector2(x + rSq, y + rSq));
- //               collision |= cg.GetCollision(new Vector2(x + rSq, y - rSq));
- //               collision |= cg.GetCollision(new Vector2(x - rSq, y + rSq));
- //               collision |= cg.GetCollision(new Vector2(x - rSq, y - rSq));
- //               if(collision)
- //                   return false;
- //               x += stepSize;
- //               y += stepSize;
- //           }
- //           return true;
- //       }
 
 //// Get The Force Between A Unit And A Path Made Of Waypoints 
 //private Vector2 GetForce(RTSUnit unit, List<Vector2> waypoints) {

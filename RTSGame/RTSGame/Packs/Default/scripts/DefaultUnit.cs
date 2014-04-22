@@ -287,8 +287,9 @@ namespace RTS.Default.Unit {
 
     public class Movement : ACUnitMovementController {
         // The Constants Used In Flow Field Calculations
-        protected const float rForce = 10f;
-        protected const float aForce = -200f;
+        protected const float dForce = 2f;
+        protected const float sForce = 10f;
+        protected const float pForce = -200f;
 
         // Calculate The Unit Force Between Two Locations
         public Vector2 UnitForce(Vector2 a, Vector2 b) {
@@ -297,20 +298,6 @@ namespace RTS.Default.Unit {
             return diff.X != 0 && diff.Y != 0 ? diff / mag : Vector2.Zero;
         }
 
-        //protected const int historySize = 20;
-        //// The Last Few Locations This Unit Has Been To
-        //private Queue<Vector2> unitHistory = new Queue<Vector2>();
-        //public Queue<Vector2> UnitHistory {
-        //    get { return unitHistory; }
-        //    set { unitHistory = value; }
-        //}
-
-        //public void AddToHistory(Vector2 location) {
-        //    if(UnitHistory.Count >= historySize)
-        //        UnitHistory.Dequeue();
-        //    UnitHistory.Enqueue(location);
-        //}
-        
         //// How Many Waypoints This Unit Should Lookahead When Updating Its PF Query
         //protected const int lookahead = 2;
 
@@ -343,7 +330,6 @@ namespace RTS.Default.Unit {
             SetNetForceAndWaypoint(g);
         }
         public override void ApplyMove(GameState g, float dt) {
-            //AddToHistory(unit.GridPosition);
             if(NetForce != Vector2.Zero) {
                 float magnitude = NetForce.Length();
                 Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MovementController.MinDefaultMoveSpeed * dt;
@@ -356,28 +342,35 @@ namespace RTS.Default.Unit {
         }
 
         private void SetNetForceAndWaypoint(GameState g) {
+            CollisionGrid cg = g.CGrid;
+            //int tempIdx = 0;
+            //Vector2 waypoint = Waypoints[tempIdx];
+            //float r = unit.CollisionGeometry.BoundingRadius;
+            //while(IsValid(tempIdx)) {
+            //    DevConsole.AddCommand("t: " + tempIdx);
+            //    if(CoastIsClear(unit.GridPosition, waypoint, r, r, cg)) {
+            //        CurrentWaypointIndex = tempIdx;
+            //        break;
+            //    }
+            //    tempIdx++;
+            //}
             Vector2 waypoint = Waypoints[CurrentWaypointIndex];
             // Set Net Force...
-            NetForce = aForce*UnitForce(unit.GridPosition, waypoint);
-            CollisionGrid cg = g.CGrid;
+            NetForce = pForce*UnitForce(unit.GridPosition, waypoint);
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
             // Apply Forces From Other Units In This One's Cell
             foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
-                NetForce += rForce*UnitForce(unit.GridPosition, otherUnit.GridPosition);
+                NetForce += dForce*UnitForce(unit.GridPosition, otherUnit.GridPosition);
             }
             // Apply Forces From Buildings And Other Units Near This One
             foreach(Point n in Pathfinder.Neighborhood(unitCell)) {
                 RTSBuilding b = cg.EStatic[n.X, n.Y];
                 if(b != null)
-                    NetForce += rForce*UnitForce(unit.GridPosition, b.GridPosition);
+                    NetForce += sForce * UnitForce(unit.GridPosition, b.GridPosition);
                 foreach(var otherUnit in cg.EDynamic[n.X, n.Y]) {
-                    NetForce += rForce*UnitForce(unit.GridPosition, otherUnit.GridPosition);
+                    NetForce += sForce * UnitForce(unit.GridPosition, otherUnit.GridPosition);
                 }
             }
-            //// Apply Forces From Unit's Recent Locations To Push It Forward
-            //foreach(var prevLocation in UnitHistory) {
-            //    NetForce += rForce*UnitForce(unit.GridPosition, prevLocation);
-            //}
             // Set Waypoint...
             Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
             bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
@@ -385,6 +378,41 @@ namespace RTS.Default.Unit {
             if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < 1.5 * SquadRadiusSquared) {
                 CurrentWaypointIndex--;
             }
+        }
+
+        // There Is A Straigt-Line Path From A To B That Intersects No Collidable Objects (Ignores Dynamic Entities)
+        private bool CoastIsClear(Vector2 a, Vector2 b, float stepSize, float radius, CollisionGrid cg) {
+            Vector2 diff = b - a;
+            float mag = diff.X != 0 && diff.Y != 0 ? diff.LengthSquared() : 1.0f;
+            diff /= mag;
+            Vector2 step = stepSize * diff;
+            float root2 = 1.41421356237f;
+            Vector2[] offsets = {   new Vector2(radius, 0),
+                                    new Vector2(radius / 2.0f, 0),
+                                    new Vector2(-radius, 0),
+                                    new Vector2(-radius / 2.0f, 0),
+                                    new Vector2(0, radius),
+                                    new Vector2(0, radius / 2.0f),
+                                    new Vector2(0, -radius),
+                                    new Vector2(0, -radius / 2.0f),
+                                    (new Vector2(1, 1) / root2) * radius, 
+                                    (new Vector2(1, 1) / root2) * radius / 2.0f,
+                                    (new Vector2(-1, 1) / root2) * radius,
+                                    (new Vector2(-1, 1) / root2) * radius / 2.0f,
+                                    (new Vector2(1, -1) / root2) * radius,
+                                    (new Vector2(1, -1) / root2) * radius / 2.0f,
+                                    (new Vector2(-1, -1) / root2) * radius,
+                                    (new Vector2(-1, -1) / root2) * radius / 2.0f   };
+            while(a.X < b.X && a.Y < b.Y) {
+                bool collision = cg.GetCollision(a);
+                foreach(var offset in offsets) {
+                    collision |= cg.GetCollision(a + offset);
+                }
+                if(collision)
+                    return false;
+                a += step;
+            }
+            return true;
         }
 
         public override void Serialize(BinaryWriter s) {
