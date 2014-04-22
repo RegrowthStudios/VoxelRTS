@@ -296,7 +296,7 @@ namespace RTS.Input {
                    }
                }
                RTSBuilding b = GameState.CGrid.EStatic[c.X, c.Y];
-               if (b.Team.Index != Team.Index) {
+               if (b != null && b.Team.Index != Team.Index) {
                    bool takeDamage = (random.Next(100) <= FireHitBuildingP);
                    if (takeDamage) {
                        b.Damage(FireBuildingDamage);
@@ -330,7 +330,7 @@ namespace RTS.Input {
                 for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
                     for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
                         RTSBuilding b = GameState.CGrid.EStatic[c.X + x, c.Y + y];
-                        if (b.Team.Index != Team.Index) {
+                        if (b != null && b.Team.Index != Team.Index) {
                             bool takeDamage = (random.Next(100) <= EarthquakeHitP);
                             if (takeDamage) {
                                 b.Damage(EarthquakeDamage);
@@ -342,79 +342,82 @@ namespace RTS.Input {
             }
         }
 
-       /*
+
         private void SpawnUnits(Region r, int level) {
-            // Find The Cell With The Largest Impact
-            Point p = r.Cells.First();
+            // Find The Cell With The Largest Impact Which Still Contains Trees Or Ore
+            Point p = new Point(-1, -1);
+            bool hasResource = false;
+            List<Point> resources = new List<Point>();
+            List<Point> res;
             foreach (var c in r.Cells) {
-                if (grid.CellImpact[c.X, c.Y] > grid.CellImpact[p.X, p.Y]) {
-                    p = c;
-                }
-            }
-            // Randomly Choose An Impact Generator In That Cell
-            ImpactGenerator g = null;
-
-            // TODO: Choose Random
-            int rpi = random.Next(r.Cells.Count);
-            Vector2 spawnPos = new Vector2(r.Cells[rpi].X, r.Cells[rpi].Y) * grid.cellSize + Vector2.One;
-
-            if (grid.ImpactGenerators[p.X, p.Y].Count != 0) {
-                var ig = grid.ImpactGenerators[p.X, p.Y];
-                int igi = random.Next(ig.Count);
-                for (int i = 0; i < ig.Count; i++) {
-                    if (ig[i].Data.FriendlyName.Equals(OreData.FriendlyName) ||
-                        ig[i].Data.FriendlyName.Equals(FloraData.FriendlyName)) {
-                        igi--;
-                        if (igi == 0)
-                            g = ig[i];
+                if ((p.X < 0 && p.Y < 0) || grid.CellImpact[c.X, c.Y] > grid.CellImpact[p.X, p.Y]) {
+                    res = new List<Point>();
+                    for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
+                        for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
+                            RTSBuilding b = GameState.CGrid.EStatic[c.X + x, c.Y + y];
+                            if (b != null && b.Team.Index == Team.Index) {
+                                hasResource = true;
+                                res.Add(new Point(c.X + x, c.Y + y));
+                            }
+                        }
+                    }
+                    if (hasResource) {
+                        p = c;
+                        resources = res;
                     }
                 }
-                spawnPos = g.GridPosition;
             }
 
-            // Spawn Environmental Units
-            Vector2 offset;
-            int numSpawn;
-            //FIX
-            int ti = 0;
-            foreach (var spawnType in Spawns) {
-                numSpawn = random.Next(minNumSpawn[level - 1][ti], maxNumSpawn[level - 1][ti]);
-                offset.X = random.Next(SpawnOffset);
-                offset.Y = random.Next(SpawnOffset);
-                for (int j = 0; j < numSpawn; j++) {
-                    AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos + offset));
+            if (resources.Count > 0) {
+                // Randomly Choose An Impact Generator In That Cell
+                int i = random.Next(resources.Count);
+                Point resourcePos = resources[i];
+                RTSBuilding resource = GameState.CGrid.EStatic[resourcePos.X, resourcePos.Y];
+
+                // Spawn Environmental Units
+                Vector2 spawnPos = new Vector2(resourcePos.X, resourcePos.Y) * GameState.CGrid.cellSize + Vector2.One;
+                Vector2 offset;
+                int numSpawn;
+
+                int ti = 0;
+                foreach (var spawnType in Spawns) {
+                    numSpawn = random.Next(minNumSpawn[level - 1][ti], maxNumSpawn[level - 1][ti]);
+                    offset.X = random.Next(SpawnOffset);
+                    offset.Y = random.Next(SpawnOffset);
+                    for (int j = 0; j < numSpawn; j++) {
+                        AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos + offset));
+                    }
+                    ti++;
                 }
-                ti++;
-            }
 
-            SetInitTarget();
+                SetInitTarget(r);
+            }
         }
 
 
-        private void SetInitTarget() {
-            foreach(var r in GameState.Regions) {
-                // Select Units Not In A Squad
-                List<IEntity> squad = new List<IEntity>();
-                foreach(RTSUnit u in r.units) {
-                    if(u.Squad.Units.Count == 1)
-                        squad.Add(u);
-                }
-                AddEvent(new SelectEvent(TeamIndex, squad));
-                // Set The Target For Those Units
-                IEntity target = null;
-                Vector2 sumPos = Vector2.Zero;
-                foreach(var u2 in squad)
-                    sumPos += u2.GridPosition;
-                Vector2 averagePos = new Vector2(sumPos.X / squad.Count, sumPos.Y / squad.Count);
-                foreach(var t2 in GameState.activeTeams)
-                    if(t2.Index != TeamIndex)
-                        foreach(var u3 in t2.Team.Units)
-                            if(target == null || Vector2.Distance(u3.GridPosition, averagePos) < Vector2.Distance(u3.GridPosition, target.GridPosition))
-                                target = u3;
-                AddEvent(new SetTargetEvent(TeamIndex, target));
+        private void SetInitTarget(Region r) {
+            // Select Units Not In A Squad
+            List<IEntity> squad = new List<IEntity>();
+            foreach(RTSUnit u in r.units) {
+                if(u.Squad.Units.Count == 1)
+                    squad.Add(u);
             }
+            AddEvent(new SelectEvent(TeamIndex, squad));
+            // Set The Target For Those Units
+            IEntity target = null;
+            Vector2 sumPos = Vector2.Zero;
+            foreach(var u2 in squad)
+                sumPos += u2.GridPosition;
+            Vector2 averagePos = new Vector2(sumPos.X / squad.Count, sumPos.Y / squad.Count);
+            foreach(var t2 in GameState.activeTeams)
+                if(t2.Index != TeamIndex)
+                    foreach(var u3 in t2.Team.Units)
+                        if(target == null || Vector2.Distance(u3.GridPosition, averagePos) < Vector2.Distance(u3.GridPosition, target.GridPosition))
+                            target = u3;
+            AddEvent(new SetTargetEvent(TeamIndex, target));
+            
         }
-       */
+       
          
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize
