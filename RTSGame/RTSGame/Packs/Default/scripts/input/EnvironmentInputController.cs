@@ -246,15 +246,18 @@ namespace RTS.Input {
                     level = 1;
                 else
                     level = 0;
+
+                level = 3; //testing
+
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
 
                     // Decide disaster type
                     int type = random.Next(2);
-                    
+
                     // Create the appropriate disaster
                     if (type == 0) {
-                        //SpawnUnits(r, level);
+                        SpawnUnits(r, level);
                     }
                     else {
                         if (level == 1) {
