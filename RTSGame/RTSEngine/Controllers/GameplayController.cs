@@ -200,9 +200,7 @@ namespace RTSEngine.Controllers {
             }
             if(squad != null) {
                 AddTask(s, squad);
-                squad.RecalculateGridPosition();
-                var query = squad.MovementController.Query;
-                squad.MovementController.Query = pathfinder.ReissuePathQuery(query, squad.GridPosition, e);
+                SendSquadQuery(s, squad, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
@@ -221,11 +219,37 @@ namespace RTSEngine.Controllers {
                 if(squad == null) return;
                 squad.TargetingController.Target = e.Target;
                 AddTask(s, squad);
-                squad.RecalculateGridPosition();
-                var query = squad.MovementController.Query;
-                squad.MovementController.Query = pathfinder.ReissuePathQuery(query, squad.GridPosition, e);
+                SendSquadQuery(s, squad, e);
             }
         }
+        private void SendSquadQuery(GameState s, RTSSquad squad, GameInputEvent e) {
+            squad.RecalculateGridPosition();
+            Vector2 start = squad.GridPosition;
+            var swe = e as SetWayPointEvent;
+            var ste = e as SetTargetEvent;
+            Vector2 goal = start;
+            if(swe != null)
+                goal = swe.Waypoint;
+            else if(ste != null && ste.Target != null)
+                goal = ste.Target.GridPosition;
+            // Handle The Case Where The Squad Centroid Ends Up Inside A Building
+            CollisionGrid cg = s.CGrid;
+            if(cg.GetCollision(start)) {
+                float minDistSq = float.MaxValue;
+                for(int u = 0; u < squad.Units.Count; u++) {
+                    RTSUnit unit = squad.Units[u];
+                    float distSq = (goal - unit.GridPosition).LengthSquared();
+                    if(distSq < minDistSq) {
+                        minDistSq = distSq;
+                        start = unit.GridPosition;
+                    }
+                }
+
+            }
+            var query = squad.MovementController.Query;
+            squad.MovementController.Query = pathfinder.ReissuePathQuery(query, start, goal, e.Team);
+        }
+
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
             RTSTeam team = s.teams[e.Team];
             RTSUnit unit = team.AddUnit(e.Type, e.Position);

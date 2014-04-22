@@ -339,7 +339,7 @@ namespace RTS.Default.Unit {
             }
             if(invalid && (Query == null || Query != null && Query.IsOld)) {
                 Vector2 goal = Waypoints[0];
-                Query = pathfinder.ReissuePathQuery(Query, unit.GridPosition, new SetWayPointEvent(unit.Team.Index, goal));
+                Query = pathfinder.ReissuePathQuery(Query, unit.GridPosition, goal, unit.Team.Index);
             }
             SetNetForceAndWaypoint(g);
         }
