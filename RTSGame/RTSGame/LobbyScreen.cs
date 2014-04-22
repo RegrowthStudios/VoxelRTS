@@ -359,7 +359,7 @@ namespace RTS {
                         break;
                 }
             }
-            eld.MapFile = new FileInfo(@"Packs\Default\maps\0\test.map");
+            eld.MapFile = new FileInfo(@"Packs\Default\maps\Caldera\test.map");
         }
 
         void OnKeyPressed(object sender, KeyEventArgs args) {
