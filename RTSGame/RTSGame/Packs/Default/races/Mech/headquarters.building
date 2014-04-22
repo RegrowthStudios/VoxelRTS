@@ -2,7 +2,7 @@
 NAME            [Headquarters]
 
 // Unit Model
-MODEL           [..\..\models\Barracks.obj]
+MODEL           [..\..\models\Barracks.model]
 TEXMAIN         [..\..\textures\BarracksMain.png]
 TEXCOLOR        [..\..\textures\BarracksKey.png]
 ICON            [..\..\icons\Barracks.png]

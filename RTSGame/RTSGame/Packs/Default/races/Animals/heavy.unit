@@ -2,7 +2,7 @@
 NAME            [Heavy Soldier]
 
 // Unit Model
-MODEL           [..\..\models\Dog.obj]
+MODEL           [..\..\models\Dog.model]
 TEXMAIN         [..\..\textures\Dog.png]
 TEXCOLOR        [..\..\textures\DogKey.png]
 ANIMATION       [..\..\animations\Dog.png]

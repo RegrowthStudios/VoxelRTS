@@ -2,7 +2,7 @@
 NAME            [Ore]
 
 // Unit Model
-MODEL           [..\..\models\Tree.obj]
+MODEL           [..\..\models\Tree.model]
 TEXMAIN         [..\..\textures\Tree.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
 ICON            [..\..\icons\OreButton.png]

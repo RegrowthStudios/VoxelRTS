@@ -372,38 +372,37 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="Packs\Default\levels\0.dat" />
     <None Include="Packs\Default\maps\0\map.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Packs\Default\maps\0\test.map">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Packs\Default\models\Cat.obj">
+    <None Include="Packs\Default\models\Cat.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\models\Dog.obj">
+    </None>
+    <None Include="Packs\Default\models\Dog.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="Packs\Default\races\Animals\armor.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\models\Barracks.obj">
+    <None Include="Packs\Default\models\Barracks.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\models\House.obj">
+    </None>
+    <None Include="Packs\Default\models\House.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\models\Tree.obj">
+    </None>
+    <None Include="Packs\Default\models\Tree.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="Packs\Default\races\Animals\heavy.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Packs\Default\models\HQ.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\models\RockGolem.obj">
+    <None Include="Packs\Default\models\RockGolem.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Packs\Default\races\Animals\barracks.building">
@@ -436,9 +435,9 @@
     <None Include="Packs\Default\races\Gaia\Gaia.race">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Packs\Default\models\MechBase.obj">
+    <None Include="Packs\Default\models\MechBase.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="Packs\schemes\red.scheme">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -478,7 +477,7 @@
     <None Include="Packs\Default\races\Mech\house.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\races\Mech\robots.race">
+    <None Include="Packs\Default\races\Mech\Mech.race">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Packs\Default\races\Mech\soldier.unit">

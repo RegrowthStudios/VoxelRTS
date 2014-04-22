@@ -2,7 +2,7 @@
 NAME            [Golem]
 
 // Unit Model
-MODEL           [..\..\models\RockGolem.obj]
+MODEL           [..\..\models\RockGolem.model]
 TEXMAIN         [..\..\textures\Golem.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
 ANIMATION       [..\..\animations\RockGolem.png]

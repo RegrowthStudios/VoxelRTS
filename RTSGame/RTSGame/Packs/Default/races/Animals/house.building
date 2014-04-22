@@ -2,7 +2,7 @@
 NAME            [House]
 
 // Unit Model
-MODEL           [..\..\models\House.obj]
+MODEL           [..\..\models\House.model]
 TEXMAIN         [..\..\textures\HouseMain.png]
 TEXCOLOR        [..\..\textures\HouseKey.png]
 ICON            [..\..\icons\FactoryButton.png]
