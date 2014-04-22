@@ -322,23 +322,6 @@ namespace RTS.Default.Unit {
         //// This Unit Movement Controller's Current PathQuery
         //public PathQuery Query { get; set; }
 
-        //// Setup And Send Pathfinding Query
-        //public void SendPathQuery(GameState s, GameInputEvent e) {
-        //    if(Query != null)
-        //        Query.IsOld = true;
-        //    PathQuery query = null;
-        //    var swe = e as SetWayPointEvent;
-        //    var ste = e as SetTargetEvent;
-        //    if(swe != null)
-        //        query = new PathQuery(unit.GridPosition, swe.Waypoint, e.Team);
-        //    else if(ste != null && ste.Target != null)
-        //        query = new PathQuery(unit.GridPosition, ste.Target.GridPosition, e.Team);
-        //    else
-        //        return;
-        //    Query = query;
-        //    pathfinder.Add(query);
-        //}
-
         public override void DecideMove(GameState g, float dt) {
             doMove = IsValid(CurrentWaypointIndex);
             if(!doMove) return;

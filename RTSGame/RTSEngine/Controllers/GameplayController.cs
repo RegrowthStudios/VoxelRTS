@@ -200,7 +200,9 @@ namespace RTSEngine.Controllers {
             }
             if(squad != null) {
                 AddTask(s, squad);
-                squad.MovementController.SendPathQuery(s, e);
+                squad.RecalculateGridPosition();
+                var query = squad.MovementController.Query;
+                squad.MovementController.Query = pathfinder.ReissuePathQuery(query, squad.GridPosition, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
@@ -219,7 +221,9 @@ namespace RTSEngine.Controllers {
                 if(squad == null) return;
                 squad.TargetingController.Target = e.Target;
                 AddTask(s, squad);
-                squad.MovementController.SendPathQuery(s, e);
+                squad.RecalculateGridPosition();
+                var query = squad.MovementController.Query;
+                squad.MovementController.Query = pathfinder.ReissuePathQuery(query, squad.GridPosition, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {

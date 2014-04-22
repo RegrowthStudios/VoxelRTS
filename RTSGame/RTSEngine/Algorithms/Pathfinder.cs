@@ -51,8 +51,6 @@ namespace RTSEngine.Algorithms {
         private ConcurrentQueue<PathQuery> queries;
         private Thread thread;
 
-
-
         public Pathfinder(GameState g) {
             // A*
             gameState = g;
@@ -66,6 +64,23 @@ namespace RTSEngine.Algorithms {
             thread.Priority = ThreadPriority.Normal;
             thread.IsBackground = true;
             thread.Start();
+        }
+
+        // Update And Re-Issue PathQuery From Start
+        public PathQuery ReissuePathQuery(PathQuery pq, Vector2 start, GameInputEvent e) {
+            if(pq != null)
+                pq.IsOld = true;
+            PathQuery query = null;
+            var swe = e as SetWayPointEvent;
+            var ste = e as SetTargetEvent;
+            if(swe != null)
+                query = new PathQuery(start, swe.Waypoint, e.Team);
+            else if(ste != null && ste.Target != null)
+                query = new PathQuery(start, ste.Target.GridPosition, e.Team);
+            else
+                return pq;
+            Add(query);
+            return query;
         }
 
         public void Add(PathQuery q) {

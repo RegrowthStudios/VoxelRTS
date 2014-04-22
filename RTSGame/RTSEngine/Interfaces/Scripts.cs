@@ -216,25 +216,7 @@ namespace RTSEngine.Interfaces {
         protected Pathfinder pathfinder;
 
         // This Squad Movement Controller's Current PathQuery
-        protected PathQuery Query { get; set; }
-
-        // Setup And Send Pathfinding Query
-        public void SendPathQuery(GameState s, GameInputEvent e) {
-            if(Query != null)
-                Query.IsOld = true;
-            PathQuery query = null;
-            var swe = e as SetWayPointEvent;
-            var ste = e as SetTargetEvent;
-            squad.RecalculateGridPosition();
-            if(swe != null)
-                query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
-            else if(ste != null && ste.Target != null)
-                query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
-            else
-                return;
-            Query = query;
-            pathfinder.Add(query);
-        }
+        public PathQuery Query { get; set; }
 
         // Scripted Logic For Movement
         public abstract void DecideMove(GameState g, float dt);
