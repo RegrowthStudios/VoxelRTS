@@ -10,6 +10,7 @@ using BlisterUI.Input;
 using BlisterUI.Widgets;
 using RTSEngine.Data;
 using RTSEngine.Controllers;
+using RTSEngine.Data.Team;
 
 namespace RTSEngine.Graphics {
     public struct RTSUIButton {
@@ -51,6 +52,10 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        public RTSUIBuildPanel BuildingPanel {
+            get;
+            private set;
+        }
 
         public int ButtonRows {
             get;
@@ -75,6 +80,7 @@ namespace RTSEngine.Graphics {
             BuildMinimap(renderer, 5);
             BuildSelectionPanel(renderer);
             BuildTeamDataPanel();
+            BuildBuildingPanel();
             SelectionPanel.IconLibrary = renderer.IconLibrary;
         }
         public void Dispose() {
@@ -85,6 +91,7 @@ namespace RTSEngine.Graphics {
             wrMain.Dispose();
             TeamDataPanel.Dispose();
             SelectionPanel.Dispose();
+            BuildingPanel.Dispose();
         }
 
         private void BuildBounds(RTSRenderer renderer, int ph, Color c) {
@@ -135,6 +142,19 @@ namespace RTSEngine.Graphics {
         private void BuildTeamDataPanel() {
             TeamDataPanel = new RTSUITeamDataPanel(wrMain);
             TeamDataPanel.Width = (rectBounds.Width * 5) / 7;
+        }
+        private void BuildBuildingPanel() {
+            BuildingPanel = new RTSUIBuildPanel(wrMain, 180, 26, 5, 12, 24);
+            BuildingPanel.Parent = PanelBottom;
+        }
+
+        public void SetTeam(RTSTeam team) {
+            BuildingPanel.Build(team);
+            BuildingPanel.Hook();
+        }
+
+        public bool Inside(int x, int y) {
+            return PanelBottom.Inside(x, y) || BuildingPanel.Inside(x, y) || TeamDataPanel.Inside(x, y);
         }
 
         public void BuildButtonPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {
@@ -197,6 +217,7 @@ namespace RTSEngine.Graphics {
         }
 
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
+            var f = new System.Windows.Forms.Form();
             wrMain.Draw(batch);
             Rectangle rMap = new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height);
             batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
@@ -208,5 +229,6 @@ namespace RTSEngine.Graphics {
         private void OnWindowResize() {
             PanelBottom.Width = rectBounds.Width;
         }
+
     }
 }
