@@ -19,9 +19,10 @@ namespace RTS.Default {
 
             public override int? GetVictoriousTeam(GameState s) {
                 int tAlive = -1, cAlive = 0;
-                foreach(var at in s.activeTeams) {
+                for(int i = 0; i < s.activeTeams.Length; i++) {
+                    var at = s.activeTeams[i];
                     if(at.Team.Units.Count > 0) {
-                        tAlive = at.Index;
+                        tAlive = at.Team.Index;
                         cAlive++;
                     }
                 }

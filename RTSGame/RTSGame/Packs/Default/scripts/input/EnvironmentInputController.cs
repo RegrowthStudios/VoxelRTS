@@ -157,10 +157,12 @@ namespace RTS.Input {
         }
 
         private void UpdateUnitsInRegion() {
-            foreach(var r in GameState.Regions) {
+            for(int i = 0; i < GameState.Regions.Count; i++) {
+                var r = GameState.Regions[i];
                 r.units = new List<IEntity>();
             }
-            foreach(var u in Team.Units) {
+            for(int i = 0; i < Team.Units.Count; i++) {
+                var u = Team.Units[i];
                 Point unitI = HashHelper.Hash(u.GridPosition, grid.numCells, grid.size);
                 grid.Region[unitI.X, unitI.Y].units.Add(u);
             }
@@ -170,7 +172,8 @@ namespace RTS.Input {
         private void Recover() {
             if(treeLocations == null || treeLocations.Count < 1) return;
 
-            foreach(var r in GameState.Regions) {
+            for(int i = 0; i < GameState.Regions.Count; i++) {
+                var r = GameState.Regions[i];
                 if(r.RegionImpact < PointOfNoReturn && r.RegionImpact > 0) {
                     // Randomly Choose The Location Of A Starting Tree
                     int tp = random.Next(treeLocations.Count);
@@ -182,6 +185,7 @@ namespace RTS.Input {
                             Point newTreeC = new Point(treeC.X + x, treeC.Y + y);
                             Vector2 newTreePos = new Vector2(newTreeC.X * GameState.CGrid.size.X, newTreeC.Y * GameState.CGrid.size.Y);
                             Point newTreeI = HashHelper.Hash(newTreePos, grid.numCells, grid.size);
+                            // TODO: Remove This foreach
                             foreach(var t in GameState.IGrid.ImpactGenerators[newTreeI.X, newTreeI.Y]) {
                                 Point tc = HashHelper.Hash(t.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
                                 if(!Point.Equals(tc, newTreeC) && tc.X > -1 && tc.Y > -1 && tc.X < GameState.CGrid.numCells.X && tc.Y < GameState.CGrid.numCells.Y) {
@@ -193,7 +197,9 @@ namespace RTS.Input {
                     }
 
                     // Regenerate Ore Health
-                    foreach(var c in r.Cells) {
+                    for(int ci = 0; ci < r.Cells.Count; ci++) {
+                        var c = r.Cells[ci];
+                        // TODO: Remove This foreach
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
                             if(o.BuildingData.FriendlyName.Equals(OreData.FriendlyName)) {
                                 o.Health += RecoverImpact;
@@ -208,7 +214,8 @@ namespace RTS.Input {
 
         // Disaster Phase
         private void SpawnUnits() {
-            foreach(var r in GameState.Regions) {
+            for(int i = 0; i < GameState.Regions.Count; i++) {
+                var r = GameState.Regions[i];
                 // Decide Level
                 int level;
                 if(r.RegionImpact > L3Impact)
@@ -224,7 +231,8 @@ namespace RTS.Input {
 
                     // Find The Cell With The Largest Impact
                     Point p = r.Cells.First();
-                    foreach(var c in r.Cells) {
+                    for(int ci = 0; ci < r.Cells.Count; ci++) {
+                        var c = r.Cells[ci];
                         if(grid.CellImpact[c.X, c.Y] > grid.CellImpact[p.X, p.Y]) {
                             p = c;
                         }
@@ -239,12 +247,12 @@ namespace RTS.Input {
                     if(grid.ImpactGenerators[p.X, p.Y].Count != 0) {
                         var ig = grid.ImpactGenerators[p.X, p.Y];
                         int igi = random.Next(ig.Count);
-                        for(int i = 0; i < ig.Count; i++) {
-                            if(ig[i].BuildingData.FriendlyName.Equals(OreData.FriendlyName) ||
-                                ig[i].BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
+                        for(int gi = 0; gi < ig.Count; gi++) {
+                            if(ig[gi].BuildingData.FriendlyName.Equals(OreData.FriendlyName) ||
+                                ig[gi].BuildingData.FriendlyName.Equals(FloraData.FriendlyName)) {
                                 igi--;
                                 if(igi == 0)
-                                    g = ig[i];
+                                    g = ig[gi];
                             }
                         }
                         spawnPos = g.GridPosition;
@@ -269,10 +277,12 @@ namespace RTS.Input {
         }
 
         private void SetInitTarget() {
-            foreach(var r in GameState.Regions) {
+            for(int i = 0; i < GameState.Regions.Count; i++) {
+                var r = GameState.Regions[i];
                 // Select Units Not In A Squad
                 List<IEntity> squad = new List<IEntity>();
-                foreach(RTSUnit u in r.units) {
+                for(int ui = 0; ui < r.units.Count; ui++) {
+                    var u = r.units[ui] as RTSUnit;
                     if(u.Squad.Units.Count == 1)
                         squad.Add(u);
                 }
@@ -283,11 +293,15 @@ namespace RTS.Input {
                 foreach(var u2 in squad)
                     sumPos += u2.GridPosition;
                 Vector2 averagePos = new Vector2(sumPos.X / squad.Count, sumPos.Y / squad.Count);
-                foreach(var t2 in GameState.activeTeams)
+                for(int ti = 0; ti < GameState.activeTeams.Length; ti++) {
+                    var t2 = GameState.activeTeams[ti];
                     if(t2.Index != TeamIndex)
-                        foreach(var u3 in t2.Team.Units)
+                        for(int tui = 0; tui < t2.Team.Units.Count; tui++) {
+                            var u3 = t2.Team.Units[tui];
                             if(target == null || Vector2.Distance(u3.GridPosition, averagePos) < Vector2.Distance(u3.GridPosition, target.GridPosition))
                                 target = u3;
+                        }
+                }
                 AddEvent(new SetTargetEvent(TeamIndex, target));
             }
         }

@@ -164,10 +164,11 @@ namespace RTS.Default.Worker
         void DSFindDepository(GameState g, float dt) {
             float minDist = float.MaxValue;
             RTSBuilding depository = null;
-            foreach (RTSBuilding building in unit.Team.Buildings) {
-                if (building.Data.Depositable) {
+            for(int i = 0; i < unit.Team.Buildings.Count; i++) {
+                var building = unit.Team.Buildings[i];
+                if(building.Data.Depositable) {
                     float dist = (building.GridPosition - unit.GridPosition).Length();
-                    if (minDist > dist) {
+                    if(minDist > dist) {
                         minDist = dist;
                         depository = building;
                     }

@@ -132,13 +132,13 @@
     </Compile>
     <Compile Include="PressEnterScreen.cs" />
     <Compile Include="RTSScreen.cs" />
-    <Content Include="Content\Audio\BG\Defiant Planet BGM.wav">
+    <Content Include="Content\Audio\btnHover.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Audio\btnClick.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\Audio\btnHover.wav">
+    <Content Include="Content\Audio\BG\Defiant Planet BGM.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Audio\Theme.wav">

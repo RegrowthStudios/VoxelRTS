@@ -54,17 +54,20 @@ namespace RTS.Default.Squad {
         public override void DecideMoves(GameState g, float dt) {
             // Pathfinding Has Not Finished: Make The Formation At The Average Squad Position
             a = 0f;
-            foreach(var unit in squad.Units) {
+            for(int i = 0; i < squad.Units.Count; i++) {
+                var unit = squad.Units[i];
                 a += unit.CollisionGeometry.BoundingRadius * unit.CollisionGeometry.BoundingRadius * MathHelper.Pi;
             }
             if(Waypoints == null || Waypoints.Count == 0) {
-                foreach(var unit in squad.Units) {
+                for(int i = 0; i < squad.Units.Count; i++) {
+                    var unit = squad.Units[i];
                     SetNetForceAndMove(g, unit, squad.GridPosition, null);
                 }
             }
             // Having A Target Trumps Regular Movement
             else if(squad.TargetingController != null && squad.TargetingController.Target != null) {
-                foreach(var unit in squad.Units) {
+                for(int i = 0; i < squad.Units.Count; i++) {
+                    var unit = squad.Units[i];
                     RTSUnit target = unit.Target as RTSUnit;
                     if(target != null) {
                         switch(unit.CombatOrders) {
@@ -87,7 +90,8 @@ namespace RTS.Default.Squad {
             }
             // Regular Movement 
             else {
-                foreach(var unit in squad.Units) {
+                for(int i = 0; i < squad.Units.Count; i++) {
+                    var unit = squad.Units[i];
                     if(CurrentWaypointIndices.ContainsKey(unit.UUID) && IsValid(CurrentWaypointIndices[unit.UUID])) {
                         Vector2 waypoint = squad.MovementController.Waypoints[CurrentWaypointIndices[unit.UUID]];
                         SetNetForceAndMove(g, unit, waypoint, null);
@@ -98,12 +102,14 @@ namespace RTS.Default.Squad {
         public override void ApplyMoves(GameState g, float dt) {
             // The Whole Squad Will Move At The Min Default Movespeed
             float minDefaultMoveSpeed = float.MaxValue;
-            foreach(var unit in squad.Units) {
+            for(int i = 0; i < squad.Units.Count; i++) {
+                var unit = squad.Units[i];
                 float moveSpeed = unit.MovementSpeed / unit.MovementMultiplier;
                 if(moveSpeed < minDefaultMoveSpeed)
                     minDefaultMoveSpeed = moveSpeed;
             }
-            foreach(var unit in squad.Units) {
+            for(int i = 0; i < squad.Units.Count; i++) {
+                var unit = squad.Units[i];
                 AddToHistory(unit, unit.GridPosition);
                 if(!doMove.ContainsKey(unit.UUID)) continue;
                 if(doMove[unit.UUID]) {
@@ -145,7 +151,8 @@ namespace RTS.Default.Squad {
                 netForce += Force(unit, otherUnit);
             }
             if(UnitHistory.ContainsKey(unit.UUID)) {
-                foreach(var prevLocation in UnitHistory[unit.UUID]) {
+                for(int i = 0; i < UnitHistory[unit.UUID].Count; i++) {
+                    var prevLocation = UnitHistory[unit.UUID].ElementAt(i);
                     netForce -= Force(unit, prevLocation);
                 }
             }
@@ -214,7 +221,8 @@ namespace RTS.Default.Squad {
             for(int i = 0; i < g.activeTeams.Length; i++) {
                 RTSTeam team = g.activeTeams[i].Team;
                 if(team == squad.Team) continue;
-                foreach(var sq in team.Squads) {
+                for(int si = 0; si < team.Squads.Count; si++) {
+                    var sq = team.Squads[si];
                     float d = (sq.GridPosition - squad.GridPosition).LengthSquared();
                     if(d < minDist) {
                         targetSquad = sq;
@@ -244,7 +252,8 @@ namespace RTS.Default.Squad {
             }
         }
         public override void ApplyTarget(GameState g, float dt) {
-            foreach(var unit in squad.Units) {
+            for(int i = 0; i < squad.Units.Count; i++) {
+                var unit = squad.Units[i];
                 unit.Target = target;
             }
         }
