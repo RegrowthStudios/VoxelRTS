@@ -67,18 +67,10 @@ namespace RTSEngine.Algorithms {
         }
 
         // Update And Re-Issue PathQuery From Start
-        public PathQuery ReissuePathQuery(PathQuery pq, Vector2 start, GameInputEvent e) {
-            if(pq != null)
-                pq.IsOld = true;
-            PathQuery query = null;
-            var swe = e as SetWayPointEvent;
-            var ste = e as SetTargetEvent;
-            if(swe != null)
-                query = new PathQuery(start, swe.Waypoint, e.Team);
-            else if(ste != null && ste.Target != null)
-                query = new PathQuery(start, ste.Target.GridPosition, e.Team);
-            else
-                return pq;
+        public PathQuery ReissuePathQuery(PathQuery query, Vector2 start, Vector2 goal, int teamIndex) {
+            if(query != null)
+                query.IsOld = true;
+            query = new PathQuery(start, goal, teamIndex);
             Add(query);
             return query;
         }
