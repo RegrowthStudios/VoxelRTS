@@ -378,15 +378,7 @@ namespace RTSEngine.Controllers {
             for(int i = 0; i < c.Count; i++) ApplyInput(s, dt, e);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
-            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                foreach(var squad in s.activeTeams[ti].Team.Squads) {
-                    if(squad.MovementController != null) {
-                        foreach(var unit in squad.Units) {
-                            squad.MovementController.CurrentWaypointIndices[unit.UUID] = -1;
-                        }
-                    }
-                }
-            }
+            // TODO: Deprecate ?
         }
         private void ApplyLogic(GameState s, float dt, DevCommandKillUnits c) {
             RTSTeam team;

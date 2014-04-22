@@ -38,8 +38,8 @@ namespace RTSEngine.Algorithms {
 
     public class Pathfinder : IDisposable {
         // A*
-        private GameState gameState;
-        private CollisionGrid World { get { return gameState.CGrid; } }
+        private static GameState gameState;
+        private static CollisionGrid World { get { return gameState.CGrid; } }
         // Whether A World Coordinate Is Collidable, Given The Pathfinding Team's Knowledge Of The World
         private bool[,] isCollidable;
         protected Point[,] prev;
@@ -104,7 +104,7 @@ namespace RTSEngine.Algorithms {
         }
 
         // Get The Search Grid Locations Adjacent To The Input
-        private bool InGrid(Point p) {
+        public static bool InGrid(Point p) {
             return p.X >= 0 && p.X < World.numCells.X && p.Y >= 0 && p.Y < World.numCells.Y;
         }
 
@@ -123,7 +123,7 @@ namespace RTSEngine.Algorithms {
         }
 
         public static IEnumerable<Point> Neighborhood(Point p) {
-            return NeighborhoodAlign(p).Concat<Point>(NeighborhoodDiag(p));
+            return (NeighborhoodAlign(p).Concat<Point>(NeighborhoodDiag(p))).Where(InGrid);
         }
 
         // Return The Two Aligned Locations One Could Cross Instead Of Moving Diagonally From P to N

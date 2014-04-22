@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Algorithms;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
@@ -14,6 +15,8 @@ namespace RTS.Default.Unit {
     public class Action : ACUnitActionController {
         int teamIndex;
         Action<GameState, float> fDecide, fApply;
+        Combat cc;
+        Movement mc;
 
         public override void DecideAction(GameState g, float dt) {
             fDecide(g, dt);
@@ -26,15 +29,33 @@ namespace RTS.Default.Unit {
         }
 
         public override void Init(GameState s, GameplayController c) {
+            cc = unit.CombatController as Combat;
+            mc = unit.MovementController as Movement;
+
             unit.State = BehaviorFSM.Rest;
             unit.TargetingOrders = BehaviorFSM.TargetAggressively;
             unit.CombatOrders = BehaviorFSM.CombatRanged;
             unit.MovementOrders = 0;
 
-            fDecide = DSRest;
+            fDecide = DSTest;//DSRest;
             fApply = ASRest;
 
             teamIndex = unit.Team.Index;
+        }
+
+        void DSTest(GameState g, float dt) {
+            if(mc != null) {
+                mc.DecideMove(g, dt);
+                var doMove = mc.doMove;
+                if(doMove) {
+                    unit.State = BehaviorFSM.Walking;
+                    fApply = mc.ApplyMove;
+                }
+                else if(!(unit.State == BehaviorFSM.CombatMelee || unit.State == BehaviorFSM.CombatRanged)) {
+                    unit.State = BehaviorFSM.Rest;
+                    fApply = ASRest;
+                }
+            }
         }
 
         void DSRest(GameState g, float dt) {
@@ -264,10 +285,123 @@ namespace RTS.Default.Unit {
         }
     }
 
-    // TODO: Decide If We Need This
     public class Movement : ACUnitMovementController {
-        public override void Init(GameState s, GameplayController c) {
+        // The Constants Used In Flow Field Calculations
+        protected const float rForce = 10f;
+        protected const float aForce = -200f;
 
+        // Calculate The Unit Force Between Two Locations
+        public Vector2 UnitForce(Vector2 a, Vector2 b) {
+            Vector2 diff = a - b;
+            float mag = diff.LengthSquared();
+            return diff.X != 0 && diff.Y != 0 ? diff / mag : Vector2.Zero;
+        }
+
+        //protected const int historySize = 20;
+        //// The Last Few Locations This Unit Has Been To
+        //private Queue<Vector2> unitHistory = new Queue<Vector2>();
+        //public Queue<Vector2> UnitHistory {
+        //    get { return unitHistory; }
+        //    set { unitHistory = value; }
+        //}
+
+        //public void AddToHistory(Vector2 location) {
+        //    if(UnitHistory.Count >= historySize)
+        //        UnitHistory.Dequeue();
+        //    UnitHistory.Enqueue(location);
+        //}
+        
+        //// How Many Waypoints This Unit Should Lookahead When Updating Its PF Query
+        //protected const int lookahead = 2;
+
+        public override void Init(GameState s, GameplayController c) {
+            pathfinder = c.pathfinder;
+            NetForce = Vector2.Zero;
+        }
+
+        //// This Unit Movement Controller's Current PathQuery
+        //public PathQuery Query { get; set; }
+
+        //// Setup And Send Pathfinding Query
+        //public void SendPathQuery(GameState s, GameInputEvent e) {
+        //    if(Query != null)
+        //        Query.IsOld = true;
+        //    PathQuery query = null;
+        //    var swe = e as SetWayPointEvent;
+        //    var ste = e as SetTargetEvent;
+        //    if(swe != null)
+        //        query = new PathQuery(unit.GridPosition, swe.Waypoint, e.Team);
+        //    else if(ste != null && ste.Target != null)
+        //        query = new PathQuery(unit.GridPosition, ste.Target.GridPosition, e.Team);
+        //    else
+        //        return;
+        //    Query = query;
+        //    pathfinder.Add(query);
+        //}
+
+        public override void DecideMove(GameState g, float dt) {
+            doMove = IsValid(CurrentWaypointIndex);
+            if(!doMove) return;
+            //// If The Old Path Has Become Invalidated, Send A New Query
+            //bool invalid = false;
+            //int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
+            //for(int i = CurrentWaypointIndex; i > end; i--) {
+            //    Vector2 wp = Waypoints[i];
+            //    Point wpCell = HashHelper.Hash(wp, g.CGrid.numCells, g.CGrid.size);
+            //    if(g.CGrid.GetCollision(wpCell.X, wpCell.Y)) {
+            //        invalid = true;
+            //        break;
+            //    }
+            //}
+            //if(invalid) {
+            //    Vector2 goal = Waypoints[0];
+            //    SendPathQuery(g, new SetWayPointEvent(unit.Team.Index, goal));
+            //}
+            SetNetForceAndWaypoint(g);
+        }
+        public override void ApplyMove(GameState g, float dt) {
+            //AddToHistory(unit.GridPosition);
+            if(NetForce != Vector2.Zero) {
+                float magnitude = NetForce.Length();
+                Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MovementController.MinDefaultMoveSpeed * dt;
+                // TODO: Make Sure We Don't Overshoot The Goal But Otherwise Move At Max Speed
+                if(scaledChange.LengthSquared() > magnitude * magnitude)
+                    unit.Move(NetForce);
+                else
+                    unit.Move(scaledChange);
+            }
+        }
+
+        private void SetNetForceAndWaypoint(GameState g) {
+            Vector2 waypoint = Waypoints[CurrentWaypointIndex];
+            // Set Net Force...
+            NetForce = aForce*UnitForce(unit.GridPosition, waypoint);
+            CollisionGrid cg = g.CGrid;
+            Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
+            // Apply Forces From Other Units In This One's Cell
+            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
+                NetForce += rForce*UnitForce(unit.GridPosition, otherUnit.GridPosition);
+            }
+            // Apply Forces From Buildings And Other Units Near This One
+            foreach(Point n in Pathfinder.Neighborhood(unitCell)) {
+                RTSBuilding b = cg.EStatic[n.X, n.Y];
+                if(b != null)
+                    NetForce += rForce*UnitForce(unit.GridPosition, b.GridPosition);
+                foreach(var otherUnit in cg.EDynamic[n.X, n.Y]) {
+                    NetForce += rForce*UnitForce(unit.GridPosition, otherUnit.GridPosition);
+                }
+            }
+            //// Apply Forces From Unit's Recent Locations To Push It Forward
+            //foreach(var prevLocation in UnitHistory) {
+            //    NetForce += rForce*UnitForce(unit.GridPosition, prevLocation);
+            //}
+            // Set Waypoint...
+            Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
+            bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
+            float SquadRadiusSquared = unit.Squad.MovementController.SquadRadiusSquared;
+            if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < 1.5 * SquadRadiusSquared) {
+                CurrentWaypointIndex--;
+            }
         }
 
         public override void Serialize(BinaryWriter s) {

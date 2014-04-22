@@ -88,23 +88,33 @@ namespace RTSEngine.Interfaces {
 
     // Special Movement Mechanics
     public abstract class ACUnitMovementController : ACUnitController {
-        //// Index Of Squad Waypoint That This Controller's Unit Is Currently Attempting To Reach
-        //public int CurrentWaypointIndex { get; set; }
+        // Pathfinder To Be Run On A Separate Thread         
+        protected Pathfinder pathfinder;
 
-        //// Has This Controller's Unit's Squad's Pathfinding Query Been Resolved?
-        //public bool HasPath { get; set; }
+        // Squad Waypoints
+        private List<Vector2> waypoints = new List<Vector2>();
+        public List<Vector2> Waypoints {
+            get { return waypoints; }
+            set { waypoints = value; }
+        }
 
-        //// Does The Provided Index Point To A Valid Squad Waypoint?
-        //public bool IsValid(int idx) {
-        //    if(unit.Squad == null || unit.Squad.MovementController == null || unit.Squad.MovementController.Waypoints == null)
-        //        return false;
-        //    else
-        //        return idx >= 0 && idx < unit.Squad.MovementController.Waypoints.Count;
-        //}
+        // Index Of Squad Waypoint That This Controller's Unit Is Currently Attempting To Reach
+        public int CurrentWaypointIndex { get; set; }
 
-        //// Scripted Logic For Movement
-        //public abstract void DecideMove(GameState g, float dt);
-        //public abstract void ApplyMove(GameState g, float dt);
+        // Whether This Unit Has Actually Decided To Move
+        public bool doMove { get; set; }
+
+        // The Net Force On This Unit
+        public Vector2 NetForce {get; set; }
+
+        // Does The Provided Index Point To A Valid Squad Waypoint?
+        public bool IsValid(int idx) {
+            return Waypoints != null && idx >= 0 && idx < Waypoints.Count;
+        }
+
+        // Scripted Logic For Movement
+        public abstract void DecideMove(GameState g, float dt);
+        public abstract void ApplyMove(GameState g, float dt);
     }
     #endregion
 
@@ -189,9 +199,6 @@ namespace RTSEngine.Interfaces {
 
     // The Movement Controller That Dictates The General Movement Behavior Of Units In The Squad
     public abstract class ACSquadMovementController : ACSquadController {
-        // Pathfinder To Be Run On A Separate Thread         
-        protected Pathfinder pathfinder;
-        
         // Waypoints That Units In This Squad Will Generally Follow
         private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {
@@ -199,25 +206,26 @@ namespace RTSEngine.Interfaces {
             set { waypoints = value; }
         }
 
-        // The Index Of The Current Waypoint Each Unit In This Squad Is Supposed To Head Toward
-        // Key: UUID; Value: CurrentWaypointIndex
-        private Dictionary<int, int> currentWaypointIndices = new Dictionary<int, int>();
-        public Dictionary<int, int> CurrentWaypointIndices {
-            get { return currentWaypointIndices; }
-            set { currentWaypointIndices = value; }
-        }
+        // The Whole Squad Will Move At The Min Default Movespeed
+        public float MinDefaultMoveSpeed { get; set; } 
+
+        // Used For Movement Halting Logic
+        public float SquadRadiusSquared { get; set; }
+
+        // Pathfinder To Be Run On A Separate Thread         
+        protected Pathfinder pathfinder;
 
         // This Squad Movement Controller's Current PathQuery
-        public PathQuery Query { get; set; }
+        protected PathQuery Query { get; set; }
 
         // Setup And Send Pathfinding Query
         public void SendPathQuery(GameState s, GameInputEvent e) {
             if(Query != null)
                 Query.IsOld = true;
-            squad.RecalculateGridPosition();
             PathQuery query = null;
             var swe = e as SetWayPointEvent;
             var ste = e as SetTargetEvent;
+            squad.RecalculateGridPosition();
             if(swe != null)
                 query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
             else if(ste != null && ste.Target != null)
@@ -228,14 +236,9 @@ namespace RTSEngine.Interfaces {
             pathfinder.Add(query);
         }
 
-        // Does The Provided Index Point To A Valid Squad Waypoint?
-        public bool IsValid(int idx) {
-            return Waypoints != null && idx >= 0 && idx < Waypoints.Count;
-        }
-
         // Scripted Logic For Movement
-        public abstract void DecideMove(GameState g, float dt, RTSUnit unit);
-        public abstract void ApplyMove(GameState g, float dt, RTSUnit unit);
+        public abstract void DecideMove(GameState g, float dt);
+        public abstract void ApplyMove(GameState g, float dt);
     }
 
     // Controls The Targeting That A Squad Performs
