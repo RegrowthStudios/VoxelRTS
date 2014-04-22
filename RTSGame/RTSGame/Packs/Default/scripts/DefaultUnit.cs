@@ -23,7 +23,7 @@ namespace RTS.Default.Unit {
         }
         public override void ApplyAction(GameState g, float dt) {
             fApply(g, dt);
-            if(unit.Target != null) {
+            if(unit.Target != null && unit.TargetingOrders != BehaviorFSM.TargetNone) {
                 unit.TurnToFace(unit.Target.GridPosition);
             }
         }
@@ -34,10 +34,10 @@ namespace RTS.Default.Unit {
 
             unit.State = BehaviorFSM.Rest;
             unit.TargetingOrders = BehaviorFSM.TargetAggressively;
-            unit.CombatOrders = BehaviorFSM.CombatRanged;
-            unit.MovementOrders = 0;
+            unit.CombatOrders = BehaviorFSM.UseRangedAttack;
+            unit.MovementOrders = BehaviorFSM.JustMove;
 
-            fDecide = DSTest;//DSRest;
+            fDecide = DSRest;
             fApply = ASRest;
 
             teamIndex = unit.Team.Index;
@@ -59,29 +59,42 @@ namespace RTS.Default.Unit {
         }
 
         void DSRest(GameState g, float dt) {
+            // Default: Rest
             unit.State = BehaviorFSM.Rest;
-            if(unit.Target != null) {
-                FogOfWar f = g.CGrid.GetFogOfWar(unit.Target.GridPosition, teamIndex);
-                if(f != FogOfWar.Active) {
-                    return;
-                }
-                switch(unit.TargetingOrders) {
-                    case BehaviorFSM.TargetOmnisciently:
-                    case BehaviorFSM.TargetAggressively:
-                        fDecide = DSFollowTarget;
-                        fApply = ASFollowTarget;
-                        fDecide(g, dt);
-                        break;
-                    case BehaviorFSM.TargetPassively:
-                        float mr = unit.Data.BaseCombatData.MaxRange;
-                        float d2 = (unit.Target.GridPosition - unit.GridPosition).LengthSquared();
-                        if(d2 <= mr * mr) {
-                            origin = unit.Target.GridPosition;
-                            fDecide = DSPassiveTarget;
-                            fApply = ASPassiveTarget;
-                            fDecide(g, dt);
+            fDecide = DSRest;
+            fApply = DSRest;
+            if(mc != null) {
+                mc.DecideMove(g, dt);
+                var doMove = mc.doMove;
+                if(doMove) {
+                    if(unit.Target != null) {
+                        //FogOfWar f = g.CGrid.GetFogOfWar(unit.Target.GridPosition, teamIndex);
+                        //if(f != FogOfWar.Active) {
+                        //    return;
+                        //}
+                        switch(unit.TargetingOrders) {
+                            case BehaviorFSM.TargetPassively:
+                                float mr = unit.Data.BaseCombatData.MaxRange;
+                                float d2 = (unit.Target.GridPosition - unit.GridPosition).LengthSquared();
+                                if(d2 <= mr * mr) {
+                                    origin = unit.GridPosition;
+                                    fDecide = DSPassiveTarget;
+                                    fApply = ASPassiveTarget;
+                                }
+                                break;
+                            case BehaviorFSM.TargetAggressively:
+                                fDecide = DSFollowTarget;
+                                fApply = ASFollowTarget;
+                                break;
                         }
-                        break;
+                        fDecide(g, dt);
+                        unit.State = BehaviorFSM.Walking;
+                        fApply = mc.ApplyMove;
+                    }
+                }
+                else if(!(unit.State == BehaviorFSM.CombatMelee || unit.State == BehaviorFSM.CombatRanged)) {
+                    unit.State = BehaviorFSM.Rest;
+                    fApply = ASRest;
                 }
             }
         }
@@ -109,7 +122,7 @@ namespace RTS.Default.Unit {
                         case BehaviorFSM.CombatRanged:
                             if(d <= mr * 0.75) {
                                 unit.State = BehaviorFSM.CombatRanged;
-                                etCombat = 0;
+                                //etCombat = 0;
                                 fDecide = DSCombatRanged;
                                 fApply = ASCombatRanged;
                             }
@@ -118,7 +131,7 @@ namespace RTS.Default.Unit {
                         case BehaviorFSM.CombatMelee:
                             if(dBetween <= unit.CollisionGeometry.InnerRadius * 0.2f) {
                                 unit.State = BehaviorFSM.CombatMelee;
-                                etCombat = 0;
+                                //etCombat = 0;
                                 fDecide = DSCombatMelee;
                                 fApply = ASCombatMelee;
                             }
@@ -185,37 +198,39 @@ namespace RTS.Default.Unit {
             }
         }
 
-        float etCombat = 0;
-        Random r = new Random();
+        //float etCombat = 0;
+        //Random r = new Random();
         void DSCombatRanged(GameState g, float dt) {
-            if(unit.Target == null) {
+            if(unit.Target == null || cc == null) {
                 unit.State = BehaviorFSM.Rest;
                 fDecide = DSRest;
                 fApply = ASRest;
                 return;
             }
-
-            float mr = unit.Data.BaseCombatData.MaxRange;
-            float d = (unit.Target.GridPosition - unit.GridPosition).Length();
-            if(d > mr) {
-                unit.State = BehaviorFSM.Rest;
-                fDecide = DSRest;
-                fApply = ASRest;
-                fDecide(g, dt);
-            }
+            unit.State = BehaviorFSM.CombatRanged;
+            fDecide = DSCombatRanged;
+            fApply = ASCombatRanged;
+            //float mr = unit.Data.BaseCombatData.MaxRange;
+            //float d = (unit.Target.GridPosition - unit.GridPosition).Length();
+            //if(d > mr) {
+            //    unit.State = BehaviorFSM.Rest;
+            //    fDecide = DSRest;
+            //    fApply = ASRest;
+            //    fDecide(g, dt);
+            //}
         }
         void ASCombatRanged(GameState g, float dt) {
             if(unit.Target == null || unit.CombatOrders != BehaviorFSM.CombatRanged) return;
-
-            float mr = unit.Data.BaseCombatData.MaxRange;
-            float d = (unit.Target.GridPosition - unit.GridPosition).Length();
-            etCombat += dt;
-            if(d < mr) {
-                if(etCombat > unit.Data.BaseCombatData.AttackTimer) {
-                    unit.DamageTarget(r.NextDouble());
-                    etCombat = 0;
-                }
-            }
+            cc.Attack(g, dt);
+            //float mr = unit.Data.BaseCombatData.MaxRange;
+            //float d = (unit.Target.GridPosition - unit.GridPosition).Length();
+            //etCombat += dt;
+            //if(d < mr) {
+            //    if(etCombat > unit.Data.BaseCombatData.AttackTimer) {
+            //        unit.DamageTarget(r.NextDouble());
+            //        etCombat = 0;
+            //    }
+            //}
         }
 
         void DSCombatMelee(GameState g, float dt) {
@@ -254,7 +269,7 @@ namespace RTS.Default.Unit {
         public override void Attack(GameState g, float dt) {
             if(attackCooldown > 0)
                 attackCooldown -= dt;
-            if(unit.State != BehaviorFSM.None)
+            if(!(unit.State == BehaviorFSM.CombatMelee || unit.State == BehaviorFSM.CombatRanged))
                 return;
             if(unit.Target != null) {
                 if(!unit.Target.IsAlive) {
@@ -262,13 +277,12 @@ namespace RTS.Default.Unit {
                     return;
                 }
                 float minDistSquared = unit.Data.BaseCombatData.MinRange * unit.Data.BaseCombatData.MinRange;
-                float distSquared = (unit.Target.WorldPosition - unit.WorldPosition).LengthSquared();
+                float distSquared = (unit.Target.GridPosition - unit.GridPosition).LengthSquared();
                 float maxDistSquared = unit.Data.BaseCombatData.MaxRange * unit.Data.BaseCombatData.MaxRange;
                 if(distSquared > maxDistSquared) return;
 
                 if(attackCooldown <= 0) {
                     attackCooldown = unit.Data.BaseCombatData.AttackTimer;
-                    unit.State = BehaviorFSM.CombatMelee;
                     if(minDistSquared <= distSquared) {
                         unit.DamageTarget(critRoller.NextDouble());
                         if(!unit.Target.IsAlive) unit.Target = null;
