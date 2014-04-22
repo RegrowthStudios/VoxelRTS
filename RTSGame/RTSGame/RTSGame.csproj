@@ -332,6 +332,9 @@
     <Content Include="Packs\Default\maps\Caldera\Region5x5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Packs\Default\races\Gaia\textures\Ore.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\textures\BarracksKey.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -437,6 +440,9 @@
     <None Include="Packs\Default\races\Animals\house.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Packs\Default\races\Gaia\models\Ore.model">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Packs\Default\races\Gaia\ore.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
