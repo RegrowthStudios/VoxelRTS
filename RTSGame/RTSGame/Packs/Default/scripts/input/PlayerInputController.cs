@@ -236,8 +236,8 @@ namespace RTS.Input {
             switch(args.KeyCode) {
                 case Keys.Delete:
                     if(selected != null) {
-                        foreach(var unit in selected) {
-                            unit.Destroy();
+                        for(int i = selected.Count - 1; i >= 0; i--) {
+                            selected[i].Destroy();
                         }
                         selected.Clear();
                     }

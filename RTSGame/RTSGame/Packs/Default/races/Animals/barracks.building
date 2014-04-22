@@ -2,7 +2,7 @@
 NAME            [Barracks]
 
 // Unit Model
-MODEL           [..\..\models\Barracks.obj]
+MODEL           [..\..\models\Barracks.model]
 TEXMAIN         [..\..\textures\BarracksMain.png]
 TEXCOLOR        [..\..\textures\BarracksKey.png]
 ICON            [..\..\icons\BarracksButton.png]
@@ -17,6 +17,7 @@ BUILDAMOUNT     [20]
 SIGHTRADIUS     [24]
 GRIDSIZE        [2 , 2]
 RESOURCE        [0]
+DEPOSITABLE		[0]
 
 // Collision Data
 BBOXMIN         [-2 , 0.0 , -2]

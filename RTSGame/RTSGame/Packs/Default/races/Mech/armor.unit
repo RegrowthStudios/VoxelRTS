@@ -2,7 +2,7 @@
 NAME            [Armored Soldier]
 
 // Unit Model
-MODEL           [..\..\models\MechBase.obj]
+MODEL           [..\..\models\MechBase.model]
 TEXMAIN         [..\..\textures\Main.png]
 TEXCOLOR        [..\..\textures\Key.png]
 ANIMATION       [..\..\animations\Mech3.png]

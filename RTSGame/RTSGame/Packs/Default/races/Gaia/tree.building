@@ -2,7 +2,7 @@
 NAME            [Tree]
 
 // Unit Model
-MODEL           [..\..\models\Tree.obj]
+MODEL           [..\..\models\Tree.model]
 TEXMAIN         [..\..\textures\Tree.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
 ICON            [..\..\icons\TreeButton.png]
@@ -17,6 +17,7 @@ BUILDAMOUNT     [20]
 SIGHTRADIUS     [8]
 GRIDSIZE        [1, 1]
 RESOURCE        [1]
+DEPOSITABLE		[0]
 
 // Collision Data
 BBOXMIN         [-1 , 0.0 , -1]

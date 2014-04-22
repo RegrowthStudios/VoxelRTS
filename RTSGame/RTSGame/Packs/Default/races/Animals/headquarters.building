@@ -2,9 +2,9 @@
 NAME            [Headquarters]
 
 // Unit Model
-MODEL           [..\..\models\Barracks.obj]
-TEXMAIN         [..\..\textures\BarracksMain.png]
-TEXCOLOR        [..\..\textures\BarracksKey.png]
+MODEL           [..\..\models\HQ.model]
+TEXMAIN         [..\..\textures\HQMain.png]
+TEXCOLOR        [..\..\textures\NoKey.png]
 ICON            [..\..\icons\HQButton.png]
 MAXCOUNT        [100]
 
@@ -15,12 +15,13 @@ POPCAPCHANGE    [20]
 IMPACT          [10]
 BUILDAMOUNT     [20]
 SIGHTRADIUS     [54]
-GRIDSIZE        [2 , 2]
+GRIDSIZE        [2 , 3]
 RESOURCE        [0]
+DEPOSITABLE		[0]
 
 // Collision Data
-BBOXMIN         [-2 , 0.0 , -2]
-BBOXMAX         [2 , 3.0 , 2]
-CRECT           [4 , 4 , 0 , 0]
+BBOXMIN         [-2 , 0.0 , -3]
+BBOXMAX         [2 , 3.0 , 3]
+CRECT           [4 , 6 , 0 , 0]
 
 CTRLACTION      [RTS.Default.Building.Action]

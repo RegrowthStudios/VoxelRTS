@@ -2,7 +2,7 @@
 NAME            [Soldier]
 
 // Unit Model
-MODEL           [..\..\models\Cat.obj]
+MODEL           [..\..\models\Cat.model]
 TEXMAIN         [..\..\textures\Cat.png]
 TEXCOLOR        [..\..\textures\CatKey.png]
 ANIMATION       [..\..\animations\Cat.png]

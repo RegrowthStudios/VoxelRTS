@@ -18,12 +18,6 @@ namespace RTSEngine.Graphics {
         public Action<GameState> FOnPress;
     }
 
-    /**
-     * RTS UI Menus:
-     * When Units Selected: Unit/Type Counts
-     * When Unit Selected: Unit/Profile
-     * When Building Selected: Building/Profile
-     */
     public class RTSUI : IDisposable {
         private WidgetRenderer wrButtonPanel, wrMain;
 

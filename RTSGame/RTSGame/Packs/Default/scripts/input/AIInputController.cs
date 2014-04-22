@@ -89,7 +89,8 @@ namespace RTS.Input {
         }
         private void MoveUnits(Random r) {
             var toMove = new List<IEntity>();
-            foreach(var unit in Team.Units) {
+            for(int i = 0; i < Team.Units.Count; i++) {
+                var unit = Team.Units[i];
                 if(r.Next(100) > 80)
                     toMove.Add(unit);
             }
