@@ -90,8 +90,9 @@ namespace RTS.Default.Worker {
                 mc.DecideMove(g, dt);
                 var doMove = mc.doMove;
                 if(doMove) {
-                    if(unit.Target != null)  // This Is A User-Set Target
+                    if(unit.Target != null)  {// This Is A User-Set Target
                         DSChaseTarget(g, dt);
+                    }
                     else
                         SetState(BehaviorFSM.Walking);
                 }
@@ -194,18 +195,14 @@ namespace RTS.Default.Worker {
             switch(unit.State) {
                 case BehaviorFSM.Build:
                     cc.Attack(g, dt);
-                    if(targetB != null) {
-                        if(targetB.BuildAmountLeft <= 0) {
-                            SetState(BehaviorFSM.Rest);
-                        }
+                    if(targetB != null && targetB.BuildAmountLeft <= 0) {
+                        SetState(BehaviorFSM.Rest);
                     }
                     break;
                 case BehaviorFSM.Repair:
                     cc.Attack(g, dt);
-                    if(targetB != null) {
-                        if(targetB.Health >= targetB.Data.Health) {
-                            SetState(BehaviorFSM.Rest);
-                        }
+                    if(targetB != null && targetB.Health >= targetB.Data.Health) {
+                        SetState(BehaviorFSM.Rest);
                     }
                     break;
                 case BehaviorFSM.Harvest:
