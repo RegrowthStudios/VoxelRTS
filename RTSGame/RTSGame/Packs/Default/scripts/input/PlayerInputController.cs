@@ -47,7 +47,6 @@ namespace RTS.Input {
             // Create UI
             UI = new RTSUI(renderer, "Courier New", 32, 140);
             UI.SetTeam(Team);
-            UI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
             OnNewSelection += UI.BBPanel.OnNewSelection;
 
@@ -287,7 +286,7 @@ namespace RTS.Input {
         }
 
         public void OnUIPress(Point p, MouseButton b) {
-            Vector2 r;
+            Vector2 r = Vector2.Zero;
             if(UI.Minimap.Inside(p.X, p.Y, out r)) {
                 // Use The Minimap
                 Vector2 mapPos = r * GameState.CGrid.size;
@@ -321,6 +320,9 @@ namespace RTS.Input {
             }
         }
 
+        public void Update(RTSRenderer renderer, GameState s) {
+            UI.BuildingPanel.Update();
+        }
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             UI.Draw(renderer, batch);
         }
