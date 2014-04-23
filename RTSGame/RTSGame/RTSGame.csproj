@@ -138,9 +138,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\scripts\DefaultWorker.cs">
-    <Compile Include="Packs\Default\scripts\DefaultWorker.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
     <Content Include="Packs\Default\scripts\buttons\DBSpawn.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
