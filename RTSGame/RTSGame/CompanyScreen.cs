@@ -18,7 +18,7 @@ namespace RTS {
         private const float SCREEN_MAX_TIME = 15f;
 
         public override int Next {
-            get { return game.InduZtryScreen.Index; }
+            get { return game.WispScreen.Index; }
             protected set { }
         }
         public override int Previous {
