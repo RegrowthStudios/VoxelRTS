@@ -185,7 +185,12 @@ namespace RTSEngine.Data {
             return null;
         }
         public void AddParticle(Particle p) {
-            tmpParticles.Add(p);
+            lock (lckParticles)
+                tmpParticles.Add(p);
+        }
+        public void AddParticles(IEnumerable<Particle> p) {
+            lock (lckParticles)
+                tmpParticles.AddRange(p);
         }
     }
 }

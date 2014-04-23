@@ -32,15 +32,15 @@ namespace RTSEngine.Data.Parsers {
                     L1MaxNumSpawn = new int[] {6,3,1},
                     L2MaxNumSpawn = new int[] {12,5,2},
                     L3MaxNumSpawn = new int[] {15,10,5},
-                    LightningHitP = 100,
-                    LightningDamage = 10000,
-                    EarthquakeHitP = 100,
-                    EarthquakeDamage = 10000,
-                    FireHitUnitP = 100,
-                    FireUnitDamage = 10000,
-                    FireHitBuildingP = 100,
-                    FireBuildingDamage = 10000,
-                    FireSpreadP = 100
+                    LightningHitP = 60,
+                    LightningDamage = 1000,
+                    EarthquakeHitP = 40,
+                    EarthquakeDamage = 2000,
+                    FireHitUnitP = 90,
+                    FireUnitDamage = 10,
+                    FireHitBuildingP = 80,
+                    FireBuildingDamage = 10,
+                    FireSpreadP = 10
                 };
             }
         }

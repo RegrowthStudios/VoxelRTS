@@ -203,7 +203,7 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyInput(GameState s, float dt, SelectEvent e) {
-            s.teams[e.Team].Input.Select(e.Selected);
+            s.teams[e.Team].Input.Select(e.Selected, e.Append);
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
             RTSTeam team = s.teams[e.Team];

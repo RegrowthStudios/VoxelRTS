@@ -144,5 +144,9 @@ namespace RTSEngine.Graphics {
                 textVictory = null;
             }
         }
+
+        public bool Inside(int x, int y) {
+            return rectBase.Inside(x, y);
+        }
     }
 }

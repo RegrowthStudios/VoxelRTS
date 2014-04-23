@@ -13,7 +13,7 @@ using BlisterUI.Input;
 namespace RTS {
     public class PressEnterScreen : GameScreen<App> {
         private const string TEXTURE_FILE = @"Content\UI\Press Enter.png";
-        private const string SOUND_FILE_THEME = @"Content\Audio\Theme.wav";
+        private const string SOUND_FILE_THEME = @"Content\Audio\IntroTheme.wav";
 
         public override int Next {
             get { return game.LoginScreen.Index; }

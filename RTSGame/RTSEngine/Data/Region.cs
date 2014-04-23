@@ -8,7 +8,7 @@ using System.Text;
 
 namespace RTSEngine.Data {
     public class Region {
-        public int RegionImpact { get; private set; }
+        public int RegionImpact { get;  private set; }
         public List<Point> Cells { get; private set; }
         public List<IEntity> units { get; set; }
 

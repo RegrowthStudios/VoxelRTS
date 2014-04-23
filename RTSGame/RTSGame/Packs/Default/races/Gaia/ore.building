@@ -2,8 +2,8 @@
 NAME            [Ore]
 
 // Unit Model
-MODEL           [..\..\models\Tree.model]
-TEXMAIN         [..\..\textures\Tree.png]
+MODEL           [models\Ore.model]
+TEXMAIN         [textures\Ore.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
 ICON            [..\..\icons\OreButton.png]
 MAXCOUNT        [400]

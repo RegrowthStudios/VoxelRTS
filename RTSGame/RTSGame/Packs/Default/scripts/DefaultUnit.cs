@@ -209,7 +209,7 @@ namespace RTS.Default.Unit {
         }
 
         public override void Serialize(BinaryWriter s) {
-        
+
         }
         public override void Deserialize(BinaryReader s) {
 
@@ -278,6 +278,7 @@ namespace RTS.Default.Unit {
 
     public class Animation : ACUnitAnimationController {
         private static Random r = new Random();
+        private GameState state;
 
         private AnimationLoop alRest, alWalk, alCombat;
         private AnimationLoop alCurrent;
@@ -297,7 +298,7 @@ namespace RTS.Default.Unit {
         }
 
         public override void Init(GameState s, GameplayController c) {
-
+            state = s;
         }
 
         public override void SetUnit(RTSUnit u) {
@@ -382,4 +383,3 @@ namespace RTS.Default.Unit {
         }
     }
 }
-
