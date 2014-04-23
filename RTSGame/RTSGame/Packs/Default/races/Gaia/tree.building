@@ -6,7 +6,7 @@ MODEL           [models\Tree.model]
 TEXMAIN         [textures\Tree.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
 ICON            [icons\Tree.png]
-MAXCOUNT        [2000]
+MAXCOUNT        [5000]
 
 // Unit Data
 HEALTH          [120]
