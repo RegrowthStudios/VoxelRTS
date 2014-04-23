@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using RTSEngine.Algorithms;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
@@ -14,220 +15,296 @@ namespace RTS.Default.Worker {
     public class Action : ACUnitActionController {
         int teamIndex;
         Action<GameState, float> fDecide, fApply;
+        Combat cc;
+        Movement mc;
+
+        // Targeting Behavior State Info
+        Point targetCellPrev = Point.Zero;
+        IEntity prevTarget = null;
+
+        // Worker Specific Stuff
         private RTSBuilding targetResource;
-        private IEntity target;
-        private bool headingDepository;
-        private bool harvesting;
+        private RTSBuilding targetDistro;
+        bool depositing;
+
+        public override void SetUnit(RTSUnit u) {
+            base.SetUnit(u);
+            if(unit != null) {
+                // Prevent Units From Running Toward The Location Of A Killed Target
+                unit.OnNewTarget += (S, T) => {
+                    if(mc != null && T == null)
+                        mc.Waypoints = null;
+                };
+            }
+        }
 
         public override void DecideAction(GameState g, float dt) {
             fDecide(g, dt);
         }
         public override void ApplyAction(GameState g, float dt) {
             fApply(g, dt);
-            if(unit.Target != null)
-                unit.TurnToFace(unit.Target.GridPosition);
         }
 
         public override void Init(RTSEngine.Data.GameState s, RTSEngine.Controllers.GameplayController c) {
-            unit.State = BehaviorFSM.Rest;
-            unit.TargetingOrders = BehaviorFSM.TargetPassively; // Never changes
-            unit.CombatOrders = BehaviorFSM.CombatMelee; // Never changes
-            unit.MovementOrders = 0;
-            targetResource = null;
-            target = null;
-            headingDepository = false;
-            harvesting = false;
+            cc = unit.CombatController as Combat;
+            mc = unit.MovementController as Movement;
 
-            fDecide = DSRest;
-            fApply = ASRest;
+            unit.TargetingOrders = BehaviorFSM.TargetPassively;
+            unit.CombatOrders = BehaviorFSM.UseMeleeAttack;
+            unit.MovementOrders = BehaviorFSM.JustMove;
+            SetState(BehaviorFSM.Rest);
 
             teamIndex = unit.Team.Index;
+
+            // Worker Specific Stuff
+            targetResource = null;
+            targetDistro = null;
+            depositing = false;
         }
 
-        void DSRest(GameState g, float dt) {
-            if (unit.Target != null || target != null) {
-                if (target == null) target = unit.Target;
-                Vector2 dir = target.GridPosition - unit.GridPosition;
-                float dl = dir.Length();
+        private void SetState(int state) {
+            unit.State = state;
+            switch(unit.State) {
+                case BehaviorFSM.Rest:
+                    fDecide = DSMain;
+                    fApply = ASRest;
+                    break;
+                case BehaviorFSM.Walking:
+                    fDecide = DSMain;
+                    fApply = mc.ApplyMove;
+                    break;
+                case BehaviorFSM.Harvest:
+                    fDecide = DSHarvest;
+                    fApply = DecideWorkerAction;
+                    break;
+                case BehaviorFSM.Build:    
+                case BehaviorFSM.Repair:
+                case BehaviorFSM.CombatMelee:
+                    fDecide = DSMain;
+                    fApply = ApplyWorkerAction;
+                    break;
+            }
+        }
 
-                // If the unit is far away from target, walk there
-                if (dl > unit.Data.BaseCombatData.MinRange + target.CollisionGeometry.BoundingRadius) {
-                    unit.State = BehaviorFSM.Walking;
-                    fDecide = DSWalk;
-                    fApply = ASWalk;
+        void DSMain(GameState g, float dt) {
+            // Default: Rest
+            SetState(BehaviorFSM.Rest);
+            if(mc != null) {
+                mc.DecideMove(g, dt);
+                var doMove = mc.doMove;
+                if(doMove) {
+                    if(unit.Target != null)  // This Is A User-Set Target
+                        DSChaseTarget(g, dt);
+                    else
+                        SetState(BehaviorFSM.Walking);
                 }
-                // If target is close
                 else {
-                    unit.State = BehaviorFSM.CombatRanged;
-                    fDecide = DSCombatRanged;
-                    fApply = ASCombatRanged; 
-                } 
+                    if(unit.Target != null) { // This Is A SquadTC-Set Target
+                        switch(unit.TargetingOrders) {
+                            case BehaviorFSM.TargetPassively:
+                                // TODO: Implement/Verify
+                                break;
+                            case BehaviorFSM.TargetAggressively:
+                                DSChaseTarget(g, dt);
+                                break;
+                        }
+                    }
+                }
             }
         }
 
         void ASRest(GameState g, float dt) { /* Do nothing */ }
 
-        void DSWalk(GameState g, float dt) {
-            // If target does not exist anymore
-            if (target == null){
-                if (headingDepository)
-                    target = GetClosestDepository();
-                Rest();
+        void DSChaseTarget(GameState g, float dt) {
+            if(unit.Target == null) {
+                SetState(BehaviorFSM.Rest);
                 return;
             }
-            Vector2 dir = target.GridPosition - unit.GridPosition;
-            float dl = dir.Length();
-            
-            // If target is close enough, switch to CombatRanged
-            if (dl <= unit.Data.BaseCombatData.MinRange + target.CollisionGeometry.BoundingRadius) {
-                unit.State = BehaviorFSM.CombatRanged;
-                fDecide = DSCombatRanged;
-                fApply = ASCombatRanged;
+            FogOfWar f = g.CGrid.GetFogOfWar(unit.Target.GridPosition, teamIndex);
+            switch(f) {
+                case FogOfWar.Active:
+                    float mr = unit.Data.BaseCombatData.MaxRange;
+                    float d = (unit.Target.GridPosition - unit.GridPosition).Length();
+                    float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
+                    switch(unit.CombatOrders) {
+                        case BehaviorFSM.UseRangedAttack:
+                            if(d <= mr * 0.75) {
+                                SetState(BehaviorFSM.CombatRanged);
+                                return;
+                            }
+                            break;
+                        // Melee Attack Will Be Used For Many Special Worker Functions
+                        case BehaviorFSM.UseMeleeAttack:
+                            if(dBetween <= unit.CollisionGeometry.InnerRadius * 0.2f) {
+                                DecideWorkerAction(g, dt);
+                                return;
+                            }
+                            break;
+                    }
+                    Point targetCellCurr = HashHelper.Hash(unit.Target.GridPosition, g.CGrid.numCells, g.CGrid.size);
+                    bool sameTarget = prevTarget == unit.Target;
+                    // If The Target Has Changed Cells And Is Out Of Range, We Need To Pathfind To It
+                    if(sameTarget && (targetCellCurr.X != targetCellPrev.X || targetCellCurr.Y != targetCellPrev.Y)) {
+                        mc.Query = mc.Pathfinder.ReissuePathQuery(mc.Query, unit.GridPosition, unit.Target.GridPosition, unit.Team.Index);
+                        SetState(BehaviorFSM.Rest);
+                    }
+                    else {
+                        SetState(BehaviorFSM.Walking);
+                    }
+                    prevTarget = unit.Target;
+                    targetCellPrev = targetCellCurr;
+                    break;
             }
         }
 
-        void ASWalk(GameState g, float dt) {
-            if (target == null) return;
-            // Move unit to target
-            Vector2 dir = target.GridPosition - unit.GridPosition;
-            float dl = dir.Length();
-            dir /= dl;
-            float m = unit.MovementSpeed * dt;
-            if (m > dl)
-                unit.Move(dir * dl);
-            else
-                unit.Move(dir * m);     
-        }
-
-        void DSCombatRanged(GameState g, float dt) {
-            // If target does not exist, rest
-            if (target == null)
-                Rest();
-            // If target is on the same team
-            else if (target.Team.Index == teamIndex) {
-                // If target is a building
-                if (target is RTSBuilding) {
-                    RTSBuilding targetB = (RTSBuilding)target;
-                    // If target is player's depositable building
-                    if (targetB.Data.Depositable) {
-                        fDecide = DSDeposit;
-                        fApply = ASDeposit;
+        void DecideWorkerAction(GameState g, float dt) {
+            if (unit.Target == null)
+                SetState(BehaviorFSM.Rest);
+            RTSBuilding targetB = unit.Target as RTSBuilding;
+            // If Target Is On The Same Team -> Might Be A Depositable Building, Etc.
+            if (unit.Target.Team.Index == teamIndex) {
+                if(targetB != null) {
+                    // Prioritize Building Unbuilt buildings
+                    if(!targetB.IsBuilt) {
+                        SetState(BehaviorFSM.Build);
                     }
-                    // If target is the player's undepositable building, repair
+                    // If Target Is Player's Depositable Building
+                    else if(targetB.Data.Depositable) {
+                        targetDistro = targetB;
+                        SetState(BehaviorFSM.Harvest);
+                    }
+                    // If Target Is The Player's Undepositable Building, Repair
                     else {
-                        unit.State = BehaviorFSM.Repair;
-                        fDecide = DSRepair;
-                        fApply = ASRepair;
+                        SetState(BehaviorFSM.Repair);
                     }
                 }
             }
-            // If target is on different team
+            // If Target Is On Another Team
             else {
-                // If target is a building type
-                if (target is RTSBuilding) {
-                    RTSBuilding targetB = (RTSBuilding)target;
-                    // If target is resource
+                if(targetB != null) {
                     if (targetB.IsResource) {
-                        harvesting = true;
-                        unit.State = BehaviorFSM.Harvest;
-                        fDecide = DSHarvest;
-                        fApply = ASHarvest;
+                        SetState(BehaviorFSM.Harvest);
                     }
 
                 }
                 // If enemy target is not resource, switch to combat state
                 else {
-                    unit.State = BehaviorFSM.CombatMelee;
-                    fDecide = DSCombatMelee;
-                    fApply = ASCombatMelee;
+                    SetState(BehaviorFSM.CombatMelee);
                 }
             }
         }
 
-        void ASCombatRanged(GameState g, float dt) { /* Do nothing */ }
-
-        void DSDeposit(GameState g, float dt) {
-            if (harvesting && targetResource != null && targetResource.IsAlive)
-                target = targetResource;
-            else 
-                target = null;
-            Rest();
+        void ApplyWorkerAction(GameState g, float dt) {
+            if(unit.Target == null || cc == null) {
+                SetState(BehaviorFSM.Rest);
+                return;
+            }
+            RTSBuilding targetB = unit.Target as RTSBuilding;
+            switch(unit.State) {
+                case BehaviorFSM.Build:
+                    cc.Attack(g, dt);
+                    if(targetB != null) {
+                        if(targetB.BuildAmountLeft <= 0) {
+                            SetState(BehaviorFSM.Rest);
+                        }
+                    }
+                    break;
+                case BehaviorFSM.Repair:
+                    cc.Attack(g, dt);
+                    if(targetB != null) {
+                        if(targetB.Health >= targetB.Data.Health) {
+                            SetState(BehaviorFSM.Rest);
+                        }
+                    }
+                    break;
+                case BehaviorFSM.Harvest:
+                    if(depositing)
+                        ASDeposit(g, dt);
+                    else {
+                        cc.Attack(g, dt);
+                        SetState(BehaviorFSM.Harvest);
+                    }
+                    break;
+                case BehaviorFSM.CombatMelee:
+                    cc.Attack(g, dt);
+                    break;
+            }
         }
 
+        // Worker-Specific Things
+        // TODO: Why /2?
         void ASDeposit(GameState g, float dt) {
             if (unit.Resources == 0) return;
             unit.Team.Input.AddEvent(new CapitalEvent(teamIndex, unit.Resources/2));
             unit.Resources = 0;
-            headingDepository = false;
+            depositing = false;
         }
 
         void DSHarvest(GameState g, float dt) {
-            // If unit cannot carry resources anymore or resource is exhausted, find depository
-            if (unit.Resources > unit.Data.CarryingCapacity || target == null || !target.IsAlive) {
-                if (target == null || !target.IsAlive) {
-                    harvesting = false;
-                    targetResource = null;
-                }
-                headingDepository = true;
-                target = GetClosestDepository();
-                Rest();
+            if(!depositing) {
+
             }
-        }
-
-        void ASHarvest(GameState g, float dt) {
-            unit.Target = target;
-            // Apply damage to resource and add capital
-            unit.CombatController.Attack(g, dt);
-        }
-
-        void DSCombatMelee(GameState g, float dt) {
-            // If target does not exist, rest
-            if (target == null)
-                Rest();
-        }
-
-        void ASCombatMelee(GameState g, float dt) {
-            unit.Target = target;
-            unit.CombatController.Attack(g, dt);
-        }
-
-        void DSRepair(GameState g, float dt) {
-            if (target == null)
-                Rest();
-            else if (target is RTSBuilding){
-                RTSBuilding targetB = (RTSBuilding) target;
-                if (targetB.Health >= targetB.Data.Health)
-                    Rest();
+            // Look For A Distro
+            if(unit.Resources > unit.Data.CarryingCapacity) {
+                if(targetDistro == null)
+                    targetDistro = GetClosestDepository();
+                unit.Target = targetDistro;
+                SetState(BehaviorFSM.Rest); 
             }
+            else if(unit.Target == null || !unit.Target.IsAlive) {
+                // Look For More Harvestable Stuff
+                if(targetResource == null)
+                    targetResource = GetClosestResource(g);
+                unit.Target = GetClosestResource(g);
+                SetState(BehaviorFSM.Rest);        
+            }
+            depositing = unit.Target == targetDistro;
         }
 
-        void ASRepair(GameState g, float dt) {
-            unit.Target = target;
-            unit.CombatController.Attack(g, dt);
-        }
-
-        // Helper method to apply rest state
-        private void Rest() {
-            unit.State = BehaviorFSM.Rest;
-            fDecide = DSRest;
-            fApply = ASRest;
-        }
-
-        // Helper method for finding closest depositable building
+        // Helper Method For Finding The Closest Depositable Building
         private RTSBuilding GetClosestDepository() {
-            float minDist = float.MaxValue;
+            float minDistSq = float.MaxValue;
             RTSBuilding depository = null;
             for (int i = 0; i < unit.Team.Buildings.Count; i++) {
                 var building = unit.Team.Buildings[i];
-                if (building.Data.Depositable) {
-                    float dist = (building.GridPosition - unit.GridPosition).Length();
-                    if (minDist > dist) {
-                        minDist = dist;
-                        depository = building;
-                    }
+                if(!building.Data.Depositable)
+                    continue;
+                float distSq = (building.GridPosition - unit.GridPosition).LengthSquared();
+                if(distSq < minDistSq) {
+                    minDistSq = distSq;
+                    depository = building;
                 }
             }
             return depository;
+        }
+
+        // Helper Method For Finding The Closest Resource In Region
+        // TODO: Decide If Worker Should Only Work "In-Region"
+        private RTSBuilding GetClosestResource(GameState g) {
+            float minDistSq = float.MaxValue;
+            RTSBuilding resource = null;
+            for(int ti = 0; ti < g.activeTeams.Length; ti++) {
+                // Don't Automatically Self-Target
+                if(g.activeTeams[ti].Index == teamIndex)
+                    continue;
+                // TODO: Ignore Teams That Aren't On The Environment
+                RTSTeam team = g.activeTeams[ti].Team;
+                for(int i = 0; i < team.Buildings.Count; i++) {
+                    RTSBuilding b = team.Buildings[i];
+                    // This Check Makes Sure The Candidate Target Is In Range Of The Squad
+                    if(g.CGrid.GetFogOfWar(b.GridPosition, teamIndex) != FogOfWar.Active)
+                        continue;
+                    // Make Sure This Building Is A Resource
+                    if(!b.IsResource)
+                        continue;
+                    float d = (b.GridPosition - unit.GridPosition).LengthSquared();
+                    if(d < minDistSq) {
+                        resource = b;
+                        minDistSq = d;
+                    }
+                }
+            }
+            return resource;
         }
 
         public override void Deserialize(System.IO.BinaryReader s) {
@@ -244,45 +321,59 @@ namespace RTS.Default.Worker {
         private static Random critRoller = new Random();
         private float attackCooldown;
 
-        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c) {}
+        public override void Init(GameState s, GameplayController c) {}
 
         public override void Attack(GameState g, float dt) {
             if(attackCooldown > 0)
                 attackCooldown -= dt;
-            //f(unit.State != BehaviorFSM.None)
-             //   return;
             if(unit.Target != null) {
                 if(!unit.Target.IsAlive) {
                     unit.Target = null;
                     return;
                 }
+                unit.TurnToFace(unit.Target.GridPosition);
+
                 float minDistSquared = unit.Data.BaseCombatData.MinRange * unit.Data.BaseCombatData.MinRange;
-                float distSquared = (unit.Target.WorldPosition - unit.WorldPosition).LengthSquared();
+                float distSquared = (unit.Target.GridPosition - unit.GridPosition).LengthSquared();
                 float maxDistSquared = unit.Data.BaseCombatData.MaxRange * unit.Data.BaseCombatData.MaxRange;
                 if(distSquared > maxDistSquared) return;
 
+                // TODO: Verify Damage:Resource & Damage:Capital & Damage:BuildAmt Ratios
                 if(attackCooldown <= 0) {
                     attackCooldown = unit.Data.BaseCombatData.AttackTimer;
-                    int damage = unit.Data.BaseCombatData.AttackDamage;                    
-                    switch (unit.State) {
-                        case BehaviorFSM.Harvest:
-                            unit.Target.Damage(damage);
-                            unit.Resources += damage; // Unit gets resources
-                            if(!unit.Target.IsAlive) unit.Target = null;
-                            break;
-                        case BehaviorFSM.Repair:
-                            // Negative damage = heal
-                            unit.Target.Damage(-damage);
-                            unit.Team.Input.AddEvent(new CapitalEvent(unit.Team.Index, -damage));
-                            break;
-                        case BehaviorFSM.CombatMelee:
-                            if(minDistSquared <= distSquared) {
+                    int damage = unit.Data.BaseCombatData.AttackDamage;
+                    if(minDistSquared <= distSquared) {
+                        RTSBuilding bTarget = unit.Target as RTSBuilding;
+                        switch(unit.State) {
+                            case BehaviorFSM.Build:
+                                if(bTarget != null && !bTarget.IsBuilt) { // Only Build Unbuilt Buildings
+                                    bTarget.BuildAmountLeft -= damage;
+                                    if(bTarget.BuildAmountLeft < 0) bTarget.BuildAmountLeft = 0;
+                                }
+                                break;
+                            case BehaviorFSM.Harvest:
+                                if(bTarget != null && bTarget.IsResource) { // Only Harvest Resources
+                                    bTarget.Damage(damage);
+                                    unit.Resources += damage;
+                                }
+                                break;
+                            case BehaviorFSM.Repair:
+                                if(bTarget != null) { // Only Repair Buildings
+                                    // Negative Damage = Heal
+                                    bTarget.Damage(-damage);
+                                    // Clamp Repaired Health To Target's Max Health
+                                    if(bTarget.Health > bTarget.Data.Health)
+                                        bTarget.Health = bTarget.Data.Health;
+                                    unit.Team.Input.AddEvent(new CapitalEvent(unit.Team.Index, -damage));
+                                }
+                                break;
+                            case BehaviorFSM.CombatMelee:
                                 unit.DamageTarget(critRoller.NextDouble());
-                                if(!unit.Target.IsAlive) unit.Target = null;
-                            }
-                            break;
+                                break;
+                        }
                     }
                 }
+                if(!unit.Target.IsAlive) unit.Target = null;
             }
         }
 
@@ -291,6 +382,164 @@ namespace RTS.Default.Worker {
         }
         public override void Serialize(System.IO.BinaryWriter s) {
             // TODO
+        }
+    }
+
+    public class Movement : ACUnitMovementController {
+        // The Constants Used In Flow Field Calculations
+        protected const float dForce = 2f;
+        protected const float sForce = 10f;
+        protected const float pForce = -200f;
+
+        // Calculate The Unit Force Between Two Locations
+        public Vector2 UnitForce(Vector2 a, Vector2 b) {
+            Vector2 diff = a - b;
+            float mag = diff.LengthSquared();
+            return diff.X != 0 && diff.Y != 0 ? diff / mag : Vector2.Zero;
+        }
+
+        // How Many Waypoints This Unit Should Lookahead When Updating Its PF Query
+        protected const int lookahead = 2;
+
+        public override void Init(GameState s, GameplayController c) {
+            Pathfinder = c.pathfinder;
+            NetForce = Vector2.Zero;
+        }
+
+        // This Unit Movement Controller's Current PathQuery
+        public PathQuery Query { get; set; }
+
+        public override void DecideMove(GameState g, float dt) {
+            doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
+            if(!doMove) return;
+            // If The Old Path Has Become Invalidated, Send A New Query
+            bool invalid = false;
+            int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
+            for(int i = CurrentWaypointIndex; i > end; i--) {
+                Vector2 wp = Waypoints[i];
+                Point wpCell = HashHelper.Hash(wp, g.CGrid.numCells, g.CGrid.size);
+                if(g.CGrid.GetCollision(wpCell.X, wpCell.Y)) {
+                    invalid = true;
+                    break;
+                }
+            }
+            if(invalid && (Query == null || Query != null && Query.IsOld)) {
+                Vector2 goal = Waypoints[0];
+                Query = Pathfinder.ReissuePathQuery(Query, unit.GridPosition, goal, unit.Team.Index);
+            }
+            SetNetForceAndWaypoint(g);
+        }
+        public override void ApplyMove(GameState g, float dt) {
+            if(NetForce != Vector2.Zero) {
+                float magnitude = NetForce.Length();
+                Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MovementController.MinDefaultMoveSpeed * dt;
+                // TODO: Make Sure We Don't Overshoot The Goal But Otherwise Move At Max Speed
+                if(scaledChange.LengthSquared() > magnitude * magnitude)
+                    unit.Move(NetForce);
+                else
+                    unit.Move(scaledChange);
+            }
+        }
+
+        private void SetNetForceAndWaypoint(GameState g) {
+            CollisionGrid cg = g.CGrid;
+            // TODO: Make The Routine Below Fast Enough To Use
+            //int tempIdx = 0;
+            //Vector2 waypoint = Waypoints[tempIdx];
+            //float r = unit.CollisionGeometry.BoundingRadius;
+            //while(IsValid(tempIdx)) {
+            //    // Get The Waypoint Closest To The Goal That This Unit Can Straight-Shot
+            //    if(CoastIsClear(unit.GridPosition, waypoint, r, r, cg)) {
+            //        CurrentWaypointIndex = tempIdx;
+            //        break;
+            //    }
+            //    tempIdx++;
+            //}
+            Vector2 waypoint = Waypoints[CurrentWaypointIndex];
+            if(Query != null && !Query.IsOld && Query.IsComplete) {
+                Query.IsOld = true; // Only Do This Once Per Query
+                Waypoints = Query.waypoints;
+                CurrentWaypointIndex = Waypoints.Count - 1;
+            }
+            // Set Net Force...
+            NetForce = pForce*UnitForce(unit.GridPosition, waypoint);
+            Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
+            // Apply Forces From Other Units In This One's Cell
+            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
+                NetForce += dForce*UnitForce(unit.GridPosition, otherUnit.GridPosition);
+            }
+            // Apply Forces From Buildings And Other Units Near This One
+            foreach(Point n in Pathfinder.Neighborhood(unitCell)) {
+                RTSBuilding b = cg.EStatic[n.X, n.Y];
+                if(b != null)
+                    NetForce += sForce * UnitForce(unit.GridPosition, b.GridPosition);
+                foreach(var otherUnit in cg.EDynamic[n.X, n.Y]) {
+                    NetForce += sForce * UnitForce(unit.GridPosition, otherUnit.GridPosition);
+                }
+            }
+            // Set Waypoint...
+            Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
+            bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
+            float SquadRadiusSquared = unit.Squad.MovementController.SquadRadiusSquared;
+            if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < 1.5 * SquadRadiusSquared) {
+                CurrentWaypointIndex--;
+            }
+        }
+
+        // There Is A Straight-Line Path From A To B That Intersects No Collidable Objects (Ignores Dynamic Entities)
+        private bool CoastIsClear(Vector2 a, Vector2 b, float stepSize, float radius, CollisionGrid cg) {
+            Vector2 diff = b - a;
+            float mag = diff.X != 0 && diff.Y != 0 ? diff.LengthSquared() : 1.0f;
+            diff /= mag;
+            Vector2 step = stepSize * diff;
+            float root2 = 1.41421356237f;
+            Func<bool> cont;
+            if(a.X < b.X && a.Y < b.Y) {
+                cont = () => {return a.X < b.X && a.Y < b.Y; };
+            }
+            else if(a.X < b.X && a.Y > b.Y) {
+                cont = () => {return a.X < b.X && a.Y > b.Y; };
+            }
+            else if(a.X > b.X && a.Y < b.Y) {
+                cont = () => {return a.X > b.X && a.Y < b.Y; };
+            }
+            else {
+                cont = () => { return a.X > b.X && a.Y > b.Y; };
+            }
+            Vector2[] offsets = {   new Vector2(radius, 0),
+                                    new Vector2(radius / 2.0f, 0),
+                                    new Vector2(-radius, 0),
+                                    new Vector2(-radius / 2.0f, 0),
+                                    new Vector2(0, radius),
+                                    new Vector2(0, radius / 2.0f),
+                                    new Vector2(0, -radius),
+                                    new Vector2(0, -radius / 2.0f),
+                                    (new Vector2(1, 1) / root2) * radius, 
+                                    (new Vector2(1, 1) / root2) * radius / 2.0f,
+                                    (new Vector2(-1, 1) / root2) * radius,
+                                    (new Vector2(-1, 1) / root2) * radius / 2.0f,
+                                    (new Vector2(1, -1) / root2) * radius,
+                                    (new Vector2(1, -1) / root2) * radius / 2.0f,
+                                    (new Vector2(-1, -1) / root2) * radius,
+                                    (new Vector2(-1, -1) / root2) * radius / 2.0f   };
+            while(cont()) {
+                bool collision = cg.GetCollision(a);
+                foreach(var offset in offsets) {
+                    collision |= cg.GetCollision(a + offset);
+                }
+                if(collision)
+                    return false;
+                a += step;
+            }
+            return true;
+        }
+
+        public override void Serialize(BinaryWriter s) {
+
+        }
+
+        public override void Deserialize(BinaryReader s) {
+
         }
     }
 
