@@ -2,7 +2,7 @@
 NAME            [House]
 
 // Unit Model
-MODEL           [..\..\models\House.obj]
+MODEL           [..\..\models\House.model]
 TEXMAIN         [..\..\textures\HouseMain.png]
 TEXCOLOR        [..\..\textures\HouseKey.png]
 ICON            [..\..\icons\House.png]
@@ -14,8 +14,10 @@ COST            [20]
 POPCAPCHANGE    [10]
 IMPACT          [10]
 BUILDAMOUNT     [20]
-SIGHTRADIUS     [24]
+SIGHTRADIUS     [14]
 GRIDSIZE        [1 , 1]
+RESOURCE        [0]
+DEPOSITABLE		[1]
 
 // Collision Data
 BBOXMIN         [-1 , 0.0 , -1]

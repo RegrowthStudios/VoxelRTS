@@ -36,6 +36,9 @@ namespace RTS.Input {
             get { return selected.Count == 1 && selected[0].Team != Team; }
         }
 
+        private RTSBuildingData buildingToPlace;
+        private bool isShiftPressed;
+
         public Player()
             : base() {
             Type = RTSInputType.Player;
@@ -43,19 +46,34 @@ namespace RTS.Input {
         public void Build(RTSRenderer renderer) {
             // Create UI
             UI = new RTSUI(renderer, "Courier New", 32, 140);
+            UI.SetTeam(Team);
             UI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
+
+            Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
+            Team.OnPopulationCapChange += (t, c) => { UI.TeamDataPanel.PopulationCap = Team.PopulationCap; };
+            Team.OnCapitalChange += (t, c) => { UI.TeamDataPanel.Capital = Team.Capital; };
         }
         public override void Begin() {
             useSelectRect = false;
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMousePress += OnMousePress;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
+            KeyboardEventDispatcher.OnKeyReleased += OnKeyRelease;
+            if(System.Windows.Forms.Form.ActiveForm != null) {
+                System.Windows.Forms.Form.ActiveForm.KeyDown += ActiveForm_KeyPress;
+                System.Windows.Forms.Form.ActiveForm.KeyUp += ActiveForm_KeyPress;
+            }
         }
         public override void Dispose() {
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
             MouseEventDispatcher.OnMousePress -= OnMousePress;
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
+            KeyboardEventDispatcher.OnKeyReleased -= OnKeyRelease;
+            if(System.Windows.Forms.Form.ActiveForm != null) {
+                System.Windows.Forms.Form.ActiveForm.KeyDown -= ActiveForm_KeyPress;
+                System.Windows.Forms.Form.ActiveForm.KeyUp -= ActiveForm_KeyPress;
+            }
             if(UI != null) {
                 UI.Dispose();
             }
@@ -96,15 +114,15 @@ namespace RTS.Input {
             if(selectedUnits.Count > 0) {
                 // Only Select Units
                 sb.AddRange(selectedUnits);
-                AddEvent(new SelectEvent(TeamIndex, sb));
+                AddEvent(new SelectEvent(TeamIndex, sb, isShiftPressed));
             }
             else if(selectedBuildings.Count > 0) {
                 // Choose The Closest Building
                 selectedBuildings.Sort(ClosestBuilding);
                 sb.Add(selectedBuildings[0]);
-                AddEvent(new SelectEvent(TeamIndex, sb));
+                AddEvent(new SelectEvent(TeamIndex, sb, isShiftPressed));
             }
-            else {
+            else if(!isShiftPressed) {
                 AddEvent(new SelectEvent(TeamIndex, null));
             }
         }
@@ -184,9 +202,9 @@ namespace RTS.Input {
                     if(se != null) {
                         List<IEntity> le = new List<IEntity>();
                         le.Add(se);
-                        AddEvent(new SelectEvent(TeamIndex, le));
+                        AddEvent(new SelectEvent(TeamIndex, le, isShiftPressed));
                     }
-                    else {
+                    else if(!isShiftPressed) {
                         AddEvent(new SelectEvent(TeamIndex, null));
                     }
                 }
@@ -197,7 +215,7 @@ namespace RTS.Input {
             Camera.Controller.IsActive = false;
 
             Point pl = new Point((int)location.X, (int)location.Y);
-            if(UI != null && UI.PanelBottom.Inside(pl.X, pl.Y)) {
+            if(UI != null && UI.Inside(pl.X, pl.Y)) {
                 // Check UI Actions
                 OnUIPress(pl, b);
             }
@@ -205,9 +223,21 @@ namespace RTS.Input {
                 // Action In The World
                 if(b == BUTTON_ACTION) {
                     if(Camera == null) return;
+                    IntersectionRecord rec = new IntersectionRecord();
+                    Ray ray = Camera.GetViewRay(location);
+
+                    // Check Building Placement
+                    if(buildingToPlace != null) {
+                        if(GameState.Map.BVH.Intersect(ref rec, ray)) {
+                            Vector3 rh = ray.Position + ray.Direction * rec.T;
+                            Point bp = HashHelper.Hash(new Vector2(rh.X, rh.Z), GameState.CGrid.numCells, GameState.CGrid.size);
+                            AddEvent(new SpawnBuildingEvent(TeamIndex, buildingToPlace.Index, bp));
+                        }
+                        if(!isShiftPressed) buildingToPlace = null;
+                        return;
+                    }
 
                     // Get Ray From Mouse Position
-                    Ray ray = Camera.GetViewRay(location);
                     IEntity se = SelectFromRay(ray);
                     if(se != null) {
                         // Use Entity As A Target
@@ -215,7 +245,6 @@ namespace RTS.Input {
                     }
                     else if(!HasSelectedEnemy) {
                         // Add A Waypoint Event
-                        IntersectionRecord rec = new IntersectionRecord();
                         if(GameState.Map.BVH.Intersect(ref rec, ray)) {
                             Vector3 rh = ray.Position + ray.Direction * rec.T;
                             AddEvent(new SetWayPointEvent(TeamIndex, new Vector2(rh.X, rh.Z)));
@@ -223,6 +252,7 @@ namespace RTS.Input {
                     }
                 }
                 else if(b == BUTTON_SELECT) {
+                    buildingToPlace = null;
                     useSelectRect = true;
                     selectionRectStart = location;
                 }
@@ -231,14 +261,28 @@ namespace RTS.Input {
         public void OnKeyPress(object sender, KeyEventArgs args) {
             switch(args.KeyCode) {
                 case Keys.Delete:
-                    if(selected != null) {
-                        foreach(var unit in selected) {
-                            unit.Destroy();
-                        }
-                        selected.Clear();
-                    }
+                    var arr = selected.ToArray();
+                    foreach(var e in arr) e.Destroy();
+                    break;
+                case Keys.LeftShift:
+                case Keys.RightShift:
+                    isShiftPressed = true;
+                    break;
+                case Keys.Escape:
+                    buildingToPlace = null;
                     break;
             }
+        }
+        public void OnKeyRelease(object sender, KeyEventArgs args) {
+            switch(args.KeyCode) {
+                case Keys.LeftShift:
+                case Keys.RightShift:
+                    isShiftPressed = false;
+                    break;
+            }
+        }
+        void ActiveForm_KeyPress(object sender, System.Windows.Forms.KeyEventArgs e) {
+            isShiftPressed = (System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Shift) == System.Windows.Forms.Keys.Shift;
         }
 
         public void OnUIPress(Point p, MouseButton b) {
@@ -262,6 +306,9 @@ namespace RTS.Input {
                 if(ug != null && ug.Selection != null) {
                     AddEvent(new SelectEvent(TeamIndex, ug.Selection));
                 }
+            }
+            else if(UI.BuildingPanel.Inside(p.X, p.Y)) {
+                buildingToPlace = UI.BuildingPanel.GetSelection(p.X, p.Y);
             }
         }
 

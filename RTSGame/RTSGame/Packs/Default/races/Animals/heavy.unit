@@ -1,0 +1,37 @@
+﻿// Friendly Unit Name
+NAME            [Heavy Soldier]
+
+// Unit Model
+MODEL           [..\..\models\Dog.model]
+TEXMAIN         [..\..\textures\Dog.png]
+TEXCOLOR        [..\..\textures\DogKey.png]
+ANIMATION       [..\..\animations\Dog.png]
+ICON            [..\..\icons\HeavySoldierButton.png]
+MAXCOUNT        [1000]
+
+// Unit Data
+HEALTH          [600]
+SPEED           [2.2]
+COST            [6 , 1]
+BUILDTIME       [15]
+IMPACT          [10]
+WORKER          [0]
+CARRYCAPACITY   [0]
+
+
+// Collision Data
+RADIUS          [0.4]
+BBOXMIN         [-0.4 , 0.0 , -0.4]
+BBOXMAX         [0.4 , 1.0 , 0.4]
+
+// Combat Data
+ARMOR           [0]
+RANGE           [0 , 16]
+TIMER           [2.5]
+DAMAGE          [40 , 60]
+CRITCHANCE      [0.05]
+
+CTRLACTION      [RTS.Default.Unit.Action]
+CTRLANIM        [RTS.Default.Unit.Animation]
+CTRLCOMBAT      [RTS.Default.Unit.Combat]
+CTRLMOVE        [RTS.Default.Unit.Movement]

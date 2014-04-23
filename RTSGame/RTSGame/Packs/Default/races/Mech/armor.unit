@@ -2,7 +2,7 @@
 NAME            [Armored Soldier]
 
 // Unit Model
-MODEL           [..\..\models\MechBase.obj]
+MODEL           [..\..\models\MechBase.model]
 TEXMAIN         [..\..\textures\Main.png]
 TEXCOLOR        [..\..\textures\Key.png]
 ANIMATION       [..\..\animations\Mech3.png]
@@ -15,6 +15,9 @@ SPEED           [1.5]
 COST            [20 , 2]
 BUILDTIME       [20]
 IMPACT          [10]
+WORKER          [0]
+CARRYCAPACITY   [0]
+
 
 // Collision Data
 RADIUS          [0.4]

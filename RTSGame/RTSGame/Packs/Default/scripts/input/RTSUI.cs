@@ -10,6 +10,7 @@ using BlisterUI.Input;
 using BlisterUI.Widgets;
 using RTSEngine.Data;
 using RTSEngine.Controllers;
+using RTSEngine.Data.Team;
 
 namespace RTSEngine.Graphics {
     public struct RTSUIButton {
@@ -18,15 +19,7 @@ namespace RTSEngine.Graphics {
         public Action<GameState> FOnPress;
     }
 
-    /**
-     * RTS UI Menus:
-     * When Units Selected: Unit/Type Counts
-     * When Unit Selected: Unit/Profile
-     * When Building Selected: Building/Profile
-     */
     public class RTSUI : IDisposable {
-        private const float LAYER_DELTA = 0.05f;
-
         private WidgetRenderer wrButtonPanel, wrMain;
 
         public Rectangle WindowSize {
@@ -55,6 +48,14 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        public RTSUITeamDataPanel TeamDataPanel {
+            get;
+            private set;
+        }
+        public RTSUIBuildPanel BuildingPanel {
+            get;
+            private set;
+        }
 
         public int ButtonRows {
             get;
@@ -78,6 +79,8 @@ namespace RTSEngine.Graphics {
             BuildBounds(renderer, ph, new Color(20, 20, 20));
             BuildMinimap(renderer, 5);
             BuildSelectionPanel(renderer);
+            BuildTeamDataPanel();
+            BuildBuildingPanel();
             SelectionPanel.IconLibrary = renderer.IconLibrary;
         }
         public void Dispose() {
@@ -86,6 +89,9 @@ namespace RTSEngine.Graphics {
             tTransparent.Dispose();
             wrButtonPanel.Dispose();
             wrMain.Dispose();
+            TeamDataPanel.Dispose();
+            SelectionPanel.Dispose();
+            BuildingPanel.Dispose();
         }
 
         private void BuildBounds(RTSRenderer renderer, int ph, Color c) {
@@ -112,7 +118,6 @@ namespace RTSEngine.Graphics {
             PanelBottom.AlignX = Alignment.MID;
             PanelBottom.AlignY = Alignment.BOTTOM;
             PanelBottom.Parent = rectBounds;
-            PanelBottom.LayerDepth = rectBounds.LayerDepth - LAYER_DELTA;
         }
         private void BuildMinimap(RTSRenderer renderer, int buf) {
             int s = PanelBottom.Height - buf * 2;
@@ -126,14 +131,30 @@ namespace RTSEngine.Graphics {
             Minimap.OffsetAlignX = Alignment.RIGHT;
             Minimap.OffsetAlignY = Alignment.BOTTOM;
             Minimap.Parent = PanelBottom;
-            Minimap.LayerDepth = PanelBottom.LayerDepth - LAYER_DELTA;
         }
         private void BuildSelectionPanel(RTSRenderer renderer) {
-            SelectionPanel = new RTSUISelectionPanel(wrMain, 2, 4, 32, 4);
+            SelectionPanel = new RTSUISelectionPanel(wrMain, 2, 4, 64, 4);
             SelectionPanel.BackPanel.Parent = Minimap;
             SelectionPanel.BackPanel.AlignX = Alignment.RIGHT;
             SelectionPanel.BackPanel.Offset = new Point(-4, 0);
             SelectionPanel.LayerDepth = PanelBottom.LayerDepth - 0.01f;
+        }
+        private void BuildTeamDataPanel() {
+            TeamDataPanel = new RTSUITeamDataPanel(wrMain);
+            TeamDataPanel.Width = (rectBounds.Width * 5) / 7;
+        }
+        private void BuildBuildingPanel() {
+            BuildingPanel = new RTSUIBuildPanel(wrMain, 180, 26, 5, 12, 24);
+            BuildingPanel.Parent = PanelBottom;
+        }
+
+        public void SetTeam(RTSTeam team) {
+            BuildingPanel.Build(team);
+            BuildingPanel.Hook();
+        }
+
+        public bool Inside(int x, int y) {
+            return PanelBottom.Inside(x, y) || BuildingPanel.Inside(x, y) || TeamDataPanel.Inside(x, y);
         }
 
         public void BuildButtonPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {
@@ -196,6 +217,7 @@ namespace RTSEngine.Graphics {
         }
 
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
+            var f = new System.Windows.Forms.Form();
             wrMain.Draw(batch);
             Rectangle rMap = new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height);
             batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);

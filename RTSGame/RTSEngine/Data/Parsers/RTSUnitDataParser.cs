@@ -25,6 +25,8 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxSpeed = RegexHelper.GenerateNumber("SPEED");
         private static readonly Regex rgxCost = RegexHelper.GenerateVec2Int("COST");
         private static readonly Regex rgxBuildTime = RegexHelper.GenerateInteger("BUILDTIME");
+        private static readonly Regex rgxCarryCapacity = RegexHelper.GenerateInteger("CARRYCAPACITY");
+        private static readonly Regex rgxWorker = RegexHelper.GenerateInteger("WORKER");
         private static readonly Regex rgxImpact = RegexHelper.GenerateInteger("IMPACT");
         private static readonly Regex rgxRadius = RegexHelper.GenerateNumber("RADIUS");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
@@ -122,6 +124,8 @@ namespace RTSEngine.Data.Parsers {
                 rgxCost.Match(mStr),
                 rgxMaxCount.Match(mStr),
                 rgxSpeed.Match(mStr),
+                rgxCarryCapacity.Match(mStr),
+                rgxWorker.Match(mStr),
                 rgxRadius.Match(mStr),
                 rgxBBMin.Match(mStr),
                 rgxBBMax.Match(mStr),
@@ -151,6 +155,8 @@ namespace RTSEngine.Data.Parsers {
             data.PopulationCost = buf[1];
             data.MaxCount = RegexHelper.ExtractInt(mp[ri++]);
             data.MovementSpeed = RegexHelper.ExtractFloat(mp[ri++]);
+            data.CarryingCapacity = RegexHelper.ExtractInt(mp[ri++]);
+            data.IsWorker = RegexHelper.ExtractInt(mp[ri++]) == 0 ? false : true;
 
             // Collision Information
             data.ICollidableShape = new CollisionCircle(

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -131,6 +132,30 @@ namespace RTSEngine.Data.Parsers {
                 int.Parse(s[2]),
                 int.Parse(s[3])
             };
+        }
+
+        public static string ReadFile(FileInfo f) {
+            // Check File Existence
+            if(f == null || !f.Exists) return null;
+
+            // Read The Entire File
+            string mStr = null;
+            using(FileStream fs = File.OpenRead(f.FullName)) {
+                StreamReader s = new StreamReader(fs);
+                mStr = s.ReadToEnd();
+            }
+            return mStr;
+        }
+        public static string ReadFile(string f) {
+            return ReadFile(new FileInfo(f));
+        }
+        public static Match[] FindMatches(string mStr, params Regex[] rgx) {
+            if(string.IsNullOrWhiteSpace(mStr)) return null;
+            Match[] m = new Match[rgx.Length];
+            for(int i = 0; i < m.Length; i++) {
+                m[i] = rgx[i].Match(mStr);
+            }
+            return m;
         }
     }
 }

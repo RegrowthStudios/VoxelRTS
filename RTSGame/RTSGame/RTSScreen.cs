@@ -19,12 +19,16 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Graphics;
 using RTSEngine.Net;
 using System.Text.RegularExpressions;
+using Microsoft.Xna.Framework.Audio;
 
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
         const int NUM_FPS_SAMPLES = 64;
+        const string BS_SOUND_DIR = @"Packs\audio\bg";
+        static readonly Random rSong = new Random();
         static readonly Regex rgxTeam = RegexHelper.GenerateInteger("setteam");
         static readonly Regex rgxType = RegexHelper.GenerateInteger("settype");
+        static readonly Regex rgxSpawn = RegexHelper.GenerateVec2Int("setspawn");
 
         private GameplayController playController;
         private GameState state;
@@ -40,6 +44,8 @@ namespace RTS {
         Thread tEngine;
         SpriteFont sfDebug;
         int eFPS;
+
+        Jukebox jukeBox;
 
         public override int Next {
             get { return -1; }
@@ -85,6 +91,9 @@ namespace RTS {
             pauseEngine = false;
             pauseRender = false;
             tEngine.Start();
+
+            jukeBox = new Jukebox();
+            jukeBox.LoadFromDirectory(new DirectoryInfo(BS_SOUND_DIR));
         }
         public override void OnExit(GameTime gameTime) {
             MouseEventDispatcher.OnMousePress -= OnMP;
@@ -100,11 +109,15 @@ namespace RTS {
             tEngine.Join();
             GameEngine.Dispose(state);
             state = null;
+
+            jukeBox.Dispose();
+            jukeBox = null;
         }
 
         public override void Update(GameTime gameTime) {
             // This Tells Us We Are GPU-Bound
             //Thread.Sleep(10);
+            jukeBox.Update();
             renderer.UpdateAnimations(state, (float)game.TargetElapsedTime.TotalSeconds);
         }
         public override void Draw(GameTime gameTime) {
@@ -117,8 +130,7 @@ namespace RTS {
                 G.Clear(Color.Black);
             }
             (gameInput as IVisualInputController).Draw(renderer, SB);
-
-            game.DrawDevConsole();
+#if DEBUG
             if(!DevConsole.IsActivated) {
                 // Show FPS
                 double fps = gameTime.ElapsedGameTime.TotalSeconds;
@@ -127,11 +139,13 @@ namespace RTS {
                 SB.DrawString(sfDebug, fps + " / " + eFPS, Vector2.One * 10, Color.White);
                 SB.End();
             }
+#endif
+            game.DrawDevConsole();
             game.DrawMouse();
 
-            //if(state.gtC.VictoriousTeam.HasValue) {
-            //    State = ScreenState.ChangePrevious;
-            //}
+            if(state.gtC.VictoriousTeam.HasValue) {
+                State = ScreenState.ChangePrevious;
+            }
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
@@ -147,28 +161,13 @@ namespace RTS {
                     else if(addBuilding)
                         gameInput.AddEvent(new SpawnBuildingEvent(
                             team, type,
-                            HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size)
-                            ));
+                            HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size),
+                            true));
                 }
             }
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
-                case Keys.D1:
-                    team = 0;
-                    break;
-                case Keys.D2:
-                    team = 1;
-                    break;
-                case Keys.D8:
-                    type = 0;
-                    break;
-                case Keys.D9:
-                    type = 1;
-                    break;
-                case Keys.D0:
-                    type = 2;
-                    break;
                 case Keys.E:
                     addUnit = true;
                     break;
@@ -251,6 +250,11 @@ namespace RTS {
             }
             else if((m = rgxType.Match(obj)).Success) {
                 type = RegexHelper.ExtractInt(m);
+            }
+            else if((m = rgxSpawn.Match(obj)).Success) {
+                int[] buf = RegexHelper.ExtractVec2I(m);
+                team = buf[0];
+                type = buf[1];
             }
         }
     }

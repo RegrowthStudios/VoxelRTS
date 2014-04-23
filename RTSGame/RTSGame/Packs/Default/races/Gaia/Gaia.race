@@ -1,0 +1,15 @@
+﻿// Friendly Team Name
+NAME            [Gaia]
+
+// Default Squad Controllers
+CTRLACTION      [RTS.Default.Squad.Action]
+CTRLMOVEMENT    [RTS.Default.Squad.Movement]
+CTRLTARGET      [RTS.Default.Squad.Targeting]
+
+// List Of All Unit Types Belonging To Team
+UNIT            [minion.unit]
+UNIT            [tank.unit]
+
+// List Of All Building Types Belonging To Team
+BUILDING        [tree.building]
+BUILDING        [ore.building]

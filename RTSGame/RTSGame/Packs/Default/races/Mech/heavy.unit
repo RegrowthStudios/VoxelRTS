@@ -2,7 +2,7 @@
 NAME            [Heavy Soldier]
 
 // Unit Model
-MODEL           [..\..\models\MechBase.obj]
+MODEL           [..\..\models\MechBase.model]
 TEXMAIN         [..\..\textures\Main.png]
 TEXCOLOR        [..\..\textures\Key.png]
 ANIMATION       [..\..\animations\Mech2.png]
@@ -15,6 +15,9 @@ SPEED           [2.2]
 COST            [6 , 1]
 BUILDTIME       [15]
 IMPACT          [10]
+WORKER          [0]
+CARRYCAPACITY   [0]
+
 
 // Collision Data
 RADIUS          [0.4]
