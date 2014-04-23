@@ -29,7 +29,9 @@ namespace RTSEngine.Interfaces {
         public const int UseRangedAttack = UseMeleeAttack + 1;
 
         // Movement Order Codes - Will Influence Movement Behavior
-        public const int FreeFormation = 0;
+        public const int JustMove = 0;
+        // TODO: Add Support For A-Move
+        public const int AttackMove = JustMove + 1;
 
         public static int GetState(int behaviorCode) {
             return GetByte(behaviorCode, 0);

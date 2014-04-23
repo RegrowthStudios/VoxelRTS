@@ -27,7 +27,7 @@ namespace RTS {
         IDisposable tFont;
 
         TextInput tInput;
-        TextWidget wUsername;
+        TextWidget wUsername, txtLogin;
         RectButton bFinish;
 
         public override void Build() {
@@ -59,6 +59,16 @@ namespace RTS {
             bFinish.OnButtonPress += bFinish_OnButtonPress;
             bFinish.Hook();
 
+            txtLogin = new TextWidget(wr);
+            txtLogin.Height = bFinish.Height;
+            txtLogin.Text = "Login";
+            txtLogin.Color = Color.Black;
+            txtLogin.AlignX = Alignment.MID;
+            txtLogin.AlignY = Alignment.MID;
+            txtLogin.OffsetAlignX = Alignment.MID;
+            txtLogin.OffsetAlignY = Alignment.MID;
+            txtLogin.Parent = bFinish;
+
             tInput = new TextInput();
             tInput.OnTextChanged += tInput_OnTextChanged;
             tInput.Activate();
@@ -77,6 +87,7 @@ namespace RTS {
 
             tInput.Dispose();
             wr.Dispose();
+            txtLogin.Dispose();
             wUsername.Dispose();
             bFinish.Dispose();
             tFont.Dispose();

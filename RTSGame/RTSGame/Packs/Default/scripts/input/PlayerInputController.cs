@@ -47,8 +47,8 @@ namespace RTS.Input {
             // Create UI
             UI = new RTSUI(renderer, "Courier New", 32, 140);
             UI.SetTeam(Team);
-            UI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
+            OnNewSelection += UI.BBPanel.OnNewSelection;
 
             Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
             Team.OnPopulationCapChange += (t, c) => { UI.TeamDataPanel.PopulationCap = Team.PopulationCap; };
@@ -286,7 +286,7 @@ namespace RTS.Input {
         }
 
         public void OnUIPress(Point p, MouseButton b) {
-            Vector2 r;
+            Vector2 r = Vector2.Zero;
             if(UI.Minimap.Inside(p.X, p.Y, out r)) {
                 // Use The Minimap
                 Vector2 mapPos = r * GameState.CGrid.size;
@@ -303,15 +303,26 @@ namespace RTS.Input {
             }
             else if(UI.SelectionPanel.BackPanel.Inside(p.X, p.Y)) {
                 var ug = UI.SelectionPanel.GetSelection(p.X, p.Y);
-                if(ug != null && ug.Selection != null) {
-                    AddEvent(new SelectEvent(TeamIndex, ug.Selection));
+                if(ug != null) {
+                    AddEvent(new SelectEvent(TeamIndex, ug));
                 }
             }
             else if(UI.BuildingPanel.Inside(p.X, p.Y)) {
                 buildingToPlace = UI.BuildingPanel.GetSelection(p.X, p.Y);
             }
+            else if(UI.BBPanel.BackPanel.Inside(p.X, p.Y)) {
+                var bbs = UI.BBPanel.GetSelection(p.X, p.Y);
+                if(bbs != null) {
+                    for(int i = 0; i < bbs.Count; i++) {
+                        bbs[i].OnQueueFinished(GameState);
+                    }
+                }
+            }
         }
 
+        public void Update(RTSRenderer renderer, GameState s) {
+            UI.BuildingPanel.Update();
+        }
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             UI.Draw(renderer, batch);
         }

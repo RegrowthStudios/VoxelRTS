@@ -2,10 +2,10 @@
 NAME            [Tree]
 
 // Unit Model
-MODEL           [..\..\models\Tree.model]
-TEXMAIN         [..\..\textures\Tree.png]
+MODEL           [models\Tree.model]
+TEXMAIN         [textures\Tree.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
-ICON            [..\..\icons\TreeButton.png]
+ICON            [icons\Tree.png]
 MAXCOUNT        [2000]
 
 // Unit Data

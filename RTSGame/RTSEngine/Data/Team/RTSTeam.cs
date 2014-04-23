@@ -319,7 +319,10 @@ namespace RTSEngine.Data.Team {
 
             RTSBuilding b = new RTSBuilding(this, data, pos);
             b.OnBuildingFinished += OnBuildingFinished;
-            b.ActionController = Race.Buildings[type].DefaultActionController.CreateInstance<ACBuildingActionController>();
+            b.ActionController = data.DefaultActionController.CreateInstance<ACBuildingActionController>();
+            for(int i = 0; i < data.DefaultButtonControllers.Count; i++) {
+                b.AddButton(data.DefaultButtonControllers[i].CreateInstance<ACBuildingButtonController>());
+            }
             Buildings.Add(b);
             if(OnBuildingSpawn != null)
                 OnBuildingSpawn(b);

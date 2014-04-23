@@ -112,9 +112,11 @@ namespace RTSEngine.Data.Team {
         public BoundingBox BBox;
 
         public ReflectedScript DefaultActionController;
+        public readonly List<ReflectedScript> DefaultButtonControllers;
 
         public RTSBuildingData(int i) {
             Index = i;
+            DefaultButtonControllers = new List<ReflectedScript>();
         }
     }
 }

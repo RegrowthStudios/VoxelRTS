@@ -5,11 +5,13 @@ using System.Text;
 using BlisterUI.Widgets;
 using Microsoft.Xna.Framework;
 using RTSEngine.Data.Team;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Graphics {
     public class RTSUIBuildPanel : IDisposable {
         const float TEXT_H_RATIO = 0.95f;
         const int TEXT_X_OFF = 5;
+        const int MOVE_SPEED = 15;
 
         private RectWidget rectBase;
         private RectButton[] buttons;
@@ -18,7 +20,7 @@ namespace RTSEngine.Graphics {
 
         Dictionary<string, RTSBuildingData> buildings;
         string[] vText;
-        int si;
+        int si, mi;
 
         public bool HasButtons {
             get { return buttons != null && buttons.Length > 0; }
@@ -31,6 +33,9 @@ namespace RTSEngine.Graphics {
         }
         public int DataCount {
             get { return buildings.Count; }
+        }
+        public int FullWidth {
+            get { return rectBase.Width + scrollBar.Width; }
         }
 
         public BaseWidget Parent {
@@ -156,6 +161,9 @@ namespace RTSEngine.Graphics {
             si = -1;
             Array.Sort(vText);
             RefreshVisible();
+
+            team.Input.OnNewSelection += Input_OnNewSelection;
+            rectBase.Offset = new Point(-FullWidth, 0);
         }
 
         void ScrollChange(ScrollBar sb, float r) {
@@ -198,6 +206,26 @@ namespace RTSEngine.Graphics {
                 }
             }
             return null;
+        }
+
+        void Input_OnNewSelection(ACInputController arg1, List<IEntity> arg2) {
+            for(int i = 0; i < arg2.Count; i++) {
+                RTSUnit u = arg2[i] as RTSUnit;
+                if(u != null && u.Team.Index == arg1.TeamIndex && u.Data.IsWorker && u.IsAlive) {
+                    mi = MOVE_SPEED;
+                    return;
+                }
+            }
+            if(rectBase.Offset.X > -FullWidth) mi = -MOVE_SPEED;
+            else mi = 0;
+        }
+
+        public void Update() {
+            if(mi != 0) {
+                int x = Math.Max(-FullWidth, Math.Min(0, rectBase.Offset.X + mi));
+                if(x == -FullWidth || x == 0) mi = 0;
+                rectBase.Offset = new Point(x, rectBase.Offset.Y);
+            }
         }
     }
 }

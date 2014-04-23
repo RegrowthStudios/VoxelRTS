@@ -29,6 +29,8 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxBBMax = RegexHelper.GenerateVec3("BBOXMAX");
         private static readonly Regex rgxCRect = RegexHelper.GenerateVec4("CRECT");
         private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlButton = RegexHelper.Generate("CTRLBUTTON", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlButtonIcon = RegexHelper.GenerateFile("CTRLBUTTONICON");
 
         private static readonly Regex rgxModel = RegexHelper.GenerateFile("MODEL");
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
@@ -75,7 +77,19 @@ namespace RTSEngine.Data.Parsers {
                 string key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mp[4]));
                 if(!renderer.IconLibrary.ContainsKey(key))
                     renderer.IconLibrary.Add(key, renderer.LoadTexture2D(fiIcon.FullName));
+
+                var mButton = rgxCtrlButton.Match(mStr);
+                var mButtonIcon = rgxCtrlButtonIcon.Match(mStr);
+                while(mButton.Success && mButtonIcon.Success) {
+                    key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mButton));
+                    if(!renderer.IconLibrary.ContainsKey(key))
+                        renderer.IconLibrary.Add(key, renderer.LoadTexture2D(RegexHelper.ExtractFile(mButtonIcon, infoFile.Directory.FullName).FullName));
+
+                    mButton = mButton.NextMatch();
+                    mButtonIcon = mButtonIcon.NextMatch();
+                }
             }
+
 
             return model;
         }
@@ -133,11 +147,16 @@ namespace RTSEngine.Data.Parsers {
             Vector4 cr = RegexHelper.ExtractVec4(mp[ri++]);
             data.ICollidableShape = new CollisionRect(cr.X, cr.Y, new Vector2(cr.Z, cr.W), true);
 
+
             // Get The Controllers From The Controller Dictionary
             if(controllers != null) {
                 data.DefaultActionController = controllers[RegexHelper.Extract(mp[ri++])];
             }
-
+            var mButton = rgxCtrlButton.Match(mStr);
+            while(mButton.Success) {
+                data.DefaultButtonControllers.Add(controllers[RegexHelper.Extract(mButton)]);
+                mButton = mButton.NextMatch();
+            }
             return data;
         }
     }

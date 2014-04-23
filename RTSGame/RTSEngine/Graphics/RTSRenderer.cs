@@ -19,6 +19,8 @@ namespace RTSEngine.Graphics {
     public class RTSRenderer : IDisposable {
         private const float SELECTION_RADIUS_MODIFIER = 1.1f;
         private const float SELECTION_HEIGHT_PLACEMENT = 0.05f;
+        private static readonly Color HEALTH_FULL_COLOR = new Color(0.07f, 0.3f, 0.8f, 1f);
+        private static readonly Color HEALTH_EMPTY_COLOR = new Color(0.97f, 0.1f, 0f, 1f);
 
         // Really Should Not Be Holding This Though
         private GameWindow window;
@@ -517,7 +519,7 @@ namespace RTSEngine.Graphics {
         private void DrawSelectionCircles(Vector3 c) {
             if(SelectionCircleTexture == null)
                 return;
-            VertexPositionTexture[] verts;
+            VertexPositionColorTexture[] verts;
             int[] inds;
             UpdateSelections(out verts, out inds);
             if(verts == null || inds == null)
@@ -538,9 +540,16 @@ namespace RTSEngine.Graphics {
             fxSimple.DiffuseColor = c;
             fxSimple.CurrentTechnique.Passes[0].Apply();
 
-            G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionTexture.VertexDeclaration);
+            G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
+
+            fxSimple.VertexColorEnabled = true;
+            fxSimple.World = Matrix.CreateTranslation(0, (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1.0), 0);
+            fxSimple.DiffuseColor = Vector3.One;
+            fxSimple.CurrentTechnique.Passes[0].Apply();
+
+            G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
         }
-        public void UpdateSelections(out VertexPositionTexture[] verts, out int[] inds) {
+        public void UpdateSelections(out VertexPositionColorTexture[] verts, out int[] inds) {
             // Check If We Need To Render Any Selected Entities
             if(teamInput.selected.Count < 1) {
                 verts = null;
@@ -549,20 +558,24 @@ namespace RTSEngine.Graphics {
             }
 
             // Build The Selections
-            verts = new VertexPositionTexture[teamInput.selected.Count * 4];
+            verts = new VertexPositionColorTexture[teamInput.selected.Count * 4];
             int i = 0;
             foreach(var e in teamInput.selected) {
                 Vector2 c = e.GridPosition;
                 float r = e.CollisionGeometry.BoundingRadius * SELECTION_RADIUS_MODIFIER;
                 float h = e.Height;
                 h += (e.BBox.Max.Y - e.BBox.Min.Y) * SELECTION_HEIGHT_PLACEMENT;
-                verts[i++] = new VertexPositionTexture(new Vector3(c.X - r, h, c.Y - r), Vector2.Zero);
-                verts[i++] = new VertexPositionTexture(new Vector3(c.X + r, h, c.Y - r), Vector2.UnitX);
-                verts[i++] = new VertexPositionTexture(new Vector3(c.X - r, h, c.Y + r), Vector2.UnitY);
-                verts[i++] = new VertexPositionTexture(new Vector3(c.X + r, h, c.Y + r), Vector2.One);
+                float mh = 1f;
+                if(e as RTSBuilding != null) mh = (e as RTSBuilding).Data.Health;
+                else mh = (e as RTSUnit).Data.Health;
+                Color cHealth = Color.Lerp(HEALTH_EMPTY_COLOR, HEALTH_FULL_COLOR, e.Health / mh);
+                verts[i++] = new VertexPositionColorTexture(new Vector3(c.X - r, h, c.Y - r), cHealth, Vector2.Zero);
+                verts[i++] = new VertexPositionColorTexture(new Vector3(c.X + r, h, c.Y - r), cHealth, Vector2.UnitX);
+                verts[i++] = new VertexPositionColorTexture(new Vector3(c.X - r, h, c.Y + r), cHealth, Vector2.UnitY);
+                verts[i++] = new VertexPositionColorTexture(new Vector3(c.X + r, h, c.Y + r), cHealth, Vector2.One);
             }
 
-            inds = new int[teamInput.selected.Count * 6];
+            inds = new int[(verts.Length * 3) / 2];
             for(int vi = 0, ii = 0; vi < verts.Length; ) {
                 inds[ii++] = vi + 0;
                 inds[ii++] = vi + 1;

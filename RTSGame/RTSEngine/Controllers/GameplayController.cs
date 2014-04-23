@@ -78,17 +78,7 @@ namespace RTSEngine.Controllers {
         private TimeBudget tbFOWCalculations;
 
         // Pathfinding
-        private Pathfinder pathfinder;
-        private List<SquadQuery> squadQueries;
-
-        struct SquadQuery {
-            public RTSSquad squad;
-            public PathQuery query;
-            public SquadQuery(RTSSquad s, PathQuery q) {
-                squad = s;
-                query = q;
-            }
-        }
+        public Pathfinder pathfinder;
 
         public GameplayController() {
             commands = new Queue<DevCommand>();
@@ -96,8 +86,6 @@ namespace RTSEngine.Controllers {
             tbSquadDecisions = new TimeBudget(SQUAD_BUDGET_BINS);
             tbEntityDecisions = new TimeBudget(ENTITY_BUDGET_BINS);
             tbFOWCalculations = new TimeBudget(FOW_BUDGET_BINS);
-
-            squadQueries = new List<SquadQuery>();
         }
         public void Dispose() {
             DevConsole.OnNewCommand -= OnDevCommand;
@@ -110,7 +98,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 tbFOWCalculations.AddTask(new FOWTask(s, s.activeTeams[ti].Index));
             }
-            pathfinder = new Pathfinder(s.CGrid);
+            pathfinder = new Pathfinder(s);
 
             // Start The Input Controllers
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
@@ -144,9 +132,6 @@ namespace RTSEngine.Controllers {
             // Input Pass
             ResolveInput(s, dt);
             ApplyInput(s, dt);
-
-            // Pathfinding Pass
-            ApplyFinishedPathQueries();
 
             // Logic Pass
             ApplyLogic(s, dt);
@@ -221,7 +206,7 @@ namespace RTSEngine.Controllers {
             }
             if(squad != null) {
                 AddTask(s, squad);
-                SendPathQuery(s, squad, e);
+                SendSquadQuery(s, squad, e);
             }
         }
         private void ApplyInput(GameState s, float dt, SetTargetEvent e) {
@@ -240,9 +225,37 @@ namespace RTSEngine.Controllers {
                 if(squad == null) return;
                 squad.TargetingController.Target = e.Target;
                 AddTask(s, squad);
-                SendPathQuery(s, squad, e);
+                SendSquadQuery(s, squad, e);
             }
         }
+        private void SendSquadQuery(GameState s, RTSSquad squad, GameInputEvent e) {
+            squad.RecalculateGridPosition();
+            Vector2 start = squad.GridPosition;
+            var swe = e as SetWayPointEvent;
+            var ste = e as SetTargetEvent;
+            Vector2 goal = start;
+            if(swe != null)
+                goal = swe.Waypoint;
+            else if(ste != null && ste.Target != null)
+                goal = ste.Target.GridPosition;
+            // Handle The Case Where The Squad Centroid Ends Up Inside A Building
+            CollisionGrid cg = s.CGrid;
+            if(cg.GetCollision(start)) {
+                float minDistSq = float.MaxValue;
+                for(int u = 0; u < squad.Units.Count; u++) {
+                    RTSUnit unit = squad.Units[u];
+                    float distSq = (goal - unit.GridPosition).LengthSquared();
+                    if(distSq < minDistSq) {
+                        minDistSq = distSq;
+                        start = unit.GridPosition;
+                    }
+                }
+
+            }
+            var query = squad.MovementController.Query;
+            squad.MovementController.Query = pathfinder.ReissuePathQuery(query, start, goal, e.Team);
+        }
+
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
             RTSTeam team = s.teams[e.Team];
             RTSUnit unit = team.AddUnit(e.Type, e.Position);
@@ -294,10 +307,10 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
-            if(unit.ActionController != null) unit.ActionController.Init(s, this);
             if(unit.CombatController != null) unit.CombatController.Init(s, this);
             if(unit.MovementController != null) unit.MovementController.Init(s, this);
             if(unit.AnimationController != null) unit.AnimationController.Init(s, this);
+            if(unit.ActionController != null) unit.ActionController.Init(s, this);
 
             var btu = new BTaskUnitDecision(s, unit);
             unit.OnDestruction += (o) => {
@@ -307,9 +320,9 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSSquad squad) {
             // Init The Squad
-            if(squad.ActionController != null) squad.ActionController.Init(s, this);
-            if(squad.MovementController != null) squad.MovementController.Init(s, this);
             if(squad.TargetingController != null) squad.TargetingController.Init(s, this);
+            if(squad.MovementController != null) squad.MovementController.Init(s, this);
+            if(squad.ActionController != null) squad.ActionController.Init(s, this);
 
             var bts = new BTaskSquadDecision(s, squad);
             squad.OnDeath += (o) => {
@@ -320,6 +333,8 @@ namespace RTSEngine.Controllers {
         private void AddTask(GameState s, RTSBuilding building) {
             // Init The Building
             if(building.ActionController != null) building.ActionController.Init(s, this);
+            for(int i = 0; i < building.ButtonControllers.Count; i++)
+                building.ButtonControllers[i].Init(s, this);
 
             var btu = new BTaskBuildingDecision(s, building);
             building.OnDestruction += (o) => {
@@ -340,47 +355,6 @@ namespace RTSEngine.Controllers {
                 var ebu = new EnemyBuildingUpdater(s, i, vb, building);
                 s.tbMemBuildings.AddTask(ebu);
             }
-        }
-
-        // Setup And Send Pathfinding Query
-        private void SendPathQuery(GameState s, RTSSquad squad, GameInputEvent e) {
-            foreach(var squadQuery in squadQueries) {
-                if(squadQuery.squad.Equals(squad)) {
-                    squadQuery.query.IsOld = true;
-                }
-            }
-            squad.RecalculateGridPosition();
-            PathQuery query = null;
-            var swe = e as SetWayPointEvent;
-            var ste = e as SetTargetEvent;
-            if(swe != null)
-                query = new PathQuery(squad.GridPosition, swe.Waypoint, e.Team);
-            else if(ste != null && ste.Target != null)
-                query = new PathQuery(squad.GridPosition, ste.Target.GridPosition, e.Team);
-            else
-                return;
-            squadQueries.Add(new SquadQuery(squad, query));
-            pathfinder.Add(query);
-        }
-
-        // Apply Results Of Any Finished Pathfinding
-        private void ApplyFinishedPathQueries() {
-            List<SquadQuery> newQueries = new List<SquadQuery>();
-            foreach(var squadQuery in squadQueries) {
-                RTSSquad squad = squadQuery.squad;
-                PathQuery query = squadQuery.query;
-                if(!query.IsOld && query.IsComplete) {
-                    squad.MovementController.Waypoints = query.waypoints;
-                    // Tell All The Units In The Squad To Head To The First Waypoint
-                    foreach(var unit in squad.Units) {
-                        squad.MovementController.CurrentWaypointIndices[unit.UUID] = query.waypoints.Count - 1;
-                    }
-                }
-                else if(!query.IsOld) {
-                    newQueries.Add(squadQuery);
-                }
-            }
-            squadQueries = newQueries;
         }
 
         // Logic Stage
@@ -452,15 +426,7 @@ namespace RTSEngine.Controllers {
             for(int i = 0; i < c.Count; i++) ApplyInput(s, dt, e);
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
-            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                foreach(var squad in s.activeTeams[ti].Team.Squads) {
-                    if(squad.MovementController != null) {
-                        foreach(var unit in squad.Units) {
-                            squad.MovementController.CurrentWaypointIndices[unit.UUID] = -1;
-                        }
-                    }
-                }
-            }
+            // TODO: Deprecate ?
         }
         private void ApplyLogic(GameState s, float dt, DevCommandKillUnits c) {
             RTSTeam team;

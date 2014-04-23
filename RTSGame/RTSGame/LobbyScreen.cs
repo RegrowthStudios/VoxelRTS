@@ -297,10 +297,11 @@ namespace RTS {
                 widgets[i].Set(pt, Races, schemes);
             }
             widgets[0].TextUser.Text = UserConfig.UserName;
+            var k = Races.Keys.FirstOrDefault((s) => { return true; });
             widgets[0].PlayerType = "Player";
-            widgets[0].Race = "Animals";
+            widgets[0].Race = k;
             widgets[1].PlayerType = "Computer";
-            widgets[1].Race = "Animals";
+            widgets[1].Race = k;
 
             DevConsole.OnNewCommand += DevConsole_OnNewCommand;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPressed;

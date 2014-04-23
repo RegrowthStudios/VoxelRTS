@@ -38,6 +38,10 @@ namespace RTS {
             get;
             private set;
         }
+        public WispScreen WispScreen {
+            get;
+            private set;
+        }
         public InduZtryScreen InduZtryScreen {
             get;
             private set;
@@ -92,7 +96,8 @@ namespace RTS {
             graphics.IsFullScreen = UserConfig.UseFullscreen;
 
             CompanyScreen = new RTS.CompanyScreen();
-            InduZtryScreen = new RTS.InduZtryScreen(2);
+            WispScreen = new RTS.WispScreen();
+            InduZtryScreen = new RTS.InduZtryScreen(3);
             PressEnterScreen = new RTS.PressEnterScreen();
             LoginScreen = new RTS.LoginScreen();
             MenuScreen = new RTS.MenuScreen();
@@ -121,6 +126,7 @@ namespace RTS {
             screenList = new BlisterUI.ScreenList(this, 0,
                 new BlisterUI.FalseFirstScreen(1),
                 CompanyScreen,
+                WispScreen,
                 InduZtryScreen,
                 PressEnterScreen,
                 LoginScreen,

@@ -15,6 +15,7 @@ namespace RTS.Default.Worker {
         int teamIndex;
         Action<GameState, float> fDecide, fApply;
         private RTSBuilding targetResource;
+        private IEntity target;
         private bool headingDepository;
         private bool harvesting;
 
@@ -33,6 +34,7 @@ namespace RTS.Default.Worker {
             unit.CombatOrders = BehaviorFSM.CombatMelee; // Never changes
             unit.MovementOrders = 0;
             targetResource = null;
+            target = null;
             headingDepository = false;
             harvesting = false;
 
@@ -43,12 +45,13 @@ namespace RTS.Default.Worker {
         }
 
         void DSRest(GameState g, float dt) {
-            if (unit.Target != null) {
-                Vector2 dir = unit.Target.GridPosition - unit.GridPosition;
+            if (unit.Target != null || target != null) {
+                if (target == null) target = unit.Target;
+                Vector2 dir = target.GridPosition - unit.GridPosition;
                 float dl = dir.Length();
 
                 // If the unit is far away from target, walk there
-                if (dl > unit.Data.BaseCombatData.MaxRange + unit.Target.CollisionGeometry.BoundingRadius) {
+                if (dl > unit.Data.BaseCombatData.MinRange + target.CollisionGeometry.BoundingRadius) {
                     unit.State = BehaviorFSM.Walking;
                     fDecide = DSWalk;
                     fApply = ASWalk;
@@ -65,17 +68,18 @@ namespace RTS.Default.Worker {
         void ASRest(GameState g, float dt) { /* Do nothing */ }
 
         void DSWalk(GameState g, float dt) {
-            Vector2 dir = unit.Target.GridPosition - unit.GridPosition;
-            float dl = dir.Length();
             // If target does not exist anymore
-            if (unit.Target == null){
+            if (target == null){
                 if (headingDepository)
-                    unit.Target = GetClosestDepository();
+                    target = GetClosestDepository();
                 Rest();
+                return;
             }
+            Vector2 dir = target.GridPosition - unit.GridPosition;
+            float dl = dir.Length();
             
             // If target is close enough, switch to CombatRanged
-            else if (dl <= unit.Data.BaseCombatData.MinRange + unit.Target.CollisionGeometry.BoundingRadius) {
+            if (dl <= unit.Data.BaseCombatData.MinRange + target.CollisionGeometry.BoundingRadius) {
                 unit.State = BehaviorFSM.CombatRanged;
                 fDecide = DSCombatRanged;
                 fApply = ASCombatRanged;
@@ -83,8 +87,9 @@ namespace RTS.Default.Worker {
         }
 
         void ASWalk(GameState g, float dt) {
+            if (target == null) return;
             // Move unit to target
-            Vector2 dir = unit.Target.GridPosition - unit.GridPosition;
+            Vector2 dir = target.GridPosition - unit.GridPosition;
             float dl = dir.Length();
             dir /= dl;
             float m = unit.MovementSpeed * dt;
@@ -96,15 +101,15 @@ namespace RTS.Default.Worker {
 
         void DSCombatRanged(GameState g, float dt) {
             // If target does not exist, rest
-            if (unit.Target == null)
+            if (target == null)
                 Rest();
             // If target is on the same team
-            else if (unit.Target.Team.Index == teamIndex) {
+            else if (target.Team.Index == teamIndex) {
                 // If target is a building
-                if (unit.Target is RTSBuilding) {
-                    RTSBuilding target = (RTSBuilding)unit.Target;
+                if (target is RTSBuilding) {
+                    RTSBuilding targetB = (RTSBuilding)target;
                     // If target is player's depositable building
-                    if (target.Data.Depositable) {
+                    if (targetB.Data.Depositable) {
                         fDecide = DSDeposit;
                         fApply = ASDeposit;
                     }
@@ -119,11 +124,10 @@ namespace RTS.Default.Worker {
             // If target is on different team
             else {
                 // If target is a building type
-                if (unit.Target is RTSBuilding) {
-                    RTSBuilding target = (RTSBuilding)unit.Target;
+                if (target is RTSBuilding) {
+                    RTSBuilding targetB = (RTSBuilding)target;
                     // If target is resource
-                    if (target.IsResource) {
-                        targetResource = target;
+                    if (targetB.IsResource) {
                         harvesting = true;
                         unit.State = BehaviorFSM.Harvest;
                         fDecide = DSHarvest;
@@ -143,56 +147,62 @@ namespace RTS.Default.Worker {
         void ASCombatRanged(GameState g, float dt) { /* Do nothing */ }
 
         void DSDeposit(GameState g, float dt) {
-            if (harvesting)
-                unit.Target = targetResource;
+            if (harvesting && targetResource != null && targetResource.IsAlive)
+                target = targetResource;
             else 
-                unit.Target = null;
+                target = null;
+            Rest();
         }
 
         void ASDeposit(GameState g, float dt) {
             if (unit.Resources == 0) return;
-            unit.Team.Input.AddEvent(new CapitalEvent(teamIndex, unit.Resources));
+            unit.Team.Input.AddEvent(new CapitalEvent(teamIndex, unit.Resources/2));
             unit.Resources = 0;
             headingDepository = false;
-            Rest();
         }
 
         void DSHarvest(GameState g, float dt) {
             // If unit cannot carry resources anymore or resource is exhausted, find depository
-            if (unit.Resources > unit.Data.CarryingCapacity || unit.Target == null) {
+            if (unit.Resources > unit.Data.CarryingCapacity || target == null || !target.IsAlive) {
+                if (target == null || !target.IsAlive) {
+                    harvesting = false;
+                    targetResource = null;
+                }
                 headingDepository = true;
-                unit.Target = GetClosestDepository();
+                target = GetClosestDepository();
                 Rest();
-                if (unit.Target == null) harvesting = false;
             }
         }
 
         void ASHarvest(GameState g, float dt) {
+            unit.Target = target;
             // Apply damage to resource and add capital
             unit.CombatController.Attack(g, dt);
         }
 
         void DSCombatMelee(GameState g, float dt) {
             // If target does not exist, rest
-            if (unit.Target == null)
+            if (target == null)
                 Rest();
         }
 
         void ASCombatMelee(GameState g, float dt) {
+            unit.Target = target;
             unit.CombatController.Attack(g, dt);
         }
 
         void DSRepair(GameState g, float dt) {
-            if (unit.Target == null)
+            if (target == null)
                 Rest();
-            else if (unit.Target is RTSBuilding){
-                RTSBuilding target = (RTSBuilding) unit.Target;
-                if (target.Health == target.Data.Health)
+            else if (target is RTSBuilding){
+                RTSBuilding targetB = (RTSBuilding) target;
+                if (targetB.Health >= targetB.Data.Health)
                     Rest();
             }
         }
 
         void ASRepair(GameState g, float dt) {
+            unit.Target = target;
             unit.CombatController.Attack(g, dt);
         }
 
@@ -234,14 +244,13 @@ namespace RTS.Default.Worker {
         private static Random critRoller = new Random();
         private float attackCooldown;
 
-        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c) {
-        }
+        public override void Init(GameState s, RTSEngine.Controllers.GameplayController c) {}
 
         public override void Attack(GameState g, float dt) {
             if(attackCooldown > 0)
                 attackCooldown -= dt;
-            if(unit.State != BehaviorFSM.None)
-                return;
+            //f(unit.State != BehaviorFSM.None)
+             //   return;
             if(unit.Target != null) {
                 if(!unit.Target.IsAlive) {
                     unit.Target = null;

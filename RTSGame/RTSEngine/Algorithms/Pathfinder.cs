@@ -38,7 +38,10 @@ namespace RTSEngine.Algorithms {
 
     public class Pathfinder : IDisposable {
         // A*
-        private CollisionGrid world;
+        private static GameState gameState;
+        private static CollisionGrid World { get { return gameState.CGrid; } }
+        // Whether A World Coordinate Is Collidable, Given The Pathfinding Team's Knowledge Of The World
+        private bool[,] isCollidable;
         protected Point[,] prev;
         protected int[,] gScore, fScore;
         protected Point start;
@@ -48,12 +51,12 @@ namespace RTSEngine.Algorithms {
         private ConcurrentQueue<PathQuery> queries;
         private Thread thread;
 
-        public Pathfinder(CollisionGrid cg) {
+        public Pathfinder(GameState g) {
             // A*
-            world = cg;
-            prev = new Point[world.numCells.X, world.numCells.Y];
-            fScore = new int[world.numCells.X, world.numCells.Y];
-            gScore = new int[world.numCells.X, world.numCells.Y];
+            gameState = g;
+            prev = new Point[World.numCells.X, World.numCells.Y];
+            fScore = new int[World.numCells.X, World.numCells.Y];
+            gScore = new int[World.numCells.X, World.numCells.Y];
             // Threading
             running = true;
             queries = new ConcurrentQueue<PathQuery>();
@@ -61,6 +64,15 @@ namespace RTSEngine.Algorithms {
             thread.Priority = ThreadPriority.Normal;
             thread.IsBackground = true;
             thread.Start();
+        }
+
+        // Update And Re-Issue PathQuery From Start
+        public PathQuery ReissuePathQuery(PathQuery query, Vector2 start, Vector2 goal, int teamIndex) {
+            if(query != null)
+                query.IsOld = true;
+            query = new PathQuery(start, goal, teamIndex);
+            Add(query);
+            return query;
         }
 
         public void Add(PathQuery q) {
@@ -99,8 +111,8 @@ namespace RTSEngine.Algorithms {
         }
 
         // Get The Search Grid Locations Adjacent To The Input
-        private bool InGrid(Point p) {
-            return p.X >= 0 && p.X < world.numCells.X && p.Y >= 0 && p.Y < world.numCells.Y;
+        public static bool InGrid(Point p) {
+            return p.X >= 0 && p.X < World.numCells.X && p.Y >= 0 && p.Y < World.numCells.Y;
         }
 
         public static IEnumerable<Point> NeighborhoodDiag(Point p) {
@@ -115,6 +127,10 @@ namespace RTSEngine.Algorithms {
             yield return new Point(p.X - 1, p.Y);
             yield return new Point(p.X, p.Y + 1);
             yield return new Point(p.X, p.Y - 1);
+        }
+
+        public static IEnumerable<Point> Neighborhood(Point p) {
+            return (NeighborhoodAlign(p).Concat<Point>(NeighborhoodDiag(p))).Where(InGrid);
         }
 
         // Return The Two Aligned Locations One Could Cross Instead Of Moving Diagonally From P to N
@@ -148,15 +164,14 @@ namespace RTSEngine.Algorithms {
         private bool CanMove(Point n, int fowI) {
             if(!InGrid(n)) return false;
 
-            FogOfWar f = world.GetFogOfWar(n.X, n.Y, fowI);
+            FogOfWar f = World.GetFogOfWar(n.X, n.Y, fowI);
             switch(f) {
                 case FogOfWar.Nothing:
                     return true;
                 case FogOfWar.Passive:
-                    // TODO: Solve Omniscience
-                    //return !world.GetCollision(n.X, n.Y) || world.EStatic[n.X, n.Y] != null;
+                    return !(isCollidable[n.X, n.Y] || World.Collision[n.X, n.Y]); 
                 case FogOfWar.Active:
-                    return !world.GetCollision(n.X, n.Y);
+                    return !World.GetCollision(n.X, n.Y);
             }
             return false;
         }
@@ -192,12 +207,24 @@ namespace RTSEngine.Algorithms {
         // Run A* Search, Given This Pathfinder's World And A Query
         private void Pathfind(PathQuery q) {
             // Initialization
-            start = HashHelper.Hash(q.Start, world.numCells, world.size);
-            end = HashHelper.Hash(q.End, world.numCells, world.size); ;
-            for(int y = 0; y < world.numCells.Y; y++) {
-                for(int x = 0; x < world.numCells.X; x++) {
+            isCollidable = new bool[World.numCells.X, World.numCells.Y];
+            start = HashHelper.Hash(q.Start, World.numCells, World.size);
+            end = HashHelper.Hash(q.End, World.numCells, World.size); ;
+            for(int y = 0; y < World.numCells.Y; y++) {
+                for(int x = 0; x < World.numCells.X; x++) {
                     fScore[x, y] = int.MaxValue;
                     gScore[x, y] = int.MaxValue;
+                }
+            }
+            // Precondition: Any Buildings In World Have Valid Centers
+            var viewedBuildings = gameState.teams[q.FOWIndex].ViewedEnemyBuildings;
+            foreach(var vb in viewedBuildings) {
+                var vbData = gameState.teams[vb.Team].Race.Buildings[vb.Type];
+                Point p = vb.CellPoint;
+                for(int y = 0; y < vbData.GridSize.Y; y++) {
+                    for(int x = 0; x < vbData.GridSize.X; x++) {
+                        isCollidable[p.X + x, p.Y + y] = true;
+                    }
                 }
             }
             gScore[start.X, start.Y] = 0;
@@ -206,7 +233,6 @@ namespace RTSEngine.Algorithms {
             openSet.Insert(start);
 
             // A* Loop
-            // TODO: Check Fog Awareness
             List<Point> path = null;
             while(openSet.Count > 0) {
                 Point p = openSet.Pop();
@@ -249,7 +275,7 @@ namespace RTSEngine.Algorithms {
             // Check If We Need To Find The Nearest Point
             if(path == null) {
                 int s;
-                bool[,] ch = new bool[world.numCells.X, world.numCells.Y];
+                bool[,] ch = new bool[World.numCells.X, World.numCells.Y];
                 Array.Clear(ch, 0, ch.Length);
                 Point cg = FindClosestGoal(end, fScore, ch, out s);
                 if(s == int.MaxValue) {
@@ -264,11 +290,10 @@ namespace RTSEngine.Algorithms {
             // A* Conclusion
             if(path != null) {
                 foreach(Point wp in path) {
-                    q.waypoints.Add(new Vector2(((float)wp.X + 0.5f) * world.cellSize, ((float)wp.Y + 0.5f) * world.cellSize));
+                    q.waypoints.Add(new Vector2(((float)wp.X + 0.5f) * World.cellSize, ((float)wp.Y + 0.5f) * World.cellSize));
                 }
             }
             q.IsComplete = true;
-            // TODO: Add Path Smoothing
         }
     }
 }

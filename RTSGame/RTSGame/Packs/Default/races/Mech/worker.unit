@@ -1,0 +1,36 @@
+﻿// Friendly Unit Name
+NAME            [Soldier]
+
+// Unit Model
+MODEL           [models\Worker.model]
+TEXMAIN         [textures\Main.png]
+TEXCOLOR        [textures\Key.png]
+ANIMATION       [animations\Worker.png]
+ICON            [icons\Worker.png]
+MAXCOUNT        [1000]
+
+// Unit Data
+HEALTH          [600]
+SPEED           [3]
+COST            [5 , 1]
+BUILDTIME       [10]
+IMPACT          [10]
+WORKER          [1]
+CARRYCAPACITY   [20]
+
+// Collision Data
+RADIUS          [0.4]
+BBOXMIN         [-0.4 , 0.0 , -0.4]
+BBOXMAX         [0.4 , 1.0 , 0.4]
+
+// Combat Data
+ARMOR           [0]
+RANGE           [0 , 10]
+TIMER           [0.5]
+DAMAGE          [10 , 15]
+CRITCHANCE      [0.05]
+
+CTRLACTION      [RTS.Default.Worker.Action]
+CTRLANIM        [RTS.Default.Worker.Animation]
+CTRLCOMBAT      [RTS.Default.Worker.Combat]
+CTRLMOVE        [RTS.Default.Unit.Movement]

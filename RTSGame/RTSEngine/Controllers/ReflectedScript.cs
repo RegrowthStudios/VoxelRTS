@@ -19,7 +19,8 @@ namespace RTSEngine.Controllers {
         Animation,
         Combat,
         Movement,
-        Targetting
+        Targetting,
+        Button
     }
 
     public class ReflectedScript {
@@ -77,6 +78,8 @@ namespace RTSEngine.Controllers {
                 ScriptType = ScriptType.Building;
                 if(t.IsSubclassOf(typeof(ACBuildingActionController)))
                     ControllerType = ControllerType.Action;
+                else if(t.IsSubclassOf(typeof(ACBuildingButtonController)))
+                    ControllerType = ControllerType.Button;
                 else
                     throw new ArgumentException("This Script Is Not Subclassing A Building Controller");
             }
