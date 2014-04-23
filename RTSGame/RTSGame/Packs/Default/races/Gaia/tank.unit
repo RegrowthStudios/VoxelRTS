@@ -2,11 +2,11 @@
 NAME            [Golem]
 
 // Unit Model
-MODEL           [..\..\models\RockGolem.model]
-TEXMAIN         [..\..\textures\Golem.png]
+MODEL           [models\Tank.model]
+TEXMAIN         [textures\Tank.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
-ANIMATION       [..\..\animations\RockGolem.png]
-ICON            [..\..\icons\Armored.png]
+ANIMATION       [animations\Tank.png]
+ICON            [icons\Tank.png]
 MAXCOUNT        [1000]
 
 // Unit Data

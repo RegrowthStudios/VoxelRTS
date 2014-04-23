@@ -7,11 +7,12 @@ CTRLMOVEMENT    [RTS.Default.Squad.Movement]
 CTRLTARGET      [RTS.Default.Squad.Targeting]
 
 // List Of All Unit Types Belonging To Team
+UNIT            [worker.unit]
 UNIT            [soldier.unit]
 UNIT            [heavy.unit]
 UNIT            [armor.unit]
 
 // List Of All Building Types Belonging To Team
-BUILDING        [headquarters.building]
+BUILDING        [hq.building]
 BUILDING        [barracks.building]
-BUILDING        [house.building]
+BUILDING        [factory.building]

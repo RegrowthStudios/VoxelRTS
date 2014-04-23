@@ -319,6 +319,8 @@ namespace RTSEngine.Interfaces {
         Camera Camera { get; set; }
 
         void Build(RTSRenderer renderer);
+
+        void Update(RTSRenderer renderer, GameState s);
         void Draw(RTSRenderer renderer, SpriteBatch batch);
     }
 }

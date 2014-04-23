@@ -5,7 +5,7 @@ NAME            [Ore]
 MODEL           [models\Ore.model]
 TEXMAIN         [textures\Ore.png]
 TEXCOLOR        [..\..\textures\NoKey.png]
-ICON            [..\..\icons\OreButton.png]
+ICON            [icons\Ore.png]
 MAXCOUNT        [400]
 
 // Unit Data

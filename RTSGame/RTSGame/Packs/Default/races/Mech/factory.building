@@ -2,10 +2,10 @@
 NAME            [House]
 
 // Unit Model
-MODEL           [..\..\models\House.model]
-TEXMAIN         [..\..\textures\HouseMain.png]
-TEXCOLOR        [..\..\textures\HouseKey.png]
-ICON            [..\..\icons\House.png]
+MODEL           [models\Factory.model]
+TEXMAIN         [textures\FactoryMain.png]
+TEXCOLOR        [textures\FactoryKey.png]
+ICON            [icons\Factory.png]
 MAXCOUNT        [1000]
 
 // Unit Data

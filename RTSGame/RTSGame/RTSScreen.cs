@@ -35,6 +35,7 @@ namespace RTS {
         private RTSRenderer renderer;
         private Camera camera;
         private ACInputController gameInput;
+        private IVisualInputController vInput;
 
         Vector3 clickWorldPos;
         int team, type;
@@ -77,6 +78,7 @@ namespace RTS {
             renderer.UseFOW = true;
             playController = new GameplayController();
             gameInput = state.teams[0].Input;
+            vInput = gameInput as IVisualInputController;
             var vi = gameInput as IVisualInputController;
             vi.Build(renderer);
             vi.Camera = camera;
@@ -117,6 +119,7 @@ namespace RTS {
         public override void Update(GameTime gameTime) {
             // This Tells Us We Are GPU-Bound
             //Thread.Sleep(10);
+            vInput.Update(renderer, state);
             jukeBox.Update();
             renderer.UpdateAnimations(state, (float)game.TargetElapsedTime.TotalSeconds);
         }
@@ -129,7 +132,7 @@ namespace RTS {
             else {
                 G.Clear(Color.Black);
             }
-            (gameInput as IVisualInputController).Draw(renderer, SB);
+            vInput.Draw(renderer, SB);
 #if DEBUG
             if(!DevConsole.IsActivated) {
                 // Show FPS
