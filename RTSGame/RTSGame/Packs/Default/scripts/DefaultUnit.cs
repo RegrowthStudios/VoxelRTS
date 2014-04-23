@@ -20,6 +20,7 @@ namespace RTS.Default.Unit {
 
         // Targeting Behavior State Info
         Point targetCellPrev = Point.Zero;
+        IEntity prevTarget = null;
         Vector2 origin = Vector2.Zero;
         bool moveToOrigin = false;
 
@@ -106,10 +107,21 @@ namespace RTS.Default.Unit {
                 SetState(BehaviorFSM.Rest);
                 return;
             }
-
             FogOfWar f = g.CGrid.GetFogOfWar(unit.Target.GridPosition, teamIndex);
             switch(f) {
                 case FogOfWar.Active:
+                //case FogOfWar.Passive:
+                //    // Only Allow Buildings As Target In Passive State
+                //    if(f == FogOfWar.Passive) {
+                //        RTSBuilding bTarget = unit.Target as RTSBuilding;
+                //        if(bTarget == null) break;
+                //    }
+                //    if(f == FogOfWar.Active) {
+                //        if(!unit.Target.IsAlive) {
+                //            unit.Target = null;
+                //            break;
+                //        }
+                //    }
                     float mr = unit.Data.BaseCombatData.MaxRange;
                     float d = (unit.Target.GridPosition - unit.GridPosition).Length();
                     float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
@@ -128,17 +140,17 @@ namespace RTS.Default.Unit {
                             break;
                     }
                     Point targetCellCurr = HashHelper.Hash(unit.Target.GridPosition, g.CGrid.numCells, g.CGrid.size);
+                    bool sameTarget = prevTarget == unit.Target;
+                    prevTarget = unit.Target;
                     // If The Target Has Changed Cells And Is Out Of Range, We Need To Pathfind To It
-                    if(targetCellCurr.X != targetCellPrev.X || targetCellCurr.Y != targetCellPrev.Y) {
+                    if(sameTarget && (targetCellCurr.X != targetCellPrev.X || targetCellCurr.Y != targetCellPrev.Y)) {
                         targetCellPrev = targetCellCurr;
-                        DevConsole.AddCommand("Issued PF Query");
                         mc.Query = mc.Pathfinder.ReissuePathQuery(mc.Query, unit.GridPosition, unit.Target.GridPosition, unit.Team.Index);
-                        //SetState(BehaviorFSM.Rest);
+                        SetState(BehaviorFSM.Rest);
                     }
                     else {
-                        //SetState(BehaviorFSM.Walking);
+                        SetState(BehaviorFSM.Walking);
                     }
-                    SetState(BehaviorFSM.Rest); // Temp
                     break;
             }
         }
@@ -292,10 +304,8 @@ namespace RTS.Default.Unit {
         public PathQuery Query { get; set; }
 
         public override void DecideMove(GameState g, float dt) {
-            DevConsole.AddCommand("Decide Move");
             doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
             if(!doMove) return;
-            DevConsole.AddCommand("Do Move true");
             // If The Old Path Has Become Invalidated, Send A New Query
             bool invalid = false;
             int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
@@ -338,7 +348,6 @@ namespace RTS.Default.Unit {
             //    }
             //    tempIdx++;
             //}
-            DevConsole.AddCommand("Set Net Force");
             Vector2 waypoint = Waypoints[CurrentWaypointIndex];
             if(Query != null && !Query.IsOld && Query.IsComplete) {
                 Query.IsOld = true; // Only Do This Once Per Query
