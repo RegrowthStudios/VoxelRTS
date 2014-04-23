@@ -17,6 +17,7 @@ namespace RTSEngine.Interfaces {
         public const int Special1 = Special0 + 1;
         public const int Harvest = Special1 + 1;
         public const int Repair = Harvest + 1;
+        public const int Build = Repair + 1;
 
         // Targeting Order Codes - Will Influence Targeting Behavior
         public const int TargetNone = 0;
