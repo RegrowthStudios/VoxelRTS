@@ -114,18 +114,6 @@ namespace RTS.Default.Unit {
             FogOfWar f = g.CGrid.GetFogOfWar(unit.Target.GridPosition, teamIndex);
             switch(f) {
                 case FogOfWar.Active:
-                //case FogOfWar.Passive:
-                //    // Only Allow Buildings As Target In Passive State
-                //    if(f == FogOfWar.Passive) {
-                //        RTSBuilding bTarget = unit.Target as RTSBuilding;
-                //        if(bTarget == null) break;
-                //    }
-                //    if(f == FogOfWar.Active) {
-                //        if(!unit.Target.IsAlive) {
-                //            unit.Target = null;
-                //            break;
-                //        }
-                //    }
                     float mr = unit.Data.BaseCombatData.MaxRange;
                     float d = (unit.Target.GridPosition - unit.GridPosition).Length();
                     float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
@@ -336,11 +324,12 @@ namespace RTS.Default.Unit {
 
         private void SetNetForceAndWaypoint(GameState g) {
             CollisionGrid cg = g.CGrid;
+            // TODO: Make The Routine Below Fast Enough To Use
             //int tempIdx = 0;
-            //waypoint = Waypoints[tempIdx];
+            //Vector2 waypoint = Waypoints[tempIdx];
             //float r = unit.CollisionGeometry.BoundingRadius;
             //while(IsValid(tempIdx)) {
-            //    DevConsole.AddCommand("t: " + tempIdx);
+            //    // Get The Waypoint Closest To The Goal That This Unit Can Straight-Shot
             //    if(CoastIsClear(unit.GridPosition, waypoint, r, r, cg)) {
             //        CurrentWaypointIndex = tempIdx;
             //        break;
@@ -351,7 +340,6 @@ namespace RTS.Default.Unit {
             if(Query != null && !Query.IsOld && Query.IsComplete) {
                 Query.IsOld = true; // Only Do This Once Per Query
                 Waypoints = Query.waypoints;
-                DevConsole.AddCommand("Waypoints Set: "+Waypoints.Count);
                 CurrentWaypointIndex = Waypoints.Count - 1;
             }
             // Set Net Force...
@@ -386,6 +374,19 @@ namespace RTS.Default.Unit {
             diff /= mag;
             Vector2 step = stepSize * diff;
             float root2 = 1.41421356237f;
+            Func<bool> cont;
+            if(a.X < b.X && a.Y < b.Y) {
+               cont = () => {return a.X < b.X && a.Y < b.Y; };
+            }
+            else if(a.X < b.X && a.Y > b.Y) {
+                cont = () => {return a.X < b.X && a.Y > b.Y; };
+            }
+            else if(a.X > b.X && a.Y < b.Y) {
+                cont = () => {return a.X > b.X && a.Y < b.Y; };
+            }
+            else {
+                cont = () => { return a.X > b.X && a.Y > b.Y; };
+            }
             Vector2[] offsets = {   new Vector2(radius, 0),
                                     new Vector2(radius / 2.0f, 0),
                                     new Vector2(-radius, 0),
@@ -402,7 +403,7 @@ namespace RTS.Default.Unit {
                                     (new Vector2(1, -1) / root2) * radius / 2.0f,
                                     (new Vector2(-1, -1) / root2) * radius,
                                     (new Vector2(-1, -1) / root2) * radius / 2.0f   };
-            while(a.X < b.X && a.Y < b.Y) {
+            while(cont()) {
                 bool collision = cg.GetCollision(a);
                 foreach(var offset in offsets) {
                     collision |= cg.GetCollision(a + offset);
