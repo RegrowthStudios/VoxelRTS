@@ -11,7 +11,7 @@ MAXCOUNT        [1000]
 
 // Unit Data
 HEALTH          [60]
-SPEED           [3]
+SPEED           [2]
 COST            [5 , 1]
 BUILDTIME       [10]
 IMPACT          [10]
