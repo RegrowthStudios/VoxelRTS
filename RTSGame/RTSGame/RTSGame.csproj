@@ -137,9 +137,9 @@
     <Content Include="Packs\Default\races\Mech\icons\Soldier.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\scripts\DefaultWorker.cs">
+    <Compile Include="Packs\Default\scripts\DefaultWorker.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Content Include="Packs\Default\scripts\buttons\DBSpawn.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
