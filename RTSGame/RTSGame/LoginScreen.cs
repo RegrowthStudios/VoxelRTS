@@ -27,7 +27,7 @@ namespace RTS {
         IDisposable tFont;
 
         TextInput tInput;
-        TextWidget wUsername;
+        TextWidget wUsername, txtLogin;
         RectButton bFinish;
 
         public override void Build() {
@@ -58,6 +58,9 @@ namespace RTS {
             bFinish.Parent = wUsername;
             bFinish.OnButtonPress += bFinish_OnButtonPress;
             bFinish.Hook();
+
+            //txtLogin = new TextWidget();
+            
 
             tInput = new TextInput();
             tInput.OnTextChanged += tInput_OnTextChanged;

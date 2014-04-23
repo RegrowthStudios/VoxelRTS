@@ -97,9 +97,12 @@
     <Content Include="Packs\Default\scripts\DefaultWorker.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Packs\Default\scripts\input\AIInputController.cs">
+    <Content Include="Packs\Default\scripts\buttons\DBSpawn.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
+    <Content Include="Packs\Default\scripts\input\AIInputController.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\scripts\DefaultBuilding.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -109,27 +112,27 @@
     <Content Include="Packs\Default\scripts\DefaultUnit.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Packs\Default\scripts\input\EnvironmentInputController.cs">
+    <Content Include="Packs\Default\scripts\input\EnvironmentInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
     <Content Include="Packs\Default\scripts\GameTypes.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Packs\Default\scripts\input\PlayerInputController.cs">
+    <Content Include="Packs\Default\scripts\input\PlayerInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Packs\Default\scripts\input\RTSUI.cs">
+    </Content>
+    <Content Include="Packs\Default\scripts\input\RTSUI.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Packs\Default\scripts\input\RTSUIBuildPanel.cs">
+    </Content>
+    <Content Include="Packs\Default\scripts\input\RTSUIBuildPanel.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Packs\Default\scripts\input\RTSUISelectionPanel.cs">
+    </Content>
+    <Content Include="Packs\Default\scripts\input\RTSUIPanel2D.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Packs\Default\scripts\input\RTSUITeamDataPanel.cs">
+    </Content>
+    <Content Include="Packs\Default\scripts\input\RTSUITeamDataPanel.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
     <Content Include="Packs\Default\scripts\Scenarios.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
