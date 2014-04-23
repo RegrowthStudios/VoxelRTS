@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BlisterUI;
 using BlisterUI.Input;
 using System.Net;
+using RTSEngine.Graphics;
 
 namespace RTS {
     public class CompanyScreen : GameScreen<App> {
@@ -25,8 +26,8 @@ namespace RTS {
             protected set { }
         }
 
-        private Effect fx;
-        private Texture2D tNoise, tColor, tAlpha;
+        private FireShader fxFire;
+
         private float et;
         private SoundEffect seFire;
         private SoundEffectInstance seiFire;
@@ -37,21 +38,16 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
-            fx = XNAEffect.Compile(G, @"Content\FX\Fire.fx");
-            fx.CurrentTechnique = fx.Techniques[0];
-            using(var s = File.OpenRead(@"Content\Textures\FireNoise.png")) {
-                tNoise = Texture2D.FromStream(G, s);
-            }
-            using(var s = File.OpenRead(@"Content\Textures\FireColorLogo.png")) {
-                tColor = Texture2D.FromStream(G, s);
-            }
-            using(var s = File.OpenRead(@"Content\Textures\FireAlpha.png")) {
-                tAlpha = Texture2D.FromStream(G, s);
-            }
-            using(var s = File.OpenRead(@"Content\Audio\Fire.wav")) {
-                seFire = SoundEffect.FromStream(s);
-            }
+            fxFire = new FireShader();
+            fxFire.Build(G,
+                @"Content\FX\Fire.fx",
+                @"Content\Textures\FireNoise.png",
+                @"Content\Textures\FireColorLogo.png",
+                @"Content\Textures\FireAlpha.png"
+                );
+
             et = 0f;
+            using(var s = File.OpenRead(@"Content\Audio\Fire.wav")) seFire = SoundEffect.FromStream(s);
             seiFire = seFire.CreateInstance();
             seiFire.Play();
             seiFire.Volume = 0f;
@@ -61,10 +57,7 @@ namespace RTS {
         public override void OnExit(GameTime gameTime) {
             KeyboardEventDispatcher.OnKeyPressed -= KeyboardEventDispatcher_OnKeyPressed;
 
-            fx.Dispose();
-            tNoise.Dispose();
-            tColor.Dispose();
-            tAlpha.Dispose();
+            fxFire.Dispose();
             seiFire.Dispose();
             seFire.Dispose();
         }
@@ -80,28 +73,13 @@ namespace RTS {
             float l1 = MathHelper.Clamp(et / FIRE_MAX_TIME, 0, 1);
             float l2 = MathHelper.Clamp(et / SCREEN_MAX_TIME, 0, 1);
 
-            G.Textures[0] = tNoise;
-            G.SamplerStates[0] = SamplerState.LinearWrap;
-            G.Textures[1] = tColor;
-            G.SamplerStates[1] = SamplerState.LinearClamp;
-            G.Textures[2] = tAlpha;
-            G.SamplerStates[2] = SamplerState.LinearClamp;
-
             G.BlendState = BlendState.NonPremultiplied;
             G.DepthStencilState = DepthStencilState.None;
             G.RasterizerState = RasterizerState.CullNone;
 
-            fx.Parameters["WVP"].SetValue(Matrix.Identity);
-            fx.Parameters["time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
-            fx.Parameters["rates"].SetValue(new Vector3(1.8f, 2.7f, 6f));
-            fx.Parameters["scales"].SetValue(new Vector3(1, 3, 5));
-            fx.Parameters["offset1"].SetValue(new Vector2(1, 1));
-            fx.Parameters["offset2"].SetValue(new Vector2(1, 1));
-            fx.Parameters["offset3"].SetValue(new Vector2(1, 1));
-            fx.Parameters["distortScale"].SetValue(MathHelper.Lerp(0.3f, 0, MathHelper.Clamp(l2 + 0.4f, 0, 1)));
-            fx.Parameters["distortBias"].SetValue(0.01f);
-            fx.Parameters["tint"].SetValue(Vector4.Lerp(Vector4.Zero, Vector4.One, l1));
-            fx.CurrentTechnique.Passes[0].Apply();
+            fxFire.DistortScale = MathHelper.Lerp(0.3f, 0, MathHelper.Clamp(l2 + 0.4f, 0, 1));
+            fxFire.Tint = Vector4.Lerp(Vector4.Zero, Vector4.One, l1);
+            fxFire.Apply(G, Matrix.Identity, (float)gameTime.TotalGameTime.TotalSeconds);
 
             G.DrawUserPrimitives(PrimitiveType.TriangleStrip, new VertexPositionTexture[] {
                 new VertexPositionTexture(new Vector3(-1, 1, 0), Vector2.Zero),

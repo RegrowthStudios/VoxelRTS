@@ -59,6 +59,7 @@
     <Compile Include="Controllers\FOWResolver.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
+    <Compile Include="Graphics\Particles\FireShader.cs" />
     <Compile Include="Interfaces\ACInputController.cs" />
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
