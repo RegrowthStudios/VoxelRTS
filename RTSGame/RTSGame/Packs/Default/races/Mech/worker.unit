@@ -2,10 +2,10 @@
 NAME            [Soldier]
 
 // Unit Model
-MODEL           [models\Base.model]
+MODEL           [models\Worker.model]
 TEXMAIN         [textures\Main.png]
 TEXCOLOR        [textures\Key.png]
-ANIMATION       [animations\Soldier.png]
+ANIMATION       [animations\Worker.png]
 ICON            [icons\Worker.png]
 MAXCOUNT        [1000]
 

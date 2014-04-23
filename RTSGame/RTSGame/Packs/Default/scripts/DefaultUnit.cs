@@ -28,9 +28,9 @@ namespace RTS.Default.Unit {
             base.SetUnit(u);
             if(unit != null) {
                 // Prevent Units From Running Toward The Location Of A Killed Target
-                unit.OnNewTarget += (S, T) => { 
-                    if(mc != null && T == null ) 
-                        mc.Waypoints = null; 
+                unit.OnNewTarget += (S, T) => {
+                    if(mc != null && T == null)
+                        mc.Waypoints = null;
                 };
             }
         }
@@ -88,7 +88,7 @@ namespace RTS.Default.Unit {
                     else
                         SetState(BehaviorFSM.Walking);
                 }
-                else { 
+                else {
                     if(unit.Target != null) { // This Is A SquadTC-Set Target
                         switch(unit.TargetingOrders) {
                             case BehaviorFSM.TargetPassively:
@@ -193,7 +193,7 @@ namespace RTS.Default.Unit {
             }
             cc.Attack(g, dt);
         }
-        
+
         // TODO: Actually Implement Melee
         void DSCombatMelee(GameState g, float dt) {
             if(unit.Target == null || cc == null) {
@@ -343,11 +343,11 @@ namespace RTS.Default.Unit {
                 CurrentWaypointIndex = Waypoints.Count - 1;
             }
             // Set Net Force...
-            NetForce = pForce*UnitForce(unit.GridPosition, waypoint);
+            NetForce = pForce * UnitForce(unit.GridPosition, waypoint);
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
             // Apply Forces From Other Units In This One's Cell
             foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
-                NetForce += dForce*UnitForce(unit.GridPosition, otherUnit.GridPosition);
+                NetForce += dForce * UnitForce(unit.GridPosition, otherUnit.GridPosition);
             }
             // Apply Forces From Buildings And Other Units Near This One
             foreach(Point n in Pathfinder.Neighborhood(unitCell)) {
@@ -376,13 +376,13 @@ namespace RTS.Default.Unit {
             float root2 = 1.41421356237f;
             Func<bool> cont;
             if(a.X < b.X && a.Y < b.Y) {
-               cont = () => {return a.X < b.X && a.Y < b.Y; };
+                cont = () => { return a.X < b.X && a.Y < b.Y; };
             }
             else if(a.X < b.X && a.Y > b.Y) {
-                cont = () => {return a.X < b.X && a.Y > b.Y; };
+                cont = () => { return a.X < b.X && a.Y > b.Y; };
             }
             else if(a.X > b.X && a.Y < b.Y) {
-                cont = () => {return a.X > b.X && a.Y < b.Y; };
+                cont = () => { return a.X > b.X && a.Y < b.Y; };
             }
             else {
                 cont = () => { return a.X > b.X && a.Y > b.Y; };
@@ -428,7 +428,7 @@ namespace RTS.Default.Unit {
         private static Random r = new Random();
         private GameState state;
 
-        private AnimationLoop alRest, alWalk, alCombat;
+        private AnimationLoop alRest, alWalk, alMelee, alPrepareFire, alFire, alDeath;
         private AnimationLoop alCurrent;
 
         private float rt;
@@ -439,8 +439,14 @@ namespace RTS.Default.Unit {
             alRest.FrameSpeed = 30;
             alWalk = new AnimationLoop(60, 119);
             alWalk.FrameSpeed = 80;
-            alCombat = new AnimationLoop(120, 149);
-            alCombat.FrameSpeed = 30;
+            alMelee = new AnimationLoop(120, 149);
+            alMelee.FrameSpeed = 30;
+            alPrepareFire = new AnimationLoop(150, 179);
+            alPrepareFire.FrameSpeed = 50;
+            alFire = new AnimationLoop(180, 199);
+            alFire.FrameSpeed = 60;
+            alDeath = new AnimationLoop(200, 259);
+            alDeath.FrameSpeed = 40;
 
             SetAnimation(BehaviorFSM.None);
         }
@@ -473,8 +479,12 @@ namespace RTS.Default.Unit {
                     alCurrent.Restart(true);
                     break;
                 case BehaviorFSM.CombatMelee:
-                    alCurrent = alCombat;
-                    alCurrent.Restart(true);
+                    alCurrent = alMelee;
+                    alCurrent.Restart(false);
+                    break;
+                case BehaviorFSM.CombatRanged:
+                    alCurrent = alFire;
+                    alCurrent.Restart(false);
                     break;
                 case BehaviorFSM.Rest:
                     alCurrent = alRest;

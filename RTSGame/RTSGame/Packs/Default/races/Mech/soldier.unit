@@ -2,7 +2,7 @@
 NAME            [Soldier]
 
 // Unit Model
-MODEL           [models\Base.model]
+MODEL           [models\Soldier.model]
 TEXMAIN         [textures\Main.png]
 TEXCOLOR        [textures\Key.png]
 ANIMATION       [animations\Soldier.png]
@@ -31,6 +31,6 @@ DAMAGE          [10 , 15]
 CRITCHANCE      [0.05]
 
 CTRLACTION      [RTS.Default.Unit.Action]
-CTRLANIM        [RTS.Mech.Animation]
+CTRLANIM        [RTS.Default.Unit.Animation]
 CTRLCOMBAT      [RTS.Default.Unit.Combat]
 CTRLMOVE        [RTS.Default.Unit.Movement]
