@@ -203,7 +203,7 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < entities.Count; i++) {
                 if(entities[i] as RTSUnit != null) return;
                 RTSBuilding b = entities[i] as RTSBuilding;
-                if(b == null || b.Team.Index != ic.TeamIndex) continue;
+                if(b == null || b.Team.Index != ic.TeamIndex || !b.IsBuilt || !b.IsAlive) continue;
 
                 if(bType < 0) bType = b.Data.Index;
                 else if(bType != b.Data.Index) return;
