@@ -76,6 +76,15 @@ namespace RTS.Input {
                 yield return eData.L3SpawnCap;
             }
         }
+        private int L1SpawnCap {
+            get { return eData.L1SpawnCap; }
+        }
+        private int L2SpawnCap {
+            get { return eData.L2SpawnCap; }
+        }
+        private int L3SpawnCap {
+            get { return eData.L3SpawnCap; }
+        }
         // Amount Of Health Ore Recovers Per Recovery Phase
         private int OreRecoverHealth {
             get { return eData.OreRecoverHealth; }
@@ -281,15 +290,15 @@ namespace RTS.Input {
                 else
                     level = 0;
 
-                
+                //level = 3;
 
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
 
                     // Decide disaster type
                     int type = random.Next(2);
-                    
 
+                    type = 1;
 
                     // Create the appropriate disaster
                     if(type == 0) {
@@ -500,9 +509,22 @@ namespace RTS.Input {
                     }
                 }
             }
-            if(resources.Count > 0) {
 
-                // Decide Spawn Cap
+              // Decide Spawn Cap
+            int spawnCap;
+            if (level == 1){
+                spawnCap =  L1SpawnCap;
+            }
+            else if (level == 2){
+                spawnCap =  L2SpawnCap;
+            }
+            else {
+                spawnCap =  L3SpawnCap;
+            }
+
+            if(resources.Count > 0 && r.num < spawnCap) {
+
+              
 
 
                 // Count Number Of Units Currently In Region
@@ -524,6 +546,7 @@ namespace RTS.Input {
                     offset.Y = random.Next(SpawnOffset);
                     for(int j = 0; j < numSpawn; j++) {
                         AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos + offset));
+                        r.num = r.num +1;
                     }
                     ti++;
                 }
