@@ -15,8 +15,6 @@ namespace RTSEngine.Interfaces {
         public const int Death = CombatMelee + 1;
         public const int Special0 = Death + 1;
         public const int Special1 = Special0 + 1;
-        public const int ChaseTarget = Special1 + 1;
-        public const int PassiveTarget = ChaseTarget + 1;
 
         // Targeting Order Codes - Will Influence Targeting Behavior
         public const int TargetNone = 0;

@@ -24,14 +24,22 @@ namespace RTS.Default.Unit {
         Vector2 origin = Vector2.Zero;
         bool moveToOrigin = false;
 
+        public override void SetUnit(RTSUnit u) {
+            base.SetUnit(u);
+            if(unit != null) {
+                // Prevent Units From Running Toward The Location Of A Killed Target
+                unit.OnNewTarget += (S, T) => { 
+                    if(mc != null && T == null ) 
+                        mc.Waypoints = null; 
+                };
+            }
+        }
+
         public override void DecideAction(GameState g, float dt) {
             fDecide(g, dt);
         }
         public override void ApplyAction(GameState g, float dt) {
             fApply(g, dt);
-            if(unit.Target != null && unit.TargetingOrders != BehaviorFSM.TargetNone) {
-                unit.TurnToFace(unit.Target.GridPosition);
-            }
         }
 
         public override void Init(GameState s, GameplayController c) {
@@ -57,10 +65,6 @@ namespace RTS.Default.Unit {
                     fDecide = DSMain;
                     fApply = mc.ApplyMove;
                     break;
-                case BehaviorFSM.ChaseTarget:
-                    fDecide = DSChaseTarget;
-                    fApply = ASRest;
-                    break;
                 case BehaviorFSM.CombatRanged:
                     fDecide = DSCombatRanged;
                     fApply = ASCombatRanged;
@@ -80,7 +84,7 @@ namespace RTS.Default.Unit {
                 var doMove = mc.doMove;
                 if(doMove) {
                     if(unit.Target != null)  // This Is A User-Set Target
-                        SetState(BehaviorFSM.ChaseTarget);
+                        DSChaseTarget(g, dt);
                     else
                         SetState(BehaviorFSM.Walking);
                 }
@@ -91,7 +95,7 @@ namespace RTS.Default.Unit {
                                 // TODO: Implement/Verify
                                 break;
                             case BehaviorFSM.TargetAggressively:
-                                SetState(BehaviorFSM.ChaseTarget);
+                                DSChaseTarget(g, dt);
                                 break;
                         }
                     }
@@ -141,16 +145,16 @@ namespace RTS.Default.Unit {
                     }
                     Point targetCellCurr = HashHelper.Hash(unit.Target.GridPosition, g.CGrid.numCells, g.CGrid.size);
                     bool sameTarget = prevTarget == unit.Target;
-                    prevTarget = unit.Target;
                     // If The Target Has Changed Cells And Is Out Of Range, We Need To Pathfind To It
                     if(sameTarget && (targetCellCurr.X != targetCellPrev.X || targetCellCurr.Y != targetCellPrev.Y)) {
-                        targetCellPrev = targetCellCurr;
                         mc.Query = mc.Pathfinder.ReissuePathQuery(mc.Query, unit.GridPosition, unit.Target.GridPosition, unit.Team.Index);
                         SetState(BehaviorFSM.Rest);
                     }
                     else {
                         SetState(BehaviorFSM.Walking);
                     }
+                    prevTarget = unit.Target;
+                    targetCellPrev = targetCellCurr;
                     break;
             }
         }
@@ -243,9 +247,12 @@ namespace RTS.Default.Unit {
             if(!(unit.State == BehaviorFSM.CombatMelee || unit.State == BehaviorFSM.CombatRanged))
                 return;
             if(unit.Target != null) {
-                handleDeadTarget();
-                if(unit.Target == null) return;
-                
+                if(!unit.Target.IsAlive) {
+                    unit.Target = null;
+                    return;
+                }
+                unit.TurnToFace(unit.Target.GridPosition);
+
                 float minDistSquared = unit.Data.BaseCombatData.MinRange * unit.Data.BaseCombatData.MinRange;
                 float distSquared = (unit.Target.GridPosition - unit.GridPosition).LengthSquared();
                 float maxDistSquared = unit.Data.BaseCombatData.MaxRange * unit.Data.BaseCombatData.MaxRange;
@@ -255,19 +262,11 @@ namespace RTS.Default.Unit {
                     attackCooldown = unit.Data.BaseCombatData.AttackTimer;
                     if(minDistSquared <= distSquared) {
                         unit.DamageTarget(critRoller.NextDouble());
-                        handleDeadTarget();
+                        if(!unit.Target.IsAlive) {
+                            unit.Target = null;
+                        }
                     }
                 }
-            }
-        }
-
-        private void handleDeadTarget() {
-            if(!unit.Target.IsAlive) {
-                unit.Target = null;
-                // Don't Want To Move To Target's Old Position After Killing It
-                if(unit.MovementController != null)
-                    unit.MovementController.Waypoints = null;
-                return;
             }
         }
 
