@@ -25,21 +25,22 @@ namespace RTSEngine.Data.Parsers {
                     L2SpawnCap = 20,
                     L3SpawnCap = 30,
                     OreRecoverHealth = 50,
-                    SpawnOffset = 30,
+                    SpawnOffset = 10,
                     L1MinNumSpawn = new int[] {3,1,0},
                     L2MinNumSpawn = new int[] { 6, 3, 1 },
                     L3MinNumSpawn = new int[] { 12, 5, 2 },
                     L1MaxNumSpawn = new int[] {6,3,1},
                     L2MaxNumSpawn = new int[] {12,5,2},
                     L3MaxNumSpawn = new int[] {15,10,5},
-                    LightningHitP = 70,
-                    LightningDamage = 10,
-                    EarthquakeHitP = 40,
-                    EarthquakeDamage = 20,
-                    FireHitUnitP = 80,
-                    FireUnitDamage = 15,
-                    FireHitBuildingP = 60,
-                    FireBuildingDamage = 40
+                    LightningHitP = 100,
+                    LightningDamage = 10000,
+                    EarthquakeHitP = 100,
+                    EarthquakeDamage = 10000,
+                    FireHitUnitP = 100,
+                    FireUnitDamage = 10000,
+                    FireHitBuildingP = 100,
+                    FireBuildingDamage = 10000,
+                    FireSpreadP = 100
                 };
             }
         }
@@ -79,6 +80,7 @@ namespace RTSEngine.Data.Parsers {
         public int FireUnitDamage; 
         public int FireHitBuildingP;  
         public int FireBuildingDamage;
+        public int FireSpreadP;
         
     }
 
@@ -114,7 +116,7 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxFireUnitDamage = RegexHelper.GenerateInteger("FIREUNITDAMAGE");
         private static readonly Regex rgxFireHitBuildingP = RegexHelper.GenerateInteger("FIREHITBUILDINGP");
         private static readonly Regex rgxFireBuildingDamage = RegexHelper.GenerateInteger("FIREBUILDINGDAMAGE");
-        
+        private static readonly Regex rgxFireSpreadP = RegexHelper.GenerateInteger("FIRESPREADP");
 
         public static EnvironmentData Parse(FileInfo infoFile) {
             // Check File Existence
@@ -158,7 +160,8 @@ namespace RTSEngine.Data.Parsers {
                 rgxFireHitUnitP.Match(mStr),
                 rgxFireUnitDamage.Match(mStr),
                 rgxFireHitBuildingP.Match(mStr),
-                rgxFireBuildingDamage.Match(mStr)
+                rgxFireBuildingDamage.Match(mStr),
+                rgxFireSpreadP.Match(mStr)
             };
             foreach(var m in mp) if(!m.Success) return EnvironmentData.Default;
             int i = 0;
@@ -192,6 +195,7 @@ namespace RTSEngine.Data.Parsers {
             eid.FireUnitDamage = RegexHelper.ExtractInt(mp[i++]);
             eid.FireHitBuildingP = RegexHelper.ExtractInt(mp[i++]);
             eid.FireBuildingDamage = RegexHelper.ExtractInt(mp[i++]);
+            eid.FireSpreadP = RegexHelper.ExtractInt(mp[i++]);
             return eid;
         }
     }

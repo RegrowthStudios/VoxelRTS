@@ -45,9 +45,11 @@ namespace RTSEngine.Graphics {
 
         public void Draw(SpriteBatch sb, Vector2 pos) {
             string commands = "";
+
             foreach(var command in DevConsole.Lines) {
                 commands += command + "\n";
             }
+             
             commands += "\n > " + DevConsole.TypedText;
             Vector2 size = font.MeasureString(commands);
 

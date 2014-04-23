@@ -116,6 +116,9 @@ namespace RTS.Input {
         private int FireBuildingDamage {
             get { return eData.FireBuildingDamage; }
         }
+        private int FireSpreadP {
+            get { return eData.FireSpreadP; }
+        }
         // Minimum Number Of Units Spawned For Each Level
         private int[][] minNumSpawn;
         // Maximum Number Of Units Spawned For Each Level
@@ -254,6 +257,8 @@ namespace RTS.Input {
 
                     // Decide disaster type
                     int type = random.Next(2);
+                    type = 0;
+
 
                     // Create the appropriate disaster
                     if (type == 0) {
@@ -278,10 +283,11 @@ namespace RTS.Input {
         private void CreateFire(Region r) {
             List<Point> hitCells = new List<Point>();
             // Choose Subareas In The Region To Hit
-            foreach (var c in r.Cells) {
+            foreach (var ic in r.Cells) {
+                Point c = new Point(ic.X * 2, ic.Y * 2);
                 for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
                     for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
-                        bool isHit = (random.Next(100) <= 100);
+                        bool isHit = (random.Next(100) <= FireSpreadP);
                         if (isHit) {
                             hitCells.Add(new Point(c.X + x, c.Y + y));
                         }
@@ -310,7 +316,8 @@ namespace RTS.Input {
 
         // Natural Disaster That Damages Units
         private void CreateLightning(Region r) {
-            foreach (var c in r.Cells) {
+            foreach (var ic in r.Cells) {
+                Point c = new Point(ic.X * 2, ic.Y * 2);
                 for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
                     for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
                         foreach (var u in GameState.CGrid.EDynamic[c.X + x, c.Y + y]) {
@@ -329,7 +336,8 @@ namespace RTS.Input {
 
         // Natural Disaster That Damages Buildings
         private void CreateEarthquake(Region r) {
-            foreach (var c in r.Cells) {
+            foreach (var ic in r.Cells) {
+                Point c = new Point(ic.X * 2, ic.Y * 2);
                 for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
                     for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
                         RTSBuilding b = GameState.CGrid.EStatic[c.X + x, c.Y + y];
@@ -352,8 +360,9 @@ namespace RTS.Input {
             bool hasResource = false;
             List<Point> resources = new List<Point>();
             List<Point> res;
-            foreach (var c in r.Cells) {
-                if ((p.X < 0 && p.Y < 0) || grid.CellImpact[c.X, c.Y] > grid.CellImpact[p.X, p.Y]) {
+            foreach (var ic in r.Cells) {
+                if ((p.X < 0 && p.Y < 0) || grid.CellImpact[ic.X, ic.Y] > grid.CellImpact[p.X, p.Y]) {
+                    Point c = new Point(ic.X * 2, ic.Y * 2);
                     res = new List<Point>();
                     for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
                         for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
@@ -365,13 +374,19 @@ namespace RTS.Input {
                         }
                     }
                     if (hasResource) {
-                        p = c;
+                        p = ic;
                         resources = res;
                     }
                 }
             }
 
             if (resources.Count > 0) {
+                
+                // Decide Spawn Cap
+                
+                
+                // Count Number Of Units Currently In Region
+
                 // Randomly Choose An Impact Generator In That Cell
                 int i = random.Next(resources.Count);
                 Point resourcePos = resources[i];
