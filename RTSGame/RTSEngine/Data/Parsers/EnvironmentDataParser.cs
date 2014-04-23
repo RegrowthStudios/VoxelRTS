@@ -16,7 +16,7 @@ namespace RTSEngine.Data.Parsers {
                     MinionType = 0,
                     TankType = 1,
                     TitanType = 2,
-                    DisasterTime = 5,
+                    DisasterTime = 15,
                     L1Impact = 1000,
                     L2Impact = 2000,
                     L3Impact = 3000,

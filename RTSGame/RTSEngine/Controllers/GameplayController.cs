@@ -106,7 +106,7 @@ namespace RTSEngine.Controllers {
             }
 
             // Start The Game Type Controller
-            s.scrGTC = s.Scripts["RTS.Default.GameTypes.SPSurvival"];
+            s.scrGTC = s.Scripts["RTS.Default.GameTypes.SPEscapeThePlanet"];
             s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
             s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
             s.gtC.Start(s);
