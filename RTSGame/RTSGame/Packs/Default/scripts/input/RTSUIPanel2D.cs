@@ -10,7 +10,7 @@ using RTSEngine.Controllers;
 using RTSEngine.Data.Team;
 
 namespace RTSEngine.Graphics {
-    public class RTSUIUnitGroup : IDisposable {
+    public class RTSUIGroup<T> : IDisposable where T : class {
         public static Color COLOR_INACTIVE = new Color(0.7f, 0.7f, 0.7f);
         public static Color COLOR_ACTIVE = new Color(1f, 1f, 1f);
 
@@ -18,12 +18,12 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
-        public List<IEntity> Selection {
+        public T Data {
             get;
             set;
         }
 
-        public RTSUIUnitGroup(WidgetRenderer wr, int s) {
+        public RTSUIGroup(WidgetRenderer wr, int s) {
             Widget = new RectButton(wr, s, s, COLOR_INACTIVE, COLOR_ACTIVE);
         }
         public void Dispose() {
@@ -39,7 +39,7 @@ namespace RTSEngine.Graphics {
         }
     }
 
-    public class RTSUISelectionPanel : IDisposable {
+    public class RTSUIPanel2D<T> : IDisposable where T : class {
         public const float GROUPS_LAYER_OFF = 0.01f;
 
         public RectWidget BackPanel {
@@ -59,17 +59,17 @@ namespace RTSEngine.Graphics {
             set;
         }
 
-        public readonly RTSUIUnitGroup[] groups;
+        public readonly RTSUIGroup<T>[] groups;
         public readonly int Rows, Columns;
 
-        public RTSUISelectionPanel(WidgetRenderer wr, int r, int c, int s, int buf) {
+        public RTSUIPanel2D(WidgetRenderer wr, int r, int c, int s, int buf) {
             Rows = r;
             Columns = c;
-            groups = new RTSUIUnitGroup[Columns * Rows];
+            groups = new RTSUIGroup<T>[Columns * Rows];
             int i = 0;
             for(int y = 0; y < Rows; y++) {
                 for(int x = 0; x < Columns; x++) {
-                    groups[i] = new RTSUIUnitGroup(wr, s);
+                    groups[i] = new RTSUIGroup<T>(wr, s);
                     if(x > 0) {
                         groups[i].Widget.Parent = groups[i - 1].Widget;
                         groups[i].Widget.Offset = new Point(buf, 0);
@@ -108,30 +108,34 @@ namespace RTSEngine.Graphics {
             foreach(var ug in groups) ug.Unhook();
         }
 
-        private void Clear() {
+        protected void Clear() {
             foreach(var ug in groups) {
                 ug.Widget.ActiveColor = Color.Transparent;
                 ug.Widget.InactiveColor = Color.Transparent;
                 ug.Widget.Texture = null;
-                ug.Selection = null;
+                ug.Data = null;
             }
         }
-        private void Show(RTSUIUnitGroup ug) {
-            ug.Widget.ActiveColor = RTSUIUnitGroup.COLOR_ACTIVE;
-            ug.Widget.InactiveColor = RTSUIUnitGroup.COLOR_INACTIVE;
+        protected void Show(RTSUIGroup<T> ug) {
+            ug.Widget.ActiveColor = RTSUIGroup<T>.COLOR_ACTIVE;
+            ug.Widget.InactiveColor = RTSUIGroup<T>.COLOR_INACTIVE;
         }
 
-        public RTSUIUnitGroup GetSelection(int x, int y) {
+        public T GetSelection(int x, int y) {
             if(BackPanel.Inside(x, y)) {
                 foreach(var ug in groups) {
                     if(ug.Widget.Inside(x, y)) {
-                        return ug;
+                        return ug.Data;
                     }
                 }
             }
             return null;
         }
+    }
 
+    public class RTSUISelectionPanel : RTSUIPanel2D<List<IEntity>> {
+        public RTSUISelectionPanel(WidgetRenderer wr, int r, int c, int s, int buf)
+            : base(wr, r, c, s, buf) { }
         public void OnNewSelection(ACInputController ic, List<IEntity> entities) {
             Clear();
             if(IconLibrary == null)
@@ -169,7 +173,7 @@ namespace RTSEngine.Graphics {
                 Texture2D t = IconLibrary[key];
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;
-                groups[wi].Selection = kv.Value;
+                groups[wi].Data = kv.Value;
                 Show(groups[wi]);
                 wi++;
             }
@@ -179,7 +183,52 @@ namespace RTSEngine.Graphics {
                 Texture2D t = IconLibrary[key];
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;
-                groups[wi].Selection = kv.Value;
+                groups[wi].Data = kv.Value;
+                Show(groups[wi]);
+                wi++;
+            }
+        }
+    }
+
+    public class RTSUIBuildingButtonPanel : RTSUIPanel2D<List<ACBuildingButtonController>> {
+        public RTSUIBuildingButtonPanel(WidgetRenderer wr, int r, int c, int s, int buf)
+            : base(wr, r, c, s, buf) { }
+        public void OnNewSelection(ACInputController ic, List<IEntity> entities) {
+            Clear();
+            if(IconLibrary == null)
+                return;
+
+            int bType = -1;
+            List<RTSBuilding> sBuildings = new List<RTSBuilding>();
+            for(int i = 0; i < entities.Count; i++) {
+                if(entities[i] as RTSUnit != null) return;
+                RTSBuilding b = entities[i] as RTSBuilding;
+                if(b == null || b.Team.Index != ic.TeamIndex) continue;
+
+                if(bType < 0) bType = b.Data.Index;
+                else if(bType != b.Data.Index) return;
+
+                sBuildings.Add(b);
+            }
+
+            if(bType < 0) return;
+
+            int wi = 0;
+            var bd = ic.Team.Race.Buildings[bType].DefaultButtonControllers;
+            foreach(var bc in bd) {
+                if(wi >= groups.Length) break;
+                string key = string.Join(".", ic.Team.Race.FriendlyName, bc.TypeName);
+                if(!IconLibrary.ContainsKey(key)) continue;
+                Texture2D t = IconLibrary[key];
+                if(t == null) continue;
+                groups[wi].Widget.Texture = t;
+
+                var bcs = new List<ACBuildingButtonController>();
+                foreach(var b in sBuildings) {
+                    bcs.Add(b.ButtonControllers[wi]);
+                }
+                groups[wi].Data = bcs;
+
                 Show(groups[wi]);
                 wi++;
             }

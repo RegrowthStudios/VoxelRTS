@@ -152,6 +152,32 @@ namespace RTSEngine.Interfaces {
         public abstract void DecideAction(GameState g, float dt);
         public abstract void ApplyAction(GameState g, float dt);
     }
+
+    // One Of Numerous Buttons Held By The Building
+    public abstract class ACBuildingButtonController : ACBuildingController {
+        private int enqueueCount;
+
+        public abstract int QueueTime {
+            get;
+        }
+
+        // Scripted Button Logic
+        public abstract void OnQueueFinished(GameState s);
+
+        public abstract void OnClick();
+
+        protected void Enqueue() {
+            System.Threading.Interlocked.Increment(ref enqueueCount);
+        }
+        protected int GetEnqueueCount() {
+            int c = System.Threading.Interlocked.Exchange(ref enqueueCount, 0);
+            return c;
+        }
+
+        // For Cool-downs, Etc.
+        public abstract void DecideAction(GameState s, float dt);
+        public abstract void ApplyAction(GameState s, float dt);
+    }
     #endregion
 
     #region Button

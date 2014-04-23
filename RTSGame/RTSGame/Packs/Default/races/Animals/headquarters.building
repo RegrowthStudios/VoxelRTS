@@ -25,3 +25,8 @@ BBOXMAX         [2 , 3.0 , 3]
 CRECT           [4 , 6 , 0 , 0]
 
 CTRLACTION      [RTS.Default.Building.Action]
+
+CTRLBUTTON      [RTS.Default.Buttons.Spawn.Worker]
+
+
+CTRLBUTTONICON  [..\..\icons\SoldierButton.png]

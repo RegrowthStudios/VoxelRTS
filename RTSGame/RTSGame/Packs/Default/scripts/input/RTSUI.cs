@@ -11,6 +11,7 @@ using BlisterUI.Widgets;
 using RTSEngine.Data;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Team;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Graphics {
     public struct RTSUIButton {
@@ -48,6 +49,10 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        public RTSUIBuildingButtonPanel BBPanel {
+            get;
+            private set;
+        }
         public RTSUITeamDataPanel TeamDataPanel {
             get;
             private set;
@@ -79,9 +84,9 @@ namespace RTSEngine.Graphics {
             BuildBounds(renderer, ph, new Color(20, 20, 20));
             BuildMinimap(renderer, 5);
             BuildSelectionPanel(renderer);
+            BuildBBPanel(renderer);
             BuildTeamDataPanel();
             BuildBuildingPanel();
-            SelectionPanel.IconLibrary = renderer.IconLibrary;
         }
         public void Dispose() {
             foreach(var b in btnPanel)
@@ -137,7 +142,13 @@ namespace RTSEngine.Graphics {
             SelectionPanel.BackPanel.Parent = Minimap;
             SelectionPanel.BackPanel.AlignX = Alignment.RIGHT;
             SelectionPanel.BackPanel.Offset = new Point(-4, 0);
-            SelectionPanel.LayerDepth = PanelBottom.LayerDepth - 0.01f;
+            SelectionPanel.IconLibrary = renderer.IconLibrary;
+        }
+        private void BuildBBPanel(RTSRenderer renderer) {
+            BBPanel = new RTSUIBuildingButtonPanel(wrMain, 3, 4, 40, 4);
+            BBPanel.BackPanel.Parent = PanelBottom;
+            BBPanel.BackPanel.Offset = new Point(4, 0);
+            BBPanel.IconLibrary = renderer.IconLibrary;
         }
         private void BuildTeamDataPanel() {
             TeamDataPanel = new RTSUITeamDataPanel(wrMain);

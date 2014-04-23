@@ -333,6 +333,8 @@ namespace RTSEngine.Controllers {
         private void AddTask(GameState s, RTSBuilding building) {
             // Init The Building
             if(building.ActionController != null) building.ActionController.Init(s, this);
+            for(int i = 0; i < building.ButtonControllers.Count; i++)
+                building.ButtonControllers[i].Init(s, this);
 
             var btu = new BTaskBuildingDecision(s, building);
             building.OnDestruction += (o) => {

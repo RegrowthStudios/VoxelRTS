@@ -49,6 +49,7 @@ namespace RTS.Input {
             UI.SetTeam(Team);
             UI.BuildButtonPanel(5, 3, 12, 4, Color.Black, Color.White);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
+            OnNewSelection += UI.BBPanel.OnNewSelection;
 
             Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
             Team.OnPopulationCapChange += (t, c) => { UI.TeamDataPanel.PopulationCap = Team.PopulationCap; };
@@ -303,12 +304,20 @@ namespace RTS.Input {
             }
             else if(UI.SelectionPanel.BackPanel.Inside(p.X, p.Y)) {
                 var ug = UI.SelectionPanel.GetSelection(p.X, p.Y);
-                if(ug != null && ug.Selection != null) {
-                    AddEvent(new SelectEvent(TeamIndex, ug.Selection));
+                if(ug != null) {
+                    AddEvent(new SelectEvent(TeamIndex, ug));
                 }
             }
             else if(UI.BuildingPanel.Inside(p.X, p.Y)) {
                 buildingToPlace = UI.BuildingPanel.GetSelection(p.X, p.Y);
+            }
+            else if(UI.BBPanel.BackPanel.Inside(p.X, p.Y)) {
+                var bbs = UI.BBPanel.GetSelection(p.X, p.Y);
+                if(bbs != null) {
+                    for(int i = 0; i < bbs.Count; i++) {
+                        bbs[i].OnQueueFinished(GameState);
+                    }
+                }
             }
         }
 

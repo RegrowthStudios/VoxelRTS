@@ -207,6 +207,10 @@ namespace RTSEngine.Data.Team {
                 if(aController != null) aController.SetBuilding(this);
             }
         }
+        private List<ACBuildingButtonController> bControllers;
+        public List<ACBuildingButtonController> ButtonControllers {
+            get { return bControllers; }
+        }
 
         // Constructor
         public RTSBuilding(RTSTeam team, RTSBuildingData data, Vector2 position) {
@@ -226,6 +230,7 @@ namespace RTSEngine.Data.Team {
             CollisionGeometry = Data.ICollidableShape.Clone() as ICollidable;
             ViewDirection = Vector2.UnitX;
             CollisionGeometry.Center += GridPosition;
+            bControllers = new List<ACBuildingButtonController>();
         }
 
         public void SetViewedInfo(int p, bool b) {
@@ -249,6 +254,11 @@ namespace RTSEngine.Data.Team {
             Health = 0;
             if(OnDestruction != null)
                 OnDestruction(this);
+        }
+
+        public void AddButton(ACBuildingButtonController b) {
+            if(b != null) b.SetBuilding(this);
+            bControllers.Add(b);
         }
     }
 }
