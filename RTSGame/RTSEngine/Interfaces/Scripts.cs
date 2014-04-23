@@ -89,7 +89,7 @@ namespace RTSEngine.Interfaces {
     // Special Movement Mechanics
     public abstract class ACUnitMovementController : ACUnitController {
         // Pathfinder To Be Run On A Separate Thread         
-        protected Pathfinder pathfinder;
+        public Pathfinder Pathfinder { get; set; }
 
         // Squad Waypoints
         private List<Vector2> waypoints = new List<Vector2>();
