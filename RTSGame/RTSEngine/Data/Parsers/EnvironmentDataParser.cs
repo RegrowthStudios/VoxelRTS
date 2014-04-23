@@ -36,9 +36,9 @@ namespace RTSEngine.Data.Parsers {
                     LightningDamage = 1000,
                     EarthquakeHitP = 40,
                     EarthquakeDamage = 2000,
-                    FireHitUnitP = 90,
+                    FireHitUnitP = 70,
                     FireUnitDamage = 10,
-                    FireHitBuildingP = 80,
+                    FireHitBuildingP = 70,
                     FireBuildingDamage = 10,
                     FireSpreadP = 10
                 };
