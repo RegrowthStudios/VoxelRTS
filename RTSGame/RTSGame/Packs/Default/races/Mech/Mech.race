@@ -12,6 +12,6 @@ UNIT            [heavy.unit]
 UNIT            [armor.unit]
 
 // List Of All Building Types Belonging To Team
-BUILDING        [headquarters.building]
+BUILDING        [hq.building]
 BUILDING        [barracks.building]
-BUILDING        [house.building]
+BUILDING        [factory.building]

@@ -2,11 +2,11 @@
 NAME            [Soldier]
 
 // Unit Model
-MODEL           [..\..\models\MechBase.model]
-TEXMAIN         [..\..\textures\Main.png]
-TEXCOLOR        [..\..\textures\Key.png]
-ANIMATION       [..\..\animations\Mech1.png]
-ICON            [..\..\icons\Soldier.png]
+MODEL           [models\Base.model]
+TEXMAIN         [textures\Main.png]
+TEXCOLOR        [textures\Key.png]
+ANIMATION       [animations\Soldier.png]
+ICON            [icons\Soldier.png]
 MAXCOUNT        [1000]
 
 // Unit Data

@@ -94,6 +94,39 @@
     <Compile Include="LobbyScreen.cs" />
     <Compile Include="LoginScreen.cs" />
     <Compile Include="MenuScreen.cs" />
+    <Content Include="Packs\Default\races\Gaia\animations\Minion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Gaia\icons\Tank.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Gaia\icons\Minion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Gaia\textures\Minion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\icons\Armored.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\icons\Barracks.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\icons\Worker.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\icons\Factory.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\icons\Heavy.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\icons\HQ.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\icons\Soldier.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\scripts\DefaultWorker.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -207,37 +240,10 @@
     <Content Include="Packs\audio\bg\Wisp2.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\animations\RockGolem.png">
+    <Content Include="Packs\Default\races\Gaia\animations\Tank.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\icons\ArmoredSoldierButton.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\Barracks.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\BarracksButton.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\FactoryButton.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\HeavySoldierButton.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\House.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\HQButton.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\Ore.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\OreButton.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\Soldier.png">
+    <Content Include="Packs\Default\races\Gaia\icons\Ore.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\Nova\Textures\Circle.png">
@@ -312,34 +318,13 @@
     <Content Include="Content\UI\tips.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\animations\Cat.png">
+    <Content Include="Packs\Default\races\Mech\animations\Heavy.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\animations\Dog.png">
+    <Content Include="Packs\Default\races\Mech\animations\Armored.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\animations\Mech2.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\animations\Mech3.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\Armored.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\Heavy.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\SoldierButton.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\TownCenter.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\Tree.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\icons\TreeButton.png">
+    <Content Include="Packs\Default\races\Gaia\icons\Tree.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\maps\0\height.png">
@@ -363,47 +348,35 @@
     <Content Include="Packs\Default\races\Gaia\textures\Ore.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\BarracksKey.png">
+    <Content Include="Packs\Default\races\Mech\textures\BarracksKey.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\BarracksMain.png">
+    <Content Include="Packs\Default\races\Mech\textures\BarracksMain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\Golem.png">
+    <Content Include="Packs\Default\races\Gaia\textures\Tank.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\HouseKey.png">
+    <Content Include="Packs\Default\races\Mech\textures\FactoryKey.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\HouseMain.png">
+    <Content Include="Packs\Default\races\Mech\textures\FactoryMain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\HQMain.png">
+    <Content Include="Packs\Default\races\Mech\textures\HQMain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\Tree.png">
+    <Content Include="Packs\Default\races\Gaia\textures\Tree.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\Cat.png">
+    <Content Include="Packs\Default\races\Mech\textures\Key.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\CatKey.png">
+    <Content Include="Packs\Default\races\Mech\textures\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\textures\Dog.png">
+    <Content Include="Packs\Default\races\Mech\animations\Soldier.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\textures\DogKey.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\textures\Key.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\textures\Main.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\animations\Mech1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\textures\NoKey.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -429,43 +402,25 @@
     <Content Include="Packs\Default\maps\Caldera\test.map">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\models\Cat.model">
+    <None Include="Packs\Default\races\Gaia\models\Minion.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\models\Dog.model">
+    <None Include="Packs\Default\races\Mech\worker.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Packs\Default\races\Animals\armor.unit">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="Packs\Default\models\Barracks.model">
+    <None Include="Packs\Default\races\Mech\models\Barracks.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\models\House.model">
+    <None Include="Packs\Default\races\Mech\models\Factory.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\models\Tree.model">
+    <None Include="Packs\Default\races\Gaia\models\Tree.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Packs\Default\races\Animals\heavy.unit">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="Packs\Default\models\HQ.model">
+    <None Include="Packs\Default\races\Mech\models\HQ.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\models\RockGolem.model">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Animals\barracks.building">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="Packs\Default\races\Animals\worker.unit">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="Packs\Default\races\Animals\headquarters.building">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Animals\house.building">
+    <None Include="Packs\Default\races\Gaia\models\Tank.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="Packs\Default\races\Gaia\models\Ore.model">
@@ -477,12 +432,6 @@
     <None Include="Packs\Default\races\Gaia\tree.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\races\Animals\Animals.race">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="Packs\Default\races\Animals\soldier.unit">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Packs\Default\races\Gaia\tank.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -492,9 +441,9 @@
     <None Include="Packs\Default\races\Gaia\Gaia.race">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\models\MechBase.model">
+    <Content Include="Packs\Default\races\Mech\models\Base.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Packs\schemes\red.scheme">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -525,13 +474,13 @@
     <None Include="Packs\Default\races\Mech\barracks.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\races\Mech\headquarters.building">
+    <None Include="Packs\Default\races\Mech\hq.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Packs\Default\races\Mech\heavy.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Packs\Default\races\Mech\house.building">
+    <None Include="Packs\Default\races\Mech\factory.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Packs\Default\races\Mech\Mech.race">
