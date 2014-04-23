@@ -74,9 +74,6 @@ namespace RTS.Default.Worker {
                     fApply = mc.ApplyMove;
                     break;
                 case BehaviorFSM.Harvest:
-                    fDecide = DSHarvest;
-                    fApply = DecideWorkerAction;
-                    break;
                 case BehaviorFSM.Build:    
                 case BehaviorFSM.Repair:
                 case BehaviorFSM.CombatMelee:
@@ -127,12 +124,6 @@ namespace RTS.Default.Worker {
                     float d = (unit.Target.GridPosition - unit.GridPosition).Length();
                     float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
                     switch(unit.CombatOrders) {
-                        case BehaviorFSM.UseRangedAttack:
-                            if(d <= mr * 0.75) {
-                                SetState(BehaviorFSM.CombatRanged);
-                                return;
-                            }
-                            break;
                         // Melee Attack Will Be Used For Many Special Worker Functions
                         case BehaviorFSM.UseMeleeAttack:
                             if(dBetween <= unit.CollisionGeometry.InnerRadius * 0.2f) {
@@ -171,7 +162,8 @@ namespace RTS.Default.Worker {
                     // If Target Is Player's Depositable Building
                     else if(targetB.Data.Depositable) {
                         targetDistro = targetB;
-                        SetState(BehaviorFSM.Harvest);
+                        SetState(BehaviorFSM.Harvest); // TODO: Make This Harvest Only Once
+                        depositing = true;
                     }
                     // If Target Is The Player's Undepositable Building, Repair
                     else {
@@ -184,10 +176,9 @@ namespace RTS.Default.Worker {
                 if(targetB != null) {
                     if (targetB.IsResource) {
                         SetState(BehaviorFSM.Harvest);
+                        depositing = false;
                     }
-
                 }
-                // If enemy target is not resource, switch to combat state
                 else {
                     SetState(BehaviorFSM.CombatMelee);
                 }
@@ -241,21 +232,22 @@ namespace RTS.Default.Worker {
         }
 
         void DSHarvest(GameState g, float dt) {
-            if(!depositing) {
-
-            }
             // Look For A Distro
             if(unit.Resources > unit.Data.CarryingCapacity) {
-                if(targetDistro == null)
-                    targetDistro = GetClosestDepository();
+                // Always Go To Nearest Distro
+                targetDistro = GetClosestDepository();
                 unit.Target = targetDistro;
                 SetState(BehaviorFSM.Rest); 
             }
             else if(unit.Target == null || !unit.Target.IsAlive) {
                 // Look For More Harvestable Stuff
-                if(targetResource == null)
+                if(targetResource == null) // Only Target A New Resource If The Old One Is Bad
                     targetResource = GetClosestResource(g);
                 unit.Target = GetClosestResource(g);
+                if(unit.Target == null) { // No Resources Found
+                    targetDistro = GetClosestDepository();
+                    unit.Target = targetDistro;
+                }
                 SetState(BehaviorFSM.Rest);        
             }
             depositing = unit.Target == targetDistro;
