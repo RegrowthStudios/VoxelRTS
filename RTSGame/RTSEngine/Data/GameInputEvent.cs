@@ -39,10 +39,15 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
+        public bool Append {
+            get;
+            private set;
+        }
 
-        public SelectEvent(int t, List<IEntity> s)
+        public SelectEvent(int t, List<IEntity> s, bool append = false)
             : base(GameEventType.Select, t) {
             Selected = s;
+            Append = append;
         }
     }
 

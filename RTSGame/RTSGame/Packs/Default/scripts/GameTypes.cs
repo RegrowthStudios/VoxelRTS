@@ -24,7 +24,8 @@ namespace RTS.Default {
                 // Give The Player Team Starting Capital
                 pTeam = null;
                 eTeam = null;
-                foreach(var at in s.activeTeams) {
+                for(int i = 0; i < s.activeTeams.Length; i++) {
+                    var at = s.activeTeams[i];
                     if(pTeam == null && at.Team.Type == RTSInputType.Player) {
                         pTeam = at.Team;
                         pTeam.Input.AddEvent(new CapitalEvent(pTeam.Index, STARTING_CAPITAL));

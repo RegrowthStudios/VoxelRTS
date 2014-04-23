@@ -2,11 +2,11 @@
 NAME            [Treant]
 
 // Unit Model
-MODEL           [..\..\models\Dog.obj]
-TEXMAIN         [..\..\textures\Dog.png]
-TEXCOLOR        [..\..\textures\DogKey.png]
-ANIMATION       [..\..\animations\Dog.png]
-ICON            [..\..\icons\Soldier.png]
+MODEL           [models\Minion.model]
+TEXMAIN         [textures\Minion.png]
+TEXCOLOR        [..\..\textures\NoKey.png]
+ANIMATION       [animations\Minion.png]
+ICON            [icons\Minion.png]
 MAXCOUNT        [1000]
 
 // Unit Data

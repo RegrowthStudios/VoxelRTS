@@ -85,11 +85,33 @@ namespace RTSEngine.Interfaces {
 
         // Perform Correct Logic For Selection
         public void Select(List<IEntity> s, bool append = false) {
-            if(!append) selected.Clear();
-            if(s != null && s.Count > 0) selected.AddRange(s);
+            // Remove Old Units
+            if(!append && selected != null && selected.Count > 0) {
+                for(int i = 0; i < selected.Count; i++) {
+                    selected[i].OnDestruction -= OnEntityDestruction;
+                }
+                selected.Clear();
+            }
+
+            // Add New Units
+            if(s != null && s.Count > 0) {
+                for(int i = 0; i < s.Count; i++) {
+                    if(selected.Contains(s[i])) continue;
+                    s[i].OnDestruction += OnEntityDestruction;
+                    selected.Add(s[i]);
+                }
+            }
+
+            // Raise Event
             if(OnNewSelection != null) {
                 OnNewSelection(this, selected);
             }
+        }
+        public void OnEntityDestruction(IEntity e) {
+            selected.Remove(e);
+            e.OnDestruction -= OnEntityDestruction;
+            if(OnNewSelection != null)
+                OnNewSelection(this, selected);
         }
 
         public abstract void Serialize(BinaryWriter s);

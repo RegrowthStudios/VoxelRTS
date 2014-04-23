@@ -24,7 +24,8 @@ using Microsoft.Xna.Framework.Audio;
 namespace RTS {
     public class RTSScreen : GameScreen<App> {
         const int NUM_FPS_SAMPLES = 64;
-        const string BG_SOUND_FILE = @"Content\Audio\BG\Defiant Planet BGM.wav";
+        const string BS_SOUND_DIR = @"Packs\audio\bg";
+        static readonly Random rSong = new Random();
         static readonly Regex rgxTeam = RegexHelper.GenerateInteger("setteam");
         static readonly Regex rgxType = RegexHelper.GenerateInteger("settype");
         static readonly Regex rgxSpawn = RegexHelper.GenerateVec2Int("setspawn");
@@ -34,6 +35,7 @@ namespace RTS {
         private RTSRenderer renderer;
         private Camera camera;
         private ACInputController gameInput;
+        private IVisualInputController vInput;
 
         Vector3 clickWorldPos;
         int team, type;
@@ -44,8 +46,7 @@ namespace RTS {
         SpriteFont sfDebug;
         int eFPS;
 
-        SoundEffect seBG;
-        SoundEffectInstance seiBG;
+        Jukebox jukeBox;
 
         public override int Next {
             get { return -1; }
@@ -77,6 +78,7 @@ namespace RTS {
             renderer.UseFOW = true;
             playController = new GameplayController();
             gameInput = state.teams[0].Input;
+            vInput = gameInput as IVisualInputController;
             var vi = gameInput as IVisualInputController;
             vi.Build(renderer);
             vi.Camera = camera;
@@ -92,12 +94,8 @@ namespace RTS {
             pauseRender = false;
             tEngine.Start();
 
-            using(var fs = File.OpenRead(BG_SOUND_FILE)) {
-                seBG = SoundEffect.FromStream(fs);
-            }
-            seiBG = seBG.CreateInstance();
-            seiBG.IsLooped = true;
-            seiBG.Play();
+            jukeBox = new Jukebox();
+            jukeBox.LoadFromDirectory(new DirectoryInfo(BS_SOUND_DIR));
         }
         public override void OnExit(GameTime gameTime) {
             MouseEventDispatcher.OnMousePress -= OnMP;
@@ -114,13 +112,15 @@ namespace RTS {
             GameEngine.Dispose(state);
             state = null;
 
-            seiBG.Dispose();
-            seBG.Dispose();
+            jukeBox.Dispose();
+            jukeBox = null;
         }
 
         public override void Update(GameTime gameTime) {
             // This Tells Us We Are GPU-Bound
             //Thread.Sleep(10);
+            vInput.Update(renderer, state);
+            jukeBox.Update();
             renderer.UpdateAnimations(state, (float)game.TargetElapsedTime.TotalSeconds);
         }
         public override void Draw(GameTime gameTime) {
@@ -132,7 +132,7 @@ namespace RTS {
             else {
                 G.Clear(Color.Black);
             }
-            (gameInput as IVisualInputController).Draw(renderer, SB);
+            vInput.Draw(renderer, SB);
 #if DEBUG
             if(!DevConsole.IsActivated) {
                 // Show FPS

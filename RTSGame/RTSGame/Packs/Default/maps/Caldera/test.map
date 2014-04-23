@@ -1,0 +1,15 @@
+﻿// Pre-computed Height Data
+DAT         [height.png]
+
+// The Primary Model And Texture
+HMP         [map.model]
+HTP         [map.png]
+
+// The Size Of The Map
+HEIGHT      [5]
+
+// Region Key Information
+REGIONS     [Region5x5.png]
+
+// Survival Team Spawn Location
+SURVIVALSPAWN   [20, 20]

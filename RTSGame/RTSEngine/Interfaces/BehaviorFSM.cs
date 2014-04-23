@@ -16,7 +16,7 @@ namespace RTSEngine.Interfaces {
         public const int Special0 = Death + 1;
         public const int Special1 = Special0 + 1;
         public const int Harvest = Special1 + 1;
-        public const int FindDepository = Harvest + 1;
+        public const int Repair = Harvest + 1;
 
         // Targeting Order Codes - Will Influence Targeting Behavior
         public const int TargetNone = 0;
@@ -29,7 +29,9 @@ namespace RTSEngine.Interfaces {
         public const int UseRangedAttack = UseMeleeAttack + 1;
 
         // Movement Order Codes - Will Influence Movement Behavior
-        public const int FreeFormation = 0;
+        public const int JustMove = 0;
+        // TODO: Add Support For A-Move
+        public const int AttackMove = JustMove + 1;
 
         public static int GetState(int behaviorCode) {
             return GetByte(behaviorCode, 0);

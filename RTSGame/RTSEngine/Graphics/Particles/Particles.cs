@@ -7,7 +7,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace RTSEngine.Graphics {
     public enum ParticleType {
-        Bullet
+        Bullet,
+        Fire
     }
     public abstract class Particle {
         public static bool IsParticleDead(Particle p) {
@@ -86,6 +87,50 @@ namespace RTSEngine.Graphics {
                 Matrix.CreateScale(distance * s, distance * s, distance) *
                 Matrix.CreateWorld(origin, direction, Vector3.Up);
             instance.Tint = Color.White;
+        }
+    }
+
+    #region Fire Instancing
+    public struct VertexFireInstance : IVertexType {
+        #region Declaration
+        public static readonly VertexDeclaration Declaration = new VertexDeclaration(
+            new VertexElement(sizeof(float) * 0, VertexElementFormat.Vector4, VertexElementUsage.Position, 1),
+            new VertexElement(sizeof(float) * 4, VertexElementFormat.Vector4, VertexElementUsage.Position, 2),
+            new VertexElement(sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.Position, 3),
+            new VertexElement(sizeof(float) * 12, VertexElementFormat.Vector4, VertexElementUsage.Position, 4),
+            new VertexElement(sizeof(float) * 16, VertexElementFormat.Single, VertexElementUsage.TextureCoordinate, 1)
+        );
+        public VertexDeclaration VertexDeclaration {
+            get { return Declaration; }
+        }
+        #endregion
+
+        public Matrix Transform;
+        public float Time;
+
+        public VertexFireInstance(Matrix m, float t) {
+            Transform = m;
+            Time = t;
+        }
+    }
+    #endregion
+    public class FireParticle : Particle {
+        public Vector3 origin;
+        public float radius, height;
+
+        // Instance Transform Of Bullet
+        public VertexFireInstance instance;
+
+        public FireParticle(Vector3 o, float r, float h, float rotY, float t)
+            : base(t, ParticleType.Fire) {
+            origin = o;
+
+            // Create Instance Matrix
+            instance.Transform =
+                Matrix.CreateScale(r, h, r) *
+                Matrix.CreateRotationY(rotY) *
+                Matrix.CreateTranslation(o);
+            instance.Time = 0;
         }
     }
 }

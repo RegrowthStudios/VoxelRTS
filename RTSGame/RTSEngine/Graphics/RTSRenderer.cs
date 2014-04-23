@@ -258,6 +258,13 @@ namespace RTSEngine.Graphics {
                 pRenderer.LoadBulletModel(this, s, ParsingFlags.ConversionOpenGL);
             }
             pRenderer.LoadBulletTexture(this, ParticleRenderer.FILE_BULLET_TEXTURE);
+            pRenderer.BuildFireModel(this, 3);
+            pRenderer.LoadFireShader(this,
+                ParticleRenderer.FILE_FIRE_SHADER,
+                ParticleRenderer.FILE_FIRE_NOISE,
+                ParticleRenderer.FILE_FIRE_COLOR,
+                ParticleRenderer.FILE_FIRE_ALPHA
+                );
 
             // Load Team Visuals
             for(int i = 0; i < state.teams.Length; i++) {
@@ -580,6 +587,11 @@ namespace RTSEngine.Graphics {
 
             pRenderer.SetBullets(G);
             pRenderer.DrawBullets(G);
+
+
+
+            pRenderer.SetFire(G, Camera.View * Camera.Projection, (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000));
+            pRenderer.DrawFire(G);
         }
 
         // Selection Box Handling

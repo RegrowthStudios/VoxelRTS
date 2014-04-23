@@ -22,12 +22,15 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxPPC = RegexHelper.GenerateInteger("POPCAPCHANGE");
         private static readonly Regex rgxImpact = RegexHelper.GenerateInteger("IMPACT");
         private static readonly Regex rgxBuildAmount = RegexHelper.GenerateInteger("BUILDAMOUNT");
+        private static readonly Regex rgxDepositable = RegexHelper.GenerateInteger("DEPOSITABLE");
         private static readonly Regex rgxSightRadius = RegexHelper.GenerateInteger("SIGHTRADIUS");
         private static readonly Regex rgxGridSize = RegexHelper.GenerateVec2Int("GRIDSIZE");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
         private static readonly Regex rgxBBMax = RegexHelper.GenerateVec3("BBOXMAX");
         private static readonly Regex rgxCRect = RegexHelper.GenerateVec4("CRECT");
         private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlButton = RegexHelper.Generate("CTRLBUTTON", @"[\w\s\.]+");
+        private static readonly Regex rgxCtrlButtonIcon = RegexHelper.GenerateFile("CTRLBUTTONICON");
 
         private static readonly Regex rgxModel = RegexHelper.GenerateFile("MODEL");
         private static readonly Regex rgxMainTex = RegexHelper.GenerateFile("TEXMAIN");
@@ -74,7 +77,19 @@ namespace RTSEngine.Data.Parsers {
                 string key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mp[4]));
                 if(!renderer.IconLibrary.ContainsKey(key))
                     renderer.IconLibrary.Add(key, renderer.LoadTexture2D(fiIcon.FullName));
+
+                var mButton = rgxCtrlButton.Match(mStr);
+                var mButtonIcon = rgxCtrlButtonIcon.Match(mStr);
+                while(mButton.Success && mButtonIcon.Success) {
+                    key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mButton));
+                    if(!renderer.IconLibrary.ContainsKey(key))
+                        renderer.IconLibrary.Add(key, renderer.LoadTexture2D(RegexHelper.ExtractFile(mButtonIcon, infoFile.Directory.FullName).FullName));
+
+                    mButton = mButton.NextMatch();
+                    mButtonIcon = mButtonIcon.NextMatch();
+                }
             }
+
 
             return model;
         }
@@ -99,6 +114,7 @@ namespace RTSEngine.Data.Parsers {
                 rgxPPC.Match(mStr),
                 rgxImpact.Match(mStr),
                 rgxBuildAmount.Match(mStr),
+                rgxDepositable.Match(mStr),
                 rgxSightRadius.Match(mStr),
                 rgxGridSize.Match(mStr),
                 rgxBBMin.Match(mStr),
@@ -121,6 +137,7 @@ namespace RTSEngine.Data.Parsers {
             data.PopCapChange = RegexHelper.ExtractInt(mp[ri++]);
             data.Impact = RegexHelper.ExtractInt(mp[ri++]);
             data.BuildAmount = RegexHelper.ExtractInt(mp[ri++]);
+            data.Depositable = RegexHelper.ExtractInt(mp[ri++]) == 0 ? false : true;
             data.SightRadius = RegexHelper.ExtractInt(mp[ri++]);
             buf = RegexHelper.ExtractVec2I(mp[ri++]);
             data.GridSize.X = buf[0];
@@ -130,11 +147,16 @@ namespace RTSEngine.Data.Parsers {
             Vector4 cr = RegexHelper.ExtractVec4(mp[ri++]);
             data.ICollidableShape = new CollisionRect(cr.X, cr.Y, new Vector2(cr.Z, cr.W), true);
 
+
             // Get The Controllers From The Controller Dictionary
             if(controllers != null) {
                 data.DefaultActionController = controllers[RegexHelper.Extract(mp[ri++])];
             }
-
+            var mButton = rgxCtrlButton.Match(mStr);
+            while(mButton.Success) {
+                data.DefaultButtonControllers.Add(controllers[RegexHelper.Extract(mButton)]);
+                mButton = mButton.NextMatch();
+            }
             return data;
         }
     }

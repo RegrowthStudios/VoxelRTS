@@ -10,6 +10,8 @@ using BlisterUI.Input;
 using BlisterUI.Widgets;
 using RTSEngine.Data;
 using RTSEngine.Controllers;
+using RTSEngine.Data.Team;
+using RTSEngine.Interfaces;
 
 namespace RTSEngine.Graphics {
     public struct RTSUIButton {
@@ -18,12 +20,6 @@ namespace RTSEngine.Graphics {
         public Action<GameState> FOnPress;
     }
 
-    /**
-     * RTS UI Menus:
-     * When Units Selected: Unit/Type Counts
-     * When Unit Selected: Unit/Profile
-     * When Building Selected: Building/Profile
-     */
     public class RTSUI : IDisposable {
         private WidgetRenderer wrButtonPanel, wrMain;
 
@@ -40,11 +36,6 @@ namespace RTSEngine.Graphics {
             private set;
         }
 
-        private Texture2D tTransparent;
-        private RectButton[,] btnPanel;
-        private Action<GameState>[,] fPanel;
-        private LinkedList<Point> pressed;
-
         public RectWidget Minimap {
             get;
             private set;
@@ -53,16 +44,15 @@ namespace RTSEngine.Graphics {
             get;
             private set;
         }
+        public RTSUIBuildingButtonPanel BBPanel {
+            get;
+            private set;
+        }
         public RTSUITeamDataPanel TeamDataPanel {
             get;
             private set;
         }
-
-        public int ButtonRows {
-            get;
-            private set;
-        }
-        public int ButtonColumns {
+        public RTSUIBuildPanel BuildingPanel {
             get;
             private set;
         }
@@ -70,31 +60,26 @@ namespace RTSEngine.Graphics {
         public RTSUI(RTSRenderer renderer, string fontName, int fontSize, int ph) {
             SpriteFont font = renderer.CreateFont(fontName, fontSize);
             wrButtonPanel = new WidgetRenderer(renderer.G, font);
-            pressed = new LinkedList<Point>();
             wrMain = new WidgetRenderer(renderer.G, font);
-
-            // Invisible Texture
-            tTransparent = renderer.CreateTexture2D(1, 1, SurfaceFormat.Color, false);
-            tTransparent.SetData(new Color[] { Color.Transparent });
 
             BuildBounds(renderer, ph, new Color(20, 20, 20));
             BuildMinimap(renderer, 5);
             BuildSelectionPanel(renderer);
+            BuildBBPanel(renderer);
             BuildTeamDataPanel();
-            SelectionPanel.IconLibrary = renderer.IconLibrary;
+            BuildBuildingPanel();
         }
         public void Dispose() {
-            foreach(var b in btnPanel)
-                b.Dispose();
-            tTransparent.Dispose();
             wrButtonPanel.Dispose();
             wrMain.Dispose();
             TeamDataPanel.Dispose();
             SelectionPanel.Dispose();
+            BuildingPanel.Dispose();
         }
 
         private void BuildBounds(RTSRenderer renderer, int ph, Color c) {
-            rectBounds = new RectWidget(wrMain, tTransparent);
+            rectBounds = new RectWidget(wrMain);
+            rectBounds.Color = Color.Transparent;
             rectBounds.Anchor = new Point(0, 0);
             rectBounds.AlignX = Alignment.LEFT;
             rectBounds.AlignY = Alignment.TOP;
@@ -136,73 +121,34 @@ namespace RTSEngine.Graphics {
             SelectionPanel.BackPanel.Parent = Minimap;
             SelectionPanel.BackPanel.AlignX = Alignment.RIGHT;
             SelectionPanel.BackPanel.Offset = new Point(-4, 0);
-            SelectionPanel.LayerDepth = PanelBottom.LayerDepth - 0.01f;
+            SelectionPanel.IconLibrary = renderer.IconLibrary;
+        }
+        private void BuildBBPanel(RTSRenderer renderer) {
+            BBPanel = new RTSUIBuildingButtonPanel(wrMain, 3, 4, 40, 4);
+            BBPanel.BackPanel.Parent = PanelBottom;
+            BBPanel.BackPanel.Offset = new Point(4, 0);
+            BBPanel.IconLibrary = renderer.IconLibrary;
         }
         private void BuildTeamDataPanel() {
             TeamDataPanel = new RTSUITeamDataPanel(wrMain);
             TeamDataPanel.Width = (rectBounds.Width * 5) / 7;
         }
-
-        public void BuildButtonPanel(int cols, int rows, int bSize, int bSpacing, Color cInactive, Color cHovered) {
-            ButtonRows = rows;
-            ButtonColumns = cols;
-
-            ButtonHighlightOptions bh1 = new ButtonHighlightOptions(bSize, bSize, cInactive);
-            ButtonHighlightOptions bh2 = new ButtonHighlightOptions(bSize, bSize, cHovered);
-            btnPanel = new RectButton[ButtonColumns, ButtonRows];
-            fPanel = new Action<GameState>[ButtonColumns, ButtonRows];
-            for(int iy = 0; iy < ButtonRows; iy++) {
-                for(int ix = 0; ix < ButtonColumns; ix++) {
-                    btnPanel[ix, iy] = new RectButton(wrButtonPanel, bh1, bh2);
-                    if(ix > 0) {
-                        btnPanel[ix, iy].OffsetAlignX = Alignment.RIGHT;
-                        btnPanel[ix, iy].OffsetAlignY = Alignment.TOP;
-                        btnPanel[ix, iy].Offset = new Point(bSpacing, 0);
-                        btnPanel[ix, iy].Parent = btnPanel[ix - 1, iy];
-                    }
-                    else if(iy > 0) {
-                        btnPanel[ix, iy].OffsetAlignX = Alignment.LEFT;
-                        btnPanel[ix, iy].OffsetAlignY = Alignment.BOTTOM;
-                        btnPanel[ix, iy].Offset = new Point(0, bSpacing);
-                        btnPanel[ix, iy].Parent = btnPanel[ix, iy - 1];
-                    }
-                    btnPanel[ix, iy].OnButtonPress += (b, m) => {
-                        pressed.AddLast(new Point(ix, iy));
-                    };
-                }
-            }
-            ClearButtons();
-        }
-        public void SetButtons(IEnumerable<RTSUIButton> buttons) {
-            ClearButtons();
-            foreach(var b in buttons) {
-                btnPanel[b.X, b.Y].Texture = b.Texture;
-                fPanel[b.X, b.Y] = b.FOnPress;
-                btnPanel[b.X, b.Y].Hook();
-            }
-        }
-        public void ClearButtons() {
-            Array.Clear(fPanel, 0, ButtonRows * ButtonColumns);
-            for(int iy = 0; iy < ButtonRows; iy++) {
-                for(int ix = 0; ix < ButtonColumns; ix++) {
-                    btnPanel[ix, iy].Texture = tTransparent;
-                    btnPanel[ix, iy].Unhook();
-                }
-            }
+        private void BuildBuildingPanel() {
+            BuildingPanel = new RTSUIBuildPanel(wrMain, 180, 26, 5, 12, 24);
+            BuildingPanel.Parent = PanelBottom;
         }
 
-        public void UpdateButtons(GameState s) {
-            int c = pressed.Count;
-            while(c > 0) {
-                Point p = pressed.First.Value;
-                pressed.RemoveFirst();
-                if(fPanel[p.X, p.Y] != null)
-                    fPanel[p.X, p.Y](s);
-                c--;
-            }
+        public void SetTeam(RTSTeam team) {
+            BuildingPanel.Build(team);
+            BuildingPanel.Hook();
+        }
+
+        public bool Inside(int x, int y) {
+            return PanelBottom.Inside(x, y) || BuildingPanel.Inside(x, y) || TeamDataPanel.Inside(x, y);
         }
 
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
+            var f = new System.Windows.Forms.Form();
             wrMain.Draw(batch);
             Rectangle rMap = new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height);
             batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
