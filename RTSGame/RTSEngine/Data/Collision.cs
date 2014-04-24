@@ -87,7 +87,7 @@ namespace RTSEngine.Data {
             set { size.Y = value; }
         }
         public float InnerRadius {
-            get { return Width < Depth ? Width : Depth; }
+            get { return Width < Depth ? Width * 0.5f : Depth * 0.5f; }
         }
         public float BoundingRadius {
             get { return Width == Depth ? Width * SQRT_2 * 0.5f : size.Length() * 0.5f; }
