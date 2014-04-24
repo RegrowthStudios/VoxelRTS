@@ -90,7 +90,7 @@ namespace RTSEngine.Data {
             get { return Width < Depth ? Width : Depth; }
         }
         public float BoundingRadius {
-            get { return Width == Depth ? Width * SQRT_2 : size.Length(); }
+            get { return Width == Depth ? Width * SQRT_2 * 0.5f : size.Length() * 0.5f; }
         }
 
         // Constructor
