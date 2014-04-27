@@ -21,21 +21,9 @@ namespace RTSEngine.Data.Parsers {
         private static readonly Regex rgxAnimation = RegexHelper.GenerateFile("ANIMATION");
         private static readonly Regex rgxIcon = RegexHelper.GenerateFile("ICON");
         private static readonly Regex rgxMaxCount = RegexHelper.GenerateInteger("MAXCOUNT");
-        private static readonly Regex rgxHealth = RegexHelper.GenerateInteger("HEALTH");
-        private static readonly Regex rgxSpeed = RegexHelper.GenerateNumber("SPEED");
-        private static readonly Regex rgxCost = RegexHelper.GenerateVec2Int("COST");
-        private static readonly Regex rgxBuildTime = RegexHelper.GenerateInteger("BUILDTIME");
-        private static readonly Regex rgxCarryCapacity = RegexHelper.GenerateInteger("CARRYCAPACITY");
-        private static readonly Regex rgxWorker = RegexHelper.GenerateInteger("WORKER");
-        private static readonly Regex rgxImpact = RegexHelper.GenerateInteger("IMPACT");
         private static readonly Regex rgxRadius = RegexHelper.GenerateNumber("RADIUS");
         private static readonly Regex rgxBBMin = RegexHelper.GenerateVec3("BBOXMIN");
         private static readonly Regex rgxBBMax = RegexHelper.GenerateVec3("BBOXMAX");
-        private static readonly Regex rgxArmor = RegexHelper.GenerateInteger("ARMOR");
-        private static readonly Regex rgxDamage = RegexHelper.GenerateVec2Int("DAMAGE");
-        private static readonly Regex rgxRange = RegexHelper.GenerateVec2Int("RANGE");
-        private static readonly Regex rgxTimer = RegexHelper.GenerateNumber("TIMER");
-        private static readonly Regex rgxCritChance = RegexHelper.GenerateNumber("CRITCHANCE");
         private static readonly Regex rgxCtrlMove = RegexHelper.Generate("CTRLMOVE", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
         private static readonly Regex rgxCtrlAnimation = RegexHelper.Generate("CTRLANIM", @"[\w\s\.]+");
@@ -67,6 +55,10 @@ namespace RTSEngine.Data.Parsers {
                 StreamReader s = new StreamReader(fs);
                 mStr = s.ReadToEnd();
             }
+
+            // Set Environment Variables
+            ZXParser.SetEnvironment("FILEROOTDIR", infoFile.Directory.FullName);
+
 
             // Match Tokens
             Match[] mp = {
@@ -115,76 +107,14 @@ namespace RTSEngine.Data.Parsers {
                 mStr = s.ReadToEnd();
             }
 
-            // Match Tokens
-            Match[] mp = {
-                rgxName.Match(mStr),
-                rgxHealth.Match(mStr),
-                rgxImpact.Match(mStr),
-                rgxBuildTime.Match(mStr),
-                rgxCost.Match(mStr),
-                rgxMaxCount.Match(mStr),
-                rgxSpeed.Match(mStr),
-                rgxCarryCapacity.Match(mStr),
-                rgxWorker.Match(mStr),
-                rgxRadius.Match(mStr),
-                rgxBBMin.Match(mStr),
-                rgxBBMax.Match(mStr),
-                rgxArmor.Match(mStr),
-                rgxDamage.Match(mStr),
-                rgxRange.Match(mStr),
-                rgxCritChance.Match(mStr),
-                rgxTimer.Match(mStr),
-                rgxCtrlAction.Match(mStr),
-                rgxCtrlAnimation.Match(mStr),
-                rgxCtrlCombat.Match(mStr),
-                rgxCtrlMove.Match(mStr)
-            };
-            foreach(var m in mp) if(!m.Success) return null;
+            // Set Environment Variables
+            ZXParser.SetEnvironment("FILEROOTDIR", infoFile.Directory.FullName);
+            ZXParser.SetEnvironment("DICTSCRIPTS", controllers);
 
             // Read Data
-            int[] buf;
-            int ri = 0;
             RTSUnitData data = new RTSUnitData(index);
+            ZXParser.ParseInto(mStr, data);
             data.InfoFile = PathHelper.GetRelativePath(infoFile.FullName);
-            data.FriendlyName = RegexHelper.Extract(mp[ri++]);
-            data.Health = RegexHelper.ExtractInt(mp[ri++]);
-            data.Impact = RegexHelper.ExtractInt(mp[ri++]);
-            data.BuildTime = RegexHelper.ExtractInt(mp[ri++]);
-            buf = RegexHelper.ExtractVec2I(mp[ri++]);
-            data.CapitalCost = buf[0];
-            data.PopulationCost = buf[1];
-            data.MaxCount = RegexHelper.ExtractInt(mp[ri++]);
-            data.MovementSpeed = RegexHelper.ExtractFloat(mp[ri++]);
-            data.CarryingCapacity = RegexHelper.ExtractInt(mp[ri++]);
-            data.IsWorker = RegexHelper.ExtractInt(mp[ri++]) == 0 ? false : true;
-
-            // Collision Information
-            data.ICollidableShape = new CollisionCircle(
-                RegexHelper.ExtractFloat(mp[ri++]),
-                Vector2.Zero, false
-                );
-            data.BBox.Min = RegexHelper.ExtractVec3(mp[ri++]);
-            data.BBox.Max = RegexHelper.ExtractVec3(mp[ri++]);
-
-            // Read Combat Data
-            data.BaseCombatData.Armor = RegexHelper.ExtractInt(mp[ri++]);
-            buf = RegexHelper.ExtractVec2I(mp[ri++]);
-            data.BaseCombatData.AttackDamage = buf[0];
-            data.BaseCombatData.CriticalDamage = buf[1];
-            buf = RegexHelper.ExtractVec2I(mp[ri++]);
-            data.BaseCombatData.MinRange = buf[0];
-            data.BaseCombatData.MaxRange = buf[1];
-            data.BaseCombatData.CriticalChance = RegexHelper.ExtractDouble(mp[ri++]);
-            data.BaseCombatData.AttackTimer = RegexHelper.ExtractFloat(mp[ri++]);
-
-            // Get The Controllers From The Controller Dictionary
-            if(controllers != null) {
-                data.DefaultActionController = controllers[RegexHelper.Extract(mp[ri++])];
-                data.DefaultAnimationController = controllers[RegexHelper.Extract(mp[ri++])];
-                data.DefaultCombatController = controllers[RegexHelper.Extract(mp[ri++])];
-                data.DefaultMoveController = controllers[RegexHelper.Extract(mp[ri++])];
-            }
-
             return data;
         }
     }

@@ -70,15 +70,10 @@ namespace RTS {
             get;
             private set;
         }
-        //public RTSNetScreen RTSNetScreen {
-        //    get;
-        //    private set;
-        //}
         public ColorSchemeScreen ColorSchemeScreen {
             get;
             private set;
         }
-
 
         public MouseRenderer mRenderer;
         public Texture2D tMouseMain;
@@ -109,6 +104,8 @@ namespace RTS {
         }
 
         protected override void FullInitialize() {
+            ZXPCExt.AddXNATypes();
+
             BlisterUI.Input.WMHookInput.Initialize(Window);
             fx = new BasicEffect(GraphicsDevice);
         }
@@ -120,6 +117,10 @@ namespace RTS {
             mRenderer.Texture = tMouseMain;
             mRenderer.InnerRadius = 28f;
             dcv = new DevConsoleView(GraphicsDevice);
+
+            ZXParser.SetEnvironment("GD", GraphicsDevice);
+            ZXParser.SetEnvironment("GDM", graphics);
+            ZXParser.SetEnvironment("Window", Window);
         }
 
         protected override void BuildScreenList() {

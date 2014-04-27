@@ -80,7 +80,7 @@ namespace RTSEngine.Data {
             else {
                 using(var s = fi.OpenRead()) {
                     var mStr = new StreamReader(s).ReadToEnd();
-                    ZXParser.Parse(mStr, data);
+                    ZXParser.ParseInto(mStr, data);
                 }
             }
         }

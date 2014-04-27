@@ -6,9 +6,6 @@ using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 
 namespace RTSEngine.Data.Parsers {
-    public class IZXParseable {
-    }
-
     [AttributeUsage(AttributeTargets.All)]
     public class ZXParseAttribute : System.Attribute {
         public string Key {
