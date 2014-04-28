@@ -12,6 +12,7 @@ namespace RTSEngine.Data.Parsers {
             ZXParser.AddConverter(typeof(Vector3), new ZXPCVector3());
             ZXParser.AddConverter(typeof(Vector4), new ZXPCVector4());
             ZXParser.AddConverter(typeof(Point), new ZXPCPoint());
+            ZXParser.AddConverter(typeof(Color), new ZXPCColor());
             ZXParser.AddConverter(typeof(Rectangle), new ZXPCRectangle());
             ZXParser.AddConverter(typeof(BoundingBox), new ZXPCBBox());
         }
@@ -146,6 +147,40 @@ namespace RTSEngine.Data.Parsers {
             Point v = (Point)value;
             if(v == null) return "Null";
             return string.Format("{0} , {1}", v.X, v.Y);
+        }
+    }
+    public class ZXPCColor : IZXPConverter {
+        public string ParsingType { get { return "Color"; } }
+        public bool Convert(string s, out object value) {
+            Color v = Color.Transparent;
+            value = v;
+            byte f;
+            string[] splits = s.Split(ZXPCExt.VALUE_DELIMITERS, StringSplitOptions.RemoveEmptyEntries);
+            int vi = 0;
+            foreach(var sv in splits) {
+                if(vi == 4) break;
+                if(string.IsNullOrWhiteSpace(sv))
+                    continue;
+                if(byte.TryParse(sv, out f)) {
+                    switch(vi) {
+                        case 0: v.R = f; break;
+                        case 1: v.G = f; break;
+                        case 2: v.B = f; break;
+                        case 3: v.A = f; break;
+                    }
+                    vi++;
+                }
+            }
+            if(vi < 4) return false;
+
+            value = v;
+            return true;
+        }
+        public string Convert(object value) {
+            if(value == null) return "Null";
+            Color v = (Color)value;
+            if(v == null) return "Null";
+            return string.Format("{0} , {1} , {2}, {3}", v.R, v.G, v.B, v.A);
         }
     }
     public class ZXPCRectangle : IZXPConverter {

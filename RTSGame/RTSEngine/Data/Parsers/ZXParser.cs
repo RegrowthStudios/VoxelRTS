@@ -166,11 +166,18 @@ namespace RTSEngine.Data.Parsers {
             // Find The Field That Matches To This Key
             ZXPDatum datum = null;
             if(zpp.DataDict.TryGetValue(key, out datum)) {
+                object val = null;
+
+                // Check For Array
+                if(datum.Type.IsArray) {
+                    if(ParseArray(datum, s.Substring(ld[li].Start, ld[li].Length), out val))
+                        datum.SetValue(o, val);
+                }
+
                 // Check For A Possible Conversion
                 if(datum.Converter == null) return;
 
                 // Try To Convert
-                object val = null;
                 string sValue = s.Substring(ld[li].Start, ld[li].Length);
                 if(ReadValue(sValue, datum.Converter, out val))
                     datum.SetValue(o, val);
@@ -292,6 +299,61 @@ namespace RTSEngine.Data.Parsers {
                 method.Invoke(o, args);
             }
         }
+        private static bool ParseArray(ZXPDatum datum, string sArray, out object val) {
+            val = null;
+            if(!datum.Type.HasElementType) return false;
+            Type eType = datum.Type.GetElementType();
+            IZXPConverter etConv;
+            ZXParser.GetConverter(eType, out etConv);
+
+            var nl = Delimiter.Delimit(sArray, DelimitType.Angled | DelimitType.Curly);
+
+            // Create Parameters
+            object element;
+            var elements = new List<object>();
+            for(int ai = 0; ai < nl.Count; ) {
+                if(nl[ai].Type == DelimitType.Angled) {
+                    if(ai >= nl.Count - 1 || nl[ai + 1].Type != DelimitType.Curly) {
+                        ai++;
+                        continue;
+                    }
+
+                    // Get The Argument Type
+                    string atValue = sArray.Substring(nl[ai].Start, nl[ai].Length);
+                    if(string.IsNullOrWhiteSpace(atValue))
+                        break;
+                    Type aType = GetTypeFromString(atValue);
+                    if(aType == null)
+                        break;
+
+
+                    // Get The Argument
+                    string sValue = sArray.Substring(nl[ai + 1].Start, nl[ai + 1].Length);
+                    IZXPConverter conv;
+                    ZXParser.GetConverter(aType, out conv);
+                    if(ReadValue(sValue, conv, aType, out element)) {
+                        elements.Add(element);
+                    }
+                    ai += 2;
+                }
+                else {
+                    // Simple Parse
+                    string sValue = sArray.Substring(nl[ai].Start, nl[ai].Length);
+                    if(ReadValue(sValue, etConv, eType, out element)) {
+                        elements.Add(element);
+                    }
+                    ai++;
+                }
+            }
+
+            if(elements.Count < 1) return true;
+            var valArr = Array.CreateInstance(eType, elements.Count);
+            for(int i = 0; i < elements.Count; i++) {
+                valArr.SetValue(elements[i], i);
+            }
+            val = valArr;
+            return true;
+        }
 
         public static object ParseNew(string s, Type t) {
             // Check Arguments
@@ -318,6 +380,15 @@ namespace RTSEngine.Data.Parsers {
         public static void ParseInto(string s, object o) {
             ZXPProxy zpp = ZXPProxy.GetProxy(o.GetType());
             ParseInto(s, o, zpp);
+        }
+        public static object ParseFile(string f, Type t) {
+            FileInfo fi = new FileInfo(f);
+            if(!fi.Exists) return null;
+            object val = null;
+            using(var fs = fi.OpenRead()) {
+                val = ParseNew(new StreamReader(fs).ReadToEnd(), t);
+            }
+            return val;
         }
 
         public static void Write(StreamWriter writer, object o, ZXPProxy zpp, int spaces = 0) {
