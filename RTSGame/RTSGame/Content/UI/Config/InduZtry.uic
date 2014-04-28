@@ -1,0 +1,30 @@
+﻿ColorBackground     [0, 0, 0, 255]
+
+LightningSound      [Content\Audio\lightning.wav]
+ThunderSound        [Content\Audio\thunder.wav]
+
+LightningAlphaImage [Content\Textures\InduZtry.png]
+LightningBoltImage  [Content\Textures\Lightning.png]
+ColorCombos         [
+    <RTS.LightningColors> { Fore [40, 180, 12, 255] Back [25, 3, 255, 255] }
+    <RTS.LightningColors> { Fore [255, 25, 20, 255] Back [200, 25, 255, 255] }
+]
+
+LightningLerpTime   [4]
+ThunderTime         [1.5]
+LightningPlayPause  [5]
+
+Bolt    <RTS.LightningBoltArgs> {
+    Width       [4]
+    Jag         [3]
+    MinLength   [1]
+    MaxLength   [6]
+}
+Branch  <RTS.LightningBoltArgs> {
+    Width       [2.33333]
+    Jag         [3]
+    MinLength   [6]
+    MaxLength   [24]
+}
+BranchingSlope      [0.0005]
+BranchProbability   [0.00025]

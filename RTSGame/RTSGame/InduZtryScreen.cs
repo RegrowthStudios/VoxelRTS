@@ -9,34 +9,16 @@ using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Graphics;
 using BlisterUI;
 using BlisterUI.Input;
+using RTSEngine.Data.Parsers;
 
 namespace RTS {
     public class InduZtryScreen : GameScreenIndexed {
-        private const string SOUND_FILE_LIGHTNING = @"Content\Audio\lightning.wav";
-        private const string SOUND_FILE_THUNDER = @"Content\Audio\thunder.wav";
-        private const string TEXTURE_FILE = @"Content\Textures\InduZtry.png";
-
-        // Lightning Fade Time
-        private const float LERP_TIME = 4f;
-        private const float THUNDER_TIME = 1.5f;
-        private const int LIGHTNING_PLAY_PAUSE = 5;
-
-        // Lightning Arguments
-        private const float BOLT_WIDTH = 4f, BOLT_JAG = 3f, BOLT_MIN = 1f, BOLT_MAX = 6f;
-        private const float BRANCH_WIDTH = 2.33333f, BRANCH_JAG = 3f, BRANCH_MIN = 6f, BRANCH_MAX = 24f, BRANCH_SLOPE = 0.0005f;
-
-        // Lightning Color Combinations
-        private static readonly Color[] textColors = {
-            new Color(0.2f, 0.7f, 0.06f),
-            new Color(1f, 0.1f, 0.06f)
-        };
-        private static readonly Color[] backColors = {
-            new Color(0.1f, 0.01f, 1f),
-            new Color(0.8f, 0.1f, 1f)
-        };
+        private const string UIC_FILE = @"Content\UI\Config\InduZtry.uic";
 
         public InduZtryScreen(int i) : base(i) { }
         public InduZtryScreen(int p, int n) : base(p, n) { }
+
+        private UICInduZtry uic;
 
         // Where To Spawn Lightning Within An Image
         private List<Vector2> textPos;
@@ -62,7 +44,7 @@ namespace RTS {
         // How To Calculate A Fade Between Two Types Of Lightning
         private float t;
         private float Fade {
-            get { return t < 0 ? 1 : 1 - t / LERP_TIME; }
+            get { return t < 0 ? 1 : 1 - t / uic.LightningLerpTime; }
         }
         private float BoltFade {
             get {
@@ -81,21 +63,23 @@ namespace RTS {
         }
 
         public override void Build() {
+            uic = ZXParser.ParseFile(UIC_FILE, typeof(UICInduZtry)) as UICInduZtry;
+
             Random rColor = new Random();
-            int ci = rColor.Next(0, 2);
+            int ci = rColor.Next(0, uic.ColorCombos.Length);
 
-            lBoltArgs.JagDisplacement = BOLT_JAG;
-            lBoltArgs.LineMinLength = BOLT_MIN;
-            lBoltArgs.LineMaxLength = BOLT_MAX;
-            lBoltArgs.Color = textColors[ci];
+            lBoltArgs.JagDisplacement = uic.Bolt.Width;
+            lBoltArgs.LineMinLength = uic.Bolt.MinLength;
+            lBoltArgs.LineMaxLength = uic.Bolt.MaxLength;
+            lBoltArgs.Color = uic.ColorCombos[ci].Foreground;
 
-            lBranchArgs.JagDisplacement = BRANCH_JAG;
-            lBranchArgs.LineMinLength = BRANCH_MIN;
-            lBranchArgs.LineMaxLength = BRANCH_MAX;
-            lBranchArgs.BranchSlope = BRANCH_SLOPE;
+            lBranchArgs.JagDisplacement = uic.Branch.Width;
+            lBranchArgs.LineMinLength = uic.Branch.MinLength;
+            lBranchArgs.LineMaxLength = uic.Branch.MaxLength;
+            lBranchArgs.BranchSlope = uic.BranchingSlope;
             lBranchArgs.MinBounds = Vector2.Zero;
             lBranchArgs.MaxBounds = ViewSize;
-            lBranchArgs.Color = backColors[ci];
+            lBranchArgs.Color = uic.ColorCombos[ci].Background;
         }
         public override void Destroy(GameTime gameTime) {
         }
@@ -103,7 +87,7 @@ namespace RTS {
         public override void OnEntry(GameTime gameTime) {
             KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;
 
-            t = LERP_TIME;
+            t = uic.LightningLerpTime;
             r = new Random(343);
 
             rtLightning = new RenderTarget2D(G, G.Viewport.Width, G.Viewport.Height, false, SurfaceFormat.HdrBlendable, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
@@ -111,11 +95,11 @@ namespace RTS {
             rtLightningBr = new RenderTarget2D(G, G.Viewport.Width, G.Viewport.Height, false, SurfaceFormat.HdrBlendable, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
             rtLightningBrPrev = new RenderTarget2D(G, G.Viewport.Width, G.Viewport.Height, false, SurfaceFormat.HdrBlendable, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
 
-            using(var fs = System.IO.File.OpenRead("Content\\Textures\\Lightning.png")) {
+            using(var fs = System.IO.File.OpenRead(uic.LightningBoltImage)) {
                 tLightning = Texture2D.FromStream(G, fs);
             }
             textPos = new List<Vector2>();
-            using(var bmp = System.Drawing.Bitmap.FromFile(TEXTURE_FILE) as System.Drawing.Bitmap) {
+            using(var bmp = System.Drawing.Bitmap.FromFile(uic.LightningAlphaImage) as System.Drawing.Bitmap) {
                 for(int y = 0; y < bmp.Height; y++) {
                     for(int x = 0; x < bmp.Width; x++) {
                         if(bmp.GetPixel(x, y).A > 60) {
@@ -140,10 +124,10 @@ namespace RTS {
             originLMid = new Vector2(0, rsLMid.Y + rsLMid.Height / 2f);
             originLEndR = new Vector2(0, rsLEndR.Y + rsLEndR.Height / 2f);
 
-            using(var s = System.IO.File.OpenRead(SOUND_FILE_LIGHTNING)) {
+            using(var s = System.IO.File.OpenRead(uic.LightningSound)) {
                 seLightning = SoundEffect.FromStream(s);
             }
-            using(var s = System.IO.File.OpenRead(SOUND_FILE_THUNDER)) {
+            using(var s = System.IO.File.OpenRead(uic.ThunderSound)) {
                 seThunder = SoundEffect.FromStream(s);
             }
             nextThunder = 0;
@@ -180,7 +164,7 @@ namespace RTS {
             nextThunder -= dt;
             if(nextThunder < 0) {
                 seThunder.Play();
-                nextThunder = (float)(r.NextDouble() * THUNDER_TIME + 1.5);
+                nextThunder = (float)(r.NextDouble() * uic.ThunderTime + 1.5);
             }
         }
         public override void Draw(GameTime gameTime) {
@@ -194,7 +178,7 @@ namespace RTS {
             int rC = r.Next(LightningPerFrame);
             for(int i = 0; i < rC; i++) {
                 Vector2 ts = Vector2.Zero, te = ts;
-                if(r.Next(4000) < 3999) {
+                if(r.NextDouble() > uic.BranchProbability) {
                     te = ViewSize / 2f;
                     ts = textPos[r.Next(textPos.Count)];
                     float d2 = float.MaxValue;
@@ -220,7 +204,7 @@ namespace RTS {
             }
             playSound &= lastLightning == 0;
             if(playSound) {
-                lastLightning = LIGHTNING_PLAY_PAUSE;
+                lastLightning = uic.LightningPlayPause;
                 seLightning.Play();
             }
             // Set Render Target To Lightning
@@ -231,7 +215,7 @@ namespace RTS {
             SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
             SB.Draw(rtLightningPrev, G.Viewport.TitleSafeArea, new Color(BoltFade, BoltFade, BoltFade, BoltFade));
             SB.End();
-            DrawLightning(bolts, BOLT_WIDTH);
+            DrawLightning(bolts, uic.Bolt.Width);
 
             // Set Render Target To Lightning Branches
             G.SetRenderTarget(rtLightningBr);
@@ -241,19 +225,18 @@ namespace RTS {
             SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
             SB.Draw(rtLightningBrPrev, G.Viewport.TitleSafeArea, new Color(BoltFade, BoltFade, BoltFade, BoltFade));
             SB.End();
-            DrawLightning(branches, BRANCH_WIDTH);
+            DrawLightning(branches, uic.Branch.Width);
             SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
             SB.Draw(tLightning, ViewSize / 2f, null, Color.Black, 0, new Vector2(tLightning.Width, tLightning.Height) / 2f, new Vector2(4f, 0.7f), SpriteEffects.None, 0);
             SB.End();
 
             // Draw Lightning To User
             G.SetRenderTarget(null);
-            G.Clear(Color.Black);
+            G.Clear(uic.ColorBackground);
             SB.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
             SB.Draw(rtLightning, G.Viewport.TitleSafeArea, Color.White);
             SB.Draw(rtLightningBr, G.Viewport.TitleSafeArea, Color.White);
             SB.End();
-
 
             // Swap Lightning Render Targets
             var b = rtLightning;

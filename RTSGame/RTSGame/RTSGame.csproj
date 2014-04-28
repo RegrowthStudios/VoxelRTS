@@ -90,6 +90,7 @@
     <Compile Include="ColorSchemeScreen.cs" />
     <Compile Include="CompanyScreen.cs" />
     <Compile Include="Content\UI\Config\UICCompanyLogo.cs" />
+    <Compile Include="Content\UI\Config\UICInduZtry.cs" />
     <Compile Include="Content\UI\Config\UICMainMenu.cs" />
     <Compile Include="InduZtryScreen.cs" />
     <Compile Include="Jukebox.cs" />
@@ -403,6 +404,9 @@
     </Content>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="Content\UI\Config\CompanyLogo.uic">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\UI\Config\InduZtry.uic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Content\UI\Config\MainMenu.uic">
