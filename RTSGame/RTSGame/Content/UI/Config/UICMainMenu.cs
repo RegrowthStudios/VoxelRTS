@@ -20,6 +20,9 @@ namespace RTS {
     }
 
     public class UICMainMenu {
+        [ZXParse("ColorBackground")]
+        public Color ColorBackground;
+
         [ZXParse("Font")]
         public string Font;
         [ZXParse("FontRes")]

@@ -1,5 +1,6 @@
-﻿Font    [Chintzy CPU BRK]
-FontRes [32]
+﻿ColorBackground [0, 0, 0, 255]
+Font            [Chintzy CPU BRK]
+FontRes         [32]
 
 TitleText       [Main Menu]
 TitleTextSize   [80]

@@ -135,7 +135,7 @@ namespace RTS {
         public override void Update(GameTime gameTime) {
         }
         public override void Draw(GameTime gameTime) {
-            G.Clear(Color.Black);
+            G.Clear(uic.ColorBackground);
             wr.Draw(SB);
             game.mRenderer.BeginPass(G);
             game.mRenderer.Draw(G);
