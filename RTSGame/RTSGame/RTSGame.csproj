@@ -97,6 +97,10 @@
     <Compile Include="LobbyScreen.cs" />
     <Compile Include="LoginScreen.cs" />
     <Compile Include="MenuScreen.cs" />
+    <Content Include="Content\FX\Particles\ParticleLightning.fx" />
+    <Content Include="Packs\Default\scripts\input\UICRTS.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="WispScreen.cs" />
     <Content Include="Content\Textures\Wisp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -208,9 +212,6 @@
     <Content Include="Content\Audio\thunder.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Content\FX\ParticleFire.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Content\FX\Particle.fx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -298,6 +299,9 @@
     <Content Include="Content\Textures\FireNoise.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Content\FX\Particles\Particle.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Content\Textures\SelectionCircle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -517,6 +521,9 @@
     <None Include="Packs\Default\races\Mech\soldier.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Packs\Default\scripts\input\RTS.uic">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\RTSGame\BlisterUI\BlisterUI.csproj">

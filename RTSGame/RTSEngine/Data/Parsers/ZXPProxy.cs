@@ -142,7 +142,14 @@ namespace RTSEngine.Data.Parsers {
 
                 // Add The Field
                 if(attr != null) {
+                    // If There Is No String, This Is Not A Proxy
+                    if(attr.Key == null) continue;
                     ZXPDatum v = new ZXPDatum(attr.Key, data);
+                    Data.Add(v);
+                    DataDict[v.Key] = v;
+                }
+                else {
+                    ZXPDatum v = new ZXPDatum(data.Name, data);
                     Data.Add(v);
                     DataDict[v.Key] = v;
                 }
@@ -156,7 +163,14 @@ namespace RTSEngine.Data.Parsers {
 
                 // Add The Property
                 if(attr != null) {
+                    // If There Is No String, This Is Not A Proxy
+                    if(attr.Key == null) continue;
                     ZXPDatum v = new ZXPDatum(attr.Key, data);
+                    Data.Add(v);
+                    DataDict[v.Key] = v;
+                }
+                else {
+                    ZXPDatum v = new ZXPDatum(data.Name, data);
                     Data.Add(v);
                     DataDict[v.Key] = v;
                 }
@@ -170,7 +184,14 @@ namespace RTSEngine.Data.Parsers {
 
                 // Add The Method
                 if(attr != null) {
+                    // If There Is No String, This Is Not A Proxy
+                    if(attr.Key == null) continue;
                     ZXPFunc v = new ZXPFunc(attr.Key, method);
+                    Funcs.Add(v);
+                    FuncsDict[v.Key] = v;
+                }
+                else {
+                    ZXPFunc v = new ZXPFunc(method.Name, method);
                     Funcs.Add(v);
                     FuncsDict[v.Key] = v;
                 }

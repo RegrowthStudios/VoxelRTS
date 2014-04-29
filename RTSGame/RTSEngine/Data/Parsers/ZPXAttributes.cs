@@ -13,6 +13,9 @@ namespace RTSEngine.Data.Parsers {
             private set;
         }
 
+        public ZXParseAttribute() {
+            Key = null;
+        }
         public ZXParseAttribute(string key) {
             Key = key;
         }

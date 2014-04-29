@@ -256,17 +256,9 @@ namespace RTSEngine.Graphics {
 
 
             // Load Particles
-            using(var s = File.OpenRead(ParticleRenderer.FILE_BULLET_MODEL)) {
-                pRenderer.LoadBulletModel(this, s, ParsingFlags.ConversionOpenGL);
-            }
-            pRenderer.LoadBulletTexture(this, ParticleRenderer.FILE_BULLET_TEXTURE);
-            pRenderer.BuildFireModel(this, 3);
-            pRenderer.LoadFireShader(this,
-                ParticleRenderer.FILE_FIRE_SHADER,
-                ParticleRenderer.FILE_FIRE_NOISE,
-                ParticleRenderer.FILE_FIRE_COLOR,
-                ParticleRenderer.FILE_FIRE_ALPHA
-                );
+            // TODO: Config
+            ParticleOptions pOpt= ZXParser.ParseFile(@"Content\FX\Particles\Particle.conf", typeof(ParticleOptions)) as ParticleOptions;
+            pRenderer.Load(this, pOpt);
 
             // Load Team Visuals
             for(int i = 0; i < state.teams.Length; i++) {

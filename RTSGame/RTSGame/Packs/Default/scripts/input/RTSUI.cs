@@ -12,15 +12,13 @@ using RTSEngine.Data;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
+using RTSEngine.Graphics;
+using RTSEngine.Data.Parsers;
 
-namespace RTSEngine.Graphics {
-    public struct RTSUIButton {
-        public int X, Y;
-        public Texture2D Texture;
-        public Action<GameState> FOnPress;
-    }
-
+namespace RTS.Input {
     public class RTSUI : IDisposable {
+        private UICRTS uic;
+
         private WidgetRenderer wrButtonPanel, wrMain;
 
         public Rectangle WindowSize {
@@ -57,17 +55,19 @@ namespace RTSEngine.Graphics {
             private set;
         }
 
-        public RTSUI(RTSRenderer renderer, string fontName, int fontSize, int ph) {
-            SpriteFont font = renderer.CreateFont(fontName, fontSize);
+        public RTSUI(RTSRenderer renderer, string uicFile) {
+            uic = ZXParser.ParseFile(uicFile, typeof(UICRTS)) as UICRTS;
+
+            SpriteFont font = renderer.CreateFont(uic.Font, uic.FontSize);
             wrButtonPanel = new WidgetRenderer(renderer.G, font);
             wrMain = new WidgetRenderer(renderer.G, font);
 
-            BuildBounds(renderer, ph, new Color(20, 20, 20));
-            BuildMinimap(renderer, 5);
-            BuildSelectionPanel(renderer);
+            BuildBounds(renderer, uic.BottomPanelHeight, uic.BottomPanelColor);
+            BuildMinimap(renderer, uic.MinimapBorder);
             BuildBBPanel(renderer);
-            BuildTeamDataPanel();
             BuildBuildingPanel();
+            BuildSelectionPanel(renderer);
+            BuildTeamDataPanel();
         }
         public void Dispose() {
             wrButtonPanel.Dispose();
@@ -114,28 +114,33 @@ namespace RTSEngine.Graphics {
             Minimap.Offset = new Point(-buf, -buf);
             Minimap.OffsetAlignX = Alignment.RIGHT;
             Minimap.OffsetAlignY = Alignment.BOTTOM;
-            Minimap.Parent = PanelBottom;
-        }
-        private void BuildSelectionPanel(RTSRenderer renderer) {
-            SelectionPanel = new RTSUISelectionPanel(wrMain, 2, 4, 64, 4);
-            SelectionPanel.BackPanel.Parent = Minimap;
-            SelectionPanel.BackPanel.AlignX = Alignment.RIGHT;
-            SelectionPanel.BackPanel.Offset = new Point(-4, 0);
-            SelectionPanel.IconLibrary = renderer.IconLibrary;
+            Minimap.Parent = rectBounds;
         }
         private void BuildBBPanel(RTSRenderer renderer) {
             BBPanel = new RTSUIBuildingButtonPanel(wrMain, 3, 4, 40, 4);
-            BBPanel.BackPanel.Parent = PanelBottom;
+            BBPanel.BackPanel.Parent = rectBounds;
+            BBPanel.BackPanel.AlignY = Alignment.BOTTOM;
+            BBPanel.BackPanel.OffsetAlignY = Alignment.BOTTOM;
             BBPanel.BackPanel.Offset = new Point(4, 0);
             BBPanel.IconLibrary = renderer.IconLibrary;
+        }
+        private void BuildBuildingPanel() {
+            BuildingPanel = new RTSUIBuildPanel(wrMain, 180, 26, 5, 12, 24);
+            BuildingPanel.Parent = BBPanel.BackPanel;
+        }
+        private void BuildSelectionPanel(RTSRenderer renderer) {
+            SelectionPanel = new RTSUISelectionPanel(wrMain, uic.SelectionRows, uic.SelectionColumns, uic.SelectionIconSize, uic.SelectionIconBuffer);
+            SelectionPanel.BackPanel.Parent = rectBounds;
+            SelectionPanel.BackPanel.AlignX = Alignment.LEFT;
+            SelectionPanel.BackPanel.AlignY = Alignment.BOTTOM;
+            SelectionPanel.BackPanel.OffsetAlignX = Alignment.LEFT;
+            SelectionPanel.BackPanel.OffsetAlignY = Alignment.BOTTOM;
+            SelectionPanel.BackPanel.Offset = new Point(BBPanel.BackPanel.Width + uic.SelectionIconBuffer, 0);
+            SelectionPanel.IconLibrary = renderer.IconLibrary;
         }
         private void BuildTeamDataPanel() {
             TeamDataPanel = new RTSUITeamDataPanel(wrMain);
             TeamDataPanel.Width = (rectBounds.Width * 5) / 7;
-        }
-        private void BuildBuildingPanel() {
-            BuildingPanel = new RTSUIBuildPanel(wrMain, 180, 26, 5, 12, 24);
-            BuildingPanel.Parent = PanelBottom;
         }
 
         public void SetTeam(RTSTeam team) {
