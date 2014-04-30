@@ -257,7 +257,7 @@ namespace RTSEngine.Graphics {
 
             // Load Particles
             // TODO: Config
-            ParticleOptions pOpt= ZXParser.ParseFile(@"Content\FX\Particles\Particle.conf", typeof(ParticleOptions)) as ParticleOptions;
+            ParticleOptions pOpt = ZXParser.ParseFile(@"Content\FX\Particles\Particle.conf", typeof(ParticleOptions)) as ParticleOptions;
             pRenderer.Load(this, pOpt);
 
             // Load Team Visuals
@@ -593,10 +593,13 @@ namespace RTSEngine.Graphics {
             pRenderer.SetBullets(G);
             pRenderer.DrawBullets(G);
 
+            float t = (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000);
 
-
-            pRenderer.SetFire(G, Camera.View * Camera.Projection, (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000));
+            pRenderer.SetFire(G, Camera.View * Camera.Projection, t);
             pRenderer.DrawFire(G);
+
+            pRenderer.SetLightning(G, Camera.View * Camera.Projection, t);
+            pRenderer.DrawLightning(G);
         }
 
         // Selection Box Handling

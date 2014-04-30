@@ -31,10 +31,13 @@ VSO VS(VSI input) {
 
 	// Pass UV
 	output.UV = float2((input.TimeType.y + input.UV.x) / Splits, input.UV.y);
-	// Calculate Noise UV's
-	float pTime = Time - input.TimeType.x;
 
     return output;
+}
+float4 PS(VSO input) : COLOR0 {
+    float4 col = tex2D(LMap, input.UV);
+	clip(col.a - 0.1);
+	return col;
 }
 
 technique Default {

@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace RTSEngine.Graphics.Particles {
+namespace RTSEngine.Graphics {
     public class LightningShader {
         private Effect fx;
         private EffectParameter fxpWVP, fxpTime, fxpSplitCount;

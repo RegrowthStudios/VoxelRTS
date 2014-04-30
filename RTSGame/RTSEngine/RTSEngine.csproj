@@ -67,6 +67,7 @@
     <Compile Include="Data\Parsers\ZXPProxy.cs" />
     <Compile Include="Graphics\Particles\FireShader.cs" />
     <Compile Include="Graphics\Particles\LightningShader.cs" />
+    <Compile Include="Graphics\Particles\ParticleList.cs" />
     <Compile Include="Interfaces\ACInputController.cs" />
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
