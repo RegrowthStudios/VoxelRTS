@@ -12,12 +12,12 @@ MAXCOUNT        [1000]
 // Unit Data
 HEALTH          [800]
 SPEED           [1.5]
-COST            [20 , 2]
+CAPITALCOST     [20]
+POPULATIONCOST  [2]
 BUILDTIME       [20]
 IMPACT          [10]
-WORKER          [0]
+WORKER          [False]
 CARRYCAPACITY   [0]
-
 
 // Collision Data
 RADIUS          [0.4]
@@ -25,13 +25,17 @@ BBOXMIN         [-0.4 , 0.0 , -0.4]
 BBOXMAX         [0.4 , 1.0 , 0.4]
 
 // Combat Data
-ARMOR           [8]
-RANGE           [0 , 8]
-TIMER           [1.5]
-DAMAGE          [13 , 20]
-CRITCHANCE      [0.05]
+BASECOMBAT <RTSEngine.Data.BaseCombatData> {
+    ARMOR           [8]
+    MINRANGE        [0]
+    MAXRANGE        [8]
+    ATTACKTIMER     [1.5]
+    ATTACKDAMAGE    [13]
+    CRITICALDAMAGE  [20]
+    CRITICALCHANCE  [0.05]
+}
 
-CTRLACTION      [RTS.Default.Unit.Action]
-CTRLANIM        [RTS.Mech.Animation]
-CTRLCOMBAT      [RTS.Default.Unit.Combat]
-CTRLMOVE        [RTS.Default.Unit.Movement]
+SCRCONTROL({~~DICTSCRIPTS~~} {Action} {RTS.Default.Unit.Action})
+SCRCONTROL({~~DICTSCRIPTS~~} {Anim}   {RTS.Mech.Animation})
+SCRCONTROL({~~DICTSCRIPTS~~} {Combat} {RTS.Default.Unit.Combat})
+SCRCONTROL({~~DICTSCRIPTS~~} {Move}   {RTS.Default.Unit.Movement})

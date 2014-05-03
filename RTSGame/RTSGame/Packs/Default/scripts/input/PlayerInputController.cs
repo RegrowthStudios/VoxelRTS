@@ -45,7 +45,7 @@ namespace RTS.Input {
         }
         public void Build(RTSRenderer renderer) {
             // Create UI
-            UI = new RTSUI(renderer, "Courier New", 32, 140);
+            UI = new RTSUI(renderer, @"Packs\Default\scripts\input\RTS.uic");
             UI.SetTeam(Team);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
             OnNewSelection += UI.BBPanel.OnNewSelection;

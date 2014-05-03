@@ -1,0 +1,12 @@
+﻿Font                    [Courier New]
+FontSize                [32]
+
+BottomPanelHeight       [140]
+BottomPanelColor        [20, 20, 20, 255]
+
+MinimapBorder           [5]
+
+SelectionRows           [2]
+SelectionColumns        [4]
+SelectionIconSize       [64]
+SelectionIconBuffer     [4]

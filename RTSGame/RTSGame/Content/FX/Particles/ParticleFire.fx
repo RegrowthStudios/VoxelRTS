@@ -18,7 +18,6 @@ float distortBias;
 
 float4 tint;
 
-// Always The Same Input
 struct VSI {
     float4 Position : POSITION0;
 	float4x4 Instance : POSITION1;
@@ -36,8 +35,9 @@ struct VSO {
 VSO VS(VSI input) {
     VSO output;
 
-	// Project	
-	output.Position = mul(input.Position, WVP);
+	// Project
+	float4 wPos = mul(input.Instance, input.Position);
+	output.Position = mul(wPos, WVP);
 	// Pass UV
 	output.UV = input.UV;
 	// Calculate Noise UV's

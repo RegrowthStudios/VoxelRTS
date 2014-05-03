@@ -9,7 +9,7 @@ using RTSEngine.Interfaces;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Team;
 
-namespace RTSEngine.Graphics {
+namespace RTS.Input {
     public class RTSUIGroup<T> : IDisposable where T : class {
         public static Color COLOR_INACTIVE = new Color(0.7f, 0.7f, 0.7f);
         public static Color COLOR_ACTIVE = new Color(1f, 1f, 1f);

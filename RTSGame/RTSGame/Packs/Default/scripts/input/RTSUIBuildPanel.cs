@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 
-namespace RTSEngine.Graphics {
+namespace RTS.Input {
     public class RTSUIBuildPanel : IDisposable {
         const float TEXT_H_RATIO = 0.95f;
         const int TEXT_X_OFF = 5;

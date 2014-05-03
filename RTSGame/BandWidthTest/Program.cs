@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Net;
 using System.Net.Sockets;
-using RTSEngine.Net;
 using Lidgren.Network;
 
 namespace BandWidthTest {
