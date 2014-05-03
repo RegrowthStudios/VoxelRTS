@@ -40,7 +40,7 @@ namespace RTSEngine.Data.Parsers {
                     FireHitUnitP = 70,
                     FireUnitDamage = 10,
                     FireHitBuildingP = 70,
-                    FireBuildingDamage = 10,
+                    FireBuildingDamage = 5,
                     FireSpreadP = 10
                 };
             }

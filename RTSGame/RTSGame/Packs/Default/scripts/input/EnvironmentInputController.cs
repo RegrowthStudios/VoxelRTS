@@ -203,12 +203,15 @@ namespace RTS.Input {
                 b.OnDamage += OnBuildingDamage;
                 grid.AddImpactGenerator(b);
             };
+            
             FireStarts = new List<Point>();
+            /*
             FireStarts.Add(new Point(25,25));
             FireThread = new Thread(FireWorkThread);
             FireThread.IsBackground = true;
             FireRunning = true;
             FireThread.Start(FireStarts);
+             */
         }
 
         private void WorkThread() {
@@ -217,10 +220,9 @@ namespace RTS.Input {
                     Thread.Sleep(1000);
                     continue;
                 }
-
+                DevConsole.AddCommand("Tick");
                 foreach (var r in GameState.Regions) {
                     SetInitTarget(r);
-
                 }
 
                 if(counter % DisasterTime == 0) {
@@ -231,7 +233,7 @@ namespace RTS.Input {
                 }
                 counter++;
                 counter = counter % (RecoverTime);
-                Thread.Sleep(1000);
+                Thread.Sleep(3000);
             }
         }
 
@@ -295,7 +297,7 @@ namespace RTS.Input {
                 else
                     level = 0;
 
-                level = 0;
+                level = 3;
 
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
@@ -303,7 +305,7 @@ namespace RTS.Input {
                     // Decide disaster type
                     int type = random.Next(2);
 
-                    type = 0;
+                    type = 1;
 
                     // Create the appropriate disaster
                     if(type == 0) {
@@ -323,7 +325,7 @@ namespace RTS.Input {
                 }
             }
 
-            /*
+            
             if (FireThread != null) {
                 FireRunning = false;
                 FireThread.Join();
@@ -331,8 +333,12 @@ namespace RTS.Input {
             FireThread = new Thread(FireWorkThread);
             FireThread.IsBackground = true;
             FireRunning = true;
-            FireThread.Start(FireStarts);
-             */
+            List<Point> fires = new List<Point>();
+            foreach (var f in FireStarts) {
+                fires.Add(f);
+            }
+            FireStarts.Clear();
+            FireThread.Start(fires);
         }
 
        /*
@@ -346,8 +352,8 @@ namespace RTS.Input {
         
         private void FireWorkThread(Object l) {
             DevConsole.AddCommand("started");
-            
-            List<Point> fires = (List<Point>) l;
+
+            List<Point> fires = l as List<Point>;
             HashSet<Point> hitCells = new HashSet<Point>();
             List<FireParticle> particles = new List<FireParticle>();
             int hitChance = 80;
@@ -376,7 +382,7 @@ namespace RTS.Input {
                             if (b != null && b.Team.Index != Team.Index) {
                                 bool takeDamage = (random.Next(100) <= FireHitBuildingP);
                                 if (true) {
-                                    b.Damage(FireBuildingDamage);
+                                    //b.Damage(FireBuildingDamage);
                                     particles.Add(new FireParticle(b.WorldPosition, 5, 4, 5, 5));
                                 }
                             }
@@ -389,9 +395,9 @@ namespace RTS.Input {
                     
                     // Fire Spreading
                     for(int x = -1; x < 2 ; x++) {
-                        if (f.X + x < GameState.CGrid.numCells.X && f.X + x >= 0) {  
+                        if (f.X + x < grid.numCells.X && f.X + x >= 0) {  
                             for(int y = -1; y < 2; y++) {
-                                if (f.Y + y < GameState.CGrid.numCells.Y && f.Y + y >= 0) {
+                                if (f.Y + y < grid.numCells.Y && f.Y + y >= 0) {
                                     bool isHit = (random.Next(100) <= hitChance);
                                     if (isHit) {
                                         bool added = hitCells.Add(new Point(f.X + x, f.Y + y));
@@ -401,7 +407,7 @@ namespace RTS.Input {
                         }
                     }
                 }
-                hitChance = (int)((float)hitChance * 0.6);
+                hitChance = (int)((float)hitChance * 0.7);
                 fires.Clear();
                 foreach (var hc in hitCells) {
                     fires.Add(hc);
@@ -410,69 +416,25 @@ namespace RTS.Input {
                 GameState.AddParticles(particles);
                 particles.Clear();
                 Thread.Sleep(3000);
-            }
-             
+            }   
         }
         
         
 
         // Natural Disaster That Damages Both Units And Buildings
         private void CreateFire(Region r) {
-            /*
+            
             // Find Impact Cell With Highest Impact
-            //int i = random.Next(r.Cells.Count); 
-            //Point highest = r.Cells.ElementAt(i);
-            Point highest = r.Cells.First();
+            int i = random.Next(r.Cells.Count); 
+            Point highest = r.Cells.ElementAt(i);
             foreach (var ic in r.Cells) {
                 if (grid.CellImpact[highest.X, highest.Y] > grid.CellImpact[ic.X, ic.Y]) {
                     highest = ic;
                 }
             }
-            // Use A Random Collision Cell In That Impact Cell As A Starting Point 
-            Point start = new Point(highest.X * 2 + random.Next(2), highest.Y * 2 + random.Next(2));
-            FireStarts.Add(start);
-            */
-
-            
-            List<Point> hitCells = new List<Point>();
-            // Choose Subareas In The Region To Hit
-            foreach (var ic in r.Cells) {
-                Point c = new Point(ic.X * 2, ic.Y * 2);
-                for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
-                    for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
-                        bool isHit = (random.Next(100) <= 100);
-                        if (isHit) {
-                            hitCells.Add(new Point(c.X + x, c.Y + y));
-                        }
-                    }
-                }
-            }
-            // Apply Fire Damage To Chosen Subareas
-            List<FireParticle> particles = new List<FireParticle>();
-            foreach(var c in hitCells) {
-                Vector2 hitGridPos = new Vector2(c.X, c.Y) * GameState.CGrid.cellSize + Vector2.One;
-                Vector3 hitPos = new Vector3(hitGridPos.X, GameState.Map.HeightAt(hitGridPos.X, hitGridPos.Y),hitGridPos.Y);
-                //particles.Add(new FireParticle(hitPos, 3, 2, 5, 5));
-                foreach(var u in GameState.CGrid.EDynamic[c.X, c.Y]) {
-                    if(u.Team.Index != Team.Index) {
-                        bool takeDamage = (random.Next(100) <= FireHitUnitP);
-                        if(takeDamage) {
-                            u.Damage(FireUnitDamage);
-                            particles.Add(new FireParticle(u.WorldPosition, 1, 15, 1, 5));
-                        }
-                    }
-                }
-                RTSBuilding b = GameState.CGrid.EStatic[c.X, c.Y];
-                if(b != null && b.Team.Index != Team.Index) {
-                    bool takeDamage = (random.Next(100) <= FireHitBuildingP);
-                    if(takeDamage) {
-                        b.Damage(FireBuildingDamage);
-                        particles.Add(new FireParticle(b.WorldPosition, 5, 4, 5, 5));
-                    }
-                }
-            }
-            GameState.AddParticles(particles);
-             
+            // Use That Impact Cell As A Fire Starting Point 
+            FireStarts.Add(highest);
+                 
         }
 
         // Natural Disaster That Damages Units
