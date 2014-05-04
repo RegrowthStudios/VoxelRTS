@@ -17,7 +17,7 @@ namespace RTSEngine.Data.Parsers {
                     MinionType = 0,
                     TankType = 1,
                     TitanType = 2,
-                    DisasterTime = 15,
+                    DisasterTime = 20,
                     L1Impact = 1000,
                     L2Impact = 2000,
                     L3Impact = 3000,
@@ -38,7 +38,7 @@ namespace RTSEngine.Data.Parsers {
                     EarthquakeHitP = 40,
                     EarthquakeDamage = 2000,
                     FireHitUnitP = 70,
-                    FireUnitDamage = 10,
+                    FireUnitDamage = 150,
                     FireHitBuildingP = 70,
                     FireBuildingDamage = 5,
                     FireSpreadP = 10

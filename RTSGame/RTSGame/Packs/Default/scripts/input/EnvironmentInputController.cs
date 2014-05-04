@@ -297,15 +297,12 @@ namespace RTS.Input {
                 else
                     level = 0;
 
-                level = 3;
 
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
 
                     // Decide disaster type
                     int type = random.Next(2);
-
-                    type = 1;
 
                     // Create the appropriate disaster
                     if(type == 0) {
@@ -341,19 +338,18 @@ namespace RTS.Input {
             FireThread.Start(fires);
         }
 
-       /*
-
-        private List<FireParticle> FireStart() {
+       
+        private void FireStart(List<Point> starts) {
 
 
         }
-        */
-
+       
         
         private void FireWorkThread(Object l) {
             DevConsole.AddCommand("started");
 
             List<Point> fires = l as List<Point>;
+            FireStart(fires);
             HashSet<Point> hitCells = new HashSet<Point>();
             List<FireParticle> particles = new List<FireParticle>();
             int hitChance = 80;
@@ -373,7 +369,7 @@ namespace RTS.Input {
                                     bool takeDamage = (random.Next(100) <= FireHitUnitP);
                                     if (true) {
                                         u.Damage(FireUnitDamage);
-                                        particles.Add(new FireParticle(u.WorldPosition, 1, 1, 1, 5));
+                                        particles.Add(new FireParticle(u.WorldPosition, 3, 2, 2, 7));
 
                                     }
                                 }
@@ -382,8 +378,8 @@ namespace RTS.Input {
                             if (b != null && b.Team.Index != Team.Index) {
                                 bool takeDamage = (random.Next(100) <= FireHitBuildingP);
                                 if (true) {
-                                    //b.Damage(FireBuildingDamage);
-                                    particles.Add(new FireParticle(b.WorldPosition, 5, 4, 5, 5));
+                                    b.Damage(FireBuildingDamage);
+                                    particles.Add(new FireParticle(b.WorldPosition, 5, 4, 5, 7));
                                 }
                             }
                         }
@@ -391,7 +387,7 @@ namespace RTS.Input {
                     // Add Fire Particle To Where There Is Fire
                     Vector2 p = new Vector2(f.X, f.Y) * grid.cellSize + Vector2.One;
                     Vector3 pos = new Vector3(p.X, GameState.Map.HeightAt(p.X, p.Y), p.Y);
-                    particles.Add(new FireParticle(pos, 4, 3, 10, 7));
+                    particles.Add(new FireParticle(pos, 4, 3, 10, 9));
                     
                     // Fire Spreading
                     for(int x = -1; x < 2 ; x++) {
