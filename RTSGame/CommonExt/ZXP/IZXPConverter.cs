@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace RTSEngine.Data.Parsers {
+namespace System {
     public interface IZXPConverter {
         string ParsingType { get; }
         bool Convert(string s, out object value);

@@ -159,12 +159,15 @@ namespace RTS {
                 State = ScreenState.ChangeNext;
             }
             else if(obj == buttons[2]) {
-                RTSEngine.Data.UserConfig.UseFullscreen = !RTSEngine.Data.UserConfig.UseFullscreen;
-                RTSEngine.Data.UserConfig.Save(App.USER_CONFIG_FILE_PATH);
-                ProcessStartInfo psi = new ProcessStartInfo("RTS.exe");
-                psi.WorkingDirectory = Process.GetCurrentProcess().StartInfo.WorkingDirectory;
-                Process.Start(psi);
-                State = ScreenState.ExitApplication;
+                Next = game.LEScreen.Index;
+                State = ScreenState.ChangeNext;
+
+                //RTSEngine.Data.UserConfig.UseFullscreen = !RTSEngine.Data.UserConfig.UseFullscreen;
+                //RTSEngine.Data.UserConfig.Save(App.USER_CONFIG_FILE_PATH);
+                //ProcessStartInfo psi = new ProcessStartInfo("RTS.exe");
+                //psi.WorkingDirectory = Process.GetCurrentProcess().StartInfo.WorkingDirectory;
+                //Process.Start(psi);
+                //State = ScreenState.ExitApplication;
             }
             else if(obj == buttons[3]) {
                 State = ScreenState.ExitApplication;

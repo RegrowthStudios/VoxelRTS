@@ -31,6 +31,7 @@ namespace RTS.Input {
             get;
             set;
         }
+        private BVH bvh;
 
         public bool HasSelectedEnemy {
             get { return selected.Count == 1 && selected[0].Team != Team; }
@@ -42,6 +43,7 @@ namespace RTS.Input {
         public Player()
             : base() {
             Type = RTSInputType.Player;
+            bvh = new BVH();
         }
         public void Build(RTSRenderer renderer) {
             // Create UI
@@ -53,6 +55,9 @@ namespace RTS.Input {
             Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
             Team.OnPopulationCapChange += (t, c) => { UI.TeamDataPanel.PopulationCap = Team.PopulationCap; };
             Team.OnCapitalChange += (t, c) => { UI.TeamDataPanel.Capital = Team.Capital; };
+
+            // Build The BVH
+            bvh = renderer.Map.BVH;
         }
         public override void Begin() {
             useSelectRect = false;
@@ -228,7 +233,7 @@ namespace RTS.Input {
 
                     // Check Building Placement
                     if(buildingToPlace != null) {
-                        if(GameState.Map.BVH.Intersect(ref rec, ray)) {
+                        if(bvh.Intersect(ref rec, ray)) {
                             Vector3 rh = ray.Position + ray.Direction * rec.T;
                             Point bp = HashHelper.Hash(new Vector2(rh.X, rh.Z), GameState.CGrid.numCells, GameState.CGrid.size);
                             AddEvent(new SpawnBuildingEvent(TeamIndex, buildingToPlace.Index, bp));
@@ -245,7 +250,7 @@ namespace RTS.Input {
                     }
                     else if(!HasSelectedEnemy) {
                         // Add A Waypoint Event
-                        if(GameState.Map.BVH.Intersect(ref rec, ray)) {
+                        if(bvh.Intersect(ref rec, ray)) {
                             Vector3 rh = ray.Position + ray.Direction * rec.T;
                             AddEvent(new SetWayPointEvent(TeamIndex, new Vector2(rh.X, rh.Z)));
                         }

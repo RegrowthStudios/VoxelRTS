@@ -13,6 +13,7 @@ namespace RTSEngine.Data {
             "System.Windows.Forms.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",
+            "CommonExt.dll",
             "RTSEngine.dll",
             "BlisterUI.dll"
         };

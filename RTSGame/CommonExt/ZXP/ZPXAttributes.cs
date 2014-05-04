@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 
-namespace RTSEngine.Data.Parsers {
+namespace System {
     [AttributeUsage(AttributeTargets.All)]
     public class ZXParseAttribute : System.Attribute {
         public string Key {

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.IO;
 
-namespace RTSEngine.Data.Parsers {
+namespace System {
     /** Data Format
      * Field:
      * KEY [Data]
@@ -170,7 +170,9 @@ namespace RTSEngine.Data.Parsers {
 
                 // Check For Array
                 if(datum.Type.IsArray) {
-                    if(ParseArray(datum, s.Substring(ld[li].Start, ld[li].Length), out val))
+                    if(!datum.Type.HasElementType) return;
+                    Type eType = datum.Type.GetElementType();
+                    if(ParseArray(eType, s.Substring(ld[li].Start, ld[li].Length), out val))
                         datum.SetValue(o, val);
                 }
 
@@ -299,10 +301,8 @@ namespace RTSEngine.Data.Parsers {
                 method.Invoke(o, args);
             }
         }
-        private static bool ParseArray(ZXPDatum datum, string sArray, out object val) {
+        private static bool ParseArray(Type eType, string sArray, out object val) {
             val = null;
-            if(!datum.Type.HasElementType) return false;
-            Type eType = datum.Type.GetElementType();
             IZXPConverter etConv;
             ZXParser.GetConverter(eType, out etConv);
 
@@ -366,6 +366,14 @@ namespace RTSEngine.Data.Parsers {
                 object value = null;
                 conv.Convert(s, out value);
                 return value;
+            }
+            else if(t.IsArray) {
+                object val = null;
+                if(!t.HasElementType) return null;
+                Type eType = t.GetElementType();
+                if(ParseArray(eType, s, out val))
+                    return val;
+                else return null;
             }
 
             // Create A Complex Value

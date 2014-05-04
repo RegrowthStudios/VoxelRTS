@@ -22,15 +22,17 @@ namespace RTSEngine.Graphics {
             private set;
         }
 
+        public BVH BVH {
+            get;
+            private set;
+        }
+
         public HeightmapModel(RTSRenderer renderer, int fw, int fh) {
             FW = fw;
             FH = fh;
             FogOfWar = new float[FW * FH];
             Array.Clear(FogOfWar, 0, FogOfWar.Length);
-            //Random r = new Random();
-            //for(int i = 0; i < FW * FH; i++) {
-            //    FogOfWar[i] = r.Next(3) / 2f;
-            //}
+            BVH = new Graphics.BVH();
             Reset = false;
             FogOfWarTexture = renderer.CreateTexture2D(fw, fh, SurfaceFormat.Single, false);
             FogOfWarTexture.SetData(FogOfWar);

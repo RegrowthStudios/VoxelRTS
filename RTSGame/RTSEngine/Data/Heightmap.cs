@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
@@ -7,25 +9,13 @@ using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Graphics;
 
 namespace RTSEngine.Data {
+    public struct HeightTile {
+        public float XNZN, XPZN, XNZP, XPZP;
+    }
+
     public class Heightmap {
         // Height Values
-        private float[] heights;
-
-        // The BVH (Yay)
-        public BVH BVH {
-            get;
-            private set;
-        }
-
-        // Corresponds To Texture Size
-        public int HValueWidth {
-            get;
-            private set;
-        }
-        public int HValueDepth {
-            get;
-            private set;
-        }
+        private HeightTile[] heights;
 
         // Texture Size - 1
         public int GridWidth {
@@ -65,23 +55,48 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        // Constructor With Heightmap Data Passed In
-        public Heightmap(float[] v, int w, int h) {
-            HValueWidth = w;
-            HValueDepth = h;
-            heights = new float[HValueWidth * HValueDepth];
-            v.CopyTo(heights, 0);
-            GridWidth = HValueWidth - 1;
-            GridDepth = HValueDepth - 1;
-            BVH = new BVH();
+        // Constructor With Heightmap Data File Passed In
+        public Heightmap(string file) {
+            using(var s = File.OpenRead(file)) {
+                // Read How Much Data To Allocate
+                var br = new BinaryReader(s);
+                int l = br.ReadInt32();
+
+                // Decompress Data
+                byte[] data = new byte[l];
+                var gs = new GZipStream(s, CompressionMode.Decompress);
+                gs.Read(data, 0, data.Length);
+                
+                // Convert Data
+                ReadHeights(data);
+            }
             ScaleY = 1f;
+        }
+        public void ReadHeights(byte[] data) {
+            // Read Width And Height
+            int ci = 0;
+            GridWidth = BitConverter.ToInt32(data, ci); ci += 4;
+            GridDepth = BitConverter.ToInt32(data, ci); ci += 4;
+            heights = new HeightTile[GridWidth * GridDepth];
+
+            // Read All Tiles
+            for(int i = 0; i < heights.Length; i++) {
+                heights[i].XNZN = BitConverter.ToSingle(data, ci); ci += 4;
+                heights[i].XPZN = BitConverter.ToSingle(data, ci); ci += 4;
+                heights[i].XNZP = BitConverter.ToSingle(data, ci); ci += 4;
+                heights[i].XPZP = BitConverter.ToSingle(data, ci); ci += 4;
+            }
         }
 
         // Scale The Heights By A Certain Value
         public void ScaleHeights(float s) {
             ScaleY *= s;
-            for(int i = 0; i < heights.Length; i++)
-                heights[i] *= s;
+            for(int i = 0; i < heights.Length; i++) {
+                heights[i].XNZN *= s;
+                heights[i].XPZN *= s;
+                heights[i].XNZP *= s;
+                heights[i].XPZP *= s;
+            }
         }
 
         // Find The Floored Location On The Heightmap
@@ -111,21 +126,18 @@ namespace RTSEngine.Data {
             // Find The Floored Values And The Remainder
             int fx = x <= 0 ? 0 : (x >= GridWidth - 1 ? GridWidth - 1 : (int)x);
             int fz = z <= 0 ? 0 : (z >= GridDepth - 1 ? GridDepth - 1 : (int)z);
+            int i = fz * GridWidth + fx;
             float rx = x - fx;
             float rz = z - fz;
 
             // Bilerp For Value
             return Bilerp(
-                heights[fz * HValueWidth + fx],
-                heights[fz * HValueWidth + fx + 1],
-                heights[(fz + 1) * HValueWidth + fx],
-                heights[(fz + 1) * HValueWidth + fx + 1],
+                heights[i].XNZN,
+                heights[i].XPZN,
+                heights[i].XNZP,
+                heights[i].XPZP,
                 rx, rz
                 );
-        }
-        // Convert A 2D Index Into a 1D Index
-        private int HeightMapIndex(int x, int z) {
-            return z*HValueWidth + x;
         }
     }
 }

@@ -226,7 +226,6 @@ namespace RTS.Default.Unit {
         private float attackCooldown;
 
         public override void Init(GameState s, GameplayController c) {
-
         }
 
         public override void Attack(GameState g, float dt) {
