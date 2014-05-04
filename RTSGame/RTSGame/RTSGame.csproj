@@ -94,6 +94,8 @@
     <Compile Include="Content\UI\Config\UICMainMenu.cs" />
     <Compile Include="InduZtryScreen.cs" />
     <Compile Include="Jukebox.cs" />
+    <Compile Include="LevelEditor\LEScreen.cs" />
+    <Compile Include="LevelEditor\VRay.cs" />
     <Compile Include="LobbyScreen.cs" />
     <Compile Include="LoginScreen.cs" />
     <Compile Include="MenuScreen.cs" />
@@ -102,6 +104,12 @@
     </Content>
     <Content Include="Content\FX\Particles\ParticleLightning.fx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LevelEditor\Voxel.fx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LevelEditor\VoxMap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\scripts\input\UICRTS.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -349,9 +357,6 @@
     <Content Include="Packs\Default\races\Gaia\icons\Tree.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\maps\0\height.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Packs\Default\maps\0\map.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -421,6 +426,12 @@
     <None Include="Content\UI\Config\MainMenu.uic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Packs\Default\maps\0\height.hmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="LevelEditor\Geo.zxp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Packs\Default\maps\0\map.obj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -538,6 +549,14 @@
     <ProjectReference Include="..\..\RTSGame\RTSEngine\RTSEngine.csproj">
       <Project>{79AEFEF0-5165-4B43-BD2E-9F925A198C96}</Project>
       <Name>RTSEngine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonExt\CommonExt.csproj">
+      <Project>{c3fcb10d-3f6d-45cb-8b75-4897c73bc502}</Project>
+      <Name>CommonExt</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GreyEngine\GreyEngine.csproj">
+      <Project>{64a9ea1d-525b-473b-bd9a-4c2cc41ef487}</Project>
+      <Name>GreyEngine</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

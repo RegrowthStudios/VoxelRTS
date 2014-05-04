@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace RTSEngine.Data.Parsers {
+namespace System {
     public static class ZXPCExt {
         public static readonly char[] VALUE_DELIMITERS = { ',', '|', ';' };
         public static void AddXNATypes() {

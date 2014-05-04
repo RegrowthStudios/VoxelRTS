@@ -59,12 +59,6 @@
     <Compile Include="Controllers\FOWResolver.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
-    <Compile Include="Data\Parsers\Delimiter.cs" />
-    <Compile Include="Data\Parsers\IZXPConverter.cs" />
-    <Compile Include="Data\Parsers\ZPXAttributes.cs" />
-    <Compile Include="Data\Parsers\ZXParser.cs" />
-    <Compile Include="Data\Parsers\ZXPCExt.cs" />
-    <Compile Include="Data\Parsers\ZXPProxy.cs" />
     <Compile Include="Graphics\Particles\FireShader.cs" />
     <Compile Include="Graphics\Particles\LightningShader.cs" />
     <Compile Include="Graphics\Particles\ParticleList.cs" />
@@ -160,6 +154,10 @@
     <ProjectReference Include="..\BlisterUI\BlisterUI.csproj">
       <Project>{28292778-5EDC-4898-8E0C-9E32412174CD}</Project>
       <Name>BlisterUI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonExt\CommonExt.csproj">
+      <Project>{c3fcb10d-3f6d-45cb-8b75-4897c73bc502}</Project>
+      <Name>CommonExt</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

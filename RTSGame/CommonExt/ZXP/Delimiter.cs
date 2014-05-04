@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace RTSEngine.Data.Parsers {
+namespace System {
     public enum DelimitType {
         None = 0x00,
         Paranthesis = 0x01,

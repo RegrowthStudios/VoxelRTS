@@ -245,7 +245,7 @@ namespace RTSEngine.Graphics {
 
             // Create The Map
             Heightmap map = state.Map;
-            Map = MapParser.ParseModel(this, new Vector3(map.Width, map.ScaleY, map.Depth), state.CGrid.numCells.X, state.CGrid.numCells.Y, new FileInfo(state.LevelGrid.InfoFile));
+            Map = MapParser.ParseModel(this, state.LevelGrid, new FileInfo(state.LevelGrid.InfoFile));
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
             fxParticle.Parameters["MapSize"].SetValue(new Vector2(map.Width, map.Depth));

@@ -1,0 +1,7 @@
+﻿Main Visual Thread
+ - Update
+ - Draw
+
+Main Voxel Engine Thread
+ - Update
+   - Checks Queue Of Events

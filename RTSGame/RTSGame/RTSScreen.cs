@@ -152,22 +152,22 @@ namespace RTS {
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
-            if(b == MouseButton.Right) {
-                Ray r = renderer.Camera.GetViewRay(p);
-                IntersectionRecord rec = new IntersectionRecord();
-                if(state.Map.BVH.Intersect(ref rec, r)) {
-                    clickWorldPos = r.Position + r.Direction * rec.T;
-                    if(addUnit)
-                        gameInput.AddEvent(new SpawnUnitEvent(
-                            team, type, new Vector2(clickWorldPos.X, clickWorldPos.Z)
-                            ));
-                    else if(addBuilding)
-                        gameInput.AddEvent(new SpawnBuildingEvent(
-                            team, type,
-                            HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size),
-                            true));
-                }
-            }
+            //if(b == MouseButton.Right) {
+            //    Ray r = renderer.Camera.GetViewRay(p);
+            //    IntersectionRecord rec = new IntersectionRecord();
+            //    if(state.Map.BVH.Intersect(ref rec, r)) {
+            //        clickWorldPos = r.Position + r.Direction * rec.T;
+            //        if(addUnit)
+            //            gameInput.AddEvent(new SpawnUnitEvent(
+            //                team, type, new Vector2(clickWorldPos.X, clickWorldPos.Z)
+            //                ));
+            //        else if(addBuilding)
+            //            gameInput.AddEvent(new SpawnBuildingEvent(
+            //                team, type,
+            //                HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size),
+            //                true));
+            //    }
+            //}
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {

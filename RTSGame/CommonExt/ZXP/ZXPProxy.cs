@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace RTSEngine.Data.Parsers {
+namespace System {
     public class ZXPDatum {
         public readonly string Key;
         private FieldInfo field;
@@ -16,10 +16,10 @@ namespace RTSEngine.Data.Parsers {
             get { return prop != null; }
         }
         public bool CanWrite {
-            get { return IsProperty ? prop.CanWrite != null : true; }
+            get { return IsProperty ? prop.CanWrite : true; }
         }
         public bool CanRead {
-            get { return IsProperty ? prop.CanRead != null : true; }
+            get { return IsProperty ? prop.CanRead : true; }
         }
         public Type Type {
             get { return IsProperty ? prop.PropertyType : field.FieldType; }
