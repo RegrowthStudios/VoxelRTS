@@ -10,6 +10,7 @@ using Grey.Engine;
 using Grey.Vox.Managers;
 using Grey.Graphics;
 using Grey.Vox;
+using BlisterUI.Widgets;
 
 namespace RTS {
     public struct LEVT {
@@ -32,19 +33,34 @@ namespace RTS {
         WorldManager vManager;
         VoxState state;
         VoxelRenderer renderer;
+
+        // Voxel Modifying Data
         Dictionary<string, VoxData> dVox;
+        ushort curVoxID;
+
+        // Widgets
+        WidgetRenderer wr;
+        IDisposable font;
+        ScrollMenu voxMenu;
 
         InputManager input;
-        OrbitingCamera camera;
+        FreeCamera camera;
 
         public override void Build() {
-            camera = new OrbitingCamera(Vector3.UnitY * Region.HEIGHT * 0.6f, 100, G.Viewport.AspectRatio);
             input = new InputManager();
         }
         public override void Destroy(GameTime gameTime) {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            camera = new FreeCamera(Vector3.UnitY * Region.HEIGHT * 0.6f, 0, 0, G.Viewport.AspectRatio);
+
+            CreateVoxWorld();
+            CreateWidgets();
+            curVoxID = 0;
+            MouseEventDispatcher.OnMousePress += OnMP;
+        }
+        private void CreateVoxWorld() {
             dVox = new Dictionary<string, VoxData>();
             state = new VoxState();
 
@@ -69,14 +85,34 @@ namespace RTS {
                 }
             }
             state.VWorkPool.Start(2);
+        }
+        private void CreateWidgets() {
+            wr = new WidgetRenderer(G, XNASpriteFont.Compile(G, "Impact", 24, out font));
 
-            MouseEventDispatcher.OnMousePress += OnMP;
+            voxMenu = new ScrollMenu(wr, 180, 30, 5, 12, 30);
+            voxMenu.Build(dVox.Keys.ToArray());
+            voxMenu.BaseColor = Color.LightCoral;
+            voxMenu.HighlightColor = Color.Red;
+            voxMenu.TextColor = Color.Black;
+            voxMenu.ScrollBarBaseColor = Color.Green;
+            voxMenu.Widget.AlignY = Alignment.BOTTOM;
+            voxMenu.Widget.Anchor = new Point(0, game.Window.ClientBounds.Height);
+            voxMenu.Hook();
         }
         public override void OnExit(GameTime gameTime) {
             MouseEventDispatcher.OnMousePress -= OnMP;
-
+            DestroyWidgets();
+            DestroyVoxWorld();
+        }
+        private void DestroyVoxWorld() {
             state.VWorkPool.Dispose();
             renderer.Dispose();
+
+        }
+        private void DestroyWidgets() {
+            voxMenu.Unhook();
+            voxMenu.Dispose();
+            wr.Dispose();
         }
 
         public override void Update(GameTime gameTime) {
@@ -91,11 +127,29 @@ namespace RTS {
             G.Clear(Color.Black);
             renderer.DrawAll(camera.View, camera.Projection);
 
-            G.BlendState = BlendState.NonPremultiplied;
-            game.DrawMouse();
+            if(!input.Mouse.IsBound) {
+                G.DepthStencilState = DepthStencilState.None;
+                G.BlendState = BlendState.NonPremultiplied;
+
+                wr.Draw(SB);
+                game.DrawMouse();
+            }
         }
 
         public void OnMP(Vector2 sPos, MouseButton button) {
+            Point mPos = new Point((int)sPos.X, (int)sPos.Y);
+
+            // Check For New Voxel Selection
+            if(voxMenu.Inside(mPos.X, mPos.Y)) {
+                string vt = voxMenu.GetSelection(mPos.X, mPos.Y);
+                if(string.IsNullOrWhiteSpace(vt)) return;
+                VoxData vd;
+                if(dVox.TryGetValue(vt, out vd))
+                    curVoxID = vd.ID;
+                return;
+            }
+
+
             Ray r = camera.GetViewRay(sPos, G.Viewport.Width, G.Viewport.Height);
             r.Position -= new Vector3(state.World.worldMin.X * Region.WIDTH, 0, state.World.worldMin.Y * Region.DEPTH);
             VRay vr = new VRay(r.Position, r.Direction);
@@ -104,17 +158,19 @@ namespace RTS {
             if(!r.Intersects(bb).HasValue) {
                 return;
             }
-            while(!IsInBounds(loc)) loc = vr.GetNextLocation();
+            while(!IsInBounds(loc))
+                loc = vr.GetNextLocation();
+
+            Point cr, pr;
+            Vector3I cv, pv;
+
             if(button == MouseButton.Left) {
                 while(IsInBounds(loc)) {
-                    int rx = loc.X >> Region.XZ_SHIFT;
-                    int vx = loc.X & ((0x01 << Region.XZ_SHIFT) - 1);
-                    int rz = loc.Z >> Region.XZ_SHIFT;
-                    int vz = loc.Z & ((0x01 << Region.XZ_SHIFT) - 1);
-                    Region region = state.World.regions[VoxWorld.ToIndex(rx, rz)];
-                    ushort id = region.voxels[Region.ToIndex(vx, loc.Y, vz)].ID;
+                    ToRV(loc, out cr, out cv);
+                    Region region = state.World.regions[VoxWorld.ToIndex(cr)];
+                    ushort id = region.voxels[Region.ToIndex(cv)].ID;
                     if(id != 0) {
-                        region.RemoveVoxel(vx, loc.Y, vz);
+                        region.RemoveVoxel(cv.X, cv.Y, cv.Z);
                         break;
                     }
                     loc = vr.GetNextLocation();
@@ -122,18 +178,13 @@ namespace RTS {
             }
             else if(button == MouseButton.Right) {
                 Vector3I pLoc = loc;
-                Vector3I pv;
-                Point pr;
                 while(IsInBounds(loc)) {
-                    int rx = loc.X >> Region.XZ_SHIFT;
-                    int vx = loc.X & ((0x01 << Region.XZ_SHIFT) - 1);
-                    int rz = loc.Z >> Region.XZ_SHIFT;
-                    int vz = loc.Z & ((0x01 << Region.XZ_SHIFT) - 1);
-                    Region region = state.World.regions[VoxWorld.ToIndex(rx, rz)];
-                    ushort id = region.voxels[Region.ToIndex(vx, loc.Y, vz)].ID;
+                    ToRV(loc, out cr, out cv);
+                    Region region = state.World.regions[VoxWorld.ToIndex(cr)];
+                    ushort id = region.voxels[Region.ToIndex(cv)].ID;
                     if(id != 0) {
                         ToRV(pLoc, out pr, out pv);
-                        state.World.regions[VoxWorld.ToIndex(pr.X, pr.Y)].AddVoxel(pv.X, pv.Y, pv.Z, (ushort)1u);
+                        state.World.regions[VoxWorld.ToIndex(pr)].AddVoxel(pv.X, pv.Y, pv.Z, curVoxID);
                         break;
                     }
                     pLoc = loc;
@@ -148,7 +199,6 @@ namespace RTS {
                 v.Z >= 0 && v.Z < VoxWorld.DEPTH * Region.DEPTH
                 ;
         }
-
         public void ToRV(Vector3I loc, out Point r, out Vector3I v) {
             r = new Point(loc.X >> Region.XZ_SHIFT, loc.Z >> Region.XZ_SHIFT);
             v = new Vector3I(

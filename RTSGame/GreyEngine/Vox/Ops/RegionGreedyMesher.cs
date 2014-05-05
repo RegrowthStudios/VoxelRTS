@@ -6,12 +6,6 @@ using Microsoft.Xna.Framework;
 using Grey.Graphics;
 
 namespace Grey.Vox {
-    public struct RegionMeshResult {
-        public List<Vector3I> Vertices;
-        public List<int[]> Faces;
-        public List<MeshedFace> MFaces;
-    }
-
     public static class RegionGreedyMesher {
         public static List<MeshedFace> Mesh(Region region) {
             var res = new List<MeshedFace>();
@@ -20,8 +14,7 @@ namespace Grey.Vox {
             MeshZ(region, res);
             return res;
         }
-
-        public static void MeshY(Region region, List<MeshedFace> res) {
+        private static void MeshY(Region region, List<MeshedFace> res) {
             // Loop Through All Planes
             Vector3I pos = Vector3I.Zero;
             for(pos.Y = 0; pos.Y <= Region.HEIGHT; pos.Y++) {
@@ -42,15 +35,15 @@ namespace Grey.Vox {
                         if(pos.Y < Region.HEIGHT)
                             pID = VoxelID(region, pos.X, pos.Y, pos.Z);
                         else
-                            pID = 0;
+                            pID = VoxelID(region, pos.X, pos.Y - 1, pos.Z);
 
                         // Create Mask
                         if(nID == pID)
                             mask[mi] = 0;
                         else if(nID != 0)
-                            mask[mi] = pos.Y > 0 ? nID : 0;
+                            mask[mi] = nID;
                         else
-                            mask[mi] = pos.Y < Region.HEIGHT ? -pID : 0;
+                            mask[mi] = -pID;
                         mi++;
                     }
                 }
@@ -100,7 +93,7 @@ namespace Grey.Vox {
                 }
             }
         }
-        public static void MeshX(Region region, List<MeshedFace> res) {
+        private static void MeshX(Region region, List<MeshedFace> res) {
             // Find Neighbor Regions
             Region rNeg = region.rNX;
             Region rPos = region.rPX;
@@ -121,7 +114,7 @@ namespace Grey.Vox {
                         else if(rNeg != null)
                             nID = VoxelID(rNeg, Region.WIDTH - 1, pos.Y, pos.Z);
                         else
-                            nID = 0;
+                            nID = VoxelID(region, pos.X, pos.Y, pos.Z);
 
                         // Get Positive Voxel
                         if(pos.X < Region.WIDTH)
@@ -129,15 +122,15 @@ namespace Grey.Vox {
                         else if(rPos != null)
                             pID = VoxelID(rPos, 0, pos.Y, pos.Z);
                         else
-                            pID = 0;
+                            pID = VoxelID(region, pos.X - 1, pos.Y, pos.Z); ;
 
                         // Create Mask
                         if(nID == pID)
                             mask[mi] = 0;
                         else if(nID != 0)
-                            mask[mi] = pos.X > 0 ? nID : 0;
+                            mask[mi] = nID;
                         else
-                            mask[mi] = pos.X < Region.WIDTH ? -pID : 0;
+                            mask[mi] = -pID;
                         mi++;
                     }
                 }
@@ -187,7 +180,7 @@ namespace Grey.Vox {
                 }
             }
         }
-        public static void MeshZ(Region region, List<MeshedFace> res) {
+        private static void MeshZ(Region region, List<MeshedFace> res) {
             // Find Neighbor Regions
             Region rNeg = region.rNZ;
             Region rPos = region.rPZ;
@@ -208,7 +201,7 @@ namespace Grey.Vox {
                         else if(rNeg != null)
                             nID = VoxelID(rNeg, pos.X, pos.Y, Region.DEPTH - 1);
                         else
-                            nID = 0;
+                            nID = VoxelID(region, pos.X, pos.Y, pos.Z);
 
                         // Get Positive Voxel
                         if(pos.Z < Region.DEPTH)
@@ -216,15 +209,15 @@ namespace Grey.Vox {
                         else if(rPos != null)
                             pID = VoxelID(rPos, pos.X, pos.Y, 0);
                         else
-                            pID = 0;
+                            pID = VoxelID(region, pos.X, pos.Y, pos.Z - 1);
 
                         // Create Mask
                         if(nID == pID)
                             mask[mi] = 0;
                         else if(nID != 0)
-                            mask[mi] = pos.Z > 0 ? nID : 0;
+                            mask[mi] = nID;
                         else
-                            mask[mi] = pos.Z < Region.DEPTH ? -pID : 0;
+                            mask[mi] = -pID;
                         mi++;
                     }
                 }
@@ -274,7 +267,6 @@ namespace Grey.Vox {
                 }
             }
         }
-
         private static ushort VoxelID(Region region, int x, int y, int z) {
             return region.voxels[Region.ToIndex(x, y, z)].ID;
         }

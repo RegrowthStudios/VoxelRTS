@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace Grey.Vox {
     public class VoxWorld {
-        public const int XZ_SHIFT = 5;
+        public const int XZ_SHIFT = 4;
         public const int INDZ_SHIFT = XZ_SHIFT;
         public const int WIDTH = 0x01 << XZ_SHIFT;
         public const int DEPTH = 0x01 << XZ_SHIFT;

@@ -87,6 +87,7 @@
     <Compile Include="Widgets\RectButton.cs" />
     <Compile Include="Widgets\RectWidget.cs" />
     <Compile Include="Widgets\ScrollBar.cs" />
+    <Compile Include="Widgets\ScrollMenu.cs" />
     <Compile Include="Widgets\TextWidget.cs" />
     <Compile Include="Widgets\WidgetRenderer.cs" />
   </ItemGroup>

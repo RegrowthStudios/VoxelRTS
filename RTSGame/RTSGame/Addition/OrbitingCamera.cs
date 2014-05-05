@@ -125,9 +125,9 @@ namespace RTS {
                         ));
 
                     Matrix mVI = Matrix.Invert(mView);
-                     Plane hit = new Plane(Center, Center + mVI.Up, Center + mVI.Right);
+                    Plane hit = new Plane(Center, Center + mVI.Up, Center + mVI.Right);
 
-                   //new Plane(Vector3.Normalize(eye - Center), 0f);
+                    //new Plane(Vector3.Normalize(eye - Center), 0f);
 
                     r1.Direction -= r1.Position; r1.Direction.Normalize();
                     float d1 = r1.Intersects(hit).Value;

@@ -43,13 +43,13 @@ namespace Grey.Vox {
             int rx = region.loc.X;
             int rz = region.loc.Y;
             if(region.rNX != null) region.rNX.NotifyFacesChanged();
-            else region.World.state.AddEvent(new VEWorldMod(rx - 1, rz, VEWMType.RegionAdd));
+            //else region.World.state.AddEvent(new VEWorldMod(rx - 1, rz, VEWMType.RegionAdd));
             if(region.rPX != null) region.rPX.NotifyFacesChanged();
-            else region.World.state.AddEvent(new VEWorldMod(rx + 1, rz, VEWMType.RegionAdd));
+            //else region.World.state.AddEvent(new VEWorldMod(rx + 1, rz, VEWMType.RegionAdd));
             if(region.rNZ != null) region.rNZ.NotifyFacesChanged();
-            else region.World.state.AddEvent(new VEWorldMod(rx, rz - 1, VEWMType.RegionAdd));
+            //else region.World.state.AddEvent(new VEWorldMod(rx, rz - 1, VEWMType.RegionAdd));
             if(region.rPZ != null) region.rPZ.NotifyFacesChanged();
-            else region.World.state.AddEvent(new VEWorldMod(rx, rz + 1, VEWMType.RegionAdd));
+            //else region.World.state.AddEvent(new VEWorldMod(rx, rz + 1, VEWMType.RegionAdd));
         }
     }
 }
