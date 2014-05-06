@@ -113,7 +113,6 @@
     <Compile Include="Interfaces\Scripts.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />
     <Compile Include="Interfaces\IEntity.cs" />
-    <Compile Include="Data\Parsers\ObjParser.cs" />
     <Compile Include="Nova\Game\PlayScreen.cs" />
     <Compile Include="Nova\GUI\CenterText.cs" />
     <Compile Include="Nova\GUI\ComboText.cs" />

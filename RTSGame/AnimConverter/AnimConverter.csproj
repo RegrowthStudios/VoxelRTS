@@ -86,6 +86,10 @@
       <Project>{28292778-5EDC-4898-8E0C-9E32412174CD}</Project>
       <Name>BlisterUI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CommonExt\CommonExt.csproj">
+      <Project>{c3fcb10d-3f6d-45cb-8b75-4897c73bc502}</Project>
+      <Name>CommonExt</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RTSEngine\RTSEngine.csproj">
       <Project>{79AEFEF0-5165-4B43-BD2E-9F925A198C96}</Project>
       <Name>RTSEngine</Name>
