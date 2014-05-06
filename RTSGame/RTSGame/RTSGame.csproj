@@ -186,9 +186,9 @@
     <Content Include="Packs\Default\scripts\DefaultUnit.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\scripts\input\EnvironmentInputController.cs">
+    <Compile Include="Packs\Default\scripts\input\EnvironmentInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Content Include="Packs\Default\scripts\GameTypes.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

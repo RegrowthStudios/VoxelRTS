@@ -233,7 +233,7 @@ namespace RTS.Input {
                 }
                 counter++;
                 counter = counter % (RecoverTime);
-                Thread.Sleep(3000);
+                Thread.Sleep(500);
             }
         }
 
@@ -297,7 +297,7 @@ namespace RTS.Input {
                 else
                     level = 0;
 
-                //level = 3;
+               // level = 2;
 
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
@@ -450,7 +450,7 @@ namespace RTS.Input {
                                 bool takeDamage = (random.Next(100) <= LightningHitP);
                                 if(takeDamage) {
                                     u.Damage(LightningDamage);
-                                    particles.Add(new LightningParticle(u.WorldPosition, 3, 7, 2, 0.6f, 5));
+                                    particles.Add(new LightningParticle(u.WorldPosition, 1, 7, 1, 0.6f, 1, Color.BlueViolet));
                                 }
                             }
                         }
@@ -470,9 +470,9 @@ namespace RTS.Input {
                         RTSBuilding b = GameState.CGrid.EStatic[c.X + x, c.Y + y];
                         if(b != null && b.Team.Index != Team.Index) {
                             bool takeDamage = (random.Next(100) <= EarthquakeHitP);
-                            if(takeDamage) {
+                            if(true) {
                                 b.Damage(EarthquakeDamage);
-                                particles.Add(new LightningParticle(b.WorldPosition, 3, 8, 2, 2, 5));
+                                particles.Add(new LightningParticle(b.WorldPosition, 3, 10, 2, 0.6f, 1,Color.Red));
                             }
                         }
 

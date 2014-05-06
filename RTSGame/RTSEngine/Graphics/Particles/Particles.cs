@@ -183,7 +183,7 @@ namespace RTSEngine.Graphics {
         // Instance Transform Of Bullet
         private VertexLightningInstance instance;
 
-        public LightningParticle(Vector3 o, float r, float h, float rotY, float t, int inst)
+        public LightningParticle(Vector3 o, float r, float h, float rotY, float t, int inst, Color c)
             : base(t, ParticleType.Lightning) {
             origin = o;
             radius = r;
@@ -197,6 +197,7 @@ namespace RTSEngine.Graphics {
                 Matrix.CreateTranslation(origin);
             instance.TimeType.X = t;
             instance.TimeType.Y = inst;
+            instance.Color = c;
             Vertex = instance;
         }
     }
