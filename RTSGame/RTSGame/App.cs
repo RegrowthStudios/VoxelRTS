@@ -152,10 +152,10 @@ namespace RTS {
         }
 
         protected override void FullQuit(GameTime gameTime) {
+            base.FullQuit(gameTime);
             tMouseMain.Dispose();
             mRenderer.Dispose();
             dcv.Dispose();
-            base.FullQuit(gameTime);
         }
 
         public void DrawMouse() {

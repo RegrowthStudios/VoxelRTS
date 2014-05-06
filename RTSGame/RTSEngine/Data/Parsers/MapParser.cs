@@ -28,28 +28,6 @@ namespace RTSEngine.Data.Parsers {
 
         public void ReadHeightData(string rootPath, string filePath) {
             string path = Path.Combine(rootPath, filePath);
-            //byte[] col;
-            //int w, h;
-            //using(var bmp = Bitmap.FromFile(path) as Bitmap) {
-            //    w = bmp.Width;
-            //    h = bmp.Height;
-            //    col = new byte[w * h * 4];
-
-            //    // Convert Bitmap
-            //    System.Drawing.Imaging.BitmapData bd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
-            //    System.Runtime.InteropServices.Marshal.Copy(bd.Scan0, col, 0, bd.Stride * bd.Height);
-            //    bmp.UnlockBits(bd);
-            //}
-
-            //// TODO: Make Pixels As Floating Point Values
-            //int i = 0, ci = 0;
-            //float[] hd = new float[w * h];
-            //for(int y = 0; y < h; y++) {
-            //    for(int x = 0; x < w; x++) {
-            //        hd[i++] = 1f - (col[ci + 2] / 255f);
-            //        ci += 4;
-            //    }
-            //}
             LGrid.L0 = new Heightmap(path);
             LGrid.L0.ScaleHeights(MapHeight);
         }

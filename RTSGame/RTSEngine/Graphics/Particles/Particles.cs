@@ -157,7 +157,8 @@ namespace RTSEngine.Graphics {
             new VertexElement(sizeof(float) * 4, VertexElementFormat.Vector4, VertexElementUsage.Position, 2),
             new VertexElement(sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.Position, 3),
             new VertexElement(sizeof(float) * 12, VertexElementFormat.Vector4, VertexElementUsage.Position, 4),
-            new VertexElement(sizeof(float) * 16, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 1)
+            new VertexElement(sizeof(float) * 16, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 1),
+            new VertexElement(sizeof(float) * 18, VertexElementFormat.Color, VertexElementUsage.Color, 0)
         );
         public VertexDeclaration VertexDeclaration {
             get { return Declaration; }
@@ -166,10 +167,12 @@ namespace RTSEngine.Graphics {
 
         public Matrix Transform;
         public Vector2 TimeType;
+        public Color Color;
 
         public VertexLightningInstance(Matrix m, float t, float inst) {
             Transform = m;
             TimeType = new Vector2(t, inst);
+            Color = Color.White;
         }
     }
     #endregion

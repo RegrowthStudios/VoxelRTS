@@ -50,6 +50,7 @@
     <Compile Include="Engine\Events\VEWorldMod.cs" />
     <Compile Include="Engine\Events\VEvent.cs" />
     <Compile Include="Engine\VoxState.cs" />
+    <Compile Include="Graphics\Geo\VGPRamp.cs" />
     <Compile Include="Graphics\Geo\VGPCube6.cs" />
     <Compile Include="Graphics\Geo\IVGeoProvider.cs" />
     <Compile Include="Graphics\VertexVoxel.cs" />

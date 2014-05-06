@@ -61,6 +61,12 @@ namespace RTSEngine.Controllers {
     }
     #endregion
 
+    public class GCDecisionBudgeting {
+        public int SquadBins;
+        public int EntityBins;
+        public int FOWBins;
+    }
+
     public class GameplayController : IDisposable {
         public const int SQUAD_BUDGET_BINS = 10;
         public const int ENTITY_BUDGET_BINS = 30;

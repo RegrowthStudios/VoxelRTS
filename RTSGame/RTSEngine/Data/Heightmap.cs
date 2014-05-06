@@ -139,5 +139,27 @@ namespace RTSEngine.Data {
                 rx, rz
                 );
         }
+        public float SmoothHeightAt(float x, float z) {
+
+
+            // Convert To Grid Space
+            x /= ScaleX; z /= ScaleZ;
+
+            // Find The Floored Values And The Remainder
+            int fx = x <= 0 ? 0 : (x >= GridWidth - 1 ? GridWidth - 1 : (int)x);
+            int fz = z <= 0 ? 0 : (z >= GridDepth - 1 ? GridDepth - 1 : (int)z);
+            int i = fz * GridWidth + fx;
+            float rx = x - fx;
+            float rz = z - fz;
+
+            // Bilerp For Value
+            return Bilerp(
+                HeightAt(x - 2 * 0.5f, z - 2 * 0.5f),
+                HeightAt(x + 2 * 0.5f, z - 2 * 0.5f),
+                HeightAt(x - 2 * 0.5f, z + 2 * 0.5f),
+                HeightAt(x + 2 * 0.5f, z + 2 * 0.5f),
+                rx, rz
+                );
+        }
     }
 }

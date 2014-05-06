@@ -11,6 +11,9 @@ using Grey.Vox.Managers;
 using Grey.Graphics;
 using Grey.Vox;
 using BlisterUI.Widgets;
+using System.IO;
+using System.IO.Compression;
+using Microsoft.Xna.Framework.Input;
 
 namespace RTS {
     public struct LEVT {
@@ -18,6 +21,9 @@ namespace RTS {
         public uint FaceType;
         public uint FaceMask;
         public IVGeoProvider Geo;
+    }
+    public struct Tool {
+
     }
 
     public class LEScreen : GameScreen<App> {
@@ -36,7 +42,6 @@ namespace RTS {
 
         // Voxel Modifying Data
         Dictionary<string, VoxData> dVox;
-        ushort curVoxID;
 
         // Widgets
         WidgetRenderer wr;
@@ -45,6 +50,11 @@ namespace RTS {
 
         InputManager input;
         FreeCamera camera;
+
+        // Tools
+        LETool curTool;
+        LETool[] tools;
+        ScrollMenu toolMenu;
 
         public override void Build() {
             input = new InputManager();
@@ -57,8 +67,9 @@ namespace RTS {
 
             CreateVoxWorld();
             CreateWidgets();
-            curVoxID = 0;
+            CreateTools();
             MouseEventDispatcher.OnMousePress += OnMP;
+            KeyboardEventDispatcher.OnKeyPressed += OnKP;
         }
         private void CreateVoxWorld() {
             dVox = new Dictionary<string, VoxData>();
@@ -71,6 +82,17 @@ namespace RTS {
                 v.FaceType.SetAllMasks(vt.FaceMask);
                 v.GeoProvider = vt.Geo;
                 dVox.Add(vt.Name, v);
+            }
+            Random r = new Random();
+            for(int i = 0; i < 20; i++) {
+                var v = state.World.Atlas.Create();
+                v.FaceType.SetAllTypes(1);
+                v.FaceType.SetAllMasks(254);
+                var vgp = new VGPCube();
+                vgp.Color = new Color(r.Next(256), r.Next(256), r.Next(256));
+                vgp.UVRect = new Vector4(0, 0.25f, 0.25f, 0.25f);
+                v.GeoProvider = vgp;
+                dVox.Add("Region " + i, v);
             }
 
             renderer = new VoxelRenderer(game.Graphics);
@@ -99,10 +121,37 @@ namespace RTS {
             voxMenu.Widget.Anchor = new Point(0, game.Window.ClientBounds.Height);
             voxMenu.Hook();
         }
+        private void CreateTools() {
+            tools = new LETool[] {
+                new LETSingle(),
+                new LETCluster(),
+                new LETPaint()
+            };
+            curTool = tools[0];
+
+            // Create Menu
+            toolMenu = new ScrollMenu(wr, 180, 30, 5, 12, 30);
+            toolMenu.Build((from tool in tools select tool.Name).ToArray());
+            toolMenu.BaseColor = Color.LightCoral;
+            toolMenu.HighlightColor = Color.Red;
+            toolMenu.TextColor = Color.Black;
+            toolMenu.ScrollBarBaseColor = Color.Green;
+            toolMenu.Widget.AlignY = Alignment.BOTTOM;
+            toolMenu.Parent = voxMenu.Widget;
+            toolMenu.Hook();
+
+            // Set The Textures
+            foreach(var tool in tools)
+                tool.LoadMouseTexture(G, @"LevelEditor\Mouse\" + tool.Name + ".png");
+            game.mRenderer.Texture = curTool.MouseTexture;
+        }
         public override void OnExit(GameTime gameTime) {
             MouseEventDispatcher.OnMousePress -= OnMP;
+            KeyboardEventDispatcher.OnKeyPressed -= OnKP;
+            DestroyTools();
             DestroyWidgets();
             DestroyVoxWorld();
+            game.mRenderer.Texture = game.tMouseMain;
         }
         private void DestroyVoxWorld() {
             state.VWorkPool.Dispose();
@@ -113,6 +162,11 @@ namespace RTS {
             voxMenu.Unhook();
             voxMenu.Dispose();
             wr.Dispose();
+        }
+        private void DestroyTools() {
+            foreach(var tool in tools) tool.Dispose();
+            tools = null;
+            curTool = null;
         }
 
         public override void Update(GameTime gameTime) {
@@ -144,68 +198,83 @@ namespace RTS {
                 string vt = voxMenu.GetSelection(mPos.X, mPos.Y);
                 if(string.IsNullOrWhiteSpace(vt)) return;
                 VoxData vd;
-                if(dVox.TryGetValue(vt, out vd))
-                    curVoxID = vd.ID;
+                if(dVox.TryGetValue(vt, out vd)) {
+                    foreach(var tool in tools)
+                        tool.CurVoxID = vd.ID;
+                }
                 return;
             }
 
-
-            Ray r = camera.GetViewRay(sPos, G.Viewport.Width, G.Viewport.Height);
-            r.Position -= new Vector3(state.World.worldMin.X * Region.WIDTH, 0, state.World.worldMin.Y * Region.DEPTH);
-            VRay vr = new VRay(r.Position, r.Direction);
-            Vector3I loc = vr.GetNextLocation();
-            BoundingBox bb = new BoundingBox(Vector3.Zero, new Vector3(VoxWorld.WIDTH * Region.WIDTH, Region.HEIGHT, VoxWorld.DEPTH * Region.DEPTH));
-            if(!r.Intersects(bb).HasValue) {
+            if(toolMenu.Inside(mPos.X, mPos.Y)) {
+                string vt = toolMenu.GetSelection(mPos.X, mPos.Y);
+                curTool = (from tool in tools where tool.Name.Equals(vt) select tool).FirstOrDefault();
+                if(curTool != null)
+                    game.mRenderer.Texture = curTool.MouseTexture;
                 return;
             }
-            while(!IsInBounds(loc))
-                loc = vr.GetNextLocation();
 
-            Point cr, pr;
-            Vector3I cv, pv;
-
-            if(button == MouseButton.Left) {
-                while(IsInBounds(loc)) {
-                    ToRV(loc, out cr, out cv);
-                    Region region = state.World.regions[VoxWorld.ToIndex(cr)];
-                    ushort id = region.voxels[Region.ToIndex(cv)].ID;
-                    if(id != 0) {
-                        region.RemoveVoxel(cv.X, cv.Y, cv.Z);
-                        break;
-                    }
-                    loc = vr.GetNextLocation();
-                }
-            }
-            else if(button == MouseButton.Right) {
-                Vector3I pLoc = loc;
-                while(IsInBounds(loc)) {
-                    ToRV(loc, out cr, out cv);
-                    Region region = state.World.regions[VoxWorld.ToIndex(cr)];
-                    ushort id = region.voxels[Region.ToIndex(cv)].ID;
-                    if(id != 0) {
-                        ToRV(pLoc, out pr, out pv);
-                        state.World.regions[VoxWorld.ToIndex(pr)].AddVoxel(pv.X, pv.Y, pv.Z, curVoxID);
-                        break;
-                    }
-                    pLoc = loc;
-                    loc = vr.GetNextLocation();
-                }
+            if(curTool != null)
+                curTool.OnMouseClick(state, camera, sPos, button, G.Viewport);
+        }
+        public void OnKP(object sender, KeyEventArgs args) {
+            switch(args.KeyCode) {
+                case Keys.F2:
+                    Write(@"LevelEditor\Saved", 100, 100);
+                    break;
             }
         }
-        public bool IsInBounds(Vector3I v) {
-            return
-                v.X >= 0 && v.X < VoxWorld.WIDTH * Region.WIDTH &&
-                v.Y >= 0 && v.Y < Region.HEIGHT &&
-                v.Z >= 0 && v.Z < VoxWorld.DEPTH * Region.DEPTH
-                ;
+
+        private void Write(string dir, int w, int h) {
+            DirectoryInfo dirInfo = new DirectoryInfo(dir);
+            if(!dirInfo.Exists) dirInfo.Create();
+
+            WriteHeights(dirInfo.FullName + @"\height.hmd", w, h);
         }
-        public void ToRV(Vector3I loc, out Point r, out Vector3I v) {
-            r = new Point(loc.X >> Region.XZ_SHIFT, loc.Z >> Region.XZ_SHIFT);
-            v = new Vector3I(
-                loc.X & ((0x01 << Region.XZ_SHIFT) - 1),
-                loc.Y,
-                loc.Z & ((0x01 << Region.XZ_SHIFT) - 1)
-                );
+        private void WriteHeights(string file, int w, int h) {
+            byte[] hd = new byte[w * h * 16 + 8];
+            int i = 0;
+            BitConverter.GetBytes(w).CopyTo(hd, i); i += 4;
+            BitConverter.GetBytes(h).CopyTo(hd, i); i += 4;
+            Vector3I loc = Vector3I.Zero;
+            RTSEngine.Data.HeightTile ht = new RTSEngine.Data.HeightTile();
+            for(loc.Z = 0; loc.Z < h; loc.Z++) {
+                for(loc.X = 0; loc.X < w; loc.X++) {
+                    loc.Y = Region.HEIGHT - 1;
+                    VoxLocation vl = new VoxLocation(loc);
+
+                    ht = new RTSEngine.Data.HeightTile();
+                    Region r = state.World.regions[vl.RegionIndex];
+                    for(; vl.VoxelLoc.Y > 0; vl.VoxelLoc.Y--) {
+                        ushort id = r.voxels[vl.VoxelIndex].ID;
+                        if(id == 1) {
+                            ht.XNZN = vl.VoxelLoc.Y;
+                            ht.XPZN = vl.VoxelLoc.Y;
+                            ht.XNZP = vl.VoxelLoc.Y;
+                            ht.XPZP = vl.VoxelLoc.Y;
+                            break;
+                        }
+                    }
+
+                    BitConverter.GetBytes(ht.XNZN).CopyTo(hd, i); i += 4;
+                    BitConverter.GetBytes(ht.XPZN).CopyTo(hd, i); i += 4;
+                    BitConverter.GetBytes(ht.XNZP).CopyTo(hd, i); i += 4;
+                    BitConverter.GetBytes(ht.XPZP).CopyTo(hd, i); i += 4;
+                }
+            }
+
+            using(MemoryStream ms = new MemoryStream()) {
+                var gs = new GZipStream(ms, CompressionMode.Compress, true);
+                gs.Write(hd, 0, hd.Length);
+                gs.Close();
+                ms.Position = 0;
+                using(var s = File.Create(file)) {
+                    var bw = new BinaryWriter(s);
+                    bw.Write(hd.Length);
+                    bw.Flush();
+                    ms.CopyTo(s);
+                    s.Flush();
+                }
+            }
         }
     }
 }

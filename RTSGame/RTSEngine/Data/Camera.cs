@@ -142,7 +142,7 @@ namespace RTSEngine.Data {
             Zoom(z, dt);
             camOrigin.X = MathHelper.Clamp(camOrigin.X, 0, map.Width);
             camOrigin.Z = MathHelper.Clamp(camOrigin.Z, 0, map.Depth);
-            camOrigin.Y = map.HeightAt(camOrigin.X, camOrigin.Z);
+            camOrigin.Y = map.SmoothHeightAt(camOrigin.X, camOrigin.Z);
 
             bool reset;
             camController.GetResetDefault(out reset);
