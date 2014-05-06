@@ -16,10 +16,12 @@ struct VSI {
 	float4x4 Instance : POSITION1;
     float2 UV : TEXCOORD0;
 	float2 TimeType : TEXCOORD1;
+	float4 Color : COLOR0;
 };
 struct VSO {
     float4 Position : POSITION0;
     float2 UV : TEXCOORD0;
+	float4 Color : COLOR0;
 };
 
 VSO VS(VSI input) {
@@ -31,13 +33,14 @@ VSO VS(VSI input) {
 
 	// Pass UV
 	output.UV = float2((input.TimeType.y + input.UV.x) / Splits, input.UV.y);
+	output.Color = input.Color;
 
     return output;
 }
 float4 PS(VSO input) : COLOR0 {
     float4 col = tex2D(LMap, input.UV);
 	clip(col.a - 0.1);
-	return col;
+	return col * input.Color;
 }
 
 technique Default {

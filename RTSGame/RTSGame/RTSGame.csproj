@@ -600,6 +600,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="conf\" />
+    <Folder Include="Packs\presets\" />
     <Folder Include="User\" />
   </ItemGroup>
   <ItemGroup>
