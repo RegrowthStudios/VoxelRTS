@@ -28,7 +28,7 @@ namespace Grey.Vox {
     public class Region {
         // Size Of Array
         public const int XZ_SHIFT = 4;
-        public const int Y_SHIFT = 8;
+        public const int Y_SHIFT = 6;
         public const int WIDTH = 0x01 << XZ_SHIFT;
         public const int HEIGHT = 0x01 << Y_SHIFT;
         public const int DEPTH = 0x01 << XZ_SHIFT;
@@ -152,6 +152,10 @@ namespace Grey.Vox {
                 change |= RecalculateSeams(i - PLANE_SIZE, i, Voxel.FACE_PY);
 
             // TODO: Send Update To Neighboring Regions
+            if(x == 0 && rNX != null) rNX.NotifyFacesChanged();
+            else if(x == Region.WIDTH - 1 && rPX != null) rPX.NotifyFacesChanged();
+            if(z == 0 && rNZ != null) rNZ.NotifyFacesChanged();
+            else if(z == Region.DEPTH - 1 && rPZ != null) rPZ.NotifyFacesChanged();
 
             // TODO: Use The Change
             NotifyFacesChanged();
@@ -180,6 +184,10 @@ namespace Grey.Vox {
                 change |= RecalculateSeam(i - PLANE_SIZE, i, Voxel.FACE_PY);
 
             // TODO: Send Update To Neighboring Regions
+            if(x == 0 && rNX != null) rNX.NotifyFacesChanged();
+            else if(x == Region.WIDTH - 1 && rPX != null) rPX.NotifyFacesChanged();
+            if(z == 0 && rNZ != null) rNZ.NotifyFacesChanged();
+            else if(z == Region.DEPTH - 1 && rPZ != null) rPZ.NotifyFacesChanged();
 
             // TODO: Use The Change
             NotifyFacesChanged();

@@ -149,7 +149,6 @@ namespace BlisterUI.Widgets {
             options.CopyTo(vText, 0);
             si = -1;
             RefreshVisible();
-            Widget.Offset = new Point(-FullWidth, 0);
         }
 
         void ScrollChange(ScrollBar sb, float r) {
