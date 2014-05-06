@@ -82,7 +82,9 @@ namespace RTS {
             var vi = gameInput as IVisualInputController;
             vi.Build(renderer);
             vi.Camera = camera;
-            playController.Init(state);
+            GCInitArgs gca = new GCInitArgs();
+            gca.GameTypeScript = "RTS.Default.GameTypes.SPEscapeThePlanet";
+            playController.Init(state, gca);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
             tEngine = new Thread(EngineThread);

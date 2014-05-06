@@ -72,8 +72,7 @@
     <Compile Include="Data\Combat.cs" />
     <Compile Include="Data\GameState.cs" />
     <Compile Include="Data\LevelGrid.cs" />
-    <Compile Include="Data\Parsers\EngineLoadParser.cs" />
-    <Compile Include="Data\Parsers\EnvironmentDataParser.cs" />
+    <Compile Include="Data\Parsers\EnvironmentData.cs" />
     <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
     <Compile Include="Data\Parsers\ScriptParser.cs" />
     <Compile Include="Data\Parsers\MapParser.cs" />
