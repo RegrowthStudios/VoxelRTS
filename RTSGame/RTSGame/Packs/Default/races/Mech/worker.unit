@@ -38,4 +38,4 @@ BASECOMBAT <RTSEngine.Data.BaseCombatData> {
 SCRCONTROL({~~DICTSCRIPTS~~} {Action} {RTS.Default.Worker.Action})
 SCRCONTROL({~~DICTSCRIPTS~~} {Anim}   {RTS.Default.Worker.Animation})
 SCRCONTROL({~~DICTSCRIPTS~~} {Combat} {RTS.Default.Worker.Combat})
-SCRCONTROL({~~DICTSCRIPTS~~} {Move}   {RTS.Default.Worker.Movement})
+SCRCONTROL({~~DICTSCRIPTS~~} {Move}   {RTS.Default.Unit.Movement})

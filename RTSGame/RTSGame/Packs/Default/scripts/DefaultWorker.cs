@@ -15,8 +15,8 @@ namespace RTS.Default.Worker {
     public class Action : ACUnitActionController {
         int teamIndex;
         Action<GameState, float> fDecide, fApply;
-        Combat cc;
-        Movement mc;
+        ACUnitCombatController cc;
+        ACUnitMovementController mc;
 
         // Targeting Behavior State Info
         Point targetCellPrev = Point.Zero;
@@ -46,8 +46,8 @@ namespace RTS.Default.Worker {
         }
 
         public override void Init(RTSEngine.Data.GameState s, RTSEngine.Controllers.GameplayController c) {
-            cc = unit.CombatController as Combat;
-            mc = unit.MovementController as Movement;
+            cc = unit.CombatController;
+            mc = unit.MovementController;
 
             unit.TargetingOrders = BehaviorFSM.TargetPassively;
             unit.CombatOrders = BehaviorFSM.UseMeleeAttack;
@@ -156,7 +156,7 @@ namespace RTS.Default.Worker {
             // If Target Is On The Same Team -> Might Be A Depositable Building, Etc.
             if (unit.Target.Team.Index == teamIndex) {
                 if(targetB != null) {
-                    // Prioritize Building Unbuilt buildings
+                    // Prioritize Building Unbuilt Buildings
                     if(!targetB.IsBuilt) {
                         SetState(BehaviorFSM.Build);
                     }
@@ -197,12 +197,14 @@ namespace RTS.Default.Worker {
                     cc.Attack(g, dt);
                     if(targetB != null && targetB.BuildAmountLeft <= 0) {
                         SetState(BehaviorFSM.Rest);
+                        unit.Target = null;
                     }
                     break;
                 case BehaviorFSM.Repair:
                     cc.Attack(g, dt);
                     if(targetB != null && targetB.Health >= targetB.Data.Health) {
                         SetState(BehaviorFSM.Rest);
+                        unit.Target = null;
                     }
                     break;
                 case BehaviorFSM.Harvest:
@@ -220,10 +222,9 @@ namespace RTS.Default.Worker {
         }
 
         // Worker-Specific Things
-        // TODO: Why /2?
         void ASDeposit(GameState g, float dt) {
             if (unit.Resources == 0) return;
-            unit.Team.Input.AddEvent(new CapitalEvent(teamIndex, unit.Resources/2));
+            unit.Team.Input.AddEvent(new CapitalEvent(teamIndex, unit.Resources));
             unit.Resources = 0;
             depositing = false;
         }
@@ -276,8 +277,9 @@ namespace RTS.Default.Worker {
                 // Don't Automatically Self-Target
                 if(g.activeTeams[ti].Index == teamIndex)
                     continue;
-                // TODO: Ignore Teams That Aren't On The Environment
                 RTSTeam team = g.activeTeams[ti].Team;
+                // Ignore Teams That Aren't On The Environment
+                if(team.Input.Type != RTSInputType.Environment) continue;
                 for(int i = 0; i < team.Buildings.Count; i++) {
                     RTSBuilding b = team.Buildings[i];
                     // This Check Makes Sure The Candidate Target Is In Range Of The Squad
@@ -371,164 +373,6 @@ namespace RTS.Default.Worker {
         }
         public override void Serialize(System.IO.BinaryWriter s) {
             // TODO
-        }
-    }
-
-    public class Movement : ACUnitMovementController {
-        // The Constants Used In Flow Field Calculations
-        protected const float dForce = 2f;
-        protected const float sForce = 10f;
-        protected const float pForce = -200f;
-
-        // Calculate The Unit Force Between Two Locations
-        public Vector2 UnitForce(Vector2 a, Vector2 b) {
-            Vector2 diff = a - b;
-            float mag = diff.LengthSquared();
-            return diff.X != 0 && diff.Y != 0 ? diff / mag : Vector2.Zero;
-        }
-
-        // How Many Waypoints This Unit Should Lookahead When Updating Its PF Query
-        protected const int lookahead = 2;
-
-        public override void Init(GameState s, GameplayController c) {
-            Pathfinder = c.pathfinder;
-            NetForce = Vector2.Zero;
-        }
-
-        // This Unit Movement Controller's Current PathQuery
-        public PathQuery Query { get; set; }
-
-        public override void DecideMove(GameState g, float dt) {
-            doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
-            if(!doMove) return;
-            // If The Old Path Has Become Invalidated, Send A New Query
-            bool invalid = false;
-            int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
-            for(int i = CurrentWaypointIndex; i > end; i--) {
-                Vector2 wp = Waypoints[i];
-                Point wpCell = HashHelper.Hash(wp, g.CGrid.numCells, g.CGrid.size);
-                if(g.CGrid.GetCollision(wpCell.X, wpCell.Y)) {
-                    invalid = true;
-                    break;
-                }
-            }
-            if(invalid && (Query == null || Query != null && Query.IsOld)) {
-                Vector2 goal = Waypoints[0];
-                Query = Pathfinder.ReissuePathQuery(Query, unit.GridPosition, goal, unit.Team.Index);
-            }
-            SetNetForceAndWaypoint(g);
-        }
-        public override void ApplyMove(GameState g, float dt) {
-            if(NetForce != Vector2.Zero) {
-                float magnitude = NetForce.Length();
-                Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MovementController.MinDefaultMoveSpeed * dt;
-                // TODO: Make Sure We Don't Overshoot The Goal But Otherwise Move At Max Speed
-                if(scaledChange.LengthSquared() > magnitude * magnitude)
-                    unit.Move(NetForce);
-                else
-                    unit.Move(scaledChange);
-            }
-        }
-
-        private void SetNetForceAndWaypoint(GameState g) {
-            CollisionGrid cg = g.CGrid;
-            // TODO: Make The Routine Below Fast Enough To Use
-            //int tempIdx = 0;
-            //Vector2 waypoint = Waypoints[tempIdx];
-            //float r = unit.CollisionGeometry.BoundingRadius;
-            //while(IsValid(tempIdx)) {
-            //    // Get The Waypoint Closest To The Goal That This Unit Can Straight-Shot
-            //    if(CoastIsClear(unit.GridPosition, waypoint, r, r, cg)) {
-            //        CurrentWaypointIndex = tempIdx;
-            //        break;
-            //    }
-            //    tempIdx++;
-            //}
-            Vector2 waypoint = Waypoints[CurrentWaypointIndex];
-            if(Query != null && !Query.IsOld && Query.IsComplete) {
-                Query.IsOld = true; // Only Do This Once Per Query
-                Waypoints = Query.waypoints;
-                CurrentWaypointIndex = Waypoints.Count - 1;
-            }
-            // Set Net Force...
-            NetForce = pForce*UnitForce(unit.GridPosition, waypoint);
-            Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
-            // Apply Forces From Other Units In This One's Cell
-            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
-                NetForce += dForce*UnitForce(unit.GridPosition, otherUnit.GridPosition);
-            }
-            // Apply Forces From Buildings And Other Units Near This One
-            foreach(Point n in Pathfinder.Neighborhood(unitCell)) {
-                RTSBuilding b = cg.EStatic[n.X, n.Y];
-                if(b != null)
-                    NetForce += sForce * UnitForce(unit.GridPosition, b.GridPosition);
-                foreach(var otherUnit in cg.EDynamic[n.X, n.Y]) {
-                    NetForce += sForce * UnitForce(unit.GridPosition, otherUnit.GridPosition);
-                }
-            }
-            // Set Waypoint...
-            Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
-            bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
-            float SquadRadiusSquared = unit.Squad.MovementController.SquadRadiusSquared;
-            if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < 1.5 * SquadRadiusSquared) {
-                CurrentWaypointIndex--;
-            }
-        }
-
-        // There Is A Straight-Line Path From A To B That Intersects No Collidable Objects (Ignores Dynamic Entities)
-        private bool CoastIsClear(Vector2 a, Vector2 b, float stepSize, float radius, CollisionGrid cg) {
-            Vector2 diff = b - a;
-            float mag = diff.X != 0 && diff.Y != 0 ? diff.LengthSquared() : 1.0f;
-            diff /= mag;
-            Vector2 step = stepSize * diff;
-            float root2 = 1.41421356237f;
-            Func<bool> cont;
-            if(a.X < b.X && a.Y < b.Y) {
-                cont = () => {return a.X < b.X && a.Y < b.Y; };
-            }
-            else if(a.X < b.X && a.Y > b.Y) {
-                cont = () => {return a.X < b.X && a.Y > b.Y; };
-            }
-            else if(a.X > b.X && a.Y < b.Y) {
-                cont = () => {return a.X > b.X && a.Y < b.Y; };
-            }
-            else {
-                cont = () => { return a.X > b.X && a.Y > b.Y; };
-            }
-            Vector2[] offsets = {   new Vector2(radius, 0),
-                                    new Vector2(radius / 2.0f, 0),
-                                    new Vector2(-radius, 0),
-                                    new Vector2(-radius / 2.0f, 0),
-                                    new Vector2(0, radius),
-                                    new Vector2(0, radius / 2.0f),
-                                    new Vector2(0, -radius),
-                                    new Vector2(0, -radius / 2.0f),
-                                    (new Vector2(1, 1) / root2) * radius, 
-                                    (new Vector2(1, 1) / root2) * radius / 2.0f,
-                                    (new Vector2(-1, 1) / root2) * radius,
-                                    (new Vector2(-1, 1) / root2) * radius / 2.0f,
-                                    (new Vector2(1, -1) / root2) * radius,
-                                    (new Vector2(1, -1) / root2) * radius / 2.0f,
-                                    (new Vector2(-1, -1) / root2) * radius,
-                                    (new Vector2(-1, -1) / root2) * radius / 2.0f   };
-            while(cont()) {
-                bool collision = cg.GetCollision(a);
-                foreach(var offset in offsets) {
-                    collision |= cg.GetCollision(a + offset);
-                }
-                if(collision)
-                    return false;
-                a += step;
-            }
-            return true;
-        }
-
-        public override void Serialize(BinaryWriter s) {
-
-        }
-
-        public override void Deserialize(BinaryReader s) {
-
         }
     }
 

@@ -15,8 +15,8 @@ namespace RTS.Default.Unit {
     public class Action : ACUnitActionController {
         int teamIndex;
         Action<GameState, float> fDecide, fApply;
-        Combat cc;
-        Movement mc;
+        ACUnitCombatController cc;
+        ACUnitMovementController mc;
 
         // Targeting Behavior State Info
         Point targetCellPrev = Point.Zero;
@@ -43,8 +43,8 @@ namespace RTS.Default.Unit {
         }
 
         public override void Init(GameState s, GameplayController c) {
-            cc = unit.CombatController as Combat;
-            mc = unit.MovementController as Movement;
+            cc = unit.CombatController;
+            mc = unit.MovementController;
 
             unit.TargetingOrders = BehaviorFSM.TargetPassively;
             unit.CombatOrders = BehaviorFSM.UseRangedAttack;
@@ -285,9 +285,6 @@ namespace RTS.Default.Unit {
             Pathfinder = c.pathfinder;
             NetForce = Vector2.Zero;
         }
-
-        // This Unit Movement Controller's Current PathQuery
-        public PathQuery Query { get; set; }
 
         public override void DecideMove(GameState g, float dt) {
             doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
