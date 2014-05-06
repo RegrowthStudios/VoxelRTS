@@ -13,6 +13,22 @@ using RTSEngine.Graphics;
 using RTSEngine.Interfaces;
 
 namespace RTSEngine.Controllers {
+    // This Is How A Team Should Be Made
+    public struct TeamInitOption {
+        public string PlayerName;
+        public int InputType;
+        public string Race;
+        public RTSColorScheme Colors;
+    }
+
+    // The Data The Engine Needs To Know About To Properly Create A Game
+    public struct EngineLoadData {
+        // Teams In The Battle
+        public TeamInitOption[] Teams;
+
+        // Where To Load The Map
+        public FileInfo MapFile;
+    }
 
     public static class GameEngine {
         public static void SearchAllInitInfo(DirectoryInfo dir, Dictionary<string, FileInfo> races, Dictionary<string, RTSColorScheme> dictSchemes) {

@@ -314,7 +314,23 @@ namespace RTSEngine.Data {
             }
         }
 
-        public string InfoFile;
+        // IO Information
+        private string localFile;
+        public string InfoFile {
+            get { return localFile; }
+            set {
+                localFile = value;
+                File = new FileInfo(localFile);
+            }
+        }
+        public FileInfo File {
+            get;
+            private set;
+        }
+        public DirectoryInfo Directory {
+            get { return File.Directory; }
+        }
+
         public Heightmap L0;
         public CollisionGrid L1;
         public ImpactGrid L2;
