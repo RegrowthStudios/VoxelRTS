@@ -297,12 +297,15 @@ namespace RTS.Input {
                 else
                     level = 0;
 
+                //level = 3;
 
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
 
                     // Decide disaster type
                     int type = random.Next(2);
+
+                   // type = 1;
 
                     // Create the appropriate disaster
                     if(type == 0) {
@@ -327,15 +330,17 @@ namespace RTS.Input {
                 FireRunning = false;
                 FireThread.Join();
             }
-            FireThread = new Thread(FireWorkThread);
-            FireThread.IsBackground = true;
-            FireRunning = true;
-            List<Point> fires = new List<Point>();
-            foreach (var f in FireStarts) {
-                fires.Add(f);
+            if (FireStarts.Count > 0) {
+                FireThread = new Thread(FireWorkThread);
+                FireThread.IsBackground = true;
+                FireRunning = true;
+                List<Point> fires = new List<Point>();
+                foreach (var f in FireStarts) {
+                    fires.Add(f);
+                }
+                FireStarts.Clear();
+                FireThread.Start(fires);
             }
-            FireStarts.Clear();
-            FireThread.Start(fires);
         }
 
        
@@ -435,6 +440,7 @@ namespace RTS.Input {
 
         // Natural Disaster That Damages Units
         private void CreateLightning(Region r) {
+            List<LightningParticle> particles = new List<LightningParticle>();
             foreach(var ic in r.Cells) {
                 Point c = new Point(ic.X * 2, ic.Y * 2);
                 for(int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
@@ -444,16 +450,19 @@ namespace RTS.Input {
                                 bool takeDamage = (random.Next(100) <= LightningHitP);
                                 if(takeDamage) {
                                     u.Damage(LightningDamage);
+                                    particles.Add(new LightningParticle(u.WorldPosition, 3, 7, 2, 0.6f, 5));
                                 }
                             }
                         }
                     }
                 }
             }
+            GameState.AddParticles(particles);
         }
 
         // Natural Disaster That Damages Buildings
         private void CreateEarthquake(Region r) {
+            List<LightningParticle> particles = new List<LightningParticle>();
             foreach(var ic in r.Cells) {
                 Point c = new Point(ic.X * 2, ic.Y * 2);
                 for(int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
@@ -463,12 +472,14 @@ namespace RTS.Input {
                             bool takeDamage = (random.Next(100) <= EarthquakeHitP);
                             if(takeDamage) {
                                 b.Damage(EarthquakeDamage);
+                                particles.Add(new LightningParticle(b.WorldPosition, 3, 8, 2, 2, 5));
                             }
                         }
 
                     }
                 }
             }
+            GameState.AddParticles(particles);
         }
         /*
         private void SpawnUnits(Region r, int level) {
