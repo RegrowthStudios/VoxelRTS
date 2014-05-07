@@ -30,7 +30,7 @@ namespace RTS.Input {
         private RTSTeam player; // Player
         private float playerDistance; // How far is player unit from my barracks?
         private RTSUnit targetUnit; // Target unit
-        private int spawnCoolDown; // Not used yet
+        private float spawnCoolDown; // 
         private int[,] unitBatches = new int[3,10]; // Unit patterns to spawn
 
         public AI()
@@ -54,9 +54,11 @@ namespace RTS.Input {
             MaxUnit = Team.Buildings.Count * 10;
             aggressionLevel = AggressionLevel.LOW;
             playerDistance = float.MaxValue;
+            spawnCoolDown = 0;
         }
 
-        public void DecideAction(GameState g) {
+        public void DecideAction(GameState g, float dt) {
+            spawnCoolDown -= dt;
             // Update aggression level
             if (g.TotalGameTime > 60) {
                 aggressionLevel = AggressionLevel.HIGH;
@@ -79,8 +81,11 @@ namespace RTS.Input {
             }
         }
 
-        public void ApplyAction(GameState g) {
-            SpawnUnits(g);
+        public void ApplyAction(GameState g, float dt) {
+            if (spawnCoolDown < 0) {
+                SpawnUnits(g);
+                spawnCoolDown = 30;
+            }
             MoveUnits(g);
         }
 
