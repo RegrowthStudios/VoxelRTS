@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using BlisterUI.Widgets;
 using Microsoft.Xna.Framework;
+using RTSEngine.Data;
 
 namespace RTS.Input {
     public class RTSUITeamDataPanel : IDisposable {
@@ -105,9 +106,9 @@ namespace RTS.Input {
 
             Width = 400;
 
-            ColorBase = new Color(8, 8, 8);
+            ColorBase = UserConfig.MainScheme.WidgetBase;
             ColorPop = Color.White;
-            ColorText = Color.Red;
+            ColorText = UserConfig.MainScheme.Text;
 
             VictoryText = "Victory Condition";
             Capital = 0;

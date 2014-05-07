@@ -12,6 +12,7 @@ using RTSEngine.Controllers;
 using RTSEngine.Graphics;
 using RTSEngine.Algorithms;
 using RTSEngine.Interfaces;
+using Grey.Engine;
 
 namespace RTSEngine.Data {
     public struct IndexedTeam {
@@ -63,6 +64,12 @@ namespace RTSEngine.Data {
                 state.tbMemBuildings.AddTask(ebu);
             }
             LevelGrid.Deserialize(s, state);
+        }
+
+        // The Voxel Grid :)
+        public VoxState VoxState {
+            get;
+            private set;
         }
 
         // The Grids For The Level
@@ -125,6 +132,8 @@ namespace RTSEngine.Data {
             Regions = new List<Region>();
 
             // No Data Yet Available
+            VoxState = new VoxState();
+            VoxState.World.worldMin = Point.Zero;
             Scripts = new Dictionary<string, ReflectedScript>();
             grid = new LevelGrid();
             grid.L0 = null;

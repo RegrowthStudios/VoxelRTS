@@ -8,26 +8,22 @@ using RTSEngine.Data.Parsers;
 
 namespace RTS.Input {
     public class UICRTS {
-        [ZXParse("Font")]
         public string Font;
-        [ZXParse("FontSize")]
         public int FontSize;
 
-        [ZXParse("BottomPanelHeight")]
-        public int BottomPanelHeight;
-        [ZXParse("BottomPanelColor")]
-        public Color BottomPanelColor;
-
-        [ZXParse("MinimapBorder")]
         public int MinimapBorder;
+        public int MinimapSize;
 
-        [ZXParse("SelectionRows")]
+        public int BBRows;
+        public int BBColumns;
+        public int BBIconSize;
+        public int BBIconBuffer;
+        public string BBTexture;
+
         public int SelectionRows;
-        [ZXParse("SelectionColumns")]
         public int SelectionColumns;
-        [ZXParse("SelectionIconSize")]
         public int SelectionIconSize;
-        [ZXParse("SelectionIconBuffer")]
         public int SelectionIconBuffer;
+        public string SelectionTexture;
     }
 }

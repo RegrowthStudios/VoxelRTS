@@ -5,8 +5,16 @@ BottomPanelHeight       [140]
 BottomPanelColor        [20, 20, 20, 255]
 
 MinimapBorder           [5]
+MinimapSize             [80]
+
+BBRows                  [3]
+BBColumns               [4]
+BBIconSize              [32]
+BBIconBuffer            [4]
+BBTexture               [Packs\Default\textures\BBPanel.png]
 
 SelectionRows           [2]
-SelectionColumns        [4]
-SelectionIconSize       [64]
+SelectionColumns        [5]
+SelectionIconSize       [46]
 SelectionIconBuffer     [4]
+SelectionTexture        [Packs\Default\textures\SelectionPanel.png]

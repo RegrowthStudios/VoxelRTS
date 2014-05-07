@@ -37,10 +37,8 @@ namespace RTS {
         private ACInputController gameInput;
         private IVisualInputController vInput;
 
-        Vector3 clickWorldPos;
         int team, type;
         bool pauseEngine, pauseRender;
-        bool addUnit, addBuilding;
         int playing;
         Thread tEngine;
         SpriteFont sfDebug;
@@ -69,7 +67,6 @@ namespace RTS {
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
             DevConsole.OnNewCommand += DevConsole_OnNewCommand;
 
-            addUnit = false;
             team = 0;
             type = 0;
 
@@ -174,12 +171,6 @@ namespace RTS {
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
-                case Keys.E:
-                    addUnit = true;
-                    break;
-                case Keys.R:
-                    addBuilding = true;
-                    break;
                 case Keys.P:
                     if(!DevConsole.IsActivated)
                         pauseEngine = !pauseEngine;
@@ -201,12 +192,6 @@ namespace RTS {
         }
         public void OnKR(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
-                case Keys.E:
-                    addUnit = false;
-                    break;
-                case Keys.R:
-                    addBuilding = false;
-                    break;
             }
         }
 

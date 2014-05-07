@@ -18,8 +18,11 @@ namespace RTSEngine.Data.Parsers {
         public float MapHeight;
         public Microsoft.Xna.Framework.Point[] PlayerSpawns;
 
+        [ZXParse]
         public LevelGrid LGrid;
+        [ZXParse]
         public List<Region> Regions;
+        public string VoxWorldFile;
 
         public TerrainData() {
             Regions = new List<Region>();
@@ -29,7 +32,6 @@ namespace RTSEngine.Data.Parsers {
         public void ReadHeightData(string rootPath, string filePath) {
             string path = Path.Combine(rootPath, filePath);
             LGrid.L0 = new Heightmap(path);
-            LGrid.L0.ScaleHeights(MapHeight);
         }
         public void ReadGridData(string rootPath, string filePath) {
             string path = Path.Combine(rootPath, filePath);

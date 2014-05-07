@@ -17,7 +17,7 @@ SURVIVALSPAWN   [100, 100]
 MapHeight [5]
 ReadHeightData({~~FILEROOTDIR~~} {height.hmd})
 ReadGridData({~~FILEROOTDIR~~} {Region5x5.png})
-
+VoxWorldFile [vox.world]
 BuildPrimary(
     {~~RENDERER~~}
     {~~FILEROOTDIR~~}

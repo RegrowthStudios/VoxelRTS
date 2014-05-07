@@ -50,6 +50,7 @@
     <Compile Include="Engine\Events\VEWorldMod.cs" />
     <Compile Include="Engine\Events\VEvent.cs" />
     <Compile Include="Engine\VoxState.cs" />
+    <Compile Include="Graphics\Geo\VGPCustom.cs" />
     <Compile Include="Graphics\Geo\VGPRamp.cs" />
     <Compile Include="Graphics\Geo\VGPCube6.cs" />
     <Compile Include="Graphics\Geo\IVGeoProvider.cs" />
@@ -63,6 +64,8 @@
     <Compile Include="Vox\Ops\RegionGreedyMesher.cs" />
     <Compile Include="Vox\Ops\RegionLoader.cs" />
     <Compile Include="Vox\Ops\RegionTesselator.cs" />
+    <Compile Include="Vox\Ops\VRay.cs" />
+    <Compile Include="Vox\Ops\VRayHelper.cs" />
     <Compile Include="Vox\Ops\Workers.cs" />
     <Compile Include="Vox\RegionPager.cs" />
     <Compile Include="Vox\VoxData.cs" />
