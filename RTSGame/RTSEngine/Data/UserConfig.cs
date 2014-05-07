@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using RTSEngine.Data.Parsers;
+using Microsoft.Xna.Framework;
 
 namespace RTSEngine.Data {
     public static class UserConfig {
@@ -13,6 +14,21 @@ namespace RTSEngine.Data {
         public const int DEFAULT_RES_WIDTH = 800;
         public const int DEFAULT_RES_HEIGHT = 600;
 
+        public class ColorScheme {
+            public Color WidgetBase;
+            public Color WidgetInactive;
+            public Color WidgetActive;
+            public Color WidgetBorder;
+            public Color Text;
+
+            public ColorScheme() {
+                WidgetBase = new Color(12, 12, 12);
+                WidgetInactive = new Color(12, 12, 26);
+                WidgetActive = new Color(20, 80, 120);
+                WidgetBorder = new Color(15, 15, 0);
+                Text = new Color(200, 250, 100);
+            }
+        }
         private class Args {
             [ZXParse("FULL")]
             public bool FullScreen;
@@ -23,16 +39,23 @@ namespace RTSEngine.Data {
             [ZXParse("RESHEIGHT")]
             public int ResHeight;
 
+            [ZXParse("CSMAIN")]
+            public ColorScheme MainScheme;
+
             public Args() {
                 FullScreen = false;
                 UserName = DEFAULT_USER_NAME;
                 ResWidth = DEFAULT_RES_WIDTH;
                 ResHeight = DEFAULT_RES_HEIGHT;
+                MainScheme = new ColorScheme();
             }
         }
 
         private static Args data = new Args();
         private static bool changeDetected = false;
+        public static ColorScheme MainScheme {
+            get { return data.MainScheme; }
+        }
 
         public static bool UseFullscreen {
             get { return data.FullScreen; }

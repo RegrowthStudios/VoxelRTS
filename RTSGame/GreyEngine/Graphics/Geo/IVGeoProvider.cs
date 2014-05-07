@@ -7,6 +7,15 @@ using Microsoft.Xna.Framework;
 
 namespace Grey.Graphics {
     public struct MeshedFace {
+        public static readonly Vector3I[,] FACE_AXES = {
+            { new Vector3I(0, 0, 1), new Vector3I(0, -1, 0) },
+            { new Vector3I(0, 0, -1), new Vector3I(0, -1, 0) },
+            { new Vector3I(1, 0, 0), new Vector3I(0, 0, -1) },
+            { new Vector3I(1, 0, 0), new Vector3I(0, 0, 1) },
+            { new Vector3I(-1, 0, 0), new Vector3I(0, -1, 0) },
+            { new Vector3I(1, 0, 0), new Vector3I(0, -1, 0) }
+        };
+
         // Rectangle Locations
         public Vector3I RXNYN;
         public Vector3I RXPYN;

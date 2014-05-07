@@ -12,11 +12,18 @@ using BlisterUI.Input;
 using RTSEngine.Data.Parsers;
 
 namespace RTS {
-    public class InduZtryScreen : GameScreenIndexed {
+    public class InduZtryScreen : GameScreen<App> {
         private const string UIC_FILE = @"Content\UI\Config\InduZtry.uic";
 
-        public InduZtryScreen(int i) : base(i) { }
-        public InduZtryScreen(int p, int n) : base(p, n) { }
+        bool early;
+        public override int Next {
+            get { return early ? game.LoginScreen.Index : game.PressEnterScreen.Index; }
+            protected set { }
+        }
+        public override int Previous {
+            get { return -1; }
+            protected set { }
+        }
 
         private UICInduZtry uic;
 
@@ -85,6 +92,7 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            early = false;
             KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;
 
             t = uic.LightningLerpTime;
@@ -250,7 +258,14 @@ namespace RTS {
         }
 
         void KeyboardEventDispatcher_OnKeyPressed(object sender, KeyEventArgs args) {
-            State = ScreenState.ChangeNext;
+            switch(args.KeyCode) {
+                case Keys.Space:
+                case Keys.Enter:
+                case Keys.Escape:
+                    early = true;
+                    State = ScreenState.ChangeNext;
+                    break;
+            }
         }
     }
 }

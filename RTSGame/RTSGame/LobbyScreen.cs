@@ -17,6 +17,15 @@ using System.Text.RegularExpressions;
 using RTSEngine.Interfaces;
 
 namespace RTS {
+    public struct GamePreset {
+        public string Name;
+        public string LoadImage;
+        public string GameType;
+        public string Map;
+        public string[] PlayerTypes;
+        public string[] Races;
+    }
+
     public class TeamInitWidget : IDisposable {
         public BaseWidget Parent {
             set {
@@ -224,8 +233,11 @@ namespace RTS {
         }
     }
 
+
+
     public class LobbyScreen : GameScreen<App> {
         private static readonly Regex rgxLoadGame = RegexHelper.GenerateFile("load");
+        private const string PRESET_DIR = @"Packs\presets";
 
         public override int Next {
             get { return game.LoadScreen.Index; }
@@ -242,6 +254,7 @@ namespace RTS {
             private set;
         }
         Dictionary<string, RTSColorScheme> schemes;
+        List<GamePreset> gPresets;
 
         private EngineLoadData eld;
         public EngineLoadData InitInfo {
@@ -250,9 +263,18 @@ namespace RTS {
 
         WidgetRenderer wr;
         TeamInitWidget[] widgets;
+        TextWidget textGTController, textMap;
         IDisposable tFont;
+        ScrollMenu menuPresets;
 
         public override void Build() {
+            gPresets = new List<GamePreset>();
+            var di = new DirectoryInfo(PRESET_DIR);
+            foreach(var fi in di.GetFiles()) {
+                if(!fi.Extension.EndsWith(@"game")) continue;
+                GamePreset gp = (GamePreset)ZXParser.ParseFile(fi.FullName, typeof(GamePreset));
+                gPresets.Add(gp);
+            }
         }
         public override void Destroy(GameTime gameTime) {
         }
@@ -297,16 +319,45 @@ namespace RTS {
                 widgets[i].Set(pt, Races, schemes);
             }
             widgets[0].TextUser.Text = UserConfig.UserName;
-            var k = Races.Keys.FirstOrDefault((s) => { return true; });
-            widgets[0].PlayerType = "Player";
-            widgets[0].Race = k;
-            widgets[1].PlayerType = "Computer";
-            widgets[1].Race = k;
+
+            menuPresets = new ScrollMenu(wr,
+                game.Window.ClientBounds.Width - widgets[0].BackRect.Width - 20,
+                24,
+                game.Window.ClientBounds.Height / 24,
+                20,
+                40
+                );
+            menuPresets.BaseColor = UserConfig.MainScheme.WidgetBase;
+            menuPresets.TextColor = UserConfig.MainScheme.Text;
+            menuPresets.ScrollBarBaseColor = UserConfig.MainScheme.WidgetInactive;
+            menuPresets.HighlightColor = UserConfig.MainScheme.WidgetActive;
+            menuPresets.Widget.Anchor = new Point(game.Window.ClientBounds.Width - 20, 0);
+            menuPresets.Widget.AlignX = Alignment.RIGHT;
+            menuPresets.Build((from gp in gPresets select gp.Name).ToArray());
+            menuPresets.Hook();
+
+            textMap = new TextWidget(wr);
+            textMap.Color = UserConfig.MainScheme.Text;
+            textMap.Offset = new Point(0, 5);
+            textMap.Height = 32;
+            textMap.OffsetAlignY = Alignment.BOTTOM;
+            textMap.Parent = widgets[widgets.Length - 1].BackRect;
+
+            textGTController = new TextWidget(wr);
+            textGTController.Color = UserConfig.MainScheme.Text;
+            textGTController.Offset = new Point(0, 5);
+            textGTController.Height = 32;
+            textGTController.OffsetAlignY = Alignment.BOTTOM;
+            textGTController.Parent = textMap;
+
+            SetWidgetData(gPresets[0]);
 
             DevConsole.OnNewCommand += DevConsole_OnNewCommand;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPressed;
+            MouseEventDispatcher.OnMousePress += OnMP;
         }
         public override void OnExit(GameTime gameTime) {
+            MouseEventDispatcher.OnMousePress -= OnMP;
             DevConsole.OnNewCommand -= DevConsole_OnNewCommand;
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPressed;
             DevConsole.Deactivate();
@@ -315,6 +366,7 @@ namespace RTS {
                 game.LoadScreen.LoadData = eld;
             }
 
+            menuPresets.Dispose();
             foreach(var w in widgets) w.Dispose();
             wr.Dispose();
             tFont.Dispose();
@@ -360,7 +412,17 @@ namespace RTS {
                         break;
                 }
             }
-            eld.MapFile = new FileInfo(@"Packs\Default\maps\0\test.map");
+            eld.MapFile = new FileInfo(textMap.Text);
+            eld.GTController = textGTController.Text;
+        }
+        private void SetWidgetData(GamePreset gp) {
+            for(int i = 0; i < gp.Races.Length; i++) {
+                widgets[i].PlayerType = gp.PlayerTypes[i];
+                widgets[i].Race = gp.Races[i];
+            }
+            game.LoadScreen.ImageFile = gp.LoadImage;
+            textGTController.Text = gp.GameType;
+            textMap.Text = gp.Map;
         }
 
         void OnKeyPressed(object sender, KeyEventArgs args) {
@@ -369,12 +431,29 @@ namespace RTS {
                     if(!DevConsole.IsActivated)
                         State = ScreenState.ChangeNext;
                     break;
+                case Keys.P:
+                case Keys.Back:
+                    if(!DevConsole.IsActivated)
+                        State = ScreenState.ChangePrevious;
+                    break;
                 case DevConsole.ACTIVATION_KEY:
                     if(DevConsole.IsActivated)
                         DevConsole.Deactivate();
                     else
                         DevConsole.Activate();
                     break;
+            }
+        }
+        void OnMP(Vector2 pos, MouseButton button) {
+            Point p = new Point((int)pos.X, (int)pos.Y);
+            string gps = menuPresets.GetSelection(p.X, p.Y);
+            if(gps != null) {
+                foreach(var gp in gPresets) {
+                    if(gp.Name.Equals(gps)) {
+                        SetWidgetData(gp);
+                        return;
+                    }
+                }
             }
         }
         void DevConsole_OnNewCommand(string obj) {

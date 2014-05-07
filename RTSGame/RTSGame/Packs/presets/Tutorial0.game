@@ -1,0 +1,26 @@
+﻿Name        [Tutorial 1]
+PlayerTypes [
+    {Player}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+]
+Races [
+    {Mech}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+]
+LoadImage   [Packs\presets\Tutorial0.png]
+GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
+Map         [Packs\Default\maps\Tutorial0\info.map]

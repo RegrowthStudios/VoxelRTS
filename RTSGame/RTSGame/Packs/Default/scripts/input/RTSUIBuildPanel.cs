@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using BlisterUI.Widgets;
 using Microsoft.Xna.Framework;
+using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 
@@ -119,10 +120,10 @@ namespace RTS.Input {
                 buttonsText[i].Parent = buttons[i];
             }
 
-            BaseColor = Color.Black;
-            HighlightColor = Color.DarkSlateGray;
-            TextColor = Color.White;
-            ScrollBarBaseColor = Color.Red;
+            BaseColor = UserConfig.MainScheme.WidgetBase;
+            HighlightColor = UserConfig.MainScheme.WidgetActive;
+            TextColor = UserConfig.MainScheme.Text;
+            ScrollBarBaseColor = UserConfig.MainScheme.WidgetInactive;
         }
         public void Dispose() {
             rectBase.Dispose();

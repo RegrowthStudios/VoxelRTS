@@ -65,6 +65,7 @@
     <Compile Include="Graphics\Particles\FireShader.cs" />
     <Compile Include="Graphics\Particles\LightningShader.cs" />
     <Compile Include="Graphics\Particles\ParticleList.cs" />
+    <Compile Include="Graphics\VoxMap.cs" />
     <Compile Include="Interfaces\ACInputController.cs" />
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
@@ -157,6 +158,10 @@
     <ProjectReference Include="..\CommonExt\CommonExt.csproj">
       <Project>{c3fcb10d-3f6d-45cb-8b75-4897c73bc502}</Project>
       <Name>CommonExt</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GreyEngine\GreyEngine.csproj">
+      <Project>{64a9ea1d-525b-473b-bd9a-4c2cc41ef487}</Project>
+      <Name>GreyEngine</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
