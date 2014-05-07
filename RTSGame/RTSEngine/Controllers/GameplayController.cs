@@ -122,12 +122,6 @@ namespace RTSEngine.Controllers {
             s.VoxState.VWorkPool.Start(1, System.Threading.ThreadPriority.BelowNormal);
             vManager = new WorldManager(s.VoxState);
 
-            // Start The Game Type Controller
-            s.scrGTC = s.Scripts[args.GameTypeScript];
-            s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
-            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
-            s.gtC.Start(s);
-
             // Add All Tasks
             foreach(var at in s.activeTeams) {
                 foreach(var unit in at.Team.Units) {
@@ -140,6 +134,12 @@ namespace RTSEngine.Controllers {
                     AddTask(s, squad);
                 }
             }
+
+            // Start The Game Type Controller
+            s.scrGTC = s.Scripts[args.GameTypeScript];
+            s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
+            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
+            s.gtC.Start(s);
         }
 
         // The Update Function

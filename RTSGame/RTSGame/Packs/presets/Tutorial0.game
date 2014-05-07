@@ -22,5 +22,5 @@ Races [
     {None}
 ]
 LoadImage   [Packs\presets\Tutorial0.png]
-GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
+GameType    [RTS.Default.Tutorials.Tut0]
 Map         [Packs\Default\maps\Tutorial0\info.map]
