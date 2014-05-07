@@ -33,6 +33,7 @@ namespace RTSEngine.Data.Parsers {
         [ZXParse]
         public RTSUnitModel View;
 
+        [ZXParse("ViewModel")]
         public void Build(RTSRenderer renderer, string rootPath, string model, string[] tex) {
             using(var sModel = File.OpenRead(Path.Combine(rootPath, model))) {
                 Texture2D tAnim = AnimationFromBitmap(renderer, Path.Combine(rootPath, tex[0]));
@@ -41,6 +42,7 @@ namespace RTSEngine.Data.Parsers {
             View.ModelTexture = renderer.LoadTexture2D(Path.Combine(rootPath, tex[1]));
             View.ColorCodeTexture = renderer.LoadTexture2D(Path.Combine(rootPath, tex[2]));
         }
+        [ZXParse("ViewIcon")]
         public void BuildIcon(RTSRenderer renderer, RTSRace race, string name, string rootPath, string icon) {
             string key = string.Join(".", race.FriendlyName, name);
             if(!renderer.IconLibrary.ContainsKey(key))

@@ -77,6 +77,7 @@ namespace RTSEngine.Data.Team {
         }
 
         // The Friendly Name
+        [ZXParse("Name")]
         public string FriendlyName;
         public string InfoFile;
         public readonly int Index;
@@ -117,6 +118,29 @@ namespace RTSEngine.Data.Team {
         public RTSBuildingData(int i) {
             Index = i;
             DefaultButtonControllers = new List<ReflectedScript>();
+        }
+
+        public void SetBBox(Vector3 min, Vector3 max) {
+            BBox.Min = min;
+            BBox.Max = max;
+            Vector3 c = BBox.Min + BBox.Max;
+            c *= 0.5f;
+            Vector3 s = BBox.Max - BBox.Min;
+            ICollidableShape = new CollisionRect(s.X, s.Z, new Vector2(c.X, c.Z), true);
+        }
+
+        public void SetController(Dictionary<string, ReflectedScript> d, string cType, string key) {
+            switch(cType.Trim().ToLower()) {
+                case "act":
+                case "action":
+                    d.TryGetValue(key, out DefaultActionController);
+                    break;
+                case "button":
+                    ReflectedScript scr;
+                    d.TryGetValue(key, out scr);
+                    DefaultButtonControllers.Add(scr);
+                    break;
+            }
         }
     }
 }

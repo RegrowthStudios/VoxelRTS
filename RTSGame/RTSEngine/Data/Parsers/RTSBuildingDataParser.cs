@@ -15,14 +15,22 @@ namespace RTSEngine.Data.Parsers {
         [ZXParse]
         public RTSBuildingModel View;
 
+        [ZXParse("ViewModel")]
         public void Build(RTSRenderer renderer, string rootPath, string model, string[] tex) {
             using(var sModel = File.OpenRead(Path.Combine(rootPath, model))) {
                 View = new RTSBuildingModel(renderer, sModel);
             }
-            View.ModelTexture = renderer.LoadTexture2D(Path.Combine(rootPath, tex[1]));
-            View.ColorCodeTexture = renderer.LoadTexture2D(Path.Combine(rootPath, tex[2]));
+            View.ModelTexture = renderer.LoadTexture2D(Path.Combine(rootPath, tex[0]));
+            View.ColorCodeTexture = renderer.LoadTexture2D(Path.Combine(rootPath, tex[1]));
         }
+        [ZXParse("ViewIcon")]
         public void BuildIcon(RTSRenderer renderer, RTSRace race, string name, string rootPath, string icon) {
+            string key = string.Join(".", race.FriendlyName, name);
+            if(!renderer.IconLibrary.ContainsKey(key))
+                renderer.IconLibrary.Add(key, renderer.LoadTexture2D(Path.Combine(rootPath, icon)));
+        }
+        [ZXParse("ViewButton")]
+        public void BuildButton(RTSRenderer renderer, RTSRace race, string name, string rootPath, string icon) {
             string key = string.Join(".", race.FriendlyName, name);
             if(!renderer.IconLibrary.ContainsKey(key))
                 renderer.IconLibrary.Add(key, renderer.LoadTexture2D(Path.Combine(rootPath, icon)));
@@ -64,61 +72,61 @@ namespace RTSEngine.Data.Parsers {
             ZXParser.SetEnvironment("RACE", race);
             RTSBuildingViewData vd = ZXParser.ParseFile(infoFile.FullName, typeof(RTSBuildingViewData)) as RTSBuildingViewData;
             return vd.View;
-            
-            // Check File Existence
-            if(infoFile == null || !infoFile.Exists) return null;
 
-            // Read The Entire File
-            string mStr;
-            using(FileStream fs = File.OpenRead(infoFile.FullName)) {
-                StreamReader s = new StreamReader(fs);
-                mStr = s.ReadToEnd();
-            }
+            //// Check File Existence
+            //if(infoFile == null || !infoFile.Exists) return null;
 
-            // Match Tokens
-            Match[] mp = {
-                rgxModel.Match(mStr),
-                rgxMainTex.Match(mStr),
-                rgxColorTex.Match(mStr),
-                rgxIcon.Match(mStr),
-                rgxName.Match(mStr)
-            };
+            //// Read The Entire File
+            //string mStr;
+            //using(FileStream fs = File.OpenRead(infoFile.FullName)) {
+            //    StreamReader s = new StreamReader(fs);
+            //    mStr = s.ReadToEnd();
+            //}
 
-            // Check Existence
-            foreach(var m in mp) if(!m.Success) return null;
-            FileInfo fiModel = RegexHelper.ExtractFile(mp[0], infoFile.Directory.FullName);
-            FileInfo fiTexMain = RegexHelper.ExtractFile(mp[1], infoFile.Directory.FullName);
-            FileInfo fiTexKey = RegexHelper.ExtractFile(mp[2], infoFile.Directory.FullName);
-            FileInfo fiIcon = RegexHelper.ExtractFile(mp[3], infoFile.Directory.FullName);
-            if(!fiModel.Exists || !fiTexMain.Exists || !fiTexKey.Exists || !fiIcon.Exists)
-                return null;
+            //// Match Tokens
+            //Match[] mp = {
+            //    rgxModel.Match(mStr),
+            //    rgxMainTex.Match(mStr),
+            //    rgxColorTex.Match(mStr),
+            //    rgxIcon.Match(mStr),
+            //    rgxName.Match(mStr)
+            //};
 
-            RTSBuildingModel model;
-            using(var sModel = File.OpenRead(fiModel.FullName)) {
-                model = new RTSBuildingModel(renderer, sModel);
-            }
-            model.ModelTexture = renderer.LoadTexture2D(fiTexMain.FullName);
-            model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
+            //// Check Existence
+            //foreach(var m in mp) if(!m.Success) return null;
+            //FileInfo fiModel = RegexHelper.ExtractFile(mp[0], infoFile.Directory.FullName);
+            //FileInfo fiTexMain = RegexHelper.ExtractFile(mp[1], infoFile.Directory.FullName);
+            //FileInfo fiTexKey = RegexHelper.ExtractFile(mp[2], infoFile.Directory.FullName);
+            //FileInfo fiIcon = RegexHelper.ExtractFile(mp[3], infoFile.Directory.FullName);
+            //if(!fiModel.Exists || !fiTexMain.Exists || !fiTexKey.Exists || !fiIcon.Exists)
+            //    return null;
 
-            if(race != null) {
-                string key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mp[4]));
-                if(!renderer.IconLibrary.ContainsKey(key))
-                    renderer.IconLibrary.Add(key, renderer.LoadTexture2D(fiIcon.FullName));
+            //RTSBuildingModel model;
+            //using(var sModel = File.OpenRead(fiModel.FullName)) {
+            //    model = new RTSBuildingModel(renderer, sModel);
+            //}
+            //model.ModelTexture = renderer.LoadTexture2D(fiTexMain.FullName);
+            //model.ColorCodeTexture = renderer.LoadTexture2D(fiTexKey.FullName);
 
-                var mButton = rgxCtrlButton.Match(mStr);
-                var mButtonIcon = rgxCtrlButtonIcon.Match(mStr);
-                while(mButton.Success && mButtonIcon.Success) {
-                    key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mButton));
-                    if(!renderer.IconLibrary.ContainsKey(key))
-                        renderer.IconLibrary.Add(key, renderer.LoadTexture2D(RegexHelper.ExtractFile(mButtonIcon, infoFile.Directory.FullName).FullName));
+            //if(race != null) {
+            //    string key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mp[4]));
+            //    if(!renderer.IconLibrary.ContainsKey(key))
+            //        renderer.IconLibrary.Add(key, renderer.LoadTexture2D(fiIcon.FullName));
 
-                    mButton = mButton.NextMatch();
-                    mButtonIcon = mButtonIcon.NextMatch();
-                }
-            }
+            //    var mButton = rgxCtrlButton.Match(mStr);
+            //    var mButtonIcon = rgxCtrlButtonIcon.Match(mStr);
+            //    while(mButton.Success && mButtonIcon.Success) {
+            //        key = string.Join(".", race.FriendlyName, RegexHelper.Extract(mButton));
+            //        if(!renderer.IconLibrary.ContainsKey(key))
+            //            renderer.IconLibrary.Add(key, renderer.LoadTexture2D(RegexHelper.ExtractFile(mButtonIcon, infoFile.Directory.FullName).FullName));
+
+            //        mButton = mButton.NextMatch();
+            //        mButtonIcon = mButtonIcon.NextMatch();
+            //    }
+            //}
 
 
-            return model;
+            //return model;
         }
         public static RTSBuildingData ParseData(Dictionary<string, ReflectedScript> controllers, FileInfo infoFile, int index) {
             // Check File Existence

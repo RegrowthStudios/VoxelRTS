@@ -1,35 +1,57 @@
-﻿// Friendly Unit Name
-NAME            [Barracks]
-
-// Unit Model
-MODEL           [models\Barracks.model]
-TEXMAIN         [textures\BarracksMain.png]
-TEXCOLOR        [textures\BarracksKey.png]
-ICON            [icons\Barracks.png]
-MAXCOUNT        [1000]
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Barracks.model}
+    {{textures\BarracksMain.png} {textures\BarracksKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Barracks}
+    {~~FILEROOTDIR~~}
+    {icons\Barracks.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {RTS.Default.Buttons.Spawn.Soldier}
+    {~~FILEROOTDIR~~}
+    {icons\Soldier.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {RTS.Default.Buttons.Spawn.Heavy}
+    {~~FILEROOTDIR~~}
+    {icons\Heavy.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {RTS.Default.Buttons.Spawn.Armored}
+    {~~FILEROOTDIR~~}
+    {icons\Armored.png}
+)
 
 // Unit Data
-HEALTH          [120]
-COST            [20]
-POPCAPCHANGE    [0]
-IMPACT          [10]
-BUILDAMOUNT     [20]
-SIGHTRADIUS     [24]
-GRIDSIZE        [2 , 2]
-RESOURCE        [0]
-DEPOSITABLE		[0]
+Name            [Barracks]
+Health          [120]
+CapitalCost     [20]
+PopCapChange    [0]
+Impact          [10]
+BuildAmount     [20]
+SightRadius     [24]
+GridSize        [2, 2]
+IsResource      [False]
+Depositable		[False]
+MaxCount        [1000]
 
 // Collision Data
-BBOXMIN         [-2 , 0.0 , -2]
-BBOXMAX         [2 , 3.0 , 2]
-CRECT           [4 , 4 , 0 , 0]
+SetBBox ({-2, 0, -2} {2, 2, 2})
 
-CTRLACTION      [RTS.Default.Building.Action]
-
-CTRLBUTTON      [RTS.Default.Buttons.Spawn.Soldier]
-CTRLBUTTON      [RTS.Default.Buttons.Spawn.Heavy]
-CTRLBUTTON      [RTS.Default.Buttons.Spawn.Armored]
-
-CTRLBUTTONICON  [icons\Soldier.png]
-CTRLBUTTONICON  [icons\Heavy.png]
-CTRLBUTTONICON  [icons\Armored.png]
+// Controllers
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
+SetController({~~DICTSCRIPTS~~} {Button} {RTS.Default.Buttons.Spawn.Soldier})
+SetController({~~DICTSCRIPTS~~} {Button} {RTS.Default.Buttons.Spawn.Heavy})
+SetController({~~DICTSCRIPTS~~} {Button} {RTS.Default.Buttons.Spawn.Armored})
