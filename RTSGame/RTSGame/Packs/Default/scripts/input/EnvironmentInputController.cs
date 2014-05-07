@@ -159,7 +159,7 @@ namespace RTS.Input {
             thread.IsBackground = true;
             running = true;
             paused = true;
-            eData = EnvironmentDataParser.Parse(Team.Race.InfoFile);
+            eData = EnvironmentData.Default;
             minNumSpawn = new int[3][] { eData.L1MinNumSpawn, eData.L1MaxNumSpawn, eData.L2MinNumSpawn };
             maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
             treeLocations = new List<Point>();
@@ -297,7 +297,7 @@ namespace RTS.Input {
                 else
                     level = 0;
 
-               // level = 2;
+                level = 3;
 
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
@@ -305,7 +305,7 @@ namespace RTS.Input {
                     // Decide disaster type
                     int type = random.Next(2);
 
-                   // type = 1;
+                    type = 1;
 
                     // Create the appropriate disaster
                     if(type == 0) {
@@ -358,6 +358,15 @@ namespace RTS.Input {
             HashSet<Point> hitCells = new HashSet<Point>();
             List<FireParticle> particles = new List<FireParticle>();
             int hitChance = 80;
+
+            RTSTeam pTeam = null; 
+            for (int i = 0; i < GameState.activeTeams.Length; i++) {
+                var at = GameState.activeTeams[i];
+                if (at.Team.Type == RTSInputType.Player) {
+                    pTeam = at.Team;
+                }
+            }
+
             while(FireRunning) {
                 if (fires.Count < 1) {
                     DevConsole.AddCommand("return");
@@ -374,8 +383,9 @@ namespace RTS.Input {
                                     bool takeDamage = (random.Next(100) <= FireHitUnitP);
                                     if (true) {
                                         u.Damage(FireUnitDamage);
-                                        particles.Add(new FireParticle(u.WorldPosition, 3, 2, 2, 7));
-
+                                        if (u.Team.Input.Type == RTSInputType.Player) {
+                                            particles.Add(new FireParticle(u.WorldPosition, 3, 2, 2, 7));
+                                        }
                                     }
                                 }
                             }            
@@ -384,16 +394,20 @@ namespace RTS.Input {
                                 bool takeDamage = (random.Next(100) <= FireHitBuildingP);
                                 if (true) {
                                     b.Damage(FireBuildingDamage);
-                                    particles.Add(new FireParticle(b.WorldPosition, 5, 4, 5, 7));
+                                    if (b.Team.Input.Type == RTSInputType.Player) {
+                                        particles.Add(new FireParticle(b.WorldPosition, 5, 4, 5, 7));
+                                    }
                                 }
                             }
                         }
                     }
-                    // Add Fire Particle To Where There Is Fire
+                    // Add Fire Particle If Not In Player's Fog Of War
                     Vector2 p = new Vector2(f.X, f.Y) * grid.cellSize + Vector2.One;
-                    Vector3 pos = new Vector3(p.X, GameState.Map.HeightAt(p.X, p.Y), p.Y);
-                    particles.Add(new FireParticle(pos, 4, 3, 10, 9));
-                    
+                    bool canSee = GameState.CGrid.GetFogOfWar(p, pTeam.Index) == FogOfWar.Active;
+                    if (canSee) {
+                        Vector3 pos = new Vector3(p.X, GameState.Map.HeightAt(p.X, p.Y), p.Y);
+                        particles.Add(new FireParticle(pos, 4, 3, 10, 9));
+                    }
                     // Fire Spreading
                     for(int x = -1; x < 2 ; x++) {
                         if (f.X + x < grid.numCells.X && f.X + x >= 0) {  
@@ -450,7 +464,9 @@ namespace RTS.Input {
                                 bool takeDamage = (random.Next(100) <= LightningHitP);
                                 if(takeDamage) {
                                     u.Damage(LightningDamage);
-                                    particles.Add(new LightningParticle(u.WorldPosition, 1, 7, 1, 0.6f, 1, Color.BlueViolet));
+                                    if (u.Team.Input.Type == RTSInputType.Player) {
+                                        particles.Add(new LightningParticle(u.WorldPosition, 1, 7, 1, 0.6f, 1, Color.BlueViolet));
+                                    }
                                 }
                             }
                         }
@@ -472,7 +488,9 @@ namespace RTS.Input {
                             bool takeDamage = (random.Next(100) <= EarthquakeHitP);
                             if(true) {
                                 b.Damage(EarthquakeDamage);
-                                particles.Add(new LightningParticle(b.WorldPosition, 3, 10, 2, 0.6f, 1,Color.Red));
+                                if (b.Team.Input.Type == RTSInputType.Player) {
+                                    particles.Add(new LightningParticle(b.WorldPosition, 3, 10, 2, 0.6f, 1, Color.Red));
+                                }
                             }
                         }
 
