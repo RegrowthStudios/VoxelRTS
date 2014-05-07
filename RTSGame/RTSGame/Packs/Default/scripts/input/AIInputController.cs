@@ -21,6 +21,8 @@ namespace RTS.Input {
         private static readonly Random AI_SEEDER = new Random();
         private const int RareUnitCount = 2; // Within each batch, there are a few rare units that have a different type
         private int MaxUnit; // Maximum number of units I can spawn
+        private int[,] unitBatches = new int[3, 10]; // Unit patterns to spawn
+        private int BuildingCount = 3;
         private int aggressionLevel; // How angry I am
         Thread t;
         bool running, paused;
@@ -31,7 +33,7 @@ namespace RTS.Input {
         private float playerDistance; // How far is player unit from my barracks?
         private RTSUnit targetUnit; // Target unit
         private float spawnCoolDown; // 
-        private int[,] unitBatches = new int[3,10]; // Unit patterns to spawn
+        
 
         public AI()
             : base() {
@@ -55,6 +57,7 @@ namespace RTS.Input {
             aggressionLevel = AggressionLevel.LOW;
             playerDistance = float.MaxValue;
             spawnCoolDown = 0;
+            SpawnBuildings(s);
         }
 
         public void DecideAction(GameState g, float dt) {
@@ -204,6 +207,21 @@ namespace RTS.Input {
                     r.Next((int)GameState.Map.Width - 20) + 10,
                     r.Next((int)GameState.Map.Depth - 20) + 10)
                 ));*/
+        }
+
+        public void SpawnBuildings(GameState g) {
+            for (int i = 0; i < BuildingCount; i++) {
+                Point pos = new Point(
+                    r.Next((int)GameState.Map.Width - 20) + 10,
+                    r.Next((int)GameState.Map.Depth - 20) + 10);
+                // If the grid is occupied, choose another position.
+                while (g.CGrid.EStatic[pos.X, pos.Y] != null) {
+                    pos = new Point(
+                    r.Next((int)GameState.Map.Width - 20) + 10,
+                    r.Next((int)GameState.Map.Depth - 20) + 10);
+                }
+                AddEvent(new SpawnBuildingEvent(TeamIndex, 1, pos));
+            }
         }
 
         private void InitializeUnitBatches() {
