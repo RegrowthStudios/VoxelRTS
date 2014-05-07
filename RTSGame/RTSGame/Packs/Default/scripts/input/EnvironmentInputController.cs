@@ -215,8 +215,10 @@ namespace RTS.Input {
             }
             Team.OnUnitSpawn += OnUnitSpawn;
 
+            /*
             AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, new Point(60,60)));
             treeLocations.Add(new Point(60, 60));
+             */
 
         }
 
@@ -239,7 +241,8 @@ namespace RTS.Input {
                 }
                 counter++;
                 counter = counter % (RecoverTime);
-                Thread.Sleep(500);
+                DevConsole.AddCommand("tick");
+                Thread.Sleep(2500);
             }
         }
 
@@ -271,12 +274,12 @@ namespace RTS.Input {
                     if (treesInRegion.Count > 0) {
                         int i = random.Next(treesInRegion.Count);
                         Point treeC = treesInRegion[i];
-                        DevConsole.AddCommand("Recovery");
+                       
                         for (int x = -1; x <= 1; x++) {
                             for (int y = -1; y <= 1; y++) {
-                                DevConsole.AddCommand("Add Tree");
+                                
                                 Point newTreeC = new Point(treeC.X + x, treeC.Y + y);
-                                //AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
+                                AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
                                 Vector2 newTreePos = new Vector2(newTreeC.X, newTreeC.Y) * GameState.CGrid.cellSize + Vector2.One;
                                 grid.AddImpact(newTreePos, -1 * (FloraData.Impact * FloraData.Health));
                             }
@@ -286,7 +289,7 @@ namespace RTS.Input {
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
                             if(o.Data.FriendlyName.Equals(OreData.FriendlyName)) {
-                                DevConsole.AddCommand("Heal Ore");
+                               
                                 o.Health += OreRecoverHealth;
                                 r.AddToRegionImpact(-(OreData.Impact * OreRecoverHealth));
                             }
@@ -312,15 +315,14 @@ namespace RTS.Input {
                 else
                     level = 0;
 
-                level = 3;
+                //level = 3;
 
                 if(level > 0) {
-                    //DevConsole.AddCommand("Has Level");
-
+                    DevConsole.AddCommand("has level");
                     // Decide disaster type
                     int type = random.Next(2);
 
-                    type = 0;
+                    //type = 0;
 
                     // Create the appropriate disaster
                     if(type == 0) {
@@ -357,19 +359,11 @@ namespace RTS.Input {
                 FireThread.Start(fires);
             }
         }
-
-       
-        private void FireStart(List<Point> starts) {
-
-
-        }
-       
         
         private void FireWorkThread(Object l) {
-            DevConsole.AddCommand("started fire thread");
+            DevConsole.AddCommand("started");
 
             List<Point> fires = l as List<Point>;
-            FireStart(fires);
             HashSet<Point> hitCells = new HashSet<Point>();
             List<FireParticle> particles = new List<FireParticle>();
             int hitChance = 80;
@@ -377,7 +371,7 @@ namespace RTS.Input {
 
             while(FireRunning) {
                 if (fires.Count < 1) {
-                    DevConsole.AddCommand("returned from fire thread");
+                    DevConsole.AddCommand("return");
                     return;
                 }
                 
@@ -402,10 +396,10 @@ namespace RTS.Input {
                             if (b != null && b.Team.Index != Team.Index) {
                                 bool takeDamage = (random.Next(100) <= FireHitBuildingP);
                                 if (true) {
-                                    b.Damage(FireBuildingDamage);
+                                    //b.Damage(FireBuildingDamage);
                                     canSee = GameState.CGrid.GetFogOfWar(b.GridPosition, playerIndex) == FogOfWar.Active;
                                     if (canSee) {
-                                        particles.Add(new FireParticle(b.WorldPosition, 5, 4, 2, 7));
+                                        particles.Add(new FireParticle(b.WorldPosition, 5, 1, 2, 6));
                                     }
                                 }
                             }
@@ -513,7 +507,6 @@ namespace RTS.Input {
         }
 
         private void SpawnUnits(Region r, int level) {
-            //DevConsole.AddCommand("SpawnUnits Method");
             // Decide Spawn Cap
             int spawnCap;
             if (level == 1) {
@@ -531,7 +524,6 @@ namespace RTS.Input {
 
             // Return If Population Count Of Region Is Greater Than The Spawn Cap For The Region
             if (r.PopCount >= spawnCap) { 
-                //DevConsole.AddCommand("return");  
                 return; 
             }
         
@@ -554,7 +546,6 @@ namespace RTS.Input {
                 }
             }
             if (start.X > 0 && start.Y > 0) {
-                //DevConsole.AddCommand("have start");
                 unvisited.Enqueue(start);
                 visited[start.X, start.Y] = true;
             }
@@ -573,7 +564,6 @@ namespace RTS.Input {
                                 bool isOre = b.Data.FriendlyName.Equals(OreData.FriendlyName);
                                 bool isTree = b.Data.FriendlyName.Equals(FloraData.FriendlyName);
                                 if (isOre || isTree) {
-                                    //DevConsole.AddCommand("found spawn point");
                                     spawnPoints.Add(at);
                                 }
                             }
@@ -604,12 +594,11 @@ namespace RTS.Input {
                     ti++;
                 }
             }
-            //SetInitTarget(r);
+            SetInitTarget(r);
             
         }
 
         private void OnUnitSpawn(RTSUnit u) {
-            //DevConsole.AddCommand("spawned unit");
             Region r = FindRegion(u);
             r.Selected.Add(u);
             r.PopCount++;
@@ -617,7 +606,6 @@ namespace RTS.Input {
         }
 
         private void OnUnitDeath(IEntity e) {
-            //DevConsole.AddCommand("unit death");
             Region r = FindRegion(e);
             r.PopCount--;
             IEntity dead = null;
@@ -677,7 +665,7 @@ namespace RTS.Input {
             RTSBuilding building = e as RTSBuilding;
             int imp = building.Data.Impact * d;
             grid.AddImpact(e.GridPosition, imp);
-            DevConsole.AddCommand("Impact Added " + imp);
+            //DevConsole.AddCommand("Impact Added " + imp);
         }
     }
 }

@@ -93,8 +93,9 @@ namespace RTSEngine.Data {
             Point p = HashHelper.Hash(pos, numCells, size);
             for(int y = 0; y < gs.Y; y++) {
                 for(int x = 0; x < gs.X; x++) {
-                    if(EStatic[p.X + x, p.Y + y] != null)
-                        return false;
+                    if(p.X + x >= 0 && p.X + x < numCells.X && p.Y + y >= 0 && p.Y + y < numCells.Y)
+                        if(EStatic[p.X + x, p.Y + y] != null)
+                            return false;
                 }
             }
             return true;
