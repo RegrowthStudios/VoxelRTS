@@ -11,6 +11,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Algorithms;
 using System.Text.RegularExpressions;
 using RTSEngine.Data.Parsers;
+using RTSEngine.Graphics;
 
 namespace RTS.Default.Tutorials {
     public class Tut0 : ACGameTypeController {
@@ -30,9 +31,15 @@ namespace RTS.Default.Tutorials {
                 }
             }
             pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
+            DevConsole.AddCommand("franz ferdinand");
             pTeam.Input.OnNewSelection += (ic, ns) => {
-                //s.SendPopup(@"Content\Textures\InduZtry.png", new Rectangle(10, 60, 400, 300));
+                if(ns.Count < 1) return;
+                s.SendPopup(@"Packs\presets\Tutorial0\2.png", new Rectangle(10, 60, 400, 300));
                 System.Threading.Interlocked.Exchange(ref state, 3);
+                s.AddParticle(new FireParticle(new Vector3(29, 34, 13), 5, 6, 0.3f, 4f));
             };
             state = 0;
         }
@@ -43,7 +50,7 @@ namespace RTS.Default.Tutorials {
 
             // If All The Buildings And Units Are Destroyed
             foreach(var e in pTeam.Units) {
-                if(e.WorldPosition.Y < 64.5)
+                if(e.WorldPosition.Y < 33.5)
                     return null;
             }
             return 1;
@@ -53,13 +60,13 @@ namespace RTS.Default.Tutorials {
             switch(state) {
                 case 0:
                     if(s.CurrentFrame > 100) {
-                        //s.SendPopup(@"Content\Textures\InduZtry.png", new Rectangle(10, 60, 400, 300));
+                        s.SendPopup(@"Packs\presets\Tutorial0\0.png", new Rectangle(10, 60, 400, 300));
                         System.Threading.Interlocked.Increment(ref state);
                     }
                     break;
                 case 1:
                     if(s.CurrentFrame > 900) {
-                        //s.SendPopup(@"Content\Textures\InduZtry.png", new Rectangle(10, 60, 400, 300));
+                        s.SendPopup(@"Packs\presets\Tutorial0\1.png", new Rectangle(10, 60, 400, 300));
                         System.Threading.Interlocked.Increment(ref state);
                     }
                     break;

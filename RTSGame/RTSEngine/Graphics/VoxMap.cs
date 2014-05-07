@@ -67,9 +67,9 @@ namespace RTSEngine.Graphics {
         }
 
         public void Draw(GraphicsDevice g, Matrix mView, Matrix mProj) {
-            g.Textures[1] = FogOfWarTexture;
-            g.SamplerStates[1] = SamplerState.PointClamp;
-            vRenderer.DrawAll(mView, mProj);
+            vRenderer.FX.Parameters["TexelSize"].SetValue(new Vector2(1f / FogOfWarTexture.Width, 1f / FogOfWarTexture.Height));
+            vRenderer.FX.Parameters["MapSize"].SetValue(new Vector2(FogOfWarTexture.Width, FogOfWarTexture.Height) * 2f);
+            vRenderer.DrawAll(Matrix.CreateScale(2f, 1f, 2f), mView, mProj);
         }
     }
 }

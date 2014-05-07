@@ -446,7 +446,9 @@ namespace RTSEngine.Graphics {
             fxMap.VP = mVP;
 
             // Primary Map Model
-            Map.Draw(G, Matrix.CreateScale(2, 1, 2) * Camera.View, Camera.Projection);
+            G.Textures[1] = Map.FogOfWarTexture;
+            G.SamplerStates[1] = SamplerState.PointClamp;
+            Map.Draw(G, Camera.View, Camera.Projection);
             //if(Map.TrianglesPrimary > 0) {
             //    fxMap.SetTextures(G, Map.PrimaryTexture, FOWTexture);
             //    G.SetVertexBuffer(Map.VBPrimary);
