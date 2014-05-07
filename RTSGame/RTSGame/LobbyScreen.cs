@@ -19,10 +19,13 @@ using RTSEngine.Interfaces;
 namespace RTS {
     public struct GamePreset {
         public string Name;
+        public string LoadImage;
+        public string GameType;
+        public string Map;
         public string[] PlayerTypes;
         public string[] Races;
     }
-    
+
     public class TeamInitWidget : IDisposable {
         public BaseWidget Parent {
             set {
@@ -260,6 +263,7 @@ namespace RTS {
 
         WidgetRenderer wr;
         TeamInitWidget[] widgets;
+        TextWidget textGTController, textMap;
         IDisposable tFont;
         ScrollMenu menuPresets;
 
@@ -267,6 +271,7 @@ namespace RTS {
             gPresets = new List<GamePreset>();
             var di = new DirectoryInfo(PRESET_DIR);
             foreach(var fi in di.GetFiles()) {
+                if(!fi.Extension.EndsWith(@"game")) continue;
                 GamePreset gp = (GamePreset)ZXParser.ParseFile(fi.FullName, typeof(GamePreset));
                 gPresets.Add(gp);
             }
@@ -315,15 +320,10 @@ namespace RTS {
             }
             widgets[0].TextUser.Text = UserConfig.UserName;
 
-            for(int i = 0; i < gPresets[0].Races.Length; i++) {
-                widgets[i].PlayerType = gPresets[0].PlayerTypes[i];
-                widgets[i].Race = gPresets[0].Races[i];
-            }
-
             menuPresets = new ScrollMenu(wr,
                 game.Window.ClientBounds.Width - widgets[0].BackRect.Width - 20,
-                game.Window.ClientBounds.Height / 10,
-                10,
+                24,
+                game.Window.ClientBounds.Height / 24,
                 20,
                 40
                 );
@@ -335,6 +335,22 @@ namespace RTS {
             menuPresets.Widget.AlignX = Alignment.RIGHT;
             menuPresets.Build((from gp in gPresets select gp.Name).ToArray());
             menuPresets.Hook();
+
+            textMap = new TextWidget(wr);
+            textMap.Color = UserConfig.MainScheme.Text;
+            textMap.Offset = new Point(0, 5);
+            textMap.Height = 32;
+            textMap.OffsetAlignY = Alignment.BOTTOM;
+            textMap.Parent = widgets[widgets.Length - 1].BackRect;
+
+            textGTController = new TextWidget(wr);
+            textGTController.Color = UserConfig.MainScheme.Text;
+            textGTController.Offset = new Point(0, 5);
+            textGTController.Height = 32;
+            textGTController.OffsetAlignY = Alignment.BOTTOM;
+            textGTController.Parent = textMap;
+
+            SetWidgetData(gPresets[0]);
 
             DevConsole.OnNewCommand += DevConsole_OnNewCommand;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPressed;
@@ -396,7 +412,17 @@ namespace RTS {
                         break;
                 }
             }
-            eld.MapFile = new FileInfo(@"Packs\Default\maps\0\test.map");
+            eld.MapFile = new FileInfo(textMap.Text);
+            eld.GTController = textGTController.Text;
+        }
+        private void SetWidgetData(GamePreset gp) {
+            for(int i = 0; i < gp.Races.Length; i++) {
+                widgets[i].PlayerType = gp.PlayerTypes[i];
+                widgets[i].Race = gp.Races[i];
+            }
+            game.LoadScreen.ImageFile = gp.LoadImage;
+            textGTController.Text = gp.GameType;
+            textMap.Text = gp.Map;
         }
 
         void OnKeyPressed(object sender, KeyEventArgs args) {
@@ -419,10 +445,7 @@ namespace RTS {
             if(gps != null) {
                 foreach(var gp in gPresets) {
                     if(gp.Name.Equals(gps)) {
-                        for(int i = 0; i < gPresets[0].Races.Length; i++) {
-                            widgets[i].PlayerType = gp.PlayerTypes[i];
-                            widgets[i].Race = gp.Races[i];
-                        }
+                        SetWidgetData(gp);
                         return;
                     }
                 }

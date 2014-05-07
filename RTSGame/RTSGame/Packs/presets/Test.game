@@ -1,4 +1,4 @@
-﻿Name        [Test]
+﻿Name        [Testbed]
 PlayerTypes [
     {Player}
     {None}
@@ -21,3 +21,5 @@ Races [
     {None}
     {Gaia}
 ]
+GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
+Map         [Packs\Default\maps\0\test.map]

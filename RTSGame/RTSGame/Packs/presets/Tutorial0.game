@@ -1,7 +1,7 @@
-﻿Name        [Test 2]
+﻿Name        [Tutorial 1]
 PlayerTypes [
     {Player}
-    {Environment}
+    {None}
     {None}
     {None}
     {None}
@@ -12,7 +12,7 @@ PlayerTypes [
 ]
 Races [
     {Mech}
-    {Gaia}
+    {None}
     {None}
     {None}
     {None}
@@ -21,3 +21,6 @@ Races [
     {None}
     {None}
 ]
+LoadImage   [Packs\presets\Tutorial0.png]
+GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
+Map         [Packs\Default\maps\Tutorial0\info.map]

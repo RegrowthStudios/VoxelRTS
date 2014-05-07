@@ -52,7 +52,7 @@ namespace RTS {
         private List<FileInfo> imageList;
         public string ImageFile {
             get;
-            private set;
+            set;
         }
         private float percent;
         public List<string> tips;

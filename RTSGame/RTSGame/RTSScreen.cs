@@ -81,7 +81,7 @@ namespace RTS {
             vi.Build(renderer);
             vi.Camera = camera;
             GCInitArgs gca = new GCInitArgs();
-            gca.GameTypeScript = "RTS.Default.GameTypes.SPEscapeThePlanet";
+            gca.GameTypeScript = game.LoadScreen.LoadData.GTController;
             playController.Init(state, gca);
 
             sfDebug = renderer.CreateFont("Courier New", 32);

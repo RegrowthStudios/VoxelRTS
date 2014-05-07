@@ -31,6 +31,9 @@ namespace RTSEngine.Controllers {
 
         // Where To Load The Map
         public FileInfo MapFile;
+
+        // The Type Of Game To Be Played
+        public string GTController;
     }
 
     public static class GameEngine {
