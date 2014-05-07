@@ -322,7 +322,7 @@ namespace RTS.Input {
                     // Decide disaster type
                     int type = random.Next(2);
 
-                    //type = 0;
+                    type = 1;
 
                     // Create the appropriate disaster
                     if(type == 0) {
