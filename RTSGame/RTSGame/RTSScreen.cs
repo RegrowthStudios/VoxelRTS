@@ -49,6 +49,7 @@ namespace RTS {
 
         // End Animations
         Texture2D tVictory, tDefeat;
+        Vector2 ctV, ctD;
         float tl;
         bool end;
         int gResult;
@@ -70,9 +71,11 @@ namespace RTS {
             using(var s = File.OpenRead(@"Content\Textures\Victory.png")) {
                 tVictory = Texture2D.FromStream(G, s);
             }
+            ctV = new Vector2(tVictory.Width, tVictory.Height) * 0.5f;
             using(var s = File.OpenRead(@"Content\Textures\Defeat.png")) {
                 tDefeat = Texture2D.FromStream(G, s);
             }
+            ctD = new Vector2(tDefeat.Width, tDefeat.Height) * 0.5f;
         }
         public override void Destroy(GameTime gameTime) {
             tVictory.Dispose();
@@ -81,6 +84,7 @@ namespace RTS {
 
         public override void OnEntry(GameTime gameTime) {
             tPopup = null;
+            end = false;
             MouseEventDispatcher.OnMousePress += OnMP;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
@@ -187,7 +191,13 @@ namespace RTS {
                 SB.Draw(
                     gResult < 0 ? tDefeat : tVictory,
                     center, null,
-                    Color.Lerp(Color.Transparent, Color.White, MathHelper.Clamp(3f - tl, 0, 1)));
+                    Color.Lerp(Color.Transparent, Color.White, MathHelper.Clamp(3f - tl, 0, 1)),
+                    0f,
+                    gResult < 0 ? ctD : ctV,
+                    MathHelper.Lerp(0.3f, 1f, MathHelper.Clamp(3f - tl, 0, 1)),
+                    SpriteEffects.None,
+                    0f
+                    );
                 SB.End();
             }
             else if(state.gtC.VictoriousTeam.HasValue) {
