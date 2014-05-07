@@ -8,7 +8,8 @@ using Microsoft.Xna.Framework.Graphics;
 namespace RTSEngine.Graphics {
     public enum ParticleType {
         Bullet,
-        Fire
+        Fire,
+        Lightning
     }
     public abstract class Particle {
         public static bool IsParticleDead(Particle p) {
@@ -30,6 +31,8 @@ namespace RTSEngine.Graphics {
         public float TimeRatio {
             get { return timeAlive / duration; }
         }
+
+        public IVertexType Vertex;
 
         public Particle(float t, ParticleType pt) {
             duration = t;
@@ -72,7 +75,14 @@ namespace RTSEngine.Graphics {
         public float angle, distance;
 
         // Instance Transform Of Bullet
-        public VertexBulletInstance instance;
+        private VertexBulletInstance instance;
+        public Color Tint {
+            get { return instance.Tint; }
+            set {
+                instance.Tint = value;
+                Vertex = instance;
+            }
+        }
 
         public BulletParticle(Vector3 o, Vector3 d, float ang, float dist, float t)
             : base(t, ParticleType.Bullet) {
@@ -87,6 +97,7 @@ namespace RTSEngine.Graphics {
                 Matrix.CreateScale(distance * s, distance * s, distance) *
                 Matrix.CreateWorld(origin, direction, Vector3.Up);
             instance.Tint = Color.White;
+            Vertex = instance;
         }
     }
 
@@ -116,21 +127,78 @@ namespace RTSEngine.Graphics {
     #endregion
     public class FireParticle : Particle {
         public Vector3 origin;
-        public float radius, height;
+        public float radius, height, rotation;
 
         // Instance Transform Of Bullet
-        public VertexFireInstance instance;
+        private VertexFireInstance instance;
 
         public FireParticle(Vector3 o, float r, float h, float rotY, float t)
             : base(t, ParticleType.Fire) {
             origin = o;
+            radius = r;
+            height = h;
+            rotation = rotY;
 
             // Create Instance Matrix
             instance.Transform =
-                Matrix.CreateScale(r, h, r) *
+                Matrix.CreateScale(radius, height, radius) *
                 Matrix.CreateRotationY(rotY) *
-                Matrix.CreateTranslation(o);
+                Matrix.CreateTranslation(origin);
             instance.Time = 0;
+            Vertex = instance;
+        }
+    }
+
+    #region Lightning Instancing
+    public struct VertexLightningInstance : IVertexType {
+        #region Declaration
+        public static readonly VertexDeclaration Declaration = new VertexDeclaration(
+            new VertexElement(sizeof(float) * 0, VertexElementFormat.Vector4, VertexElementUsage.Position, 1),
+            new VertexElement(sizeof(float) * 4, VertexElementFormat.Vector4, VertexElementUsage.Position, 2),
+            new VertexElement(sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.Position, 3),
+            new VertexElement(sizeof(float) * 12, VertexElementFormat.Vector4, VertexElementUsage.Position, 4),
+            new VertexElement(sizeof(float) * 16, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 1),
+            new VertexElement(sizeof(float) * 18, VertexElementFormat.Color, VertexElementUsage.Color, 0)
+        );
+        public VertexDeclaration VertexDeclaration {
+            get { return Declaration; }
+        }
+        #endregion
+
+        public Matrix Transform;
+        public Vector2 TimeType;
+        public Color Color;
+
+        public VertexLightningInstance(Matrix m, float t, float inst) {
+            Transform = m;
+            TimeType = new Vector2(t, inst);
+            Color = Color.White;
+        }
+    }
+    #endregion
+    public class LightningParticle : Particle {
+        public Vector3 origin;
+        public float radius, height, rotation;
+
+        // Instance Transform Of Bullet
+        private VertexLightningInstance instance;
+
+        public LightningParticle(Vector3 o, float r, float h, float rotY, float t, int inst, Color c)
+            : base(t, ParticleType.Lightning) {
+            origin = o;
+            radius = r;
+            height = h;
+            rotation = rotY;
+
+            // Create Instance Matrix
+            instance.Transform =
+                Matrix.CreateScale(radius, height, radius) *
+                Matrix.CreateRotationY(rotY) *
+                Matrix.CreateTranslation(origin);
+            instance.TimeType.X = t;
+            instance.TimeType.Y = inst;
+            instance.Color = c;
+            Vertex = instance;
         }
     }
 }

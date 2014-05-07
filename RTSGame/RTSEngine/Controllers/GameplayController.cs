@@ -61,6 +61,17 @@ namespace RTSEngine.Controllers {
     }
     #endregion
 
+    // TODO: Use This From Config
+    public struct GCDecisionBudgeting {
+        public int SquadBins;
+        public int EntityBins;
+        public int FOWBins;
+    }
+    public struct GCInitArgs {
+        public string GameTypeScript;
+    }
+
+
     public class GameplayController : IDisposable {
         public const int SQUAD_BUDGET_BINS = 10;
         public const int ENTITY_BUDGET_BINS = 30;
@@ -92,7 +103,7 @@ namespace RTSEngine.Controllers {
             pathfinder.Dispose();
         }
 
-        public void Init(GameState s) {
+        public void Init(GameState s, GCInitArgs args) {
             DevConsole.OnNewCommand += OnDevCommand;
             tbFOWCalculations.ClearTasks();
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
@@ -106,7 +117,7 @@ namespace RTSEngine.Controllers {
             }
 
             // Start The Game Type Controller
-            s.scrGTC = s.Scripts["RTS.Default.GameTypes.SPSurvival"];
+            s.scrGTC = s.Scripts[args.GameTypeScript];
             s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
             s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
             s.gtC.Start(s);

@@ -66,7 +66,7 @@ namespace RTSEngine.Graphics {
             }
 
             // Create Model Geometry
-            ModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
+            RTSModelHelper.CreateBuffers(renderer, verts, VertexPositionTexture.VertexDeclaration, inds, out vbModel, out ibModel, BufferUsage.WriteOnly);
         }
 
         public void Hook(RTSRenderer renderer, GameState s, int ti, int fti, int building) {

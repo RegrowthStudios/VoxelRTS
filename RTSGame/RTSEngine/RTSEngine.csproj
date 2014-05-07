@@ -60,6 +60,8 @@
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
     <Compile Include="Graphics\Particles\FireShader.cs" />
+    <Compile Include="Graphics\Particles\LightningShader.cs" />
+    <Compile Include="Graphics\Particles\ParticleList.cs" />
     <Compile Include="Interfaces\ACInputController.cs" />
     <Compile Include="Data\AnimationLoop.cs" />
     <Compile Include="Data\Camera.cs" />
@@ -70,8 +72,7 @@
     <Compile Include="Data\Combat.cs" />
     <Compile Include="Data\GameState.cs" />
     <Compile Include="Data\LevelGrid.cs" />
-    <Compile Include="Data\Parsers\EngineLoadParser.cs" />
-    <Compile Include="Data\Parsers\EnvironmentDataParser.cs" />
+    <Compile Include="Data\Parsers\EnvironmentData.cs" />
     <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
     <Compile Include="Data\Parsers\ScriptParser.cs" />
     <Compile Include="Data\Parsers\MapParser.cs" />
@@ -152,6 +153,10 @@
     <ProjectReference Include="..\BlisterUI\BlisterUI.csproj">
       <Project>{28292778-5EDC-4898-8E0C-9E32412174CD}</Project>
       <Name>BlisterUI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonExt\CommonExt.csproj">
+      <Project>{c3fcb10d-3f6d-45cb-8b75-4897c73bc502}</Project>
+      <Name>CommonExt</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

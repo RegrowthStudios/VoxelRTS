@@ -8,7 +8,6 @@ sampler2D Color : register(s0);
 float2 MapSize;
 sampler2D FOW : register(s1);
 
-// Always The Same Input
 struct VSI {
     float4 Position : POSITION0;
     float2 UV : TEXCOORD0;

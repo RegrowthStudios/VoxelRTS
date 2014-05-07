@@ -5,7 +5,7 @@ using System.Text;
 using BlisterUI.Widgets;
 using Microsoft.Xna.Framework;
 
-namespace RTSEngine.Graphics {
+namespace RTS.Input {
     public class RTSUITeamDataPanel : IDisposable {
         RectWidget rectBase, rectPopPic, rectCapital;
         TextWidget textPopCur, textPopCap, textCapital, textVictory;

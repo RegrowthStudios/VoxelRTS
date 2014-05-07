@@ -41,6 +41,10 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
+        public CollisionRect[,][] Walls {
+            get;
+            private set;
+        }
         public uint[,] Fog {
             get;
             private set;
@@ -73,6 +77,7 @@ namespace RTSEngine.Data {
             ActiveGrids = new List<Point>();
             Fog = new uint[numCells.X, numCells.Y];
             Collision = new bool[numCells.X, numCells.Y];
+            Walls = new CollisionRect[numCells.X, numCells.Y][];
         }
 
         public void Add(RTSUnit o) {
@@ -105,6 +110,10 @@ namespace RTSEngine.Data {
                 }
             }
         }
+        public void Add(CollisionRect[] walls, int x, int y) {
+            Walls[x, y] = new CollisionRect[walls.Length];
+            Array.Copy(walls, Walls, Walls.Length);
+        }
 
         public void ClearDynamic() {
             for(int i = 0; i < ActiveGrids.Count; i++)
@@ -123,24 +132,30 @@ namespace RTSEngine.Data {
             var al1 = EDynamic[x, y];
             var al2 = EDynamic[ox, oy];
             var sl2 = EStatic[ox, oy];
+            var wl2 = Walls[ox, oy];
 
             // Empty Check
-            if(al2.Count + (sl2 == null ? 0 : 1) < 1) return;
+            if(al2.Count + (sl2 == null ? 0 : 1) + (wl2 == null ? 0 : 1) < 1) return;
 
-            for(int i1 = 0; i1 < al1.Count; i1++) {
-                // Dynamic-Dynamic
+            // Dynamic-Dynamic
+            for(int i1 = 0; i1 < al1.Count; i1++)
                 for(int i2 = 0; i2 < al2.Count; i2++)
                     // Get Rid Of Doubles
                     if(al1[i1].UUID > al2[i2].UUID)
                         CollisionController.ProcessCollision(al1[i1].CollisionGeometry, al2[i2].CollisionGeometry);
-                // Dynamic-Static
-                if(sl2 != null)
+            // Dynamic-Static
+            if(sl2 != null)
+                for(int i1 = 0; i1 < al1.Count; i1++)
                     CollisionController.ProcessCollision(al1[i1].CollisionGeometry, sl2.CollisionGeometry);
-            }
+            if(wl2 != null)
+                for(int i1 = 0; i1 < al1.Count; i1++)
+                    for(int i2 = 0; i2 < wl2.Length; i1++)
+                        CollisionController.ProcessCollision(al1[i1].CollisionGeometry, wl2[i2]);
         }
         public void HandleGridCollision(int x, int y) {
             var al = EDynamic[x, y];
             var sl = EStatic[x, y];
+            var wl = Walls[x, y];
 
             // Dynamic-Dynamic
             for(int i1 = 0; i1 < al.Count - 1; i1++)
@@ -150,6 +165,10 @@ namespace RTSEngine.Data {
             if(sl != null)
                 for(int i1 = 0; i1 < al.Count; i1++)
                     CollisionController.ProcessCollision(al[i1].CollisionGeometry, sl.CollisionGeometry);
+            if(wl != null)
+                for(int i1 = 0; i1 < al.Count; i1++)
+                    for(int i2 = 0; i2 < wl.Length; i2++)
+                        CollisionController.ProcessCollision(al[i1].CollisionGeometry, wl[i2]);
         }
 
         public void SetFogOfWar(int x, int y, int p, FogOfWar f) {
@@ -243,8 +262,14 @@ namespace RTSEngine.Data {
         // Adds Impact To The Appropriate Cell And Region 
         public void AddImpact(Vector2 pos, int amount) {
             Point p = HashHelper.Hash(pos, numCells, size);
-            CellImpact[p.X, p.Y] += amount;
-            Region[p.X, p.Y].AddToRegionImpact(amount);
+            if(CellImpact[p.X, p.Y] + amount < 0) {
+                Region[p.X, p.Y].AddToRegionImpact(-1 * CellImpact[p.X, p.Y]);
+                CellImpact[p.X, p.Y] = 0;
+            }
+            else {
+                CellImpact[p.X, p.Y] += amount;
+                Region[p.X, p.Y].AddToRegionImpact(amount);
+            }
         }
 
         public void AddImpact(Point p, int amount) {
@@ -289,7 +314,23 @@ namespace RTSEngine.Data {
             }
         }
 
-        public string InfoFile;
+        // IO Information
+        private string localFile;
+        public string InfoFile {
+            get { return localFile; }
+            set {
+                localFile = value;
+                File = new FileInfo(localFile);
+            }
+        }
+        public FileInfo File {
+            get;
+            private set;
+        }
+        public DirectoryInfo Directory {
+            get { return File.Directory; }
+        }
+
         public Heightmap L0;
         public CollisionGrid L1;
         public ImpactGrid L2;

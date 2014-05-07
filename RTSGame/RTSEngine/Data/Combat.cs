@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using RTSEngine.Data.Parsers;
 
 namespace RTSEngine.Data {
-    public struct BaseCombatData {
-        public static void Serialize(BinaryWriter s, ref BaseCombatData data) {
+    public class BaseCombatData {
+        public static void Serialize(BinaryWriter s, BaseCombatData data) {
             s.Write(data.MinRange);
             s.Write(data.MaxRange);
             s.Write(data.AttackDamage);
@@ -15,7 +16,7 @@ namespace RTSEngine.Data {
             s.Write(data.Armor);
             s.Write(data.CriticalChance);
         }
-        public static void Deserialize(BinaryReader s, ref BaseCombatData data) {
+        public static void Deserialize(BinaryReader s, BaseCombatData data) {
             data.MinRange = s.ReadInt32();
             data.MaxRange = s.ReadInt32();
             data.AttackDamage = s.ReadInt32();
@@ -26,19 +27,27 @@ namespace RTSEngine.Data {
         }
 
         // Maximum And Minimum Range Of Attacking
-        public int MaxRange, MinRange;
+        [ZXParse("MAXRANGE")]
+        public int MaxRange;
+        [ZXParse("MINRANGE")]
+        public int MinRange;
 
         // Amount Of Damage Done Per Hit
+        [ZXParse("ATTACKDAMAGE")]
         public int AttackDamage;
+        [ZXParse("CRITICALDAMAGE")]
         public int CriticalDamage;
 
         // Amount Of Time To Wait Before An Attack Can Be Utilized
+        [ZXParse("ATTACKTIMER")]
         public float AttackTimer;
 
         // Subtracts Source Damage By Armor Amount
+        [ZXParse("ARMOR")]
         public int Armor;
 
         // [0 - 1] Ratio Of Critical Hits To Be Obtained
+        [ZXParse("CRITICALCHANCE")]
         public double CriticalChance;
 
         // Find The Correct Damage Dealt Based Off Of A Random Number

@@ -9,9 +9,11 @@ namespace RTSEngine.Data {
             "System.dll",
             "System.Core.dll",
             "System.Data.dll",
+            "System.Drawing.dll",
             "System.Windows.Forms.dll",
             "System.Xml.dll",
             "System.Xml.Linq.dll",
+            "CommonExt.dll",
             "RTSEngine.dll",
             "BlisterUI.dll"
         };

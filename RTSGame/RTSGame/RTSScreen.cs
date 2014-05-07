@@ -58,6 +58,7 @@ namespace RTS {
         }
 
         public override void Build() {
+            GameEngine.CompileAllScripts(new DirectoryInfo(@"Packs"));
         }
         public override void Destroy(GameTime gameTime) {
         }
@@ -82,7 +83,9 @@ namespace RTS {
             var vi = gameInput as IVisualInputController;
             vi.Build(renderer);
             vi.Camera = camera;
-            playController.Init(state);
+            GCInitArgs gca = new GCInitArgs();
+            gca.GameTypeScript = "RTS.Default.GameTypes.SPEscapeThePlanet";
+            playController.Init(state, gca);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
             tEngine = new Thread(EngineThread);
@@ -152,22 +155,22 @@ namespace RTS {
         }
 
         public void OnMP(Vector2 p, MouseButton b) {
-            if(b == MouseButton.Right) {
-                Ray r = renderer.Camera.GetViewRay(p);
-                IntersectionRecord rec = new IntersectionRecord();
-                if(state.Map.BVH.Intersect(ref rec, r)) {
-                    clickWorldPos = r.Position + r.Direction * rec.T;
-                    if(addUnit)
-                        gameInput.AddEvent(new SpawnUnitEvent(
-                            team, type, new Vector2(clickWorldPos.X, clickWorldPos.Z)
-                            ));
-                    else if(addBuilding)
-                        gameInput.AddEvent(new SpawnBuildingEvent(
-                            team, type,
-                            HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size),
-                            true));
-                }
-            }
+            //if(b == MouseButton.Right) {
+            //    Ray r = renderer.Camera.GetViewRay(p);
+            //    IntersectionRecord rec = new IntersectionRecord();
+            //    if(state.Map.BVH.Intersect(ref rec, r)) {
+            //        clickWorldPos = r.Position + r.Direction * rec.T;
+            //        if(addUnit)
+            //            gameInput.AddEvent(new SpawnUnitEvent(
+            //                team, type, new Vector2(clickWorldPos.X, clickWorldPos.Z)
+            //                ));
+            //        else if(addBuilding)
+            //            gameInput.AddEvent(new SpawnBuildingEvent(
+            //                team, type,
+            //                HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size),
+            //                true));
+            //    }
+            //}
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {

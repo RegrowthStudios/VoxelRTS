@@ -9,12 +9,12 @@ namespace RTS {
     public class Jukebox : IDisposable {
         private List<SoundEffect> seFX;
         SoundEffectInstance currentSound;
-        Random r;
+        int si;
 
         public Jukebox() {
             seFX = new List<SoundEffect>();
             currentSound = null;
-            r = new Random();
+            si = 0;
         }
         public void Dispose() {
             var l = System.Threading.Interlocked.Exchange(ref seFX, new List<SoundEffect>());
@@ -33,9 +33,12 @@ namespace RTS {
         public void Update() {
             if(currentSound == null) {
                 if(seFX.Count < 1) return;
-                currentSound = seFX[r.Next(seFX.Count)].CreateInstance();
+                currentSound = seFX[si].CreateInstance();
                 currentSound.IsLooped = false;
                 currentSound.Play();
+
+                si++;
+                si %= seFX.Count;
             }
             else {
                 if(currentSound.State == SoundState.Stopped) {

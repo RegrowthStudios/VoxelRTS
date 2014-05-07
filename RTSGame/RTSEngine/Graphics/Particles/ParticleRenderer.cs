@@ -5,46 +5,59 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using RTSEngine.Data.Parsers;
 
 namespace RTSEngine.Graphics {
+    public class ParticleOptions {
+        public int BulletMaxCount;
+        public string BulletModel;
+        public string BulletTexture;
+
+        public int FireMaxCount;
+        public int FireDetail;
+        public string FireShader;
+        public string FireNoise;
+        public string FireColor;
+        public string FireAlpha;
+
+        public int LightningMaxCount;
+        public string LightningShader;
+        public string LightningImage;
+        public int LightningNumTypes;
+    }
+
     public class ParticleRenderer {
-        public const string FILE_BULLET_MODEL = @"Content\FX\Particles\Bullet.obj";
-        public const string FILE_BULLET_TEXTURE = @"Content\FX\Particles\Bullet.png";
-        public const string FILE_FIRE_SHADER = @"Content\FX\ParticleFire.fx";
-        public const string FILE_FIRE_NOISE = @"Content\FX\Particles\FireNoise.png";
-        public const string FILE_FIRE_COLOR = @"Content\FX\Particles\FireColor.png";
-        public const string FILE_FIRE_ALPHA = @"Content\FX\Particles\FireAlpha.png";
-        public const int MAX_BULLETS = 1000;
-        public const int MAX_FIRES = 200;
-
         // Lists Of Particles
-        private List<BulletParticle> pBullets;
-        private readonly VertexBulletInstance[] bullets;
-        private List<FireParticle> pFires;
-        private readonly VertexFireInstance[] fires;
+        private ParticleList<BulletParticle, VertexBulletInstance> plBullets;
+        private ParticleList<FireParticle, VertexFireInstance> plFires;
+        private ParticleList<LightningParticle, VertexLightningInstance> plBolts;
 
-        // Bullet Models
-        private VertexBuffer vbBullet;
-        private IndexBuffer ibBullet;
         private Texture2D tBullet;
-        private DynamicVertexBuffer dvbBullet;
-        private VertexBufferBinding[] vbbBullets;
-
-        // Fire Models
-        private VertexBuffer vbFire;
-        private IndexBuffer ibFire;
         private FireShader fxFire;
-        private DynamicVertexBuffer dvbFire;
-        private VertexBufferBinding[] vbbFires;
+        private LightningShader fxLightning;
 
         public ParticleRenderer() {
-            pBullets = new List<BulletParticle>();
-            bullets = new VertexBulletInstance[MAX_BULLETS];
-            pFires = new List<FireParticle>();
-            fires = new VertexFireInstance[MAX_FIRES];
         }
 
-        public void LoadBulletModel(RTSRenderer renderer, Stream s, ParsingFlags pf = ParsingFlags.ConversionOpenGL) {
+        public void Load(RTSRenderer renderer, ParticleOptions o) {
+            // Create Bullet System
+            plBullets = new ParticleList<BulletParticle, VertexBulletInstance>(renderer, o.BulletMaxCount, ParticleType.Bullet);
+            using(var fs = File.OpenRead(o.BulletModel)) {
+                LoadBulletModel(renderer, fs, ParsingFlags.ConversionOpenGL);
+            }
+            LoadBulletTexture(renderer, o.BulletTexture);
+
+            // Create Fire System
+            plFires = new ParticleList<FireParticle, VertexFireInstance>(renderer, o.FireMaxCount, ParticleType.Fire);
+            BuildFireModel(renderer, o.FireDetail);
+            LoadFireShader(renderer, o.FireShader, o.FireNoise, o.FireColor, o.FireAlpha);
+
+            // Create Lightning System
+            plBolts = new ParticleList<LightningParticle, VertexLightningInstance>(renderer, o.LightningMaxCount, ParticleType.Lightning);
+            BuildLightningModel(renderer);
+            LoadLightningShader(renderer, o.LightningShader, o.LightningImage, o.LightningNumTypes);
+        }
+        private void LoadBulletModel(RTSRenderer renderer, Stream s, ParsingFlags pf = ParsingFlags.ConversionOpenGL) {
             VertexPositionNormalTexture[] v;
             int[] inds;
             ObjParser.TryParse(s, out v, out inds, pf);
@@ -53,21 +66,15 @@ namespace RTSEngine.Graphics {
                 verts[i].Position = v[i].Position;
                 verts[i].TextureCoordinate = v[i].TextureCoordinate;
             }
-            vbBullet = renderer.CreateVertexBuffer(VertexPositionTexture.VertexDeclaration, verts.Length, BufferUsage.WriteOnly);
-            vbBullet.SetData(verts);
-            ibBullet = renderer.CreateIndexBuffer(IndexElementSize.ThirtyTwoBits, inds.Length, BufferUsage.WriteOnly);
-            ibBullet.SetData(inds);
-            dvbBullet = renderer.CreateDynamicVertexBuffer(VertexBulletInstance.Declaration, MAX_BULLETS, BufferUsage.WriteOnly);
-            dvbBullet.SetData(bullets);
-
-            vbbBullets = new VertexBufferBinding[2];
-            vbbBullets[0] = new VertexBufferBinding(vbBullet);
-            vbbBullets[1] = new VertexBufferBinding(dvbBullet, 0, 1);
+            plBullets.VBuffer = renderer.CreateVertexBuffer(VertexPositionTexture.VertexDeclaration, verts.Length, BufferUsage.WriteOnly);
+            plBullets.VBuffer.SetData(verts);
+            plBullets.IBuffer = renderer.CreateIndexBuffer(IndexElementSize.ThirtyTwoBits, inds.Length, BufferUsage.WriteOnly);
+            plBullets.IBuffer.SetData(inds);
         }
-        public void LoadBulletTexture(RTSRenderer renderer, string f) {
+        private void LoadBulletTexture(RTSRenderer renderer, string f) {
             tBullet = renderer.LoadTexture2D(f);
         }
-        public void BuildFireModel(RTSRenderer renderer, int div) {
+        private void BuildFireModel(RTSRenderer renderer, int div) {
             VertexPositionTexture[] verts = new VertexPositionTexture[4 * div];
             short[] inds = new short[6 * div];
             double dTheta = Math.PI / div;
@@ -86,18 +93,12 @@ namespace RTSEngine.Graphics {
                 verts[vi++] = new VertexPositionTexture(new Vector3(x, 0, z), Vector2.One);
             }
 
-            vbFire = renderer.CreateVertexBuffer(VertexPositionTexture.VertexDeclaration, verts.Length, BufferUsage.WriteOnly);
-            vbFire.SetData(verts);
-            ibFire = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, BufferUsage.WriteOnly);
-            ibFire.SetData(inds);
-            dvbFire = renderer.CreateDynamicVertexBuffer(VertexFireInstance.Declaration, MAX_FIRES, BufferUsage.WriteOnly);
-            dvbFire.SetData(fires);
-
-            vbbFires = new VertexBufferBinding[2];
-            vbbFires[0] = new VertexBufferBinding(vbFire);
-            vbbFires[1] = new VertexBufferBinding(dvbFire, 0, 1);
+            plFires.VBuffer = renderer.CreateVertexBuffer(VertexPositionTexture.VertexDeclaration, verts.Length, BufferUsage.WriteOnly);
+            plFires.VBuffer.SetData(verts);
+            plFires.IBuffer = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, BufferUsage.WriteOnly);
+            plFires.IBuffer.SetData(inds);
         }
-        public void LoadFireShader(RTSRenderer renderer, string fxFile, string fNoise, string fColor, string fAlpha) {
+        private void LoadFireShader(RTSRenderer renderer, string fxFile, string fNoise, string fColor, string fAlpha) {
             fxFire = new FireShader();
             fxFire.Build(
                 renderer.LoadEffect(fxFile),
@@ -106,74 +107,59 @@ namespace RTSEngine.Graphics {
                 renderer.LoadTexture2D(fAlpha)
                 );
         }
+        private void BuildLightningModel(RTSRenderer renderer) {
+            VertexPositionTexture[] verts = new VertexPositionTexture[4];
+            verts[0] = new VertexPositionTexture(new Vector3(-1, 1, 0), Vector2.Zero);
+            verts[1] = new VertexPositionTexture(new Vector3(1, 1, 0), Vector2.UnitX);
+            verts[2] = new VertexPositionTexture(new Vector3(-1, 0, 0), Vector2.UnitY);
+            verts[3] = new VertexPositionTexture(new Vector3(1, 0, 0), Vector2.One);
+            short[] inds = { 0, 1, 2, 2, 1, 3 };
+
+            plBolts.VBuffer = renderer.CreateVertexBuffer(VertexPositionTexture.VertexDeclaration, verts.Length, BufferUsage.WriteOnly);
+            plBolts.VBuffer.SetData(verts);
+            plBolts.IBuffer = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, BufferUsage.WriteOnly);
+            plBolts.IBuffer.SetData(inds);
+        }
+        private void LoadLightningShader(RTSRenderer renderer, string fxFile, string fLMap, int splits) {
+            fxLightning = new LightningShader();
+            fxLightning.Build(renderer, fxFile, fLMap, splits);
+        }
 
         public void Update(List<Particle> newParticles, float dt) {
-            // Update Particles
-            Action<Particle> fp = (p) => { p.Update(dt); };
-            pBullets.
-                Concat<Particle>(pFires).
-                AsParallel().ForAll(fp);
-
-            // Remove Dead Particles
-            bool addB = pBullets.RemoveAll(Particle.IsParticleDead) > 0;
-            bool addF = pFires.RemoveAll(Particle.IsParticleDead) > 0;
-
-            // Add New Particles
-            for(int i = 0; i < newParticles.Count; i++) {
-                switch(newParticles[i].Type) {
-                    case ParticleType.Bullet:
-                        pBullets.Add(newParticles[i] as BulletParticle);
-                        addB = true;
-                        break;
-                    case ParticleType.Fire:
-                        pFires.Add(newParticles[i] as FireParticle);
-                        addF = true;
-                        break;
-                }
-            }
-
-            if(addB) {
-                // Make Sure We Don't Run Over
-                if(pBullets.Count > MAX_BULLETS)
-                    pBullets.RemoveRange(0, pBullets.Count - MAX_BULLETS);
-
-                for(int i = 0; i < pBullets.Count; i++) {
-                    bullets[i] = pBullets[i].instance;
-                }
-                dvbBullet.SetData(bullets);
-            }
-
-            if(addF) {
-                // Make Sure We Don't Run Over
-                if(pFires.Count > MAX_FIRES)
-                    pFires.RemoveRange(0, pFires.Count - MAX_FIRES);
-
-                for(int i = 0; i < pFires.Count; i++) {
-                    fires[i] = pFires[i].instance;
-                }
-                dvbFire.SetData(fires);
-            }
+            plBullets.Update(newParticles, dt);
+            plFires.Update(newParticles, dt);
+            plBolts.Update(newParticles, dt);
         }
 
         public void SetBullets(GraphicsDevice g) {
             g.Textures[0] = tBullet;
             g.SamplerStates[0] = SamplerState.LinearClamp;
-            g.SetVertexBuffers(vbbBullets);
-            g.Indices = ibBullet;
+            g.SetVertexBuffers(plBullets.VBBinds);
+            g.Indices = plBullets.IBuffer;
         }
         public void DrawBullets(GraphicsDevice g) {
-            if(pBullets.Count > 0)
-                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbBullet.VertexCount, 0, ibBullet.IndexCount / 3, pBullets.Count);
+            if(plBullets.ParticleCount > 0)
+                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plBullets.VertexCount, 0, plBullets.TriCount, plBullets.ParticleCount);
         }
 
         public void SetFire(GraphicsDevice g, Matrix mWVP, float t) {
             fxFire.Apply(g, mWVP, t);
-            g.SetVertexBuffers(vbbFires);
-            g.Indices = ibFire;
+            g.SetVertexBuffers(plFires.VBBinds);
+            g.Indices = plFires.IBuffer;
         }
         public void DrawFire(GraphicsDevice g) {
-            if(pFires.Count > 0)
-                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, vbFire.VertexCount, 0, ibFire.IndexCount / 3, pFires.Count);
+            if(plFires.ParticleCount > 0)
+                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plFires.VertexCount, 0, plFires.TriCount, plFires.ParticleCount);
+        }
+
+        public void SetLightning(GraphicsDevice g, Matrix mWVP, float t) {
+            fxLightning.Apply(g, mWVP, t);
+            g.SetVertexBuffers(plBolts.VBBinds);
+            g.Indices = plBolts.IBuffer;
+        }
+        public void DrawLightning(GraphicsDevice g) {
+            if(plBolts.ParticleCount > 0)
+                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plBolts.VertexCount, 0, plBolts.TriCount, plBolts.ParticleCount);
         }
     }
 }

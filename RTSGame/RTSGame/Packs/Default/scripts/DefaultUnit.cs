@@ -226,7 +226,6 @@ namespace RTS.Default.Unit {
         private float attackCooldown;
 
         public override void Init(GameState s, GameplayController c) {
-
         }
 
         public override void Attack(GameState g, float dt) {
@@ -468,7 +467,7 @@ namespace RTS.Default.Unit {
             d -= o;
             d.Normalize();
             BulletParticle bp = new BulletParticle(o, d, 0.05f, 1.4f, 0.1f);
-            bp.instance.Tint = Color.Red;
+            bp.Tint = Color.Red;
             AddParticle(bp);
         }
 
