@@ -1,0 +1,23 @@
+﻿Name        [Test]
+PlayerTypes [
+    {Player}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {Environment}
+]
+Races [
+    {Mech}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {Gaia}
+]

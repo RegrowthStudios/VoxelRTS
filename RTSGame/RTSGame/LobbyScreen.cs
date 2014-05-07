@@ -17,6 +17,12 @@ using System.Text.RegularExpressions;
 using RTSEngine.Interfaces;
 
 namespace RTS {
+    public struct GamePreset {
+        public string Name;
+        public string[] PlayerTypes;
+        public string[] Races;
+    }
+    
     public class TeamInitWidget : IDisposable {
         public BaseWidget Parent {
             set {
@@ -224,8 +230,11 @@ namespace RTS {
         }
     }
 
+
+
     public class LobbyScreen : GameScreen<App> {
         private static readonly Regex rgxLoadGame = RegexHelper.GenerateFile("load");
+        private const string PRESET_DIR = @"Packs\presets";
 
         public override int Next {
             get { return game.LoadScreen.Index; }
@@ -242,6 +251,7 @@ namespace RTS {
             private set;
         }
         Dictionary<string, RTSColorScheme> schemes;
+        List<GamePreset> gPresets;
 
         private EngineLoadData eld;
         public EngineLoadData InitInfo {
@@ -251,8 +261,15 @@ namespace RTS {
         WidgetRenderer wr;
         TeamInitWidget[] widgets;
         IDisposable tFont;
+        ScrollMenu menuPresets;
 
         public override void Build() {
+            gPresets = new List<GamePreset>();
+            var di = new DirectoryInfo(PRESET_DIR);
+            foreach(var fi in di.GetFiles()) {
+                GamePreset gp = (GamePreset)ZXParser.ParseFile(fi.FullName, typeof(GamePreset));
+                gPresets.Add(gp);
+            }
         }
         public override void Destroy(GameTime gameTime) {
         }
@@ -297,16 +314,34 @@ namespace RTS {
                 widgets[i].Set(pt, Races, schemes);
             }
             widgets[0].TextUser.Text = UserConfig.UserName;
-            var k = Races.Keys.FirstOrDefault((s) => { return true; });
-            widgets[0].PlayerType = "Player";
-            widgets[0].Race = k;
-            widgets[1].PlayerType = "Computer";
-            widgets[1].Race = k;
+
+            for(int i = 0; i < gPresets[0].Races.Length; i++) {
+                widgets[i].PlayerType = gPresets[0].PlayerTypes[i];
+                widgets[i].Race = gPresets[0].Races[i];
+            }
+
+            menuPresets = new ScrollMenu(wr,
+                game.Window.ClientBounds.Width - widgets[0].BackRect.Width - 20,
+                game.Window.ClientBounds.Height / 10,
+                10,
+                20,
+                40
+                );
+            menuPresets.BaseColor = UserConfig.MainScheme.WidgetBase;
+            menuPresets.TextColor = UserConfig.MainScheme.Text;
+            menuPresets.ScrollBarBaseColor = UserConfig.MainScheme.WidgetInactive;
+            menuPresets.HighlightColor = UserConfig.MainScheme.WidgetActive;
+            menuPresets.Widget.Anchor = new Point(game.Window.ClientBounds.Width - 20, 0);
+            menuPresets.Widget.AlignX = Alignment.RIGHT;
+            menuPresets.Build((from gp in gPresets select gp.Name).ToArray());
+            menuPresets.Hook();
 
             DevConsole.OnNewCommand += DevConsole_OnNewCommand;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPressed;
+            MouseEventDispatcher.OnMousePress += OnMP;
         }
         public override void OnExit(GameTime gameTime) {
+            MouseEventDispatcher.OnMousePress -= OnMP;
             DevConsole.OnNewCommand -= DevConsole_OnNewCommand;
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPressed;
             DevConsole.Deactivate();
@@ -315,6 +350,7 @@ namespace RTS {
                 game.LoadScreen.LoadData = eld;
             }
 
+            menuPresets.Dispose();
             foreach(var w in widgets) w.Dispose();
             wr.Dispose();
             tFont.Dispose();
@@ -375,6 +411,21 @@ namespace RTS {
                     else
                         DevConsole.Activate();
                     break;
+            }
+        }
+        void OnMP(Vector2 pos, MouseButton button) {
+            Point p = new Point((int)pos.X, (int)pos.Y);
+            string gps = menuPresets.GetSelection(p.X, p.Y);
+            if(gps != null) {
+                foreach(var gp in gPresets) {
+                    if(gp.Name.Equals(gps)) {
+                        for(int i = 0; i < gPresets[0].Races.Length; i++) {
+                            widgets[i].PlayerType = gp.PlayerTypes[i];
+                            widgets[i].Race = gp.Races[i];
+                        }
+                        return;
+                    }
+                }
             }
         }
         void DevConsole_OnNewCommand(string obj) {

@@ -50,6 +50,10 @@ namespace RTS {
         // View Info
         private Texture2D tLoad, tPixel;
         private List<FileInfo> imageList;
+        public string ImageFile {
+            get;
+            private set;
+        }
         private float percent;
         public List<string> tips;
         string tip;
@@ -97,7 +101,7 @@ namespace RTS {
 
         public override void OnEntry(GameTime gameTime) {
             Random r = new Random();
-            FileInfo fi = imageList[r.Next(imageList.Count)];
+            FileInfo fi = ImageFile == null ? imageList[r.Next(imageList.Count)] : new FileInfo(ImageFile);
             using(var s = File.OpenRead(fi.FullName)) {
                 tLoad = Texture2D.FromStream(G, s);
             }
