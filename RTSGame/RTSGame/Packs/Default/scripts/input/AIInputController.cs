@@ -11,17 +11,17 @@ using System.IO;
 
 namespace RTS.Input {
 
-    public static class AggressionLevel {
-        public static const int LOW = 0;
-        public static const int MODERATE = 1;
-        public static const int HIGH = 2;
+    public enum AggressionLevel {
+        LOW,
+        MODERATE,
+        HIGH
     }
 
     public class AI : ACInputController {
         private static readonly Random AI_SEEDER = new Random();
         private const int RareUnitCount = 2; // Within each batch, there are a few rare units that have a different type
         private int MaxUnit; // Maximum number of units I can spawn
-        private int aggressionLevel; // How angry I am
+        private AggressionLevel aggressionLevel; // How angry I am
         Thread t;
         bool running, paused;
 
