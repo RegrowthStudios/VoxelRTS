@@ -125,6 +125,9 @@ namespace RTSEngine.Data {
         private List<Particle> particles;
         private List<Particle> tmpParticles;
 
+        // Popup Events
+        public event Action<string, Rectangle> OnNewPopup; 
+
         public GameState() {
             UUIDGenerator.SetUUID(0);
             teams = new RTSTeam[MAX_PLAYERS];
@@ -200,6 +203,11 @@ namespace RTSEngine.Data {
         public void AddParticles(IEnumerable<Particle> p) {
             lock (lckParticles)
                 tmpParticles.AddRange(p);
+        }
+
+        public void SendPopup(string texFile, Rectangle destination) {
+            if(OnNewPopup != null)
+                OnNewPopup(texFile, destination);
         }
     }
 }

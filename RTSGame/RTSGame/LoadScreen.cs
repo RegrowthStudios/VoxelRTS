@@ -112,7 +112,7 @@ namespace RTS {
 
             // Font For Tips
             font = XNASpriteFont.Compile(G, TIPS_FONT, TIPS_FONT_SIZE, out tFont);
-            tip = tips[r.Next(tips.Count)];
+            tip = ImageFile != null ? null : tips[r.Next(tips.Count)];
 
             // Create The Loading Thread
             isLoaded = false;
@@ -153,8 +153,10 @@ namespace RTS {
             if(wr != null) {
                 SB.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
                 SB.Draw(tLoad, G.Viewport.Bounds, Color.White);
-                SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
-                SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
+                if(tip != null) {
+                    SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
+                    SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
+                }
                 SB.End();
 
                 wr.Draw(SB);
@@ -189,8 +191,10 @@ namespace RTS {
                 SB.Draw(tPixel, rBack, COLOR_BACK);
                 SB.Draw(tPixel, rBar, Color.Lerp(COLOR_LOW, COLOR_HIGH, percent));
 
-                SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
-                SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
+                if(tip != null) {
+                    SB.Draw(tPixel, new Rectangle(TIPS_OFFSET, TIPS_OFFSET, G.Viewport.Width - TIPS_OFFSET * 2, TIPS_HEIGHT), COLOR_BACK);
+                    SB.DrawString(font, tip, Vector2.One * (TIPS_OFFSET * 2), COLOR_HIGH);
+                }
                 SB.End();
             }
 

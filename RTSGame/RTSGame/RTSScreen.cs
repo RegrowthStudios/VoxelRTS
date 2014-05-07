@@ -44,6 +44,9 @@ namespace RTS {
         SpriteFont sfDebug;
         int eFPS;
 
+        Texture2D tPopup;
+        Rectangle rPopup;
+
         Jukebox jukeBox;
 
         public override int Next {
@@ -62,6 +65,7 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            tPopup = null;
             MouseEventDispatcher.OnMousePress += OnMP;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
@@ -71,6 +75,7 @@ namespace RTS {
             type = 0;
 
             state = game.LoadScreen.LoadedState;
+            state.OnNewPopup += OnNewPopup;
             camera = game.LoadScreen.LoadedCamera;
             renderer = game.LoadScreen.LoadedRenderer;
             renderer.UseFOW = true;
@@ -114,6 +119,8 @@ namespace RTS {
 
             jukeBox.Dispose();
             jukeBox = null;
+
+            if(tPopup != null) tPopup.Dispose();
         }
 
         public override void Update(GameTime gameTime) {
@@ -145,6 +152,12 @@ namespace RTS {
 #endif
             game.DrawDevConsole();
             game.DrawMouse();
+
+            if(tPopup != null) {
+                SB.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+                SB.Draw(tPopup, rPopup, Color.White);
+                SB.End();
+            }
 
             if(state.gtC.VictoriousTeam.HasValue) {
                 State = ScreenState.ChangePrevious;
@@ -187,6 +200,11 @@ namespace RTS {
                     break;
                 case Keys.Escape:
                     State = ScreenState.ChangePrevious;
+                    break;
+                case Keys.Enter:
+                    Texture2D t = System.Threading.Interlocked.Exchange(ref tPopup, null);
+                    if(t != null) t.Dispose();
+                    pauseEngine = false;
                     break;
             }
         }
@@ -247,6 +265,15 @@ namespace RTS {
                 team = buf[0];
                 type = buf[1];
             }
+        }
+        private void OnNewPopup(string texFile, Rectangle destination) {
+            Texture2D t = System.Threading.Interlocked.Exchange(ref tPopup, null);
+            if(t != null) t.Dispose();
+            using(var s = File.OpenRead(texFile))
+                t = Texture2D.FromStream(G, s);
+            rPopup = destination;
+            pauseEngine = true;
+            System.Threading.Interlocked.Exchange(ref tPopup, t);
         }
     }
 }

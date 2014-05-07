@@ -9,7 +9,8 @@ namespace RTSEngine.Graphics {
     public enum ParticleType {
         Bullet,
         Fire,
-        Lightning
+        Lightning,
+        Popup
     }
     public abstract class Particle {
         public static bool IsParticleDead(Particle p) {
