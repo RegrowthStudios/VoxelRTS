@@ -431,6 +431,11 @@ namespace RTS {
                     if(!DevConsole.IsActivated)
                         State = ScreenState.ChangeNext;
                     break;
+                case Keys.P:
+                case Keys.Back:
+                    if(!DevConsole.IsActivated)
+                        State = ScreenState.ChangePrevious;
+                    break;
                 case DevConsole.ACTIVATION_KEY:
                     if(DevConsole.IsActivated)
                         DevConsole.Deactivate();
