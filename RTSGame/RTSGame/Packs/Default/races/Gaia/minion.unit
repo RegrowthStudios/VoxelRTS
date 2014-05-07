@@ -1,15 +1,20 @@
-﻿// Friendly Unit Name
-NAME            [Treant]
-
-// Unit Model
-MODEL           [models\Minion.model]
-TEXMAIN         [textures\Minion.png]
-TEXCOLOR        [..\..\textures\NoKey.png]
-ANIMATION       [animations\Minion.png]
-ICON            [icons\Minion.png]
-MAXCOUNT        [1000]
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Minion.model}
+    {{animations\Minion.png} {textures\Minion.png} {..\..\textures\NoKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Treant}
+    {~~FILEROOTDIR~~}
+    {icons\Minion.png}
+)
 
 // Unit Data
+NAME            [Treant]
 HEALTH          [600]
 SPEED           [3]
 CAPITALCOST     [0]
@@ -18,6 +23,7 @@ BUILDTIME       [10]
 IMPACT          [10]
 WORKER          [False]
 CARRYCAPACITY   [0]
+MAXCOUNT        [1000]
 
 
 // Collision Data

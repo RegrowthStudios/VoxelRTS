@@ -1,18 +1,18 @@
 ﻿// Friendly Team Name
-NAME            [Mech]
+Name            [Mech]
 
 // Default Squad Controllers
-CTRLACTION      [RTS.Default.Squad.Action]
-CTRLMOVEMENT    [RTS.Default.Squad.Movement]
-CTRLTARGET      [RTS.Default.Squad.Targeting]
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Squad.Action})
+SetController({~~DICTSCRIPTS~~} {Movement} {RTS.Default.Squad.Movement})
+SetController({~~DICTSCRIPTS~~} {Targeting} {RTS.Default.Squad.Targeting})
 
 // List Of All Unit Types Belonging To Team
-UNIT            [worker.unit]
-UNIT            [soldier.unit]
-UNIT            [heavy.unit]
-UNIT            [armor.unit]
+LoadUnit({~~DICTSCRIPTS~~} {0} {~~FILEROOTDIR~~} {worker.unit})
+LoadUnit({~~DICTSCRIPTS~~} {1} {~~FILEROOTDIR~~} {soldier.unit})
+LoadUnit({~~DICTSCRIPTS~~} {2} {~~FILEROOTDIR~~} {heavy.unit})
+LoadUnit({~~DICTSCRIPTS~~} {3} {~~FILEROOTDIR~~} {armor.unit})
 
 // List Of All Building Types Belonging To Team
-BUILDING        [hq.building]
-BUILDING        [barracks.building]
-BUILDING        [factory.building]
+LoadBuilding({~~DICTSCRIPTS~~} {0} {~~FILEROOTDIR~~} {hq.building})
+LoadBuilding({~~DICTSCRIPTS~~} {1} {~~FILEROOTDIR~~} {barracks.building})
+LoadBuilding({~~DICTSCRIPTS~~} {2} {~~FILEROOTDIR~~} {factory.building})

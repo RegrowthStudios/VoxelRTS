@@ -1,27 +1,33 @@
-﻿// Friendly Unit Name
-NAME            [Ore]
-
-// Unit Model
-MODEL           [models\Ore.model]
-TEXMAIN         [textures\Ore.png]
-TEXCOLOR        [..\..\textures\NoKey.png]
-ICON            [icons\Ore.png]
-MAXCOUNT        [400]
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Ore.model}
+    {{textures\Ore.png} {..\..\textures\NoKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Ore}
+    {~~FILEROOTDIR~~}
+    {icons\Ore.png}
+)
 
 // Unit Data
-HEALTH          [2000]
-COST            [0]
-POPCAPCHANGE    [20]
-IMPACT          [5]
-BUILDAMOUNT     [20]
-SIGHTRADIUS     [8]
-GRIDSIZE        [1, 1]
-RESOURCE        [1]
-DEPOSITABLE		[0]
+Name            [Ore]
+Health          [2000]
+CapitalCost     [0]
+PopCapChange    [20]
+Impact          [5]
+BuildAmount     [20]
+SightRadius     [8]
+GridSize        [1, 1]
+IsResource      [True]
+Depositable		[False]
+MaxCount        [400]
 
 // Collision Data
-BBOXMIN         [-1 , 0.0 , -1]
-BBOXMAX         [1 , 3.0 , 1]
-CRECT           [2 , 2 , 0 , 0]
+SetBBox ({-1, 0, -1} {1, 1, 1})
 
-CTRLACTION      [RTS.Default.Building.Action]
+// Controllers
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})

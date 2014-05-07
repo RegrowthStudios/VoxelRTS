@@ -1,15 +1,20 @@
-﻿// Friendly Unit Name
-NAME            [Heavy Soldier]
-
-// Unit Model
-MODEL           [models\Base.model]
-TEXMAIN         [textures\Main.png]
-TEXCOLOR        [textures\Key.png]
-ANIMATION       [animations\Heavy.png]
-ICON            [icons\Heavy.png]
-MAXCOUNT        [1000]
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Base.model}
+    {{animations\Heavy.png} {textures\Main.png} {textures\Key.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Heavy Soldier}
+    {~~FILEROOTDIR~~}
+    {icons\Heavy.png}
+)
 
 // Unit Data
+NAME            [Heavy Soldier]
 HEALTH          [600]
 SPEED           [2.2]
 CAPITALCOST     [6]
@@ -18,7 +23,7 @@ BUILDTIME       [15]
 IMPACT          [10]
 WORKER          [False]
 CARRYCAPACITY   [0]
-
+MAXCOUNT        [1000]
 
 // Collision Data
 RADIUS          [0.4]
