@@ -47,6 +47,12 @@ namespace RTS {
         Texture2D tPopup;
         Rectangle rPopup;
 
+        // End Animations
+        Texture2D tVictory, tDefeat;
+        float tl;
+        bool end;
+        int gResult;
+
         Jukebox jukeBox;
 
         public override int Next {
@@ -60,8 +66,17 @@ namespace RTS {
 
         public override void Build() {
             GameEngine.CompileAllScripts(new DirectoryInfo(@"Packs"));
+
+            using(var s = File.OpenRead(@"Content\Textures\Victory.png")) {
+                tVictory = Texture2D.FromStream(G, s);
+            }
+            using(var s = File.OpenRead(@"Content\Textures\Defeat.png")) {
+                tDefeat = Texture2D.FromStream(G, s);
+            }
         }
         public override void Destroy(GameTime gameTime) {
+            tVictory.Dispose();
+            tDefeat.Dispose();
         }
 
         public override void OnEntry(GameTime gameTime) {
@@ -77,6 +92,7 @@ namespace RTS {
             state = game.LoadScreen.LoadedState;
             state.OnNewPopup += OnNewPopup;
             camera = game.LoadScreen.LoadedCamera;
+            camera.CamOrigin = new Vector3(30, 35, 30);
             renderer = game.LoadScreen.LoadedRenderer;
             renderer.UseFOW = true;
             playController = new GameplayController();
@@ -131,6 +147,8 @@ namespace RTS {
             renderer.UpdateAnimations(state, (float)game.TargetElapsedTime.TotalSeconds);
         }
         public override void Draw(GameTime gameTime) {
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             if(!pauseRender) {
                 camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
                 renderer.Update(state);
@@ -159,8 +177,23 @@ namespace RTS {
                 SB.End();
             }
 
-            if(state.gtC.VictoriousTeam.HasValue) {
-                State = ScreenState.ChangePrevious;
+            if(end) {
+                tl -= dt;
+                if(tl < 0)
+                    State = ScreenState.ChangePrevious;
+
+                Vector2 center = new Vector2(G.Viewport.Width, G.Viewport.Height) * 0.5f;
+                SB.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone);
+                SB.Draw(
+                    gResult < 0 ? tDefeat : tVictory,
+                    center, null,
+                    Color.Lerp(Color.Transparent, Color.White, MathHelper.Clamp(3f - tl, 0, 1)));
+                SB.End();
+            }
+            else if(state.gtC.VictoriousTeam.HasValue) {
+                end = true;
+                tl = 3f;
+                gResult = state.gtC.VictoriousTeam.Value;
             }
         }
 

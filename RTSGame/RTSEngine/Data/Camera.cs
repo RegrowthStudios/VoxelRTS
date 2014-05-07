@@ -70,6 +70,7 @@ namespace RTSEngine.Data {
         private Vector3 camOrigin;
         public Vector3 CamOrigin {
             get { return camOrigin; }
+            set { camOrigin = value; }
         }
         public CameraMotionSettings lowSettings, highSettings;
         public CameraMotionSettings MovementSettings {

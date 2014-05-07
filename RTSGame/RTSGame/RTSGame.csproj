@@ -136,9 +136,9 @@
     <Content Include="Packs\Default\scripts\input\UICRTS.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\scripts\tutorials\T0.cs">
+    <Compile Include="Packs\Default\scripts\tutorials\T0.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Compile Include="WispScreen.cs" />
     <Content Include="Content\Textures\Wisp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -439,7 +439,16 @@
     <Content Include="Packs\Default\textures\NoKey.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\presets\Tutorial0.png">
+    <Content Include="Packs\presets\Tutorial0\0.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\presets\Tutorial0\1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\presets\Tutorial0\2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\presets\Tutorial0\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="README.txt" />
