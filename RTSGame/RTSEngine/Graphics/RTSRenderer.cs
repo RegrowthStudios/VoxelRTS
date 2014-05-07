@@ -597,7 +597,8 @@ namespace RTSEngine.Graphics {
             // Build The Selections
             verts = new VertexPositionColorTexture[teamInput.selected.Count * 4];
             int i = 0;
-            foreach(var e in teamInput.selected) {
+            var sarr = teamInput.selected.ToArray();
+            foreach(var e in sarr) {
                 Vector2 c = e.GridPosition;
                 float r = e.CollisionGeometry.BoundingRadius * SELECTION_RADIUS_MODIFIER;
                 float h = e.Height;

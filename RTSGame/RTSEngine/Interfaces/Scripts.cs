@@ -91,6 +91,9 @@ namespace RTSEngine.Interfaces {
         // Pathfinder To Be Run On A Separate Thread         
         public Pathfinder Pathfinder { get; set; }
 
+        // This Unit Movement Controller's Current PathQuery
+        public PathQuery Query { get; set; }
+
         // Squad Waypoints
         private List<Vector2> waypoints = new List<Vector2>();
         public List<Vector2> Waypoints {

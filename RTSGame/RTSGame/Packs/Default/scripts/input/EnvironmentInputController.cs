@@ -159,6 +159,7 @@ namespace RTS.Input {
             thread.IsBackground = true;
             running = true;
             paused = true;
+            eData = EnvironmentData.Default;
             minNumSpawn = new int[3][] { eData.L1MinNumSpawn, eData.L1MaxNumSpawn, eData.L2MinNumSpawn };
             maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
             treeLocations = new List<Point>();

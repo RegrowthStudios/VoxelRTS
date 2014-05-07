@@ -213,3 +213,6 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+*.dll
+RTSGame/Libraries/GreyEngine.dll
+RTSGame/Libraries/CommonExt.dll
