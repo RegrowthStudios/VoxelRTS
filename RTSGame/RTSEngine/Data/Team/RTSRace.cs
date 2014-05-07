@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using RTSEngine.Controllers;
+using RTSEngine.Data.Parsers;
 
 namespace RTSEngine.Data.Team {
     public class RTSRace {
@@ -47,6 +48,7 @@ namespace RTSEngine.Data.Team {
         public const int MAX_UNIT_TYPES = 24;
         public const int MAX_BUILDING_TYPES = 36;
 
+        [ZXParse("Name")]
         public string FriendlyName;
         public FileInfo InfoFile;
 
@@ -88,6 +90,30 @@ namespace RTSEngine.Data.Team {
             for(int i = 0; i < MAX_BUILDING_TYPES; i++) {
                 if(Buildings[i] != null) ActiveBuildings[c++] = Buildings[i];
             }
+        }
+
+        public void SetController(Dictionary<string, ReflectedScript> d, string cType, string key) {
+            switch(cType.Trim().ToLower()) {
+                case "act":
+                case "action":
+                    d.TryGetValue(key, out SCAction);
+                    break;
+                case "move":
+                case "movement":
+                case "motion":
+                    d.TryGetValue(key, out SCMovement);
+                    break;
+                case "target":
+                case "targeting":
+                    d.TryGetValue(key, out SCTargeting);
+                    break;
+            }
+        }
+        public void LoadUnit(Dictionary<string, ReflectedScript> d, int index, string rootPath, string file) {
+            Units[index] = RTSUnitDataParser.ParseData(d, new FileInfo(Path.Combine(rootPath, file)), index);
+        }
+        public void LoadBuilding(Dictionary<string, ReflectedScript> d, int index, string rootPath, string file) {
+            Buildings[index] = RTSBuildingDataParser.ParseData(d, new FileInfo(Path.Combine(rootPath, file)), index);
         }
     }
 }
