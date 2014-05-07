@@ -339,7 +339,7 @@ namespace RTS {
                 foreach(var fi in dir.GetFiles()) {
                     if(fi.Extension.EndsWith(RTSUnitDataParser.EXTENSION))
                         unitDataFiles.Add(fi);
-                    else if(fi.Extension.EndsWith(RTSColorSchemeParser.EXTENSION))
+                    else if(fi.Extension.EndsWith(".scheme"))
                         schemeFiles.Add(fi);
                 }
             }
@@ -379,12 +379,12 @@ namespace RTS {
                 else if(!file.Exists) {
                     DevConsole.AddCommand("File Does Not Exist");
                 }
-                var cs = RTSColorSchemeParser.Parse(file);
-                if(!cs.HasValue) {
+                var cs = ZXParser.ParseFile(file.FullName, typeof(RTSColorScheme));
+                if(cs == null) {
                     DevConsole.AddCommand("Incorrect File Format");
                 }
                 else {
-                    colorScheme = cs.Value;
+                    colorScheme = (RTSColorScheme)cs;
                     name = colorScheme.Name;
                     sP.Color = colorScheme.Primary;
                     sS.Color = colorScheme.Secondary;

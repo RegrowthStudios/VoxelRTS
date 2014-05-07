@@ -233,7 +233,7 @@ namespace RTS.Input {
                 }
                 counter++;
                 counter = counter % (RecoverTime);
-                Thread.Sleep(3000);
+                Thread.Sleep(500);
             }
         }
 
@@ -297,12 +297,15 @@ namespace RTS.Input {
                 else
                     level = 0;
 
+               // level = 2;
 
                 if(level > 0) {
                     DevConsole.AddCommand("Has Level");
 
                     // Decide disaster type
                     int type = random.Next(2);
+
+                   // type = 1;
 
                     // Create the appropriate disaster
                     if(type == 0) {
@@ -327,15 +330,17 @@ namespace RTS.Input {
                 FireRunning = false;
                 FireThread.Join();
             }
-            FireThread = new Thread(FireWorkThread);
-            FireThread.IsBackground = true;
-            FireRunning = true;
-            List<Point> fires = new List<Point>();
-            foreach (var f in FireStarts) {
-                fires.Add(f);
+            if (FireStarts.Count > 0) {
+                FireThread = new Thread(FireWorkThread);
+                FireThread.IsBackground = true;
+                FireRunning = true;
+                List<Point> fires = new List<Point>();
+                foreach (var f in FireStarts) {
+                    fires.Add(f);
+                }
+                FireStarts.Clear();
+                FireThread.Start(fires);
             }
-            FireStarts.Clear();
-            FireThread.Start(fires);
         }
 
        
@@ -435,6 +440,7 @@ namespace RTS.Input {
 
         // Natural Disaster That Damages Units
         private void CreateLightning(Region r) {
+            List<LightningParticle> particles = new List<LightningParticle>();
             foreach(var ic in r.Cells) {
                 Point c = new Point(ic.X * 2, ic.Y * 2);
                 for(int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
@@ -444,16 +450,19 @@ namespace RTS.Input {
                                 bool takeDamage = (random.Next(100) <= LightningHitP);
                                 if(takeDamage) {
                                     u.Damage(LightningDamage);
+                                    particles.Add(new LightningParticle(u.WorldPosition, 1, 7, 1, 0.6f, 1, Color.BlueViolet));
                                 }
                             }
                         }
                     }
                 }
             }
+            GameState.AddParticles(particles);
         }
 
         // Natural Disaster That Damages Buildings
         private void CreateEarthquake(Region r) {
+            List<LightningParticle> particles = new List<LightningParticle>();
             foreach(var ic in r.Cells) {
                 Point c = new Point(ic.X * 2, ic.Y * 2);
                 for(int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
@@ -461,14 +470,16 @@ namespace RTS.Input {
                         RTSBuilding b = GameState.CGrid.EStatic[c.X + x, c.Y + y];
                         if(b != null && b.Team.Index != Team.Index) {
                             bool takeDamage = (random.Next(100) <= EarthquakeHitP);
-                            if(takeDamage) {
+                            if(true) {
                                 b.Damage(EarthquakeDamage);
+                                particles.Add(new LightningParticle(b.WorldPosition, 3, 10, 2, 0.6f, 1,Color.Red));
                             }
                         }
 
                     }
                 }
             }
+            GameState.AddParticles(particles);
         }
         /*
         private void SpawnUnits(Region r, int level) {

@@ -58,6 +58,7 @@ namespace RTS {
         }
 
         public override void Build() {
+            GameEngine.CompileAllScripts(new DirectoryInfo(@"Packs"));
         }
         public override void Destroy(GameTime gameTime) {
         }

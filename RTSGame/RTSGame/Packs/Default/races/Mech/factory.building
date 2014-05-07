@@ -1,27 +1,33 @@
-﻿// Friendly Unit Name
-NAME            [House]
-
-// Unit Model
-MODEL           [models\Factory.model]
-TEXMAIN         [textures\FactoryMain.png]
-TEXCOLOR        [textures\FactoryKey.png]
-ICON            [icons\Factory.png]
-MAXCOUNT        [1000]
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Factory.model}
+    {{textures\FactoryMain.png} {textures\FactoryKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Factory}
+    {~~FILEROOTDIR~~}
+    {icons\Factory.png}
+)
 
 // Unit Data
-HEALTH          [120]
-COST            [20]
-POPCAPCHANGE    [10]
-IMPACT          [10]
-BUILDAMOUNT     [20]
-SIGHTRADIUS     [14]
-GRIDSIZE        [1 , 1]
-RESOURCE        [0]
-DEPOSITABLE		[1]
+Name            [Factory]
+Health          [120]
+CapitalCost     [20]
+PopCapChange    [10]
+Impact          [10]
+BuildAmount     [20]
+SightRadius     [14]
+GridSize        [1, 1]
+IsResource      [False]
+Depositable		[True]
+MaxCount        [1000]
 
 // Collision Data
-BBOXMIN         [-1 , 0.0 , -1]
-BBOXMAX         [1 , 3.0 , 1]
-CRECT           [2 , 2 , 0 , 0]
+SetBBox ({-1, 0, -1} {1, 2, 1})
 
-CTRLACTION      [RTS.Default.Building.Action]
+// Controllers
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})

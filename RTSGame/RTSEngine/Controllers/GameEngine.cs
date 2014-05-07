@@ -31,6 +31,8 @@ namespace RTSEngine.Controllers {
     }
 
     public static class GameEngine {
+        private static Dictionary<string, ReflectedScript> scripts;
+
         public static void SearchAllInitInfo(DirectoryInfo dir, Dictionary<string, FileInfo> races, Dictionary<string, RTSColorScheme> dictSchemes) {
             var files = dir.GetFiles();
             foreach(var file in files) {
@@ -38,9 +40,11 @@ namespace RTSEngine.Controllers {
                     races.Add(RTSRaceParser.ParseName(file), file);
                 }
                 else if(file.Extension.ToLower().EndsWith("scheme")) {
-                    RTSColorScheme? scheme = RTSColorSchemeParser.Parse(file);
-                    if(scheme.HasValue)
-                        dictSchemes.Add(scheme.Value.Name, scheme.Value);
+                    object scheme = ZXParser.ParseFile(file.FullName, typeof(RTSColorScheme));
+                    if(scheme != null) {
+                        var v = (RTSColorScheme)scheme;
+                        dictSchemes.Add(v.Name, v);
+                    }
                 }
             }
             var dirs = dir.GetDirectories();
@@ -49,13 +53,13 @@ namespace RTSEngine.Controllers {
             }
         }
 
-        private static Dictionary<string, ReflectedScript> CompileAllScripts(DirectoryInfo root) {
+        public static void CompileAllScripts(DirectoryInfo root) {
             string error;
             List<string> files = new List<string>();
             List<string> libs = new List<string>(RTSConstants.ENGINE_LIBRARIES);
             FindAllInitData(root, files, libs);
-            var s = ScriptParser.Compile(files.ToArray(), libs.ToArray(), out error);
-            return s;
+            scripts = ScriptParser.Compile(files.ToArray(), libs.ToArray(), out error);
+            return;
         }
         private static void FindAllInitData(DirectoryInfo dir, List<string> files, List<string> libs) {
             var f = dir.GetFiles();
@@ -85,12 +89,8 @@ namespace RTSEngine.Controllers {
             }
         }
         private static void BuildScripts(GameState state, DirectoryInfo root) {
-            var res = CompileAllScripts(root);
-            if(res == null)
-                throw new Exception("Bro, You Fucked Up The Scripts.\nDon't Mod It If You Don't Know It");
-
             // Add Scripts
-            foreach(KeyValuePair<string, ReflectedScript> kv in res)
+            foreach(KeyValuePair<string, ReflectedScript> kv in scripts)
                 state.Scripts.Add(kv.Key, kv.Value);
         }
         private static void BuildMap(GameState state, FileInfo infoFile) {
@@ -122,16 +122,12 @@ namespace RTSEngine.Controllers {
             }
         }
         public static void Load(GameState state, DirectoryInfo root, string fi) {
-            var res = CompileAllScripts(root);
-            if(res == null)
-                throw new Exception("Bro, You Fucked Up The Scripts.\nDon't Mod It If You Don't Know It");
-
             string mapFile = "";
             using(var s = File.OpenRead(fi)) {
                 BinaryReader r = new BinaryReader(s, Encoding.ASCII);
                 mapFile = r.ReadString();
                 BuildMap(state, new FileInfo(mapFile));
-                GameState.Deserialize(r, res, state);
+                GameState.Deserialize(r, scripts, state);
             }
 
             // Hook Building Spawn Events To Collision Grid
