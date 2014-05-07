@@ -22,9 +22,13 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        [ZXParse("NAME")]
         public string Name;
+        [ZXParse("PRIMARY")]
         public Vector3 Primary;
+        [ZXParse("SECONDARY")]
         public Vector3 Secondary;
+        [ZXParse("TERTIARY")]
         public Vector3 Tertiary;
     }
 

@@ -12,12 +12,7 @@ namespace RTSEngine.Data.Parsers {
     public static class RTSRaceParser {
         const string DIRECTORY = "races";
         const string EXTENSION = "race";
-        static readonly Regex rgxName = RegexHelper.GenerateString("NAME");
-        private static readonly Regex rgxCtrlAction = RegexHelper.Generate("CTRLACTION", @"[\w\s\.]+");
-        private static readonly Regex rgxCtrlMovement = RegexHelper.Generate("CTRLMOVEMENT", @"[\w\s\.]+");
-        private static readonly Regex rgxCtrlTargeting = RegexHelper.Generate("CTRLTARGET", @"[\w\s\.]+");
-        static readonly Regex rgxUnit = RegexHelper.GenerateFile("UNIT");
-        static readonly Regex rgxBuilding = RegexHelper.GenerateFile("BUILDING");
+        static readonly Regex rgxName = RegexHelper.GenerateString("Name");
 
         private static bool IsFile(FileInfo fi) {
             return fi.Extension.EndsWith(EXTENSION);
@@ -40,46 +35,28 @@ namespace RTSEngine.Data.Parsers {
             }
             return res;
         }
-        public static RTSRace Parse(FileInfo fi, Dictionary<string, ReflectedScript> scripts) {
-            if(fi == null || !fi.Exists) return null;
+        public static RTSRace Parse(FileInfo infoFile, Dictionary<string, ReflectedScript> scripts) {
+            // Check File Existence
+            if(infoFile == null || !infoFile.Exists) return null;
 
-            string mStr = null;
-            using(FileStream s = File.OpenRead(fi.FullName)) {
-                mStr = new StreamReader(s).ReadToEnd();
+            // Read The Entire File
+            string mStr;
+            using(FileStream fs = File.OpenRead(infoFile.FullName)) {
+                StreamReader s = new StreamReader(fs);
+                mStr = s.ReadToEnd();
             }
 
-            RTSRace res = new RTSRace();
-            res.InfoFile = fi;
+            // Set Environment Variables
+            ZXParser.SetEnvironment("FILEROOTDIR", infoFile.Directory.FullName);
+            ZXParser.SetEnvironment("DICTSCRIPTS", scripts);
 
-            // Read Name
-            res.FriendlyName = RegexHelper.Extract(rgxName.Match(mStr));
-            if(scripts != null) {
-                res.SCAction = scripts[RegexHelper.Extract(rgxCtrlAction.Match(mStr))];
-                res.SCMovement = scripts[RegexHelper.Extract(rgxCtrlMovement.Match(mStr))];
-                res.SCTargeting = scripts[RegexHelper.Extract(rgxCtrlTargeting.Match(mStr))];
-            }
-
-            // Read All Units
-            Match m = rgxUnit.Match(mStr);
-            int type = 0;
-            while(m.Success) {
-                RTSUnitData data = RTSUnitDataParser.ParseData(scripts, RegexHelper.ExtractFile(m, fi.Directory.FullName), type);
-                res.Units[type++] = data;
-                m = m.NextMatch();
-            }
-            res.UpdateActiveUnits();
-
-            // Read All Buildings
-            m = rgxBuilding.Match(mStr);
-            type = 0;
-            while(m.Success) {
-                RTSBuildingData data = RTSBuildingDataParser.ParseData(scripts, RegexHelper.ExtractFile(m, fi.Directory.FullName), type);
-                res.Buildings[type++] = data;
-                m = m.NextMatch();
-            }
-            res.UpdateActiveBuildings();
-
-            return res;
+            // Read Data
+            RTSRace data = new RTSRace();
+            ZXParser.ParseInto(mStr, data);
+            data.InfoFile = new FileInfo(PathHelper.GetRelativePath(infoFile.FullName));
+            data.UpdateActiveUnits();
+            data.UpdateActiveBuildings();
+            return data;
         }
         public static string ParseName(FileInfo fi) {
             if(fi == null || !fi.Exists) return null;

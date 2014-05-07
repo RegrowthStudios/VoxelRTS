@@ -128,7 +128,6 @@ namespace RTSEngine.Data.Team {
             Vector3 s = BBox.Max - BBox.Min;
             ICollidableShape = new CollisionRect(s.X, s.Z, new Vector2(c.X, c.Z), true);
         }
-
         public void SetController(Dictionary<string, ReflectedScript> d, string cType, string key) {
             switch(cType.Trim().ToLower()) {
                 case "act":

@@ -59,6 +59,9 @@
     <Compile Include="Controllers\FOWResolver.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
+    <Compile Include="Data\Parsers\RegexHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Graphics\Particles\FireShader.cs" />
     <Compile Include="Graphics\Particles\LightningShader.cs" />
     <Compile Include="Graphics\Particles\ParticleList.cs" />
@@ -76,8 +79,6 @@
     <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
     <Compile Include="Data\Parsers\ScriptParser.cs" />
     <Compile Include="Data\Parsers\MapParser.cs" />
-    <Compile Include="Data\Parsers\RegexHelper.cs" />
-    <Compile Include="Data\Parsers\RTSColorSchemeParser.cs" />
     <Compile Include="Data\Parsers\RTSRaceParser.cs" />
     <Compile Include="Data\Parsers\RTSUnitDataParser.cs" />
     <Compile Include="Data\Region.cs" />

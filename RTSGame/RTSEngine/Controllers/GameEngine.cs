@@ -40,9 +40,11 @@ namespace RTSEngine.Controllers {
                     races.Add(RTSRaceParser.ParseName(file), file);
                 }
                 else if(file.Extension.ToLower().EndsWith("scheme")) {
-                    RTSColorScheme? scheme = RTSColorSchemeParser.Parse(file);
-                    if(scheme.HasValue)
-                        dictSchemes.Add(scheme.Value.Name, scheme.Value);
+                    object scheme = ZXParser.ParseFile(file.FullName, typeof(RTSColorScheme));
+                    if(scheme != null) {
+                        var v = (RTSColorScheme)scheme;
+                        dictSchemes.Add(v.Name, v);
+                    }
                 }
             }
             var dirs = dir.GetDirectories();
