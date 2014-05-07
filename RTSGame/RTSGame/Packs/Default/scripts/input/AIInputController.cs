@@ -11,10 +11,10 @@ using System.IO;
 
 namespace RTS.Input {
 
-    public static class AggressionLevel {
-        public static const int LOW = 0;
-        public static const int MODERATE = 1;
-        public static const int HIGH = 2;
+    public enum AggressionLevel {
+        LOW,
+        MODERATE,
+        HIGH
     }
 
     public class AI : ACInputController {
@@ -23,7 +23,8 @@ namespace RTS.Input {
         private int MaxUnit; // Maximum number of units I can spawn
         private int[,] unitBatches = new int[3, 10]; // Unit patterns to spawn
         private int BuildingCount = 3;
-        private int aggressionLevel; // How angry I am
+        private AggressionLevel aggressionLevel; // How angry I am
+
         Thread t;
         bool running, paused;
 
