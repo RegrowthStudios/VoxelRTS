@@ -18,8 +18,11 @@ namespace RTSEngine.Data.Parsers {
         public float MapHeight;
         public Microsoft.Xna.Framework.Point[] PlayerSpawns;
 
+        [ZXParse]
         public LevelGrid LGrid;
+        [ZXParse]
         public List<Region> Regions;
+        public string VoxWorldFile;
 
         public TerrainData() {
             Regions = new List<Region>();
@@ -29,7 +32,6 @@ namespace RTSEngine.Data.Parsers {
         public void ReadHeightData(string rootPath, string filePath) {
             string path = Path.Combine(rootPath, filePath);
             LGrid.L0 = new Heightmap(path);
-            LGrid.L0.ScaleHeights(MapHeight);
         }
         public void ReadGridData(string rootPath, string filePath) {
             string path = Path.Combine(rootPath, filePath);
@@ -80,142 +82,11 @@ namespace RTSEngine.Data.Parsers {
             LGrid.L0.Depth = LGrid.L1.size.Y;
         }
     }
-    public class TerrainViewData {
-        [ZXParse]
-        public HeightmapModel View;
-        [ZXParse]
-        public BoundingBox AABB;
-        [ZXParse]
-        public Vector3 Scaling;
-
-        public void BuildPrimary(RTSRenderer ge, string rootPath, LevelGrid grid, string fModel, string fTexture) {
-            Scaling = new Vector3(grid.L0.Width, grid.L0.ScaleY, grid.L0.Depth);
-            int fWidth = grid.L1.numCells.X, fHeight = grid.L1.numCells.Y;
-            Vector2 uvScale = new Vector2(1f / Scaling.X, 1f / Scaling.Z);
-
-            // Try To Find The First Model
-            FileInfo mpfi = new FileInfo(Path.Combine(rootPath, fModel));
-            FileInfo tpfi = new FileInfo(Path.Combine(rootPath, fTexture));
-            if(!mpfi.Exists || !tpfi.Exists) return;
-
-            // Try To Get The First Texture
-            Texture2D t;
-            FileStream ts = null;
-            try {
-                ts = File.OpenRead(tpfi.FullName);
-                t = ge.LoadTexture2D(ts);
-                ts.Dispose();
-            }
-            catch(Exception) {
-                if(ts != null) ts.Dispose();
-                t = null;
-            }
-            if(t == null) return;
-
-            // Try To Parse The Primary Model
-            VertexPositionNormalTexture[] vertsPNT;
-            VertexPositionTexture[] verts;
-            int[] inds;
-            bool error;
-            using(var ms = File.OpenRead(mpfi.FullName)) {
-                error = !ObjParser.TryParse(ms, out vertsPNT, out inds, ParsingFlags.ConversionOpenGL);
-            }
-            if(error) return;
-
-            // Reposition Model
-            AABB = new BoundingBox(new Vector3(float.MaxValue), new Vector3(-float.MaxValue));
-            verts = new VertexPositionTexture[vertsPNT.Length];
-            for(int i = 0; i < vertsPNT.Length; i++) {
-                // Copy Over Information
-                verts[i].Position = vertsPNT[i].Position;
-                verts[i].TextureCoordinate = vertsPNT[i].TextureCoordinate;
-
-                // Calculate Bounding Box
-                if(verts[i].Position.X > AABB.Max.X) AABB.Max.X = verts[i].Position.X;
-                if(verts[i].Position.X < AABB.Min.X) AABB.Min.X = verts[i].Position.X;
-                if(verts[i].Position.Y > AABB.Max.Y) AABB.Max.Y = verts[i].Position.Y;
-                if(verts[i].Position.Y < AABB.Min.Y) AABB.Min.Y = verts[i].Position.Y;
-                if(verts[i].Position.Z > AABB.Max.Z) AABB.Max.Z = verts[i].Position.Z;
-                if(verts[i].Position.Z < AABB.Min.Z) AABB.Min.Z = verts[i].Position.Z;
-            }
-            // Find Scaling
-            Scaling /= AABB.Max - AABB.Min;
-            for(int i = 0; i < verts.Length; i++) {
-                // Move Model Minimum To Origin
-                verts[i].Position -= AABB.Min;
-                // Scale Heights To [0,size.Y]
-                verts[i].Position *= Scaling;
-                verts[i].Position.Y = grid.L0.HeightAt(verts[i].Position.X, verts[i].Position.Z);
-                verts[i].TextureCoordinate = new Vector2(
-                    verts[i].Position.X * uvScale.X,
-                    verts[i].Position.Z * uvScale.Y
-                    );
-            }
-
-            // Create The Primary Model
-            View = new HeightmapModel(ge, fWidth, fHeight);
-            View.BVH.Build(verts, inds);
-            RTSModelHelper.CreateBuffers(ge, verts, VertexPositionTexture.VertexDeclaration, inds, out View.VBPrimary, out View.IBPrimary, BufferUsage.WriteOnly);
-            View.PrimaryTexture = t;
-        }
-        public void BuildSecondary(RTSRenderer ge, string rootPath, LevelGrid grid, string fModel, string fTexture) {
-            if(View == null) return;
-
-            // Try To Find The First Model
-            FileInfo mpfi = new FileInfo(Path.Combine(rootPath, fModel));
-            FileInfo tpfi = new FileInfo(Path.Combine(rootPath, fTexture));
-            if(!mpfi.Exists || !tpfi.Exists) return;
-
-            // Try To Get The Second Texture
-            Texture2D t;
-            FileStream ts = null;
-            try {
-                ts = null;
-                ts = File.OpenRead(tpfi.FullName);
-                t = ge.LoadTexture2D(ts);
-                ts.Dispose();
-            }
-            catch(Exception) {
-                if(ts != null) ts.Dispose();
-                t = null;
-            }
-            if(t == null) return;
-
-            // Try To Parse The Secondary Model
-            VertexPositionNormalTexture[] vertsPNT;
-            int[] inds;
-            bool error;
-            using(var ms = File.OpenRead(mpfi.FullName)) {
-                error = !ObjParser.TryParse(ms, out vertsPNT, out inds, ParsingFlags.ConversionOpenGL);
-            }
-            if(error) return;
-            // Reposition Secondary To Coincide With The First
-            VertexPositionTexture[] verts = new VertexPositionTexture[vertsPNT.Length];
-            for(int i = 0; i < verts.Length; i++) {
-                verts[i].Position -= AABB.Min;
-                verts[i].Position *= Scaling;
-            }
-
-            // Create The Secondary Model
-            RTSModelHelper.CreateBuffers(ge, verts, VertexPositionTexture.VertexDeclaration, inds, out View.VBSecondary, out View.IBSecondary, BufferUsage.WriteOnly);
-            View.SecondaryTexture = t;
-        }
-    }
 
     public static class MapParser {
         // Data Detection
         const string EXTENSION = "map";
 
-        public static HeightmapModel ParseModel(RTSRenderer ge, LevelGrid grid, FileInfo infoFile) {
-            // Check File Existence
-            if(infoFile == null || !infoFile.Exists) return null;
-
-            ZXParser.SetEnvironment("FILEROOTDIR", infoFile.Directory.FullName);
-            ZXParser.SetEnvironment("RENDERER", ge);
-            ZXParser.SetEnvironment("LGRID", grid);
-            TerrainViewData mio = ZXParser.ParseFile(infoFile.FullName, typeof(TerrainViewData)) as TerrainViewData;
-            return mio.View;
-        }
         public static TerrainData ParseData(FileInfo infoFile, List<Region> regions) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;

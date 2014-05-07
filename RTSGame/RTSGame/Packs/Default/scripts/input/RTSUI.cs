@@ -25,19 +25,17 @@ namespace RTS.Input {
             set {
                 rectBounds.Width = value.Width;
                 rectBounds.Height = value.Height;
-                OnWindowResize();
             }
         }
         private RectWidget rectBounds;
-        public RectWidget PanelBottom {
-            get;
-            private set;
-        }
 
+        private RectWidget rectMapBack;
         public RectWidget Minimap {
             get;
             private set;
         }
+
+
         public RTSUISelectionPanel SelectionPanel {
             get;
             private set;
@@ -62,8 +60,8 @@ namespace RTS.Input {
             wrButtonPanel = new WidgetRenderer(renderer.G, font);
             wrMain = new WidgetRenderer(renderer.G, font);
 
-            BuildBounds(renderer, uic.BottomPanelHeight, uic.BottomPanelColor);
-            BuildMinimap(renderer, uic.MinimapBorder);
+            BuildBounds(renderer);
+            BuildMinimap(renderer, uic.MinimapBorder, uic.MinimapSize);
             BuildBBPanel(renderer);
             BuildBuildingPanel();
             BuildSelectionPanel(renderer);
@@ -77,7 +75,7 @@ namespace RTS.Input {
             BuildingPanel.Dispose();
         }
 
-        private void BuildBounds(RTSRenderer renderer, int ph, Color c) {
+        private void BuildBounds(RTSRenderer renderer) {
             rectBounds = new RectWidget(wrMain);
             rectBounds.Color = Color.Transparent;
             rectBounds.Anchor = new Point(0, 0);
@@ -88,23 +86,20 @@ namespace RTS.Input {
             renderer.Window.ClientSizeChanged += (sender, args) => {
                 rectBounds.Width = renderer.G.Viewport.Width;
                 rectBounds.Height = renderer.G.Viewport.Height;
-                OnWindowResize();
             };
             rectBounds.LayerDepth = 1f;
-
-            PanelBottom = new RectWidget(wrMain);
-            PanelBottom.Color = c;
-            PanelBottom.Width = rectBounds.Width;
-            PanelBottom.Height = ph;
-            PanelBottom.Offset = new Point(0, 0);
-            PanelBottom.OffsetAlignY = Alignment.BOTTOM;
-            PanelBottom.OffsetAlignX = Alignment.MID;
-            PanelBottom.AlignX = Alignment.MID;
-            PanelBottom.AlignY = Alignment.BOTTOM;
-            PanelBottom.Parent = rectBounds;
         }
-        private void BuildMinimap(RTSRenderer renderer, int buf) {
-            int s = PanelBottom.Height - buf * 2;
+        private void BuildMinimap(RTSRenderer renderer, int buf, int s) {
+            rectMapBack = new RectWidget(wrMain, null);
+            rectMapBack.Height = s + buf * 2;
+            rectMapBack.Width = rectMapBack.Height;
+            rectMapBack.AlignX = Alignment.RIGHT;
+            rectMapBack.AlignY = Alignment.BOTTOM;
+            rectMapBack.OffsetAlignX = Alignment.RIGHT;
+            rectMapBack.OffsetAlignY = Alignment.BOTTOM;
+            rectMapBack.Parent = rectBounds;
+            rectMapBack.Color = UserConfig.MainScheme.WidgetBorder;
+
             Minimap = new RectWidget(wrMain, renderer.Minimap.Terrain);
             Minimap.Width = s;
             Minimap.Height = s;
@@ -114,15 +109,17 @@ namespace RTS.Input {
             Minimap.Offset = new Point(-buf, -buf);
             Minimap.OffsetAlignX = Alignment.RIGHT;
             Minimap.OffsetAlignY = Alignment.BOTTOM;
-            Minimap.Parent = rectBounds;
+            Minimap.Parent = rectMapBack;
         }
         private void BuildBBPanel(RTSRenderer renderer) {
-            BBPanel = new RTSUIBuildingButtonPanel(wrMain, 3, 4, 40, 4);
+            BBPanel = new RTSUIBuildingButtonPanel(wrMain, uic.BBRows, uic.BBColumns, uic.BBIconSize, uic.BBIconBuffer);
+            BBPanel.BackPanel.Texture = renderer.LoadTexture2D(uic.BBTexture);
             BBPanel.BackPanel.Parent = rectBounds;
             BBPanel.BackPanel.AlignY = Alignment.BOTTOM;
             BBPanel.BackPanel.OffsetAlignY = Alignment.BOTTOM;
-            BBPanel.BackPanel.Offset = new Point(4, 0);
+            BBPanel.BackPanel.Offset = new Point(uic.BBIconBuffer, 0);
             BBPanel.IconLibrary = renderer.IconLibrary;
+            BBPanel.BackPanel.Color = UserConfig.MainScheme.WidgetBase;
         }
         private void BuildBuildingPanel() {
             BuildingPanel = new RTSUIBuildPanel(wrMain, 180, 26, 5, 12, 24);
@@ -130,13 +127,15 @@ namespace RTS.Input {
         }
         private void BuildSelectionPanel(RTSRenderer renderer) {
             SelectionPanel = new RTSUISelectionPanel(wrMain, uic.SelectionRows, uic.SelectionColumns, uic.SelectionIconSize, uic.SelectionIconBuffer);
-            SelectionPanel.BackPanel.Parent = rectBounds;
+            SelectionPanel.BackPanel.Texture = renderer.LoadTexture2D(uic.SelectionTexture);
+            SelectionPanel.BackPanel.Parent = BBPanel.BackPanel;
             SelectionPanel.BackPanel.AlignX = Alignment.LEFT;
             SelectionPanel.BackPanel.AlignY = Alignment.BOTTOM;
-            SelectionPanel.BackPanel.OffsetAlignX = Alignment.LEFT;
+            SelectionPanel.BackPanel.OffsetAlignX = Alignment.RIGHT;
             SelectionPanel.BackPanel.OffsetAlignY = Alignment.BOTTOM;
-            SelectionPanel.BackPanel.Offset = new Point(BBPanel.BackPanel.Width + uic.SelectionIconBuffer, 0);
+            SelectionPanel.BackPanel.Offset = new Point(0, 0);
             SelectionPanel.IconLibrary = renderer.IconLibrary;
+            SelectionPanel.BackPanel.Color = UserConfig.MainScheme.WidgetBase;
         }
         private void BuildTeamDataPanel() {
             TeamDataPanel = new RTSUITeamDataPanel(wrMain);
@@ -149,7 +148,12 @@ namespace RTS.Input {
         }
 
         public bool Inside(int x, int y) {
-            return PanelBottom.Inside(x, y) || BuildingPanel.Inside(x, y) || TeamDataPanel.Inside(x, y);
+            return
+                Minimap.Inside(x, y) ||
+                SelectionPanel.BackPanel.Inside(x, y) ||
+                BBPanel.BackPanel.Inside(x, y) ||
+                BuildingPanel.Inside(x, y) ||
+                TeamDataPanel.Inside(x, y);
         }
 
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
@@ -162,8 +166,8 @@ namespace RTS.Input {
             renderer.Minimap.DrawCamera(renderer, new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height));
         }
 
-        private void OnWindowResize() {
-            PanelBottom.Width = rectBounds.Width;
-        }
+        //private void OnWindowResize() {
+        //    PanelBottom.Width = rectBounds.Width;
+        //}
     }
 }

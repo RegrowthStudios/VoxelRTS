@@ -12,6 +12,8 @@ using RTSEngine.Interfaces;
 using RTSEngine.Data.Team;
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
+using Grey.Vox.Ops;
+using VRegion = Grey.Vox.Region;
 
 namespace RTS.Input {
     public class Player : ACInputController, IVisualInputController {
@@ -31,7 +33,7 @@ namespace RTS.Input {
             get;
             set;
         }
-        private BVH bvh;
+        //private BVH bvh;
 
         public bool HasSelectedEnemy {
             get { return selected.Count == 1 && selected[0].Team != Team; }
@@ -43,7 +45,7 @@ namespace RTS.Input {
         public Player()
             : base() {
             Type = RTSInputType.Player;
-            bvh = new BVH();
+            //bvh = new BVH();
         }
         public void Build(RTSRenderer renderer) {
             // Create UI
@@ -57,7 +59,7 @@ namespace RTS.Input {
             Team.OnCapitalChange += (t, c) => { UI.TeamDataPanel.Capital = Team.Capital; };
 
             // Build The BVH
-            bvh = renderer.Map.BVH;
+            // bvh = renderer.Map.BVH;
         }
         public override void Begin() {
             useSelectRect = false;
@@ -233,8 +235,18 @@ namespace RTS.Input {
 
                     // Check Building Placement
                     if(buildingToPlace != null) {
-                        if(bvh.Intersect(ref rec, ray)) {
-                            Vector3 rh = ray.Position + ray.Direction * rec.T;
+                        ray.Position *= new Vector3(0.5f, 1f, 0.5f);
+                        ray.Direction *= new Vector3(0.5f, 1f, 0.5f);
+                        ray.Direction.Normalize();
+                        var nvl = VRayHelper.GetOuter(ray, GameState.VoxState);
+                        if(nvl.HasValue) {
+                            Vector3 rh = new Vector3(
+                                nvl.Value.RegionLoc.X * VRegion.WIDTH + nvl.Value.VoxelLoc.X,
+                                nvl.Value.VoxelLoc.Y,
+                                nvl.Value.RegionLoc.Y * VRegion.DEPTH + nvl.Value.VoxelLoc.Z
+                                );
+                            rh *= new Vector3(2f, 1f, 2f);
+                            // Vector3 rh = ray.Position + ray.Direction * rec.T;
                             Point bp = HashHelper.Hash(new Vector2(rh.X, rh.Z), GameState.CGrid.numCells, GameState.CGrid.size);
                             AddEvent(new SpawnBuildingEvent(TeamIndex, buildingToPlace.Index, bp));
                         }
@@ -250,8 +262,19 @@ namespace RTS.Input {
                     }
                     else if(!HasSelectedEnemy) {
                         // Add A Waypoint Event
-                        if(bvh.Intersect(ref rec, ray)) {
-                            Vector3 rh = ray.Position + ray.Direction * rec.T;
+                        ray.Position *= new Vector3(0.5f, 1f, 0.5f);
+                        ray.Direction *= new Vector3(0.5f, 1f, 0.5f);
+                        ray.Direction.Normalize();
+                        var nvl = VRayHelper.GetOuter(ray, GameState.VoxState);
+                        if(nvl.HasValue) {
+                            Vector3 rh = new Vector3(
+                                nvl.Value.RegionLoc.X * VRegion.WIDTH + nvl.Value.VoxelLoc.X,
+                                nvl.Value.VoxelLoc.Y,
+                                nvl.Value.RegionLoc.Y * VRegion.DEPTH + nvl.Value.VoxelLoc.Z
+                                );
+                            rh *= new Vector3(2f, 1f, 2f);
+                            rh.X += 1f; rh.Z += 1f;
+                            //Vector3 rh = ray.Position + ray.Direction * rec.T;
                             AddEvent(new SetWayPointEvent(TeamIndex, new Vector2(rh.X, rh.Z)));
                         }
                     }

@@ -37,14 +37,15 @@ namespace RTS {
         private ACInputController gameInput;
         private IVisualInputController vInput;
 
-        Vector3 clickWorldPos;
         int team, type;
         bool pauseEngine, pauseRender;
-        bool addUnit, addBuilding;
         int playing;
         Thread tEngine;
         SpriteFont sfDebug;
         int eFPS;
+
+        Texture2D tPopup;
+        Rectangle rPopup;
 
         Jukebox jukeBox;
 
@@ -64,16 +65,17 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            tPopup = null;
             MouseEventDispatcher.OnMousePress += OnMP;
             KeyboardEventDispatcher.OnKeyPressed += OnKP;
             KeyboardEventDispatcher.OnKeyReleased += OnKR;
             DevConsole.OnNewCommand += DevConsole_OnNewCommand;
 
-            addUnit = false;
             team = 0;
             type = 0;
 
             state = game.LoadScreen.LoadedState;
+            state.OnNewPopup += OnNewPopup;
             camera = game.LoadScreen.LoadedCamera;
             renderer = game.LoadScreen.LoadedRenderer;
             renderer.UseFOW = true;
@@ -84,7 +86,7 @@ namespace RTS {
             vi.Build(renderer);
             vi.Camera = camera;
             GCInitArgs gca = new GCInitArgs();
-            gca.GameTypeScript = "RTS.Default.GameTypes.SPEscapeThePlanet";
+            gca.GameTypeScript = game.LoadScreen.LoadData.GTController;
             playController.Init(state, gca);
 
             sfDebug = renderer.CreateFont("Courier New", 32);
@@ -117,6 +119,8 @@ namespace RTS {
 
             jukeBox.Dispose();
             jukeBox = null;
+
+            if(tPopup != null) tPopup.Dispose();
         }
 
         public override void Update(GameTime gameTime) {
@@ -149,6 +153,12 @@ namespace RTS {
             game.DrawDevConsole();
             game.DrawMouse();
 
+            if(tPopup != null) {
+                SB.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+                SB.Draw(tPopup, rPopup, Color.White);
+                SB.End();
+            }
+
             if(state.gtC.VictoriousTeam.HasValue) {
                 State = ScreenState.ChangePrevious;
             }
@@ -174,12 +184,6 @@ namespace RTS {
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
-                case Keys.E:
-                    addUnit = true;
-                    break;
-                case Keys.R:
-                    addBuilding = true;
-                    break;
                 case Keys.P:
                     if(!DevConsole.IsActivated)
                         pauseEngine = !pauseEngine;
@@ -197,16 +201,15 @@ namespace RTS {
                 case Keys.Escape:
                     State = ScreenState.ChangePrevious;
                     break;
+                case Keys.Enter:
+                    Texture2D t = System.Threading.Interlocked.Exchange(ref tPopup, null);
+                    if(t != null) t.Dispose();
+                    pauseEngine = false;
+                    break;
             }
         }
         public void OnKR(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
-                case Keys.E:
-                    addUnit = false;
-                    break;
-                case Keys.R:
-                    addBuilding = false;
-                    break;
             }
         }
 
@@ -262,6 +265,15 @@ namespace RTS {
                 team = buf[0];
                 type = buf[1];
             }
+        }
+        private void OnNewPopup(string texFile, Rectangle destination) {
+            Texture2D t = System.Threading.Interlocked.Exchange(ref tPopup, null);
+            if(t != null) t.Dispose();
+            using(var s = File.OpenRead(texFile))
+                t = Texture2D.FromStream(G, s);
+            rPopup = destination;
+            pauseEngine = true;
+            System.Threading.Interlocked.Exchange(ref tPopup, t);
         }
     }
 }

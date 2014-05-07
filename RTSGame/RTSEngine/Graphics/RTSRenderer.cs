@@ -13,6 +13,8 @@ using RTSEngine.Data;
 using RTSEngine.Data.Team;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Interfaces;
+using Grey.Vox;
+using Grey.Graphics;
 
 namespace RTSEngine.Graphics {
 
@@ -44,7 +46,7 @@ namespace RTSEngine.Graphics {
         }
 
         // Map To Render
-        public HeightmapModel Map {
+        public VoxMap Map {
             get;
             set;
         }
@@ -244,8 +246,18 @@ namespace RTSEngine.Graphics {
             Camera = camera;
 
             // Create The Map
+            CreateVoxGeos(state.VoxState.World.Atlas);
             Heightmap map = state.Map;
-            Map = MapParser.ParseModel(this, state.LevelGrid, new FileInfo(state.LevelGrid.InfoFile));
+            Map = new VoxMap(this, state.CGrid.numCells.X, state.CGrid.numCells.Y);
+            // TODO: Parse This In
+            VoxMapConfig vmc = new VoxMapConfig();
+            vmc.VoxState = state.VoxState;
+            vmc.TexVoxMap = @"voxmap.png";
+            vmc.RootPath = state.LevelGrid.Directory.FullName;
+            vmc.FXFile = @"Content\FX\Voxel.fx";
+            Map.Build(gManager, vmc);
+
+            //Map = MapParser.ParseModel(this, state.LevelGrid, new FileInfo(state.LevelGrid.InfoFile));
             Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
             fxMap.MapSize = new Vector2(map.Width, map.Depth);
             fxParticle.Parameters["MapSize"].SetValue(new Vector2(map.Width, map.Depth));
@@ -281,6 +293,37 @@ namespace RTSEngine.Graphics {
                             break;
                     }
                 }
+            }
+        }
+        public void CreateVoxGeos(VoxAtlas atlas) {
+            float DUV = 0.125f;
+            for(int i = 1; i < 6; i++) {
+                var vgpTop = new VGPCube6();
+                var vgpTrans = new VGPCube6();
+                var vgpCliff = new VGPCube6();
+                for(int fi = 0; fi < 6; fi++) {
+                    vgpTop.Colors[fi] = Color.White;
+                    switch(fi) {
+                        case Voxel.FACE_NY:
+                            vgpTop.UVRects[fi] = new Vector4(DUV * i, DUV * 4, DUV, DUV);
+                            vgpTrans.UVRects[fi] = new Vector4(DUV * i, DUV * 4, DUV, DUV);
+                            vgpCliff.UVRects[fi] = new Vector4(DUV * i, DUV * 4, DUV, DUV);
+                            break;
+                        case Voxel.FACE_PY:
+                            vgpTop.UVRects[fi] = new Vector4(DUV * i, DUV * 0, DUV, DUV);
+                            vgpTrans.UVRects[fi] = new Vector4(DUV * i, DUV * 4, DUV, DUV);
+                            vgpCliff.UVRects[fi] = new Vector4(DUV * i, DUV * 4, DUV, DUV);
+                            break;
+                        default:
+                            vgpTop.UVRects[fi] = new Vector4(DUV * i, DUV * 1, DUV, DUV);
+                            vgpTrans.UVRects[fi] = new Vector4(DUV * i, DUV * 2, DUV, DUV);
+                            vgpCliff.UVRects[fi] = new Vector4(DUV * i, DUV * 3, DUV, DUV);
+                            break;
+                    }
+                }
+                atlas[(ushort)(i)].GeoProvider = vgpTop;
+                atlas[(ushort)(i + 5)].GeoProvider = vgpTrans;
+                atlas[(ushort)(i + 10)].GeoProvider = vgpCliff;
             }
         }
         private void LoadTeamVisuals(GameState state, int ti) {
@@ -341,6 +384,7 @@ namespace RTSEngine.Graphics {
         public void Update(GameState state) {
             if(Map.Reset) Map.ApplyFOW();
             Minimap.Refresh(this);
+            Map.Update();
         }
 
         // Rendering Passes
@@ -402,21 +446,22 @@ namespace RTSEngine.Graphics {
             fxMap.VP = mVP;
 
             // Primary Map Model
-            if(Map.TrianglesPrimary > 0) {
-                fxMap.SetTextures(G, Map.PrimaryTexture, FOWTexture);
-                G.SetVertexBuffer(Map.VBPrimary);
-                G.Indices = Map.IBPrimary;
-                fxMap.ApplyPassPrimary();
-                G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBPrimary.VertexCount, 0, Map.TrianglesPrimary);
-            }
-            // Secondary Map Model
-            if(Map.TrianglesSecondary > 0) {
-                fxMap.SetTextures(G, Map.SecondaryTexture, FOWTexture);
-                G.SetVertexBuffer(Map.VBSecondary);
-                G.Indices = Map.IBSecondary;
-                fxMap.ApplyPassSecondary();
-                G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBSecondary.VertexCount, 0, Map.TrianglesSecondary);
-            }
+            Map.Draw(G, Matrix.CreateScale(2, 1, 2) * Camera.View, Camera.Projection);
+            //if(Map.TrianglesPrimary > 0) {
+            //    fxMap.SetTextures(G, Map.PrimaryTexture, FOWTexture);
+            //    G.SetVertexBuffer(Map.VBPrimary);
+            //    G.Indices = Map.IBPrimary;
+            //    fxMap.ApplyPassPrimary();
+            //    G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBPrimary.VertexCount, 0, Map.TrianglesPrimary);
+            //}
+            //// Secondary Map Model
+            //if(Map.TrianglesSecondary > 0) {
+            //    fxMap.SetTextures(G, Map.SecondaryTexture, FOWTexture);
+            //    G.SetVertexBuffer(Map.VBSecondary);
+            //    G.Indices = Map.IBSecondary;
+            //    fxMap.ApplyPassSecondary();
+            //    G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBSecondary.VertexCount, 0, Map.TrianglesSecondary);
+            //}
         }
 
         // Draw Buildings
@@ -552,7 +597,8 @@ namespace RTSEngine.Graphics {
             // Build The Selections
             verts = new VertexPositionColorTexture[teamInput.selected.Count * 4];
             int i = 0;
-            foreach(var e in teamInput.selected) {
+            var sarr = teamInput.selected.ToArray();
+            foreach(var e in sarr) {
                 Vector2 c = e.GridPosition;
                 float r = e.CollisionGeometry.BoundingRadius * SELECTION_RADIUS_MODIFIER;
                 float h = e.Height;
