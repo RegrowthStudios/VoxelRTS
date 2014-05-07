@@ -17,8 +17,9 @@ namespace RTS {
     public class CompanyScreen : GameScreen<App> {
         private const string UIC_FILE = @"Content\UI\Config\CompanyLogo.uic";
 
+        bool early;
         public override int Next {
-            get { return game.WispScreen.Index; }
+            get { return early ? game.LoginScreen.Index : game.WispScreen.Index; }
             protected set { }
         }
         public override int Previous {
@@ -41,6 +42,7 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            early = false;
             fxFire = new FireShader();
             fxFire.Build(G, uic.FireShader, uic.FireImageNoise, uic.FireImageColor, uic.FireImageAlpha);
 
@@ -95,6 +97,7 @@ namespace RTS {
                 case Keys.Space:
                 case Keys.Enter:
                 case Keys.Escape:
+                    early = true;
                     State = ScreenState.ChangeNext;
                     break;
             }

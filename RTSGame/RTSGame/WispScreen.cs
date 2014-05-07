@@ -15,8 +15,9 @@ namespace RTS {
         const float DURATION = 8f;
         const float TRANS_DURATION = DURATION * 0.7f;
 
+        bool early;
         public override int Next {
-            get { return game.InduZtryScreen.Index; }
+            get { return early ? game.LoginScreen.Index : game.InduZtryScreen.Index; }
             protected set { }
         }
         public override int Previous {
@@ -33,6 +34,7 @@ namespace RTS {
         }
 
         public override void OnEntry(GameTime gameTime) {
+            early = false;
             using(var s = File.OpenRead(FILE)) tWisp = Texture2D.FromStream(G, s);
             et = 0f;
             KeyboardEventDispatcher.OnKeyPressed += KeyboardEventDispatcher_OnKeyPressed;

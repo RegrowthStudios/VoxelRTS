@@ -28,6 +28,7 @@ namespace Grey.Vox {
             }
 
             // Build The Geometry
+            if(lVerts.Count < 1) return;
             VoxGeo geo = new VoxGeo();
             geo.Region = region;
             geo.VB = new VertexBuffer(renderer.G, VertexVoxel.Declaration, lVerts.Count, BufferUsage.WriteOnly);

@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using RTSEngine.Algorithms;
 using RTSEngine.Data.Parsers;
 using System.IO;
+using Grey.Vox.Managers;
 
 namespace RTSEngine.Controllers {
     #region Time Budgeting
@@ -91,6 +92,9 @@ namespace RTSEngine.Controllers {
         // Pathfinding
         public Pathfinder pathfinder;
 
+        // Vox World Manager
+        WorldManager vManager;
+
         public GameplayController() {
             commands = new Queue<DevCommand>();
 
@@ -115,12 +119,8 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 s.activeTeams[ti].Team.Input.Begin();
             }
-
-            // Start The Game Type Controller
-            s.scrGTC = s.Scripts[args.GameTypeScript];
-            s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
-            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
-            s.gtC.Start(s);
+            s.VoxState.VWorkPool.Start(1, System.Threading.ThreadPriority.BelowNormal);
+            vManager = new WorldManager(s.VoxState);
 
             // Add All Tasks
             foreach(var at in s.activeTeams) {
@@ -134,6 +134,12 @@ namespace RTSEngine.Controllers {
                     AddTask(s, squad);
                 }
             }
+
+            // Start The Game Type Controller
+            s.scrGTC = s.Scripts[args.GameTypeScript];
+            s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
+            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
+            s.gtC.Start(s);
         }
 
         // The Update Function
@@ -152,6 +158,8 @@ namespace RTSEngine.Controllers {
 
             // Cleanup The State
             Cleanup(s, dt);
+
+            vManager.Update();
         }
 
         // Input Stage

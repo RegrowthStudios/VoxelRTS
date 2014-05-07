@@ -96,7 +96,7 @@ namespace RTS {
 
             CompanyScreen = new RTS.CompanyScreen();
             WispScreen = new RTS.WispScreen();
-            InduZtryScreen = new RTS.InduZtryScreen(3);
+            InduZtryScreen = new RTS.InduZtryScreen();
             PressEnterScreen = new RTS.PressEnterScreen();
             LoginScreen = new RTS.LoginScreen();
             MenuScreen = new RTS.MenuScreen();

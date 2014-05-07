@@ -124,25 +124,26 @@ namespace RTSEngine.Data {
             back.Normalize();
 
             Vector3 eye = CamOrigin + back * dist;
-            if(map != null) {
-                float h = map.HeightAt(eye.X, eye.Z);
-                if(eye.Y < h)
-                    eye.Y = h + EYE_HEIGHT_OFFSET;
-            }
+            //if(map != null) {
+            //    float h = map.HeightAt(eye.X, eye.Z);
+            //    if(eye.Y < h)
+            //        eye.Y = h + EYE_HEIGHT_OFFSET;
+            //}
             View = Matrix.CreateLookAt(eye, CamOrigin, Vector3.Up);
         }
 
         public void Update(Heightmap map, float dt) {
             CameraMotionSettings cms = MovementSettings;
 
-            Scroll(camController.ScrollX, camController.ScrollY, cms, dt);
+            Scroll(camController.ScrollX, camController.ScrollZ, cms, dt);
             Orbit(camController.Yaw, camController.Pitch, cms, dt);
             int z;
             camController.GetZoom(out z);
             Zoom(z, dt);
             camOrigin.X = MathHelper.Clamp(camOrigin.X, 0, map.Width);
             camOrigin.Z = MathHelper.Clamp(camOrigin.Z, 0, map.Depth);
-            camOrigin.Y = map.SmoothHeightAt(camOrigin.X, camOrigin.Z);
+            //camOrigin.Y = Grey.Vox.Region.HEIGHT * 0.5f; // MathHelper.Clamp(camOrigin.Y, 0, Grey.Vox.Region.HEIGHT);
+            // camOrigin.Y = map.SmoothHeightAt(camOrigin.X, camOrigin.Z);
 
             bool reset;
             camController.GetResetDefault(out reset);
@@ -155,6 +156,8 @@ namespace RTSEngine.Data {
             RecalculateView(map, MathHelper.Lerp(cms.MinDistance, cms.MaxDistance, ZoomRatio));
         }
         private void Scroll(int x, int y, CameraMotionSettings cms, float dt) {
+            camOrigin.Y += camController.ScrollY * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
+
             if(x == 0 && y == 0) return;
 
             Matrix camWorld = Matrix.Invert(mView);

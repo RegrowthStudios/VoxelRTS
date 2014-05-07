@@ -14,6 +14,8 @@ namespace RTSEngine.Controllers {
         public const Keys KEY_MOVE_RIGHT = Keys.D;
         public const Keys KEY_MOVE_UP = Keys.W;
         public const Keys KEY_MOVE_DOWN = Keys.S;
+        public const Keys KEY_MOVE_YPOS = Keys.Z;
+        public const Keys KEY_MOVE_YNEG = Keys.X;
         public const Keys KEY_MOVE_LEFT_ALT = Keys.Left;
         public const Keys KEY_MOVE_RIGHT_ALT = Keys.Right;
         public const Keys KEY_MOVE_UP_ALT = Keys.Up;
@@ -55,14 +57,14 @@ namespace RTSEngine.Controllers {
                 isActive = value;
                 if(!IsActive) {
                     mx = 0;
-                    my = 0;
+                    mz = 0;
                     zoom = 0;
                 }
             }
         }
 
         // Output Values
-        private int mx, my;
+        private int mx, mz;
         public int KX {
             get {
                 int kp = moveKeys[0] || moveKeys[1] ? 1 : 0;
@@ -70,10 +72,17 @@ namespace RTSEngine.Controllers {
                 return kp - kn;
             }
         }
-        public int KY {
+        public int KZ {
             get {
                 int kp = moveKeys[4] || moveKeys[5] ? 1 : 0;
                 int kn = moveKeys[6] || moveKeys[7] ? 1 : 0;
+                return kp - kn;
+            }
+        }
+        public int KY {
+            get {
+                int kp = moveKeys[8] ? 1 : 0;
+                int kn = moveKeys[9] ? 1 : 0;
                 return kp - kn;
             }
         }
@@ -83,10 +92,15 @@ namespace RTSEngine.Controllers {
                 return mx == 0 ? KX : mx;
             }
         }
-        public int ScrollY {
+        public int ScrollZ {
             get {
                 if(useOrbit) return 0;
-                return my == 0 ? KY : my;
+                return mz == 0 ? KZ : mz;
+            }
+        }
+        public int ScrollY {
+            get {
+                return KY;
             }
         }
         public int Yaw {
@@ -98,7 +112,7 @@ namespace RTSEngine.Controllers {
         public int Pitch {
             get {
                 if(!useOrbit) return 0;
-                return my == 0 ? KY : my;
+                return mz == 0 ? KZ : mz;
             }
         }
         private int zoom;
@@ -114,7 +128,7 @@ namespace RTSEngine.Controllers {
             IsHooked = false;
             zoom = 0;
             useOrbit = false;
-            moveKeys = new bool[8];
+            moveKeys = new bool[10];
             Array.Clear(moveKeys, 0, moveKeys.Length);
             IsActive = true;
         }
@@ -159,9 +173,9 @@ namespace RTSEngine.Controllers {
             else if(pos.X > MaxX) mx = 1;
             else mx = 0;
 
-            if(pos.Y < MinY) my = 1;
-            else if(pos.Y > MaxY) my = -1;
-            else my = 0;
+            if(pos.Y < MinY) mz = 1;
+            else if(pos.Y > MaxY) mz = -1;
+            else mz = 0;
         }
         public void OnMouseScroll(int v, int d) {
             if(!IsActive) return;
@@ -179,6 +193,8 @@ namespace RTSEngine.Controllers {
                 case KEY_MOVE_UP_ALT: moveKeys[5] = true; return;
                 case KEY_MOVE_DOWN: moveKeys[6] = true; return;
                 case KEY_MOVE_DOWN_ALT: moveKeys[7] = true; return;
+                case KEY_MOVE_YPOS: moveKeys[8] = true; return;
+                case KEY_MOVE_YNEG: moveKeys[9] = true; return;
                 case KEY_RESET_DEFAULT: resetDefault = true; return;
             }
         }
@@ -192,6 +208,8 @@ namespace RTSEngine.Controllers {
                 case KEY_MOVE_UP: moveKeys[4] = false; return;
                 case KEY_MOVE_UP_ALT: moveKeys[5] = false; return;
                 case KEY_MOVE_DOWN: moveKeys[6] = false; return;
+                case KEY_MOVE_YPOS: moveKeys[8] = false; return;
+                case KEY_MOVE_YNEG: moveKeys[9] = false; return;
                 case KEY_MOVE_DOWN_ALT: moveKeys[7] = false; return;
             }
         }
@@ -202,7 +220,7 @@ namespace RTSEngine.Controllers {
             WindowHeight = window.ClientBounds.Height;
 
             Array.Clear(moveKeys, 0, moveKeys.Length);
-            mx = 0; my = 0;
+            mx = 0; mz = 0;
         }
     }
 }
