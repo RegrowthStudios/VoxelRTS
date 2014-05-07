@@ -273,8 +273,14 @@ namespace RTSEngine.Data {
         }
 
         public void AddImpact(Point p, int amount) {
-            CellImpact[p.X, p.Y] += amount;
-            Region[p.X, p.Y].AddToRegionImpact(amount);
+            if (CellImpact[p.X, p.Y] + amount < 0) {
+                Region[p.X, p.Y].AddToRegionImpact(-1 * CellImpact[p.X, p.Y]);
+                CellImpact[p.X, p.Y] = 0;
+            }
+            else {
+                CellImpact[p.X, p.Y] += amount;
+                Region[p.X, p.Y].AddToRegionImpact(amount);
+            }
         }
     }
 
