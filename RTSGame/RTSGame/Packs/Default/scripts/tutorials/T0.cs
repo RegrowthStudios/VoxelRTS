@@ -30,16 +30,16 @@ namespace RTS.Default.Tutorials {
                     pTeam.PopulationCap = 100;
                 }
             }
-            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
-            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
-            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
-            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(10, 17)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(10, 17)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(10, 17)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(10, 17)));
             DevConsole.AddCommand("franz ferdinand");
             pTeam.Input.OnNewSelection += (ic, ns) => {
                 if(ns.Count < 1) return;
                 s.SendPopup(@"Packs\presets\Tutorial0\2.png", new Rectangle(10, 60, 400, 300));
                 System.Threading.Interlocked.Exchange(ref state, 3);
-                s.AddParticle(new FireParticle(new Vector3(29, 34, 13), 5, 6, 0.3f, 4f));
+                s.AddParticle(new FireParticle(new Vector3(10, 34, 7), 5, 6, 0.3f, 4f));
             };
             state = 0;
         }

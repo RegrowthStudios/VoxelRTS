@@ -53,6 +53,16 @@ namespace RTSEngine.Controllers {
                 OnNewCommand(c);
         }
 
+        public static void Toggle(Action<string> f) {
+            if(IsActivated) {
+                OnNewCommand -= f;
+                Deactivate();
+            }
+            else {
+                Activate();
+                OnNewCommand += f;
+            }
+        }
         public static void Activate() {
             if(IsActivated) return;
             IsActivated = true;

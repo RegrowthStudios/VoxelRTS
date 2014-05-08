@@ -15,6 +15,9 @@ using System.IO;
 using System.IO.Compression;
 using Microsoft.Xna.Framework.Input;
 using CGrid = RTSEngine.Data.CollisionGrid;
+using System.Text.RegularExpressions;
+using RTSEngine.Data.Parsers;
+using RTSEngine.Controllers;
 
 namespace RTS {
     public struct LEVT {
@@ -29,6 +32,7 @@ namespace RTS {
 
     public class LEScreen : GameScreen<App> {
         const float DUV = 0.125f;
+        private static readonly Regex rgxSave = RegexHelper.GenerateVec2Int("SAVE");
 
         public override int Next {
             get { return -1; }
@@ -102,7 +106,7 @@ namespace RTS {
             for(int i = 0; i < 5; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllMasks(0x00000001u);
+                vd.FaceType.SetAllTypes(0x00000001u);
                 vd.FaceType.SetAllMasks(0xfffffffeu);
                 var vgp = new VGPCube();
                 switch(i) {
@@ -119,7 +123,7 @@ namespace RTS {
             for(int i = 0; i < 10; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllMasks(0x00000001u);
+                vd.FaceType.SetAllTypes(0x00000001u);
                 vd.FaceType.SetAllMasks(0xfffffffeu);
                 var vgp = new VGPCube();
                 switch(i) {
@@ -141,8 +145,8 @@ namespace RTS {
             for(int i = 0; i < 4; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
+                vd.FaceType.SetAllTypes(0xffffffffu);
                 vd.FaceType.SetAllMasks(0xffffffffu);
-                vd.FaceType.SetAllMasks(state.World.Atlas[0].FaceType.AllowTypes[0]);
                 var vgp = new VGPCustom();
                 Vector4 uvr = new Vector4(DUV * 3, DUV * 0, DUV, DUV);
                 switch(i) {
@@ -196,7 +200,7 @@ namespace RTS {
             for(int i = 0; i < 20; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllMasks(0x00000001u);
+                vd.FaceType.SetAllTypes(0x00000001u);
                 vd.FaceType.SetAllMasks(0xfffffffeu);
                 var vgp = new VGPCube();
                 vgp.Color = new Color(r.Next(256), r.Next(256), r.Next(256));
@@ -227,7 +231,7 @@ namespace RTS {
             for(int i = 0; i < 2; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllMasks(0x00000001u);
+                vd.FaceType.SetAllTypes(0x00000001u);
                 vd.FaceType.SetAllMasks(0xfffffffeu);
                 var vgp = new VGPCube();
                 vgp.Color = Color.White;
@@ -280,6 +284,7 @@ namespace RTS {
             DestroyWidgets();
             DestroyVoxWorld();
             game.mRenderer.Texture = game.tMouseMain;
+            if(DevConsole.IsActivated) DevConsole.Toggle(OnDC);
         }
         private void DestroyVoxWorld() {
             state.VWorkPool.Dispose();
@@ -309,11 +314,14 @@ namespace RTS {
             G.Clear(Color.Black);
             renderer.DrawAll(camera.View, camera.Projection);
 
+
             if(!input.Mouse.IsBound) {
                 G.DepthStencilState = DepthStencilState.None;
                 G.BlendState = BlendState.NonPremultiplied;
-
                 wr.Draw(SB);
+                if(DevConsole.IsActivated) {
+                    game.DrawDevConsole();
+                }
                 game.DrawMouse();
             }
         }
@@ -346,8 +354,12 @@ namespace RTS {
         }
         public void OnKP(object sender, KeyEventArgs args) {
             switch(args.KeyCode) {
-                case Keys.F2:
-                    Write(@"LevelEditor\Saved", 100, 100);
+                case DevConsole.ACTIVATION_KEY:
+                    DevConsole.Toggle(OnDC);
+                    break;
+                case Keys.P:
+                    if(DevConsole.IsActivated) return;
+                    State = ScreenState.ChangePrevious;
                     break;
             }
         }
@@ -445,6 +457,14 @@ namespace RTS {
                     ms.CopyTo(s);
                     s.Flush();
                 }
+            }
+        }
+
+        private void OnDC(string comm) {
+            Match m = rgxSave.Match(comm);
+            if(m.Success) {
+                int[] buf = RegexHelper.ExtractVec2I(m);
+                Write(@"LevelEditor\Saved", buf[0], buf[1]);
             }
         }
     }
