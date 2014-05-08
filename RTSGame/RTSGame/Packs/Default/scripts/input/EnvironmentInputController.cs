@@ -409,7 +409,7 @@ namespace RTS.Input {
                     Vector2 p = new Vector2(f.X, f.Y) * grid.cellSize + Vector2.One;
                     canSee = GameState.CGrid.GetFogOfWar(p, playerIndex) == FogOfWar.Active;
                     if (canSee) {
-                        Vector3 pos = new Vector3(p.X, GameState.CGrid.HeightAt(p.X, p.Y), p.Y);
+                        Vector3 pos = new Vector3(p.X, GameState.CGrid.HeightAt(p), p.Y);
                         particles.Add(new FireParticle(pos, 4, 3, 10, 9));
                     }
                     // Fire Spreading

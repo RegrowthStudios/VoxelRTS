@@ -113,11 +113,15 @@ namespace RTSEngine.Data {
         public bool CanAddBuilding(Vector2 pos, Point gs) {
             // Check All The Cells
             Point p = HashHelper.Hash(pos, numCells, size);
+
+            // Check If Building Fits In Map
+            if(p.X + gs.X >= numCells.X || p.Y + gs.Y >= numCells.Y)
+                return false;
+
             for(int y = 0; y < gs.Y; y++) {
                 for(int x = 0; x < gs.X; x++) {
-                    if(p.X + x >= 0 && p.X + x < numCells.X && p.Y + y >= 0 && p.Y + y < numCells.Y)
-                        if(EStatic[p.X + x, p.Y + y] != null)
-                            return false;
+                    if(EStatic[p.X + x, p.Y + y] != null)
+                        return false;
                 }
             }
             return true;
