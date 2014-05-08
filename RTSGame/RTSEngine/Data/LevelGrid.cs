@@ -25,7 +25,22 @@ namespace RTSEngine.Data {
         }
     }
 
+    public struct HeightTile {
+        public float XNZN, XPZN, XNZP, XPZP;
+    }
+
     public class CollisionGrid {
+        public static class Direction {
+            public const byte XN = 0x01;
+            public const byte XP = 0x02;
+            public const byte ZN = 0x04;
+            public const byte ZP = 0x08;
+            public const byte XNZN = 0x10;
+            public const byte XPZN = 0x20;
+            public const byte XNZP = 0x40;
+            public const byte XPZP = 0x80;
+        }
+
         // Full Size Of The Map
         public readonly Vector2 size;
 
@@ -45,6 +60,10 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
+        public byte[,] WallInformation {
+            get;
+            private set;
+        }
         public uint[,] Fog {
             get;
             private set;
@@ -53,6 +72,7 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
+        private HeightTile[,] heights;
 
         // Locations In The Grid Which Contain Units
         public List<Point> ActiveGrids {
@@ -62,9 +82,9 @@ namespace RTSEngine.Data {
 
         public event Action<int, int, int, FogOfWar> OnFOWChange;
 
-        public CollisionGrid(int w, int h, float cs) {
+        public CollisionGrid(int w, int h) {
+            cellSize = RTSConstants.CGRID_SIZE;
             numCells = new Point(w, h);
-            cellSize = cs;
             size = new Vector2(w, h) * cellSize;
 
             EDynamic = new List<RTSUnit>[numCells.X, numCells.Y];
@@ -78,6 +98,8 @@ namespace RTSEngine.Data {
             Fog = new uint[numCells.X, numCells.Y];
             Collision = new bool[numCells.X, numCells.Y];
             Walls = new CollisionRect[numCells.X, numCells.Y][];
+            WallInformation = new byte[numCells.X, numCells.Y];
+            heights = new HeightTile[numCells.X, numCells.Y];
         }
 
         public void Add(RTSUnit o) {
@@ -110,15 +132,89 @@ namespace RTSEngine.Data {
                 }
             }
         }
-        public void Add(CollisionRect[] walls, int x, int y) {
+        public void AddWalls(int x, int y, params byte[] directions) {
+            byte dir = 0x00;
+            for(int i = 0; i < directions.Length; i++) dir |= directions[i];
+            AddWalls(x, y, dir);
+        }
+        public void AddWalls(int x, int y, byte directions) {
+            byte mi = 0x00;
+            CollisionRect[] pWalls = new CollisionRect[4];
+            int c = 0;
+            if((directions & Direction.XN) != 0 && pWalls[0] == null) {
+                mi |= Direction.XN | Direction.XNZN | Direction.XNZP;
+                pWalls[0] = new CollisionRect(
+                    RTSConstants.CGRID_WALL_SIZE,
+                    RTSConstants.CGRID_SIZE,
+                    new Vector2(
+                        x * RTSConstants.CGRID_SIZE + RTSConstants.CGRID_WALL_SIZE * 0.5f,
+                        y * RTSConstants.CGRID_SIZE + RTSConstants.CGRID_SIZE * 0.5f
+                        ),
+                    true
+                    );
+                c++;
+            }
+            if((directions & Direction.XP) != 0 && pWalls[1] == null) {
+                mi |= Direction.XP | Direction.XPZN | Direction.XPZP;
+                pWalls[1] = new CollisionRect(
+                    RTSConstants.CGRID_WALL_SIZE,
+                    RTSConstants.CGRID_SIZE,
+                    new Vector2(
+                        (x + 1) * RTSConstants.CGRID_SIZE - RTSConstants.CGRID_WALL_SIZE * 0.5f,
+                        y * RTSConstants.CGRID_SIZE + RTSConstants.CGRID_SIZE * 0.5f
+                        ),
+                    true
+                    );
+                c++;
+            }
+            if((directions & Direction.ZN) != 0 && pWalls[2] == null) {
+                mi |= Direction.ZN | Direction.XNZN | Direction.XPZN;
+                pWalls[2] = new CollisionRect(
+                    RTSConstants.CGRID_SIZE,
+                    RTSConstants.CGRID_WALL_SIZE,
+                    new Vector2(
+                        x * RTSConstants.CGRID_SIZE + RTSConstants.CGRID_SIZE * 0.5f,
+                        y * RTSConstants.CGRID_SIZE + RTSConstants.CGRID_WALL_SIZE * 0.5f
+                        ),
+                    true
+                    );
+                c++;
+            }
+            if((directions & Direction.ZP) != 0 && pWalls[3] == null) {
+                mi |= Direction.ZP | Direction.XNZP | Direction.XPZP;
+                pWalls[3] = new CollisionRect(
+                    RTSConstants.CGRID_SIZE,
+                    RTSConstants.CGRID_WALL_SIZE,
+                    new Vector2(
+                        x * RTSConstants.CGRID_SIZE + RTSConstants.CGRID_SIZE * 0.5f,
+                        (y + 1) * RTSConstants.CGRID_SIZE - RTSConstants.CGRID_WALL_SIZE * 0.5f
+                        ),
+                    true
+                    );
+                c++;
+            }
+            CollisionRect[] walls = new CollisionRect[c];
+            c = 0;
+            if(pWalls[0] != null) walls[c++] = pWalls[0];
+            if(pWalls[1] != null) walls[c++] = pWalls[1];
+            if(pWalls[2] != null) walls[c++] = pWalls[2];
+            if(pWalls[3] != null) walls[c++] = pWalls[3];
+            Add(walls, mi, x, y);
+        }
+        public void Add(CollisionRect[] walls, byte mi, int x, int y) {
             Walls[x, y] = new CollisionRect[walls.Length];
-            Array.Copy(walls, Walls, Walls.Length);
+            WallInformation[x, y] = mi;
+            Array.Copy(walls, Walls[x, y], Walls[x, y].Length);
         }
 
         public void ClearDynamic() {
             for(int i = 0; i < ActiveGrids.Count; i++)
                 EDynamic[ActiveGrids[i].X, ActiveGrids[i].Y] = new List<RTSUnit>();
             ActiveGrids = new List<Point>();
+        }
+
+        public bool CanMoveTo(Point pOrigin, byte direction) {
+            return (WallInformation[pOrigin.X, pOrigin.Y] & direction) == 0;
         }
 
         // Precondition This[x,y] Must Be Active
@@ -149,7 +245,7 @@ namespace RTSEngine.Data {
                     CollisionController.ProcessCollision(al1[i1].CollisionGeometry, sl2.CollisionGeometry);
             if(wl2 != null)
                 for(int i1 = 0; i1 < al1.Count; i1++)
-                    for(int i2 = 0; i2 < wl2.Length; i1++)
+                    for(int i2 = 0; i2 < wl2.Length; i2++)
                         CollisionController.ProcessCollision(al1[i1].CollisionGeometry, wl2[i2]);
         }
         public void HandleGridCollision(int x, int y) {
@@ -212,6 +308,31 @@ namespace RTSEngine.Data {
                 }
             }
         }
+
+        public void SetHeight(int x, int y, HeightTile ht) {
+            heights[x, y] = ht;
+        }
+        // Retrieve Interpolated Height From The Heightmap
+        private float Bilerp(float v1, float v2, float v3, float v4, float rx, float rz) {
+            return MathHelper.Lerp(
+                MathHelper.Lerp(v1, v2, rx),
+                MathHelper.Lerp(v3, v4, rx),
+                rz
+                );
+        }
+        public float HeightAt(Vector2 pos) {
+            Vector2 r;
+            Point c = HashHelper.Hash(pos, numCells, size, out r);
+
+            // Bilerp For Value
+            return Bilerp(
+                heights[c.X, c.Y].XNZN,
+                heights[c.X, c.Y].XPZN,
+                heights[c.X, c.Y].XNZP,
+                heights[c.X, c.Y].XPZP,
+                r.X, r.Y
+                );
+        }
     }
 
     public class ImpactGrid {
@@ -235,11 +356,10 @@ namespace RTSEngine.Data {
         public int[,] CellImpact { get; private set; }
 
         // Creates An Impact Grid Using The Size And Cell Size Of The Given Collision Grid
-        public ImpactGrid(CollisionGrid cg) {
-            cellSize = 2 * cg.cellSize;
-            numCells = new Point((int)Math.Ceiling(cg.size.X / cellSize), (int)Math.Ceiling(cg.size.Y / cellSize));
-            cellSize = cg.size.X / numCells.X;
-            size = cg.size;
+        public ImpactGrid(int w, int h) {
+            cellSize = 2 * RTSConstants.IGRID_SIZE;
+            numCells = new Point(w, h);
+            size = new Vector2(numCells.X, numCells.Y) * cellSize;
             Region = new Region[numCells.X, numCells.Y];
             ImpactGenerators = new List<RTSBuilding>[numCells.X, numCells.Y];
             CellImpact = new int[numCells.X, numCells.Y];
@@ -331,12 +451,24 @@ namespace RTSEngine.Data {
             get { return File.Directory; }
         }
 
-        public Heightmap L0;
+        //public Heightmap L0;
         public CollisionGrid L1;
         public ImpactGrid L2;
     }
 
     public static class HashHelper {
+        public static Point Hash(Vector2 pos, ref int gx, ref float sx, out float rx, ref int gy, ref float sy, out float ry) {
+            pos.X *= gx / sx;
+            pos.Y *= gy / sy;
+            Point p = new Point((int)pos.X, (int)pos.Y);
+            rx = pos.X - p.X;
+            ry = pos.Y - p.Y;
+            if(p.X < 0) p.X = 0;
+            else if(p.X >= gx) p.X = gx - 1;
+            if(p.Y < 0) p.Y = 0;
+            else if(p.Y >= gy) p.Y = gy - 1;
+            return p;
+        }
         public static Point Hash(Vector2 pos, ref int gx, ref float sx, ref int gy, ref float sy) {
             pos.X *= gx / sx;
             pos.Y *= gy / sy;
@@ -362,6 +494,9 @@ namespace RTSEngine.Data {
         }
         public static Point Hash(Vector2 pos, Point g, Vector2 s) {
             return Hash(pos, ref g.X, ref s.X, ref g.Y, ref s.Y);
+        }
+        public static Point Hash(Vector2 pos, Point g, Vector2 s, out Vector2 r) {
+            return Hash(pos, ref g.X, ref s.X, out r.X, ref g.Y, ref s.Y, out r.Y);
         }
     }
 }

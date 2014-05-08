@@ -142,9 +142,9 @@
     <Content Include="Packs\Default\scripts\input\UICRTS.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Packs\Default\scripts\tutorials\T0.cs">
+    <Content Include="Packs\Default\scripts\tutorials\T0.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
     <Compile Include="WispScreen.cs" />
     <Content Include="Content\Textures\Wisp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

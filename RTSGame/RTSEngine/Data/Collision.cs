@@ -315,9 +315,9 @@ namespace RTSEngine.Data {
         }
 
         // Clamp The Geometry To The Heightmap
-        public static void CollideHeightmap(ICollidable o, Heightmap map) {
+        public static void CollideHeightmap(ICollidable o, CollisionGrid map) {
             if(!o.IsStatic)
-                o.Height = map.HeightAt(o.Center.X, o.Center.Y);
+                o.Height = map.HeightAt(o.Center);
         }
     }
 }

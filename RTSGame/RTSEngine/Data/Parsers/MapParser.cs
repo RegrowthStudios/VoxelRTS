@@ -12,10 +12,10 @@ using RTSEngine.Interfaces;
 using RTSEngine.Graphics;
 using System.Collections.Concurrent;
 using RTSEngine.Controllers;
+using System.IO.Compression;
 
 namespace RTSEngine.Data.Parsers {
     public class TerrainData {
-        public float MapHeight;
         public Microsoft.Xna.Framework.Point[] PlayerSpawns;
 
         [ZXParse]
@@ -31,7 +31,37 @@ namespace RTSEngine.Data.Parsers {
 
         public void ReadHeightData(string rootPath, string filePath) {
             string path = Path.Combine(rootPath, filePath);
-            LGrid.L0 = new Heightmap(path);
+            byte[] data;
+            using(var s = File.OpenRead(path)) {
+                // Read How Much Data To Allocate
+                var br = new BinaryReader(s);
+                int l = br.ReadInt32();
+
+                // Decompress Data
+                data = new byte[l];
+                var gs = new GZipStream(s, CompressionMode.Decompress);
+                gs.Read(data, 0, data.Length);
+            }
+
+            // Read Width And Height
+            int ci = 0;
+            int w = BitConverter.ToInt32(data, ci); ci += 4;
+            int h = BitConverter.ToInt32(data, ci); ci += 4;
+            LGrid.L1 = new CollisionGrid(w, h);
+            HeightTile ht;
+
+            // Read All Tiles
+            for(int z = 0; z < h; z++) {
+                for(int x = 0; x < w; x++) {
+                    ht.XNZN = BitConverter.ToSingle(data, ci); ci += 4;
+                    ht.XPZN = BitConverter.ToSingle(data, ci); ci += 4;
+                    ht.XNZP = BitConverter.ToSingle(data, ci); ci += 4;
+                    ht.XPZP = BitConverter.ToSingle(data, ci); ci += 4;
+                    LGrid.L1.SetHeight(x, z, ht);
+                    LGrid.L1.AddWalls(x, z, data[ci]);
+                    ci++;
+                }
+            }
         }
         public void ReadGridData(string rootPath, string filePath) {
             string path = Path.Combine(rootPath, filePath);
@@ -49,8 +79,7 @@ namespace RTSEngine.Data.Parsers {
             }
 
             var regionCells = new Dictionary<int, List<Microsoft.Xna.Framework.Point>>();
-            LGrid.L1 = new CollisionGrid(w * 2, h * 2, RTSConstants.CGRID_SIZE);
-            LGrid.L2 = new ImpactGrid(LGrid.L1);
+            LGrid.L2 = new ImpactGrid(w, h);
 
             // Find All The Regions
             int ii = 0;
@@ -76,10 +105,6 @@ namespace RTSEngine.Data.Parsers {
                     LGrid.L2.Region[p.X, p.Y] = r;
                 }
             }
-
-            // Apply Heightmap Size
-            LGrid.L0.Width = LGrid.L1.size.X;
-            LGrid.L0.Depth = LGrid.L1.size.Y;
         }
     }
 

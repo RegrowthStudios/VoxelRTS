@@ -154,7 +154,7 @@ namespace RTS {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if(!pauseRender) {
-                camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
+                camera.Update(state.CGrid, RTSConstants.GAME_DELTA_TIME);
                 renderer.Update(state);
                 renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
             }

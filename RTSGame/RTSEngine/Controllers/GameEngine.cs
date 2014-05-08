@@ -81,7 +81,9 @@ namespace RTSEngine.Controllers {
         }
 
         public static void BuildLocal(GameState state, EngineLoadData eld, DirectoryInfo root, Dictionary<string, FileInfo> races) {
-            BuildScripts(state, root);
+            // Copy Over All The Scripts
+            foreach(KeyValuePair<string, ReflectedScript> kv in scripts)
+                state.Scripts.Add(kv.Key, kv.Value);
 
             // Load The Map
             BuildMap(state, eld.MapFile);
@@ -93,11 +95,6 @@ namespace RTSEngine.Controllers {
             foreach(var team in (from t in state.activeTeams select t.Team)) {
                 team.OnBuildingSpawn += state.CGrid.OnBuildingSpawn;
             }
-        }
-        private static void BuildScripts(GameState state, DirectoryInfo root) {
-            // Add Scripts
-            foreach(KeyValuePair<string, ReflectedScript> kv in scripts)
-                state.Scripts.Add(kv.Key, kv.Value);
         }
         private static void BuildMap(GameState state, FileInfo infoFile) {
             // Parse Map Data

@@ -308,7 +308,7 @@ namespace RTSEngine.Controllers {
             if(building == null) return;
 
             // Set Default Height
-            building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
+            building.Height = s.CGrid.HeightAt(building.GridPosition);
             building.CollisionGeometry.Height = building.Height;
             s.CGrid.Add(building);
 
@@ -515,7 +515,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
                 foreach(RTSUnit unit in team.Units) {
-                    CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
+                    CollisionController.CollideHeightmap(unit.CollisionGeometry, s.CGrid);
                     unit.GridPosition = unit.CollisionGeometry.Center;
                     unit.Height = unit.CollisionGeometry.Height;
                 }

@@ -77,9 +77,9 @@ namespace RTSEngine.Data {
         public LevelGrid LevelGrid {
             get { return grid; }
         }
-        public Heightmap Map {
-            get { return grid.L0; }
-        }
+        //public Heightmap Map {
+        //    get { return grid.L0; }
+        //}
         public CollisionGrid CGrid {
             get { return grid.L1; }
         }
@@ -139,7 +139,7 @@ namespace RTSEngine.Data {
             VoxState.World.worldMin = Point.Zero;
             Scripts = new Dictionary<string, ReflectedScript>();
             grid = new LevelGrid();
-            grid.L0 = null;
+            //grid.L0 = null;
             grid.L1 = null;
             grid.L2 = null;
 
@@ -156,7 +156,7 @@ namespace RTSEngine.Data {
         // Create With Premade Data
         public void SetGrids(LevelGrid lg) {
             grid.InfoFile = lg.InfoFile;
-            grid.L0 = lg.L0;
+            //grid.L0 = lg.L0;
             grid.L1 = lg.L1;
             grid.L2 = lg.L2;
         }

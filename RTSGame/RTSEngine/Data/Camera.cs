@@ -116,7 +116,7 @@ namespace RTSEngine.Data {
         }
 
         // View Matrix Recalculation
-        public void RecalculateView(Heightmap map, float dist) {
+        public void RecalculateView(CollisionGrid map, float dist) {
             Matrix rot =
                 Matrix.CreateRotationZ(Pitch) *
                 Matrix.CreateRotationY(Yaw);
@@ -133,7 +133,7 @@ namespace RTSEngine.Data {
             View = Matrix.CreateLookAt(eye, CamOrigin, Vector3.Up);
         }
 
-        public void Update(Heightmap map, float dt) {
+        public void Update(CollisionGrid map, float dt) {
             CameraMotionSettings cms = MovementSettings;
 
             Scroll(camController.ScrollX, camController.ScrollZ, cms, dt);
@@ -141,8 +141,8 @@ namespace RTSEngine.Data {
             int z;
             camController.GetZoom(out z);
             Zoom(z, dt);
-            camOrigin.X = MathHelper.Clamp(camOrigin.X, 0, map.Width);
-            camOrigin.Z = MathHelper.Clamp(camOrigin.Z, 0, map.Depth);
+            camOrigin.X = MathHelper.Clamp(camOrigin.X, 0, map.size.X);
+            camOrigin.Z = MathHelper.Clamp(camOrigin.Z, 0, map.size.Y);
             //camOrigin.Y = Grey.Vox.Region.HEIGHT * 0.5f; // MathHelper.Clamp(camOrigin.Y, 0, Grey.Vox.Region.HEIGHT);
             // camOrigin.Y = map.SmoothHeightAt(camOrigin.X, camOrigin.Z);
 

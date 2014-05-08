@@ -14,6 +14,7 @@ using BlisterUI.Widgets;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Xna.Framework.Input;
+using CGrid = RTSEngine.Data.CollisionGrid;
 
 namespace RTS {
     public struct LEVT {
@@ -359,7 +360,7 @@ namespace RTS {
             WriteWorld(dirInfo.FullName + @"\vox.world", w, h);
         }
         private void WriteHeights(string file, int w, int h) {
-            byte[] hd = new byte[w * h * 16 + 8];
+            byte[] hd = new byte[w * h * 17 + 8];
             int i = 0;
             BitConverter.GetBytes(w).CopyTo(hd, i); i += 4;
             BitConverter.GetBytes(h).CopyTo(hd, i); i += 4;
@@ -370,6 +371,7 @@ namespace RTS {
                     loc.Y = Region.HEIGHT - 1;
                     VoxLocation vl = new VoxLocation(loc);
 
+                    // Get Height Information
                     ht = new RTSEngine.Data.HeightTile();
                     Region r = state.World.regions[vl.RegionIndex];
                     for(; vl.VoxelLoc.Y > 0; vl.VoxelLoc.Y--) {
@@ -382,11 +384,19 @@ namespace RTS {
                             break;
                         }
                     }
-
                     BitConverter.GetBytes(ht.XNZN).CopyTo(hd, i); i += 4;
                     BitConverter.GetBytes(ht.XPZN).CopyTo(hd, i); i += 4;
                     BitConverter.GetBytes(ht.XNZP).CopyTo(hd, i); i += 4;
                     BitConverter.GetBytes(ht.XPZP).CopyTo(hd, i); i += 4;
+
+                    // Get Wall Information
+                    byte walls = 0x00;
+                    if(loc.X == 0) walls |= CGrid.Direction.XN;
+                    else if(loc.X == w - 1) walls |= CGrid.Direction.XP;
+                    if(loc.Z == 0) walls |= CGrid.Direction.ZN;
+                    else if(loc.Z == h - 1) walls |= CGrid.Direction.ZP;
+
+                    hd[i++] = walls;
                 }
             }
 
