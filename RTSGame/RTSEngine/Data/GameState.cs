@@ -77,9 +77,6 @@ namespace RTSEngine.Data {
         public LevelGrid LevelGrid {
             get { return grid; }
         }
-        //public Heightmap Map {
-        //    get { return grid.L0; }
-        //}
         public CollisionGrid CGrid {
             get { return grid.L1; }
         }
