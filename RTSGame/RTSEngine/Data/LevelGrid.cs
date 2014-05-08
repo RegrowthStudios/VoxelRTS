@@ -115,8 +115,9 @@ namespace RTSEngine.Data {
             Point p = HashHelper.Hash(pos, numCells, size);
             for(int y = 0; y < gs.Y; y++) {
                 for(int x = 0; x < gs.X; x++) {
-                    if(EStatic[p.X + x, p.Y + y] != null)
-                        return false;
+                    if(p.X + x >= 0 && p.X + x < numCells.X && p.Y + y >= 0 && p.Y + y < numCells.Y)
+                        if(EStatic[p.X + x, p.Y + y] != null)
+                            return false;
                 }
             }
             return true;
@@ -393,8 +394,14 @@ namespace RTSEngine.Data {
         }
 
         public void AddImpact(Point p, int amount) {
-            CellImpact[p.X, p.Y] += amount;
-            Region[p.X, p.Y].AddToRegionImpact(amount);
+            if (CellImpact[p.X, p.Y] + amount < 0) {
+                Region[p.X, p.Y].AddToRegionImpact(-1 * CellImpact[p.X, p.Y]);
+                CellImpact[p.X, p.Y] = 0;
+            }
+            else {
+                CellImpact[p.X, p.Y] += amount;
+                Region[p.X, p.Y].AddToRegionImpact(amount);
+            }
         }
     }
 

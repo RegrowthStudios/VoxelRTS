@@ -21,6 +21,7 @@ namespace RTS.Input {
         private Random random;
         private ImpactGrid grid;
         private int counter;
+        private int playerIndex;
 
         private List<Point> treeLocations;
         public RTSBuildingData FloraData {
@@ -164,6 +165,7 @@ namespace RTS.Input {
             maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
             treeLocations = new List<Point>();
             treeLocations.Add(new Point(1, 1));
+            FireStarts = new List<Point>();
 
             for(int i = 0; i < Team.Buildings.Count; i++) {
                 Team.Buildings[i].OnDamage += OnBuildingDamage;
@@ -203,15 +205,21 @@ namespace RTS.Input {
                 b.OnDamage += OnBuildingDamage;
                 grid.AddImpactGenerator(b);
             };
-            
-            FireStarts = new List<Point>();
+
+            // Find Player's Index 
+            for (int i = 0; i < GameState.activeTeams.Length; i++) {
+                var at = GameState.activeTeams[i];
+                if (at.Team.Type == RTSInputType.Player) {
+                    playerIndex = at.Team.Index;
+                }
+            }
+            Team.OnUnitSpawn += OnUnitSpawn;
+
             /*
-            FireStarts.Add(new Point(25,25));
-            FireThread = new Thread(FireWorkThread);
-            FireThread.IsBackground = true;
-            FireRunning = true;
-            FireThread.Start(FireStarts);
+            AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, new Point(60,60)));
+            treeLocations.Add(new Point(60, 60));
              */
+
         }
 
         private void WorkThread() {
@@ -220,20 +228,21 @@ namespace RTS.Input {
                     Thread.Sleep(1000);
                     continue;
                 }
-                DevConsole.AddCommand("Tick");
+                //DevConsole.AddCommand("Tick");
                 foreach (var r in GameState.Regions) {
-                    SetInitTarget(r);
+                    //SetInitTarget(r);
                 }
 
                 if(counter % DisasterTime == 0) {
                     CreateDisaster();
                 }
                 if(counter % RecoverTime == 0) {
-                    Recover();
+                    //Recover();
                 }
                 counter++;
                 counter = counter % (RecoverTime);
-                Thread.Sleep(500);
+                DevConsole.AddCommand("tick");
+                Thread.Sleep(2500);
             }
         }
 
@@ -251,27 +260,36 @@ namespace RTS.Input {
         // Recovery Phase
         private void Recover() {
             if(treeLocations == null || treeLocations.Count < 1) return;
-
             foreach(var r in GameState.Regions) {
                 if(r.RegionImpact < PointOfNoReturn && r.RegionImpact > 0) {
-                    // Randomly Choose The Location Of A Starting Tree
-                    int tp = random.Next(treeLocations.Count);
-                    Point treeC = treeLocations[tp];
-
-                    // Spawn Trees Around The Starting Tree
-                    for(int x = -1; x <= 1; x++) {
-                        for(int y = -1; y <= 1; y++) {
-                            Point newTreeC = new Point(treeC.X + x, treeC.Y + y);
-                            AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
-                            Vector2 newTreePos = new Vector2(newTreeC.X, newTreeC.Y) * GameState.CGrid.cellSize + Vector2.One;
-                            grid.AddImpact(newTreePos, -1 * (FloraData.Impact * FloraData.Health));
+                    // Randomly Choose The Location Of A Starting Tree In Region
+                    List<Point> treesInRegion = new List<Point>();
+                    foreach (var tl in treeLocations) {
+                        Region rr = FindRegion(tl);
+                        if (rr == r) {
+                            treesInRegion.Add(tl);
                         }
                     }
-
+                    // Spawn Trees Around The Starting Tree
+                    if (treesInRegion.Count > 0) {
+                        int i = random.Next(treesInRegion.Count);
+                        Point treeC = treesInRegion[i];
+                       
+                        for (int x = -1; x <= 1; x++) {
+                            for (int y = -1; y <= 1; y++) {
+                                
+                                Point newTreeC = new Point(treeC.X + x, treeC.Y + y);
+                                AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
+                                Vector2 newTreePos = new Vector2(newTreeC.X, newTreeC.Y) * GameState.CGrid.cellSize + Vector2.One;
+                                grid.AddImpact(newTreePos, -1 * (FloraData.Impact * FloraData.Health));
+                            }
+                        }
+                    }
                     // Regenerate Ore Health
                     foreach(var c in r.Cells) {
                         foreach(var o in GameState.IGrid.ImpactGenerators[c.X, c.Y]) {
                             if(o.Data.FriendlyName.Equals(OreData.FriendlyName)) {
+                               
                                 o.Health += OreRecoverHealth;
                                 r.AddToRegionImpact(-(OreData.Impact * OreRecoverHealth));
                             }
@@ -297,15 +315,14 @@ namespace RTS.Input {
                 else
                     level = 0;
 
-               // level = 2;
+                //level = 3;
 
                 if(level > 0) {
-                    DevConsole.AddCommand("Has Level");
-
+                    DevConsole.AddCommand("has level");
                     // Decide disaster type
                     int type = random.Next(2);
 
-                   // type = 1;
+                    type = 1;
 
                     // Create the appropriate disaster
                     if(type == 0) {
@@ -342,22 +359,16 @@ namespace RTS.Input {
                 FireThread.Start(fires);
             }
         }
-
-       
-        private void FireStart(List<Point> starts) {
-
-
-        }
-       
         
         private void FireWorkThread(Object l) {
             DevConsole.AddCommand("started");
 
             List<Point> fires = l as List<Point>;
-            FireStart(fires);
             HashSet<Point> hitCells = new HashSet<Point>();
             List<FireParticle> particles = new List<FireParticle>();
             int hitChance = 80;
+            bool canSee;
+
             while(FireRunning) {
                 if (fires.Count < 1) {
                     DevConsole.AddCommand("return");
@@ -374,8 +385,10 @@ namespace RTS.Input {
                                     bool takeDamage = (random.Next(100) <= FireHitUnitP);
                                     if (true) {
                                         u.Damage(FireUnitDamage);
-                                        particles.Add(new FireParticle(u.WorldPosition, 3, 2, 2, 7));
-
+                                        canSee = GameState.CGrid.GetFogOfWar(u.GridPosition, playerIndex) == FogOfWar.Active;
+                                        if (canSee) {
+                                            particles.Add(new FireParticle(u.WorldPosition, 3, 2, 2, 7));
+                                        }
                                     }
                                 }
                             }            
@@ -383,17 +396,22 @@ namespace RTS.Input {
                             if (b != null && b.Team.Index != Team.Index) {
                                 bool takeDamage = (random.Next(100) <= FireHitBuildingP);
                                 if (true) {
-                                    b.Damage(FireBuildingDamage);
-                                    particles.Add(new FireParticle(b.WorldPosition, 5, 4, 5, 7));
+                                    //b.Damage(FireBuildingDamage);
+                                    canSee = GameState.CGrid.GetFogOfWar(b.GridPosition, playerIndex) == FogOfWar.Active;
+                                    if (canSee) {
+                                        particles.Add(new FireParticle(b.WorldPosition, 5, 1, 2, 6));
+                                    }
                                 }
                             }
                         }
                     }
-                    // Add Fire Particle To Where There Is Fire
+                    // Add Fire Particle If Not In Player's Fog Of War
                     Vector2 p = new Vector2(f.X, f.Y) * grid.cellSize + Vector2.One;
-                    Vector3 pos = new Vector3(p.X, GameState.CGrid.HeightAt(p), p.Y);
-                    particles.Add(new FireParticle(pos, 4, 3, 10, 9));
-                    
+                    canSee = GameState.CGrid.GetFogOfWar(p, playerIndex) == FogOfWar.Active;
+                    if (canSee) {
+                        Vector3 pos = new Vector3(p.X, GameState.CGrid.HeightAt(p.X, p.Y), p.Y);
+                        particles.Add(new FireParticle(pos, 4, 3, 10, 9));
+                    }
                     // Fire Spreading
                     for(int x = -1; x < 2 ; x++) {
                         if (f.X + x < grid.numCells.X && f.X + x >= 0) {  
@@ -450,7 +468,10 @@ namespace RTS.Input {
                                 bool takeDamage = (random.Next(100) <= LightningHitP);
                                 if(takeDamage) {
                                     u.Damage(LightningDamage);
-                                    particles.Add(new LightningParticle(u.WorldPosition, 1, 7, 1, 0.6f, 1, Color.BlueViolet));
+                                    bool canSee = GameState.CGrid.GetFogOfWar(u.GridPosition, playerIndex) == FogOfWar.Active;
+                                    if (canSee) {
+                                        particles.Add(new LightningParticle(u.WorldPosition, 1, 7, 1, 0.6f, 1, Color.BlueViolet));
+                                    }
                                 }
                             }
                         }
@@ -472,7 +493,10 @@ namespace RTS.Input {
                             bool takeDamage = (random.Next(100) <= EarthquakeHitP);
                             if(true) {
                                 b.Damage(EarthquakeDamage);
-                                particles.Add(new LightningParticle(b.WorldPosition, 3, 10, 2, 0.6f, 1,Color.Red));
+                                bool canSee = GameState.CGrid.GetFogOfWar(b.GridPosition, playerIndex) == FogOfWar.Active;
+                                if (canSee) {
+                                    particles.Add(new LightningParticle(b.WorldPosition, 3, 10, 2, 0.6f, 1, Color.Red));
+                                }
                             }
                         }
 
@@ -481,96 +505,8 @@ namespace RTS.Input {
             }
             GameState.AddParticles(particles);
         }
-        /*
+
         private void SpawnUnits(Region r, int level) {
-            // Find The Cell With The Largest Impact Which Still Contains Trees Or Ore
-            Point p = new Point(-1, -1);
-            bool hasResource = false;
-            List<Point> resources = new List<Point>();
-            List<Point> res;
-            foreach(var ic in r.Cells) {
-                if((p.X < 0 && p.Y < 0) || grid.CellImpact[ic.X, ic.Y] > grid.CellImpact[p.X, p.Y]) {
-                    Point c = new Point(ic.X * 2, ic.Y * 2);
-                    res = new List<Point>();
-                    for(int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
-                        for(int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
-                            RTSBuilding b = GameState.CGrid.EStatic[c.X + x, c.Y + y];
-                            if(b != null && b.Team.Index == Team.Index) {
-                                hasResource = true;
-                                res.Add(new Point(c.X + x, c.Y + y));
-                            }
-                        }
-                    }
-                    if(hasResource) {
-                        p = ic;
-                        resources = res;
-                    }
-                }
-            }
-
-              // Decide Spawn Cap
-            int spawnCap;
-            if (level == 1){
-                spawnCap =  L1SpawnCap;
-            }
-            else if (level == 2){
-                spawnCap =  L2SpawnCap;
-            }
-            else {
-                spawnCap =  L3SpawnCap;
-            }
-
-            if(resources.Count > 0 && r.num < spawnCap) {
-
-              
-
-
-                // Count Number Of Units Currently In Region
-
-                // Randomly Choose An Impact Generator In That Cell
-                int i = random.Next(resources.Count);
-                Point resourcePos = resources[i];
-                RTSBuilding resource = GameState.CGrid.EStatic[resourcePos.X, resourcePos.Y];
-
-                // Spawn Environmental Units
-                Vector2 spawnPos = new Vector2(resourcePos.X, resourcePos.Y) * GameState.CGrid.cellSize + Vector2.One;
-                Vector2 offset;
-                int numSpawn;
-
-                int ti = 0;
-                foreach(var spawnType in Spawns) {
-                    numSpawn = random.Next(minNumSpawn[level - 1][ti], maxNumSpawn[level - 1][ti]);
-                    offset.X = random.Next(SpawnOffset);
-                    offset.Y = random.Next(SpawnOffset);
-                    for(int j = 0; j < numSpawn; j++) {
-                        AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos + offset));
-                        r.num = r.num +1;
-                    }
-                    ti++;
-                }
-
-                SetInitTarget(r);
-            }
-        }
-        */
-        private void SpawnUnits(Region r, int level) {
-   
-            
-            List<Point> ccs = new List<Point>();
-            foreach (var ic in r.Cells) {
-                Point c = new Point(ic.X * 2, ic.Y * 2);
-                for (int x = 0; x < 2 && c.X + x < GameState.CGrid.numCells.X; x++) {
-                    for (int y = 0; y < 2 && c.Y + y < GameState.CGrid.numCells.Y; y++) {
-                        RTSBuilding b = GameState.CGrid.EStatic[c.X + x, c.Y + y];
-                        if (b == null) {
-
-                            ccs.Add(new Point(c.X + x, c.Y + y));
-                        }
-                    }
-
-                }
-            }
-
             // Decide Spawn Cap
             int spawnCap;
             if (level == 1) {
@@ -586,54 +522,133 @@ namespace RTS.Input {
                 spawnCap = 0;
             }
 
-            if (r.num < spawnCap) {
+            // Return If Population Count Of Region Is Greater Than The Spawn Cap For The Region
+            if (r.PopCount >= spawnCap) { 
+                return; 
+            }
+        
+            // Decide On A Starting Point
+            Point start = new Point(-1, -1);
+            foreach (var u in GameState.activeTeams[playerIndex].Team.Units) {
+                Point cc = HashHelper.Hash(u.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
+                start = cc;
+            }
 
+            // Find Possible Spawn Points
+            List<Point> spawnPoints = new List<Point>();
+            Queue<Point> unvisited = new Queue<Point>();
+            int width = GameState.CGrid.numCells.X;
+            int height = GameState.CGrid.numCells.Y;
+            bool[,] visited = new bool[width, height];
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    visited[x, y] = false;
+                }
+            }
+            if (start.X > 0 && start.Y > 0) {
+                unvisited.Enqueue(start);
+                visited[start.X, start.Y] = true;
+            }
 
+            while (unvisited.Count > 0) {
+                
+                Point at = unvisited.Dequeue();   
+                
+                for (int x = -1; x < 2; x++) {
+                    for (int y = -1; y < 2; y++) {
+                        Point p = new Point(at.X + x, at.Y + y);
+                        if ((p.X != at.X || p.Y != at.Y) && p.X > 0 && p.Y > 0 && p.X < width && p.Y < height) {
+                            Region pr = FindRegion(p);
+                            RTSBuilding b = GameState.CGrid.EStatic[p.X, p.Y];
+                            if (pr.Cells.First() == r.Cells.First() && b != null) {
+                                bool isOre = b.Data.FriendlyName.Equals(OreData.FriendlyName);
+                                bool isTree = b.Data.FriendlyName.Equals(FloraData.FriendlyName);
+                                if (isOre || isTree) {
+                                    spawnPoints.Add(at);
+                                }
+                            }
+                            else if (pr.Cells.First() == r.Cells.First() && b == null && !visited[p.X, p.Y]) {
+                                unvisited.Enqueue(p);
+                                visited[p.X, p.Y] = true;
+                            }
+                        }
+                    }
+                }
+            }
 
-                // Randomly Choose An Impact Generator In That Cell
-                int i = random.Next(ccs.Count);
-                Point cc = ccs[i];
-               
+            if (spawnPoints.Count > 0) {
+                // Choose A Random Spawn Point
+                int ii = random.Next(spawnPoints.Count);
+                Point spawnPoint = spawnPoints.ElementAt(ii);
+                Vector2 spawnPos = new Vector2(spawnPoint.X, spawnPoint.Y) * GameState.CGrid.cellSize + Vector2.One;
+
                 // Spawn Environmental Units
-                Vector2 spawnPos = new Vector2(cc.X,  cc.Y) * GameState.CGrid.cellSize + Vector2.One;
-                Vector2 offset;
                 int numSpawn;
-
                 int ti = 0;
                 foreach (var spawnType in Spawns) {
                     numSpawn = random.Next(minNumSpawn[level - 1][ti], maxNumSpawn[level - 1][ti]);
-                    //offset.X = random.Next(SpawnOffset);
-                    //offset.Y = random.Next(SpawnOffset);
-                    for (int j = 0; j < numSpawn; j++) {
+                    for (int j = 0; j < numSpawn && r.PopCount < spawnCap; j++) {
                         AddEvent(new SpawnUnitEvent(TeamIndex, spawnType, spawnPos));
-                        r.num = r.num + 1;
+                        r.PopCount++;
                     }
                     ti++;
                 }
+            }
+            SetInitTarget(r);
+            
+        }
 
-                SetInitTarget(r);
+        private void OnUnitSpawn(RTSUnit u) {
+            Region r = FindRegion(u);
+            r.Selected.Add(u);
+            r.PopCount++;
+            u.OnDestruction += OnUnitDeath;
+        }
+
+        private void OnUnitDeath(IEntity e) {
+            Region r = FindRegion(e);
+            r.PopCount--;
+            IEntity dead = null;
+            foreach (var u in r.Selected) {
+                if (e.UUID == u.UUID) {
+                    dead = e;
+                }
+            }
+            if (dead != null) {
+                r.Selected.Remove(dead);
             }
         }
 
+        // Find The Region An Entity Is Located In
+        private Region FindRegion(IEntity e) {
+            Point ic = HashHelper.Hash(e.GridPosition, grid.numCells, grid.size);
+            Region r = grid.Region[ic.X, ic.Y];
+            return r;
+        }
+
+        // Find The Region A Collision Cell Is Located In
+        private Region FindRegion(Point cc) {
+            Vector2 pos = new Vector2(cc.X, cc.Y) * GameState.CGrid.cellSize + Vector2.One;
+            Point ic = HashHelper.Hash(pos, grid.numCells, grid.size);
+            Region r = grid.Region[ic.X, ic.Y];
+            return r;
+        }
+
         private void SetInitTarget(Region r) {
+            List<IEntity> selected = r.Selected;
             // Select Units Not In A Squad
-            List<IEntity> squad = new List<IEntity>();
-            foreach(RTSUnit u in r.units) {
-                if(u.Squad.Units.Count == 1)
-                    squad.Add(u);
-            }
-            AddEvent(new SelectEvent(TeamIndex, squad));
+            AddEvent(new SelectEvent(TeamIndex, selected));
             // Set The Target For Those Units
             IEntity target = null;
             Vector2 sumPos = Vector2.Zero;
-            foreach(var u2 in squad)
-                sumPos += u2.GridPosition;
-            Vector2 averagePos = new Vector2(sumPos.X / squad.Count, sumPos.Y / squad.Count);
-            foreach(var t2 in GameState.activeTeams)
-                if(t2.Index != TeamIndex)
-                    foreach(var u3 in t2.Team.Units)
-                        if(target == null || Vector2.Distance(u3.GridPosition, averagePos) < Vector2.Distance(u3.GridPosition, target.GridPosition))
-                            target = u3;
+            foreach(var s in selected)
+                sumPos += s.GridPosition;
+            Vector2 averagePos = new Vector2(sumPos.X / selected.Count, sumPos.Y / selected.Count);
+            foreach(var t in GameState.activeTeams)
+                if(t.Index != TeamIndex)
+                    foreach(var u in t.Team.Units)
+                        if(target == null || Vector2.Distance(u.GridPosition, averagePos) < Vector2.Distance(u.GridPosition, target.GridPosition))
+                            target = u;
             AddEvent(new SetTargetEvent(TeamIndex, target));
 
         }
@@ -650,7 +665,7 @@ namespace RTS.Input {
             RTSBuilding building = e as RTSBuilding;
             int imp = building.Data.Impact * d;
             grid.AddImpact(e.GridPosition, imp);
-            DevConsole.AddCommand("Impact Added " + imp);
+            //DevConsole.AddCommand("Impact Added " + imp);
         }
     }
 }

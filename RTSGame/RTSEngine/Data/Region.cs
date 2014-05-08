@@ -10,14 +10,14 @@ namespace RTSEngine.Data {
     public class Region {
         public int RegionImpact { get;  private set; }
         public List<Point> Cells { get; private set; }
-        public List<IEntity> units { get; set; }
-        public int num { get; set; }
+        public List<IEntity> Selected { get; set; }
+        public int PopCount { get; set; }
 
         public Region(List<Point> cellList) {
             Cells = cellList;
             RegionImpact = 0;
-            units = new List<IEntity>();
-            num = 0;
+            Selected = new List<IEntity>();
+            PopCount = 0;
         }
 
         public void AddToRegionImpact(int amount) {
