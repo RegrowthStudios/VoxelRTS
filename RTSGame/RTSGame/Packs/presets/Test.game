@@ -7,8 +7,8 @@ PlayerTypes [
     {None}
     {None}
     {None}
-    {None}
     {Environment}
+    {None}
 ]
 Races [
     {Mech}
@@ -18,8 +18,8 @@ Races [
     {None}
     {None}
     {None}
-    {None}
     {Gaia}
+    {None}
 ]
 GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
 Map         [Packs\Default\maps\0\test.map]
