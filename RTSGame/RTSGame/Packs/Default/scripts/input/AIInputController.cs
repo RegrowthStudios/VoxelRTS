@@ -162,7 +162,7 @@ namespace RTS.Input {
             switch (aggressionLevel) {
                 case AggressionLevel.LOW:
                     // If player distance is pretty close
-                    if (playerDistance < g.Map.GridWidth * 0.1) {
+                    if (playerDistance < g.CGrid.numCells.X * 0.1) {
                         // Recruit 5 (or fewer) units to attack target unit
                         int unitsToRecruit = Math.Min(Team.Units.Count, 5);
                         for (int i = 0; i < unitsToRecruit; i++) 
@@ -170,7 +170,7 @@ namespace RTS.Input {
                     }
                     break;
                 case AggressionLevel.MODERATE:
-                    if (playerDistance < g.Map.GridWidth * 0.2) {
+                    if(playerDistance < g.CGrid.numCells.X * 0.2) {
                         // Recruit 10 (or fewer) units to attack target unit
                         int unitsToRecruit = Math.Min(Team.Units.Count, 10);
                         for (int i = 0; i < unitsToRecruit; i++)
@@ -213,13 +213,13 @@ namespace RTS.Input {
         public void SpawnBuildings(GameState g) {
             for (int i = 0; i < BuildingCount; i++) {
                 Point pos = new Point(
-                    r.Next((int)GameState.Map.Width - 20) + 10,
-                    r.Next((int)GameState.Map.Depth - 20) + 10);
+                    r.Next((int)GameState.CGrid.size.X - 20) + 10,
+                    r.Next((int)GameState.CGrid.size.Y - 20) + 10);
                 // If the grid is occupied, choose another position.
                 while (g.CGrid.EStatic[pos.X, pos.Y] != null) {
                     pos = new Point(
-                    r.Next((int)GameState.Map.Width - 20) + 10,
-                    r.Next((int)GameState.Map.Depth - 20) + 10);
+                    r.Next((int)GameState.CGrid.size.X - 20) + 10,
+                    r.Next((int)GameState.CGrid.size.Y - 20) + 10);
                 }
                 AddEvent(new SpawnBuildingEvent(TeamIndex, 1, pos));
             }

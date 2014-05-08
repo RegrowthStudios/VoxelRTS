@@ -391,7 +391,7 @@ namespace RTS.Input {
                     }
                     // Add Fire Particle To Where There Is Fire
                     Vector2 p = new Vector2(f.X, f.Y) * grid.cellSize + Vector2.One;
-                    Vector3 pos = new Vector3(p.X, GameState.Map.HeightAt(p.X, p.Y), p.Y);
+                    Vector3 pos = new Vector3(p.X, GameState.CGrid.HeightAt(p), p.Y);
                     particles.Add(new FireParticle(pos, 4, 3, 10, 9));
                     
                     // Fire Spreading
