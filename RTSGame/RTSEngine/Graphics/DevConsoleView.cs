@@ -46,7 +46,8 @@ namespace RTSEngine.Graphics {
         public void Draw(SpriteBatch sb, Vector2 pos) {
             string commands = "";
 
-            foreach(var command in DevConsole.Lines) {
+            var coms = DevConsole.Lines.ToArray();
+            foreach(var command in coms) {
                 commands += command + "\n";
             }
              
