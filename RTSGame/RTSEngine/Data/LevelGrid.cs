@@ -220,7 +220,7 @@ namespace RTSEngine.Data {
 
         // Can Move To N From P
         public bool CanMoveFrom(Point p, Point n) {
-            return CanMoveTo(n, GetDirection(p, n));
+            return CanMoveTo(p, GetDirection(p, n));
         }
 
         // Figure Out In Which Direction N Lies From P
