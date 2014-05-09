@@ -34,7 +34,6 @@ namespace RTS.Input {
             get;
             set;
         }
-        //private BVH bvh;
 
         public bool HasSelectedEnemy {
             get { return selected.Count == 1 && selected[0].Team != Team; }
@@ -244,7 +243,6 @@ namespace RTS.Input {
                 // Action In The World
                 if(b == BUTTON_ACTION) {
                     if(Camera == null) return;
-                    // IntersectionRecord rec = new IntersectionRecord();
                     Ray ray = Camera.GetViewRay(location);
 
                     // Check Building Placement
@@ -260,7 +258,6 @@ namespace RTS.Input {
                                 nvl.Value.RegionLoc.Y * Region.DEPTH + nvl.Value.VoxelLoc.Z
                                 );
                             rh *= new Vector3(2f, 1f, 2f);
-                            // Vector3 rh = ray.Position + ray.Direction * rec.T;
                             Point bp = HashHelper.Hash(new Vector2(rh.X, rh.Z), GameState.CGrid.numCells, GameState.CGrid.size);
                             AddEvent(new SpawnBuildingEvent(TeamIndex, buildingToPlace.Index, bp));
                         }
@@ -288,7 +285,9 @@ namespace RTS.Input {
                                 );
                             rh *= new Vector3(2f, 1f, 2f);
                             rh.X += 1f; rh.Z += 1f;
-                            //Vector3 rh = ray.Position + ray.Direction * rec.T;
+                            GameState.AddParticle(new LightningParticle(
+                                rh, 1f, 12f, 0f, 5f, 1, Color.Purple
+                                ));
                             AddEvent(new SetWayPointEvent(TeamIndex, new Vector2(rh.X, rh.Z)));
                         }
                     }
@@ -420,7 +419,7 @@ namespace RTS.Input {
 
             // Flush And Close (No Data)
             s.Write(w / 2);
-            s.Write((Grey.Vox.Region.HEIGHT  * 3) / 4);
+            s.Write((Grey.Vox.Region.HEIGHT * 3) / 4);
             s.Write(h / 2);
             s.Flush();
             s.BaseStream.Dispose();
