@@ -22,7 +22,7 @@ namespace RTS.Input {
         private static readonly Random AI_SEEDER = new Random();
         private const int RareUnitCount = 2; // Within each batch, there are a few rare units that have a different type
         private int MaxUnit; // Maximum number of units I can spawn
-        private int[,] unitBatches = new int[3, 10]; // Unit patterns to spawn
+        public int[,] unitBatches = new int[3, 10]; // Unit patterns to spawn
         private AggressionLevel aggressionLevel; // How angry I am
 
         Thread t;
@@ -30,11 +30,11 @@ namespace RTS.Input {
 
         Random r = new Random(AI_SEEDER.Next());
         private int playerIndex; // Player index
-        private RTSTeam player; // Player
+        public RTSTeam player; // Player
         private float playerDistance; // How far is player unit from my barracks?
         private RTSUnit targetUnit; // Target unit
         private float spawnCoolDown; // 
-        
+        public int spawnCap;
 
         public AI()
             : base() {
@@ -104,18 +104,9 @@ namespace RTS.Input {
 
         private void WorkThread() {
             while(running) {
-                //if(paused) {
-                //    Thread.Sleep(1000);
-                //    continue;
-                //}
-                //switch(r.Next(12)) {
-                //    case 0:
-                //        SpawnUnits(r);
-                //        break;
-                //    case 1:
-                //        MoveUnits(r);
-                //        break;
-                //}
+                
+                
+                 
                 Thread.Sleep(1000);
             }
         }
