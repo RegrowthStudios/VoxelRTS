@@ -222,7 +222,6 @@ namespace RTSEngine.Data {
         public bool CanMoveFrom(Point p, Point n) {
             return CanMoveTo(p, GetDirection(p, n));
         }
-
         // Figure Out In Which Direction N Lies From P
         private byte GetDirection(Point p, Point n) {
             if(n.X > p.X && n.Y > p.Y) {
@@ -250,8 +249,7 @@ namespace RTSEngine.Data {
                 return Direction.ZP;
             }
         }
-
-        private bool CanMoveTo(Point pOrigin, byte direction) {
+        public bool CanMoveTo(Point pOrigin, byte direction) {
             return (WallInformation[pOrigin.X, pOrigin.Y] & direction) == 0;
         }
 

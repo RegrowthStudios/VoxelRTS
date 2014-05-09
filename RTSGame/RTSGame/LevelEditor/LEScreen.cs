@@ -394,73 +394,15 @@ namespace RTS {
             BitConverter.GetBytes(w).CopyTo(hd, i); i += 4;
             BitConverter.GetBytes(h).CopyTo(hd, i); i += 4;
             Vector3I loc = Vector3I.Zero;
-            RTSEngine.Data.HeightTile ht = new RTSEngine.Data.HeightTile();
+            LEVGR vgr = new LEVGR();
             for(loc.Z = 0; loc.Z < h; loc.Z++) {
                 for(loc.X = 0; loc.X < w; loc.X++) {
-                    loc.Y = Region.HEIGHT - 1;
-                    VoxLocation vl = new VoxLocation(loc);
-
-                    // Get Height Information
-                    ht = new RTSEngine.Data.HeightTile();
-                    Region r = state.World.regions[vl.RegionIndex];
-                    for(; vl.VoxelLoc.Y > 0; vl.VoxelLoc.Y--) {
-                        ushort id = r.voxels[vl.VoxelIndex].ID;
-                        int terr = id - MINID_TERRAIN;
-                        int ramp = id - MINID_RAMP;
-                        if(terr >= 0 && terr < COUNT_TERRAIN) {
-                            ht.XNZN = vl.VoxelLoc.Y + 1;
-                            ht.XPZN = vl.VoxelLoc.Y + 1;
-                            ht.XNZP = vl.VoxelLoc.Y + 1;
-                            ht.XPZP = vl.VoxelLoc.Y + 1;
-                            break;
-                        }
-                        else if(ramp >= 0 && ramp < COUNT_RAMP) {
-                            switch(ramp) {
-                                case 0:
-                                    ht.XNZN = vl.VoxelLoc.Y + 1;
-                                    ht.XPZN = vl.VoxelLoc.Y + 0;
-                                    ht.XNZP = vl.VoxelLoc.Y + 1;
-                                    ht.XPZP = vl.VoxelLoc.Y + 0;
-                                    break;
-                                case 1:
-                                    ht.XNZN = vl.VoxelLoc.Y + 0;
-                                    ht.XPZN = vl.VoxelLoc.Y + 1;
-                                    ht.XNZP = vl.VoxelLoc.Y + 0;
-                                    ht.XPZP = vl.VoxelLoc.Y + 1;
-                                    break;
-                                case 2:
-                                    ht.XNZN = vl.VoxelLoc.Y + 1;
-                                    ht.XPZN = vl.VoxelLoc.Y + 1;
-                                    ht.XNZP = vl.VoxelLoc.Y + 0;
-                                    ht.XPZP = vl.VoxelLoc.Y + 0;
-                                    break;
-                                case 3:
-                                    ht.XNZN = vl.VoxelLoc.Y + 0;
-                                    ht.XPZN = vl.VoxelLoc.Y + 0;
-                                    ht.XNZP = vl.VoxelLoc.Y + 1;
-                                    ht.XPZP = vl.VoxelLoc.Y + 1;
-                                    break;
-                            }
-                            break;
-                        }
-                    }
-                    BitConverter.GetBytes(ht.XNZN).CopyTo(hd, i); i += 4;
-                    BitConverter.GetBytes(ht.XPZN).CopyTo(hd, i); i += 4;
-                    BitConverter.GetBytes(ht.XNZP).CopyTo(hd, i); i += 4;
-                    BitConverter.GetBytes(ht.XPZP).CopyTo(hd, i); i += 4;
-
-                    // Get Wall Information
-                    byte walls = 0x00;
-                    if(loc.X == 0) walls |= CGrid.Direction.XN;
-                    if(loc.X == w - 1) walls |= CGrid.Direction.XP;
-                    if(loc.Z == 0) walls |= CGrid.Direction.ZN;
-                    if(loc.Z == h - 1) walls |= CGrid.Direction.ZP;
-                    if(loc.X == 0 && loc.Z == 0) walls |= CGrid.Direction.XNZN;
-                    if(loc.X == 0 && loc.Z == h - 1) walls |= CGrid.Direction.XNZP;
-                    if(loc.X == w - 1 && loc.Z == 0) walls |= CGrid.Direction.XPZN;
-                    if(loc.X == w - 1 && loc.Z == h - 1) walls |= CGrid.Direction.XPZP;
-
-                    hd[i++] = walls;
+                    ColumnResult cr = MapParser.GetColumn(state.World, loc.X, loc.Z, w, h, vgr);
+                    BitConverter.GetBytes(cr.Height.XNZN).CopyTo(hd, i); i += 4;
+                    BitConverter.GetBytes(cr.Height.XPZN).CopyTo(hd, i); i += 4;
+                    BitConverter.GetBytes(cr.Height.XNZP).CopyTo(hd, i); i += 4;
+                    BitConverter.GetBytes(cr.Height.XPZP).CopyTo(hd, i); i += 4;
+                    hd[i++] = cr.Walls;
                 }
             }
 
@@ -480,9 +422,8 @@ namespace RTS {
         }
         private void WriteWorld(string file, int w, int h) {
             List<byte> data = new List<byte>(w * h * 4 + 8);
-            int i = 0;
-            data.AddRange(BitConverter.GetBytes(w));// .CopyTo(data, i); i += 4;
-            data.AddRange(BitConverter.GetBytes(h));// .CopyTo(data, i); i += 4;
+            data.AddRange(BitConverter.GetBytes(w));
+            data.AddRange(BitConverter.GetBytes(h));
             Vector3I loc = Vector3I.Zero;
             for(loc.Z = 0; loc.Z < h; loc.Z++) {
                 for(loc.X = 0; loc.X < w; loc.X++) {
@@ -500,23 +441,23 @@ namespace RTS {
                         if(terr >= 0 && terr < COUNT_TERRAIN) break;
                         else if(ramp >= 0 && ramp < COUNT_RAMP) break;
                         else if(scen >= 0 && ramp < COUNT_SCENERY) {
-                            data.AddRange(BitConverter.GetBytes(scen));// .CopyTo(data, i); i += 4;
+                            data.AddRange(BitConverter.GetBytes(scen));
                         }
                     }
-                    data.AddRange(BitConverter.GetBytes(-1));// .CopyTo(data, i); i += 4;
+                    data.AddRange(BitConverter.GetBytes(-1));
 
                     // Write Surface
-                    data.AddRange(BitConverter.GetBytes(vl.VoxelLoc.Y));// .CopyTo(data, i); i += 4;
+                    data.AddRange(BitConverter.GetBytes(vl.VoxelLoc.Y));
                     if(terr >= 0 && terr < COUNT_TERRAIN) {
-                        data.AddRange(BitConverter.GetBytes(0));// .CopyTo(data, i); i += 4;
-                        data.AddRange(BitConverter.GetBytes(terr));// .CopyTo(data, i); i += 4;
+                        data.AddRange(BitConverter.GetBytes(0));
+                        data.AddRange(BitConverter.GetBytes(terr));
                     }
                     else if(ramp >= 0 && ramp < COUNT_RAMP) {
-                        data.AddRange(BitConverter.GetBytes(1));// .CopyTo(data, i); i += 4;
-                        data.AddRange(BitConverter.GetBytes(ramp));// .CopyTo(data, i); i += 4;
+                        data.AddRange(BitConverter.GetBytes(1));
+                        data.AddRange(BitConverter.GetBytes(ramp));
                     }
                     else {
-                        data.AddRange(BitConverter.GetBytes(-1));// .CopyTo(data, i); i += 4;
+                        data.AddRange(BitConverter.GetBytes(-1));
                     }
                 }
             }
@@ -568,6 +509,117 @@ namespace RTS {
             if(m.Success) {
                 int[] buf = RegexHelper.ExtractVec2I(m);
                 Write(@"LevelEditor\Saved", buf[0], buf[1]);
+            }
+        }
+
+        public class LEVGR : IVoxGridResolver {
+            public bool TryGetFlat(ushort id) {
+                return id >= MINID_TERRAIN && id < MINID_TERRAIN + COUNT_TERRAIN;
+            }
+            public bool TryGetRamp(ushort id, out int direction) {
+                direction = id - MINID_RAMP;
+                return direction >= 0 && direction < COUNT_RAMP;
+            }
+            public Point HeightIndex(Region r, int x, int z, int direction) {
+                Point p = Point.Zero;
+                for(int y = Region.HEIGHT - 1; y >= 0; y--) {
+                    int i = Region.ToIndex(x, y, z);
+                    ushort id = r.voxels[i].ID;
+                    if(TryGetFlat(id)) {
+                        p.X = y + 1;
+                        p.Y = 0;
+                        return p;
+                    }
+                    else {
+                        int ramp;
+                        if(TryGetRamp(id, out ramp)) {
+                            switch(ramp) {
+                                case 0:
+                                    switch(direction) {
+                                        case 0:
+                                            p.X = y + 1;
+                                            p.Y = 0;
+                                            break;
+                                        case 1:
+                                            p.X = y;
+                                            p.Y = 0;
+                                            break;
+                                        case 2:
+                                            p.X = y;
+                                            p.Y = 1;
+                                            break;
+                                        case 3:
+                                            p.X = y;
+                                            p.Y = -1;
+                                            break;
+                                    }
+                                    break;
+                                case 1:
+                                    switch(direction) {
+                                        case 0:
+                                            p.X = y;
+                                            p.Y = 0;
+                                            break;
+                                        case 1:
+                                            p.X = y + 1;
+                                            p.Y = 0;
+                                            break;
+                                        case 2:
+                                            p.X = y;
+                                            p.Y = -1;
+                                            break;
+                                        case 3:
+                                            p.X = y;
+                                            p.Y = 1;
+                                            break;
+                                    }
+                                    break;
+                                case 2:
+                                    switch(direction) {
+                                        case 2:
+                                            p.X = y + 1;
+                                            p.Y = 0;
+                                            break;
+                                        case 3:
+                                            p.X = y;
+                                            p.Y = 0;
+                                            break;
+                                        case 0:
+                                            p.X = y;
+                                            p.Y = 1;
+                                            break;
+                                        case 1:
+                                            p.X = y;
+                                            p.Y = -1;
+                                            break;
+                                    }
+                                    break;
+                                case 3:
+                                    switch(direction) {
+                                        case 2:
+                                            p.X = y;
+                                            p.Y = 0;
+                                            break;
+                                        case 3:
+                                            p.X = y + 1;
+                                            p.Y = 0;
+                                            break;
+                                        case 0:
+                                            p.X = y;
+                                            p.Y = -1;
+                                            break;
+                                        case 1:
+                                            p.X = y;
+                                            p.Y = 1;
+                                            break;
+                                    }
+                                    break;
+                            }
+                            return p;
+                        }
+                    }
+                }
+                return p;
             }
         }
     }

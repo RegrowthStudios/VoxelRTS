@@ -3,7 +3,7 @@ ViewModel(
     {~~RENDERER~~}
     {~~FILEROOTDIR~~}
     {models\HQ.model}
-    {{textures\HQMain.png} {..\..\textures\NoKey.png}}
+    {{textures\HQMain.png} {textures\HQKey.png}}
 )
 ViewIcon(
     {~~RENDERER~~}

@@ -11,6 +11,7 @@ using RTSEngine.Algorithms;
 using RTSEngine.Data.Parsers;
 using System.IO;
 using Grey.Vox.Managers;
+using RTSEngine.Graphics;
 
 namespace RTSEngine.Controllers {
     #region Time Budgeting
@@ -447,6 +448,37 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
             // TODO: Deprecate ?
+            for(int z = 0; z < s.CGrid.numCells.Y; z++) {
+                for(int x = 0; x < s.CGrid.numCells.X; x++) {
+                    Point p = new Point(x, z);
+                    Vector3 pos = new Vector3(x * 2 + 1, 0, z * 2 + 1);
+                    pos.Y = s.CGrid.HeightAt(new Vector2(pos.X, pos.Z));
+                    if(!s.CGrid.CanMoveTo(p, CollisionGrid.Direction.XP)) {
+                        s.AddParticle(new LightningParticle(
+                            pos + Vector3.UnitX, 1f, 12f, MathHelper.PiOver2,
+                            5f, 1, Color.LightBlue
+                            ));
+                    }
+                    if(!s.CGrid.CanMoveTo(p, CollisionGrid.Direction.XN)) {
+                        s.AddParticle(new LightningParticle(
+                            pos - Vector3.UnitX, 1f, 12f, MathHelper.PiOver2,
+                            5f, 1, Color.LightBlue
+                            ));
+                    }
+                    if(!s.CGrid.CanMoveTo(p, CollisionGrid.Direction.ZP)) {
+                        s.AddParticle(new LightningParticle(
+                            pos + Vector3.UnitZ, 1f, 12f, 0f,
+                            5f, 1, Color.LightBlue
+                            ));
+                    }
+                    if(!s.CGrid.CanMoveTo(p, CollisionGrid.Direction.ZN)) {
+                        s.AddParticle(new LightningParticle(
+                            pos - Vector3.UnitZ, 1f, 12f, 0f,
+                            5f, 1, Color.LightBlue
+                            ));
+                    }
+                }
+            }
         }
         private void ApplyLogic(GameState s, float dt, DevCommandKillUnits c) {
             RTSTeam team;
