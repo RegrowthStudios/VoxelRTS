@@ -405,11 +405,42 @@ namespace RTS {
                     Region r = state.World.regions[vl.RegionIndex];
                     for(; vl.VoxelLoc.Y > 0; vl.VoxelLoc.Y--) {
                         ushort id = r.voxels[vl.VoxelIndex].ID;
-                        if(id > 0 && id <= 5) {
+                        int terr = id - MINID_TERRAIN;
+                        int ramp = id - MINID_RAMP;
+                        if(terr >= 0 && terr < COUNT_TERRAIN) {
                             ht.XNZN = vl.VoxelLoc.Y + 1;
                             ht.XPZN = vl.VoxelLoc.Y + 1;
                             ht.XNZP = vl.VoxelLoc.Y + 1;
                             ht.XPZP = vl.VoxelLoc.Y + 1;
+                            break;
+                        }
+                        else if(ramp >= 0 && ramp < COUNT_RAMP) {
+                            switch(ramp) {
+                                case 0:
+                                    ht.XNZN = vl.VoxelLoc.Y + 1;
+                                    ht.XPZN = vl.VoxelLoc.Y + 0;
+                                    ht.XNZP = vl.VoxelLoc.Y + 1;
+                                    ht.XPZP = vl.VoxelLoc.Y + 0;
+                                    break;
+                                case 1:
+                                    ht.XNZN = vl.VoxelLoc.Y + 0;
+                                    ht.XPZN = vl.VoxelLoc.Y + 1;
+                                    ht.XNZP = vl.VoxelLoc.Y + 0;
+                                    ht.XPZP = vl.VoxelLoc.Y + 1;
+                                    break;
+                                case 2:
+                                    ht.XNZN = vl.VoxelLoc.Y + 1;
+                                    ht.XPZN = vl.VoxelLoc.Y + 1;
+                                    ht.XNZP = vl.VoxelLoc.Y + 0;
+                                    ht.XPZP = vl.VoxelLoc.Y + 0;
+                                    break;
+                                case 3:
+                                    ht.XNZN = vl.VoxelLoc.Y + 0;
+                                    ht.XPZN = vl.VoxelLoc.Y + 0;
+                                    ht.XNZP = vl.VoxelLoc.Y + 1;
+                                    ht.XPZP = vl.VoxelLoc.Y + 1;
+                                    break;
+                            }
                             break;
                         }
                     }
@@ -421,9 +452,13 @@ namespace RTS {
                     // Get Wall Information
                     byte walls = 0x00;
                     if(loc.X == 0) walls |= CGrid.Direction.XN;
-                    else if(loc.X == w - 1) walls |= CGrid.Direction.XP;
+                    if(loc.X == w - 1) walls |= CGrid.Direction.XP;
                     if(loc.Z == 0) walls |= CGrid.Direction.ZN;
-                    else if(loc.Z == h - 1) walls |= CGrid.Direction.ZP;
+                    if(loc.Z == h - 1) walls |= CGrid.Direction.ZP;
+                    if(loc.X == 0 && loc.Z == 0) walls |= CGrid.Direction.XNZN;
+                    if(loc.X == 0 && loc.Z == h - 1) walls |= CGrid.Direction.XNZP;
+                    if(loc.X == w - 1 && loc.Z == 0) walls |= CGrid.Direction.XPZN;
+                    if(loc.X == w - 1 && loc.Z == h - 1) walls |= CGrid.Direction.XPZP;
 
                     hd[i++] = walls;
                 }
@@ -444,32 +479,56 @@ namespace RTS {
             }
         }
         private void WriteWorld(string file, int w, int h) {
-            byte[] data = new byte[w * h * 4 + 8];
+            List<byte> data = new List<byte>(w * h * 4 + 8);
             int i = 0;
-            BitConverter.GetBytes(w).CopyTo(data, i); i += 4;
-            BitConverter.GetBytes(h).CopyTo(data, i); i += 4;
+            data.AddRange(BitConverter.GetBytes(w));// .CopyTo(data, i); i += 4;
+            data.AddRange(BitConverter.GetBytes(h));// .CopyTo(data, i); i += 4;
             Vector3I loc = Vector3I.Zero;
             for(loc.Z = 0; loc.Z < h; loc.Z++) {
                 for(loc.X = 0; loc.X < w; loc.X++) {
                     loc.Y = Region.HEIGHT - 1;
                     VoxLocation vl = new VoxLocation(loc);
                     Region r = state.World.regions[vl.RegionIndex];
+                    ushort id = 0;
+                    int terr = -1, scen = -1, ramp = -1;
+                    // Write Scenery
                     for(; vl.VoxelLoc.Y > 0; vl.VoxelLoc.Y--) {
-                        ushort id = r.voxels[vl.VoxelIndex].ID;
-                        if(id == 1) break;
+                        id = r.voxels[vl.VoxelIndex].ID;
+                        terr = id - MINID_TERRAIN;
+                        scen = id - MINID_SCENERY;
+                        ramp = id - MINID_RAMP;
+                        if(terr >= 0 && terr < COUNT_TERRAIN) break;
+                        else if(ramp >= 0 && ramp < COUNT_RAMP) break;
+                        else if(scen >= 0 && ramp < COUNT_SCENERY) {
+                            data.AddRange(BitConverter.GetBytes(scen));// .CopyTo(data, i); i += 4;
+                        }
                     }
-                    BitConverter.GetBytes(vl.VoxelLoc.Y).CopyTo(data, i); i += 4;
+                    data.AddRange(BitConverter.GetBytes(-1));// .CopyTo(data, i); i += 4;
+
+                    // Write Surface
+                    data.AddRange(BitConverter.GetBytes(vl.VoxelLoc.Y));// .CopyTo(data, i); i += 4;
+                    if(terr >= 0 && terr < COUNT_TERRAIN) {
+                        data.AddRange(BitConverter.GetBytes(0));// .CopyTo(data, i); i += 4;
+                        data.AddRange(BitConverter.GetBytes(terr));// .CopyTo(data, i); i += 4;
+                    }
+                    else if(ramp >= 0 && ramp < COUNT_RAMP) {
+                        data.AddRange(BitConverter.GetBytes(1));// .CopyTo(data, i); i += 4;
+                        data.AddRange(BitConverter.GetBytes(ramp));// .CopyTo(data, i); i += 4;
+                    }
+                    else {
+                        data.AddRange(BitConverter.GetBytes(-1));// .CopyTo(data, i); i += 4;
+                    }
                 }
             }
 
             using(MemoryStream ms = new MemoryStream()) {
                 var gs = new GZipStream(ms, CompressionMode.Compress, true);
-                gs.Write(data, 0, data.Length);
+                gs.Write(data.ToArray(), 0, data.Count);
                 gs.Close();
                 ms.Position = 0;
                 using(var s = File.Create(file)) {
                     var bw = new BinaryWriter(s);
-                    bw.Write(data.Length);
+                    bw.Write(data.Count);
                     bw.Flush();
                     ms.CopyTo(s);
                     s.Flush();

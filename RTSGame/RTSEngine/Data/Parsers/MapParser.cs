@@ -13,6 +13,7 @@ using RTSEngine.Graphics;
 using System.Collections.Concurrent;
 using RTSEngine.Controllers;
 using System.IO.Compression;
+using Grey.Vox;
 
 namespace RTSEngine.Data.Parsers {
     public class TerrainData {
@@ -121,6 +122,90 @@ namespace RTSEngine.Data.Parsers {
             mio.LGrid.InfoFile = PathHelper.GetRelativePath(infoFile.FullName);
             regions.AddRange(mio.Regions); // TODO: Remove
             return mio;
+        }
+        public static void ParseVoxels(VoxWorld vw, string file) {
+            // Set Voxel Data
+            byte[] data;
+            using(var s = File.OpenRead(file)) {
+                // Read How Much Data To Allocate
+                var br = new BinaryReader(s);
+                int l = br.ReadInt32();
+
+                // Decompress Data
+                data = new byte[l];
+                var gs = new GZipStream(s, CompressionMode.Decompress);
+                gs.Read(data, 0, data.Length);
+            }
+
+            // Convert Data
+            int i = 0;
+            int x = BitConverter.ToInt32(data, i); i += 4;
+            int z = BitConverter.ToInt32(data, i); i += 4;
+            Vector3I loc = Vector3I.Zero;
+            Grey.Vox.Region rN;
+            for(loc.Z = 0; loc.Z < z; loc.Z++) {
+                for(loc.X = 0; loc.X < x; loc.X++) {
+                    loc.Y = 0;
+                    VoxLocation vl = new VoxLocation(loc);
+                    var r = vw.regions[vl.RegionIndex];
+                    if(r == null) {
+                        // Check If The Region Needs To Be Loaded
+                        r = vw.TryCreateRegion(vl.RegionLoc.X, vl.RegionLoc.Y);
+                        int rx = vl.RegionLoc.X;
+                        int rz = vl.RegionLoc.Y;
+                        if(r == null) continue;
+                        // Look For Neighbors
+                        rN = vw.pager.Obtain(rx - 1, rz);
+                        if(rN != null) { r.rNX = rN; rN.rPX = r; }
+                        rN = vw.pager.Obtain(rx + 1, rz);
+                        if(rN != null) { r.rPX = rN; rN.rNX = r; }
+                        rN = vw.pager.Obtain(rx, rz - 1);
+                        if(rN != null) { r.rNZ = rN; rN.rPZ = r; }
+                        rN = vw.pager.Obtain(rx, rz + 1);
+                        if(rN != null) { r.rPZ = rN; rN.rNZ = r; }
+                        vw.regions[vl.RegionIndex] = r;
+                    }
+
+                    // Read Scenery
+                    while(true) {
+                        int scen = BitConverter.ToInt32(data, i); i += 4;
+                        if(scen == -1) break;
+
+                    }
+
+
+                    int h = BitConverter.ToInt32(data, i); i += 4;
+                    int t = BitConverter.ToInt32(data, i); i += 4;
+                    switch(t) {
+                        case 0:
+                            // Terrain
+                            int terr = BitConverter.ToInt32(data, i) + 1; i += 4;
+                            for(vl.VoxelLoc.Y = 0; vl.VoxelLoc.Y <= h; vl.VoxelLoc.Y++) {
+                                r.SetVoxel(vl.VoxelLoc.X, vl.VoxelLoc.Y, vl.VoxelLoc.Z, (ushort)(terr + 10));
+                            }
+                            if(h > 0) r.SetVoxel(vl.VoxelLoc.X, h, vl.VoxelLoc.Z, (ushort)(terr));
+                            if(h > 1) r.SetVoxel(vl.VoxelLoc.X, h - 1, vl.VoxelLoc.Z, (ushort)(terr + 5));
+                            break;
+                        case 1:
+                            // Ramp
+                            int ramp = BitConverter.ToInt32(data, i); i += 4;
+                            for(vl.VoxelLoc.Y = 0; vl.VoxelLoc.Y <= h; vl.VoxelLoc.Y++) {
+                                r.SetVoxel(vl.VoxelLoc.X, vl.VoxelLoc.Y, vl.VoxelLoc.Z, 11);
+                            }
+                            if(h > 0) r.SetVoxel(vl.VoxelLoc.X, h, vl.VoxelLoc.Z, 1);
+                            if(h > 1) r.SetVoxel(vl.VoxelLoc.X, h - 1, vl.VoxelLoc.Z, 6);
+                            break;
+                    }
+                    r.NotifyFacesChanged();
+                }
+            }
+
+            for(int vi = 0; vi < 15; vi++) {
+                var vd = vw.Atlas.Create();
+                vd.FaceType = new VoxFaceType();
+                vd.FaceType.SetAllTypes(0x01u);
+                vd.FaceType.SetAllMasks(0xfeu);
+            }
         }
     }
 }

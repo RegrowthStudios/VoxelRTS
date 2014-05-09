@@ -72,11 +72,10 @@ namespace RTSEngine.Controllers {
         public string GameTypeScript;
     }
 
-
     public class GameplayController : IDisposable {
         public const int SQUAD_BUDGET_BINS = 10;
         public const int ENTITY_BUDGET_BINS = 30;
-        public const int FOW_BUDGET_BINS = 8;
+        public const int FOW_BUDGET_BINS = GameState.MAX_PLAYERS;
 
         // Queue Of Events
         private LinkedList<GameInputEvent> events;
