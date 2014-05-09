@@ -106,8 +106,8 @@ namespace RTSEngine.Data.Team {
         public Vector2 GridStartPos {
             get {
                 Vector2 gs = GridPosition;
-                gs.X -= (Data.GridSize.X / 2);
-                gs.Y -= (Data.GridSize.Y / 2);
+                gs.X -= (Data.GridSize.X - 1);
+                gs.Y -= (Data.GridSize.Y - 1);
                 return gs;
             }
         }
@@ -222,8 +222,8 @@ namespace RTSEngine.Data.Team {
             viewedInfo.SetAll(false);
 
             Data = data;
-            gridPos.X += (Data.GridSize.X / 2);
-            gridPos.Y += (Data.GridSize.Y / 2);
+            gridPos.X += (Data.GridSize.X - 1);
+            gridPos.Y += (Data.GridSize.Y - 1);
             height = 0;
             Health = Data.Health;
             bAmount = Data.BuildAmount;

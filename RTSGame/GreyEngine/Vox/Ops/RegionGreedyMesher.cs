@@ -38,7 +38,9 @@ namespace Grey.Vox {
                             pID = VoxelID(region, pos.X, pos.Y - 1, pos.Z);
 
                         // Create Mask
-                        if(nID == pID)
+                        VoxData nVD = region.World.Atlas[(ushort)nID];
+                        VoxData pVD = region.World.Atlas[(ushort)pID];
+                        if(nID == pID || (!nVD.FaceType.CanShowFace(pVD.FaceType, Voxel.FACE_PY) && !pVD.FaceType.CanShowFace(nVD.FaceType, Voxel.FACE_NY)))
                             mask[mi] = 0;
                         else if(nID != 0)
                             mask[mi] = nID;
@@ -114,7 +116,7 @@ namespace Grey.Vox {
                         else if(rNeg != null)
                             nID = VoxelID(rNeg, Region.WIDTH - 1, pos.Y, pos.Z);
                         else
-                            nID = VoxelID(region, pos.X, pos.Y, pos.Z);
+                            nID = 0; // VoxelID(region, pos.X, pos.Y, pos.Z);
 
                         // Get Positive Voxel
                         if(pos.X < Region.WIDTH)
@@ -122,10 +124,12 @@ namespace Grey.Vox {
                         else if(rPos != null)
                             pID = VoxelID(rPos, 0, pos.Y, pos.Z);
                         else
-                            pID = VoxelID(region, pos.X - 1, pos.Y, pos.Z); ;
+                            pID = 0; // VoxelID(region, pos.X - 1, pos.Y, pos.Z); ;
 
                         // Create Mask
-                        if(nID == pID)
+                        VoxData nVD = region.World.Atlas[(ushort)nID];
+                        VoxData pVD = region.World.Atlas[(ushort)pID];
+                        if(nID == pID || (!nVD.FaceType.CanShowFace(pVD.FaceType, Voxel.FACE_PX) && !pVD.FaceType.CanShowFace(nVD.FaceType, Voxel.FACE_NX)))
                             mask[mi] = 0;
                         else if(nID != 0)
                             mask[mi] = nID;
@@ -201,7 +205,7 @@ namespace Grey.Vox {
                         else if(rNeg != null)
                             nID = VoxelID(rNeg, pos.X, pos.Y, Region.DEPTH - 1);
                         else
-                            nID = VoxelID(region, pos.X, pos.Y, pos.Z);
+                            nID = 0; // VoxelID(region, pos.X, pos.Y, pos.Z);
 
                         // Get Positive Voxel
                         if(pos.Z < Region.DEPTH)
@@ -209,10 +213,12 @@ namespace Grey.Vox {
                         else if(rPos != null)
                             pID = VoxelID(rPos, pos.X, pos.Y, 0);
                         else
-                            pID = VoxelID(region, pos.X, pos.Y, pos.Z - 1);
+                            pID = 0; // VoxelID(region, pos.X, pos.Y, pos.Z - 1);
 
                         // Create Mask
-                        if(nID == pID)
+                        VoxData nVD = region.World.Atlas[(ushort)nID];
+                        VoxData pVD = region.World.Atlas[(ushort)pID];
+                        if(nID == pID || (!nVD.FaceType.CanShowFace(pVD.FaceType, Voxel.FACE_PZ) && !pVD.FaceType.CanShowFace(nVD.FaceType, Voxel.FACE_NZ)))
                             mask[mi] = 0;
                         else if(nID != 0)
                             mask[mi] = nID;

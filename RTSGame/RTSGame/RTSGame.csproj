@@ -142,14 +142,11 @@
     <Content Include="Packs\Default\scripts\input\UICRTS.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Packs\Default\scripts\tutorials\T0.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="WispScreen.cs" />
-    <Content Include="Content\Textures\Wisp.png">
+    <Content Include="Packs\Default\scripts\tutorials\T0.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\maps\0\Resources.png">
+    <Compile Include="WispScreen.cs" />
+    <Content Include="Content\Textures\Wisp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\races\Gaia\animations\Minion.png">
@@ -206,9 +203,9 @@
     <Content Include="Packs\Default\scripts\DefaultUnit.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Packs\Default\scripts\input\EnvironmentInputController.cs">
+    <Content Include="Packs\Default\scripts\input\EnvironmentInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
     <Content Include="Packs\Default\scripts\GameTypes.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -225,9 +222,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\scripts\input\RTSUITeamDataPanel.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\scripts\Scenarios.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\scripts\UIInput.cs">
@@ -388,19 +382,7 @@
     <Content Include="Packs\Default\races\Gaia\icons\Tree.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\maps\0\map.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\maps\0\Region5x5.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\maps\Caldera\height.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\maps\Caldera\map.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\maps\Caldera\Region5x5.png">
+    <Content Include="Packs\Default\maps\0\regions.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\races\Gaia\textures\Ore.png">
@@ -481,18 +463,12 @@
     <Content Include="LevelEditor\Geo.zxp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\maps\0\map.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="Packs\Default\maps\0\horde.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Packs\Default\maps\0\test.map">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="Packs\Default\maps\Caldera\map.model">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\maps\Caldera\test.map">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Packs\Default\maps\0\vox.world">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

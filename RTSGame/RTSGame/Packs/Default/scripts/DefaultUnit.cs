@@ -267,15 +267,36 @@ namespace RTS.Default.Unit {
 
     public class Movement : ACUnitMovementController {
         // The Constants Used In Flow Field Calculations
-        protected const float dForce = 2f;
-        protected const float sForce = 10f;
+        protected const float dForce = 0f;
+        protected const float sForce = 0f;
         protected const float pForce = -200f;
+
+        // The Unit Thinks It Is Stuck
+        bool stuck;
+        // The Unit Was Recently Stuck
+        bool wasStuck;
+        // The Current Path Is Invalid
+        bool invalid;
 
         // Calculate The Unit Force Between Two Locations
         public Vector2 UnitForce(Vector2 a, Vector2 b) {
             Vector2 diff = a - b;
             float mag = diff.LengthSquared();
             return diff.X != 0 && diff.Y != 0 ? diff / mag : Vector2.Zero;
+        }
+
+        protected const int historySize = 5;
+        // The Last Few Locations This Unit Has Been To
+        private Queue<Vector2> unitHistory = new Queue<Vector2>();
+        public Queue<Vector2> UnitHistory {
+            get { return unitHistory; }
+            set { unitHistory = value; }
+        }
+
+        public void AddToHistory(Vector2 location) {
+            if(UnitHistory.Count >= historySize)
+                UnitHistory.Dequeue();
+            UnitHistory.Enqueue(location);
         }
 
         // How Many Waypoints This Unit Should Lookahead When Updating Its PF Query
@@ -287,10 +308,24 @@ namespace RTS.Default.Unit {
         }
 
         public override void DecideMove(GameState g, float dt) {
+            stuck = false;
+            if(unitHistory.Count >= historySize) {
+                Vector2 delta = Vector2.Zero;
+                while(unitHistory.Count > 1) {
+                    Vector2 oldest = unitHistory.Dequeue();
+                    Vector2 oldest2 = unitHistory.Dequeue();
+                    delta += oldest2 - oldest;
+                }
+                delta += unit.GridPosition - unitHistory.Dequeue();
+                delta /= unitHistory.Count+1;
+                float r = unit.CollisionGeometry.BoundingRadius;
+                wasStuck = stuck = Waypoints != null && Waypoints.Count > 0 && delta.LengthSquared() < 1.2*r * 1.2*r;
+            }
+            AddToHistory(unit.GridPosition);
             doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
             if(!doMove) return;
             // If The Old Path Has Become Invalidated, Send A New Query
-            bool invalid = false;
+            invalid = false;
             int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
             for(int i = CurrentWaypointIndex; i > end; i--) {
                 Vector2 wp = Waypoints[i];
@@ -300,7 +335,7 @@ namespace RTS.Default.Unit {
                     break;
                 }
             }
-            if(invalid && (Query == null || Query != null && Query.IsOld)) {
+            if(stuck || invalid && (Query == null || Query != null && Query.IsOld)) {
                 Vector2 goal = Waypoints[0];
                 Query = Pathfinder.ReissuePathQuery(Query, unit.GridPosition, goal, unit.Team.Index);
             }
@@ -333,6 +368,9 @@ namespace RTS.Default.Unit {
             //    tempIdx++;
             //}
             Vector2 waypoint = Waypoints[CurrentWaypointIndex];
+            Vector2 first = Waypoints[Waypoints.Count - 1];
+            g.AddParticle(new LightningParticle(new Vector3(first.X, g.CGrid.HeightAt(waypoint), first.Y), 2, 8, 0, 1, 1, Color.Green));
+            g.AddParticle(new LightningParticle(new Vector3(waypoint.X, g.CGrid.HeightAt(waypoint), waypoint.Y), 2, 8, 0, 1, 0, Color.Red));
             if(Query != null && !Query.IsOld && Query.IsComplete) {
                 Query.IsOld = true; // Only Do This Once Per Query
                 Waypoints = Query.waypoints;
@@ -356,10 +394,15 @@ namespace RTS.Default.Unit {
             }
             // Set Waypoint...
             Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
-            bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
             float SquadRadiusSquared = unit.Squad.MovementController.SquadRadiusSquared;
-            if(inGoalCell || (waypoint - unit.GridPosition).LengthSquared() < 1.5 * SquadRadiusSquared) {
+            bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
+            bool withinCellDistSq = (waypoint - unit.GridPosition).LengthSquared() < cg.cellSize;
+            bool withinSquad = (waypoint - unit.GridPosition).LengthSquared() < 1.5 * SquadRadiusSquared;
+            if(inGoalCell || (!wasStuck && (withinSquad || withinCellDistSq))) {
                 CurrentWaypointIndex--;
+                if(CurrentWaypointIndex < 0)
+                    Waypoints = null;
+                wasStuck = false;
             }
         }
 

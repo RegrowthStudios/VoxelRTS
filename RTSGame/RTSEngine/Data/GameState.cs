@@ -27,7 +27,7 @@ namespace RTSEngine.Data {
 
     // Holds All The Data Necessary For A Game
     public class GameState {
-        public const int MAX_NONENV_PLAYERS = 8;
+        public const int MAX_NONENV_PLAYERS = 7;
         public const int MAX_PLAYERS = MAX_NONENV_PLAYERS + 1;
         public const int BUILDING_MEMORIZATION_LATENCY = MAX_PLAYERS * 2;
 
@@ -77,9 +77,6 @@ namespace RTSEngine.Data {
         public LevelGrid LevelGrid {
             get { return grid; }
         }
-        public Heightmap Map {
-            get { return grid.L0; }
-        }
         public CollisionGrid CGrid {
             get { return grid.L1; }
         }
@@ -98,7 +95,7 @@ namespace RTSEngine.Data {
         public IndexedTeam[] activeTeams;
 
         // List of Regions In The Environment
-        public List<Region> Regions {
+        public List<ImpactRegion> Regions {
             get;
             private set;
         }
@@ -132,14 +129,14 @@ namespace RTSEngine.Data {
             UUIDGenerator.SetUUID(0);
             teams = new RTSTeam[MAX_PLAYERS];
             activeTeams = new IndexedTeam[0];
-            Regions = new List<Region>();
+            Regions = new List<ImpactRegion>();
 
             // No Data Yet Available
             VoxState = new VoxState();
             VoxState.World.worldMin = Point.Zero;
             Scripts = new Dictionary<string, ReflectedScript>();
             grid = new LevelGrid();
-            grid.L0 = null;
+            //grid.L0 = null;
             grid.L1 = null;
             grid.L2 = null;
 
@@ -156,7 +153,7 @@ namespace RTSEngine.Data {
         // Create With Premade Data
         public void SetGrids(LevelGrid lg) {
             grid.InfoFile = lg.InfoFile;
-            grid.L0 = lg.L0;
+            //grid.L0 = lg.L0;
             grid.L1 = lg.L1;
             grid.L2 = lg.L2;
         }

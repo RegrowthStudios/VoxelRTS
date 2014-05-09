@@ -143,7 +143,7 @@ namespace RTSEngine.Graphics {
 
             Vector3 center = new Vector3(s.CGrid.size.X * 0.5f, 0, s.CGrid.size.Y * 0.5f);
 
-            float h = s.Map.ScaleY + Camera.INITIAL_HIGH_SETTINGS.MaxDistance;
+            float h = Grey.Vox.Region.HEIGHT + Camera.INITIAL_HIGH_SETTINGS.MaxDistance;
             mV = Matrix.CreateLookAt(center + Vector3.Up * (h + 1f), center, -Vector3.UnitZ);
             mP = Matrix.CreateOrthographic(s.CGrid.size.X, s.CGrid.size.Y, 0, h + 2f);
             mVP = mV * mP;

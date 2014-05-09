@@ -11,6 +11,8 @@ using System.Threading;
 using System.IO;
 using RTSEngine.Controllers;
 using RTSEngine.Graphics;
+using Grey.Vox;
+using Grey.Graphics;
 
 namespace RTS.Input {
     public class Environment : ACInputController {
@@ -176,29 +178,20 @@ namespace RTS.Input {
                 }
             }
 
-            using(var bmp = System.Drawing.Bitmap.FromFile(@"Packs\Default\maps\0\Resources.png") as System.Drawing.Bitmap) {
-                int w = bmp.Width;
-                int h = bmp.Height;
-                float[] hd = new float[w * h];
-                byte[] col = new byte[w * h * 4];
-                int i = 0, ci = 0;
 
-                // Convert Bitmap
-                System.Drawing.Imaging.BitmapData bd = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.ReadOnly, bmp.PixelFormat);
-                System.Runtime.InteropServices.Marshal.Copy(bd.Scan0, col, 0, bd.Stride * bd.Height);
-                bmp.UnlockBits(bd);
-                // TODO: Make Pixels As Floating Point Values
-                for(int y = 0; y < h; y++) {
-                    for(int x = 0; x < w; x++) {
-                        if(col[ci + 2] > 128) {
-                            AddEvent(new SpawnBuildingEvent(TeamIndex, OreType, new Microsoft.Xna.Framework.Point(x, y), true));
-                        }
-                        else if(col[ci + 1] > 128) {
-                            AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, new Microsoft.Xna.Framework.Point(x, y), true));
-                        }
-                        ci += 4;
-                    }
+            // Open File
+            FileInfo fi = new FileInfo(s.LevelGrid.Directory.FullName + @"\env.dat");
+            if(fi.Exists) {
+                BinaryReader r = new BinaryReader(fi.OpenRead());
+
+                while(true) {
+                    int type = r.ReadInt32();
+                    if(type == -1) break;
+                    int x = r.ReadInt32();
+                    int z = r.ReadInt32();
+                    AddEvent(new SpawnBuildingEvent(TeamIndex, type == 0 ? FloraType : OreType, new Point(x, z), true));
                 }
+                r.BaseStream.Dispose();
             }
 
             Team.OnBuildingSpawn += (b) => {
@@ -265,7 +258,7 @@ namespace RTS.Input {
                     // Randomly Choose The Location Of A Starting Tree In Region
                     List<Point> treesInRegion = new List<Point>();
                     foreach (var tl in treeLocations) {
-                        Region rr = FindRegion(tl);
+                        ImpactRegion rr = FindRegion(tl);
                         if (rr == r) {
                             treesInRegion.Add(tl);
                         }
@@ -412,7 +405,7 @@ namespace RTS.Input {
                     Vector2 p = new Vector2(f.X, f.Y) * grid.cellSize + Vector2.One;
                     canSee = GameState.CGrid.GetFogOfWar(p, playerIndex) == FogOfWar.Active;
                     if (canSee) {
-                        Vector3 pos = new Vector3(p.X, GameState.Map.HeightAt(p.X, p.Y), p.Y);
+                        Vector3 pos = new Vector3(p.X, GameState.CGrid.HeightAt(p), p.Y);
                         particles.Add(new FireParticle(pos, 4, 3, 10, 9));
                     }
                     // Fire Spreading
@@ -444,7 +437,7 @@ namespace RTS.Input {
         
 
         // Natural Disaster That Damages Both Units And Buildings
-        private void CreateFire(Region r) {
+        private void CreateFire(ImpactRegion r) {
             
             // Find Impact Cell With Highest Impact
             int i = random.Next(r.Cells.Count); 
@@ -460,7 +453,7 @@ namespace RTS.Input {
         }
 
         // Natural Disaster That Damages Units
-        private void CreateLightning(Region r) {
+        private void CreateLightning(ImpactRegion r) {
             List<LightningParticle> particles = new List<LightningParticle>();
             foreach(var ic in r.Cells) {
                 Point c = new Point(ic.X * 2, ic.Y * 2);
@@ -485,7 +478,7 @@ namespace RTS.Input {
         }
 
         // Natural Disaster That Damages Buildings
-        private void CreateEarthquake(Region r) {
+        private void CreateEarthquake(ImpactRegion r) {
             List<LightningParticle> particles = new List<LightningParticle>();
             foreach(var ic in r.Cells) {
                 Point c = new Point(ic.X * 2, ic.Y * 2);
@@ -509,7 +502,7 @@ namespace RTS.Input {
             GameState.AddParticles(particles);
         }
 
-        private void SpawnUnits(Region r, int level) {
+        private void SpawnUnits(ImpactRegion r, int level) {
             // Decide Spawn Cap
             int spawnCap;
             if (level == 1) {
@@ -561,7 +554,7 @@ namespace RTS.Input {
                     for (int y = -1; y < 2; y++) {
                         Point p = new Point(at.X + x, at.Y + y);
                         if ((p.X != at.X || p.Y != at.Y) && p.X > 0 && p.Y > 0 && p.X < width && p.Y < height) {
-                            Region pr = FindRegion(p);
+                            ImpactRegion pr = FindRegion(p);
                             RTSBuilding b = GameState.CGrid.EStatic[p.X, p.Y];
                             if (pr.Cells.First() == r.Cells.First() && b != null) {
                                 bool isOre = b.Data.FriendlyName.Equals(OreData.FriendlyName);
@@ -602,14 +595,14 @@ namespace RTS.Input {
         }
 
         private void OnUnitSpawn(RTSUnit u) {
-            Region r = FindRegion(u);
+            ImpactRegion r = FindRegion(u);
             r.Selected.Add(u);
             r.PopCount++;
             u.OnDestruction += OnUnitDeath;
         }
 
         private void OnUnitDeath(IEntity e) {
-            Region r = FindRegion(e);
+            ImpactRegion r = FindRegion(e);
             r.PopCount--;
             IEntity dead = null;
             foreach (var u in r.Selected) {
@@ -623,21 +616,21 @@ namespace RTS.Input {
         }
 
         // Find The Region An Entity Is Located In
-        private Region FindRegion(IEntity e) {
+        private ImpactRegion FindRegion(IEntity e) {
             Point ic = HashHelper.Hash(e.GridPosition, grid.numCells, grid.size);
-            Region r = grid.Region[ic.X, ic.Y];
+            ImpactRegion r = grid.Region[ic.X, ic.Y];
             return r;
         }
 
         // Find The Region A Collision Cell Is Located In
-        private Region FindRegion(Point cc) {
+        private ImpactRegion FindRegion(Point cc) {
             Vector2 pos = new Vector2(cc.X, cc.Y) * GameState.CGrid.cellSize + Vector2.One;
             Point ic = HashHelper.Hash(pos, grid.numCells, grid.size);
-            Region r = grid.Region[ic.X, ic.Y];
+            ImpactRegion r = grid.Region[ic.X, ic.Y];
             return r;
         }
 
-        private void SetInitTarget(Region r) {
+        private void SetInitTarget(ImpactRegion r) {
             List<IEntity> selected = r.Selected;
             // Select Units Not In A Squad
             AddEvent(new SelectEvent(TeamIndex, selected));
@@ -656,6 +649,75 @@ namespace RTS.Input {
 
         }
 
+        #region Level Editor
+        List<LEVoxel> voxels;
+        ushort minID, maxID;
+        public override List<LEVoxel> CreateVoxels(VoxAtlas atlas) {
+            float duv = 1f / 8f;
+            voxels = new List<LEVoxel>(2);
+            LEVoxel lev;
+            VGPCube vgp;
+
+            // Create Flora Voxel
+            lev = new LEVoxel("Flora", atlas);
+            lev.VData.FaceType.SetAllTypes(0x00000001u);
+            lev.VData.FaceType.SetAllMasks(0xfffffffeu);
+            vgp = new VGPCube();
+            vgp.Color = Color.Khaki;
+            vgp.UVRect = new Vector4(duv * 0, duv * 1, duv, duv);
+            lev.VData.GeoProvider = vgp;
+            voxels.Add(lev);
+
+            // Create Ore Voxel
+            lev = new LEVoxel("Ore", atlas);
+            lev.VData.FaceType.SetAllTypes(0x00000001u);
+            lev.VData.FaceType.SetAllMasks(0xfffffffeu);
+            vgp = new VGPCube();
+            vgp.Color = Color.Purple;
+            vgp.UVRect = new Vector4(duv * 1, duv * 1, duv, duv);
+            lev.VData.GeoProvider = vgp;
+            voxels.Add(lev);
+         
+            minID = voxels[0].VData.ID;
+            maxID = voxels[voxels.Count - 1].VData.ID;
+            return voxels;
+        }
+        public override void LESave(VoxWorld world, int w, int h, DirectoryInfo dir) {
+            // Create File
+            FileInfo fi = new FileInfo(dir.FullName + @"\env.dat");
+            BinaryWriter s = new BinaryWriter(fi.Create());
+
+            // Search Through Columns
+            Vector3I loc = Vector3I.Zero;
+            for(loc.Z = 0; loc.Z < h; loc.Z++) {
+                for(loc.X = 0; loc.X < w; loc.X++) {
+                    loc.Y = 0;
+                    VoxLocation vl = new VoxLocation(loc);
+                    Region r = world.regions[vl.RegionIndex];
+
+                    // Search Through The Region
+                    int type;
+                    for(; vl.VoxelLoc.Y < Region.HEIGHT; vl.VoxelLoc.Y++) {
+                        ushort id = r.voxels[vl.VoxelIndex].ID;
+                        if(id < minID || id > maxID) continue;
+
+                        // Write Team And Type
+                        type = id - minID;
+
+                        s.Write(type);
+                        s.Write(loc.X);
+                        s.Write(loc.Z);
+                        break;
+                    }
+                }
+            }
+            s.Write(-1);
+
+            // Flush And Close
+            s.Flush();
+            s.BaseStream.Dispose();
+        }
+        #endregion
 
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize

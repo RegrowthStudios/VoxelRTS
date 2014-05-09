@@ -72,11 +72,10 @@ namespace RTSEngine.Controllers {
         public string GameTypeScript;
     }
 
-
     public class GameplayController : IDisposable {
         public const int SQUAD_BUDGET_BINS = 10;
         public const int ENTITY_BUDGET_BINS = 30;
-        public const int FOW_BUDGET_BINS = 8;
+        public const int FOW_BUDGET_BINS = GameState.MAX_PLAYERS;
 
         // Queue Of Events
         private LinkedList<GameInputEvent> events;
@@ -114,12 +113,6 @@ namespace RTSEngine.Controllers {
                 tbFOWCalculations.AddTask(new FOWTask(s, s.activeTeams[ti].Index));
             }
             pathfinder = new Pathfinder(s);
-
-            // Start The Input Controllers
-            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                s.activeTeams[ti].Team.Input.Begin();
-            }
-            s.VoxState.VWorkPool.Start(1, System.Threading.ThreadPriority.BelowNormal);
             vManager = new WorldManager(s.VoxState);
 
             // Add All Tasks
@@ -138,7 +131,15 @@ namespace RTSEngine.Controllers {
             // Start The Game Type Controller
             s.scrGTC = s.Scripts[args.GameTypeScript];
             s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
-            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
+            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile).Directory);
+        }
+
+        public void BeginPlaying(GameState s) {
+            // Start The Various Threaded Elements
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                s.activeTeams[ti].Team.Input.Begin();
+            }
+            s.VoxState.VWorkPool.Start(1, System.Threading.ThreadPriority.BelowNormal);
             s.gtC.Start(s);
         }
 
@@ -308,7 +309,7 @@ namespace RTSEngine.Controllers {
             if(building == null) return;
 
             // Set Default Height
-            building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
+            building.Height = s.CGrid.HeightAt(building.GridPosition);
             building.CollisionGeometry.Height = building.Height;
             s.CGrid.Add(building);
 
@@ -515,7 +516,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
                 foreach(RTSUnit unit in team.Units) {
-                    CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
+                    CollisionController.CollideHeightmap(unit.CollisionGeometry, s.CGrid);
                     unit.GridPosition = unit.CollisionGeometry.Center;
                     unit.Height = unit.CollisionGeometry.Height;
                 }

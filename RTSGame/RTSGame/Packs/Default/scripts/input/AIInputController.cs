@@ -8,6 +8,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework;
 using System.IO;
+using Grey.Vox;
 
 namespace RTS.Input {
 
@@ -22,7 +23,6 @@ namespace RTS.Input {
         private const int RareUnitCount = 2; // Within each batch, there are a few rare units that have a different type
         private int MaxUnit; // Maximum number of units I can spawn
         private int[,] unitBatches = new int[3, 10]; // Unit patterns to spawn
-        private int BuildingCount = 3;
         private AggressionLevel aggressionLevel; // How angry I am
 
         Thread t;
@@ -50,15 +50,14 @@ namespace RTS.Input {
             paused = true;
             for (int i = 0; i < s.activeTeams.Length; i++) {
                 if (s.activeTeams[i].Team.Input.Type == RTSInputType.Player)
-                    playerIndex = i;
+                    playerIndex = s.activeTeams[i].Team.Index;
             }
-            player = s.activeTeams[playerIndex].Team;
+            player = s.teams[playerIndex];
             InitializeUnitBatches();
             MaxUnit = Team.Buildings.Count * 10;
             aggressionLevel = AggressionLevel.LOW;
             playerDistance = float.MaxValue;
             spawnCoolDown = 0;
-            SpawnBuildings(s);
         }
 
         public void DecideAction(GameState g, float dt) {
@@ -162,7 +161,7 @@ namespace RTS.Input {
             switch (aggressionLevel) {
                 case AggressionLevel.LOW:
                     // If player distance is pretty close
-                    if (playerDistance < g.Map.GridWidth * 0.1) {
+                    if (playerDistance < g.CGrid.numCells.X * 0.1) {
                         // Recruit 5 (or fewer) units to attack target unit
                         int unitsToRecruit = Math.Min(Team.Units.Count, 5);
                         for (int i = 0; i < unitsToRecruit; i++) 
@@ -170,7 +169,7 @@ namespace RTS.Input {
                     }
                     break;
                 case AggressionLevel.MODERATE:
-                    if (playerDistance < g.Map.GridWidth * 0.2) {
+                    if(playerDistance < g.CGrid.numCells.X * 0.2) {
                         // Recruit 10 (or fewer) units to attack target unit
                         int unitsToRecruit = Math.Min(Team.Units.Count, 10);
                         for (int i = 0; i < unitsToRecruit; i++)
@@ -210,21 +209,6 @@ namespace RTS.Input {
                 ));*/
         }
 
-        public void SpawnBuildings(GameState g) {
-            for (int i = 0; i < BuildingCount; i++) {
-                Point pos = new Point(
-                    r.Next((int)GameState.Map.Width - 20) + 10,
-                    r.Next((int)GameState.Map.Depth - 20) + 10);
-                // If the grid is occupied, choose another position.
-                while (g.CGrid.EStatic[pos.X, pos.Y] != null) {
-                    pos = new Point(
-                    r.Next((int)GameState.Map.Width - 20) + 10,
-                    r.Next((int)GameState.Map.Depth - 20) + 10);
-                }
-                AddEvent(new SpawnBuildingEvent(TeamIndex, 1, pos));
-            }
-        }
-
         private void InitializeUnitBatches() {
             // Initialize unit batches. Each batch holds one type of units with a few rare type.
             for (int i = 0; i < unitBatches.GetLength(0); i++) {
@@ -252,6 +236,15 @@ namespace RTS.Input {
                 }
             }
         }
+
+        #region Level Editor
+        public override List<LEVoxel> CreateVoxels(VoxAtlas atlas) {
+            return null;
+        }
+        public override void LESave(VoxWorld world, int w, int h, DirectoryInfo dir) {
+            return;
+        }
+        #endregion
 
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize

@@ -28,6 +28,7 @@ namespace RTSEngine.Controllers {
             return s.GetType().FullName;
         }
 
+        // The Key Used In The Dictionary
         public readonly string TypeName;
 
         // The Types Of Controller That This Is
@@ -83,11 +84,8 @@ namespace RTSEngine.Controllers {
                 else
                     throw new ArgumentException("This Script Is Not Subclassing A Building Controller");
             }
-            else if(t.IsSubclassOf(typeof(ACRTSButton))) {
-                ScriptType = ScriptType.Button;
-            }
             else if(t.IsSubclassOf(typeof(ACGameTypeController))) {
-                ScriptType = ScriptType.Button;
+                ScriptType = ScriptType.GameType;
             }
             else if(t.IsSubclassOf(typeof(ACInputController))) {
                 ScriptType = ScriptType.Input;

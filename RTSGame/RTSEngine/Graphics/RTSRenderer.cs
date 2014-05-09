@@ -247,7 +247,7 @@ namespace RTSEngine.Graphics {
 
             // Create The Map
             CreateVoxGeos(state.VoxState.World.Atlas);
-            Heightmap map = state.Map;
+            //Heightmap map = state.Map;
             Map = new VoxMap(this, state.CGrid.numCells.X, state.CGrid.numCells.Y);
             // TODO: Parse This In
             VoxMapConfig vmc = new VoxMapConfig();
@@ -258,9 +258,9 @@ namespace RTSEngine.Graphics {
             Map.Build(gManager, vmc);
 
             //Map = MapParser.ParseModel(this, state.LevelGrid, new FileInfo(state.LevelGrid.InfoFile));
-            Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
-            fxMap.MapSize = new Vector2(map.Width, map.Depth);
-            fxParticle.Parameters["MapSize"].SetValue(new Vector2(map.Width, map.Depth));
+            Camera.MoveTo(state.CGrid.size.X * 0.5f, state.CGrid.size.Y * 0.5f);
+            fxMap.MapSize = state.CGrid.size;
+            fxParticle.Parameters["MapSize"].SetValue(state.CGrid.size);
 
             // Hook FOW
             state.CGrid.OnFOWChange += OnFOWChange;

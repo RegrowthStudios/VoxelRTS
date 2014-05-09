@@ -28,6 +28,7 @@ namespace RTS {
                     seFX.Add(SoundEffect.FromStream(s));
                 }
             }
+            si = new Random().Next(seFX.Count);
         }
 
         public void Update() {

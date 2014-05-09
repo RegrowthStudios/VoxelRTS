@@ -96,20 +96,19 @@ namespace RTS {
             state = game.LoadScreen.LoadedState;
             state.OnNewPopup += OnNewPopup;
             camera = game.LoadScreen.LoadedCamera;
-            camera.CamOrigin = new Vector3(30, 35, 30);
             renderer = game.LoadScreen.LoadedRenderer;
             renderer.UseFOW = true;
-            playController = new GameplayController();
-            gameInput = state.teams[0].Input;
-            vInput = gameInput as IVisualInputController;
-            var vi = gameInput as IVisualInputController;
-            vi.Build(renderer);
-            vi.Camera = camera;
-            GCInitArgs gca = new GCInitArgs();
-            gca.GameTypeScript = game.LoadScreen.LoadData.GTController;
-            playController.Init(state, gca);
+            gameInput = (from t in state.teams
+                         where t.Input != null && t.Input.Type == RTSInputType.Player
+                         select t.Input).FirstOrDefault();
+            vInput = gameInput == null ? null : gameInput as IVisualInputController;
+            playController = game.LoadScreen.LoadedGPlay;
 
             sfDebug = renderer.CreateFont("Courier New", 32);
+
+
+            // Create Game Engine Thread
+            playController.BeginPlaying(state);
             tEngine = new Thread(EngineThread);
             tEngine.Priority = ThreadPriority.Highest;
             tEngine.TrySetApartmentState(ApartmentState.MTA);
@@ -119,6 +118,7 @@ namespace RTS {
             pauseRender = false;
             tEngine.Start();
 
+            // Create Background Music
             jukeBox = new Jukebox();
             jukeBox.LoadFromDirectory(new DirectoryInfo(BS_SOUND_DIR));
         }
@@ -144,8 +144,7 @@ namespace RTS {
         }
 
         public override void Update(GameTime gameTime) {
-            // This Tells Us We Are GPU-Bound
-            //Thread.Sleep(10);
+            // We Are GPU-Bound
             vInput.Update(renderer, state);
             jukeBox.Update();
             renderer.UpdateAnimations(state, (float)game.TargetElapsedTime.TotalSeconds);
@@ -154,7 +153,7 @@ namespace RTS {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if(!pauseRender) {
-                camera.Update(state.Map, RTSConstants.GAME_DELTA_TIME);
+                camera.Update(state.CGrid, RTSConstants.GAME_DELTA_TIME);
                 renderer.Update(state);
                 renderer.Draw(state, RTSConstants.GAME_DELTA_TIME);
             }
@@ -162,16 +161,7 @@ namespace RTS {
                 G.Clear(Color.Black);
             }
             vInput.Draw(renderer, SB);
-#if DEBUG
-            if(!DevConsole.IsActivated) {
-                // Show FPS
-                double fps = gameTime.ElapsedGameTime.TotalSeconds;
-                fps = Math.Round(1000.0 / fps) / 1000.0;
-                SB.Begin();
-                SB.DrawString(sfDebug, fps + " / " + eFPS, Vector2.One * 10, Color.White);
-                SB.End();
-            }
-#endif
+            DrawFPS(gameTime);
             game.DrawDevConsole();
             game.DrawMouse();
 
@@ -206,24 +196,19 @@ namespace RTS {
                 gResult = state.gtC.VictoriousTeam.Value;
             }
         }
+        [Conditional("DEBUG")]
+        void DrawFPS(GameTime gameTime) {
+            if(!DevConsole.IsActivated) {
+                // Show FPS
+                double fps = gameTime.ElapsedGameTime.TotalSeconds;
+                fps = Math.Round(1000.0 / fps) / 1000.0;
+                SB.Begin();
+                SB.DrawString(sfDebug, fps + " / " + eFPS, Vector2.One * 10, Color.White);
+                SB.End();
+            }
+        }
 
         public void OnMP(Vector2 p, MouseButton b) {
-            //if(b == MouseButton.Right) {
-            //    Ray r = renderer.Camera.GetViewRay(p);
-            //    IntersectionRecord rec = new IntersectionRecord();
-            //    if(state.Map.BVH.Intersect(ref rec, r)) {
-            //        clickWorldPos = r.Position + r.Direction * rec.T;
-            //        if(addUnit)
-            //            gameInput.AddEvent(new SpawnUnitEvent(
-            //                team, type, new Vector2(clickWorldPos.X, clickWorldPos.Z)
-            //                ));
-            //        else if(addBuilding)
-            //            gameInput.AddEvent(new SpawnBuildingEvent(
-            //                team, type,
-            //                HashHelper.Hash(new Vector2(clickWorldPos.X, clickWorldPos.Z), state.CGrid.numCells, state.CGrid.size),
-            //                true));
-            //    }
-            //}
         }
         public void OnKP(object s, KeyEventArgs a) {
             switch(a.KeyCode) {
@@ -252,8 +237,6 @@ namespace RTS {
             }
         }
         public void OnKR(object s, KeyEventArgs a) {
-            switch(a.KeyCode) {
-            }
         }
 
         double CalcFPS(double[] fpsSamples, ref int currentSample, double dt) {

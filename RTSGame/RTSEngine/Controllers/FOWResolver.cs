@@ -351,6 +351,7 @@ namespace RTSEngine.Controllers {
                     FogOfWar f = state.CGrid.GetFogOfWar(p.X, p.Y, teamIndex);
                     switch(f) {
                         case FogOfWar.Active:
+                            if(Added) break;
                             state.teams[teamIndex].ViewedEnemyBuildings.Add(vb);
                             Added = true;
                             break;

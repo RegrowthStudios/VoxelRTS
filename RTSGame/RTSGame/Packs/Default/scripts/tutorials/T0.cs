@@ -19,7 +19,7 @@ namespace RTS.Default.Tutorials {
         public int state;
 
         RTSTeam pTeam;
-        public override void Load(GameState s, FileInfo mapFile) {
+        public override void Load(GameState s, DirectoryInfo mapDir) {
             // Give The Player Team Starting Capital
             pTeam = null;
             for(int i = 0; i < s.activeTeams.Length; i++) {
@@ -30,16 +30,16 @@ namespace RTS.Default.Tutorials {
                     pTeam.PopulationCap = 100;
                 }
             }
-            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
-            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
-            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
-            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(29, 29)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(10, 17)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(10, 17)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(10, 17)));
+            pTeam.Input.AddEvent(new SpawnUnitEvent(pTeam.Index, 0, new Vector2(10, 17)));
             DevConsole.AddCommand("franz ferdinand");
             pTeam.Input.OnNewSelection += (ic, ns) => {
                 if(ns.Count < 1) return;
                 s.SendPopup(@"Packs\presets\Tutorial0\2.png", new Rectangle(10, 60, 400, 300));
                 System.Threading.Interlocked.Exchange(ref state, 3);
-                s.AddParticle(new FireParticle(new Vector3(29, 34, 13), 5, 6, 0.3f, 4f));
+                s.AddParticle(new FireParticle(new Vector3(10, 34, 7), 5, 6, 0.3f, 4f));
             };
             state = 0;
         }
@@ -73,9 +73,16 @@ namespace RTS.Default.Tutorials {
             }
         }
 
+        public override List<LEVoxel> CreateVoxels(Grey.Vox.VoxAtlas atlas) {
+            return null;
+        }
+        public override void LESave(Grey.Vox.VoxWorld world, int w, int h, DirectoryInfo dir) {
+        }
+
         public override void Serialize(BinaryWriter s) {
         }
         public override void Deserialize(BinaryReader s, GameState state) {
         }
+
     }
 }

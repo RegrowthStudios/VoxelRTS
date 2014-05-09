@@ -8,7 +8,16 @@ PlayerTypes [
     {None}
     {None}
     {None}
-    {None}
+]
+InputTypes [
+    {RTS.Input.Player}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
 ]
 Races [
     {Mech}
@@ -19,7 +28,16 @@ Races [
     {None}
     {None}
     {None}
-    {None}
+]
+Colors [
+   {Blue}
+   {Red}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
 ]
 LoadImage   [Packs\presets\Tutorial0\Main.png]
 GameType    [RTS.Default.Tutorials.Tut0]

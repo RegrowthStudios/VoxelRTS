@@ -21,6 +21,7 @@ namespace RTSEngine.Data {
 
         public const float GAME_DELTA_TIME = 1f / 60f;
         public const float CGRID_SIZE = 2f;
+        public const float CGRID_WALL_SIZE = CGRID_SIZE * 0.05f;
         public const float IGRID_SIZE = CGRID_SIZE * 2f;
 
         public const string MC_ADDR = "228.8.8.8";

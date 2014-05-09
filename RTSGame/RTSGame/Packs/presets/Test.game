@@ -1,16 +1,26 @@
 ﻿Name        [Testbed]
 PlayerTypes [
     {Player}
+    {Computer}
     {None}
     {None}
     {None}
     {None}
     {None}
     {None}
-    {None}
-    {Environment}
+]
+InputTypes [
+    {RTS.Input.Player}
+    {RTS.Input.AI}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
 ]
 Races [
+    {Mech}
     {Mech}
     {None}
     {None}
@@ -18,8 +28,16 @@ Races [
     {None}
     {None}
     {None}
-    {None}
-    {Gaia}
+]
+Colors [
+   {Blue}
+   {Red}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
 ]
 GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
 Map         [Packs\Default\maps\0\test.map]
