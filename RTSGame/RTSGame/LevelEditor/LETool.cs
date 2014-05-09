@@ -104,6 +104,8 @@ namespace RTS {
         }
     }
     public class LETPaint : LETool {
+        public const int HEIGHT = Region.HEIGHT - 4;
+
         public LETPaint()
             : base() {
             CurVoxID = 0;
@@ -121,7 +123,7 @@ namespace RTS {
             List<VoxLocation> locs = new List<VoxLocation>();
             if(button == MouseButton.Left) {
                 foreach(var r in GetRays(mPos, Vector2.One * 2, new Point(25, 25), camera, vp)) {
-                    VoxLocation? vl = VRayHelper.GetLevel(r, s, Region.HEIGHT - 4);
+                    VoxLocation? vl = VRayHelper.GetLevel(r, s, HEIGHT);
                     if(vl.HasValue) locs.Add(vl.Value);
                 }
                 foreach(var loc in locs.Distinct())
@@ -129,7 +131,7 @@ namespace RTS {
             }
             else if(button == MouseButton.Right) {
                 foreach(var r in GetRays(mPos, Vector2.One * 2, new Point(25, 25), camera, vp)) {
-                    VoxLocation? vl = VRayHelper.GetLevel(r, s, Region.HEIGHT - 4);
+                    VoxLocation? vl = VRayHelper.GetLevel(r, s, HEIGHT);
                     if(vl.HasValue) locs.Add(vl.Value);
                 }
                 foreach(var loc in locs.Distinct())

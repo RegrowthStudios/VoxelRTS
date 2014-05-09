@@ -8,6 +8,7 @@ using RTSEngine.Data.Team;
 using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework;
 using System.IO;
+using Grey.Vox;
 
 namespace RTS.Input {
 
@@ -235,6 +236,15 @@ namespace RTS.Input {
                 }
             }
         }
+
+        #region Level Editor
+        public override List<LEVoxel> CreateVoxels(VoxAtlas atlas) {
+            return null;
+        }
+        public override void LESave(VoxWorld world, int w, int h, DirectoryInfo dir) {
+            return;
+        }
+        #endregion
 
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize

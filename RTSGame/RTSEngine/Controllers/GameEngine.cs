@@ -69,6 +69,18 @@ namespace RTSEngine.Controllers {
             List<string> libs = new List<string>(RTSConstants.ENGINE_LIBRARIES);
             FindAllInitData(root, files, libs);
             Scripts = ScriptParser.Compile(files.ToArray(), libs.ToArray(), out error);
+            using(var s = File.Create(@"scripts.log")) {
+                StreamWriter w = new StreamWriter(s);
+                if(Scripts != null) {
+                    foreach(var kvp in Scripts) {
+                        w.WriteLine("Successfully Compiled: {0}", kvp.Key);
+                    }
+                }
+                else {
+                    w.WriteLine(error);
+                }
+                w.Flush();
+            }
             return;
         }
         private static void FindAllInitData(DirectoryInfo dir, List<string> files, List<string> libs) {

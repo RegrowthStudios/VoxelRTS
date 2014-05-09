@@ -13,7 +13,6 @@ using System.Text.RegularExpressions;
 using RTSEngine.Data.Parsers;
 using Grey.Vox;
 using Grey.Graphics;
-using VRegion = Grey.Vox.Region;
 
 namespace RTS.Default {
     namespace GameTypes {
@@ -160,11 +159,11 @@ namespace RTS.Default {
                     for(loc.X = 0; loc.X < w; loc.X++) {
                         loc.Y = 0;
                         VoxLocation vl = new VoxLocation(loc);
-                        VRegion r = world.regions[vl.RegionIndex];
+                        Region r = world.regions[vl.RegionIndex];
 
                         // Search Through The Region
                         int team, type;
-                        for(; vl.VoxelLoc.Y < VRegion.HEIGHT; vl.VoxelLoc.Y++) {
+                        for(; vl.VoxelLoc.Y < Region.HEIGHT; vl.VoxelLoc.Y++) {
                             ushort id = r.voxels[vl.VoxelIndex].ID;
                             if(id < minID || id > maxID) continue;
 

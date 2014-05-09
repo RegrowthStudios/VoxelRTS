@@ -95,7 +95,7 @@ namespace RTSEngine.Data {
         public IndexedTeam[] activeTeams;
 
         // List of Regions In The Environment
-        public List<Region> Regions {
+        public List<ImpactRegion> Regions {
             get;
             private set;
         }
@@ -129,7 +129,7 @@ namespace RTSEngine.Data {
             UUIDGenerator.SetUUID(0);
             teams = new RTSTeam[MAX_PLAYERS];
             activeTeams = new IndexedTeam[0];
-            Regions = new List<Region>();
+            Regions = new List<ImpactRegion>();
 
             // No Data Yet Available
             VoxState = new VoxState();

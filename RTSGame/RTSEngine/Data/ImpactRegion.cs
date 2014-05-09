@@ -7,13 +7,13 @@ using System.Linq;
 using System.Text;
 
 namespace RTSEngine.Data {
-    public class Region {
+    public class ImpactRegion {
         public int RegionImpact { get;  private set; }
         public List<Point> Cells { get; private set; }
         public List<IEntity> Selected { get; set; }
         public int PopCount { get; set; }
 
-        public Region(List<Point> cellList) {
+        public ImpactRegion(List<Point> cellList) {
             Cells = cellList;
             RegionImpact = 0;
             Selected = new List<IEntity>();
