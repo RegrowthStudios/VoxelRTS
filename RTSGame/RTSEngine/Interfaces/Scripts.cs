@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Grey.Vox;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Algorithms;
@@ -183,13 +184,6 @@ namespace RTSEngine.Interfaces {
     }
     #endregion
 
-    #region Button
-    // A Button That Will Be Shown
-    public abstract class ACRTSButton : ACScript {
-        public abstract void Apply(GameState s);
-    }
-    #endregion
-
     #region Squad
     // Base Controller Functionality
     public abstract class ACSquadController : ACScript {
@@ -276,6 +270,15 @@ namespace RTSEngine.Interfaces {
     #endregion
 
     #region Game Type
+    public struct LEVoxel {
+        public string Name;
+        public VoxData VData;
+
+        public LEVoxel(string name, VoxAtlas atlas) {
+            Name = name;
+            VData = atlas.Create();
+        }
+    }
     public abstract class ACGameTypeController : ACScript, IDisposable {
         private GameState state;
         private Thread t;
@@ -287,7 +290,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // The Same File As The Map File
-        public abstract void Load(GameState s, FileInfo mapFile);
+        public abstract void Load(GameState s, DirectoryInfo mapDir);
 
         public abstract int? GetVictoriousTeam(GameState s);
 
@@ -311,6 +314,9 @@ namespace RTSEngine.Interfaces {
             }
         }
         public abstract void Tick(GameState s);
+
+        public abstract List<LEVoxel> CreateVoxels(VoxAtlas atlas);
+        public abstract void LESave(VoxWorld world, int w, int h, DirectoryInfo dir);
 
         public abstract void Serialize(BinaryWriter s);
         public abstract void Deserialize(BinaryReader s, GameState state);

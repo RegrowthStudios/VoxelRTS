@@ -19,7 +19,7 @@ namespace RTS.Default.Tutorials {
         public int state;
 
         RTSTeam pTeam;
-        public override void Load(GameState s, FileInfo mapFile) {
+        public override void Load(GameState s, DirectoryInfo mapDir) {
             // Give The Player Team Starting Capital
             pTeam = null;
             for(int i = 0; i < s.activeTeams.Length; i++) {
@@ -73,9 +73,16 @@ namespace RTS.Default.Tutorials {
             }
         }
 
+        public override List<LEVoxel> CreateVoxels(Grey.Vox.VoxAtlas atlas) {
+            return null;
+        }
+        public override void LESave(Grey.Vox.VoxWorld world, int w, int h, DirectoryInfo dir) {
+        }
+
         public override void Serialize(BinaryWriter s) {
         }
         public override void Deserialize(BinaryReader s, GameState state) {
         }
+
     }
 }

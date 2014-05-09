@@ -22,7 +22,6 @@ namespace RTS.Input {
         private const int RareUnitCount = 2; // Within each batch, there are a few rare units that have a different type
         private int MaxUnit; // Maximum number of units I can spawn
         private int[,] unitBatches = new int[3, 10]; // Unit patterns to spawn
-        private int BuildingCount = 3;
         private AggressionLevel aggressionLevel; // How angry I am
 
         Thread t;
@@ -50,15 +49,14 @@ namespace RTS.Input {
             paused = true;
             for (int i = 0; i < s.activeTeams.Length; i++) {
                 if (s.activeTeams[i].Team.Input.Type == RTSInputType.Player)
-                    playerIndex = i;
+                    playerIndex = s.activeTeams[i].Team.Index;
             }
-            player = s.activeTeams[playerIndex].Team;
+            player = s.teams[playerIndex];
             InitializeUnitBatches();
             MaxUnit = Team.Buildings.Count * 10;
             aggressionLevel = AggressionLevel.LOW;
             playerDistance = float.MaxValue;
             spawnCoolDown = 0;
-            SpawnBuildings(s);
         }
 
         public void DecideAction(GameState g, float dt) {
@@ -208,21 +206,6 @@ namespace RTS.Input {
                     r.Next((int)GameState.Map.Width - 20) + 10,
                     r.Next((int)GameState.Map.Depth - 20) + 10)
                 ));*/
-        }
-
-        public void SpawnBuildings(GameState g) {
-            for (int i = 0; i < BuildingCount; i++) {
-                Point pos = new Point(
-                    r.Next((int)GameState.CGrid.size.X - 20) + 10,
-                    r.Next((int)GameState.CGrid.size.Y - 20) + 10);
-                // If the grid is occupied, choose another position.
-                while (g.CGrid.EStatic[pos.X, pos.Y] != null) {
-                    pos = new Point(
-                    r.Next((int)GameState.CGrid.size.X - 20) + 10,
-                    r.Next((int)GameState.CGrid.size.Y - 20) + 10);
-                }
-                AddEvent(new SpawnBuildingEvent(TeamIndex, 1, pos));
-            }
         }
 
         private void InitializeUnitBatches() {

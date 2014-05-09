@@ -138,7 +138,7 @@ namespace RTSEngine.Controllers {
             // Start The Game Type Controller
             s.scrGTC = s.Scripts[args.GameTypeScript];
             s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
-            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
+            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile).Directory);
             s.gtC.Start(s);
         }
 

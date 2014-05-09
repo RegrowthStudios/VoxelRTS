@@ -27,7 +27,7 @@ namespace RTSEngine.Data {
 
     // Holds All The Data Necessary For A Game
     public class GameState {
-        public const int MAX_NONENV_PLAYERS = 8;
+        public const int MAX_NONENV_PLAYERS = 7;
         public const int MAX_PLAYERS = MAX_NONENV_PLAYERS + 1;
         public const int BUILDING_MEMORIZATION_LATENCY = MAX_PLAYERS * 2;
 
@@ -77,9 +77,6 @@ namespace RTSEngine.Data {
         public LevelGrid LevelGrid {
             get { return grid; }
         }
-        //public Heightmap Map {
-        //    get { return grid.L0; }
-        //}
         public CollisionGrid CGrid {
             get { return grid.L1; }
         }

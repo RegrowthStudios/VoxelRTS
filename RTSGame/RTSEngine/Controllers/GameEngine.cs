@@ -20,6 +20,7 @@ namespace RTSEngine.Controllers {
     public struct TeamInitOption {
         public string PlayerName;
         public int InputType;
+        public string InputController;
         public string Race;
         public RTSColorScheme Colors;
     }
@@ -37,7 +38,10 @@ namespace RTSEngine.Controllers {
     }
 
     public static class GameEngine {
-        private static Dictionary<string, ReflectedScript> scripts;
+        public static Dictionary<string, ReflectedScript> Scripts {
+            get;
+            private set;
+        }
 
         public static void SearchAllInitInfo(DirectoryInfo dir, Dictionary<string, FileInfo> races, Dictionary<string, RTSColorScheme> dictSchemes) {
             var files = dir.GetFiles();
@@ -64,7 +68,7 @@ namespace RTSEngine.Controllers {
             List<string> files = new List<string>();
             List<string> libs = new List<string>(RTSConstants.ENGINE_LIBRARIES);
             FindAllInitData(root, files, libs);
-            scripts = ScriptParser.Compile(files.ToArray(), libs.ToArray(), out error);
+            Scripts = ScriptParser.Compile(files.ToArray(), libs.ToArray(), out error);
             return;
         }
         private static void FindAllInitData(DirectoryInfo dir, List<string> files, List<string> libs) {
@@ -82,7 +86,7 @@ namespace RTSEngine.Controllers {
 
         public static void BuildLocal(GameState state, EngineLoadData eld, DirectoryInfo root, Dictionary<string, FileInfo> races) {
             // Copy Over All The Scripts
-            foreach(KeyValuePair<string, ReflectedScript> kv in scripts)
+            foreach(KeyValuePair<string, ReflectedScript> kv in Scripts)
                 state.Scripts.Add(kv.Key, kv.Value);
 
             // Load The Map
@@ -189,7 +193,7 @@ namespace RTSEngine.Controllers {
                 BinaryReader r = new BinaryReader(s, Encoding.ASCII);
                 mapFile = r.ReadString();
                 BuildMap(state, new FileInfo(mapFile));
-                GameState.Deserialize(r, scripts, state);
+                GameState.Deserialize(r, Scripts, state);
             }
 
             // Hook Building Spawn Events To Collision Grid
@@ -200,7 +204,6 @@ namespace RTSEngine.Controllers {
 
         public static void SetInput(GameState state, int team, ACInputController ic) {
             state.teams[team].Input = ic;
-            ic.Init(state, team);
         }
         public static void Dispose(GameState state) {
             for(int ti = 0; ti < state.teams.Length; ti++) {

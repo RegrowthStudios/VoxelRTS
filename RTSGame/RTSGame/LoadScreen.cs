@@ -292,19 +292,13 @@ namespace RTS {
 
                 // Create The Input Controllers
                 for(int ti = 0; ti < LoadedState.teams.Length; ti++) {
-                    switch(LoadData.Teams[ti].InputType) {
-                        case RTSInputType.Player:
-                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.Player"].CreateInstance<ACInputController>());
-                            break;
-                        case RTSInputType.AI:
-                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.AI"].CreateInstance<ACInputController>());
-                            break;
-                        case RTSInputType.Environment:
-                            GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts["RTS.Input.Environment"].CreateInstance<ACInputController>());
-                            break;
-                        default:
-                            continue;
-                    }
+                    if(string.IsNullOrWhiteSpace(LoadData.Teams[ti].InputController)) 
+                        continue;
+                    GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts[LoadData.Teams[ti].InputController].CreateInstance<ACInputController>());
+                }
+                foreach(var t in LoadedState.teams) {
+                    if(t == null) continue;
+                    t.Input.Init(LoadedState, t.Index);
                 }
 
 

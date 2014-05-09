@@ -8,11 +8,19 @@ PlayerTypes [
     {None}
     {None}
     {None}
-    {None}
+]
+InputTypes [
+    {RTS.Input.Player}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
 ]
 Races [
     {Mech}
-    {None}
     {None}
     {None}
     {None}

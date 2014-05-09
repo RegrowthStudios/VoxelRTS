@@ -1,24 +1,32 @@
 ﻿Name        [Testbed]
 PlayerTypes [
     {Player}
+    {Computer}
     {None}
     {None}
     {None}
     {None}
     {None}
-    {None}
-    {Environment}
     {None}
 ]
+InputTypes [
+    {RTS.Input.Player}
+    {RTS.Input.AI}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+]
 Races [
+    {Mech}
     {Mech}
     {None}
     {None}
     {None}
     {None}
     {None}
-    {None}
-    {Gaia}
     {None}
 ]
 GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]

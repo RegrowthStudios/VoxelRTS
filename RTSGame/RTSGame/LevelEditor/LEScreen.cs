@@ -18,6 +18,7 @@ using CGrid = RTSEngine.Data.CollisionGrid;
 using System.Text.RegularExpressions;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Controllers;
+using RTSEngine.Interfaces;
 
 namespace RTS {
     public struct LEVT {
@@ -49,6 +50,7 @@ namespace RTS {
 
         // Voxel Modifying Data
         Dictionary<string, VoxData> dVox;
+        List<ACGameTypeController> gtcList;
 
         // Widgets
         WidgetRenderer wr;
@@ -71,6 +73,12 @@ namespace RTS {
 
         public override void OnEntry(GameTime gameTime) {
             camera = new FreeCamera(Vector3.UnitY * Region.HEIGHT * 0.6f, 0, 0, G.Viewport.AspectRatio);
+            gtcList = new List<ACGameTypeController>();
+            foreach(var kvp in GameEngine.Scripts) {
+                ReflectedScript rs = kvp.Value;
+                if(rs.ScriptType == ScriptType.GameType)
+                    gtcList.Add(rs.CreateInstance<ACGameTypeController>());
+            }
 
             CreateVoxWorld();
             CreateWidgets();
@@ -239,6 +247,15 @@ namespace RTS {
                 vd.GeoProvider = vgp;
                 dVox.Add(i == 0 ? "Flora" : "Ore", vd);
             }
+
+            // Load Custom Voxels
+            foreach(var gtc in gtcList) {
+                var l = gtc.CreateVoxels(state.World.Atlas);
+                if(l == null) continue;
+                foreach(var lv in l) {
+                    dVox.Add(lv.Name, lv.VData);
+                }
+            }
         }
         private void CreateWidgets() {
             wr = new WidgetRenderer(G, XNASpriteFont.Compile(G, "Impact", 24, out font));
@@ -370,6 +387,9 @@ namespace RTS {
 
             WriteHeights(dirInfo.FullName + @"\height.hmd", w, h);
             WriteWorld(dirInfo.FullName + @"\vox.world", w, h);
+            foreach(var gtc in gtcList) {
+                gtc.LESave(state.World, w, h, dirInfo);
+            }
         }
         private void WriteHeights(string file, int w, int h) {
             byte[] hd = new byte[w * h * 17 + 8];
