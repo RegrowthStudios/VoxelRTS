@@ -192,7 +192,7 @@ namespace RTSEngine.Data.Parsers {
                             for(vl.VoxelLoc.Y = 0; vl.VoxelLoc.Y <= h; vl.VoxelLoc.Y++) {
                                 r.SetVoxel(vl.VoxelLoc.X, vl.VoxelLoc.Y, vl.VoxelLoc.Z, 11);
                             }
-                            if(h > 0) r.SetVoxel(vl.VoxelLoc.X, h, vl.VoxelLoc.Z, 1);
+                            if(h > 0) r.SetVoxel(vl.VoxelLoc.X, h, vl.VoxelLoc.Z, (ushort)(ramp + 16));
                             if(h > 1) r.SetVoxel(vl.VoxelLoc.X, h - 1, vl.VoxelLoc.Z, 6);
                             break;
                     }
@@ -205,6 +205,12 @@ namespace RTSEngine.Data.Parsers {
                 vd.FaceType = new VoxFaceType();
                 vd.FaceType.SetAllTypes(0x01u);
                 vd.FaceType.SetAllMasks(0xfeu);
+            }
+            for(int vi = 0; vi < 4; vi++) {
+                var vd = vw.Atlas.Create();
+                vd.FaceType = new VoxFaceType();
+                vd.FaceType.SetAllTypes(0xffffffffu);
+                vd.FaceType.SetAllMasks(0xffffffffu);
             }
         }
     }

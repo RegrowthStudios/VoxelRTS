@@ -325,6 +325,57 @@ namespace RTSEngine.Graphics {
                 atlas[(ushort)(i + 5)].GeoProvider = vgpTrans;
                 atlas[(ushort)(i + 10)].GeoProvider = vgpCliff;
             }
+            for(int vi = 0; vi < 4; vi++) {
+                var vd = atlas[(ushort)(vi + 16)];
+                var vgp = new VGPCustom();
+                Vector4 uvr = new Vector4(DUV * 3, DUV * 0, DUV, DUV);
+                switch(vi) {
+                    case 0:
+                    case 1:
+                        vgp.CustomVerts[Voxel.FACE_PY] = new VertexVoxel[] {
+                            new VertexVoxel(new Vector3(0, 0, 0), Vector2.UnitX, uvr, Color.White),
+                            new VertexVoxel(new Vector3(1, -1, 0), Vector2.One, uvr, Color.White),
+                            new VertexVoxel(new Vector3(1, -1, 1), Vector2.UnitY, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, 0, 1), Vector2.Zero, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, -1, 0), Vector2.UnitX, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, -1, 1), Vector2.Zero, uvr, Color.White)
+                        };
+                        vgp.CustomInds[Voxel.FACE_PY] = new int[] {
+                            0, 1, 3, 3, 1, 2,
+                            3, 2, 5, 1, 0, 4,
+                            0, 3, 4, 4, 3, 5
+                        };
+                        break;
+                    default:
+                        vgp.CustomVerts[Voxel.FACE_PY] = new VertexVoxel[] {
+                            new VertexVoxel(new Vector3(1, 0, 0), Vector2.UnitX, uvr, Color.White),
+                            new VertexVoxel(new Vector3(1, -1, 1), Vector2.One, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, -1, 1), Vector2.UnitY, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, 0, 0), Vector2.Zero, uvr, Color.White),
+                            new VertexVoxel(new Vector3(1, -1, 0), Vector2.UnitX, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, -1, 0), Vector2.Zero, uvr, Color.White)
+                        };
+                        vgp.CustomInds[Voxel.FACE_PY] = new int[] {
+                            0, 1, 3, 3, 1, 2,
+                            3, 2, 5, 1, 0, 4,
+                            0, 3, 4, 4, 3, 5
+                        };
+                        break;
+                }
+                if((vi % 2) == 1) {
+                    if(vi == 1) for(int fi = 0; fi < 6; fi++)
+                            vgp.CustomVerts[Voxel.FACE_PY][fi].Position.X = 1 - vgp.CustomVerts[Voxel.FACE_PY][fi].Position.X;
+                    else for(int fi = 0; fi < 6; fi++)
+                            vgp.CustomVerts[Voxel.FACE_PY][fi].Position.Z = 1 - vgp.CustomVerts[Voxel.FACE_PY][fi].Position.Z;
+                    for(int ti = 0; ti < vgp.CustomInds[Voxel.FACE_PY].Length; ) {
+                        int buf = vgp.CustomInds[Voxel.FACE_PY][ti + 2];
+                        vgp.CustomInds[Voxel.FACE_PY][ti + 2] = vgp.CustomInds[Voxel.FACE_PY][ti];
+                        vgp.CustomInds[Voxel.FACE_PY][ti] = buf;
+                        ti += 3;
+                    }
+                }
+                vd.GeoProvider = vgp;
+            }
         }
         private void LoadTeamVisuals(GameState state, int ti) {
             RTSTeam team = state.teams[ti];
