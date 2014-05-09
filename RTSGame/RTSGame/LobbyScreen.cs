@@ -25,6 +25,7 @@ namespace RTS {
         public string[] PlayerTypes;
         public string[] InputTypes;
         public string[] Races;
+        public string[] Colors;
     }
 
     public class TeamInitWidget : IDisposable {
@@ -423,6 +424,7 @@ namespace RTS {
             for(int i = 0; i < gp.Races.Length; i++) {
                 widgets[i].PlayerType = gp.PlayerTypes[i];
                 widgets[i].Race = gp.Races[i];
+                widgets[i].Scheme = gp.Colors[i];
             }
             game.LoadScreen.ImageFile = gp.LoadImage;
             textGTController.Text = gp.GameType;

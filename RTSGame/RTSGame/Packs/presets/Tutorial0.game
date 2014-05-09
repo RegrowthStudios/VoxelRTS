@@ -29,6 +29,16 @@ Races [
     {None}
     {None}
 ]
+Colors [
+   {Blue}
+   {Red}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+]
 LoadImage   [Packs\presets\Tutorial0\Main.png]
 GameType    [RTS.Default.Tutorials.Tut0]
 Map         [Packs\Default\maps\Tutorial0\info.map]
