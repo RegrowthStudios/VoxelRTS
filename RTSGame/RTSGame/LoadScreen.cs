@@ -86,6 +86,10 @@ namespace RTS {
             get;
             set;
         }
+        public GameplayController LoadedGPlay {
+            get;
+            private set;
+        }
 
         // Loading Information
         private bool isLoaded;
@@ -292,13 +296,9 @@ namespace RTS {
 
                 // Create The Input Controllers
                 for(int ti = 0; ti < LoadedState.teams.Length; ti++) {
-                    if(string.IsNullOrWhiteSpace(LoadData.Teams[ti].InputController)) 
+                    if(string.IsNullOrWhiteSpace(LoadData.Teams[ti].InputController))
                         continue;
                     GameEngine.SetInput(LoadedState, ti, LoadedState.Scripts[LoadData.Teams[ti].InputController].CreateInstance<ACInputController>());
-                }
-                foreach(var t in LoadedState.teams) {
-                    if(t == null) continue;
-                    t.Input.Init(LoadedState, t.Index);
                 }
 
 
@@ -309,6 +309,30 @@ namespace RTS {
                 // Load The Renderer
                 LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
                 LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera);
+
+                // Initialize Inputs
+                foreach(var t in LoadedState.teams) {
+                    if(t == null) continue;
+
+                    // Set Camera
+                    var vInput = t.Input as IVisualInputController;
+                    if(vInput != null)
+                        vInput.Camera = LoadedCamera;
+
+                    // Init
+                    t.Input.Init(LoadedState, t.Index);
+
+                    // Build
+                    if(vInput != null)
+                        vInput.Build(LoadedRenderer);
+                }
+
+                // Create Gameplay
+                LoadedGPlay = new GameplayController();
+                GCInitArgs gca = new GCInitArgs() {
+                    GameTypeScript = LoadData.GTController
+                };
+                LoadedGPlay.Init(LoadedState, gca);
             }
             catch(Exception e) {
                 if(LoadedRenderer != null)

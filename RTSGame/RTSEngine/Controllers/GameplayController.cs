@@ -114,12 +114,6 @@ namespace RTSEngine.Controllers {
                 tbFOWCalculations.AddTask(new FOWTask(s, s.activeTeams[ti].Index));
             }
             pathfinder = new Pathfinder(s);
-
-            // Start The Input Controllers
-            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                s.activeTeams[ti].Team.Input.Begin();
-            }
-            s.VoxState.VWorkPool.Start(1, System.Threading.ThreadPriority.BelowNormal);
             vManager = new WorldManager(s.VoxState);
 
             // Add All Tasks
@@ -139,6 +133,14 @@ namespace RTSEngine.Controllers {
             s.scrGTC = s.Scripts[args.GameTypeScript];
             s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
             s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile).Directory);
+        }
+
+        public void BeginPlaying(GameState s) {
+            // Start The Various Threaded Elements
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                s.activeTeams[ti].Team.Input.Begin();
+            }
+            s.VoxState.VWorkPool.Start(1, System.Threading.ThreadPriority.BelowNormal);
             s.gtC.Start(s);
         }
 
