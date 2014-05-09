@@ -385,7 +385,7 @@ namespace RTSEngine.Data {
         public readonly Vector2 size;
 
         // Stores The Region Each Cell Is Located In
-        public Region[,] Region { get; set; }
+        public ImpactRegion[,] Region { get; set; }
 
         // Stores The ImpactGenerators Of Each Cell Of The Impact Grid
         public List<RTSBuilding>[,] ImpactGenerators { get; set; }
@@ -398,7 +398,7 @@ namespace RTSEngine.Data {
             cellSize = 2 * RTSConstants.IGRID_SIZE;
             numCells = new Point(w, h);
             size = new Vector2(numCells.X, numCells.Y) * cellSize;
-            Region = new Region[numCells.X, numCells.Y];
+            Region = new ImpactRegion[numCells.X, numCells.Y];
             ImpactGenerators = new List<RTSBuilding>[numCells.X, numCells.Y];
             CellImpact = new int[numCells.X, numCells.Y];
 

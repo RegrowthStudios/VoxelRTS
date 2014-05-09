@@ -96,7 +96,6 @@ namespace RTS {
             state = game.LoadScreen.LoadedState;
             state.OnNewPopup += OnNewPopup;
             camera = game.LoadScreen.LoadedCamera;
-            camera.CamOrigin = new Vector3(30, 35, 30);
             renderer = game.LoadScreen.LoadedRenderer;
             renderer.UseFOW = true;
             gameInput = (from t in state.teams
@@ -238,8 +237,6 @@ namespace RTS {
             }
         }
         public void OnKR(object s, KeyEventArgs a) {
-            switch(a.KeyCode) {
-            }
         }
 
         double CalcFPS(double[] fpsSamples, ref int currentSample, double dt) {

@@ -81,7 +81,7 @@
     <Compile Include="Data\Parsers\MapParser.cs" />
     <Compile Include="Data\Parsers\RTSRaceParser.cs" />
     <Compile Include="Data\Parsers\RTSUnitDataParser.cs" />
-    <Compile Include="Data\Region.cs" />
+    <Compile Include="Data\ImpactRegion.cs" />
     <Compile Include="Data\RTSConstants.cs" />
     <Compile Include="Data\SelectionDetection.cs" />
     <Compile Include="Data\Team\RTSBuilding.cs" />

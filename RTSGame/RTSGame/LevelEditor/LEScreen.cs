@@ -34,6 +34,20 @@ namespace RTS {
     public class LEScreen : GameScreen<App> {
         const float DUV = 0.125f;
         private static readonly Regex rgxSave = RegexHelper.GenerateVec2Int("SAVE");
+        private static readonly Color[] REGION_COLORS = new Color[] {
+            Color.Blue, Color.Red, Color.Green, Color.Yellow, Color.Orange,
+            Color.Purple, Color.Pink, Color.Gray, Color.GhostWhite, new Color(10, 10, 10),
+            Color.DarkTurquoise, Color.Honeydew, Color.Brown, Color.Salmon, Color.Sienna,
+            Color.Wheat, Color.Plum, Color.MidnightBlue, Color.MintCream, Color.LightCyan
+        };
+        private const int MINID_TERRAIN = 1;
+        private const int COUNT_TERRAIN = 5;
+        private const int MINID_SCENERY = MINID_TERRAIN + COUNT_TERRAIN;
+        private const int COUNT_SCENERY = 10;
+        private const int MINID_RAMP = MINID_SCENERY + COUNT_SCENERY;
+        private const int COUNT_RAMP = 4;
+        private const int MINID_REGION = MINID_RAMP + COUNT_RAMP;
+
 
         public override int Next {
             get { return -1; }
@@ -51,6 +65,7 @@ namespace RTS {
         // Voxel Modifying Data
         Dictionary<string, VoxData> dVox;
         List<ACGameTypeController> gtcList;
+        List<ACInputController> icList;
 
         // Widgets
         WidgetRenderer wr;
@@ -74,10 +89,13 @@ namespace RTS {
         public override void OnEntry(GameTime gameTime) {
             camera = new FreeCamera(Vector3.UnitY * Region.HEIGHT * 0.6f, 0, 0, G.Viewport.AspectRatio);
             gtcList = new List<ACGameTypeController>();
+            icList = new List<ACInputController>();
             foreach(var kvp in GameEngine.Scripts) {
                 ReflectedScript rs = kvp.Value;
                 if(rs.ScriptType == ScriptType.GameType)
                     gtcList.Add(rs.CreateInstance<ACGameTypeController>());
+                else if(rs.ScriptType == ScriptType.Input)
+                    icList.Add(rs.CreateInstance<ACInputController>());
             }
 
             CreateVoxWorld();
@@ -111,7 +129,7 @@ namespace RTS {
         }
         private void CreateVoxTypes() {
             Random r = new Random(343);
-            for(int i = 0; i < 5; i++) {
+            for(int i = 0; i < COUNT_TERRAIN; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
                 vd.FaceType.SetAllTypes(0x00000001u);
@@ -128,7 +146,7 @@ namespace RTS {
                 vd.GeoProvider = vgp;
                 dVox.Add("Terrain " + i, vd);
             }
-            for(int i = 0; i < 10; i++) {
+            for(int i = 0; i < COUNT_SCENERY; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
                 vd.FaceType.SetAllTypes(0x00000001u);
@@ -150,7 +168,7 @@ namespace RTS {
                 vd.GeoProvider = vgp;
                 dVox.Add("Scenery " + i, vd);
             }
-            for(int i = 0; i < 4; i++) {
+            for(int i = 0; i < COUNT_RAMP; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
                 vd.FaceType.SetAllTypes(0xffffffffu);
@@ -205,52 +223,27 @@ namespace RTS {
                 vd.GeoProvider = vgp;
                 dVox.Add("Ramp " + i, vd);
             }
-            for(int i = 0; i < 20; i++) {
+            for(int i = 0; i < REGION_COLORS.Length; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
                 vd.FaceType.SetAllTypes(0x00000001u);
                 vd.FaceType.SetAllMasks(0xfffffffeu);
                 var vgp = new VGPCube();
-                vgp.Color = new Color(r.Next(256), r.Next(256), r.Next(256));
+                vgp.Color = REGION_COLORS[i];
                 vgp.UVRect = new Vector4(DUV * 2, DUV * 0, DUV, DUV);
                 vd.GeoProvider = vgp;
                 dVox.Add("Region " + i, vd);
             }
-            for(int i = 0; i < 8; i++) {
-                var vd = state.World.Atlas.Create();
-                vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllMasks(0x00000001u);
-                vd.FaceType.SetAllMasks(0xfffffffeu);
-                var vgp = new VGPCube();
-                switch(i) {
-                    case 0: vgp.Color = Color.White; break;
-                    case 1: vgp.Color = Color.Goldenrod; break;
-                    case 2: vgp.Color = Color.ForestGreen; break;
-                    case 3: vgp.Color = Color.Brown; break;
-                    case 4: vgp.Color = Color.Red; break;
-                    case 5: vgp.Color = Color.Orange; break;
-                    case 6: vgp.Color = Color.Purple; break;
-                    case 7: vgp.Color = Color.DarkGray; break;
-                }
-                vgp.UVRect = new Vector4(DUV * 4, DUV * 0, DUV, DUV);
-                vd.GeoProvider = vgp;
-                dVox.Add("Player " + i, vd);
-            }
-            for(int i = 0; i < 2; i++) {
-                var vd = state.World.Atlas.Create();
-                vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllTypes(0x00000001u);
-                vd.FaceType.SetAllMasks(0xfffffffeu);
-                var vgp = new VGPCube();
-                vgp.Color = Color.White;
-                vgp.UVRect = new Vector4(DUV * (5 + i), DUV * 0, DUV, DUV);
-                vd.GeoProvider = vgp;
-                dVox.Add(i == 0 ? "Flora" : "Ore", vd);
-            }
-
             // Load Custom Voxels
             foreach(var gtc in gtcList) {
                 var l = gtc.CreateVoxels(state.World.Atlas);
+                if(l == null) continue;
+                foreach(var lv in l) {
+                    dVox.Add(lv.Name, lv.VData);
+                }
+            }
+            foreach(var ic in icList) {
+                var l = ic.CreateVoxels(state.World.Atlas);
                 if(l == null) continue;
                 foreach(var lv in l) {
                     dVox.Add(lv.Name, lv.VData);
@@ -387,8 +380,12 @@ namespace RTS {
 
             WriteHeights(dirInfo.FullName + @"\height.hmd", w, h);
             WriteWorld(dirInfo.FullName + @"\vox.world", w, h);
+            WriteRegions(dirInfo.FullName + @"\regions.png", w, h);
             foreach(var gtc in gtcList) {
                 gtc.LESave(state.World, w, h, dirInfo);
+            }
+            foreach(var ic in icList) {
+                ic.LESave(state.World, w, h, dirInfo);
             }
         }
         private void WriteHeights(string file, int w, int h) {
@@ -479,7 +476,34 @@ namespace RTS {
                 }
             }
         }
+        private void WriteRegions(string file, int w, int h) {
+            w /= 2; h /= 2;
+            byte[] data = new byte[w * h * 4];
+            Vector3I loc = Vector3I.Zero;
+            int i = 0, t;
+            for(loc.Z = 0; loc.Z < h * 2; loc.Z += 2) {
+                for(loc.X = 0; loc.X < w * 2; loc.X += 2) {
+                    t = 0;
+                    loc.Y = LETPaint.HEIGHT;
+                    VoxLocation vl = new VoxLocation(loc);
+                    Region r = state.World.regions[vl.RegionIndex];
+                    t = r.voxels[vl.VoxelIndex].ID - MINID_REGION;
+                    if(t < 0 || t >= REGION_COLORS.Length) t = 0;
+                    data[i++] = REGION_COLORS[t].B;
+                    data[i++] = REGION_COLORS[t].G;
+                    data[i++] = REGION_COLORS[t].R;
+                    data[i++] = REGION_COLORS[t].A;
+                }
+            }
 
+            // Save The Image
+            using(var bmp = new System.Drawing.Bitmap(w, h, System.Drawing.Imaging.PixelFormat.Format32bppArgb)) {
+                System.Drawing.Imaging.BitmapData bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, w, h), System.Drawing.Imaging.ImageLockMode.WriteOnly, bmp.PixelFormat);
+                System.Runtime.InteropServices.Marshal.Copy(data, 0, bmpData.Scan0, data.Length);
+                bmp.UnlockBits(bmpData);
+                bmp.Save(file, System.Drawing.Imaging.ImageFormat.Png);
+            }
+        }
         private void OnDC(string comm) {
             Match m = rgxSave.Match(comm);
             if(m.Success) {

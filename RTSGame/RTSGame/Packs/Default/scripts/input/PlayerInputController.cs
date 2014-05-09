@@ -13,7 +13,8 @@ using RTSEngine.Data.Team;
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
 using Grey.Vox.Ops;
-using VRegion = Grey.Vox.Region;
+using Grey.Vox;
+using Grey.Graphics;
 
 namespace RTS.Input {
     public class Player : ACInputController, IVisualInputController {
@@ -47,6 +48,22 @@ namespace RTS.Input {
             Type = RTSInputType.Player;
             //bvh = new BVH();
         }
+
+        public override void Init(GameState s, int ti) {
+            base.Init(s, ti);
+
+            // Open File
+            FileInfo fi = new FileInfo(s.LevelGrid.Directory.FullName + @"\camera.dat");
+            if(fi.Exists && Camera != null) {
+                BinaryReader r = new BinaryReader(fi.OpenRead());
+                int x = r.ReadInt32();
+                int y = r.ReadInt32();
+                int z = r.ReadInt32();
+                Camera.CamOrigin = new Vector3(x, y, z) * new Vector3(2, 1, 2) + Vector3.One;
+                r.BaseStream.Dispose();
+            }
+        }
+
         public void Build(RTSRenderer renderer) {
             // Create UI
             UI = new RTSUI(renderer, @"Packs\Default\scripts\input\RTS.uic");
@@ -57,9 +74,6 @@ namespace RTS.Input {
             Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
             Team.OnPopulationCapChange += (t, c) => { UI.TeamDataPanel.PopulationCap = Team.PopulationCap; };
             Team.OnCapitalChange += (t, c) => { UI.TeamDataPanel.Capital = Team.Capital; };
-
-            // Build The BVH
-            // bvh = renderer.Map.BVH;
         }
         public override void Begin() {
             useSelectRect = false;
@@ -230,7 +244,7 @@ namespace RTS.Input {
                 // Action In The World
                 if(b == BUTTON_ACTION) {
                     if(Camera == null) return;
-                    IntersectionRecord rec = new IntersectionRecord();
+                    // IntersectionRecord rec = new IntersectionRecord();
                     Ray ray = Camera.GetViewRay(location);
 
                     // Check Building Placement
@@ -241,9 +255,9 @@ namespace RTS.Input {
                         var nvl = VRayHelper.GetOuter(ray, GameState.VoxState);
                         if(nvl.HasValue) {
                             Vector3 rh = new Vector3(
-                                nvl.Value.RegionLoc.X * VRegion.WIDTH + nvl.Value.VoxelLoc.X,
+                                nvl.Value.RegionLoc.X * Region.WIDTH + nvl.Value.VoxelLoc.X,
                                 nvl.Value.VoxelLoc.Y,
-                                nvl.Value.RegionLoc.Y * VRegion.DEPTH + nvl.Value.VoxelLoc.Z
+                                nvl.Value.RegionLoc.Y * Region.DEPTH + nvl.Value.VoxelLoc.Z
                                 );
                             rh *= new Vector3(2f, 1f, 2f);
                             // Vector3 rh = ray.Position + ray.Direction * rec.T;
@@ -268,9 +282,9 @@ namespace RTS.Input {
                         var nvl = VRayHelper.GetOuter(ray, GameState.VoxState);
                         if(nvl.HasValue) {
                             Vector3 rh = new Vector3(
-                                nvl.Value.RegionLoc.X * VRegion.WIDTH + nvl.Value.VoxelLoc.X,
+                                nvl.Value.RegionLoc.X * Region.WIDTH + nvl.Value.VoxelLoc.X,
                                 nvl.Value.VoxelLoc.Y,
-                                nvl.Value.RegionLoc.Y * VRegion.DEPTH + nvl.Value.VoxelLoc.Z
+                                nvl.Value.RegionLoc.Y * Region.DEPTH + nvl.Value.VoxelLoc.Z
                                 );
                             rh *= new Vector3(2f, 1f, 2f);
                             rh.X += 1f; rh.Z += 1f;
@@ -354,6 +368,64 @@ namespace RTS.Input {
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             UI.Draw(renderer, batch);
         }
+
+        #region Level Editor
+        List<LEVoxel> voxels;
+        ushort camID;
+        public override List<LEVoxel> CreateVoxels(VoxAtlas atlas) {
+            float duv = 1f / 8f;
+            voxels = new List<LEVoxel>(1);
+
+            // Create Camera Voxel
+            LEVoxel lev = new LEVoxel("Camera Position", atlas);
+            lev.VData.FaceType.SetAllTypes(0x00000001u);
+            lev.VData.FaceType.SetAllMasks(0xfffffffeu);
+            VGPCube vgp = new VGPCube();
+            vgp.Color = Color.White;
+            vgp.UVRect = new Vector4(duv * 0, duv * 1, duv, duv);
+            lev.VData.GeoProvider = vgp;
+            voxels.Add(lev);
+
+            camID = voxels[0].VData.ID;
+            return voxels;
+        }
+        public override void LESave(VoxWorld world, int w, int h, DirectoryInfo dir) {
+            // Create File
+            FileInfo fi = new FileInfo(dir.FullName + @"\camera.dat");
+            BinaryWriter s = new BinaryWriter(fi.Create());
+
+            // Search Through Columns
+            Vector3I loc = Vector3I.Zero;
+            for(loc.Z = 0; loc.Z < h; loc.Z++) {
+                for(loc.X = 0; loc.X < w; loc.X++) {
+                    loc.Y = 0;
+                    VoxLocation vl = new VoxLocation(loc);
+                    Region r = world.regions[vl.RegionIndex];
+
+                    // Search Through The Region
+                    for(; vl.VoxelLoc.Y < Region.HEIGHT; vl.VoxelLoc.Y++) {
+                        ushort id = r.voxels[vl.VoxelIndex].ID;
+                        if(id == camID) {
+                            // Write Camera Position
+                            s.Write(loc.X);
+                            s.Write(vl.VoxelLoc.Y);
+                            s.Write(loc.Z);
+                            s.Flush();
+                            s.BaseStream.Dispose();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Flush And Close (No Data)
+            s.Write(w / 2);
+            s.Write((Grey.Vox.Region.HEIGHT  * 3) / 4);
+            s.Write(h / 2);
+            s.Flush();
+            s.BaseStream.Dispose();
+        }
+        #endregion
 
         public override void Serialize(BinaryWriter s) {
             // TODO: Implement Serialize

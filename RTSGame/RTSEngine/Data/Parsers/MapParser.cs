@@ -21,11 +21,11 @@ namespace RTSEngine.Data.Parsers {
         [ZXParse]
         public LevelGrid LGrid;
         [ZXParse]
-        public List<Region> Regions;
+        public List<ImpactRegion> Regions;
         public string VoxWorldFile;
 
         public TerrainData() {
-            Regions = new List<Region>();
+            Regions = new List<ImpactRegion>();
             LGrid = new LevelGrid();
         }
 
@@ -99,7 +99,7 @@ namespace RTSEngine.Data.Parsers {
 
             // Create The Regions
             foreach(var kv in regionCells) {
-                Region r = new Region(kv.Value);
+                ImpactRegion r = new ImpactRegion(kv.Value);
                 Regions.Add(r);
                 foreach(var p in r.Cells) {
                     LGrid.L2.Region[p.X, p.Y] = r;
@@ -112,7 +112,7 @@ namespace RTSEngine.Data.Parsers {
         // Data Detection
         const string EXTENSION = "map";
 
-        public static TerrainData ParseData(FileInfo infoFile, List<Region> regions) {
+        public static TerrainData ParseData(FileInfo infoFile, List<ImpactRegion> regions) {
             // Check File Existence
             if(infoFile == null || !infoFile.Exists) return null;
 
