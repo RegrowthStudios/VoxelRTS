@@ -181,6 +181,7 @@ namespace RTS.Default {
                         }
                     }
                 }
+                s.Write(-1);
 
                 // Flush And Close
                 s.Flush();

@@ -1,22 +1,5 @@
-﻿// Pre-computed Height Data
-DAT         [height.hmd]
-
-// The Primary Model And Texture
-HMP         [map.obj]
-HTP         [map.png]
-
-// The Size Of The Map
-HEIGHT      [5]
-
-// Region Key Information
-REGIONS     [Region5x5.png]
-
-// Survival Team Spawn Location
-SURVIVALSPAWN   [100, 100]
-
-MapHeight [5]
-ReadHeightData({~~FILEROOTDIR~~} {height.hmd})
-ReadGridData({~~FILEROOTDIR~~} {Region5x5.png})
+﻿ReadHeightData({~~FILEROOTDIR~~} {height.hmd})
+ReadGridData({~~FILEROOTDIR~~} {regions.png})
 VoxWorldFile [vox.world]
 BuildPrimary(
     {~~RENDERER~~}
