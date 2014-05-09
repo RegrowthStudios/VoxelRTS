@@ -208,7 +208,19 @@ namespace RTSEngine.Data {
         }
         public void Add(CollisionRect[] walls, byte mi, int x, int y) {
             Walls[x, y] = new CollisionRect[walls.Length];
-            WallInformation[x, y] = mi;
+            WallInformation[x, y] |= mi;
+            if(x > 0 && y > 0 && !CanMoveTo(new Point(x, y), Direction.XNZN)) {
+                WallInformation[x - 1, y - 1] |= Direction.XPZP;
+            }
+            if(x < numCells.X - 1 && y > 0 && !CanMoveTo(new Point(x, y), Direction.XPZN)) {
+                WallInformation[x + 1, y - 1] |= Direction.XNZP;
+            }
+            if(x > 0 && y < numCells.Y - 1 && !CanMoveTo(new Point(x, y), Direction.XNZP)) {
+                WallInformation[x - 1, y + 1] |= Direction.XPZN;
+            }
+            if(x < numCells.X - 1 && y < numCells.Y - 1 && !CanMoveTo(new Point(x, y), Direction.XPZP)) {
+                WallInformation[x + 1, y + 1] |= Direction.XNZN;
+            }
             Array.Copy(walls, Walls[x, y], Walls[x, y].Length);
         }
 
