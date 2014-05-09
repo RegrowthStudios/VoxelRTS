@@ -215,10 +215,10 @@ namespace RTS.Input {
             }
             Team.OnUnitSpawn += OnUnitSpawn;
 
-            /*
+            
             AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, new Point(60,60)));
             treeLocations.Add(new Point(60, 60));
-             */
+             
 
         }
 
@@ -228,26 +228,25 @@ namespace RTS.Input {
                     Thread.Sleep(1000);
                     continue;
                 }
-                //DevConsole.AddCommand("Tick");
                 foreach (var r in GameState.Regions) {
                     //SetInitTarget(r);
                 }
-
                 if(counter % DisasterTime == 0) {
+                    DevConsole.AddCommand("disaster");
                     CreateDisaster();
                 }
                 if(counter % RecoverTime == 0) {
-                    //Recover();
+                    DevConsole.AddCommand("recover");
+                    Recover();
                 }
                 counter++;
                 counter = counter % (RecoverTime);
-                DevConsole.AddCommand("tick");
-                Thread.Sleep(2500);
+                Thread.Sleep(3000);
             }
         }
 
         public override void Begin() {
-            counter = 0;
+            counter = 1;
             thread.Start();
             paused = false;
         }
@@ -260,6 +259,7 @@ namespace RTS.Input {
         // Recovery Phase
         private void Recover() {
             if(treeLocations == null || treeLocations.Count < 1) return;
+           
             foreach(var r in GameState.Regions) {
                 if(r.RegionImpact < PointOfNoReturn && r.RegionImpact > 0) {
                     // Randomly Choose The Location Of A Starting Tree In Region
@@ -277,11 +277,16 @@ namespace RTS.Input {
                        
                         for (int x = -1; x <= 1; x++) {
                             for (int y = -1; y <= 1; y++) {
-                                
+
                                 Point newTreeC = new Point(treeC.X + x, treeC.Y + y);
-                                AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
-                                Vector2 newTreePos = new Vector2(newTreeC.X, newTreeC.Y) * GameState.CGrid.cellSize + Vector2.One;
-                                grid.AddImpact(newTreePos, -1 * (FloraData.Impact * FloraData.Health));
+                                bool noBuilding = GameState.CGrid.EStatic[newTreeC.X, newTreeC.Y] == null;
+                                bool noUnits = GameState.CGrid.EDynamic[newTreeC.X, newTreeC.Y].Count == 0;
+                                if (noBuilding && noUnits && r.RegionImpact > 0) {
+                                    DevConsole.AddCommand("recover4");
+                                    AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, newTreeC));
+                                    Vector2 newTreePos = new Vector2(newTreeC.X, newTreeC.Y) * GameState.CGrid.cellSize + Vector2.One;
+                                    grid.AddImpact(newTreePos, -1 * (FloraData.Impact * FloraData.Health));
+                                }
                             }
                         }
                     }
@@ -314,8 +319,6 @@ namespace RTS.Input {
                     level = 1;
                 else
                     level = 0;
-
-                //level = 3;
 
                 if(level > 0) {
                     DevConsole.AddCommand("has level");
