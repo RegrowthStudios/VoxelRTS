@@ -41,7 +41,7 @@ namespace RTSEngine.Algorithms {
         private static GameState gameState;
         private static CollisionGrid World { get { return gameState.CGrid; } }
         // Whether A World Coordinate Is Collidable, Given The Pathfinding Team's Knowledge Of The World
-        private bool[,] isCollidable;
+        private bool[,] isThoughtCollidable;
         protected Point[,] prev;
         protected int[,] gScore, fScore;
         protected Point start;
@@ -161,7 +161,7 @@ namespace RTSEngine.Algorithms {
             p.Add(cur);
         }
 
-        private bool CanMove(Point n, int fowI) {
+        private bool CanMoveFrom(Point p, Point n, int fowI) {
             if(!InGrid(n)) return false;
 
             FogOfWar f = World.GetFogOfWar(n.X, n.Y, fowI);
@@ -169,9 +169,9 @@ namespace RTSEngine.Algorithms {
                 case FogOfWar.Nothing:
                     return true;
                 case FogOfWar.Passive:
-                    return !(isCollidable[n.X, n.Y] || World.Collision[n.X, n.Y]); 
+                    return World.CanMoveFrom(p, n) && !(isThoughtCollidable[n.X, n.Y] || World.Collision[n.X, n.Y]);
                 case FogOfWar.Active:
-                    return !World.GetCollision(n.X, n.Y);
+                    return World.CanMoveFrom(p, n) && !World.GetCollision(n.X, n.Y);
             }
             return false;
         }
@@ -207,7 +207,7 @@ namespace RTSEngine.Algorithms {
         // Run A* Search, Given This Pathfinder's World And A Query
         private void Pathfind(PathQuery q) {
             // Initialization
-            isCollidable = new bool[World.numCells.X, World.numCells.Y];
+            isThoughtCollidable = new bool[World.numCells.X, World.numCells.Y];
             start = HashHelper.Hash(q.Start, World.numCells, World.size);
             end = HashHelper.Hash(q.End, World.numCells, World.size); ;
             for(int y = 0; y < World.numCells.Y; y++) {
@@ -223,7 +223,7 @@ namespace RTSEngine.Algorithms {
                 Point p = vb.CellPoint;
                 for(int y = 0; y < vbData.GridSize.Y; y++) {
                     for(int x = 0; x < vbData.GridSize.X; x++) {
-                        isCollidable[p.X + x, p.Y + y] = true;
+                        isThoughtCollidable[p.X + x, p.Y + y] = true;
                     }
                 }
             }
@@ -244,7 +244,7 @@ namespace RTSEngine.Algorithms {
                 bool canMove = false;
                 foreach(Point n in NeighborhoodAlign(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 10;
-                    canMove = CanMove(n, q.FOWIndex);
+                    canMove = CanMoveFrom(p, n, q.FOWIndex);
                     if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;
                         gScore[n.X, n.Y] = tgs;
@@ -257,9 +257,9 @@ namespace RTSEngine.Algorithms {
                 foreach(Point n in NeighborhoodDiag(p).Where(InGrid)) {
                     int tgs = gScore[p.X, p.Y] + 14;
                     // To Move Diagonally, Destination Must Be Reachable By Horizontal & Vertical Moves As Well
-                    canMove = CanMove(n, q.FOWIndex);
+                    canMove = CanMoveFrom(p, n, q.FOWIndex);
                     foreach(Point d in DiagDecomp(p, n)) {
-                        canMove &= CanMove(d, q.FOWIndex);
+                        canMove &= CanMoveFrom(p, d, q.FOWIndex);
                     }
                     if(canMove && tgs < gScore[n.X, n.Y]) {
                         prev[n.X, n.Y] = p;

@@ -218,7 +218,40 @@ namespace RTSEngine.Data {
             ActiveGrids = new List<Point>();
         }
 
-        public bool CanMoveTo(Point pOrigin, byte direction) {
+        // Can Move To N From P
+        public bool CanMoveFrom(Point p, Point n) {
+            return CanMoveTo(n, GetDirection(p, n));
+        }
+
+        // Figure Out In Which Direction N Lies From P
+        private byte GetDirection(Point p, Point n) {
+            if(n.X > p.X && n.Y > p.Y) {
+                return Direction.XPZP;
+            }
+            else if(n.X > p.X && n.Y < p.Y) {
+                return Direction.XPZN;
+            }
+            else if(n.X < p.X && n.Y > p.Y) {
+                return Direction.XNZP;
+            }
+            else if(n.X < p.X && n.Y < p.Y) {
+                return Direction.XNZN;
+            }
+            else if(n.X < p.X && n.Y == p.Y) {
+                return Direction.XN;
+            }
+            else if(n.X > p.X && n.Y == p.Y) {
+                return Direction.XP;
+            }
+            else if(n.X == p.X && n.Y < p.Y) {
+                return Direction.ZN;
+            }
+            else {
+                return Direction.ZP;
+            }
+        }
+
+        private bool CanMoveTo(Point pOrigin, byte direction) {
             return (WallInformation[pOrigin.X, pOrigin.Y] & direction) == 0;
         }
 
