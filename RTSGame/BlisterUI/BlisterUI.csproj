@@ -89,6 +89,7 @@
     <Compile Include="Widgets\ScrollBar.cs" />
     <Compile Include="Widgets\ScrollMenu.cs" />
     <Compile Include="Widgets\TextWidget.cs" />
+    <Compile Include="Widgets\WidgetHelpers.cs" />
     <Compile Include="Widgets\WidgetRenderer.cs" />
   </ItemGroup>
   <ItemGroup />

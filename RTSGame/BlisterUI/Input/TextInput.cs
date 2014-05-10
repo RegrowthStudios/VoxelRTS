@@ -17,7 +17,7 @@ namespace BlisterUI.Input {
             set {
                 text.Clear();
                 text.Append(value);
-                Caret = Length;
+                Caret = Math.Min(Caret, Length);
                 if(OnTextChanged != null)
                     OnTextChanged(this, Text);
             }
@@ -123,8 +123,6 @@ namespace BlisterUI.Input {
                 case ControlCharacters.CtrlC:
                     if(text.Length > 0)
                         KeyboardEventDispatcher.SetToClipboard(Text);
-                    else
-                        KeyboardEventDispatcher.SetToClipboard("");
                     return;
             }
         }
