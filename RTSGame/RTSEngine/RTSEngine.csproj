@@ -53,6 +53,7 @@
     <Compile Include="Algorithms\MinHeap.cs" />
     <Compile Include="Algorithms\Pathfinder.cs" />
     <Compile Include="Algorithms\TimeBudgeting.cs" />
+    <Compile Include="Algorithms\Tweens.cs" />
     <Compile Include="Controllers\CameraController.cs" />
     <Compile Include="Controllers\DevConsole.cs" />
     <Compile Include="Controllers\ReflectedScript.cs" />
