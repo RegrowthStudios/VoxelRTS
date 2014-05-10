@@ -99,6 +99,7 @@ namespace RTSEngine.Data {
             Collision = new bool[numCells.X, numCells.Y];
             Walls = new CollisionRect[numCells.X, numCells.Y][];
             WallInformation = new byte[numCells.X, numCells.Y];
+            Array.Clear(WallInformation, 0, WallInformation.Length);
             heights = new HeightTile[numCells.X, numCells.Y];
         }
 

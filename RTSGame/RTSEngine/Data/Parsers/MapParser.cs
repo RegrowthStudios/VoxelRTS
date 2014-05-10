@@ -111,7 +111,7 @@ namespace RTSEngine.Data.Parsers {
     public interface IVoxGridResolver {
         bool TryGetFlat(ushort id);
         bool TryGetRamp(ushort id, out int direction);
-        Point HeightIndex(Region r, int x, int z, int direction);
+        Point HeightIndex(VoxWorld world, int x, int z, int direction);
     }
     public struct ColumnResult {
         public HeightTile Height;
@@ -280,8 +280,8 @@ namespace RTSEngine.Data.Parsers {
                 cr.Walls |= CollisionGrid.Direction.XN;
             }
             else {
-                Point hi = vgr.HeightIndex(r, x, z, 0);
-                Point hin = vgr.HeightIndex(r, x - 1, z, 1);
+                Point hi = vgr.HeightIndex(vw, x, z, 0);
+                Point hin = vgr.HeightIndex(vw, x - 1, z, 1);
                 if(hin != hi)
                     cr.Walls |= CollisionGrid.Direction.XN;
             }
@@ -289,8 +289,8 @@ namespace RTSEngine.Data.Parsers {
                 cr.Walls |= CollisionGrid.Direction.XP;
             }
             else {
-                Point hi = vgr.HeightIndex(r, x, z, 1);
-                Point hin = vgr.HeightIndex(r, x + 1, z, 0);
+                Point hi = vgr.HeightIndex(vw, x, z, 1);
+                Point hin = vgr.HeightIndex(vw, x + 1, z, 0);
                 if(hin != hi)
                     cr.Walls |= CollisionGrid.Direction.XP;
             }
@@ -298,8 +298,8 @@ namespace RTSEngine.Data.Parsers {
                 cr.Walls |= CollisionGrid.Direction.ZN;
             }
             else {
-                Point hi = vgr.HeightIndex(r, x, z, 2);
-                Point hin = vgr.HeightIndex(r, x, z - 1, 3);
+                Point hi = vgr.HeightIndex(vw, x, z, 2);
+                Point hin = vgr.HeightIndex(vw, x, z - 1, 3);
                 if(hin != hi)
                     cr.Walls |= CollisionGrid.Direction.ZN;
             }
@@ -307,8 +307,8 @@ namespace RTSEngine.Data.Parsers {
                 cr.Walls |= CollisionGrid.Direction.ZP;
             }
             else {
-                Point hi = vgr.HeightIndex(r, x, z, 3);
-                Point hin = vgr.HeightIndex(r, x, z + 1, 2);
+                Point hi = vgr.HeightIndex(vw, x, z, 3);
+                Point hin = vgr.HeightIndex(vw, x, z + 1, 2);
                 if(hin != hi)
                     cr.Walls |= CollisionGrid.Direction.ZP;
             }

@@ -520,8 +520,13 @@ namespace RTS {
                 direction = id - MINID_RAMP;
                 return direction >= 0 && direction < COUNT_RAMP;
             }
-            public Point HeightIndex(Region r, int x, int z, int direction) {
+            public Point HeightIndex(VoxWorld world, int x, int z, int direction) {
                 Point p = Point.Zero;
+                VoxLocation vl = new VoxLocation(new Vector3I(x, 0, z));
+                Region r = world.regions[vl.RegionIndex];
+                x = vl.VoxelLoc.X;
+                z = vl.VoxelLoc.Z;
+
                 for(int y = Region.HEIGHT - 1; y >= 0; y--) {
                     int i = Region.ToIndex(x, y, z);
                     ushort id = r.voxels[i].ID;
@@ -533,87 +538,17 @@ namespace RTS {
                     else {
                         int ramp;
                         if(TryGetRamp(id, out ramp)) {
-                            switch(ramp) {
-                                case 0:
-                                    switch(direction) {
-                                        case 0:
-                                            p.X = y + 1;
-                                            p.Y = 0;
-                                            break;
-                                        case 1:
-                                            p.X = y;
-                                            p.Y = 0;
-                                            break;
-                                        case 2:
-                                            p.X = y;
-                                            p.Y = 1;
-                                            break;
-                                        case 3:
-                                            p.X = y;
-                                            p.Y = -1;
-                                            break;
-                                    }
-                                    break;
-                                case 1:
-                                    switch(direction) {
-                                        case 0:
-                                            p.X = y;
-                                            p.Y = 0;
-                                            break;
-                                        case 1:
-                                            p.X = y + 1;
-                                            p.Y = 0;
-                                            break;
-                                        case 2:
-                                            p.X = y;
-                                            p.Y = -1;
-                                            break;
-                                        case 3:
-                                            p.X = y;
-                                            p.Y = 1;
-                                            break;
-                                    }
-                                    break;
-                                case 2:
-                                    switch(direction) {
-                                        case 2:
-                                            p.X = y + 1;
-                                            p.Y = 0;
-                                            break;
-                                        case 3:
-                                            p.X = y;
-                                            p.Y = 0;
-                                            break;
-                                        case 0:
-                                            p.X = y;
-                                            p.Y = 1;
-                                            break;
-                                        case 1:
-                                            p.X = y;
-                                            p.Y = -1;
-                                            break;
-                                    }
-                                    break;
-                                case 3:
-                                    switch(direction) {
-                                        case 2:
-                                            p.X = y;
-                                            p.Y = 0;
-                                            break;
-                                        case 3:
-                                            p.X = y + 1;
-                                            p.Y = 0;
-                                            break;
-                                        case 0:
-                                            p.X = y;
-                                            p.Y = -1;
-                                            break;
-                                        case 1:
-                                            p.X = y;
-                                            p.Y = 1;
-                                            break;
-                                    }
-                                    break;
+                            if(direction == ramp) {
+                                p.X = y + 1;
+                                p.Y = 0;
+                            }
+                            else if((direction ^ 0x01) == ramp) {
+                                p.X = y;
+                                p.Y = 0;
+                            }
+                            else {
+                                p.X = y;
+                                p.Y = ((direction + ramp) & 0x01) == 0 ? 1 : -1;
                             }
                             return p;
                         }
