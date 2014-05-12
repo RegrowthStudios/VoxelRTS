@@ -50,7 +50,7 @@ namespace RTS.Default.Tutorials {
 
             // If All The Buildings And Units Are Destroyed
             foreach(var e in pTeam.Units) {
-                if(e.WorldPosition.Y < 33.5)
+                if(e.WorldPosition.Y < 43.5)
                     return null;
             }
             return 1;

@@ -99,6 +99,7 @@ namespace RTSEngine.Data {
             Collision = new bool[numCells.X, numCells.Y];
             Walls = new CollisionRect[numCells.X, numCells.Y][];
             WallInformation = new byte[numCells.X, numCells.Y];
+            Array.Clear(WallInformation, 0, WallInformation.Length);
             heights = new HeightTile[numCells.X, numCells.Y];
         }
 
@@ -208,7 +209,19 @@ namespace RTSEngine.Data {
         }
         public void Add(CollisionRect[] walls, byte mi, int x, int y) {
             Walls[x, y] = new CollisionRect[walls.Length];
-            WallInformation[x, y] = mi;
+            WallInformation[x, y] |= mi;
+            if(x > 0 && y > 0 && !CanMoveTo(new Point(x, y), Direction.XNZN)) {
+                WallInformation[x - 1, y - 1] |= Direction.XPZP;
+            }
+            if(x < numCells.X - 1 && y > 0 && !CanMoveTo(new Point(x, y), Direction.XPZN)) {
+                WallInformation[x + 1, y - 1] |= Direction.XNZP;
+            }
+            if(x > 0 && y < numCells.Y - 1 && !CanMoveTo(new Point(x, y), Direction.XNZP)) {
+                WallInformation[x - 1, y + 1] |= Direction.XPZN;
+            }
+            if(x < numCells.X - 1 && y < numCells.Y - 1 && !CanMoveTo(new Point(x, y), Direction.XPZP)) {
+                WallInformation[x + 1, y + 1] |= Direction.XNZN;
+            }
             Array.Copy(walls, Walls[x, y], Walls[x, y].Length);
         }
 
@@ -220,9 +233,8 @@ namespace RTSEngine.Data {
 
         // Can Move To N From P
         public bool CanMoveFrom(Point p, Point n) {
-            return CanMoveTo(n, GetDirection(p, n));
+            return CanMoveTo(p, GetDirection(p, n));
         }
-
         // Figure Out In Which Direction N Lies From P
         private byte GetDirection(Point p, Point n) {
             if(n.X > p.X && n.Y > p.Y) {
@@ -250,8 +262,7 @@ namespace RTSEngine.Data {
                 return Direction.ZP;
             }
         }
-
-        private bool CanMoveTo(Point pOrigin, byte direction) {
+        public bool CanMoveTo(Point pOrigin, byte direction) {
             return (WallInformation[pOrigin.X, pOrigin.Y] & direction) == 0;
         }
 

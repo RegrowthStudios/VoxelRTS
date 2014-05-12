@@ -50,13 +50,19 @@ namespace RTSEngine.Graphics {
             foreach(var command in coms) {
                 commands += command + "\n";
             }
-             
-            commands += "\n > " + DevConsole.TypedText;
+            commands += "\n > ";
+            int cc = commands.Length;
+            commands += DevConsole.TypedText;
             Vector2 size = font.MeasureString(commands);
 
             // Draw Commands
             sb.Draw(tPixel, pos, null, BackColor, 0f, Vector2.Zero, size + TEXT_OFFSET * 2f, SpriteEffects.None, 0f);
             sb.DrawString(font, commands, pos + TEXT_OFFSET, TextColor);
+
+            // Draw The Caret
+            Vector3 cPosH = font.GetCaretOffsetAndHeight(commands, Math.Max(0, cc + DevConsole.TextCaret));
+            Vector2 cPos = new Vector2(cPosH.X, cPosH.Y);
+            sb.Draw(tPixel, pos + cPos + TEXT_OFFSET, null, Color.Red, 0f, Vector2.Zero, new Vector2(1f, cPosH.Z), SpriteEffects.None, 0f);
         }
     }
 }

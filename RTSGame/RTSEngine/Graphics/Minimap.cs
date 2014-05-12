@@ -238,7 +238,7 @@ namespace RTSEngine.Graphics {
         public void RenderMap(RTSRenderer renderer) {
             renderer.G.SetRenderTarget(Terrain);
             renderer.G.Clear(Color.Black);
-            renderer.DrawMap(mVP);
+            renderer.DrawMap(mV, mP);
             renderer.G.SetRenderTarget(null);
         }
     }

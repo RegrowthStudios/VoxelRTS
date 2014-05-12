@@ -444,7 +444,7 @@ namespace RTSEngine.Graphics {
 
             G.Clear(Color.Black);
 
-            DrawMap(Camera.View * Camera.Projection);
+            DrawMap(Camera.View, Camera.Projection);
             DrawBuildings();
             DrawUnits();
             DrawParticles();
@@ -486,20 +486,17 @@ namespace RTSEngine.Graphics {
         }
 
         // Draw The Map
-        public void DrawMap(Matrix mVP) {
+        public void DrawMap(Matrix mV, Matrix mP) {
             // Set States
             G.DepthStencilState = DepthStencilState.Default;
             G.RasterizerState = RasterizerState.CullCounterClockwise;
             G.BlendState = BlendState.Opaque;
             G.SamplerStates[0] = SamplerState.LinearClamp;
 
-            // Set Camera
-            fxMap.VP = mVP;
-
             // Primary Map Model
             G.Textures[1] = Map.FogOfWarTexture;
             G.SamplerStates[1] = SamplerState.PointClamp;
-            Map.Draw(G, Camera.View, Camera.Projection);
+            Map.Draw(G, mV, mP);
             //if(Map.TrianglesPrimary > 0) {
             //    fxMap.SetTextures(G, Map.PrimaryTexture, FOWTexture);
             //    G.SetVertexBuffer(Map.VBPrimary);

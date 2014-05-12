@@ -35,7 +35,6 @@ namespace RTS.Input {
             private set;
         }
 
-
         public RTSUISelectionPanel SelectionPanel {
             get;
             private set;
