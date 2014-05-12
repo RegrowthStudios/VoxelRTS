@@ -64,6 +64,7 @@ namespace RTS.Packs.Default.scripts.input {
                 if (dist < minDist) {
                     minDist = dist;
                     target = b;
+                    DevConsole.AddCommand("target found");
                 }
             }
         }
@@ -74,14 +75,15 @@ namespace RTS.Packs.Default.scripts.input {
                 sentArmy.Add(u);
             }
             army.Clear();
-
+            DevConsole.AddCommand("moving to target");
             AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, sentArmy));
             AIInput.AddEvent(new SetTargetEvent(AIInput.TeamIndex, target));
             
         }
 
         public void Dispose() {
-            if (army.Count > 0 && target == null) {
+            DecideTarget();
+            if (army.Count > 0 && target != null) {
                 AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, army));
                 AIInput.AddEvent(new SetTargetEvent(AIInput.TeamIndex, target));
             }
