@@ -47,6 +47,7 @@ namespace RTSEngine.Data {
         public const float PITCH_RANGE = MAX_PITCH - MIN_PITCH;
         public const float EYE_HEIGHT_OFFSET = 0.5f;
         public const float TWEEN_FACTOR = 3f;
+        public const float HOLD_TIME_SPAN = 1f;
 
         // Camera Matrices
         Matrix mView, mProj;
@@ -108,6 +109,8 @@ namespace RTSEngine.Data {
             private set;
         }
 
+        float holdVelocity;
+
         public Camera(Viewport v) {
             camOrigin = INITIAL_CAMERA_ORIGIN;
             Yaw = INITIAL_CAMERA_YAW;
@@ -121,6 +124,8 @@ namespace RTSEngine.Data {
             IsOrthographic = false;
             Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, v.AspectRatio, 0.01f, 2000f);
             camController = new CameraController(v.Width, v.Height);
+
+            holdVelocity = 0;
         }
 
         // View Matrix Recalculation
@@ -167,6 +172,14 @@ namespace RTSEngine.Data {
             RecalculateView(map, MathHelper.Lerp(cms.MinDistance, cms.MaxDistance, ZoomRatio));
         }
         private void Scroll(int x, int y, CameraMotionSettings cms, float dt) {
+            // Lerp Velocities
+            if(camController.ScrollX != 0 || camController.ScrollZ != 0)
+                holdVelocity += (dt / HOLD_TIME_SPAN);
+            else
+                holdVelocity = 0;
+            holdVelocity = MathHelper.Clamp(holdVelocity, 0, 1);
+            dt = Tweens.EASE.GetValue(0, dt, holdVelocity);
+
             camTarget.Y += camController.ScrollY * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
 
             if(x == 0 && y == 0) return;

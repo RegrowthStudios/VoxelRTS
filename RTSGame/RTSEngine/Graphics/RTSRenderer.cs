@@ -17,7 +17,15 @@ using Grey.Vox;
 using Grey.Graphics;
 
 namespace RTSEngine.Graphics {
+    public class RendererInitArgs {
+        public string CamPointerTexture;
+        public Vector3 CamPointerRadii;
+        public Vector3 CamPointerHeights;
 
+        public string FXEntity;
+        public string FXMap;
+        public string FXParticle;
+    }
     public class RTSRenderer : IDisposable {
         private const float SELECTION_RADIUS_MODIFIER = 1.1f;
         private const float SELECTION_HEIGHT_PLACEMENT = 0.05f;
@@ -43,6 +51,10 @@ namespace RTSEngine.Graphics {
         public Camera Camera {
             get;
             set;
+        }
+        public CameraPointer CamPointer {
+            get;
+            private set;
         }
 
         // Map To Render
@@ -108,7 +120,7 @@ namespace RTSEngine.Graphics {
         // Graphics Data To Dispose
         private readonly ConcurrentBag<IDisposable> toDispose;
 
-        public RTSRenderer(GraphicsDeviceManager gdm, string fxAnimFile, string fxMapFile, string fxP, GameWindow w) {
+        public RTSRenderer(GraphicsDeviceManager gdm, RendererInitArgs ria, GameWindow w) {
             window = w;
             gManager = gdm;
             toDispose = new ConcurrentBag<IDisposable>();
@@ -123,7 +135,7 @@ namespace RTSEngine.Graphics {
             tPixel.SetData(new Color[] { Color.White });
             IconLibrary.Add("None", tPixel);
 
-            fxMap = new RTSFXMap(LoadEffect(fxMapFile));
+            fxMap = new RTSFXMap(LoadEffect(ria.FXMap));
 
             fxSimple = CreateEffect();
             fxSimple.LightingEnabled = false;
@@ -133,22 +145,25 @@ namespace RTSEngine.Graphics {
             fxSimple.World = Matrix.Identity;
             fxSimple.Texture = tPixel;
 
-            fxAnim = new RTSFXEntity(LoadEffect(fxAnimFile));
+            fxAnim = new RTSFXEntity(LoadEffect(ria.FXEntity));
             fxAnim.World = Matrix.Identity;
             fxAnim.CPrimary = Vector3.UnitX;
             fxAnim.CSecondary = Vector3.UnitY;
             fxAnim.CTertiary = Vector3.UnitZ;
 
-            fxParticle = LoadEffect(fxP);
+            fxParticle = LoadEffect(ria.FXParticle);
             UseFOW = true;
+
+            pRenderer = new ParticleRenderer();
+            Minimap = new Minimap();
+
+            CamPointer = new CameraPointer();
+            CamPointer.Build(this, ria.CamPointerTexture, ria.CamPointerRadii, ria.CamPointerHeights);
 
             drawBox = false;
             MouseEventDispatcher.OnMousePress += OnMousePress;
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMouseMotion += OnMouseMove;
-
-            pRenderer = new ParticleRenderer();
-            Minimap = new Minimap();
         }
         public void Dispose() {
             MouseEventDispatcher.OnMousePress -= OnMousePress;
@@ -497,21 +512,10 @@ namespace RTSEngine.Graphics {
             G.Textures[1] = Map.FogOfWarTexture;
             G.SamplerStates[1] = SamplerState.PointClamp;
             Map.Draw(G, mV, mP);
-            //if(Map.TrianglesPrimary > 0) {
-            //    fxMap.SetTextures(G, Map.PrimaryTexture, FOWTexture);
-            //    G.SetVertexBuffer(Map.VBPrimary);
-            //    G.Indices = Map.IBPrimary;
-            //    fxMap.ApplyPassPrimary();
-            //    G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBPrimary.VertexCount, 0, Map.TrianglesPrimary);
-            //}
-            //// Secondary Map Model
-            //if(Map.TrianglesSecondary > 0) {
-            //    fxMap.SetTextures(G, Map.SecondaryTexture, FOWTexture);
-            //    G.SetVertexBuffer(Map.VBSecondary);
-            //    G.Indices = Map.IBSecondary;
-            //    fxMap.ApplyPassSecondary();
-            //    G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBSecondary.VertexCount, 0, Map.TrianglesSecondary);
-            //}
+
+            // Draw The Camera On The Map
+            G.BlendState = BlendState.NonPremultiplied;
+            CamPointer.Draw(G, Camera.View, Camera.Projection, Camera.CamTarget);
         }
 
         // Draw Buildings

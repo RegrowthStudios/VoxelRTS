@@ -63,6 +63,7 @@
     <Compile Include="Data\Parsers\RegexHelper.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Graphics\CameraPointer.cs" />
     <Compile Include="Graphics\Particles\FireShader.cs" />
     <Compile Include="Graphics\Particles\LightningShader.cs" />
     <Compile Include="Graphics\Particles\ParticleList.cs" />

@@ -116,8 +116,14 @@ namespace RTS {
             //MouseEventDispatcher.OnMousePress += sT.OnMousePress;
             //MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
             //MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
-
-            renderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
+            RendererInitArgs ria = new RendererInitArgs();
+            ria.CamPointerTexture = null;
+            ria.CamPointerHeights = Vector3.Zero;
+            ria.CamPointerRadii = Vector3.Zero;
+            ria.FXEntity = @"Content\FX\RTS.fx";
+            ria.FXMap =  @"Content\FX\Map.fx";
+            ria.FXParticle = @"Content\FX\Particle.fx";
+            renderer = new RTSRenderer(game.Graphics, ria, game.Window);
 
             // Rendering Effect
             fx = new RTSFXEntity(renderer.LoadEffect(FX_FILE_PATH));

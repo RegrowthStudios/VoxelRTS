@@ -307,7 +307,8 @@ namespace RTS {
                 LoadedCamera.Controller.Hook(game.Window);
 
                 // Load The Renderer
-                LoadedRenderer = new RTSRenderer(game.Graphics, @"Content\FX\RTS.fx", @"Content\FX\Map.fx", @"Content\FX\Particle.fx", game.Window);
+                RendererInitArgs ria = ZXParser.ParseFile(@"Content\FX\RIA.txt", typeof(RendererInitArgs)) as RendererInitArgs;
+                LoadedRenderer = new RTSRenderer(game.Graphics, ria, game.Window);
                 LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera);
 
                 // Initialize Inputs

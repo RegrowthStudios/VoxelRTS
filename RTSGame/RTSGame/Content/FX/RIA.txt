@@ -1,0 +1,6 @@
+﻿CamPointerTexture   [Content\Textures\CamPointer.png]
+CamPointerHeights   [0.1, 0.3, 0.4]
+CamPointerRadii     [0.5, 1.1, 0.7]
+FXEntity            [Content\FX\RTS.fx]
+FXMap               [Content\FX\Map.fx]
+FXParticle          [Content\FX\Particle.fx]
