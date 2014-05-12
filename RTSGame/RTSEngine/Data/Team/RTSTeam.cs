@@ -248,16 +248,18 @@ namespace RTSEngine.Data.Team {
         public RTSUnit AddUnit(int type, Vector2 pos) {
             // Check For Unit Type Existence
             RTSUnitData data = Race.Units[type];
-            if(data == null) return null;
-
+            if (data == null) {
+                DevConsole.AddCommand("data null");
+                return null;
+            }
             // Check For Unit Cap
-            if(data.CurrentCount >= data.MaxCount) return null;
+            //if(data.CurrentCount >= data.MaxCount) return null;
 
             // Check For Population Cap
-            if(data.PopulationCost + Population > PopulationCap) return null;
+            //if(data.PopulationCost + Population > PopulationCap) return null;
 
             // Check For Capital Cost
-            if(data.CapitalCost > Capital) return null;
+            //if(data.CapitalCost > Capital) return null;
 
             // Produce Unit
             Capital -= data.CapitalCost;
@@ -315,7 +317,7 @@ namespace RTSEngine.Data.Team {
             if(data.CurrentCount >= data.MaxCount) return null;
 
             // Check For Capital Cost
-            if(data.CapitalCost > Capital) return null;
+            //if(data.CapitalCost > Capital) return null;
 
             // Produce Building
             Capital -= data.CapitalCost;

@@ -281,7 +281,15 @@ namespace RTSEngine.Controllers {
             RTSUnit unit = team.AddUnit(e.Type, e.Position);
 
             // Check If A Unit Was Possible
-            if(unit == null) return;
+            if (unit == null) { return; }
+
+            if (e.BuildingID.HasValue) {
+                foreach (var b in team.Buildings) {
+                    if (e.BuildingID == b.UUID) {
+                        b.SpawnUnit(unit);
+                    }
+                }
+            }
 
             // Add Decision Tasks
             AddTask(s, unit);
