@@ -512,10 +512,6 @@ namespace RTSEngine.Graphics {
             G.Textures[1] = Map.FogOfWarTexture;
             G.SamplerStates[1] = SamplerState.PointClamp;
             Map.Draw(G, mV, mP);
-
-            // Draw The Camera On The Map
-            G.BlendState = BlendState.NonPremultiplied;
-            CamPointer.Draw(G, Camera.View, Camera.Projection, Camera.CamTarget);
         }
 
         // Draw Buildings
@@ -639,6 +635,9 @@ namespace RTSEngine.Graphics {
             fxSimple.CurrentTechnique.Passes[0].Apply();
 
             G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
+
+            // Draw The Camera On The Map
+            CamPointer.Draw(G, Camera.View, Camera.Projection, Camera.CamTarget);
         }
         public void UpdateSelections(out VertexPositionColorTexture[] verts, out int[] inds) {
             // Check If We Need To Render Any Selected Entities

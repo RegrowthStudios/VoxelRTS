@@ -212,13 +212,14 @@ namespace RTSEngine.Data.Parsers {
             for(int vi = 0; vi < 15; vi++) {
                 var vd = vw.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllTypes(0x01u);
-                vd.FaceType.SetAllMasks(0xfeu);
+                vd.FaceType.SetAllTypes(0x00000001u);
+                vd.FaceType.SetAllMasks(0xfffffffeu);
             }
             for(int vi = 0; vi < 4; vi++) {
                 var vd = vw.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllTypes(0xffffffffu);
+                vd.FaceType.SetAllTypes(0x00000000u);
+                vd.FaceType.Types[Voxel.FACE_PY] = 0xffffffffu;
                 vd.FaceType.SetAllMasks(0xffffffffu);
             }
         }

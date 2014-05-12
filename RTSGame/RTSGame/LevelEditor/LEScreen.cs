@@ -171,7 +171,8 @@ namespace RTS {
             for(int i = 0; i < COUNT_RAMP; i++) {
                 var vd = state.World.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
-                vd.FaceType.SetAllTypes(0xffffffffu);
+                vd.FaceType.SetAllTypes(0x00000000u);
+                vd.FaceType.Types[Voxel.FACE_PY] = 0xffffffffu;
                 vd.FaceType.SetAllMasks(0xffffffffu);
                 var vgp = new VGPCustom();
                 Vector4 uvr = new Vector4(DUV * 3, DUV * 0, DUV, DUV);
