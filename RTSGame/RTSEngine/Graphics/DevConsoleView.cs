@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Controllers;
 
@@ -21,11 +22,10 @@ namespace RTSEngine.Graphics {
             set;
         }
         private SpriteFont font;
-        private IDisposable fontDisp;
         private Texture2D tPixel;
 
-        public DevConsoleView(GraphicsDevice g) {
-            font = XNASpriteFont.Compile(g, "Courier New", 16, out fontDisp);
+        public DevConsoleView(ContentManager cm, string _font, GraphicsDevice g) {
+            font = cm.Load<SpriteFont>(_font);
             tPixel = new Texture2D(g, 1, 1);
             tPixel.SetData(new Color[] { Color.White });
             BackColor = DEFAULT_BACK_COLOR;
@@ -34,8 +34,6 @@ namespace RTSEngine.Graphics {
         public void Dispose() {
             if(font != null) {
                 font = null;
-                fontDisp.Dispose();
-                fontDisp = null;
             }
             if(tPixel != null) {
                 tPixel.Dispose();

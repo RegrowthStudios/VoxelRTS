@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace RTSEngine.Graphics {
@@ -63,9 +64,9 @@ namespace RTSEngine.Graphics {
             }
         }
 
-        public void Build(GraphicsDevice g, string fxFile, string fNoise, string fColor, string fAlpha) {
+        public void Build(GraphicsDevice g, ContentManager cm, string fxFile, string fNoise, string fColor, string fAlpha) {
             // Load Resources
-            fx = XNAEffect.Compile(g, fxFile);
+            fx = cm.Load<Effect>(fxFile);
             using(var s = File.OpenRead(fNoise)) tNoise = Texture2D.FromStream(g, s);
             using(var s = File.OpenRead(fColor)) tColor = Texture2D.FromStream(g, s);
             using(var s = File.OpenRead(fAlpha)) tAlpha = Texture2D.FromStream(g, s);

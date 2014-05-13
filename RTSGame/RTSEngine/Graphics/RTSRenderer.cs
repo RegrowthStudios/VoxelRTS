@@ -15,6 +15,7 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Interfaces;
 using Grey.Vox;
 using Grey.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace RTSEngine.Graphics {
     public class RendererInitArgs {
@@ -44,6 +45,7 @@ namespace RTSEngine.Graphics {
             get { return window; }
         }
         private GraphicsDeviceManager gManager;
+        private ContentManager cManager;
         public GraphicsDevice G {
             get { return gManager.GraphicsDevice; }
         }
@@ -128,9 +130,10 @@ namespace RTSEngine.Graphics {
         // Graphics Data To Dispose
         private readonly ConcurrentBag<IDisposable> toDispose;
 
-        public RTSRenderer(GraphicsDeviceManager gdm, RendererInitArgs ria, GameWindow w) {
+        public RTSRenderer(GraphicsDeviceManager gdm, ContentManager cm, RendererInitArgs ria, GameWindow w) {
             window = w;
             gManager = gdm;
+            cManager = cm;
             args = ria;
             toDispose = new ConcurrentBag<IDisposable>();
 
@@ -229,7 +232,7 @@ namespace RTSEngine.Graphics {
             return t;
         }
         public Effect LoadEffect(string file) {
-            Effect fx = XNAEffect.Compile(G, file);
+            Effect fx = cManager.Load<Effect>(file);
             toDispose.Add(fx);
             return fx;
         }
@@ -239,27 +242,20 @@ namespace RTSEngine.Graphics {
             return fx;
         }
         public SpriteFont LoadFont(string file) {
-            IDisposable disp;
-            SpriteFont f = XNASpriteFont.Compile(G, file, out disp);
-            toDispose.Add(disp);
+            SpriteFont f = cManager.Load<SpriteFont>(file);
             return f;
         }
-        public SpriteFont LoadFont(string file, out IDisposable disp) {
-            SpriteFont f = XNASpriteFont.Compile(G, file, out disp);
-            toDispose.Add(disp);
-            return f;
-        }
-        public SpriteFont CreateFont(string fontName, int size, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
-            IDisposable disp;
-            SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
-            toDispose.Add(disp);
-            return f;
-        }
-        public SpriteFont CreateFont(string fontName, int size, out IDisposable disp, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
-            SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
-            toDispose.Add(disp);
-            return f;
-        }
+        //public SpriteFont CreateFont(string fontName, int size, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
+        //    IDisposable disp;
+        //    SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
+        //    toDispose.Add(disp);
+        //    return f;
+        //}
+        //public SpriteFont CreateFont(string fontName, int size, out IDisposable disp, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
+        //    SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
+        //    toDispose.Add(disp);
+        //    return f;
+        //}
         #endregion
 
         public void HookToGame(GameState state, int ti, Camera camera) {
@@ -280,8 +276,8 @@ namespace RTSEngine.Graphics {
             vmc.VoxState = state.VoxState;
             vmc.TexVoxMap = @"voxmap.png";
             vmc.RootPath = state.LevelGrid.Directory.FullName;
-            vmc.FXFile = @"Content\FX\Voxel.fx";
-            Map.Build(gManager, vmc);
+            vmc.FXFile = @"FX\Voxel";
+            Map.Build(gManager, cManager, vmc);
 
             //Map = MapParser.ParseModel(this, state.LevelGrid, new FileInfo(state.LevelGrid.InfoFile));
             Camera.MoveTo(state.CGrid.size.X * 0.5f, state.CGrid.size.Y * 0.5f);

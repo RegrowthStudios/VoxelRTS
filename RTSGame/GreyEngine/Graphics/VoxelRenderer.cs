@@ -5,6 +5,7 @@ using System.Text;
 using Grey.Engine;
 using Grey.Vox;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Grey.Graphics {
@@ -13,6 +14,7 @@ namespace Grey.Graphics {
         public GraphicsDevice G {
             get { return graphics.GraphicsDevice; }
         }
+        private ContentManager cManager;
 
         private object lckDraw = new object();
 
@@ -30,8 +32,9 @@ namespace Grey.Graphics {
         List<Region> activeRegions;
         List<VoxGeo> geos;
 
-        public VoxelRenderer(GraphicsDeviceManager gdm) {
+        public VoxelRenderer(GraphicsDeviceManager gdm, ContentManager cm) {
             graphics = gdm;
+            cManager = cm;
             activeRegions = new List<Region>();
             geos = new List<VoxGeo>();
         }
@@ -50,7 +53,7 @@ namespace Grey.Graphics {
                 VoxelMap = Texture2D.FromStream(G, s);
         }
         public void LoadEffect(string file) {
-            FX = XNAEffect.Compile(G, file);
+            FX =  cManager.Load<Effect>(file);
             FX.CurrentTechnique = FX.Techniques[0];
             fxpVP = FX.Parameters["VP"];
             fxpWorld = FX.Parameters["World"];

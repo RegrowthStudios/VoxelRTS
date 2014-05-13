@@ -1,0 +1,15 @@
+﻿ColorBackground     [0, 0, 0, 255]
+
+FireEntranceTime    [5]
+ScreenExitTime      [15]
+
+FireImageNoise      [Content\Textures\FireNoise.png]
+FireImageColor      [Content\Textures\FireColorLogo.png]
+FireImageAlpha      [Content\Textures\FireAlpha.png]
+
+FireSound           [Content\Audio\Fire.wav]
+FireSoundVolume     [1]
+
+FireShader          [FX\Fire]
+FireMaxDistort      [0.3]
+FireTintEnd         [1, 1, 1, 1]

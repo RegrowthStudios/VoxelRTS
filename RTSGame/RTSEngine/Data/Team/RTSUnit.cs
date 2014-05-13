@@ -184,6 +184,9 @@ namespace RTSEngine.Data.Team {
             get;
             private set;
         }
+        public int MaxHealth {
+            get { return Data.Health; }
+        }
         public bool IsAlive {
             get {
                 return Health > 0;

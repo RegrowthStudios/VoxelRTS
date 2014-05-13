@@ -1,0 +1,43 @@
+﻿ColorBackground [0, 0, 0, 255]
+Font            [Fonts\Impact32]
+FontRes         [32]
+
+TitleText       [Main Menu]
+TitleTextSize   [80]
+ColorTitleText  [200, 200, 200, 255]
+
+Buttons [
+    <RTS.UICMMButton> {
+        Text            [Play Game]
+        Image           [Content\UI\MainP1.png]
+        ColorInactive   [14, 14, 14, 255]
+        ColorActive     [110, 140, 200, 255]
+        ColorText       [200, 200, 200, 255]
+    }
+    <RTS.UICMMButton> {
+        Text            [Army Painter]
+        Image           [Content\UI\MainP2.png]
+        ColorInactive   [14, 14, 14, 255]
+        ColorActive     [110, 140, 200, 255]
+        ColorText       [200, 200, 200, 255]
+    }
+    <RTS.UICMMButton> {
+        Text            [Options]
+        Image           [Content\UI\MainP3.png]
+        ColorInactive   [14, 14, 14, 255]
+        ColorActive     [110, 140, 200, 255]
+        ColorText       [200, 200, 200, 255]
+    }
+    <RTS.UICMMButton> {
+        Text            [Exit]
+        Image           [Content\UI\MainP4.png]
+        ColorInactive   [14, 14, 14, 255]
+        ColorActive     [110, 140, 200, 255]
+        ColorText       [200, 200, 200, 255]
+    }
+]
+ButtonSpacing   [10, 10]
+ButtonTextSize  [32]
+
+SoundClick  [Content\Audio\btnClick.wav]
+SoundHover  [Content\Audio\btnHover.wav]

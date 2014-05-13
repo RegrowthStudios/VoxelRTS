@@ -18,6 +18,7 @@ namespace RTSEngine.Interfaces {
 
         // The Current Health Of The Entity
         int Health { get; }
+        int MaxHealth { get; }
 
         // Whether It Is Alive Or Not
         bool IsAlive { get; set; }
@@ -67,5 +68,10 @@ namespace RTSEngine.Interfaces {
 
         // Actually Damages A Target
         void DamageTarget(double rand);
+    }
+    public static class EntityExt {
+        public static float GetHealthRatio(this IEntity e) {
+            return (float)e.Health / (float)e.MaxHealth;
+        }
     }
 }
