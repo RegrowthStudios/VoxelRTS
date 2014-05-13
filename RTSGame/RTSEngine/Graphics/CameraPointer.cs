@@ -78,6 +78,10 @@ namespace RTSEngine.Graphics {
         public void Draw(GraphicsDevice g, Matrix mView, Matrix mProj, Vector3 position) {
             g.SetVertexBuffer(vb);
             g.Indices = ib;
+            fx.FogEnabled = false;
+            fx.VertexColorEnabled = false;
+            fx.LightingEnabled = false;
+            fx.TextureEnabled = true;
             g.Textures[0] = Texture;
             g.SamplerStates[0] = SamplerState.LinearClamp;
             fx.View = mView;

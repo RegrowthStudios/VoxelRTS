@@ -23,6 +23,12 @@ namespace RTSEngine.Graphics {
         public Vector3 CamPointerHeights;
 
         public string FXEntity;
+        public string FXHealthTechnique;
+        public string FXHealthPass;
+        public string FXHealthTexture;
+        public float FXHealthRadiusModifier;
+        public Color FXHealthTint;
+
         public string FXMap;
         public string FXParticle;
     }
@@ -41,6 +47,7 @@ namespace RTSEngine.Graphics {
         public GraphicsDevice G {
             get { return gManager.GraphicsDevice; }
         }
+        private RendererInitArgs args;
 
         // Selection Box
         private Texture2D tPixel;
@@ -88,6 +95,7 @@ namespace RTSEngine.Graphics {
         // Effects
         private BasicEffect fxSimple;
         private RTSFXEntity fxAnim;
+        private HealthViewer healthView;
         private RTSFXMap fxMap;
         private Effect fxParticle;
 
@@ -123,6 +131,7 @@ namespace RTSEngine.Graphics {
         public RTSRenderer(GraphicsDeviceManager gdm, RendererInitArgs ria, GameWindow w) {
             window = w;
             gManager = gdm;
+            args = ria;
             toDispose = new ConcurrentBag<IDisposable>();
 
             NonFriendlyUnitModels = new List<RTSUnitModel>();
@@ -150,6 +159,8 @@ namespace RTSEngine.Graphics {
             fxAnim.CPrimary = Vector3.UnitX;
             fxAnim.CSecondary = Vector3.UnitY;
             fxAnim.CTertiary = Vector3.UnitZ;
+            healthView = new HealthViewer();
+            healthView.Build(this, fxAnim, ria.FXHealthTechnique, ria.FXHealthPass, ria.FXHealthTexture);
 
             fxParticle = LoadEffect(ria.FXParticle);
             UseFOW = true;
@@ -609,32 +620,28 @@ namespace RTSEngine.Graphics {
             VertexPositionColorTexture[] verts;
             int[] inds;
             UpdateSelections(out verts, out inds);
-            if(verts == null || inds == null)
-                return;
+            if(verts != null || inds != null) {
+                fxSimple.TextureEnabled = true;
+                fxSimple.VertexColorEnabled = false;
 
-            fxSimple.TextureEnabled = true;
-            fxSimple.VertexColorEnabled = false;
+                G.SamplerStates[0] = SamplerState.LinearClamp;
+                G.DepthStencilState = DepthStencilState.DepthRead;
+                G.RasterizerState = RasterizerState.CullCounterClockwise;
+                G.BlendState = BlendState.Additive;
 
-            G.SamplerStates[0] = SamplerState.LinearClamp;
-            G.DepthStencilState = DepthStencilState.DepthRead;
-            G.RasterizerState = RasterizerState.CullCounterClockwise;
-            G.BlendState = BlendState.Additive;
+                fxSimple.Texture = SelectionCircleTexture;
+                fxSimple.World = Matrix.CreateTranslation(0, (float)(DateTime.UtcNow.TimeOfDay.TotalSeconds % 1.0), 0);
+                fxSimple.View = Camera.View;
+                fxSimple.Projection = Camera.Projection;
+                fxSimple.DiffuseColor = c;
+                fxSimple.CurrentTechnique.Passes[0].Apply();
 
-            fxSimple.Texture = SelectionCircleTexture;
-            fxSimple.World = Matrix.Identity;
-            fxSimple.View = Camera.View;
-            fxSimple.Projection = Camera.Projection;
-            fxSimple.DiffuseColor = c;
-            fxSimple.CurrentTechnique.Passes[0].Apply();
+                G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
 
-            G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
-
-            fxSimple.VertexColorEnabled = true;
-            fxSimple.World = Matrix.CreateTranslation(0, (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1.0), 0);
-            fxSimple.DiffuseColor = Vector3.One;
-            fxSimple.CurrentTechnique.Passes[0].Apply();
-
-            G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
+                fxAnim.SetTechnique(args.FXHealthTechnique);
+                DrawHealth();
+                fxAnim.SetTechnique(@"Entity");
+            }
 
             // Draw The Camera On The Map
             CamPointer.Draw(G, Camera.View, Camera.Projection, Camera.CamTarget);
@@ -676,6 +683,32 @@ namespace RTSEngine.Graphics {
                 inds[ii++] = vi + 3;
                 vi += 4;
             }
+        }
+        public void DrawHealth() {
+            if(teamInput.selected.Count < 1) return;
+
+            var lhv = new List<VertexHealthInstance>(teamInput.selected.Count);
+            for(int c = teamInput.selected.Count - 1; c >= 0; c--) {
+                IEntity e = teamInput.selected[c];
+                VertexHealthInstance vert = new VertexHealthInstance();
+                vert.Position = e.WorldPosition;
+                vert.Position.Y = e.BBox.Max.Y;
+
+                float mh = 1f;
+                if(e as RTSBuilding != null) mh = (e as RTSBuilding).Data.Health;
+                else mh = (e as RTSUnit).Data.Health;
+
+                vert.DirRadiusHealth = new Vector4(
+                    e.ViewDirection,
+                    e.CollisionGeometry.BoundingRadius * args.FXHealthRadiusModifier,
+                    e.Health / mh
+                    );
+                vert.Tint = args.FXHealthTint;
+
+                lhv.Add(vert);
+            }
+
+            healthView.Draw(G, lhv);
         }
 
         // Draw Particles

@@ -106,6 +106,13 @@ namespace RTSEngine.Graphics {
             g.Textures[1] = tMain;
             g.Textures[2] = tKey;
         }
+
+        public void SetTechnique(string t) {
+            fx.CurrentTechnique = fx.Techniques[t];
+        }
+        public EffectPass GetEffectPass(string technique, string pass) {
+            return fx.Techniques[technique].Passes[pass];
+        }
     }
 
     public class RTSFXMap {

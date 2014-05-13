@@ -63,7 +63,54 @@ float4 PS_Swatch(VSO input) : COLOR0 {
     return lerp(color, float4(sv, 1), swatch.a);
 }
 
-technique Default {
+struct VSIHealth {
+    float4 Position : POSITION0;
+    float2 UV : TEXCOORD0;
+    float3 InstPosition : POSITION1;
+    float4 DRH : TEXCOORD1;
+	float4 Tint : COLOR0;
+};
+struct VSOHealth {
+    float4 Position : POSITION0;
+    float2 UV : TEXCOORD0;
+	float4 Tint : COLOR0;
+	float3 DH : TEXCOORD1;
+};
+
+VSOHealth VSHealth(VSIHealth input) {
+	VSOHealth output;
+
+	float3 uDir = float3(input.DRH.y, 0, -input.DRH.x);
+	float3 vDir = float3(input.DRH.x, 0, input.DRH.y);
+	float4 worldPosition = float4(
+		input.Position.x * uDir * input.DRH.z +
+		input.Position.z * vDir * input.DRH.z,
+		1
+		);
+	worldPosition.xyz = worldPosition.xyz + input.InstPosition;
+
+    output.Position = mul(worldPosition, VP);
+    output.UV = input.UV;
+	output.DH = input.DRH.xyw;
+	output.Tint = input.Tint;
+
+	return output;
+}
+float4 PSHealth(VSOHealth input) : COLOR0 {
+	float2 sc = input.UV;
+	sc.x = sc.x * 2 - 1;
+	sc.y = 1 - sc.y * 2;
+	sc = normalize(sc);
+
+	float dsc = dot(sc, float2(0, -1));
+	dsc = (dsc + 1) * 0.5;
+	clip(input.DH.z - dsc);
+
+	return tex2D(Model, input.UV) * input.Tint;
+	return input.Tint;
+}
+
+technique Entity {
     pass Building {
         VertexShader = compile vs_3_0 VS_Inst();
         PixelShader = compile ps_3_0 PS_Swatch();
@@ -72,4 +119,11 @@ technique Default {
         VertexShader = compile vs_3_0 VS_Anim();
         PixelShader = compile ps_3_0 PS_Swatch();
     }
+}
+
+technique Health {
+	pass Main {
+		VertexShader = compile vs_3_0 VSHealth();
+        PixelShader = compile ps_3_0 PSHealth();
+	}
 }
