@@ -51,6 +51,7 @@ namespace RTS.Packs.Default.scripts.input {
         }
 
         public void OnUnitDeath(IEntity e) {
+            if (!e.IsAlive) { return; }
             DevConsole.AddCommand("death");
             bool removedArmy = army.Remove(e);
             bool removedSentArmy = sentArmy.Remove(e);
