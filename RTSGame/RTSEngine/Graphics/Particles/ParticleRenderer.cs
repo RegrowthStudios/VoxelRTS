@@ -15,15 +15,16 @@ namespace RTSEngine.Graphics {
 
         public int FireMaxCount;
         public int FireDetail;
-        public string FireShader;
         public string FireNoise;
         public string FireColor;
         public string FireAlpha;
 
         public int LightningMaxCount;
-        public string LightningShader;
         public string LightningImage;
         public int LightningNumTypes;
+
+        public int AlertMaxCount;
+        public string AlertImage;
     }
 
     public class ParticleRenderer {
@@ -31,12 +32,21 @@ namespace RTSEngine.Graphics {
         private ParticleList<BulletParticle, VertexBulletInstance> plBullets;
         private ParticleList<FireParticle, VertexFireInstance> plFires;
         private ParticleList<LightningParticle, VertexLightningInstance> plBolts;
+        private ParticleList<AlertParticle, VertexAlertInstance> plAlerts;
 
+        private ParticleEffect fxParticle;
+        public Vector2 MapSize {
+            set { fxParticle.MapSize = value; }
+        }
         private Texture2D tBullet;
-        private FireShader fxFire;
-        private LightningShader fxLightning;
+        private Texture2D tLightningMap;
+        private Texture2D tFireColor;
+        private Texture2D tFireNoise;
+        private Texture2D tFireAlpha;
+        private Texture2D tAlert;
 
-        public ParticleRenderer() {
+        public ParticleRenderer(Effect fx, ParticleEffectConfig peConf) {
+            fxParticle = new ParticleEffect(fx, peConf);
         }
 
         public void Load(RTSRenderer renderer, ParticleOptions o) {
@@ -50,12 +60,17 @@ namespace RTSEngine.Graphics {
             // Create Fire System
             plFires = new ParticleList<FireParticle, VertexFireInstance>(renderer, o.FireMaxCount, ParticleType.Fire);
             BuildFireModel(renderer, o.FireDetail);
-            LoadFireShader(renderer, o.FireShader, o.FireNoise, o.FireColor, o.FireAlpha);
+            LoadFireShader(renderer, o.FireNoise, o.FireColor, o.FireAlpha);
 
             // Create Lightning System
             plBolts = new ParticleList<LightningParticle, VertexLightningInstance>(renderer, o.LightningMaxCount, ParticleType.Lightning);
             BuildLightningModel(renderer);
-            LoadLightningShader(renderer, o.LightningShader, o.LightningImage, o.LightningNumTypes);
+            LoadLightningShader(renderer, o.LightningImage, o.LightningNumTypes);
+
+            // Create Alert System
+            plAlerts = new ParticleList<AlertParticle, VertexAlertInstance>(renderer, o.AlertMaxCount, ParticleType.Alert);
+            BuildAlertModel(renderer);
+            tAlert = renderer.LoadTexture2D(o.AlertImage);
         }
         private void LoadBulletModel(RTSRenderer renderer, Stream s, ParsingFlags pf = ParsingFlags.ConversionOpenGL) {
             VertexPositionNormalTexture[] v;
@@ -98,14 +113,10 @@ namespace RTSEngine.Graphics {
             plFires.IBuffer = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, BufferUsage.WriteOnly);
             plFires.IBuffer.SetData(inds);
         }
-        private void LoadFireShader(RTSRenderer renderer, string fxFile, string fNoise, string fColor, string fAlpha) {
-            fxFire = new FireShader();
-            fxFire.Build(
-                renderer.LoadEffect(fxFile),
-                renderer.LoadTexture2D(fNoise),
-                renderer.LoadTexture2D(fColor),
-                renderer.LoadTexture2D(fAlpha)
-                );
+        private void LoadFireShader(RTSRenderer renderer, string fNoise, string fColor, string fAlpha) {
+            tFireColor = renderer.LoadTexture2D(fColor);
+            tFireNoise = renderer.LoadTexture2D(fNoise);
+            tFireAlpha = renderer.LoadTexture2D(fAlpha);
         }
         private void BuildLightningModel(RTSRenderer renderer) {
             VertexPositionTexture[] verts = new VertexPositionTexture[4];
@@ -120,20 +131,35 @@ namespace RTSEngine.Graphics {
             plBolts.IBuffer = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, inds.Length, BufferUsage.WriteOnly);
             plBolts.IBuffer.SetData(inds);
         }
-        private void LoadLightningShader(RTSRenderer renderer, string fxFile, string fLMap, int splits) {
-            fxLightning = new LightningShader();
-            fxLightning.Build(renderer, fxFile, fLMap, splits);
+        private void LoadLightningShader(RTSRenderer renderer, string fLMap, int splits) {
+            tLightningMap = renderer.LoadTexture2D(fLMap);
+            fxParticle.LightningSplits = splits;
+        }
+        private void BuildAlertModel(RTSRenderer renderer) {
+            plAlerts.VBuffer = renderer.CreateVertexBuffer(VertexPositionTexture.VertexDeclaration, 4, BufferUsage.WriteOnly);
+            plAlerts.VBuffer.SetData(new VertexPositionTexture[] {
+                new VertexPositionTexture(new Vector3(-1, 0, -1), Vector2.Zero),
+                new VertexPositionTexture(new Vector3(1, 0, -1), Vector2.UnitX),
+                new VertexPositionTexture(new Vector3(-1, 0, 1), Vector2.UnitY),
+                new VertexPositionTexture(new Vector3(1, 0, 1), Vector2.One)
+            });
+            plAlerts.IBuffer = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, 6, BufferUsage.WriteOnly);
+            plAlerts.IBuffer.SetData(new short[] { 0, 1, 2, 2, 1, 3 });
         }
 
         public void Update(List<Particle> newParticles, float dt) {
             plBullets.Update(newParticles, dt);
             plFires.Update(newParticles, dt);
             plBolts.Update(newParticles, dt);
+            plAlerts.Update(newParticles, dt);
+        }
+
+        public void SetupAll(GraphicsDevice g, Matrix mVP, float t, Texture2D tFOW) {
+            fxParticle.SetupBasic(g, mVP, t, tFOW);
         }
 
         public void SetBullets(GraphicsDevice g) {
-            g.Textures[0] = tBullet;
-            g.SamplerStates[0] = SamplerState.LinearClamp;
+            fxParticle.ApplySimple(g, tBullet);
             g.SetVertexBuffers(plBullets.VBBinds);
             g.Indices = plBullets.IBuffer;
         }
@@ -142,8 +168,8 @@ namespace RTSEngine.Graphics {
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plBullets.VertexCount, 0, plBullets.TriCount, plBullets.ParticleCount);
         }
 
-        public void SetFire(GraphicsDevice g, Matrix mWVP, float t) {
-            fxFire.Apply(g, mWVP, t);
+        public void SetFire(GraphicsDevice g) {
+            fxParticle.ApplyFire(g, tFireColor, tFireNoise, tFireAlpha);
             g.SetVertexBuffers(plFires.VBBinds);
             g.Indices = plFires.IBuffer;
         }
@@ -152,14 +178,24 @@ namespace RTSEngine.Graphics {
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plFires.VertexCount, 0, plFires.TriCount, plFires.ParticleCount);
         }
 
-        public void SetLightning(GraphicsDevice g, Matrix mWVP, float t) {
-            fxLightning.Apply(g, mWVP, t);
+        public void SetLightning(GraphicsDevice g) {
+            fxParticle.ApplyLightning(g, tLightningMap);
             g.SetVertexBuffers(plBolts.VBBinds);
             g.Indices = plBolts.IBuffer;
         }
         public void DrawLightning(GraphicsDevice g) {
             if(plBolts.ParticleCount > 0)
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plBolts.VertexCount, 0, plBolts.TriCount, plBolts.ParticleCount);
+        }
+
+        public void SetAlerts(GraphicsDevice g) {
+            fxParticle.ApplyAlert(g, tAlert);
+            g.SetVertexBuffers(plAlerts.VBBinds);
+            g.Indices = plAlerts.IBuffer;
+        }
+        public void DrawAlerts(GraphicsDevice g) {
+            if(plAlerts.ParticleCount > 0)
+                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plAlerts.VertexCount, 0, plAlerts.TriCount, plAlerts.ParticleCount);
         }
     }
 }

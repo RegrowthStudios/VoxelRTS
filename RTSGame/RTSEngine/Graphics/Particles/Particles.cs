@@ -10,7 +10,8 @@ namespace RTSEngine.Graphics {
         Bullet,
         Fire,
         Lightning,
-        Popup
+        Popup,
+        Alert
     }
     public abstract class Particle {
         public static bool IsParticleDead(Particle p) {
@@ -110,7 +111,8 @@ namespace RTSEngine.Graphics {
             new VertexElement(sizeof(float) * 4, VertexElementFormat.Vector4, VertexElementUsage.Position, 2),
             new VertexElement(sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.Position, 3),
             new VertexElement(sizeof(float) * 12, VertexElementFormat.Vector4, VertexElementUsage.Position, 4),
-            new VertexElement(sizeof(float) * 16, VertexElementFormat.Single, VertexElementUsage.TextureCoordinate, 1)
+            new VertexElement(sizeof(float) * 16, VertexElementFormat.Single, VertexElementUsage.TextureCoordinate, 1),
+            new VertexElement(sizeof(float) * 17, VertexElementFormat.Color, VertexElementUsage.Color, 0)
         );
         public VertexDeclaration VertexDeclaration {
             get { return Declaration; }
@@ -119,10 +121,12 @@ namespace RTSEngine.Graphics {
 
         public Matrix Transform;
         public float Time;
+        public Color Color;
 
         public VertexFireInstance(Matrix m, float t) {
             Transform = m;
             Time = t;
+            Color = Color.White;
         }
     }
     #endregion
@@ -132,6 +136,12 @@ namespace RTSEngine.Graphics {
 
         // Instance Transform Of Bullet
         private VertexFireInstance instance;
+        public Color Color {
+            set {
+                instance.Color = value;
+                Vertex = instance;
+            }
+        }
 
         public FireParticle(Vector3 o, float r, float h, float rotY, float t)
             : base(t, ParticleType.Fire) {
@@ -200,6 +210,46 @@ namespace RTSEngine.Graphics {
             instance.TimeType.Y = inst;
             instance.Color = c;
             Vertex = instance;
+        }
+    }
+
+    #region Alert Instancing
+    public struct VertexAlertInstance : IVertexType {
+        #region Declaration
+        public static readonly VertexDeclaration Declaration = new VertexDeclaration(
+            new VertexElement(sizeof(float) * 0, VertexElementFormat.Vector3, VertexElementUsage.Position, 1),
+            new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Position, 2),
+            new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector4, VertexElementUsage.Position, 3),
+            new VertexElement(sizeof(float) * 10, VertexElementFormat.Color, VertexElementUsage.Color, 0),
+            new VertexElement(sizeof(float) * 11, VertexElementFormat.Color, VertexElementUsage.Color, 1)
+        );
+        public VertexDeclaration VertexDeclaration {
+            get { return Declaration; }
+        }
+        #endregion
+
+        public Vector3 Origin;
+        public Vector3 Target;
+        public Vector4 DurationScaling;
+        public Color ColorStart;
+        public Color ColorEnd;
+
+        public VertexAlertInstance(Vector3 o, Vector3 t, Vector4 ds, Color cS, Color cE) {
+            Origin = o;
+            Target = t;
+            DurationScaling = ds;
+            ColorStart = cS;
+            ColorEnd = cE;
+        }
+    }
+    #endregion
+    public class AlertParticle : Particle {
+        public VertexAlertInstance CustomVertex;
+
+        public AlertParticle(Vector3 o, float s1, Color c1, Vector3 t, float s2, Color c2, float curTime, float timeAlive)
+            : base(timeAlive, ParticleType.Alert) {
+            CustomVertex = new VertexAlertInstance(o, t, new Vector4(curTime, timeAlive, s1, s2), c1, c2);
+            Vertex = CustomVertex;
         }
     }
 }

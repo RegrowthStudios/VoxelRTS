@@ -31,7 +31,9 @@ namespace RTSEngine.Graphics {
         public Color FXHealthTint;
 
         public string FXMap;
+
         public string FXParticle;
+        public ParticleEffectConfig ParticleConfig;
     }
     public class RTSRenderer : IDisposable {
         private const float SELECTION_RADIUS_MODIFIER = 1.1f;
@@ -99,7 +101,6 @@ namespace RTSEngine.Graphics {
         private RTSFXEntity fxAnim;
         private HealthViewer healthView;
         private RTSFXMap fxMap;
-        private Effect fxParticle;
 
         // The Friendly Team To Be Visualizing
         private int teamIndex;
@@ -165,10 +166,9 @@ namespace RTSEngine.Graphics {
             healthView = new HealthViewer();
             healthView.Build(this, fxAnim, ria.FXHealthTechnique, ria.FXHealthPass, ria.FXHealthTexture);
 
-            fxParticle = LoadEffect(ria.FXParticle);
             UseFOW = true;
 
-            pRenderer = new ParticleRenderer();
+            pRenderer = new ParticleRenderer(LoadEffect(ria.FXParticle), ria.ParticleConfig);
             Minimap = new Minimap();
 
             CamPointer = new CameraPointer();
@@ -269,7 +269,6 @@ namespace RTSEngine.Graphics {
 
             // Create The Map
             CreateVoxGeos(state.VoxState.World.Atlas);
-            //Heightmap map = state.Map;
             Map = new VoxMap(this, state.CGrid.numCells.X, state.CGrid.numCells.Y);
             // TODO: Parse This In
             VoxMapConfig vmc = new VoxMapConfig();
@@ -279,10 +278,9 @@ namespace RTSEngine.Graphics {
             vmc.FXFile = @"FX\Voxel";
             Map.Build(gManager, cManager, vmc);
 
-            //Map = MapParser.ParseModel(this, state.LevelGrid, new FileInfo(state.LevelGrid.InfoFile));
             Camera.MoveTo(state.CGrid.size.X * 0.5f, state.CGrid.size.Y * 0.5f);
             fxMap.MapSize = state.CGrid.size;
-            fxParticle.Parameters["MapSize"].SetValue(state.CGrid.size);
+            pRenderer.MapSize = state.CGrid.size;
 
             // Hook FOW
             state.CGrid.OnFOWChange += OnFOWChange;
@@ -469,7 +467,7 @@ namespace RTSEngine.Graphics {
             DrawMap(Camera.View, Camera.Projection);
             DrawBuildings();
             DrawUnits();
-            DrawParticles();
+            DrawParticles(s.TotalGameTime);
             DrawSelectionCircles(s.teams[teamIndex].ColorScheme.Secondary);
             if(drawBox) DrawSelectionBox();
 
@@ -708,26 +706,26 @@ namespace RTSEngine.Graphics {
         }
 
         // Draw Particles
-        private void DrawParticles() {
+        private void DrawParticles(float t) {
+            //float t = (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000);            
+            
             G.DepthStencilState = DepthStencilState.DepthRead;
             G.RasterizerState = RasterizerState.CullNone;
             G.BlendState = BlendState.Additive;
 
-            fxParticle.Parameters["VP"].SetValue(Camera.View * Camera.Projection);
-            G.Textures[1] = FOWTexture;
-            G.SamplerStates[1] = SamplerState.PointClamp;
-            fxParticle.CurrentTechnique.Passes[0].Apply();
+            pRenderer.SetupAll(G, Camera.View * Camera.Projection, t, Map.FogOfWarTexture);
 
             pRenderer.SetBullets(G);
             pRenderer.DrawBullets(G);
 
-            float t = (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000);
-
-            pRenderer.SetFire(G, Camera.View * Camera.Projection, t);
+            pRenderer.SetFire(G);
             pRenderer.DrawFire(G);
 
-            pRenderer.SetLightning(G, Camera.View * Camera.Projection, t);
+            pRenderer.SetLightning(G);
             pRenderer.DrawLightning(G);
+
+            pRenderer.SetAlerts(G);
+            pRenderer.DrawAlerts(G);
         }
 
         // Selection Box Handling
