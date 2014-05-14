@@ -90,6 +90,8 @@
     <Content Include="Packs\Default\scripts\input\environment\EnvironmentData.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Packs\Default\scripts\buttons\DBEnable.cs" />
+    <Content Include="Packs\Default\scripts\ExtractionBuilding.cs" />
     <Compile Include="RTSScreen.cs" />
     <Compile Include="WispScreen.cs" />
     <Content Include="Packs\Default\scripts\buttons\DBSpawn.cs">
