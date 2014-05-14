@@ -233,7 +233,7 @@ namespace RTSEngine.Graphics {
         }
         public Effect LoadEffect(string file) {
             Effect fx = cManager.Load<Effect>(file);
-            toDispose.Add(fx);
+            //toDispose.Add(fx);
             return fx;
         }
         public BasicEffect CreateEffect() {

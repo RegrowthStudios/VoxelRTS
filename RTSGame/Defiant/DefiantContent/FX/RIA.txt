@@ -2,13 +2,13 @@
 CamPointerHeights   [0.1, 0.3, 0.4]
 CamPointerRadii     [0.5, 1.1, 0.7]
 
-FXEntity            [Content\FX\RTS.fx]
+FXEntity            [FX\RTS]
 FXHealthTechnique   [Health]
 FXHealthPass        [Main]
 FXHealthTexture     [Content\Textures\SelectionCircle.png]
 FXHealthRadiusModifier  [1.3]
 FXHealthTint        [255, 255, 255, 255]
 
-FXMap               [Content\FX\Map.fx]
-FXParticle          [Content\FX\Particle.fx]
+FXMap               [FX\Map]
+FXParticle          [FX\Particle]
 

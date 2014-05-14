@@ -25,7 +25,7 @@ namespace RTS {
         private static readonly Regex rgxSave = new Regex(@"save");
         private static readonly Regex rgxLoad = new Regex(@"load");
 
-        private const string FX_FILE_PATH = @"Content\FX\RTS.fx";
+        private const string FX_FILE_PATH = @"FX\RTS";
         private static readonly Color BACK_COLOR = new Color(10, 10, 10, 255);
 
         private const float YAW_SPEED = 1f;
@@ -105,15 +105,6 @@ namespace RTS {
             sP.Hook();
             sS.Hook();
             sT.Hook();
-            //MouseEventDispatcher.OnMousePress += sP.OnMousePress;
-            //MouseEventDispatcher.OnMouseMotion += sP.OnMouseMovement;
-            //MouseEventDispatcher.OnMouseRelease += sP.OnMouseRelease;
-            //MouseEventDispatcher.OnMousePress += sS.OnMousePress;
-            //MouseEventDispatcher.OnMouseMotion += sS.OnMouseMovement;
-            //MouseEventDispatcher.OnMouseRelease += sS.OnMouseRelease;
-            //MouseEventDispatcher.OnMousePress += sT.OnMousePress;
-            //MouseEventDispatcher.OnMouseMotion += sT.OnMouseMovement;
-            //MouseEventDispatcher.OnMouseRelease += sT.OnMouseRelease;
             RendererInitArgs ria = ZXParser.ParseFile(@"Content\FX\RIA.txt", typeof(RendererInitArgs)) as RendererInitArgs;
             renderer = new RTSRenderer(game.Graphics, game.Content, ria, game.Window);
 

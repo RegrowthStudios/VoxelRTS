@@ -117,7 +117,7 @@ namespace RTS {
             mRenderer = new MouseRenderer(GraphicsDevice, Window);
             mRenderer.Texture = tMouseMain;
             mRenderer.InnerRadius = 28f;
-            dcv = new DevConsoleView(Content, @"Fonts\CourierNew32", GraphicsDevice);
+            dcv = new DevConsoleView(Content, @"Fonts\CourierNew14", GraphicsDevice);
 
             ZXParser.SetEnvironment("GD", GraphicsDevice);
             ZXParser.SetEnvironment("GDM", graphics);
