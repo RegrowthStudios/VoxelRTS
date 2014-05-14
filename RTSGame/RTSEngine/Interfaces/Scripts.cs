@@ -152,6 +152,9 @@ namespace RTSEngine.Interfaces {
 
     // A Super Controller Called By The Gameplay Controller
     public abstract class ACBuildingActionController : ACBuildingController {
+        public Queue<GameInputEvent> EventQueue;
+        public bool Enabled; // Allow user to turn on and off building (resource extraction)
+
         // Scripted Super-Controller Logic
         public abstract void DecideAction(GameState g, float dt);
         public abstract void ApplyAction(GameState g, float dt);
@@ -181,6 +184,17 @@ namespace RTSEngine.Interfaces {
         // For Cool-downs, Etc.
         public abstract void DecideAction(GameState s, float dt);
         public abstract void ApplyAction(GameState s, float dt);
+    }
+
+    public abstract class ACBuildingAnimationController : ACBuildingController {
+
+    }
+
+    public enum ButtonType {
+        Type0Unit,
+        Type1Unit,
+        Type2Unit,
+        Enable // Enable or disable the building
     }
     #endregion
 
