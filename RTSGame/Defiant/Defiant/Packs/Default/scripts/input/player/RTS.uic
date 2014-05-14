@@ -16,6 +16,13 @@ UICMinimap <RTS.Input.UICMinimap> {
     ImpactInactiveColor     [20,20,20,255]
     ImpactActiveColor       [255,0,0,255]
 }
+UICAlertQueue <RTS.Input.UICAlertQueue> {
+    AlertDuration   [240]
+    Width       [180]
+    Height      [32]
+    TextHeight  [24]
+    Buffer      [5]
+}
 
 BBRows                  [3]
 BBColumns               [4]

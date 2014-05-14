@@ -50,6 +50,10 @@ namespace RTS.Input {
             get;
             private set;
         }
+        public RTSUIAlertQueue AlertQueue {
+            get;
+            private set;
+        }
 
         public RTSUI(RTSRenderer renderer, string uicFile, bool showBuildPanel) {
             uic = ZXParser.ParseFile(uicFile, typeof(UICRTS)) as UICRTS;
@@ -64,6 +68,8 @@ namespace RTS.Input {
             BuildBuildingPanel(showBuildPanel);
             BuildSelectionPanel(renderer);
             BuildTeamDataPanel();
+            AlertQueue = new RTSUIAlertQueue(wrMain, uic.UICAlertQueue);
+            AlertQueue.WidgetBase.Parent = Minimap.WidgetBase;
         }
         public void Dispose() {
             wrButtonPanel.Dispose();

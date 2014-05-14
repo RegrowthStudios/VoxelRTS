@@ -283,11 +283,11 @@ namespace RTSEngine.Controllers {
             RTSUnit unit = team.AddUnit(e.Type, e.Position);
 
             // Check If A Unit Was Possible
-            if (unit == null) { return; }
+            if(unit == null) { return; }
 
-            if (e.BuildingID.HasValue) {
-                foreach (var b in team.Buildings) {
-                    if (e.BuildingID == b.UUID) {
+            if(e.BuildingID.HasValue) {
+                foreach(var b in team.Buildings) {
+                    if(e.BuildingID == b.UUID) {
                         b.SpawnUnit(unit);
                     }
                 }
@@ -313,7 +313,14 @@ namespace RTSEngine.Controllers {
             if(building == null) return;
 
             // Check For Instant Building
-            if(e.InstantBuild) building.BuildAmountLeft = 0;
+            if(e.InstantBuild) {
+                building.BuildAmountLeft = 0;
+            }
+            else {
+                building.OnBuildingFinished += (b) => {
+                    s.SendAlert(building.Data.FriendlyName + " Is Built", AlertLevel.Passive);
+                };
+            }
 
             // Check If A Building Was Possible
             if(building == null) return;

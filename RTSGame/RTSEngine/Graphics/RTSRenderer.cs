@@ -660,10 +660,12 @@ namespace RTSEngine.Graphics {
                 float r = e.CollisionGeometry.BoundingRadius * SELECTION_RADIUS_MODIFIER;
                 float h = e.Height;
                 h += (e.BBox.Max.Y - e.BBox.Min.Y) * SELECTION_HEIGHT_PLACEMENT;
-                float mh = 1f;
-                if(e as RTSBuilding != null) mh = (e as RTSBuilding).Data.Health;
-                else mh = (e as RTSUnit).Data.Health;
-                Color cHealth = Color.Lerp(HEALTH_EMPTY_COLOR, HEALTH_FULL_COLOR, e.Health / mh);
+
+                // No Visualizing Unbuilt Buildings
+                RTSBuilding eb = e as RTSBuilding;
+                if(eb != null && eb.BuildAmountLeft > 0) continue;
+
+                Color cHealth = Color.Lerp(HEALTH_EMPTY_COLOR, HEALTH_FULL_COLOR, e.GetHealthRatio());
                 verts[i++] = new VertexPositionColorTexture(new Vector3(c.X - r, h, c.Y - r), cHealth, Vector2.Zero);
                 verts[i++] = new VertexPositionColorTexture(new Vector3(c.X + r, h, c.Y - r), cHealth, Vector2.UnitX);
                 verts[i++] = new VertexPositionColorTexture(new Vector3(c.X - r, h, c.Y + r), cHealth, Vector2.UnitY);

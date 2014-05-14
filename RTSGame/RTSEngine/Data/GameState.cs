@@ -15,6 +15,12 @@ using RTSEngine.Interfaces;
 using Grey.Engine;
 
 namespace RTSEngine.Data {
+    public enum AlertLevel {
+        Passive,
+        Important,
+        Critical
+    }
+
     public struct IndexedTeam {
         public readonly int Index;
         public readonly RTSTeam Team;
@@ -123,7 +129,8 @@ namespace RTSEngine.Data {
         private List<Particle> tmpParticles;
 
         // Popup Events
-        public event Action<string, Rectangle> OnNewPopup; 
+        public event Action<string, Rectangle> OnNewPopup;
+        public event Action<string, AlertLevel> OnAlert;
 
         public GameState() {
             UUIDGenerator.SetUUID(0);
@@ -194,17 +201,21 @@ namespace RTSEngine.Data {
             return null;
         }
         public void AddParticle(Particle p) {
-            lock (lckParticles)
+            lock(lckParticles)
                 tmpParticles.Add(p);
         }
         public void AddParticles(IEnumerable<Particle> p) {
-            lock (lckParticles)
+            lock(lckParticles)
                 tmpParticles.AddRange(p);
         }
 
         public void SendPopup(string texFile, Rectangle destination) {
             if(OnNewPopup != null)
                 OnNewPopup(texFile, destination);
+        }
+        public void SendAlert(string message, AlertLevel level) {
+            if(OnAlert != null)
+                OnAlert(message, level);
         }
     }
 }

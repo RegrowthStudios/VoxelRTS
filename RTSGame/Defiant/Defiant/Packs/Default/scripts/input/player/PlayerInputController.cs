@@ -75,6 +75,7 @@ namespace RTS.Input {
             UI.SetTeam(Team);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
             OnNewSelection += UI.BBPanel.OnNewSelection;
+            GameState.OnAlert += UI.AlertQueue.OnAlert;
 
             Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
             Team.OnPopulationCapChange += (t, c) => { UI.TeamDataPanel.PopulationCap = Team.PopulationCap; };
@@ -363,15 +364,19 @@ namespace RTS.Input {
             else if(UI.BBPanel.BackPanel.Inside(p.X, p.Y)) {
                 var bbs = UI.BBPanel.GetSelection(p.X, p.Y);
                 if(bbs != null) {
-                    for(int i = 0; i < bbs.Count; i++) {
-                        bbs[i].OnQueueFinished(GameState);
+                    // Shift Clicking
+                    int c = isShiftPressed ? 5 : 1;
+                    for(int ci = 0; ci < c; ci++) {
+                        for(int i = 0; i < bbs.Count; i++) {
+                            bbs[i].OnQueueFinished(GameState);
+                        }
                     }
                 }
             }
         }
 
         public void Update(RTSRenderer renderer, GameState s) {
-            //UI.BuildingPanel.Update();
+            UI.AlertQueue.Update();
         }
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             UI.Draw(renderer, batch);
