@@ -25,7 +25,7 @@ namespace BlisterUI.Widgets {
             get { return drawText.color; }
             set { drawText.color = value; }
         }
-        public string Text {
+        public virtual string Text {
             get { return drawText.Text; }
             set {
                 drawText.Text = value;
@@ -53,7 +53,7 @@ namespace BlisterUI.Widgets {
             r.Remove(drawText);
         }
 
-        private void OnSelfCompute(BaseWidget w) {
+        protected virtual void OnSelfCompute(BaseWidget w) {
             drawText.TextHeight = Height;
             drawText.location = new Vector2(X, Y);
             drawText.layerDepth = layer;

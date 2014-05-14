@@ -78,6 +78,7 @@ namespace RTS {
         LETool curTool;
         LETool[] tools;
         ScrollMenu toolMenu;
+        LEMenu leMenu;
 
         public override void Build() {
             input = new InputManager();
@@ -262,6 +263,12 @@ namespace RTS {
             voxMenu.Widget.AlignY = Alignment.BOTTOM;
             voxMenu.Widget.Anchor = new Point(0, game.Window.ClientBounds.Height);
             voxMenu.Hook();
+
+            // TODO: Parse In Config
+            leMenu = new LEMenu(wr, new UICLEMenu());
+            leMenu.Activate();
+            leMenu.SaveButton.OnButtonPress += SaveButton_OnButtonPress;
+            leMenu.LoadButton.OnButtonPress += LoadButton_OnButtonPress;
         }
         private void CreateTools() {
             tools = new LETool[] {
@@ -299,11 +306,11 @@ namespace RTS {
         private void DestroyVoxWorld() {
             state.VWorkPool.Dispose();
             renderer.Dispose();
-
         }
         private void DestroyWidgets() {
             voxMenu.Unhook();
             voxMenu.Dispose();
+            leMenu.Dispose();
             wr.Dispose();
         }
         private void DestroyTools() {
@@ -324,20 +331,22 @@ namespace RTS {
             G.Clear(Color.Black);
             renderer.DrawAll(camera.View, camera.Projection);
 
-
-            if(!input.Mouse.IsBound) {
-                G.DepthStencilState = DepthStencilState.None;
-                G.BlendState = BlendState.NonPremultiplied;
-                wr.Draw(SB);
-                if(DevConsole.IsActivated) {
-                    game.DrawDevConsole();
-                }
-                game.DrawMouse();
+            G.DepthStencilState = DepthStencilState.None;
+            G.BlendState = BlendState.NonPremultiplied;
+            wr.Draw(SB);
+            if(DevConsole.IsActivated) {
+                game.DrawDevConsole();
             }
+            if(!input.Mouse.IsBound)
+                game.DrawMouse();
         }
 
         public void OnMP(Vector2 sPos, MouseButton button) {
             Point mPos = new Point((int)sPos.X, (int)sPos.Y);
+
+            if(leMenu.IsActive && !leMenu.WidgetBase.Inside(mPos.X, mPos.Y)) {
+                HideLEMenu();
+            }
 
             // Check For New Voxel Selection
             if(voxMenu.Inside(mPos.X, mPos.Y)) {
@@ -348,15 +357,20 @@ namespace RTS {
                     foreach(var tool in tools)
                         tool.CurVoxID = vd.ID;
                 }
+                HideToolMenu();
                 return;
             }
-
-            if(toolMenu.Inside(mPos.X, mPos.Y)) {
+            else if(toolMenu.Inside(mPos.X, mPos.Y)) {
                 string vt = toolMenu.GetSelection(mPos.X, mPos.Y);
                 curTool = (from tool in tools where tool.Name.Equals(vt) select tool).FirstOrDefault();
-                if(curTool != null)
+                if(curTool != null) {
                     game.mRenderer.Texture = curTool.MouseTexture;
+                    HideToolMenu();
+                }
                 return;
+            }
+            else {
+                HideToolMenu();
             }
 
             if(curTool != null)
@@ -368,8 +382,25 @@ namespace RTS {
                     DevConsole.Toggle(OnDC);
                     break;
                 case Keys.P:
-                    if(DevConsole.IsActivated) return;
+                    if(DevConsole.IsActivated || leMenu.IsActive) return;
                     State = ScreenState.ChangePrevious;
+                    break;
+                case Keys.Q:
+                    if(leMenu.IsActive) {
+                        HideLEMenu();
+                    }
+                    else {
+                        ShowLEMenu();
+                    }
+                    break;
+                case Keys.E:
+                    Point pAnchor = voxMenu.Widget.Anchor;
+                    if(pAnchor.X == 0) {
+                        HideToolMenu();
+                    }
+                    else {
+                        ShowToolMenu();
+                    }
                     break;
             }
         }
@@ -381,6 +412,7 @@ namespace RTS {
             WriteHeights(dirInfo.FullName + @"\height.hmd", w, h);
             WriteWorld(dirInfo.FullName + @"\vox.world", w, h);
             WriteRegions(dirInfo.FullName + @"\regions.png", w, h);
+            WriteVoxels(dirInfo.FullName + @"\vox.world.le");
             foreach(var gtc in gtcList) {
                 gtc.LESave(state.World, w, h, dirInfo);
             }
@@ -504,12 +536,81 @@ namespace RTS {
                 bmp.Save(file, System.Drawing.Imaging.ImageFormat.Png);
             }
         }
+        private void WriteVoxels(string file) {
+            byte[] data = new byte[VoxWorld.REGION_COUNT * Region.VOXEL_COUNT * sizeof(ushort)];
+            int i = 0;
+            foreach(var r in state.World.regions) {
+                foreach(var v in r.voxels) {
+                    data[i++] = (byte)(v.ID >> 8);
+                    data[i++] = (byte)(v.ID & 0xff);
+                }
+            }
+            using(var s = File.Create(file)) {
+                var gs = new GZipStream(s, CompressionMode.Compress);
+                gs.Write(data, 0, data.Length);
+                s.Flush();
+            }
+        }
         private void OnDC(string comm) {
             Match m = rgxSave.Match(comm);
             if(m.Success) {
                 int[] buf = RegexHelper.ExtractVec2I(m);
                 Write(@"LevelEditor\Saved", buf[0], buf[1]);
             }
+        }
+        private void ReadVoxels(string file) {
+            if(!File.Exists(file)) return;
+
+            byte[] data = new byte[VoxWorld.REGION_COUNT * Region.VOXEL_COUNT * sizeof(ushort)];
+            using(var s = File.OpenRead(file)) {
+                var gs = new GZipStream(s, CompressionMode.Decompress);
+                gs.Read(data, 0, data.Length);
+            }
+
+            int i = 0;
+            foreach(var r in state.World.regions) {
+                for(int vi = 0; vi < Region.VOXEL_COUNT; vi++) {
+                    r.voxels[vi].ID = (ushort)(data[i++] << 8);
+                    r.voxels[vi].ID |= data[i++];
+                }
+                r.NotifyFacesChanged();
+            }
+        }
+
+        public void HideLEMenu() {
+            leMenu.Deactivate();
+            leMenu.WidgetBase.Anchor = new Point(-leMenu.WidgetBase.Width, 0);
+        }
+        public void ShowLEMenu() {
+            leMenu.Activate();
+            leMenu.WidgetBase.Anchor = new Point(0, 0);
+        }
+        public void HideToolMenu() {
+            Point pAnchor = voxMenu.Widget.Anchor;
+            voxMenu.Unhook();
+            toolMenu.Unhook();
+            pAnchor.X = -voxMenu.FullWidth;
+            voxMenu.Widget.Anchor = pAnchor;
+        }
+        public void ShowToolMenu() {
+            Point pAnchor = voxMenu.Widget.Anchor;
+            voxMenu.Hook();
+            toolMenu.Hook();
+            pAnchor.X = 0;
+            voxMenu.Widget.Anchor = pAnchor;
+        }
+
+        void SaveButton_OnButtonPress(RectButton arg1, Vector2 arg2) {
+            string dir = @"Packs\" + leMenu.MapLocation;
+            int w = leMenu.MapWidth;
+            int h = leMenu.MapHeight;
+            Write(dir, w, h);
+            HideLEMenu();
+        }
+        void LoadButton_OnButtonPress(RectButton arg1, Vector2 arg2) {
+            string dir = @"Packs\" + leMenu.MapLocation;
+            ReadVoxels(dir + @"\vox.world.le");
+            HideLEMenu();
         }
 
         public class LEVGR : IVoxGridResolver {

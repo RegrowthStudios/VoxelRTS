@@ -22,9 +22,14 @@ namespace BlisterUI.Input {
                     OnTextChanged(this, Text);
             }
         }
+        private int caret;
         public int Caret {
-            get;
-            private set;
+            get { return caret; }
+            private set {
+                caret = value;
+                if(OnCaretMoved != null)
+                    OnCaretMoved(this, Caret);
+            }
         }
         public int Length {
             get { return text.Length; }
@@ -32,6 +37,7 @@ namespace BlisterUI.Input {
 
         public event Action<TextInput, string> OnTextEntered;
         public event Action<TextInput, string> OnTextChanged;
+        public event Action<TextInput, int> OnCaretMoved;
 
         public TextInput() {
             text = new StringBuilder();
