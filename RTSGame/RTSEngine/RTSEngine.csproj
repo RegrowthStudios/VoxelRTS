@@ -71,6 +71,7 @@
     <Compile Include="Graphics\Particles\LightningShader.cs" />
     <Compile Include="Graphics\Particles\ParticleEffect.cs" />
     <Compile Include="Graphics\Particles\ParticleList.cs" />
+    <Compile Include="Graphics\RTSBuildViewer.cs" />
     <Compile Include="Graphics\VoxMap.cs" />
     <Compile Include="Interfaces\ACInputController.cs" />
     <Compile Include="Data\AnimationLoop.cs" />

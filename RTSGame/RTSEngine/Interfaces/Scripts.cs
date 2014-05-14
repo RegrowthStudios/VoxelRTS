@@ -320,6 +320,7 @@ namespace RTSEngine.Interfaces {
             }
         }
         public abstract void Tick(GameState s);
+        public abstract void ApplyFrame(GameState s, float dt);
 
         public abstract List<LEVoxel> CreateVoxels(VoxAtlas atlas);
         public abstract void LESave(VoxWorld world, int w, int h, DirectoryInfo dir);

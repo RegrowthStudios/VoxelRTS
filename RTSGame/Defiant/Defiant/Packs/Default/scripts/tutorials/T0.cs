@@ -72,6 +72,9 @@ namespace RTS.Default.Tutorials {
                     break;
             }
         }
+        public override void ApplyFrame(GameState s, float dt) {
+
+        }
 
         public override List<LEVoxel> CreateVoxels(Grey.Vox.VoxAtlas atlas) {
             return null;

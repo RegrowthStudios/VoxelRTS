@@ -114,6 +114,19 @@ namespace RTS.Default {
             }
 
             public override void Tick(GameState s) {
+
+            }
+            public override void ApplyFrame(GameState s, float dt) {
+                if(s.CurrentFrame % 5 == 0) {
+                    for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                        var team = s.activeTeams[ti].Team;
+                        for(int i = 0; i < team.Buildings.Count; i++) {
+                            var b = team.Buildings[i];
+                            if(b.BuildAmountLeft > 0)
+                                b.BuildAmountLeft -= team.Race.GlobalBuildSpeed;
+                        }
+                    }
+                }
             }
 
             #region Level Editor

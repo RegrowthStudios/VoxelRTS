@@ -147,6 +147,7 @@ namespace RTSEngine.Controllers {
         // The Update Function
         public void Update(GameState s, float dt) {
             s.IncrementFrame(dt);
+            s.gtC.ApplyFrame(s, dt);
 
             // Input Pass
             ResolveInput(s, dt);

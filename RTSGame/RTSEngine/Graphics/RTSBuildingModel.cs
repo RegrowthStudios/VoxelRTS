@@ -10,9 +10,10 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 
 namespace RTSEngine.Graphics {
-    public struct VisibleBuilding {
+    public class VisibleBuilding {
         public Vector3 Position;
         public Vector2 View;
+        public float BuildAmount;
     }
 
     public class RTSBuildingModel {
@@ -83,7 +84,7 @@ namespace RTSEngine.Graphics {
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
 
             for(int i = 0; i < instVerts.Length; i++)
-                instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 0);
+                instVerts[i] = new VertexRTSAnimInst(Matrix.Identity, 1);
             dvbInstances = renderer.CreateDynamicVertexBuffer(VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
             dvbInstances.SetData(instVerts);
             dvbInstances.ContentLost += (sender, args) => { rebuildDVB = true; };
@@ -100,7 +101,13 @@ namespace RTSEngine.Graphics {
                         VisibleBuilding vb = new VisibleBuilding();
                         vb.Position = fTeam.Buildings[i].WorldPosition;
                         vb.View = fTeam.Buildings[i].ViewDirection;
-                        visible.Add(vb);
+                        vb.BuildAmount = 1 - (float)fTeam.Buildings[i].BuildAmountLeft / (float)fTeam.Buildings[i].Data.BuildAmount;
+                        if(vb.BuildAmount < 0.5) {
+                            visible.Add(vb);
+                        }
+                        else {
+                            visible.Add(vb);
+                        }
                     }
                 }
             }
@@ -117,6 +124,7 @@ namespace RTSEngine.Graphics {
                         VisibleBuilding vb = new VisibleBuilding();
                         vb.Position = bv.WorldPosition;
                         vb.View = bv.ViewDirection;
+                        vb.BuildAmount = bv.BuildAmount;
                         visible.Add(vb);
                     }
                 }
@@ -130,6 +138,7 @@ namespace RTSEngine.Graphics {
                     ) *
                     Matrix.CreateTranslation(visible[i].Position)
                     ;
+                instVerts[i].AnimationFrame = visible[i].BuildAmount;
             }
             if(rebuildDVB) {
                 dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);

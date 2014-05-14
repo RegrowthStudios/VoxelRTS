@@ -32,12 +32,13 @@ namespace RTSEngine.Data.Team {
         public Vector3 Tertiary;
     }
 
-    public struct ViewedBuilding {
+    public class ViewedBuilding {
         public int Team;
         public int Type;
         public Point CellPoint;
         public Vector3 WorldPosition;
         public Vector2 ViewDirection;
+        public float BuildAmount;
     }
 
     public class RTSTeam {

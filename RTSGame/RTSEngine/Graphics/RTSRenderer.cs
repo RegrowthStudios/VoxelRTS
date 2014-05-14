@@ -29,6 +29,7 @@ namespace RTSEngine.Graphics {
         public string FXHealthTexture;
         public float FXHealthRadiusModifier;
         public Color FXHealthTint;
+        public string FXBuildNoise;
 
         public string FXMap;
 
@@ -99,6 +100,7 @@ namespace RTSEngine.Graphics {
         // Effects
         private BasicEffect fxSimple;
         private RTSFXEntity fxAnim;
+        private Texture2D tNoise;
         private HealthViewer healthView;
         private RTSFXMap fxMap;
 
@@ -163,9 +165,9 @@ namespace RTSEngine.Graphics {
             fxAnim.CPrimary = Vector3.UnitX;
             fxAnim.CSecondary = Vector3.UnitY;
             fxAnim.CTertiary = Vector3.UnitZ;
+            tNoise = LoadTexture2D(ria.FXBuildNoise);
             healthView = new HealthViewer();
             healthView.Build(this, fxAnim, ria.FXHealthTechnique, ria.FXHealthPass, ria.FXHealthTexture);
-
             UseFOW = true;
 
             pRenderer = new ParticleRenderer(LoadEffect(ria.FXParticle), ria.ParticleConfig);
@@ -527,9 +529,10 @@ namespace RTSEngine.Graphics {
             // Loop Through Models
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
+            G.SamplerStates[3] = SamplerState.LinearClamp;
             foreach(RTSBuildingModel buildingModel in NonFriendlyBuildingModels) {
                 if(buildingModel.VisibleInstanceCount < 1) continue;
-                fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
+                fxAnim.SetTexturesBuilding(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture, tNoise);
                 fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
                 fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
                 fxAnim.CTertiary = buildingModel.ColorScheme.Tertiary;
@@ -539,7 +542,7 @@ namespace RTSEngine.Graphics {
             }
             foreach(RTSBuildingModel buildingModel in FriendlyBuildingModels) {
                 if(buildingModel.VisibleInstanceCount < 1) continue;
-                fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
+                fxAnim.SetTexturesBuilding(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture, tNoise);
                 fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
                 fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
                 fxAnim.CTertiary = buildingModel.ColorScheme.Tertiary;
@@ -708,7 +711,7 @@ namespace RTSEngine.Graphics {
         // Draw Particles
         private void DrawParticles(float t) {
             //float t = (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000);            
-            
+
             G.DepthStencilState = DepthStencilState.DepthRead;
             G.RasterizerState = RasterizerState.CullNone;
             G.BlendState = BlendState.Additive;
