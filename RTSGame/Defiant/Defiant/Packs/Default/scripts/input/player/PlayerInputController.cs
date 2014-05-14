@@ -84,6 +84,7 @@ namespace RTS.Input {
                 System.Windows.Forms.Form.ActiveForm.KeyDown += ActiveForm_KeyPress;
                 System.Windows.Forms.Form.ActiveForm.KeyUp += ActiveForm_KeyPress;
             }
+            UI.Minimap.Hook();
         }
         public override void Dispose() {
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
@@ -328,7 +329,9 @@ namespace RTS.Input {
 
         public void OnUIPress(Point p, MouseButton b) {
             Vector2 r = Vector2.Zero;
-            if(UI.Minimap.Inside(p.X, p.Y, out r)) {
+            if(UI.Minimap.WidgetBase.Inside(p.X, p.Y)) {
+                if(!UI.Minimap.MapRect.Inside(p.X, p.Y, out r))
+                    return;
                 // Use The Minimap
                 Vector2 mapPos = r * GameState.CGrid.size;
                 if(b == BUTTON_SELECT) {
