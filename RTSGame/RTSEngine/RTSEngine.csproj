@@ -68,6 +68,7 @@
     <Compile Include="Graphics\HealthViewer.cs" />
     <Compile Include="Graphics\Particles\FireShader.cs" />
     <Compile Include="Graphics\Particles\LightningShader.cs" />
+    <Compile Include="Graphics\Particles\ParticleEffect.cs" />
     <Compile Include="Graphics\Particles\ParticleList.cs" />
     <Compile Include="Graphics\VoxMap.cs" />
     <Compile Include="Interfaces\ACInputController.cs" />

@@ -367,10 +367,15 @@ namespace RTS.Default.Unit {
             //    }
             //    tempIdx++;
             //}
-            Vector2 waypoint = Waypoints[CurrentWaypointIndex];
+
             Vector2 first = Waypoints[Waypoints.Count - 1];
-            g.AddParticle(new LightningParticle(new Vector3(first.X, g.CGrid.HeightAt(waypoint), first.Y), 2, 8, 0, 1, 1, Color.Green));
-            g.AddParticle(new LightningParticle(new Vector3(waypoint.X, g.CGrid.HeightAt(waypoint), waypoint.Y), 2, 8, 0, 1, 0, Color.Red));
+            Vector3 oFirst = new Vector3(first.X, g.CGrid.HeightAt(first), first.Y);
+            g.AddParticle(new AlertParticle(oFirst, 1f, Color.Red, oFirst + Vector3.Up, 0.2f, Color.Green, g.TotalGameTime, 1f));
+
+            Vector2 waypoint = Waypoints[CurrentWaypointIndex];
+            Vector3 oWP = new Vector3(waypoint.X, g.CGrid.HeightAt(waypoint), waypoint.Y);
+            g.AddParticle(new AlertParticle(oWP, 1f, Color.Blue, oWP + Vector3.Up, 0.2f, Color.Purple, g.TotalGameTime, 3f));
+
             if(Query != null && !Query.IsOld && Query.IsComplete) {
                 Query.IsOld = true; // Only Do This Once Per Query
                 Waypoints = Query.waypoints;

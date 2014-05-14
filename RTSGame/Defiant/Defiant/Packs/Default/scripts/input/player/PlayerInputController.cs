@@ -285,8 +285,8 @@ namespace RTS.Input {
                                 );
                             rh *= new Vector3(2f, 1f, 2f);
                             rh.X += 1f; rh.Z += 1f;
-                            GameState.AddParticle(new LightningParticle(
-                                rh, 1f, 12f, 0f, 5f, 1, Color.Purple
+                            GameState.AddParticle(new AlertParticle(
+                                rh, 1f, Color.Purple, rh + Vector3.Up * 2f, 0.2f, Color.Green, GameState.TotalGameTime, 4f
                                 ));
                             AddEvent(new SetWayPointEvent(TeamIndex, new Vector2(rh.X, rh.Z)));
                         }

@@ -11,4 +11,21 @@ FXHealthTint        [255, 255, 255, 255]
 
 FXMap               [FX\Map]
 FXParticle          [FX\Particle]
+ParticleConfig      <RTSEngine.Graphics.ParticleEffectConfig> {
+    PassSimple           [Simple]
+    ParamVP              [VP]
+    ParamTime            [Time]
+    ParamMapSize         [MapSize]
+    PassLightning        [Lightning]
+    ParamSplits          [Splits]
+    PassFire             [Fire]
+    ParamRates           [rates]
+    ParamScales          [scales]
+    ParamOffset1         [offset1]
+    ParamOffset2         [offset2]
+    ParamOffset3         [offset3]
+    ParamDistortScale    [distortScale]
+    ParamDistortBias     [distortBias]
+    PassAlert            [Alert]
+}
 
