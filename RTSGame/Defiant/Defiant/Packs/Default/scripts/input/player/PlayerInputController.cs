@@ -34,6 +34,7 @@ namespace RTS.Input {
             get;
             set;
         }
+        bool showBuild;
 
         public bool HasSelectedEnemy {
             get { return selected.Count == 1 && selected[0].Team != Team; }
@@ -48,8 +49,13 @@ namespace RTS.Input {
             //bvh = new BVH();
         }
 
-        public override void Init(GameState s, int ti) {
-            base.Init(s, ti);
+        public override void Init(GameState s, int ti, object args) {
+            base.Init(s, ti, args);
+
+            if(args == null) showBuild = false;
+            else {
+                showBuild = (bool)args;
+            }
 
             // Open File
             FileInfo fi = new FileInfo(s.LevelGrid.Directory.FullName + @"\camera.dat");
@@ -65,7 +71,7 @@ namespace RTS.Input {
 
         public void Build(RTSRenderer renderer) {
             // Create UI
-            UI = new RTSUI(renderer, @"Packs\Default\scripts\input\player\RTS.uic");
+            UI = new RTSUI(renderer, @"Packs\Default\scripts\input\player\RTS.uic", showBuild);
             UI.SetTeam(Team);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
             OnNewSelection += UI.BBPanel.OnNewSelection;
@@ -365,7 +371,7 @@ namespace RTS.Input {
         }
 
         public void Update(RTSRenderer renderer, GameState s) {
-            UI.BuildingPanel.Update();
+            //UI.BuildingPanel.Update();
         }
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             UI.Draw(renderer, batch);

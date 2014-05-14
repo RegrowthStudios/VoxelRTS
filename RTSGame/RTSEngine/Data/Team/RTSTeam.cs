@@ -77,7 +77,7 @@ namespace RTSEngine.Data.Team {
                 string it = s.ReadString();
                 team.Input = state.Scripts[it].CreateInstance<ACInputController>();
                 team.Input.Deserialize(s);
-                team.Input.Init(state, index);
+                team.Input.Init(state, index, null);
             }
 
             RTSColorScheme scheme = new RTSColorScheme();

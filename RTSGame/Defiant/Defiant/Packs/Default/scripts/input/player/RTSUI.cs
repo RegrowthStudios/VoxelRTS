@@ -51,7 +51,7 @@ namespace RTS.Input {
             private set;
         }
 
-        public RTSUI(RTSRenderer renderer, string uicFile) {
+        public RTSUI(RTSRenderer renderer, string uicFile, bool showBuildPanel) {
             uic = ZXParser.ParseFile(uicFile, typeof(UICRTS)) as UICRTS;
 
             SpriteFont font = renderer.LoadFont(uic.Font);
@@ -61,7 +61,7 @@ namespace RTS.Input {
             BuildBounds(renderer);
             BuildMinimap(renderer, uic.UICMinimap);
             BuildBBPanel(renderer);
-            BuildBuildingPanel();
+            BuildBuildingPanel(showBuildPanel);
             BuildSelectionPanel(renderer);
             BuildTeamDataPanel();
         }
@@ -71,7 +71,7 @@ namespace RTS.Input {
             Minimap.Dispose();
             TeamDataPanel.Dispose();
             SelectionPanel.Dispose();
-            BuildingPanel.Dispose();
+            if(BuildingPanel != null) BuildingPanel.Dispose();
         }
 
         private void BuildBounds(RTSRenderer renderer) {
@@ -106,9 +106,11 @@ namespace RTS.Input {
             BBPanel.IconLibrary = renderer.IconLibrary;
             BBPanel.BackPanel.Color = UserConfig.MainScheme.WidgetBase;
         }
-        private void BuildBuildingPanel() {
+        private void BuildBuildingPanel(bool b) {
+            if(!b) return;
             BuildingPanel = new RTSUIBuildPanel(wrMain, 180, 26, 5, 12, 24);
-            BuildingPanel.Parent = BBPanel.BackPanel;
+            BuildingPanel.Menu.Widget.AlignY = Alignment.BOTTOM;
+            BuildingPanel.Menu.Parent = BBPanel.BackPanel;
         }
         private void BuildSelectionPanel(RTSRenderer renderer) {
             SelectionPanel = new RTSUISelectionPanel(wrMain, uic.SelectionRows, uic.SelectionColumns, uic.SelectionIconSize, uic.SelectionIconBuffer);
@@ -128,8 +130,10 @@ namespace RTS.Input {
         }
 
         public void SetTeam(RTSTeam team) {
-            BuildingPanel.Build(team);
-            BuildingPanel.Hook();
+            if(BuildingPanel != null) {
+                BuildingPanel.Build(team);
+                BuildingPanel.Hook();
+            }
         }
 
         public bool Inside(int x, int y) {
@@ -137,7 +141,7 @@ namespace RTS.Input {
                 Minimap.WidgetBase.Inside(x, y) ||
                 SelectionPanel.BackPanel.Inside(x, y) ||
                 BBPanel.BackPanel.Inside(x, y) ||
-                BuildingPanel.Inside(x, y) ||
+                (BuildingPanel == null ? false : BuildingPanel.Inside(x, y)) ||
                 TeamDataPanel.Inside(x, y);
         }
 
@@ -149,9 +153,5 @@ namespace RTS.Input {
             batch.End();
             renderer.Minimap.DrawCamera(renderer, rMap);
         }
-
-        //private void OnWindowResize() {
-        //    PanelBottom.Width = rectBounds.Width;
-        //}
     }
 }

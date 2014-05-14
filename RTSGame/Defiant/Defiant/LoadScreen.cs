@@ -308,7 +308,9 @@ namespace RTS {
                 LoadedRenderer.HookToGame(LoadedState, 0, LoadedCamera);
 
                 // Initialize Inputs
+                int teami = -1;
                 foreach(var t in LoadedState.teams) {
+                    teami++;
                     if(t == null) continue;
 
                     // Set Camera
@@ -317,7 +319,7 @@ namespace RTS {
                         vInput.Camera = LoadedCamera;
 
                     // Init
-                    t.Input.Init(LoadedState, t.Index);
+                    t.Input.Init(LoadedState, t.Index, loadData.Teams[teami].InputInitArgs);
 
                     // Build
                     if(vInput != null)

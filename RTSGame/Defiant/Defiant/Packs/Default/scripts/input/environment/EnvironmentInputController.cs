@@ -154,8 +154,8 @@ namespace RTS.Input {
             Type = RTSInputType.Environment;
         }
 
-        public override void Init(GameState s, int ti) {
-            base.Init(s, ti);
+        public override void Init(GameState s, int ti, object args) {
+            base.Init(s, ti, args);
             grid = GameState.IGrid;
             random = new Random();
             thread = new Thread(WorkThread);
@@ -207,12 +207,9 @@ namespace RTS.Input {
                 }
             }
             Team.OnUnitSpawn += OnUnitSpawn;
-
             
             AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, new Point(60,60)));
             treeLocations.Add(new Point(60, 60));
-             
-
         }
 
         private void WorkThread() {

@@ -32,8 +32,8 @@ namespace RTS.Input {
             Type = RTSInputType.AI;
         }
 
-        public override void Init(GameState s, int ti) {
-            base.Init(s, ti);
+        public override void Init(GameState s, int ti, object args) {
+            base.Init(s, ti, args);
 
             Team.OnBuildingSpawn += OnBuildingSpawn;
             random = new Random();

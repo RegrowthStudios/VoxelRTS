@@ -20,7 +20,7 @@ InputTypes [
     {}
 ]
 InputInitArgs [
-    { NULL }
+    <System.Boolean> { True }
     { NULL }
     { NULL }
     { NULL }
