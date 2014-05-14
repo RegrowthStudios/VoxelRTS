@@ -15,9 +15,26 @@ ViewIcon(
 ViewButton(
     {~~RENDERER~~}
     {~~RACE~~}
-    {RTS.Default.Buttons.Spawn.Worker}
+    {Headquarters}
+    {0}
     {~~FILEROOTDIR~~}
-    {icons\Worker.png}
+    {icons\Soldier.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Headquarters}
+    {1}
+    {~~FILEROOTDIR~~}
+    {icons\Heavy.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Headquarters}
+    {2}
+    {~~FILEROOTDIR~~}
+    {icons\Armored.png}
 )
 
 // Unit Data
@@ -38,4 +55,6 @@ SetBBox ({-2, 0, -3} {2, 2.5, 3})
 
 // Controllers
 SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
-AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Worker} { NULL })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 0 })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 1 })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 2 })

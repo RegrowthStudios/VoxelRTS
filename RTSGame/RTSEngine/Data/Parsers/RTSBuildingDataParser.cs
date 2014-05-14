@@ -30,8 +30,8 @@ namespace RTSEngine.Data.Parsers {
                 renderer.IconLibrary.Add(key, renderer.LoadTexture2D(Path.Combine(rootPath, icon)));
         }
         [ZXParse("ViewButton")]
-        public void BuildButton(RTSRenderer renderer, RTSRace race, string name, string rootPath, string icon) {
-            string key = string.Join(".", race.FriendlyName, name);
+        public void BuildButton(RTSRenderer renderer, RTSRace race, string name, int i, string rootPath, string icon) {
+            string key = string.Join(".", race.FriendlyName, name, i);
             if(!renderer.IconLibrary.ContainsKey(key))
                 renderer.IconLibrary.Add(key, renderer.LoadTexture2D(Path.Combine(rootPath, icon)));
         }

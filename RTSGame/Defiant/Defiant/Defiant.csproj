@@ -132,9 +132,9 @@
     <Content Include="Packs\Default\scripts\input\player\RTSUIBuildPanel.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\scripts\input\player\RTSUIPanel2D.cs">
+    <Compile Include="Packs\Default\scripts\input\player\RTSUIPanel2D.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </Compile>
     <Content Include="Packs\Default\scripts\input\player\RTSUITeamDataPanel.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
