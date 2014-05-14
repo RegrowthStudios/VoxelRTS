@@ -61,6 +61,7 @@
     <Compile Include="Controllers\FOWResolver.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
+    <Compile Include="DataExt\EnvironmentData.cs" />
     <Compile Include="Data\Parsers\RegexHelper.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using RTSEngine.Data.Parsers;
 
-namespace RTS.Input {
+namespace RTSEngine.Data {
     public struct EnvironmentData {
         public static EnvironmentData Default {
             get {
