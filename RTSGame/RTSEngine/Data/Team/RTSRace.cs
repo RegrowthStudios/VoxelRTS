@@ -59,8 +59,11 @@ namespace RTSEngine.Data.Team {
         public RTSBuildingData[] ActiveBuildings;
 
         public ReflectedScript SCAction;
+        public object SCActionInitArgs;
         public ReflectedScript SCMovement;
+        public object SCMovementInitArgs;
         public ReflectedScript SCTargeting;
+        public object SCTargetingInitArgs;
 
         public RTSRace() {
             Units = new RTSUnitData[MAX_UNIT_TYPES];

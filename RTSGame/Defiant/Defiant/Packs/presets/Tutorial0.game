@@ -19,6 +19,16 @@ InputTypes [
     {}
     {}
 ]
+InputInitArgs [
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+]
 Races [
     {Mech}
     {None}

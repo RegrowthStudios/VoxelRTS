@@ -18,7 +18,7 @@ namespace RTS.Default.Buttons.Spawn {
             get { return building.Team.Race.Units[UnitType].BuildTime; }
         }
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
         }
 
         public override void OnQueueFinished(GameState s) {

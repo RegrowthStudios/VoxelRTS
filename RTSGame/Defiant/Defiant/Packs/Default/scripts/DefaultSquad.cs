@@ -16,7 +16,7 @@ namespace RTS.Default.Squad {
         Targeting tc;
         Movement mc;
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
             tc = squad.TargetingController as Targeting;
             mc = squad.MovementController as Movement;
         }
@@ -50,7 +50,7 @@ namespace RTS.Default.Squad {
         int teamIndex;
         //public readonly Dictionary<int, int> origTargetOrders = new Dictionary<int, int>();
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
             teamIndex = squad.Team.Index;
             //for(int i = 0; i < squad.Units.Count; i++) {
             //    RTSUnit unit = squad.Units[i];
@@ -128,7 +128,7 @@ namespace RTS.Default.Squad {
     }
 
     public class Movement : ACSquadMovementController {
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
             pathfinder = c.pathfinder;
             MinDefaultMoveSpeed = float.MaxValue;
             SquadRadiusSquared = 0f;

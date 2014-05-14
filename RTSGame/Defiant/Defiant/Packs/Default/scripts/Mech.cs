@@ -31,7 +31,7 @@ namespace RTS.Mech {
             SetAnimation(BehaviorFSM.None);
         }
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
 
         }
 

@@ -640,7 +640,7 @@ namespace RTS {
             animLoop.FrameSpeed = sp;
         }
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
         }
 
         public override void Update(GameState s, float dt) {

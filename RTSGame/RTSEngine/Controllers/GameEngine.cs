@@ -21,6 +21,7 @@ namespace RTSEngine.Controllers {
         public string PlayerName;
         public int InputType;
         public string InputController;
+        public object InputInitArgs;
         public string Race;
         public RTSColorScheme Colors;
     }

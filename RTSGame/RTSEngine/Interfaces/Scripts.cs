@@ -28,7 +28,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // This Called By The GameplayController (After Load/Deserialization)
-        public abstract void Init(GameState s, GameplayController c);
+        public abstract void Init(GameState s, GameplayController c, object initArgs);
 
         public virtual void SetUnit(RTSUnit u) {
             if(u == null) return;
@@ -132,7 +132,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // This Called By The GameplayController
-        public abstract void Init(GameState s, GameplayController c);
+        public abstract void Init(GameState s, GameplayController c, object initArgs);
 
         public virtual void SetBuilding(RTSBuilding b) {
             if(b == null) return;
@@ -208,7 +208,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // This Called By The GameplayController
-        public abstract void Init(GameState s, GameplayController c);
+        public abstract void Init(GameState s, GameplayController c, object initArgs);
 
         // Will Set Once And Then Fail On Later Occurrences
         public virtual void SetSquad(RTSSquad s) {
@@ -335,7 +335,6 @@ namespace RTSEngine.Interfaces {
         public abstract void Serialize(BinaryWriter s);
         public abstract void Deserialize(BinaryReader s, GameState state);
     }
-
     #endregion
 
     public interface IVisualInputController {

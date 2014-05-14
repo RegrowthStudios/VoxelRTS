@@ -38,4 +38,4 @@ SetBBox ({-2, 0, -3} {2, 2.5, 3})
 
 // Controllers
 SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
-SetController({~~DICTSCRIPTS~~} {Button} {RTS.Default.Buttons.Spawn.Worker})
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Worker} { NULL })

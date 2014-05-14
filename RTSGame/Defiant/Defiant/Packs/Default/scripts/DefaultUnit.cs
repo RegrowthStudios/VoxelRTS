@@ -42,7 +42,7 @@ namespace RTS.Default.Unit {
             fApply(g, dt);
         }
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
             cc = unit.CombatController;
             mc = unit.MovementController;
 
@@ -225,7 +225,7 @@ namespace RTS.Default.Unit {
         // The Amount Of Time Remaining Before This Controller's Entity Can Attack Again
         private float attackCooldown;
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
         }
 
         public override void Attack(GameState g, float dt) {
@@ -302,7 +302,7 @@ namespace RTS.Default.Unit {
         // How Many Waypoints This Unit Should Lookahead When Updating Its PF Query
         protected const int lookahead = 2;
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
             Pathfinder = c.pathfinder;
             NetForce = Vector2.Zero;
         }
@@ -490,7 +490,7 @@ namespace RTS.Default.Unit {
             SetAnimation(BehaviorFSM.None);
         }
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
             state = s;
         }
 

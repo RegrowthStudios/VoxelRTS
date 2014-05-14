@@ -24,6 +24,7 @@ namespace RTS {
         public string Map;
         public string[] PlayerTypes;
         public string[] InputTypes;
+        public object[] InputInitArgs;
         public string[] Races;
         public string[] Colors;
     }
@@ -268,10 +269,12 @@ namespace RTS {
         TextWidget textGTController, textMap;
         ScrollMenu menuPresets;
         string[] inputTypes;
+        object[] inputInitArgs;
 
         public override void Build() {
             gPresets = new List<GamePreset>();
             inputTypes = new string[GameState.MAX_PLAYERS];
+            inputInitArgs = new object[GameState.MAX_PLAYERS];
             var di = new DirectoryInfo(PRESET_DIR);
             foreach(var fi in di.GetFiles()) {
                 if(!fi.Extension.EndsWith(@"game")) continue;
@@ -414,6 +417,7 @@ namespace RTS {
                         break;
                 }
                 eld.Teams[i].InputController = inputTypes[i];
+                eld.Teams[i].InputInitArgs = inputInitArgs[i];
             }
             eld.MapFile = new FileInfo(textMap.Text);
             eld.GTController = textGTController.Text;
@@ -428,6 +432,7 @@ namespace RTS {
             textGTController.Text = gp.GameType;
             textMap.Text = gp.Map;
             gp.InputTypes.CopyTo(inputTypes, 0);
+            gp.InputInitArgs.CopyTo(inputInitArgs, 0);
         }
 
         void OnKeyPressed(object sender, KeyEventArgs args) {

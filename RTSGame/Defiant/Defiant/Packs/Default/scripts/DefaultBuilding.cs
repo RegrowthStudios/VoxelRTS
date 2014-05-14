@@ -13,7 +13,7 @@ namespace RTS.Default.Building {
         private GameInputEvent currentEvent;
         public float buildTime; // How Long It Takes To Finish Producing The Unit
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
             EventQueue = new Queue<GameInputEvent>();
             buildTime = 0;
             currentEvent = null;

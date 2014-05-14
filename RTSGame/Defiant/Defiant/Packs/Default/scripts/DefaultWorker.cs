@@ -45,7 +45,7 @@ namespace RTS.Default.Worker {
             fApply(g, dt);
         }
 
-        public override void Init(RTSEngine.Data.GameState s, RTSEngine.Controllers.GameplayController c) {
+        public override void Init(RTSEngine.Data.GameState s, RTSEngine.Controllers.GameplayController c, object args) {
             cc = unit.CombatController;
             mc = unit.MovementController;
 
@@ -312,7 +312,7 @@ namespace RTS.Default.Worker {
         private static Random critRoller = new Random();
         private float attackCooldown;
 
-        public override void Init(GameState s, GameplayController c) {}
+        public override void Init(GameState s, GameplayController c, object args) { }
 
         public override void Attack(GameState g, float dt) {
             if(attackCooldown > 0)
@@ -396,7 +396,7 @@ namespace RTS.Default.Worker {
             SetAnimation(BehaviorFSM.None);
         }
 
-        public override void Init(GameState s, GameplayController c) {
+        public override void Init(GameState s, GameplayController c, object args) {
 
         }
 

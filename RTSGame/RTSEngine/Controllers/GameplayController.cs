@@ -336,10 +336,10 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
-            if(unit.CombatController != null) unit.CombatController.Init(s, this);
-            if(unit.MovementController != null) unit.MovementController.Init(s, this);
-            if(unit.AnimationController != null) unit.AnimationController.Init(s, this);
-            if(unit.ActionController != null) unit.ActionController.Init(s, this);
+            if(unit.CombatController != null) unit.CombatController.Init(s, this, unit.Data.CombatControllerInitArgs);
+            if(unit.MovementController != null) unit.MovementController.Init(s, this, unit.Data.MovementControllerInitArgs);
+            if(unit.AnimationController != null) unit.AnimationController.Init(s, this, unit.Data.AnimationControllerInitArgs);
+            if(unit.ActionController != null) unit.ActionController.Init(s, this, unit.Data.ActionControllerInitArgs);
 
             var btu = new BTaskUnitDecision(s, unit);
             unit.OnDestruction += (o) => {
@@ -349,9 +349,9 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSSquad squad) {
             // Init The Squad
-            if(squad.TargetingController != null) squad.TargetingController.Init(s, this);
-            if(squad.MovementController != null) squad.MovementController.Init(s, this);
-            if(squad.ActionController != null) squad.ActionController.Init(s, this);
+            if(squad.TargetingController != null) squad.TargetingController.Init(s, this, squad.Team.Race.SCTargeting);
+            if(squad.MovementController != null) squad.MovementController.Init(s, this, squad.Team.Race.SCMovementInitArgs);
+            if(squad.ActionController != null) squad.ActionController.Init(s, this, squad.Team.Race.SCActionInitArgs);
 
             var bts = new BTaskSquadDecision(s, squad);
             squad.OnDeath += (o) => {
@@ -361,9 +361,9 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSBuilding building) {
             // Init The Building
-            if(building.ActionController != null) building.ActionController.Init(s, this);
+            if(building.ActionController != null) building.ActionController.Init(s, this, building.Data.ActionControllerInitArgs);
             for(int i = 0; i < building.ButtonControllers.Count; i++)
-                building.ButtonControllers[i].Init(s, this);
+                building.ButtonControllers[i].Init(s, this, building.Data.DefaultButtonControllerInitArgs[i]);
 
             var btu = new BTaskBuildingDecision(s, building);
             building.OnDestruction += (o) => {

@@ -52,6 +52,6 @@ SetBBox ({-2, 0, -2} {2, 2, 2})
 
 // Controllers
 SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
-SetController({~~DICTSCRIPTS~~} {Button} {RTS.Default.Buttons.Spawn.Soldier})
-SetController({~~DICTSCRIPTS~~} {Button} {RTS.Default.Buttons.Spawn.Heavy})
-SetController({~~DICTSCRIPTS~~} {Button} {RTS.Default.Buttons.Spawn.Armored})
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Soldier} { NULL })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Heavy} { NULL })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Armored} { NULL })
