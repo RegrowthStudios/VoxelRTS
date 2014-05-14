@@ -119,13 +119,13 @@ namespace RTS.Default.Unit {
                     float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
                     switch(unit.CombatOrders) {
                         case BehaviorFSM.UseRangedAttack:
-                            if(d <= mr * 0.75) {
+                            if(d <= mr * 0.75 && unit.Team.Index != unit.Target.Team.Index) {
                                 SetState(BehaviorFSM.CombatRanged);
                                 return;
                             }
                             break;
                         case BehaviorFSM.UseMeleeAttack:
-                            if(dBetween <= unit.CollisionGeometry.InnerRadius * 0.2f) {
+                            if (dBetween <= unit.CollisionGeometry.InnerRadius * 0.2f && unit.Team.Index != unit.Target.Team.Index) {
                                 SetState(BehaviorFSM.CombatMelee);
                                 return;
                             }
@@ -522,13 +522,10 @@ namespace RTS.Default.Unit {
                     alCurrent = alWalk;
                     alCurrent.Restart(true);
                     break;
+                case BehaviorFSM.CombatRanged:
                 case BehaviorFSM.CombatMelee:
                     alCurrent = alMelee;
-                    alCurrent.Restart(false);
-                    break;
-                case BehaviorFSM.CombatRanged:
-                    alCurrent = alFire;
-                    alCurrent.Restart(false);
+                    alCurrent.Restart(true);
                     break;
                 case BehaviorFSM.Rest:
                     alCurrent = alRest;
