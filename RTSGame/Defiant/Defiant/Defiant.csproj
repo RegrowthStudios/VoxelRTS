@@ -146,9 +146,6 @@
     <Content Include="Packs\Default\scripts\tutorials\T0.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\scripts\UIInput.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Compile Include="PressEnterScreen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="Packs\Default\textures\BBPanel.png">
