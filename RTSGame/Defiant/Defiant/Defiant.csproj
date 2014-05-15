@@ -18,6 +18,7 @@
     <XnaOutputType>Game</XnaOutputType>
     <ApplicationIcon>Game.ico</ApplicationIcon>
     <Thumbnail>GameThumbnail.png</Thumbnail>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -28,10 +29,10 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>1</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -58,6 +59,18 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <PlatformTarget>x86</PlatformTarget>
     <XnaCompressContent>true</XnaCompressContent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>2ED00A6C330ADDA457903D87A7BEC44DB87278B8</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>Defiant_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
@@ -88,6 +101,9 @@
     <Compile Include="LevelEditor\LEScreen.cs" />
     <Compile Include="LevelEditor\LETool.cs" />
     <Content Include="LevelEditor\Mouse\Rect.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\Caldera\regions.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\races\Mech\animations\Light.png">
@@ -130,9 +146,9 @@
     <Content Include="Packs\Default\scripts\DefaultWorker.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Packs\Default\scripts\GameTypes.cs">
+    <Content Include="Packs\Default\scripts\GameTypes.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
+    </Content>
     <Compile Include="LoadScreen.cs" />
     <Compile Include="LobbyScreen.cs" />
     <Compile Include="LoginScreen.cs" />
@@ -353,9 +369,10 @@
     <Content Include="Packs\Default\maps\0\horde.dat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\maps\0\test.map">
+    <None Include="Defiant_TemporaryKey.pfx" />
+    <Content Include="Packs\Default\maps\0\test.map">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Packs\Default\maps\0\vox.world">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -374,69 +391,96 @@
     <Content Include="Packs\Default\maps\Tutorial0\vox.world">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Gaia\Gaia.race">
+    <Content Include="Packs\Default\maps\0\vox.world.le">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="Packs\Default\maps\Tutorial0\horde.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\Tutorial0\vox.world.le">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\Caldera\camera.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\Caldera\env.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\Caldera\height.hmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\Caldera\horde.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\Caldera\vox.world">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\maps\Caldera\vox.world.le">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Gaia\Gaia.race">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\races\Gaia\minion.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Gaia\models\Minion.model">
+    <Content Include="Packs\Default\races\Gaia\models\Minion.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Packs\Default\races\Gaia\models\Ore.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Gaia\models\Tank.model">
+    <Content Include="Packs\Default\races\Gaia\models\Tank.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Gaia\models\Tree.model">
+    </Content>
+    <Content Include="Packs\Default\races\Gaia\models\Tree.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Gaia\ore.building">
+    </Content>
+    <Content Include="Packs\Default\races\Gaia\ore.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Packs\Default\races\Gaia\tank.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Gaia\tree.building">
+    <Content Include="Packs\Default\races\Gaia\tree.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\armor.unit">
+    </Content>
+    <Content Include="Packs\Default\races\Mech\armor.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\barracks.building">
+    </Content>
+    <Content Include="Packs\Default\races\Mech\barracks.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Packs\Default\races\Mech\dc.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Mech\factory.building">
+    <Content Include="Packs\Default\races\Mech\factory.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\heavy.unit">
+    </Content>
+    <Content Include="Packs\Default\races\Mech\heavy.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\hq.building">
+    </Content>
+    <Content Include="Packs\Default\races\Mech\hq.building">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\Mech.race">
+    </Content>
+    <Content Include="Packs\Default\races\Mech\Mech.race">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\models\Barracks.model">
+    </Content>
+    <Content Include="Packs\Default\races\Mech\models\Barracks.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Packs\Default\races\Mech\models\Base.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\races\Mech\models\DC.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Mech\models\Factory.model">
+    <Content Include="Packs\Default\races\Mech\models\Factory.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\models\HQ.model">
+    </Content>
+    <Content Include="Packs\Default\races\Mech\models\HQ.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Packs\Default\races\Mech\models\Soldier.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -446,12 +490,12 @@
     <Content Include="Packs\Default\races\Mech\models\Light.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Packs\Default\races\Mech\soldier.unit">
+    <Content Include="Packs\Default\races\Mech\soldier.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Packs\Default\races\Mech\worker.unit">
+    </Content>
+    <Content Include="Packs\Default\races\Mech\worker.unit">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Packs\Default\scripts\input\player\RTS.uic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
