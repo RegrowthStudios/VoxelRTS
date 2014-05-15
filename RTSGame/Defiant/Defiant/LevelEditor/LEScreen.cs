@@ -19,6 +19,7 @@ using System.Text.RegularExpressions;
 using RTSEngine.Data.Parsers;
 using RTSEngine.Controllers;
 using RTSEngine.Interfaces;
+using Microsoft.Xna.Framework.Content;
 
 namespace RTS {
     public struct LEVT {
@@ -61,6 +62,7 @@ namespace RTS {
         WorldManager vManager;
         VoxState state;
         VoxelRenderer renderer;
+        ContentManager voxContent;
 
         // Voxel Modifying Data
         Dictionary<string, VoxData> dVox;
@@ -110,7 +112,10 @@ namespace RTS {
             state.World.worldMin.X = 0;
             state.World.worldMin.Y = 0;
             CreateVoxTypes();
-            renderer = new VoxelRenderer(game.Graphics, game.Content);
+
+            voxContent = new ContentManager(game.Services);
+            voxContent.RootDirectory = @"Content";
+            renderer = new VoxelRenderer(game.Graphics, voxContent);
             renderer.Hook(state);
             renderer.LoadEffect(@"FX\VoxelLE");
             renderer.LoadVMap(@"LevelEditor\VoxMap.png");
@@ -307,6 +312,9 @@ namespace RTS {
         private void DestroyVoxWorld() {
             state.VWorkPool.Dispose();
             renderer.Dispose();
+            voxContent.Unload();
+            voxContent.Dispose();
+            voxContent = null;
         }
         private void DestroyWidgets() {
             voxMenu.Unhook();
