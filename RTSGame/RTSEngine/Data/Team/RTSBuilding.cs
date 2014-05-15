@@ -187,11 +187,6 @@ namespace RTSEngine.Data.Team {
         public event Action<IEntity, int> OnDamage;
         public event Action<IEntity> OnDestruction;
         public event Action<RTSBuilding> OnBuildingFinished;
-        public event Action<RTSUnit> OnUnitSpawn;
-
-        public void SpawnUnit(RTSUnit u) {
-            OnUnitSpawn(u);
-        }
 
         // Collision Geometry
         public ICollidable CollisionGeometry {

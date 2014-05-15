@@ -83,6 +83,8 @@ namespace RTSEngine.Interfaces {
 
     // Reasons About How Combat Damage Should Be Performed To A Unit's Target
     public abstract class ACUnitCombatController : ACUnitController {
+        // Reset Any State This Controller Might Have To Manage Combat
+        public abstract void Reset();
         // Scripted Logic For Attacking
         public abstract void Attack(GameState g, float dt);
     }
@@ -234,12 +236,6 @@ namespace RTSEngine.Interfaces {
             get { return waypoints; }
             set { waypoints = value; }
         }
-
-        // The Whole Squad Will Move At The Min Default Movespeed
-        public float MinDefaultMoveSpeed { get; set; } 
-
-        // Used For Movement Halting Logic
-        public float SquadRadiusSquared { get; set; }
 
         // Pathfinder To Be Run On A Separate Thread         
         protected Pathfinder pathfinder;

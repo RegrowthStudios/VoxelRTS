@@ -1,4 +1,5 @@
-﻿using RTS.Input;
+﻿using Microsoft.Xna.Framework;
+using RTS.Input;
 using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Data.Team;
@@ -9,45 +10,28 @@ using System.Linq;
 using System.Text;
 
 namespace RTS.Packs.Default.scripts.input {
-    class BarrackController {
+    class BarracksController {
 
-        public RTSBuilding barrack;
+        public RTSBuilding barracks;
         public List<IEntity> army;
         public List<IEntity> sentArmy;
         private AI AIInput;
         public RTSBuilding target;
 
-        public BarrackController(AI input, RTSBuilding b) {
+        public BarracksController(AI input, RTSBuilding b) {
             army = new List<IEntity>();
             sentArmy = new List<IEntity>();
             AIInput = input;
-            barrack = b;
-            b.OnUnitSpawn += OnUnitSpawn;
+            barracks = b;
         }
 
         public void SpawnUnits() {
-            if (army.Count > AIInput.spawnCap) { DevConsole.AddCommand("full");  return; }
+            if (army.Count > AIInput.spawnCap) { return; }
             int numSpawn = AIInput.spawnCap - army.Count;
-            int type;
             for (int i = 0; i < numSpawn; i++) {
-                int j = AIInput.random.Next(100);
-                if (j > AIInput.unitSpawnP[0] + AIInput.unitSpawnP[1]) {
-                    type = 2;
-                }
-                else if (j > AIInput.unitSpawnP[1]) {
-                    type = 1;
-                }
-                else {
-                    type = 0;
-                }
-                AIInput.AddEvent(new SpawnUnitEvent(AIInput.TeamIndex, type, barrack.GridPosition, barrack.UUID));
+                int type = AIInput.random.Next(barracks.ButtonControllers.Count);
+                barracks.ButtonControllers[type].OnQueueFinished(AIInput.GameState);                
             } 
-        }
-
-        public void OnUnitSpawn(RTSUnit u) {
-            DevConsole.AddCommand("spawn");
-            army.Add(u);
-            u.OnDestruction += OnUnitDeath;
         }
 
         public void OnUnitDeath(IEntity e) {
@@ -60,11 +44,10 @@ namespace RTS.Packs.Default.scripts.input {
             if (target != null) { return; }
             float minDist = float.MaxValue;
             foreach (var b in AIInput.player.Buildings) {
-                float dist = (b.GridPosition - barrack.GridPosition).Length();
+                float dist = (b.GridPosition - barracks.GridPosition).Length();
                 if (dist < minDist) {
                     minDist = dist;
                     target = b;
-                    DevConsole.AddCommand("target found");
                 }
             }
         }
@@ -75,7 +58,6 @@ namespace RTS.Packs.Default.scripts.input {
                 sentArmy.Add(u);
             }
             army.Clear();
-            DevConsole.AddCommand("moving to target");
             AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, sentArmy));
             AIInput.AddEvent(new SetTargetEvent(AIInput.TeamIndex, target));
             
@@ -90,7 +72,6 @@ namespace RTS.Packs.Default.scripts.input {
             foreach (var u in army) {
                 u.OnDestruction -= OnUnitDeath;
             }
-            barrack.OnUnitSpawn -= OnUnitSpawn;
         }
     }
 }
