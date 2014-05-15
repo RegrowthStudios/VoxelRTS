@@ -355,15 +355,27 @@ namespace RTS.Default.Unit {
             doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
             if(!doMove) return;
             // If The Old Path Has Become Invalidated, Send A New Query
+            // Note: These Invalidation Checks Ignore Fog, But The Idea Is To Look Only A Small Distance Ahead (Within Sight)
             invalid = false;
             int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
             for(int i = CurrentWaypointIndex; i > end; i--) {
-                Vector2 wp = Waypoints[i];
-                Point wpCell = HashHelper.Hash(wp, g.CGrid.numCells, g.CGrid.size);
-                if(g.CGrid.GetCollision(wpCell.X, wpCell.Y)) {
+                Vector2 wp2 = Waypoints[i];
+                Point cell2 = HashHelper.Hash(wp2, g.CGrid.numCells, g.CGrid.size);
+                if(g.CGrid.GetCollision(cell2.X, cell2.Y)) {
                     invalid = true;
                     break;
                 }
+                // Check For Walls Too
+                Point cell1 = HashHelper.Hash(unit.GridPosition, g.CGrid.numCells, g.CGrid.size);
+                if(IsValid(i + 1)) {
+                    Vector2 wp1 = Waypoints[i + 1];
+                    cell1 = HashHelper.Hash(wp1, g.CGrid.numCells, g.CGrid.size);
+                }
+                if(!g.CGrid.CanMoveFrom(cell1, cell2)) {
+                    invalid = true;
+                    break;
+                }
+
             }
             if(stuck || invalid && (Query == null || Query != null && Query.IsOld)) {
                 Vector2 goal = Waypoints[0];
