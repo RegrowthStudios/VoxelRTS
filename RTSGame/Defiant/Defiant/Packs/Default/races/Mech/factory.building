@@ -1,0 +1,33 @@
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Factory.model}
+    {{textures\FactoryMain.png} {textures\FactoryKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Factory}
+    {~~FILEROOTDIR~~}
+    {icons\Factory.png}
+)
+
+// Unit Data
+Name            [Factory]
+Health          [120]
+CapitalCost     [20]
+PopCapChange    [10]
+Impact          [10]
+BuildAmount     [700]
+SightRadius     [14]
+GridSize        [1, 1]
+IsResource      [False]
+Depositable		[True]
+MaxCount        [1000]
+
+// Collision Data
+SetBBox ({-1, 0, -1} {1, 2, 1})
+
+// Controllers
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})

@@ -309,6 +309,7 @@ namespace RTSEngine.Controllers {
         private RTSBuildingData Data {
             get { return state.teams[vb.Team].Race.Buildings[vb.Type]; }
         }
+        private RTSBuilding building;
 
         public EnemyBuildingUpdater(GameState s, int tIndex, ViewedBuilding _vb, RTSBuilding b)
             : base(1) {
@@ -317,6 +318,7 @@ namespace RTSEngine.Controllers {
             Added = false;
             isDead = false;
             vb = _vb;
+            building = b;
 
             if(b != null) b.OnDestruction += OnBuildingDeath;
             else isDead = true;
@@ -335,6 +337,7 @@ namespace RTSEngine.Controllers {
         private void OnBuildingDeath(IEntity o) {
             isDead = true;
             o.OnDestruction -= OnBuildingDeath;
+            building = null;
         }
 
         public override void DoWork(float dt) {
@@ -351,6 +354,7 @@ namespace RTSEngine.Controllers {
                     FogOfWar f = state.CGrid.GetFogOfWar(p.X, p.Y, teamIndex);
                     switch(f) {
                         case FogOfWar.Active:
+                            if(Added) break;
                             state.teams[teamIndex].ViewedEnemyBuildings.Add(vb);
                             Added = true;
                             break;
@@ -370,12 +374,17 @@ namespace RTSEngine.Controllers {
                             break;
                     }
                 }
-                if(fActive > 0 && isDead) {
-                    // Know Building Is Dead Now
-                    state.teams[teamIndex].ViewedEnemyBuildings.Remove(vb);
-                    Added = false;
-                    Finish();
-                    return;
+                if(fActive > 0) {
+                    if(isDead) {
+                        // Know Building Is Dead Now
+                        state.teams[teamIndex].ViewedEnemyBuildings.Remove(vb);
+                        Added = false;
+                        Finish();
+                        return;
+                    }
+                    else {
+                        vb.BuildAmount = 1 - ((float)building.BuildAmountLeft / (float)building.Data.BuildAmount);
+                    }
                 }
                 else if(fNothing == Data.GridSize.X * Data.GridSize.Y) {
                     // Not To Be Seen Anymore

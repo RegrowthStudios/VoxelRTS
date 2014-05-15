@@ -7,6 +7,7 @@ using RTSEngine.Interfaces;
 using System.Collections.Concurrent;
 using RTSEngine.Data.Team;
 using System.IO;
+using Grey.Vox;
 
 namespace RTSEngine.Interfaces {
     // Types Of Teams
@@ -58,7 +59,7 @@ namespace RTSEngine.Interfaces {
         public abstract void Dispose();
 
         // Called After Controller Is Created
-        public virtual void Init(GameState s, int t) {
+        public virtual void Init(GameState s, int t, object args) {
             GameState = s;
             TeamIndex = t;
         }
@@ -113,6 +114,9 @@ namespace RTSEngine.Interfaces {
             if(OnNewSelection != null)
                 OnNewSelection(this, selected);
         }
+
+        public abstract List<LEVoxel> CreateVoxels(VoxAtlas atlas);
+        public abstract void LESave(VoxWorld world, int w, int h, DirectoryInfo dir);
 
         public abstract void Serialize(BinaryWriter s);
         public abstract void Deserialize(BinaryReader s);

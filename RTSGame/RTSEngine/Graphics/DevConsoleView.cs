@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Controllers;
 
@@ -21,11 +22,10 @@ namespace RTSEngine.Graphics {
             set;
         }
         private SpriteFont font;
-        private IDisposable fontDisp;
         private Texture2D tPixel;
 
-        public DevConsoleView(GraphicsDevice g) {
-            font = XNASpriteFont.Compile(g, "Courier New", 16, out fontDisp);
+        public DevConsoleView(ContentManager cm, string _font, GraphicsDevice g) {
+            font = cm.Load<SpriteFont>(_font);
             tPixel = new Texture2D(g, 1, 1);
             tPixel.SetData(new Color[] { Color.White });
             BackColor = DEFAULT_BACK_COLOR;
@@ -34,8 +34,6 @@ namespace RTSEngine.Graphics {
         public void Dispose() {
             if(font != null) {
                 font = null;
-                fontDisp.Dispose();
-                fontDisp = null;
             }
             if(tPixel != null) {
                 tPixel.Dispose();
@@ -46,16 +44,23 @@ namespace RTSEngine.Graphics {
         public void Draw(SpriteBatch sb, Vector2 pos) {
             string commands = "";
 
-            foreach(var command in DevConsole.Lines) {
+            var coms = DevConsole.Lines.ToArray();
+            foreach(var command in coms) {
                 commands += command + "\n";
             }
-             
-            commands += "\n > " + DevConsole.TypedText;
+            commands += "\n > ";
+            int cc = commands.Length;
+            commands += DevConsole.TypedText;
             Vector2 size = font.MeasureString(commands);
 
             // Draw Commands
             sb.Draw(tPixel, pos, null, BackColor, 0f, Vector2.Zero, size + TEXT_OFFSET * 2f, SpriteEffects.None, 0f);
             sb.DrawString(font, commands, pos + TEXT_OFFSET, TextColor);
+
+            // Draw The Caret
+            Vector3 cPosH = font.GetCaretOffsetAndHeight(commands, Math.Max(0, cc + DevConsole.TextCaret));
+            Vector2 cPos = new Vector2(cPosH.X, cPosH.Y);
+            sb.Draw(tPixel, pos + cPos + TEXT_OFFSET, null, Color.Red, 0f, Vector2.Zero, new Vector2(1f, cPosH.Z), SpriteEffects.None, 0f);
         }
     }
 }

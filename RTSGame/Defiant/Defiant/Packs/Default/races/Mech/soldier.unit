@@ -1,0 +1,47 @@
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Light.model}
+    {{animations\Light.png} {textures\LightMain.png} {textures\LightKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Light Soldier}
+    {~~FILEROOTDIR~~}
+    {icons\Soldier.png}
+)
+
+// Unit Data
+NAME            [Light Soldier]
+HEALTH          [600]
+SPEED           [3]
+CAPITALCOST     [5]
+POPULATIONCOST  [1]
+BUILDTIME       [10]
+IMPACT          [10]
+WORKER          [False]
+CARRYCAPACITY   [0]
+MAXCOUNT        [1000]
+
+// Collision Data
+RADIUS          [0.4]
+BBOXMIN         [-0.4 , 0.0 , -0.4]
+BBOXMAX         [0.4 , 1.0 , 0.4]
+
+// Combat Data
+BASECOMBAT <RTSEngine.Data.BaseCombatData> {
+    ARMOR           [0]
+    MINRANGE        [0]
+    MAXRANGE        [8]
+    ATTACKTIMER     [0.5]
+    ATTACKDAMAGE    [10]
+    CRITICALDAMAGE  [15]
+    CRITICALCHANCE  [0.05]
+}
+
+SCRCONTROL({~~DICTSCRIPTS~~} {Action} {RTS.Default.Unit.Action})
+SCRCONTROL({~~DICTSCRIPTS~~} {Anim}   {RTS.Default.Unit.Animation})
+SCRCONTROL({~~DICTSCRIPTS~~} {Combat} {RTS.Default.Unit.Combat})
+SCRCONTROL({~~DICTSCRIPTS~~} {Move}   {RTS.Default.Unit.Movement})

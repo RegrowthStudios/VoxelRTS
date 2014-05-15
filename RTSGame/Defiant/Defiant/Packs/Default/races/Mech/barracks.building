@@ -1,0 +1,60 @@
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Barracks.model}
+    {{textures\BarracksMain.png} {textures\BarracksKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Barracks}
+    {~~FILEROOTDIR~~}
+    {icons\Barracks.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Barracks}
+    {0}
+    {~~FILEROOTDIR~~}
+    {icons\Soldier.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Barracks}
+    {1}
+    {~~FILEROOTDIR~~}
+    {icons\Heavy.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Barracks}
+    {2}
+    {~~FILEROOTDIR~~}
+    {icons\Armored.png}
+)
+
+// Unit Data
+Name            [Barracks]
+Health          [120]
+CapitalCost     [20]
+PopCapChange    [0]
+Impact          [10]
+BuildAmount     [800]
+SightRadius     [24]
+GridSize        [2, 2]
+IsResource      [False]
+Depositable		[False]
+MaxCount        [1000]
+
+// Collision Data
+SetBBox ({-2, 0, -2} {2, 2, 2})
+
+// Controllers
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 0 })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 1 })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 2 })

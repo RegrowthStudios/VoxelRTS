@@ -113,11 +113,14 @@ namespace RTSEngine.Data.Team {
         public BoundingBox BBox;
 
         public ReflectedScript DefaultActionController;
+        public object ActionControllerInitArgs;
         public readonly List<ReflectedScript> DefaultButtonControllers;
+        public readonly List<object> DefaultButtonControllerInitArgs;
 
         public RTSBuildingData(int i) {
             Index = i;
             DefaultButtonControllers = new List<ReflectedScript>();
+            DefaultButtonControllerInitArgs = new List<object>();
         }
 
         public void SetBBox(Vector3 min, Vector3 max) {
@@ -134,12 +137,13 @@ namespace RTSEngine.Data.Team {
                 case "action":
                     d.TryGetValue(key, out DefaultActionController);
                     break;
-                case "button":
-                    ReflectedScript scr;
-                    d.TryGetValue(key, out scr);
-                    DefaultButtonControllers.Add(scr);
-                    break;
             }
+        }
+        public void AddButton(Dictionary<string, ReflectedScript> d, string key, object initArgs) {
+            ReflectedScript scr;
+            d.TryGetValue(key, out scr);
+            DefaultButtonControllers.Add(scr);
+            DefaultButtonControllerInitArgs.Add(initArgs);
         }
     }
 }

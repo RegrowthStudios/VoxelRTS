@@ -91,6 +91,7 @@ namespace RTSEngine.Data {
             Type = type;
             Position = pos;
         }
+
     }
 
     public class SpawnBuildingEvent : GameInputEvent {

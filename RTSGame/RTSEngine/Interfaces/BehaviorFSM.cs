@@ -16,14 +16,15 @@ namespace RTSEngine.Interfaces {
         public const int Special0 = Death + 1;
         public const int Special1 = Special0 + 1;
         public const int Harvest = Special1 + 1;
-        public const int Repair = Harvest + 1;
+        public const int Deposit = Harvest + 1;
+        public const int Repair = Deposit + 1;
         public const int Build = Repair + 1;
 
         // Targeting Order Codes - Will Influence Targeting Behavior
         public const int TargetNone = 0;
         public const int TargetPassively = TargetNone + 1;
         public const int TargetAggressively = TargetPassively + 1;
-        public const int TargetOmnisciently = TargetAggressively + 1;
+        public const int TargetAsSquad = TargetAggressively + 1;
 
         // Combat Order Codes - Will Influence Behavior While In Combat
         public const int UseMeleeAttack = 0;

@@ -1,0 +1,33 @@
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\DC.model}
+    {{textures\DCMain.png} {textures\DCKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Distribution Center}
+    {~~FILEROOTDIR~~}
+    {icons\Factory.png}
+)
+
+// Unit Data
+Name            [Distribution Center]
+Health          [120]
+CapitalCost     [20]
+PopCapChange    [10]
+Impact          [10]
+BuildAmount     [500]
+SightRadius     [14]
+GridSize        [1, 1]
+IsResource      [False]
+Depositable		  [True]
+MaxCount        [1000]
+
+// Collision Data
+SetBBox ({-1, 0, -1} {1, 2, 1})
+
+// Controllers
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})

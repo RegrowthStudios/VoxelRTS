@@ -184,6 +184,9 @@ namespace RTSEngine.Data.Team {
             get;
             private set;
         }
+        public int MaxHealth {
+            get { return Data.Health; }
+        }
         public bool IsAlive {
             get {
                 return Health > 0;
@@ -318,10 +321,11 @@ namespace RTSEngine.Data.Team {
 
         // Applies Damage To Health
         public void Damage(int d) {
+            bool b = IsAlive;
             Health -= d;
             if(OnDamage != null)
                 OnDamage(this, d);
-            if(!IsAlive)
+            if(b != IsAlive && !IsAlive)
                 Destroy();
         }
 

@@ -1,0 +1,32 @@
+﻿CamPointerTexture   [Content\Textures\CamPointer.png]
+CamPointerHeights   [0.1, 0.3, 0.4]
+CamPointerRadii     [0.5, 1.1, 0.7]
+
+FXEntity            [FX\RTS]
+FXHealthTechnique   [Health]
+FXHealthPass        [Main]
+FXHealthTexture     [Content\Textures\SelectionCircle.png]
+FXBuildNoise        [Content\Textures\BuildNoise.png]
+FXHealthRadiusModifier  [1.3]
+FXHealthTint        [255, 255, 255, 255]
+
+FXMap               [FX\Map]
+FXParticle          [FX\Particle]
+ParticleConfig      <RTSEngine.Graphics.ParticleEffectConfig> {
+    PassSimple           [Simple]
+    ParamVP              [VP]
+    ParamTime            [Time]
+    ParamMapSize         [MapSize]
+    PassLightning        [Lightning]
+    ParamSplits          [Splits]
+    PassFire             [Fire]
+    ParamRates           [rates]
+    ParamScales          [scales]
+    ParamOffset1         [offset1]
+    ParamOffset2         [offset2]
+    ParamOffset3         [offset3]
+    ParamDistortScale    [distortScale]
+    ParamDistortBias     [distortBias]
+    PassAlert            [Alert]
+}
+

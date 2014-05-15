@@ -15,9 +15,27 @@ using RTSEngine.Data.Parsers;
 using RTSEngine.Interfaces;
 using Grey.Vox;
 using Grey.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace RTSEngine.Graphics {
+    public class RendererInitArgs {
+        public string CamPointerTexture;
+        public Vector3 CamPointerRadii;
+        public Vector3 CamPointerHeights;
 
+        public string FXEntity;
+        public string FXHealthTechnique;
+        public string FXHealthPass;
+        public string FXHealthTexture;
+        public float FXHealthRadiusModifier;
+        public Color FXHealthTint;
+        public string FXBuildNoise;
+
+        public string FXMap;
+
+        public string FXParticle;
+        public ParticleEffectConfig ParticleConfig;
+    }
     public class RTSRenderer : IDisposable {
         private const float SELECTION_RADIUS_MODIFIER = 1.1f;
         private const float SELECTION_HEIGHT_PLACEMENT = 0.05f;
@@ -30,9 +48,11 @@ namespace RTSEngine.Graphics {
             get { return window; }
         }
         private GraphicsDeviceManager gManager;
+        private ContentManager cManager;
         public GraphicsDevice G {
             get { return gManager.GraphicsDevice; }
         }
+        private RendererInitArgs args;
 
         // Selection Box
         private Texture2D tPixel;
@@ -43,6 +63,10 @@ namespace RTSEngine.Graphics {
         public Camera Camera {
             get;
             set;
+        }
+        public CameraPointer CamPointer {
+            get;
+            private set;
         }
 
         // Map To Render
@@ -76,8 +100,9 @@ namespace RTSEngine.Graphics {
         // Effects
         private BasicEffect fxSimple;
         private RTSFXEntity fxAnim;
+        private Texture2D tNoise;
+        private HealthViewer healthView;
         private RTSFXMap fxMap;
-        private Effect fxParticle;
 
         // The Friendly Team To Be Visualizing
         private int teamIndex;
@@ -108,9 +133,11 @@ namespace RTSEngine.Graphics {
         // Graphics Data To Dispose
         private readonly ConcurrentBag<IDisposable> toDispose;
 
-        public RTSRenderer(GraphicsDeviceManager gdm, string fxAnimFile, string fxMapFile, string fxP, GameWindow w) {
+        public RTSRenderer(GraphicsDeviceManager gdm, ContentManager cm, RendererInitArgs ria, GameWindow w) {
             window = w;
             gManager = gdm;
+            cManager = cm;
+            args = ria;
             toDispose = new ConcurrentBag<IDisposable>();
 
             NonFriendlyUnitModels = new List<RTSUnitModel>();
@@ -123,7 +150,7 @@ namespace RTSEngine.Graphics {
             tPixel.SetData(new Color[] { Color.White });
             IconLibrary.Add("None", tPixel);
 
-            fxMap = new RTSFXMap(LoadEffect(fxMapFile));
+            fxMap = new RTSFXMap(LoadEffect(ria.FXMap));
 
             fxSimple = CreateEffect();
             fxSimple.LightingEnabled = false;
@@ -133,22 +160,26 @@ namespace RTSEngine.Graphics {
             fxSimple.World = Matrix.Identity;
             fxSimple.Texture = tPixel;
 
-            fxAnim = new RTSFXEntity(LoadEffect(fxAnimFile));
+            fxAnim = new RTSFXEntity(LoadEffect(ria.FXEntity));
             fxAnim.World = Matrix.Identity;
             fxAnim.CPrimary = Vector3.UnitX;
             fxAnim.CSecondary = Vector3.UnitY;
             fxAnim.CTertiary = Vector3.UnitZ;
-
-            fxParticle = LoadEffect(fxP);
+            tNoise = LoadTexture2D(ria.FXBuildNoise);
+            healthView = new HealthViewer();
+            healthView.Build(this, fxAnim, ria.FXHealthTechnique, ria.FXHealthPass, ria.FXHealthTexture);
             UseFOW = true;
+
+            pRenderer = new ParticleRenderer(LoadEffect(ria.FXParticle), ria.ParticleConfig);
+            Minimap = new Minimap();
+
+            CamPointer = new CameraPointer();
+            CamPointer.Build(this, ria.CamPointerTexture, ria.CamPointerRadii, ria.CamPointerHeights);
 
             drawBox = false;
             MouseEventDispatcher.OnMousePress += OnMousePress;
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
             MouseEventDispatcher.OnMouseMotion += OnMouseMove;
-
-            pRenderer = new ParticleRenderer();
-            Minimap = new Minimap();
         }
         public void Dispose() {
             MouseEventDispatcher.OnMousePress -= OnMousePress;
@@ -203,8 +234,8 @@ namespace RTSEngine.Graphics {
             return t;
         }
         public Effect LoadEffect(string file) {
-            Effect fx = XNAEffect.Compile(G, file);
-            toDispose.Add(fx);
+            Effect fx = cManager.Load<Effect>(file);
+            //toDispose.Add(fx);
             return fx;
         }
         public BasicEffect CreateEffect() {
@@ -213,27 +244,20 @@ namespace RTSEngine.Graphics {
             return fx;
         }
         public SpriteFont LoadFont(string file) {
-            IDisposable disp;
-            SpriteFont f = XNASpriteFont.Compile(G, file, out disp);
-            toDispose.Add(disp);
+            SpriteFont f = cManager.Load<SpriteFont>(file);
             return f;
         }
-        public SpriteFont LoadFont(string file, out IDisposable disp) {
-            SpriteFont f = XNASpriteFont.Compile(G, file, out disp);
-            toDispose.Add(disp);
-            return f;
-        }
-        public SpriteFont CreateFont(string fontName, int size, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
-            IDisposable disp;
-            SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
-            toDispose.Add(disp);
-            return f;
-        }
-        public SpriteFont CreateFont(string fontName, int size, out IDisposable disp, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
-            SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
-            toDispose.Add(disp);
-            return f;
-        }
+        //public SpriteFont CreateFont(string fontName, int size, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
+        //    IDisposable disp;
+        //    SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
+        //    toDispose.Add(disp);
+        //    return f;
+        //}
+        //public SpriteFont CreateFont(string fontName, int size, out IDisposable disp, int spacing = 0, bool useKerning = true, string style = "Regular", char defaultChar = '*', int cStart = 32, int cEnd = 126) {
+        //    SpriteFont f = XNASpriteFont.Compile(G, fontName, size, out disp, spacing, useKerning, style, defaultChar, cStart, cEnd);
+        //    toDispose.Add(disp);
+        //    return f;
+        //}
         #endregion
 
         public void HookToGame(GameState state, int ti, Camera camera) {
@@ -247,20 +271,18 @@ namespace RTSEngine.Graphics {
 
             // Create The Map
             CreateVoxGeos(state.VoxState.World.Atlas);
-            Heightmap map = state.Map;
             Map = new VoxMap(this, state.CGrid.numCells.X, state.CGrid.numCells.Y);
             // TODO: Parse This In
             VoxMapConfig vmc = new VoxMapConfig();
             vmc.VoxState = state.VoxState;
             vmc.TexVoxMap = @"voxmap.png";
             vmc.RootPath = state.LevelGrid.Directory.FullName;
-            vmc.FXFile = @"Content\FX\Voxel.fx";
-            Map.Build(gManager, vmc);
+            vmc.FXFile = @"FX\Voxel";
+            Map.Build(gManager, cManager, vmc);
 
-            //Map = MapParser.ParseModel(this, state.LevelGrid, new FileInfo(state.LevelGrid.InfoFile));
-            Camera.MoveTo(map.Width * 0.5f, map.Depth * 0.5f);
-            fxMap.MapSize = new Vector2(map.Width, map.Depth);
-            fxParticle.Parameters["MapSize"].SetValue(new Vector2(map.Width, map.Depth));
+            Camera.MoveTo(state.CGrid.size.X * 0.5f, state.CGrid.size.Y * 0.5f);
+            fxMap.MapSize = state.CGrid.size;
+            pRenderer.MapSize = state.CGrid.size;
 
             // Hook FOW
             state.CGrid.OnFOWChange += OnFOWChange;
@@ -297,6 +319,7 @@ namespace RTSEngine.Graphics {
         }
         public void CreateVoxGeos(VoxAtlas atlas) {
             float DUV = 0.125f;
+            int vi;
             for(int i = 1; i < 6; i++) {
                 var vgpTop = new VGPCube6();
                 var vgpTrans = new VGPCube6();
@@ -324,6 +347,96 @@ namespace RTSEngine.Graphics {
                 atlas[(ushort)(i)].GeoProvider = vgpTop;
                 atlas[(ushort)(i + 5)].GeoProvider = vgpTrans;
                 atlas[(ushort)(i + 10)].GeoProvider = vgpCliff;
+            }
+            for(vi = 0; vi < 4; vi++) {
+                var vd = atlas[(ushort)(vi + 16)];
+                var vgp = new VGPCustom();
+                Vector4 uvr = new Vector4(DUV * 5, DUV * 0, DUV, DUV);
+                switch(vi) {
+                    case 0:
+                    case 1:
+                        vgp.CustomVerts[Voxel.FACE_PY] = new VertexVoxel[] {
+                            new VertexVoxel(new Vector3(0, 0, 0), Vector2.UnitX, uvr, Color.White),
+                            new VertexVoxel(new Vector3(1, -1, 0), Vector2.One, uvr, Color.White),
+                            new VertexVoxel(new Vector3(1, -1, 1), Vector2.UnitY, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, 0, 1), Vector2.Zero, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, -1, 0), Vector2.UnitX, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, -1, 1), Vector2.Zero, uvr, Color.White)
+                        };
+                        vgp.CustomInds[Voxel.FACE_PY] = new int[] {
+                            0, 1, 3, 3, 1, 2,
+                            3, 2, 5, 1, 0, 4,
+                            0, 3, 4, 4, 3, 5
+                        };
+                        break;
+                    default:
+                        vgp.CustomVerts[Voxel.FACE_PY] = new VertexVoxel[] {
+                            new VertexVoxel(new Vector3(1, 0, 0), Vector2.UnitX, uvr, Color.White),
+                            new VertexVoxel(new Vector3(1, -1, 1), Vector2.One, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, -1, 1), Vector2.UnitY, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, 0, 0), Vector2.Zero, uvr, Color.White),
+                            new VertexVoxel(new Vector3(1, -1, 0), Vector2.UnitX, uvr, Color.White),
+                            new VertexVoxel(new Vector3(0, -1, 0), Vector2.Zero, uvr, Color.White)
+                        };
+                        vgp.CustomInds[Voxel.FACE_PY] = new int[] {
+                            0, 1, 3, 3, 1, 2,
+                            3, 2, 5, 1, 0, 4,
+                            0, 3, 4, 4, 3, 5
+                        };
+                        break;
+                }
+                if((vi % 2) == 1) {
+                    if(vi == 1) for(int fi = 0; fi < 6; fi++)
+                            vgp.CustomVerts[Voxel.FACE_PY][fi].Position.X = 1 - vgp.CustomVerts[Voxel.FACE_PY][fi].Position.X;
+                    else for(int fi = 0; fi < 6; fi++)
+                            vgp.CustomVerts[Voxel.FACE_PY][fi].Position.Z = 1 - vgp.CustomVerts[Voxel.FACE_PY][fi].Position.Z;
+                    for(int ti = 0; ti < vgp.CustomInds[Voxel.FACE_PY].Length; ) {
+                        int buf = vgp.CustomInds[Voxel.FACE_PY][ti + 2];
+                        vgp.CustomInds[Voxel.FACE_PY][ti + 2] = vgp.CustomInds[Voxel.FACE_PY][ti];
+                        vgp.CustomInds[Voxel.FACE_PY][ti] = buf;
+                        ti += 3;
+                    }
+                }
+                vd.GeoProvider = vgp;
+            }
+            vi = 20;
+            for(int i = 0; i < 5; i++) {
+                var vgp = new VGPCube6();
+                for(int fi = 0; fi < 6; fi++) {
+                    vgp.Colors[fi] = Color.White;
+                    switch(fi) {
+                        case Voxel.FACE_NY:
+                            vgp.UVRects[fi] = new Vector4(DUV * i, DUV * 7, DUV, DUV);
+                            break;
+                        case Voxel.FACE_PY:
+                            vgp.UVRects[fi] = new Vector4(DUV * i, DUV * 5, DUV, DUV);
+                            break;
+                        default:
+                            vgp.UVRects[fi] = new Vector4(DUV * i, DUV * 6, DUV, DUV);
+                            break;
+                    }
+                }
+                atlas[(ushort)(vi + i)].GeoProvider = vgp;
+            }
+            vi += 5;
+            for(int i = 0; i < 5; i++) {
+                var vgp = new VGPCustom();
+                Vector4 uvr = new Vector4(DUV * 7, DUV * i, DUV, DUV);
+                vgp.CustomVerts[Voxel.FACE_PY] = new VertexVoxel[] {
+                    new VertexVoxel(new Vector3(0, 0, 0), Vector2.Zero, uvr, Color.White),
+                    new VertexVoxel(new Vector3(1, 0, 1), Vector2.UnitX, uvr, Color.White),
+                    new VertexVoxel(new Vector3(0, -1, 0), Vector2.UnitY, uvr, Color.White),
+                    new VertexVoxel(new Vector3(1, -1, 1), Vector2.One, uvr, Color.White),
+                    new VertexVoxel(new Vector3(0, 0, 1), Vector2.Zero, uvr, Color.White),
+                    new VertexVoxel(new Vector3(1, 0, 0), Vector2.UnitX, uvr, Color.White),
+                    new VertexVoxel(new Vector3(0, -1, 1), Vector2.UnitY, uvr, Color.White),
+                    new VertexVoxel(new Vector3(1, -1, 0), Vector2.One, uvr, Color.White)
+                };
+                vgp.CustomInds[Voxel.FACE_PY] = new int[] {
+                    0, 1, 2, 2, 1, 3,
+                    4, 5, 6, 6, 5, 7
+                };
+                atlas[(ushort)(vi + i)].GeoProvider = vgp;
             }
         }
         private void LoadTeamVisuals(GameState state, int ti) {
@@ -393,10 +506,10 @@ namespace RTSEngine.Graphics {
 
             G.Clear(Color.Black);
 
-            DrawMap(Camera.View * Camera.Projection);
+            DrawMap(Camera.View, Camera.Projection);
             DrawBuildings();
             DrawUnits();
-            DrawParticles();
+            DrawParticles(s.TotalGameTime);
             DrawSelectionCircles(s.teams[teamIndex].ColorScheme.Secondary);
             if(drawBox) DrawSelectionBox();
 
@@ -434,37 +547,18 @@ namespace RTSEngine.Graphics {
                 bm.UpdateInstances(G, fFVB);
         }
 
-        // Draw The Map
-        public void DrawMap(Matrix mVP) {
+        public void DrawMap(Matrix mV, Matrix mP) {
             // Set States
             G.DepthStencilState = DepthStencilState.Default;
             G.RasterizerState = RasterizerState.CullCounterClockwise;
             G.BlendState = BlendState.Opaque;
             G.SamplerStates[0] = SamplerState.LinearClamp;
 
-            // Set Camera
-            fxMap.VP = mVP;
-
             // Primary Map Model
-            Map.Draw(G, Matrix.CreateScale(2, 1, 2) * Camera.View, Camera.Projection);
-            //if(Map.TrianglesPrimary > 0) {
-            //    fxMap.SetTextures(G, Map.PrimaryTexture, FOWTexture);
-            //    G.SetVertexBuffer(Map.VBPrimary);
-            //    G.Indices = Map.IBPrimary;
-            //    fxMap.ApplyPassPrimary();
-            //    G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBPrimary.VertexCount, 0, Map.TrianglesPrimary);
-            //}
-            //// Secondary Map Model
-            //if(Map.TrianglesSecondary > 0) {
-            //    fxMap.SetTextures(G, Map.SecondaryTexture, FOWTexture);
-            //    G.SetVertexBuffer(Map.VBSecondary);
-            //    G.Indices = Map.IBSecondary;
-            //    fxMap.ApplyPassSecondary();
-            //    G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, Map.VBSecondary.VertexCount, 0, Map.TrianglesSecondary);
-            //}
+            G.Textures[1] = Map.FogOfWarTexture;
+            G.SamplerStates[1] = SamplerState.PointClamp;
+            Map.Draw(G, mV, mP);
         }
-
-        // Draw Buildings
         private void DrawBuildings() {
             // Set Camera
             fxAnim.VP = Camera.View * Camera.Projection;
@@ -472,9 +566,10 @@ namespace RTSEngine.Graphics {
             // Loop Through Models
             G.SamplerStates[1] = SamplerState.LinearClamp;
             G.SamplerStates[2] = SamplerState.LinearClamp;
+            G.SamplerStates[3] = SamplerState.LinearClamp;
             foreach(RTSBuildingModel buildingModel in NonFriendlyBuildingModels) {
                 if(buildingModel.VisibleInstanceCount < 1) continue;
-                fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
+                fxAnim.SetTexturesBuilding(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture, tNoise);
                 fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
                 fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
                 fxAnim.CTertiary = buildingModel.ColorScheme.Tertiary;
@@ -484,7 +579,7 @@ namespace RTSEngine.Graphics {
             }
             foreach(RTSBuildingModel buildingModel in FriendlyBuildingModels) {
                 if(buildingModel.VisibleInstanceCount < 1) continue;
-                fxAnim.SetTextures(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture);
+                fxAnim.SetTexturesBuilding(G, buildingModel.ModelTexture, buildingModel.ColorCodeTexture, tNoise);
                 fxAnim.CPrimary = buildingModel.ColorScheme.Primary;
                 fxAnim.CSecondary = buildingModel.ColorScheme.Secondary;
                 fxAnim.CTertiary = buildingModel.ColorScheme.Tertiary;
@@ -493,8 +588,6 @@ namespace RTSEngine.Graphics {
                 buildingModel.DrawInstances(G);
             }
         }
-
-        // Draw Units
         private void DrawUnits() {
             // Set Camera
             fxAnim.VP = Camera.View * Camera.Projection;
@@ -526,8 +619,6 @@ namespace RTSEngine.Graphics {
             G.VertexTextures[0] = null;
             G.VertexSamplerStates[0] = SamplerState.LinearClamp;
         }
-
-        // Draw Selection Box
         private void DrawSelectionBox() {
             fxSimple.TextureEnabled = false;
             fxSimple.VertexColorEnabled = true;
@@ -551,40 +642,37 @@ namespace RTSEngine.Graphics {
                     new VertexPositionColor(max, new Color(1f, 0, 0f, 0.3f)),
                 }, 0, 2, VertexPositionColor.VertexDeclaration);
         }
-
-        // Draw Selection Circles Under Selected Units
         private void DrawSelectionCircles(Vector3 c) {
             if(SelectionCircleTexture == null)
                 return;
             VertexPositionColorTexture[] verts;
             int[] inds;
             UpdateSelections(out verts, out inds);
-            if(verts == null || inds == null)
-                return;
+            if(verts != null || inds != null) {
+                fxSimple.TextureEnabled = true;
+                fxSimple.VertexColorEnabled = false;
 
-            fxSimple.TextureEnabled = true;
-            fxSimple.VertexColorEnabled = false;
+                G.SamplerStates[0] = SamplerState.LinearClamp;
+                G.DepthStencilState = DepthStencilState.DepthRead;
+                G.RasterizerState = RasterizerState.CullCounterClockwise;
+                G.BlendState = BlendState.Additive;
 
-            G.SamplerStates[0] = SamplerState.LinearClamp;
-            G.DepthStencilState = DepthStencilState.DepthRead;
-            G.RasterizerState = RasterizerState.CullCounterClockwise;
-            G.BlendState = BlendState.Additive;
+                fxSimple.Texture = SelectionCircleTexture;
+                fxSimple.World = Matrix.CreateTranslation(0, (float)(DateTime.UtcNow.TimeOfDay.TotalSeconds % 1.0), 0);
+                fxSimple.View = Camera.View;
+                fxSimple.Projection = Camera.Projection;
+                fxSimple.DiffuseColor = c;
+                fxSimple.CurrentTechnique.Passes[0].Apply();
 
-            fxSimple.Texture = SelectionCircleTexture;
-            fxSimple.World = Matrix.Identity;
-            fxSimple.View = Camera.View;
-            fxSimple.Projection = Camera.Projection;
-            fxSimple.DiffuseColor = c;
-            fxSimple.CurrentTechnique.Passes[0].Apply();
+                G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
 
-            G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
+                fxAnim.SetTechnique(args.FXHealthTechnique);
+                DrawHealth();
+                fxAnim.SetTechnique(@"Entity");
+            }
 
-            fxSimple.VertexColorEnabled = true;
-            fxSimple.World = Matrix.CreateTranslation(0, (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1.0), 0);
-            fxSimple.DiffuseColor = Vector3.One;
-            fxSimple.CurrentTechnique.Passes[0].Apply();
-
-            G.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, verts, 0, verts.Length, inds, 0, inds.Length / 3, VertexPositionColorTexture.VertexDeclaration);
+            // Draw The Camera On The Map
+            CamPointer.Draw(G, Camera.View, Camera.Projection, Camera.CamTarget);
         }
         public void UpdateSelections(out VertexPositionColorTexture[] verts, out int[] inds) {
             // Check If We Need To Render Any Selected Entities
@@ -603,10 +691,12 @@ namespace RTSEngine.Graphics {
                 float r = e.CollisionGeometry.BoundingRadius * SELECTION_RADIUS_MODIFIER;
                 float h = e.Height;
                 h += (e.BBox.Max.Y - e.BBox.Min.Y) * SELECTION_HEIGHT_PLACEMENT;
-                float mh = 1f;
-                if(e as RTSBuilding != null) mh = (e as RTSBuilding).Data.Health;
-                else mh = (e as RTSUnit).Data.Health;
-                Color cHealth = Color.Lerp(HEALTH_EMPTY_COLOR, HEALTH_FULL_COLOR, e.Health / mh);
+
+                // No Visualizing Unbuilt Buildings
+                RTSBuilding eb = e as RTSBuilding;
+                if(eb != null && eb.BuildAmountLeft > 0) continue;
+
+                Color cHealth = Color.Lerp(HEALTH_EMPTY_COLOR, HEALTH_FULL_COLOR, e.GetHealthRatio());
                 verts[i++] = new VertexPositionColorTexture(new Vector3(c.X - r, h, c.Y - r), cHealth, Vector2.Zero);
                 verts[i++] = new VertexPositionColorTexture(new Vector3(c.X + r, h, c.Y - r), cHealth, Vector2.UnitX);
                 verts[i++] = new VertexPositionColorTexture(new Vector3(c.X - r, h, c.Y + r), cHealth, Vector2.UnitY);
@@ -624,28 +714,52 @@ namespace RTSEngine.Graphics {
                 vi += 4;
             }
         }
+        public void DrawHealth() {
+            if(teamInput.selected.Count < 1) return;
 
-        // Draw Particles
-        private void DrawParticles() {
+            var lhv = new List<VertexHealthInstance>(teamInput.selected.Count);
+            for(int c = teamInput.selected.Count - 1; c >= 0; c--) {
+                IEntity e = teamInput.selected[c];
+                VertexHealthInstance vert = new VertexHealthInstance();
+                vert.Position = e.WorldPosition;
+                vert.Position.Y = e.BBox.Max.Y;
+
+                float mh = 1f;
+                if(e as RTSBuilding != null) mh = (e as RTSBuilding).Data.Health;
+                else mh = (e as RTSUnit).Data.Health;
+
+                vert.DirRadiusHealth = new Vector4(
+                    e.ViewDirection,
+                    e.CollisionGeometry.BoundingRadius * args.FXHealthRadiusModifier,
+                    e.Health / mh
+                    );
+                vert.Tint = args.FXHealthTint;
+
+                lhv.Add(vert);
+            }
+
+            healthView.Draw(G, lhv);
+        }
+        private void DrawParticles(float t) {
+            //float t = (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000);            
+
             G.DepthStencilState = DepthStencilState.DepthRead;
             G.RasterizerState = RasterizerState.CullNone;
             G.BlendState = BlendState.Additive;
 
-            fxParticle.Parameters["VP"].SetValue(Camera.View * Camera.Projection);
-            G.Textures[1] = FOWTexture;
-            G.SamplerStates[1] = SamplerState.PointClamp;
-            fxParticle.CurrentTechnique.Passes[0].Apply();
+            pRenderer.SetupAll(G, Camera.View * Camera.Projection, t, Map.FogOfWarTexture);
 
             pRenderer.SetBullets(G);
             pRenderer.DrawBullets(G);
 
-            float t = (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000);
-
-            pRenderer.SetFire(G, Camera.View * Camera.Projection, t);
+            pRenderer.SetFire(G);
             pRenderer.DrawFire(G);
 
-            pRenderer.SetLightning(G, Camera.View * Camera.Projection, t);
+            pRenderer.SetLightning(G);
             pRenderer.DrawLightning(G);
+
+            pRenderer.SetAlerts(G);
+            pRenderer.DrawAlerts(G);
         }
 
         // Selection Box Handling

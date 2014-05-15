@@ -1,0 +1,47 @@
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Base.model}
+    {{animations\Armored.png} {textures\Main.png} {textures\Key.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Armored Soldier}
+    {~~FILEROOTDIR~~}
+    {icons\Armored.png}
+)
+
+// Unit Data
+NAME            [Armored Soldier]
+HEALTH          [800]
+SPEED           [1.5]
+CAPITALCOST     [20]
+POPULATIONCOST  [2]
+BUILDTIME       [20]
+IMPACT          [10]
+WORKER          [False]
+CARRYCAPACITY   [0]
+MAXCOUNT        [1000]
+
+// Collision Data
+RADIUS          [0.4]
+BBOXMIN         [-0.4 , 0.0 , -0.4]
+BBOXMAX         [0.4 , 1.0 , 0.4]
+
+// Combat Data
+BASECOMBAT <RTSEngine.Data.BaseCombatData> {
+    ARMOR           [8]
+    MINRANGE        [0]
+    MAXRANGE        [5]
+    ATTACKTIMER     [1.5]
+    ATTACKDAMAGE    [13]
+    CRITICALDAMAGE  [20]
+    CRITICALCHANCE  [0.05]
+}
+
+SCRCONTROL({~~DICTSCRIPTS~~} {Action} {RTS.Default.Unit.Action})
+SCRCONTROL({~~DICTSCRIPTS~~} {Anim}   {RTS.Mech.Animation})
+SCRCONTROL({~~DICTSCRIPTS~~} {Combat} {RTS.Default.Unit.Combat})
+SCRCONTROL({~~DICTSCRIPTS~~} {Move}   {RTS.Default.Unit.Movement})

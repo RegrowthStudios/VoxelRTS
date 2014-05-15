@@ -1,0 +1,33 @@
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\Ore.model}
+    {{textures\Ore.png} {..\..\textures\NoKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Ore}
+    {~~FILEROOTDIR~~}
+    {icons\Ore.png}
+)
+
+// Unit Data
+Name            [Ore]
+Health          [2000]
+CapitalCost     [0]
+PopCapChange    [20]
+Impact          [5]
+BuildAmount     [600]
+SightRadius     [8]
+GridSize        [1, 1]
+IsResource      [True]
+Depositable		[False]
+MaxCount        [400]
+
+// Collision Data
+SetBBox ({-1, 0, -1} {1, 1, 1})
+
+// Controllers
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})

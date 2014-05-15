@@ -5,6 +5,7 @@ using System.Text;
 using Grey.Engine;
 using Grey.Vox;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Grey.Graphics {
@@ -13,10 +14,14 @@ namespace Grey.Graphics {
         public GraphicsDevice G {
             get { return graphics.GraphicsDevice; }
         }
+        private ContentManager cManager;
 
         private object lckDraw = new object();
 
-        Effect fx;
+        public Effect FX {
+            get;
+            private set;
+        }
         EffectParameter fxpVP, fxpWorld;
 
         public Texture2D VoxelMap {
@@ -27,13 +32,14 @@ namespace Grey.Graphics {
         List<Region> activeRegions;
         List<VoxGeo> geos;
 
-        public VoxelRenderer(GraphicsDeviceManager gdm) {
+        public VoxelRenderer(GraphicsDeviceManager gdm, ContentManager cm) {
             graphics = gdm;
+            cManager = cm;
             activeRegions = new List<Region>();
             geos = new List<VoxGeo>();
         }
         public void Dispose() {
-            fx.Dispose();
+            FX.Dispose();
             foreach(var vGeo in geos) vGeo.Dispose();
             VoxelMap.Dispose();
         }
@@ -47,10 +53,10 @@ namespace Grey.Graphics {
                 VoxelMap = Texture2D.FromStream(G, s);
         }
         public void LoadEffect(string file) {
-            fx = XNAEffect.Compile(G, file);
-            fx.CurrentTechnique = fx.Techniques[0];
-            fxpVP = fx.Parameters["VP"];
-            fxpWorld = fx.Parameters["World"];
+            FX =  cManager.Load<Effect>(file);
+            FX.CurrentTechnique = FX.Techniques[0];
+            fxpVP = FX.Parameters["VP"];
+            fxpWorld = FX.Parameters["World"];
         }
         public void AddRegionGeo(VoxGeo g) {
             lock(lckDraw) {
@@ -64,9 +70,9 @@ namespace Grey.Graphics {
             }
         }
 
-        public void DrawAll(Matrix mView, Matrix mProj) {
+        public void DrawAll(Matrix mWorld, Matrix mView, Matrix mProj) {
             G.DepthStencilState = DepthStencilState.Default;
-            G.BlendState = BlendState.Opaque;
+            G.BlendState = BlendState.NonPremultiplied;
             G.RasterizerState = RasterizerState.CullNone;
 
             fxpVP.SetValue(mView * mProj);
@@ -75,13 +81,16 @@ namespace Grey.Graphics {
             G.SamplerStates[0] = SamplerState.PointClamp;
             lock(lckDraw) {
                 foreach(var vGeo in geos) {
-                    fxpWorld.SetValue(Matrix.CreateTranslation(vGeo.Region.loc.X * Region.WIDTH, 0, vGeo.Region.loc.Y * Region.DEPTH));
-                    fx.CurrentTechnique.Passes[0].Apply();
+                    fxpWorld.SetValue(Matrix.CreateTranslation(vGeo.Region.loc.X * Region.WIDTH, 0, vGeo.Region.loc.Y * Region.DEPTH) * mWorld);
+                    FX.CurrentTechnique.Passes[0].Apply();
                     G.SetVertexBuffer(vGeo.VB);
                     G.Indices = vGeo.IB;
                     G.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vGeo.VB.VertexCount, 0, vGeo.IB.IndexCount / 3);
                 }
             }
+        }
+        public void DrawAll(Matrix mView, Matrix mProj) {
+            DrawAll(Matrix.Identity, mView, mProj);
         }
 
         void OnRegionAddition(VoxWorld w, Region r) {

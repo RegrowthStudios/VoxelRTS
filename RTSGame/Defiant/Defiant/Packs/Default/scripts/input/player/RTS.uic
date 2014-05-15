@@ -1,0 +1,37 @@
+﻿Font                    [Fonts\CourierNew32]
+FontSize                [32]
+
+BottomPanelHeight       [140]
+BottomPanelColor        [20, 20, 20, 255]
+
+UICMinimap <RTS.Input.UICMinimap> {
+    MapSize                 [120]
+    ButtonWidth             [40]
+    Buffer                  [10]
+    BaseColor               [0,0,0,255]
+    PhysicalTexture         [Packs\Default\scripts\input\player\MMPhysical.png]
+    PhysicalInactiveColor   [20,20,20,255]
+    PhysicalActiveColor     [0,255,0,255]
+    ImpactTexture           [Packs\Default\scripts\input\player\MMImpact.png]
+    ImpactInactiveColor     [20,20,20,255]
+    ImpactActiveColor       [255,0,0,255]
+}
+UICAlertQueue <RTS.Input.UICAlertQueue> {
+    AlertDuration   [240]
+    Width       [180]
+    Height      [32]
+    TextHeight  [24]
+    Buffer      [5]
+}
+
+BBRows                  [3]
+BBColumns               [4]
+BBIconSize              [32]
+BBIconBuffer            [4]
+BBTexture               [Packs\Default\textures\BBPanel.png]
+
+SelectionRows           [2]
+SelectionColumns        [5]
+SelectionIconSize       [46]
+SelectionIconBuffer     [4]
+SelectionTexture        [Packs\Default\textures\SelectionPanel.png]

@@ -1,0 +1,10 @@
+﻿ReadHeightData({~~FILEROOTDIR~~} {height.hmd})
+ReadGridData({~~FILEROOTDIR~~} {regions.png})
+VoxWorldFile [vox.world]
+BuildPrimary(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {~~LGRID~~}
+    {map.obj}
+    {map.png}
+)

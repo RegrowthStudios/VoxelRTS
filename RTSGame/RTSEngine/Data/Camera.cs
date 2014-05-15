@@ -46,6 +46,8 @@ namespace RTSEngine.Data {
         public const float MAX_PITCH = 1.5f;
         public const float PITCH_RANGE = MAX_PITCH - MIN_PITCH;
         public const float EYE_HEIGHT_OFFSET = 0.5f;
+        public const float TWEEN_FACTOR = 3f;
+        public const float HOLD_TIME_SPAN = 1f;
 
         // Camera Matrices
         Matrix mView, mProj;
@@ -67,9 +69,17 @@ namespace RTSEngine.Data {
         public CameraController Controller {
             get { return camController; }
         }
-        private Vector3 camOrigin;
+        private Vector3 camOrigin, camTarget;
         public Vector3 CamOrigin {
             get { return camOrigin; }
+            set {
+                camOrigin = value;
+                CamTarget = value;
+            }
+        }
+        public Vector3 CamTarget {
+            get { return camTarget; }
+            set { camTarget = value; }
         }
         public CameraMotionSettings lowSettings, highSettings;
         public CameraMotionSettings MovementSettings {
@@ -99,6 +109,8 @@ namespace RTSEngine.Data {
             private set;
         }
 
+        float holdVelocity;
+
         public Camera(Viewport v) {
             camOrigin = INITIAL_CAMERA_ORIGIN;
             Yaw = INITIAL_CAMERA_YAW;
@@ -112,10 +124,12 @@ namespace RTSEngine.Data {
             IsOrthographic = false;
             Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, v.AspectRatio, 0.01f, 2000f);
             camController = new CameraController(v.Width, v.Height);
+
+            holdVelocity = 0;
         }
 
         // View Matrix Recalculation
-        public void RecalculateView(Heightmap map, float dist) {
+        public void RecalculateView(CollisionGrid map, float dist) {
             Matrix rot =
                 Matrix.CreateRotationZ(Pitch) *
                 Matrix.CreateRotationY(Yaw);
@@ -132,7 +146,8 @@ namespace RTSEngine.Data {
             View = Matrix.CreateLookAt(eye, CamOrigin, Vector3.Up);
         }
 
-        public void Update(Heightmap map, float dt) {
+        public void Update(CollisionGrid map, float dt) {
+
             CameraMotionSettings cms = MovementSettings;
 
             Scroll(camController.ScrollX, camController.ScrollZ, cms, dt);
@@ -140,10 +155,10 @@ namespace RTSEngine.Data {
             int z;
             camController.GetZoom(out z);
             Zoom(z, dt);
-            camOrigin.X = MathHelper.Clamp(camOrigin.X, 0, map.Width);
-            camOrigin.Z = MathHelper.Clamp(camOrigin.Z, 0, map.Depth);
+            camTarget.X = MathHelper.Clamp(camTarget.X, 0, map.size.X);
+            camTarget.Z = MathHelper.Clamp(camTarget.Z, 0, map.size.Y);
             //camOrigin.Y = Grey.Vox.Region.HEIGHT * 0.5f; // MathHelper.Clamp(camOrigin.Y, 0, Grey.Vox.Region.HEIGHT);
-            // camOrigin.Y = map.SmoothHeightAt(camOrigin.X, camOrigin.Z);
+            camTarget.Y = map.HeightAt(new Vector2(camOrigin.X, camTarget.Z));
 
             bool reset;
             camController.GetResetDefault(out reset);
@@ -153,10 +168,19 @@ namespace RTSEngine.Data {
                 ZoomRatio = INITIAL_ZOOM_RATIO;
             }
 
+            camOrigin = Tweens.LINEAR.GetValue(camOrigin, camTarget, TWEEN_FACTOR * dt);
             RecalculateView(map, MathHelper.Lerp(cms.MinDistance, cms.MaxDistance, ZoomRatio));
         }
         private void Scroll(int x, int y, CameraMotionSettings cms, float dt) {
-            camOrigin.Y += camController.ScrollY * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
+            // Lerp Velocities
+            if(camController.ScrollX != 0 || camController.ScrollZ != 0)
+                holdVelocity += (dt / HOLD_TIME_SPAN);
+            else
+                holdVelocity = 0;
+            holdVelocity = MathHelper.Clamp(holdVelocity, 0, 1);
+            dt = Tweens.EASE.GetValue(0, dt, holdVelocity);
+
+            camTarget.Y += camController.ScrollY * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
 
             if(x == 0 && y == 0) return;
 
@@ -170,8 +194,8 @@ namespace RTSEngine.Data {
             right.Y = 0;
             right.Normalize();
 
-            camOrigin += forward * y * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
-            camOrigin += right * x * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
+            camTarget += forward * y * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
+            camTarget += right * x * cms.ScrollSpeed * dt * (ZoomRatio + ZOOM_OFFSET);
         }
         private void Orbit(int x, int y, CameraMotionSettings cms, float dt) {
             Yaw += x * cms.OrbitSpeed * dt;
@@ -183,10 +207,10 @@ namespace RTSEngine.Data {
             ZoomRatio += ZoomSpeed * z * dt;
             ZoomRatio = MathHelper.Clamp(ZoomRatio, 0, 1);
         }
-        
+
         public void MoveTo(float x, float z) {
-            camOrigin.X = x;
-            camOrigin.Z = z;
+            camTarget.X = x;
+            camTarget.Z = z;
         }
 
         public BoundingFrustum GetSelectionBox(Vector2 screenMin, Vector2 screenMax) {

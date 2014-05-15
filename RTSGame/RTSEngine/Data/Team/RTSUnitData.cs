@@ -151,9 +151,13 @@ namespace RTSEngine.Data.Team {
         }
 
         public ReflectedScript DefaultActionController;
+        public object ActionControllerInitArgs;
         public ReflectedScript DefaultCombatController;
+        public object CombatControllerInitArgs;
         public ReflectedScript DefaultMoveController;
+        public object MovementControllerInitArgs;
         public ReflectedScript DefaultAnimationController;
+        public object AnimationControllerInitArgs;
 
         public RTSUnitData(int i) {
             Index = i;

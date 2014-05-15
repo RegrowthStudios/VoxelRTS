@@ -1,0 +1,60 @@
+﻿// Unit Model
+ViewModel(
+    {~~RENDERER~~}
+    {~~FILEROOTDIR~~}
+    {models\HQ.model}
+    {{textures\HQMain.png} {textures\HQKey.png}}
+)
+ViewIcon(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Headquarters}
+    {~~FILEROOTDIR~~}
+    {icons\HQ.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Headquarters}
+    {0}
+    {~~FILEROOTDIR~~}
+    {icons\Soldier.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Headquarters}
+    {1}
+    {~~FILEROOTDIR~~}
+    {icons\Heavy.png}
+)
+ViewButton(
+    {~~RENDERER~~}
+    {~~RACE~~}
+    {Headquarters}
+    {2}
+    {~~FILEROOTDIR~~}
+    {icons\Armored.png}
+)
+
+// Unit Data
+Name            [Headquarters]
+Health          [120]
+CapitalCost     [200]
+PopCapChange    [20]
+Impact          [10]
+BuildAmount     [2000]
+SightRadius     [48]
+GridSize        [2, 3]
+IsResource      [False]
+Depositable		[True]
+MaxCount        [100]
+
+// Collision Data
+SetBBox ({-2, 0, -3} {2, 2.5, 3})
+
+// Controllers
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 0 })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 1 })
+AddButton({~~DICTSCRIPTS~~} {RTS.Default.Buttons.Spawn.Unit} <System.Int32> { 2 })

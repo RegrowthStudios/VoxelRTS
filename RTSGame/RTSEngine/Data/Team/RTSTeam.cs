@@ -32,12 +32,13 @@ namespace RTSEngine.Data.Team {
         public Vector3 Tertiary;
     }
 
-    public struct ViewedBuilding {
+    public class ViewedBuilding {
         public int Team;
         public int Type;
         public Point CellPoint;
         public Vector3 WorldPosition;
         public Vector2 ViewDirection;
+        public float BuildAmount;
     }
 
     public class RTSTeam {
@@ -77,7 +78,7 @@ namespace RTSEngine.Data.Team {
                 string it = s.ReadString();
                 team.Input = state.Scripts[it].CreateInstance<ACInputController>();
                 team.Input.Deserialize(s);
-                team.Input.Init(state, index);
+                team.Input.Init(state, index, null);
             }
 
             RTSColorScheme scheme = new RTSColorScheme();
@@ -248,8 +249,10 @@ namespace RTSEngine.Data.Team {
         public RTSUnit AddUnit(int type, Vector2 pos) {
             // Check For Unit Type Existence
             RTSUnitData data = Race.Units[type];
-            if(data == null) return null;
-
+            if (data == null) {
+                DevConsole.AddCommand("data null");
+                return null;
+            }
             // Check For Unit Cap
             if(data.CurrentCount >= data.MaxCount) return null;
 

@@ -1,0 +1,53 @@
+﻿Name        [Testbed]
+PlayerTypes [
+    {Player}
+    {Computer}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+]
+InputTypes [
+    {RTS.Input.Player}
+    {RTS.Input.AI}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+]
+InputInitArgs [
+    <System.Boolean> { True }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+]
+Races [
+    {Mech}
+    {Mech}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+]
+Colors [
+   {Blue}
+   {Red}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+]
+GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
+Map         [Packs\Default\maps\0\test.map]

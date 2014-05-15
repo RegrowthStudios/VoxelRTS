@@ -11,6 +11,7 @@ using RTSEngine.Algorithms;
 using RTSEngine.Data.Parsers;
 using System.IO;
 using Grey.Vox.Managers;
+using RTSEngine.Graphics;
 
 namespace RTSEngine.Controllers {
     #region Time Budgeting
@@ -72,11 +73,10 @@ namespace RTSEngine.Controllers {
         public string GameTypeScript;
     }
 
-
     public class GameplayController : IDisposable {
         public const int SQUAD_BUDGET_BINS = 10;
         public const int ENTITY_BUDGET_BINS = 30;
-        public const int FOW_BUDGET_BINS = 8;
+        public const int FOW_BUDGET_BINS = GameState.MAX_PLAYERS;
 
         // Queue Of Events
         private LinkedList<GameInputEvent> events;
@@ -91,6 +91,18 @@ namespace RTSEngine.Controllers {
 
         // Pathfinding
         public Pathfinder pathfinder;
+
+        private List<SquadQuery> squadQueries = new List<SquadQuery> ();
+
+        public struct SquadQuery {
+            public RTSSquad Squad;
+            public PathQuery Query;
+
+            public SquadQuery(RTSSquad s, PathQuery q) {
+                Squad = s;
+                Query = q;
+            }
+        }
 
         // Vox World Manager
         WorldManager vManager;
@@ -114,12 +126,6 @@ namespace RTSEngine.Controllers {
                 tbFOWCalculations.AddTask(new FOWTask(s, s.activeTeams[ti].Index));
             }
             pathfinder = new Pathfinder(s);
-
-            // Start The Input Controllers
-            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                s.activeTeams[ti].Team.Input.Begin();
-            }
-            s.VoxState.VWorkPool.Start(1, System.Threading.ThreadPriority.BelowNormal);
             vManager = new WorldManager(s.VoxState);
 
             // Add All Tasks
@@ -138,17 +144,29 @@ namespace RTSEngine.Controllers {
             // Start The Game Type Controller
             s.scrGTC = s.Scripts[args.GameTypeScript];
             s.gtC = s.scrGTC.CreateInstance<ACGameTypeController>();
-            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile));
+            s.gtC.Load(s, new FileInfo(s.LevelGrid.InfoFile).Directory);
+        }
+
+        public void BeginPlaying(GameState s) {
+            // Start The Various Threaded Elements
+            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+                s.activeTeams[ti].Team.Input.Begin();
+            }
+            s.VoxState.VWorkPool.Start(1, System.Threading.ThreadPriority.BelowNormal);
             s.gtC.Start(s);
         }
 
         // The Update Function
         public void Update(GameState s, float dt) {
             s.IncrementFrame(dt);
+            s.gtC.ApplyFrame(s, dt);
 
             // Input Pass
             ResolveInput(s, dt);
             ApplyInput(s, dt);
+
+            // Apply Any Finished Squad-Level Pathfinding Queries
+            ApplySquadQueries();
 
             // Logic Pass
             ApplyLogic(s, dt);
@@ -242,7 +260,11 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                squad.TargetingController.Target = e.Target;
+                // Assign The Target To Every Unit In The Squad
+                for(int u = 0; u < squad.Units.Count; u++) {
+                    RTSUnit unit = squad.Units[u];
+                    unit.Target = e.Target;
+                }
                 AddTask(s, squad);
                 SendSquadQuery(s, squad, e);
             }
@@ -271,8 +293,29 @@ namespace RTSEngine.Controllers {
                 }
 
             }
-            var query = squad.MovementController.Query;
-            squad.MovementController.Query = pathfinder.ReissuePathQuery(query, start, goal, e.Team);
+            var query = pathfinder.ReissuePathQuery(new PathQuery(start, goal, e.Team), start, goal, e.Team);
+            squadQueries.Add(new SquadQuery(squad, query));
+        }
+
+        private void ApplySquadQueries() {
+            List<SquadQuery> newSquadQueries = new List<SquadQuery>();
+            foreach(var sq in squadQueries) {
+                if(sq.Query.IsComplete && !sq.Query.IsOld) {
+                    sq.Query.IsOld = true; // Pathfinder Needs To Know It Can Clear This
+                    foreach(var unit in sq.Squad.Units) {
+                        List<Vector2> waypoints = new List<Vector2>();
+                        foreach(var wp in sq.Query.waypoints) {
+                            waypoints.Add(wp);
+                        }
+                        unit.MovementController.Waypoints = waypoints;
+                        unit.MovementController.CurrentWaypointIndex = waypoints.Count - 1;
+                    }
+                }
+                if(!sq.Query.IsOld) {
+                    newSquadQueries.Add(sq);
+                }
+            }
+            squadQueries = newSquadQueries;
         }
 
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
@@ -280,7 +323,7 @@ namespace RTSEngine.Controllers {
             RTSUnit unit = team.AddUnit(e.Type, e.Position);
 
             // Check If A Unit Was Possible
-            if(unit == null) return;
+            if(unit == null) { return; }
 
             // Add Decision Tasks
             AddTask(s, unit);
@@ -302,13 +345,20 @@ namespace RTSEngine.Controllers {
             if(building == null) return;
 
             // Check For Instant Building
-            if(e.InstantBuild) building.BuildAmountLeft = 0;
+            if(e.InstantBuild) {
+                building.BuildAmountLeft = 0;
+            }
+            else {
+                building.OnBuildingFinished += (b) => {
+                    s.SendAlert(building.Data.FriendlyName + " Is Built", AlertLevel.Passive);
+                };
+            }
 
             // Check If A Building Was Possible
             if(building == null) return;
 
             // Set Default Height
-            building.Height = s.Map.HeightAt(building.GridPosition.X, building.GridPosition.Y);
+            building.Height = s.CGrid.HeightAt(building.GridPosition);
             building.CollisionGeometry.Height = building.Height;
             s.CGrid.Add(building);
 
@@ -326,10 +376,10 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
-            if(unit.CombatController != null) unit.CombatController.Init(s, this);
-            if(unit.MovementController != null) unit.MovementController.Init(s, this);
-            if(unit.AnimationController != null) unit.AnimationController.Init(s, this);
-            if(unit.ActionController != null) unit.ActionController.Init(s, this);
+            if(unit.CombatController != null) unit.CombatController.Init(s, this, unit.Data.CombatControllerInitArgs);
+            if(unit.MovementController != null) unit.MovementController.Init(s, this, unit.Data.MovementControllerInitArgs);
+            if(unit.AnimationController != null) unit.AnimationController.Init(s, this, unit.Data.AnimationControllerInitArgs);
+            if(unit.ActionController != null) unit.ActionController.Init(s, this, unit.Data.ActionControllerInitArgs);
 
             var btu = new BTaskUnitDecision(s, unit);
             unit.OnDestruction += (o) => {
@@ -339,9 +389,9 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSSquad squad) {
             // Init The Squad
-            if(squad.TargetingController != null) squad.TargetingController.Init(s, this);
-            if(squad.MovementController != null) squad.MovementController.Init(s, this);
-            if(squad.ActionController != null) squad.ActionController.Init(s, this);
+            if(squad.TargetingController != null) squad.TargetingController.Init(s, this, squad.Team.Race.SCTargeting);
+            if(squad.MovementController != null) squad.MovementController.Init(s, this, squad.Team.Race.SCMovementInitArgs);
+            if(squad.ActionController != null) squad.ActionController.Init(s, this, squad.Team.Race.SCActionInitArgs);
 
             var bts = new BTaskSquadDecision(s, squad);
             squad.OnDeath += (o) => {
@@ -351,9 +401,9 @@ namespace RTSEngine.Controllers {
         }
         private void AddTask(GameState s, RTSBuilding building) {
             // Init The Building
-            if(building.ActionController != null) building.ActionController.Init(s, this);
+            if(building.ActionController != null) building.ActionController.Init(s, this, building.Data.ActionControllerInitArgs);
             for(int i = 0; i < building.ButtonControllers.Count; i++)
-                building.ButtonControllers[i].Init(s, this);
+                building.ButtonControllers[i].Init(s, this, building.Data.DefaultButtonControllerInitArgs[i]);
 
             var btu = new BTaskBuildingDecision(s, building);
             building.OnDestruction += (o) => {
@@ -446,6 +496,37 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyLogic(GameState s, float dt, DevCommandStopMotion c) {
             // TODO: Deprecate ?
+            for(int z = 0; z < s.CGrid.numCells.Y; z++) {
+                for(int x = 0; x < s.CGrid.numCells.X; x++) {
+                    Point p = new Point(x, z);
+                    Vector3 pos = new Vector3(x * 2 + 1, 0, z * 2 + 1);
+                    pos.Y = s.CGrid.HeightAt(new Vector2(pos.X, pos.Z));
+                    if(!s.CGrid.CanMoveTo(p, CollisionGrid.Direction.XP)) {
+                        s.AddParticle(new LightningParticle(
+                            pos + Vector3.UnitX, 1f, 12f, MathHelper.PiOver2,
+                            5f, 1, Color.LightBlue
+                            ));
+                    }
+                    if(!s.CGrid.CanMoveTo(p, CollisionGrid.Direction.XN)) {
+                        s.AddParticle(new LightningParticle(
+                            pos - Vector3.UnitX, 1f, 12f, MathHelper.PiOver2,
+                            5f, 1, Color.LightBlue
+                            ));
+                    }
+                    if(!s.CGrid.CanMoveTo(p, CollisionGrid.Direction.ZP)) {
+                        s.AddParticle(new LightningParticle(
+                            pos + Vector3.UnitZ, 1f, 12f, 0f,
+                            5f, 1, Color.LightBlue
+                            ));
+                    }
+                    if(!s.CGrid.CanMoveTo(p, CollisionGrid.Direction.ZN)) {
+                        s.AddParticle(new LightningParticle(
+                            pos - Vector3.UnitZ, 1f, 12f, 0f,
+                            5f, 1, Color.LightBlue
+                            ));
+                    }
+                }
+            }
         }
         private void ApplyLogic(GameState s, float dt, DevCommandKillUnits c) {
             RTSTeam team;
@@ -515,7 +596,7 @@ namespace RTSEngine.Controllers {
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 team = s.activeTeams[ti].Team;
                 foreach(RTSUnit unit in team.Units) {
-                    CollisionController.CollideHeightmap(unit.CollisionGeometry, s.Map);
+                    CollisionController.CollideHeightmap(unit.CollisionGeometry, s.CGrid);
                     unit.GridPosition = unit.CollisionGeometry.Center;
                     unit.Height = unit.CollisionGeometry.Height;
                 }

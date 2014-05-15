@@ -17,14 +17,19 @@ namespace BlisterUI.Input {
             set {
                 text.Clear();
                 text.Append(value);
-                Caret = Length;
+                Caret = Math.Min(Caret, Length);
                 if(OnTextChanged != null)
                     OnTextChanged(this, Text);
             }
         }
+        private int caret;
         public int Caret {
-            get;
-            private set;
+            get { return caret; }
+            private set {
+                caret = value;
+                if(OnCaretMoved != null)
+                    OnCaretMoved(this, Caret);
+            }
         }
         public int Length {
             get { return text.Length; }
@@ -32,6 +37,7 @@ namespace BlisterUI.Input {
 
         public event Action<TextInput, string> OnTextEntered;
         public event Action<TextInput, string> OnTextChanged;
+        public event Action<TextInput, int> OnCaretMoved;
 
         public TextInput() {
             text = new StringBuilder();
@@ -123,8 +129,6 @@ namespace BlisterUI.Input {
                 case ControlCharacters.CtrlC:
                     if(text.Length > 0)
                         KeyboardEventDispatcher.SetToClipboard(Text);
-                    else
-                        KeyboardEventDispatcher.SetToClipboard("");
                     return;
             }
         }

@@ -9,6 +9,7 @@
     <RootNamespace>BlisterUI</RootNamespace>
     <AssemblyName>BlisterUI</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -88,7 +89,9 @@
     <Compile Include="Widgets\RectWidget.cs" />
     <Compile Include="Widgets\ScrollBar.cs" />
     <Compile Include="Widgets\ScrollMenu.cs" />
+    <Compile Include="Widgets\TextInputWidget.cs" />
     <Compile Include="Widgets\TextWidget.cs" />
+    <Compile Include="Widgets\WidgetHelpers.cs" />
     <Compile Include="Widgets\WidgetRenderer.cs" />
   </ItemGroup>
   <ItemGroup />

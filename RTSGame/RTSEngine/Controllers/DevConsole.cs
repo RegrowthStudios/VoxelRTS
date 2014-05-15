@@ -7,31 +7,34 @@ using BlisterUI.Input;
 
 namespace RTSEngine.Controllers {
     public static class DevConsole {
-        public const int MAX_LINES = 8;
-        public const int MAX_COMMAND_LENGTH = 40;
+        public const int MAX_LINES = 16;
+        public const int MAX_COMMAND_LENGTH = 60;
         public const Keys ACTIVATION_KEY = Keys.OemTilde;
         private const char ACTIVATION_CHAR1 = '`';
         private const char ACTIVATION_CHAR2 = '~';
 
+        private static int lc;
         public static readonly Queue<string> Lines = new Queue<string>((MAX_LINES * 3) / 2);
         public static event Action<string> OnNewCommand;
+
+        private static TextInput tInput;
 
         public static bool IsActivated {
             get;
             private set;
         }
-        private static readonly StringBuilder typedText = new StringBuilder((MAX_COMMAND_LENGTH * 3) / 2);
         public static string TypedText {
-            get {
-                if(typedText.Length < 1)
-                    return "";
-                else
-                    return typedText.ToString();
-            }
+            get { return tInput.Text; }
+        }
+        public static int TextCaret {
+            get { return tInput.Caret; }
         }
 
         static DevConsole() {
             IsActivated = false;
+            tInput = new TextInput();
+            tInput.Text = "";
+            lc = 0;
         }
 
         public static void AddCommand(string c) {
@@ -53,60 +56,63 @@ namespace RTSEngine.Controllers {
                 OnNewCommand(c);
         }
 
+        public static void Toggle(Action<string> f) {
+            if(IsActivated) {
+                OnNewCommand -= f;
+                Deactivate();
+            }
+            else {
+                Activate();
+                OnNewCommand += f;
+            }
+        }
         public static void Activate() {
             if(IsActivated) return;
             IsActivated = true;
-            KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
-            KeyboardEventDispatcher.ReceiveChar += OnChar;
-            KeyboardEventDispatcher.ReceiveCommand += OnControl;
+            tInput.Activate();
+            lc = 0;
+            tInput.OnTextChanged += OnTextChanged;
+            tInput.OnTextEntered += OnTextEntered;
+            tInput.Text = "";
+            KeyboardEventDispatcher.OnKeyPressed += OnKP;
         }
         public static void Deactivate() {
             if(!IsActivated) return;
             IsActivated = false;
-            KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
-            KeyboardEventDispatcher.ReceiveChar -= OnChar;
-            KeyboardEventDispatcher.ReceiveCommand -= OnControl;
+            tInput.Deactivate();
+            tInput.OnTextChanged -= OnTextChanged;
+            tInput.OnTextEntered -= OnTextEntered;
+            KeyboardEventDispatcher.OnKeyPressed -= OnKP;
         }
 
-        public static void OnKeyPress(object s, KeyEventArgs args) {
+        public static void OnKP(object sender, KeyEventArgs args) {
+            string[] lines;
             switch(args.KeyCode) {
-                case Keys.Enter:
-                    if(typedText.Length < 1)
-                        return;
-                    AddCommand(typedText.ToString());
-                    typedText.Clear();
-                    return;
-                case Keys.Back:
-                    if(typedText.Length < 1)
-                        return;
-                    typedText.Remove(typedText.Length - 1, 1);
+                case Keys.Down:
+                    lines = Lines.ToArray();
+                    if(lines.Length < 1) return;
+                    lc = (lc + 1) % lines.Length;
+                    tInput.Text = lines[lc];
+                    break;
+                case Keys.Up:
+                    lines = Lines.ToArray();
+                    if(lines.Length < 1) return;
+                    lc = (lc + lines.Length - 1) % lines.Length;
+                    tInput.Text = lines[lc];
+                    break;
+                default:
                     return;
             }
         }
-        public static void OnChar(object s, CharacterEventArgs args) {
-            if(typedText.Length == MAX_COMMAND_LENGTH)
-                return;
-            if(args.Character == ACTIVATION_CHAR1 || args.Character == ACTIVATION_CHAR2)
-                return;
-            typedText.Append(args.Character);
-        }
-        public static void OnControl(object s, CharacterEventArgs args) {
-            switch(args.Character) {
-                case ControlCharacters.CtrlV:
-                    if(typedText.Length == MAX_COMMAND_LENGTH)
-                        return;
 
-                    string c = KeyboardEventDispatcher.GetNewClipboard();
-                    if(typedText.Length + c.Length > MAX_COMMAND_LENGTH)
-                        typedText.Append(c.Substring(0, MAX_COMMAND_LENGTH - typedText.Length));
-                    else
-                        typedText.Append(c);
-                    return;
-                case ControlCharacters.CtrlC:
-                    if(typedText.Length > 0)
-                        KeyboardEventDispatcher.SetToClipboard(typedText.ToString());
-                    return;
-            }
+        private static void OnTextChanged(TextInput ti, string s) {
+            if(s.Length > MAX_COMMAND_LENGTH)
+                ti.Text = s.Substring(0, MAX_COMMAND_LENGTH);
+        }
+        private static void OnTextEntered(TextInput ti, string s) {
+            ti.Text = "";
+            lc = 0;
+            AddCommand(s);
         }
     }
 }

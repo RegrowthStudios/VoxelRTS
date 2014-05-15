@@ -12,6 +12,7 @@
     <AssemblyName>RTSEngine</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -34,9 +35,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.EffectImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.TextureImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
     <Reference Include="System" />
@@ -53,17 +51,22 @@
     <Compile Include="Algorithms\MinHeap.cs" />
     <Compile Include="Algorithms\Pathfinder.cs" />
     <Compile Include="Algorithms\TimeBudgeting.cs" />
+    <Compile Include="Algorithms\Tweens.cs" />
     <Compile Include="Controllers\CameraController.cs" />
     <Compile Include="Controllers\DevConsole.cs" />
     <Compile Include="Controllers\ReflectedScript.cs" />
     <Compile Include="Controllers\FOWResolver.cs" />
     <Compile Include="Controllers\GameEngine.cs" />
     <Compile Include="Controllers\GameplayController.cs" />
+    <Compile Include="DataExt\EnvironmentData.cs" />
     <Compile Include="Data\Parsers\RegexHelper.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Graphics\CameraPointer.cs" />
+    <Compile Include="Graphics\HealthViewer.cs" />
     <Compile Include="Graphics\Particles\FireShader.cs" />
     <Compile Include="Graphics\Particles\LightningShader.cs" />
+    <Compile Include="Graphics\Particles\ParticleEffect.cs" />
     <Compile Include="Graphics\Particles\ParticleList.cs" />
     <Compile Include="Graphics\VoxMap.cs" />
     <Compile Include="Interfaces\ACInputController.cs" />
@@ -71,18 +74,16 @@
     <Compile Include="Data\Camera.cs" />
     <Compile Include="Data\DevCommands.cs" />
     <Compile Include="Data\GameInputEvent.cs" />
-    <Compile Include="Data\Heightmap.cs" />
     <Compile Include="Data\Collision.cs" />
     <Compile Include="Data\Combat.cs" />
     <Compile Include="Data\GameState.cs" />
     <Compile Include="Data\LevelGrid.cs" />
-    <Compile Include="Data\Parsers\EnvironmentData.cs" />
     <Compile Include="Data\Parsers\RTSBuildingDataParser.cs" />
     <Compile Include="Data\Parsers\ScriptParser.cs" />
     <Compile Include="Data\Parsers\MapParser.cs" />
     <Compile Include="Data\Parsers\RTSRaceParser.cs" />
     <Compile Include="Data\Parsers\RTSUnitDataParser.cs" />
-    <Compile Include="Data\Region.cs" />
+    <Compile Include="Data\ImpactRegion.cs" />
     <Compile Include="Data\RTSConstants.cs" />
     <Compile Include="Data\SelectionDetection.cs" />
     <Compile Include="Data\Team\RTSBuilding.cs" />
@@ -115,38 +116,6 @@
     <Compile Include="Interfaces\Scripts.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />
     <Compile Include="Interfaces\IEntity.cs" />
-    <Compile Include="Nova\Game\PlayScreen.cs" />
-    <Compile Include="Nova\GUI\CenterText.cs" />
-    <Compile Include="Nova\GUI\ComboText.cs" />
-    <Compile Include="Nova\GameArea.cs" />
-    <Compile Include="Nova\Gravity\GravityLink.cs" />
-    <Compile Include="Nova\Gravity\IGravityDonor.cs" />
-    <Compile Include="Nova\Gravity\IGravityRecipient.cs" />
-    <Compile Include="Nova\LinkedQueue.cs" />
-    <Compile Include="Nova\NovaEvent.cs" />
-    <Compile Include="Nova\NovaEventCenterText.cs" />
-    <Compile Include="Nova\NovaEventPoint.cs" />
-    <Compile Include="Nova\NovaEventPowerUp.cs" />
-    <Compile Include="Nova\NovaEventQueue.cs" />
-    <Compile Include="Nova\ObjectProcessor.cs" />
-    <Compile Include="Nova\GUI\PointCounter.cs" />
-    <Compile Include="Nova\GUI\TimeBar.cs" />
-    <Compile Include="Nova\Objects\Asteroid.cs" />
-    <Compile Include="Nova\Objects\Base\IBoundable.cs" />
-    <Compile Include="Nova\Objects\Base\INovaMotion.cs" />
-    <Compile Include="Nova\Objects\Base\INovaObject.cs" />
-    <Compile Include="Nova\Objects\Base\NovaMovingObject.cs" />
-    <Compile Include="Nova\Objects\Base\NovaObject.cs" />
-    <Compile Include="Nova\Objects\Base\NovaObjectContent.cs" />
-    <Compile Include="Nova\Objects\Base\NOVA_TYPE.cs" />
-    <Compile Include="Nova\Objects\Base\ObjectCollision.cs" />
-    <Compile Include="Nova\Objects\NovaStar.cs" />
-    <Compile Include="Nova\Objects\NovaTether.cs" />
-    <Compile Include="Nova\Objects\PointCluster.cs" />
-    <Compile Include="Nova\Objects\PowerUp.cs" />
-    <Compile Include="Nova\Objects\Sinkhole.cs" />
-    <Compile Include="Nova\Objects\StarDust.cs" />
-    <Compile Include="Nova\ZMath.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\RTSEffect.cs" />
   </ItemGroup>

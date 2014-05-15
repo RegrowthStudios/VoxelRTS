@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Grey.Vox;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using RTSEngine.Algorithms;
@@ -27,7 +28,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // This Called By The GameplayController (After Load/Deserialization)
-        public abstract void Init(GameState s, GameplayController c);
+        public abstract void Init(GameState s, GameplayController c, object initArgs);
 
         public virtual void SetUnit(RTSUnit u) {
             if(u == null) return;
@@ -82,6 +83,8 @@ namespace RTSEngine.Interfaces {
 
     // Reasons About How Combat Damage Should Be Performed To A Unit's Target
     public abstract class ACUnitCombatController : ACUnitController {
+        // Reset Any State This Controller Might Have To Manage Combat
+        public abstract void Reset();
         // Scripted Logic For Attacking
         public abstract void Attack(GameState g, float dt);
     }
@@ -131,7 +134,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // This Called By The GameplayController
-        public abstract void Init(GameState s, GameplayController c);
+        public abstract void Init(GameState s, GameplayController c, object initArgs);
 
         public virtual void SetBuilding(RTSBuilding b) {
             if(b == null) return;
@@ -151,6 +154,8 @@ namespace RTSEngine.Interfaces {
 
     // A Super Controller Called By The Gameplay Controller
     public abstract class ACBuildingActionController : ACBuildingController {
+        public Queue<GameInputEvent> EventQueue;
+
         // Scripted Super-Controller Logic
         public abstract void DecideAction(GameState g, float dt);
         public abstract void ApplyAction(GameState g, float dt);
@@ -181,12 +186,9 @@ namespace RTSEngine.Interfaces {
         public abstract void DecideAction(GameState s, float dt);
         public abstract void ApplyAction(GameState s, float dt);
     }
-    #endregion
 
-    #region Button
-    // A Button That Will Be Shown
-    public abstract class ACRTSButton : ACScript {
-        public abstract void Apply(GameState s);
+    public abstract class ACBuildingAnimationController : ACBuildingController {
+
     }
     #endregion
 
@@ -200,7 +202,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // This Called By The GameplayController
-        public abstract void Init(GameState s, GameplayController c);
+        public abstract void Init(GameState s, GameplayController c, object initArgs);
 
         // Will Set Once And Then Fail On Later Occurrences
         public virtual void SetSquad(RTSSquad s) {
@@ -234,12 +236,6 @@ namespace RTSEngine.Interfaces {
             get { return waypoints; }
             set { waypoints = value; }
         }
-
-        // The Whole Squad Will Move At The Min Default Movespeed
-        public float MinDefaultMoveSpeed { get; set; } 
-
-        // Used For Movement Halting Logic
-        public float SquadRadiusSquared { get; set; }
 
         // Pathfinder To Be Run On A Separate Thread         
         protected Pathfinder pathfinder;
@@ -276,6 +272,15 @@ namespace RTSEngine.Interfaces {
     #endregion
 
     #region Game Type
+    public struct LEVoxel {
+        public string Name;
+        public VoxData VData;
+
+        public LEVoxel(string name, VoxAtlas atlas) {
+            Name = name;
+            VData = atlas.Create();
+        }
+    }
     public abstract class ACGameTypeController : ACScript, IDisposable {
         private GameState state;
         private Thread t;
@@ -287,7 +292,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // The Same File As The Map File
-        public abstract void Load(GameState s, FileInfo mapFile);
+        public abstract void Load(GameState s, DirectoryInfo mapDir);
 
         public abstract int? GetVictoriousTeam(GameState s);
 
@@ -311,11 +316,14 @@ namespace RTSEngine.Interfaces {
             }
         }
         public abstract void Tick(GameState s);
+        public abstract void ApplyFrame(GameState s, float dt);
+
+        public abstract List<LEVoxel> CreateVoxels(VoxAtlas atlas);
+        public abstract void LESave(VoxWorld world, int w, int h, DirectoryInfo dir);
 
         public abstract void Serialize(BinaryWriter s);
         public abstract void Deserialize(BinaryReader s, GameState state);
     }
-
     #endregion
 
     public interface IVisualInputController {

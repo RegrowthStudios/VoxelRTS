@@ -102,9 +102,17 @@ namespace RTSEngine.Graphics {
             g.Textures[2] = tKey;
             fxpTexelSize.SetValue(new Vector2(1f / tAnim.Width, 1f / tAnim.Height));
         }
-        public void SetTextures(GraphicsDevice g, Texture2D tMain, Texture2D tKey) {
+        public void SetTexturesBuilding(GraphicsDevice g, Texture2D tMain, Texture2D tKey, Texture2D tNoise) {
             g.Textures[1] = tMain;
             g.Textures[2] = tKey;
+            g.Textures[3] = tNoise;
+        }
+
+        public void SetTechnique(string t) {
+            fx.CurrentTechnique = fx.Techniques[t];
+        }
+        public EffectPass GetEffectPass(string technique, string pass) {
+            return fx.Techniques[technique].Passes[pass];
         }
     }
 

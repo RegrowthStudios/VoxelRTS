@@ -1,0 +1,54 @@
+﻿Name        [Tutorial 0]
+PlayerTypes [
+    {Player}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+]
+InputTypes [
+    {RTS.Input.Player}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+]
+InputInitArgs [
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+]
+Races [
+    {Mech}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+]
+Colors [
+   {Blue}
+   {Red}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+]
+LoadImage   [Packs\presets\Tutorial0\Main.png]
+GameType    [RTS.Default.Tutorials.Tut0]
+Map         [Packs\Default\maps\Tutorial0\info.map]
