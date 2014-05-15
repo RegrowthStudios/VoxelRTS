@@ -2,8 +2,8 @@
 ViewModel(
     {~~RENDERER~~}
     {~~FILEROOTDIR~~}
-    {models\Soldier.model}
-    {{animations\Soldier.png} {textures\Main.png} {textures\Key.png}}
+    {models\Light.model}
+    {{animations\Light.png} {textures\LightMain.png} {textures\LightKey.png}}
 )
 ViewIcon(
     {~~RENDERER~~}

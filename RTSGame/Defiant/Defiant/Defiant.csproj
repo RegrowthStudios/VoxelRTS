@@ -87,6 +87,15 @@
     <Compile Include="LevelEditor\LEMenu.cs" />
     <Compile Include="LevelEditor\LEScreen.cs" />
     <Compile Include="LevelEditor\LETool.cs" />
+    <Content Include="Packs\Default\races\Mech\animations\Light.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\textures\LightKey.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\textures\LightMain.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\scripts\buttons\DBEnable.cs" />
     <Content Include="Packs\Default\scripts\ExtractionBuilding.cs" />
     <Content Include="Packs\Default\scripts\input\player\MMImpact.png">
@@ -429,6 +438,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\races\Mech\models\Worker.model">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\races\Mech\models\Light.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Packs\Default\races\Mech\soldier.unit">
