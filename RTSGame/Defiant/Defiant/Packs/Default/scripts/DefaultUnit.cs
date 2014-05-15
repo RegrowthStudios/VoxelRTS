@@ -84,6 +84,11 @@ namespace RTS.Default.Unit {
         void DSMain(GameState g, float dt) {
             // Default: Rest
             SetState(BehaviorFSM.Rest);
+            if(unit.Target != null) {
+                bool inFog = g.CGrid.GetFogOfWar(unit.Target.GridPosition, teamIndex) != FogOfWar.Active;
+                if(!unit.Target.IsAlive || inFog)
+                    unit.Target = null;
+            }
             if(mc != null) {
                 mc.DecideMove(g, dt);
                 var doMove = mc.doMove;
