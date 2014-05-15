@@ -374,7 +374,7 @@ namespace RTS.Default.Unit {
         public override void ApplyMove(GameState g, float dt) {
             if(NetForce != Vector2.Zero) {
                 float magnitude = NetForce.Length();
-                Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MovementController.MinDefaultMoveSpeed * dt;
+                Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MinDefaultMoveSpeed() * dt;
                 // TODO: Make Sure We Don't Overshoot The Goal But Otherwise Move At Max Speed
                 if(scaledChange.LengthSquared() > magnitude * magnitude)
                     unit.Move(NetForce);
@@ -429,10 +429,11 @@ namespace RTS.Default.Unit {
             }
             // Set Waypoint...
             Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
-            float SquadRadiusSquared = unit.Squad.MovementController.SquadRadiusSquared;
+            float sqr2 = unit.Squad.Radius();
+            sqr2 *= sqr2;
             bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
             bool withinCellDistSq = (waypoint - unit.GridPosition).LengthSquared() < cg.cellSize;
-            bool withinSquad = (waypoint - unit.GridPosition).LengthSquared() < 1.5 * SquadRadiusSquared;
+            bool withinSquad = (waypoint - unit.GridPosition).LengthSquared() < 1.5 * sqr2;
             if(inGoalCell || (!wasStuck && (withinSquad || withinCellDistSq))) {
                 CurrentWaypointIndex--;
                 if(CurrentWaypointIndex < 0)

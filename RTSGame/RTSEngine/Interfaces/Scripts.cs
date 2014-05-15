@@ -237,12 +237,6 @@ namespace RTSEngine.Interfaces {
             set { waypoints = value; }
         }
 
-        // The Whole Squad Will Move At The Min Default Movespeed
-        public float MinDefaultMoveSpeed { get; set; } 
-
-        // Used For Movement Halting Logic
-        public float SquadRadiusSquared { get; set; }
-
         // Pathfinder To Be Run On A Separate Thread         
         protected Pathfinder pathfinder;
 
