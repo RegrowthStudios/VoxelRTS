@@ -34,15 +34,15 @@ namespace RTS.Input {
 
         public override void Init(GameState s, int ti) {
             base.Init(s, ti);
-
+            
             Team.OnBuildingSpawn += OnBuildingSpawn;
+            Team.OnUnitSpawn += OnUnitSpawn;
             random = new Random();
             spawnCap = 1;
             unitSpawnP = new int[] { 33, 33, 34 };
             barrackControllers = new List<BarrackController>();
             squads = new List<List<IEntity>>();
 
-         
             foreach (var b in Team.Buildings) {
                 DevConsole.AddCommand("added barracks");
                 barrackControllers.Add(new BarrackController(this, b));
@@ -60,6 +60,20 @@ namespace RTS.Input {
             running = true;
             paused = true;
              
+        }
+
+        public void OnUnitSpawn(RTSUnit u) {
+            DevConsole.AddCommand("spawn");
+            Point cc = HashHelper.Hash(u.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
+            RTSBuilding b = GameState.CGrid.EStatic[cc.X, cc.Y];
+            if (b != null) {
+                foreach (var bc in barrackControllers) {
+                    if (b.UUID == bc.barrack.UUID) {
+                        bc.army.Add(u);
+                        u.OnDestruction += bc.OnUnitDeath;
+                    }
+                }
+            }
         }
 
         public void OnBuildingSpawn(RTSBuilding b) {
@@ -83,16 +97,6 @@ namespace RTS.Input {
                 destroyed.Dispose();
                 barrackControllers.Remove(destroyed);
             }
-
-            RTSBuilding destroyedB = null;
-            foreach (var bb in Team.Buildings) {
-                if (bb.UUID == b.UUID) {
-                    destroyedB = bb;
-                }
-            }
-            if (destroyedB != null) {
-                Team.Buildings.Remove(destroyedB);
-            }
         }
 
         private void WorkThread() {
@@ -102,7 +106,6 @@ namespace RTS.Input {
                     Thread.Sleep(1000);
                     continue;
                 }
-                DevConsole.AddCommand("thread");
                 foreach (var bc in barrackControllers) {
                     bc.SpawnUnits();
                     bc.DecideTarget();

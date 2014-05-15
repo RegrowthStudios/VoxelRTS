@@ -48,6 +48,10 @@
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
+    <Content Include="FX\Particles\Bullet.model">
+      <Name>Bullet</Name>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="FX\RIA.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>RIA</Name>
@@ -338,10 +342,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FX\Particles\Bullet.obj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Name>Bullet</Name>
-    </None>
     <None Include="FX\Particles\Particle.conf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Particle</Name>

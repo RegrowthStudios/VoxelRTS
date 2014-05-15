@@ -86,24 +86,12 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public int? BuildingID {
-            get;
-            private set;
-        }
-
         public SpawnUnitEvent(int t, int type, Vector2 pos)
             : base(GameEventType.SpawnUnit, t) {
             Type = type;
             Position = pos;
-            BuildingID = null;
         }
 
-        public SpawnUnitEvent(int t, int type, Vector2 pos, int b_id)
-            : base(GameEventType.SpawnUnit, t) {
-            Type = type;
-            Position = pos;
-            BuildingID = b_id;
-        }
     }
 
     public class SpawnBuildingEvent : GameInputEvent {

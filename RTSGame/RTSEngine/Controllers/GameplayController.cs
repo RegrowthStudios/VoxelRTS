@@ -284,14 +284,6 @@ namespace RTSEngine.Controllers {
             // Check If A Unit Was Possible
             if (unit == null) { return; }
 
-            if (e.BuildingID.HasValue) {
-                foreach (var b in team.Buildings) {
-                    if (e.BuildingID == b.UUID) {
-                        b.SpawnUnit(unit);
-                    }
-                }
-            }
-
             // Add Decision Tasks
             AddTask(s, unit);
 
