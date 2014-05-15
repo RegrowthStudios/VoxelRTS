@@ -129,6 +129,9 @@
     <Content Include="Packs\Default\scripts\input\player\RTSUIAlertQueue.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Packs\Default\scripts\input\BarracksController.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="RTSScreen.cs" />
     <Compile Include="WispScreen.cs" />
     <Content Include="Packs\Default\scripts\buttons\DBSpawn.cs">
@@ -154,9 +157,6 @@
     <Compile Include="LoginScreen.cs" />
     <Compile Include="MenuScreen.cs" />
     <Content Include="Packs\Default\scripts\input\AIInputController.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Packs\Default\scripts\input\BarrackController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\scripts\input\environment\EnvironmentInputController.cs">
