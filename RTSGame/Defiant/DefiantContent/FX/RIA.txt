@@ -6,6 +6,7 @@ FXEntity            [FX\RTS]
 FXHealthTechnique   [Health]
 FXHealthPass        [Main]
 FXHealthTexture     [Content\Textures\SelectionCircle.png]
+FXBuildNoise        [Content\Textures\BuildNoise.png]
 FXHealthRadiusModifier  [1.3]
 FXHealthTint        [255, 255, 255, 255]
 

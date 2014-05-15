@@ -10,6 +10,7 @@ using RTSEngine.Interfaces;
 
 namespace RTS.Default.Building.Extraction {
     public class Action : ACBuildingActionController {
+        public bool Enabled;
         public float ActivityInterval;
         public int ExtractAmount;
         public float currTime;

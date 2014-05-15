@@ -32,12 +32,13 @@ namespace RTSEngine.Data.Team {
         public Vector3 Tertiary;
     }
 
-    public struct ViewedBuilding {
+    public class ViewedBuilding {
         public int Team;
         public int Type;
         public Point CellPoint;
         public Vector3 WorldPosition;
         public Vector2 ViewDirection;
+        public float BuildAmount;
     }
 
     public class RTSTeam {
@@ -77,7 +78,7 @@ namespace RTSEngine.Data.Team {
                 string it = s.ReadString();
                 team.Input = state.Scripts[it].CreateInstance<ACInputController>();
                 team.Input.Deserialize(s);
-                team.Input.Init(state, index);
+                team.Input.Init(state, index, null);
             }
 
             RTSColorScheme scheme = new RTSColorScheme();
@@ -253,13 +254,13 @@ namespace RTSEngine.Data.Team {
                 return null;
             }
             // Check For Unit Cap
-            //if(data.CurrentCount >= data.MaxCount) return null;
+            if(data.CurrentCount >= data.MaxCount) return null;
 
             // Check For Population Cap
-            //if(data.PopulationCost + Population > PopulationCap) return null;
+            if(data.PopulationCost + Population > PopulationCap) return null;
 
             // Check For Capital Cost
-            //if(data.CapitalCost > Capital) return null;
+            if(data.CapitalCost > Capital) return null;
 
             // Produce Unit
             Capital -= data.CapitalCost;
@@ -317,7 +318,7 @@ namespace RTSEngine.Data.Team {
             if(data.CurrentCount >= data.MaxCount) return null;
 
             // Check For Capital Cost
-            //if(data.CapitalCost > Capital) return null;
+            if(data.CapitalCost > Capital) return null;
 
             // Produce Building
             Capital -= data.CapitalCost;

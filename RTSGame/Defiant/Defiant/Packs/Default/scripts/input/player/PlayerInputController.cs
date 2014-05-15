@@ -34,6 +34,7 @@ namespace RTS.Input {
             get;
             set;
         }
+        bool showBuild;
 
         public bool HasSelectedEnemy {
             get { return selected.Count == 1 && selected[0].Team != Team; }
@@ -48,8 +49,13 @@ namespace RTS.Input {
             //bvh = new BVH();
         }
 
-        public override void Init(GameState s, int ti) {
-            base.Init(s, ti);
+        public override void Init(GameState s, int ti, object args) {
+            base.Init(s, ti, args);
+
+            if(args == null) showBuild = false;
+            else {
+                showBuild = (bool)args;
+            }
 
             // Open File
             FileInfo fi = new FileInfo(s.LevelGrid.Directory.FullName + @"\camera.dat");
@@ -65,10 +71,11 @@ namespace RTS.Input {
 
         public void Build(RTSRenderer renderer) {
             // Create UI
-            UI = new RTSUI(renderer, @"Packs\Default\scripts\input\player\RTS.uic");
+            UI = new RTSUI(renderer, @"Packs\Default\scripts\input\player\RTS.uic", showBuild);
             UI.SetTeam(Team);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
             OnNewSelection += UI.BBPanel.OnNewSelection;
+            GameState.OnAlert += UI.AlertQueue.OnAlert;
 
             Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
             Team.OnPopulationCapChange += (t, c) => { UI.TeamDataPanel.PopulationCap = Team.PopulationCap; };
@@ -84,6 +91,7 @@ namespace RTS.Input {
                 System.Windows.Forms.Form.ActiveForm.KeyDown += ActiveForm_KeyPress;
                 System.Windows.Forms.Form.ActiveForm.KeyUp += ActiveForm_KeyPress;
             }
+            UI.Minimap.Hook();
         }
         public override void Dispose() {
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
@@ -328,7 +336,9 @@ namespace RTS.Input {
 
         public void OnUIPress(Point p, MouseButton b) {
             Vector2 r = Vector2.Zero;
-            if(UI.Minimap.Inside(p.X, p.Y, out r)) {
+            if(UI.Minimap.WidgetBase.Inside(p.X, p.Y)) {
+                if(!UI.Minimap.MapRect.Inside(p.X, p.Y, out r))
+                    return;
                 // Use The Minimap
                 Vector2 mapPos = r * GameState.CGrid.size;
                 if(b == BUTTON_SELECT) {
@@ -354,15 +364,19 @@ namespace RTS.Input {
             else if(UI.BBPanel.BackPanel.Inside(p.X, p.Y)) {
                 var bbs = UI.BBPanel.GetSelection(p.X, p.Y);
                 if(bbs != null) {
-                    for(int i = 0; i < bbs.Count; i++) {
-                        bbs[i].OnQueueFinished(GameState);
+                    // Shift Clicking
+                    int c = isShiftPressed ? 5 : 1;
+                    for(int ci = 0; ci < c; ci++) {
+                        for(int i = 0; i < bbs.Count; i++) {
+                            bbs[i].OnQueueFinished(GameState);
+                        }
                     }
                 }
             }
         }
 
         public void Update(RTSRenderer renderer, GameState s) {
-            UI.BuildingPanel.Update();
+            UI.AlertQueue.Update();
         }
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             UI.Draw(renderer, batch);

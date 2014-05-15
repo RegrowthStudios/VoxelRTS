@@ -180,6 +180,9 @@ namespace RTSEngine.Data.Parsers {
                         int scen = BitConverter.ToInt32(data, i); i += 4;
                         if(scen == -1) break;
 
+                        int ri = BitConverter.ToInt32(data, i); i += 4;
+                        int vi = BitConverter.ToInt32(data, i); i += 4;
+                        vw.regions[ri].voxels[vi].ID = (ushort)(20 + scen);
                     }
 
 
@@ -216,6 +219,19 @@ namespace RTSEngine.Data.Parsers {
                 vd.FaceType.SetAllMasks(0xfffffffeu);
             }
             for(int vi = 0; vi < 4; vi++) {
+                var vd = vw.Atlas.Create();
+                vd.FaceType = new VoxFaceType();
+                vd.FaceType.SetAllTypes(0x00000000u);
+                vd.FaceType.Types[Voxel.FACE_PY] = 0xffffffffu;
+                vd.FaceType.SetAllMasks(0xffffffffu);
+            }
+            for(int vi = 0; vi < 5; vi++) {
+                var vd = vw.Atlas.Create();
+                vd.FaceType = new VoxFaceType();
+                vd.FaceType.SetAllTypes(0x00000001u);
+                vd.FaceType.SetAllMasks(0xfffffffeu);
+            }
+            for(int vi = 0; vi < 5; vi++) {
                 var vd = vw.Atlas.Create();
                 vd.FaceType = new VoxFaceType();
                 vd.FaceType.SetAllTypes(0x00000000u);

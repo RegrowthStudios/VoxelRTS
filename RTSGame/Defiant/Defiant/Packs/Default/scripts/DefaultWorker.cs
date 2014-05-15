@@ -63,8 +63,7 @@ namespace RTS.Default.Worker {
         }
 
         private void SetState(int state) {
-            unit.State = state;
-            switch(unit.State) {
+            switch(state) {
                 case BehaviorFSM.Rest:
                     fDecide = DSMain;
                     fApply = ASRest;
@@ -77,10 +76,13 @@ namespace RTS.Default.Worker {
                 case BehaviorFSM.Build:    
                 case BehaviorFSM.Repair:
                 case BehaviorFSM.CombatMelee:
+                    if(unit.State != state) cc.Reset();
                     fDecide = DSMain;
                     fApply = ApplyWorkerAction;
                     break;
             }
+            // Update Unit's State
+            unit.State = state;
         }
 
         void DSMain(GameState g, float dt) {
@@ -313,6 +315,10 @@ namespace RTS.Default.Worker {
         private float attackCooldown;
 
         public override void Init(GameState s, GameplayController c, object args) { }
+
+        public override void Reset() {
+            attackCooldown = unit.Data.BaseCombatData.AttackTimer;
+        }
 
         public override void Attack(GameState g, float dt) {
             if(attackCooldown > 0)

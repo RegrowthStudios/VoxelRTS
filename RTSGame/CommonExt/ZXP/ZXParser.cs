@@ -323,9 +323,10 @@ namespace System {
                     if(string.IsNullOrWhiteSpace(atValue))
                         break;
                     Type aType = GetTypeFromString(atValue);
-                    if(aType == null)
-                        break;
-
+                    if(aType == null) {
+                        ai += 2;
+                        continue;
+                    }
 
                     // Get The Argument
                     string sValue = sArray.Substring(nl[ai + 1].Start, nl[ai + 1].Length);

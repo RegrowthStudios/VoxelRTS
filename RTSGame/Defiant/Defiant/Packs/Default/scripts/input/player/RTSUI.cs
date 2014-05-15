@@ -29,8 +29,7 @@ namespace RTS.Input {
         }
         private RectWidget rectBounds;
 
-        private RectWidget rectMapBack;
-        public RectWidget Minimap {
+        public RTSUIMinimap Minimap {
             get;
             private set;
         }
@@ -51,8 +50,12 @@ namespace RTS.Input {
             get;
             private set;
         }
+        public RTSUIAlertQueue AlertQueue {
+            get;
+            private set;
+        }
 
-        public RTSUI(RTSRenderer renderer, string uicFile) {
+        public RTSUI(RTSRenderer renderer, string uicFile, bool showBuildPanel) {
             uic = ZXParser.ParseFile(uicFile, typeof(UICRTS)) as UICRTS;
 
             SpriteFont font = renderer.LoadFont(uic.Font);
@@ -60,18 +63,21 @@ namespace RTS.Input {
             wrMain = new WidgetRenderer(renderer.G, font);
 
             BuildBounds(renderer);
-            BuildMinimap(renderer, uic.MinimapBorder, uic.MinimapSize);
+            BuildMinimap(renderer, uic.UICMinimap);
             BuildBBPanel(renderer);
-            BuildBuildingPanel();
+            BuildBuildingPanel(showBuildPanel);
             BuildSelectionPanel(renderer);
             BuildTeamDataPanel();
+            AlertQueue = new RTSUIAlertQueue(wrMain, uic.UICAlertQueue);
+            AlertQueue.WidgetBase.Parent = Minimap.WidgetBase;
         }
         public void Dispose() {
             wrButtonPanel.Dispose();
             wrMain.Dispose();
+            Minimap.Dispose();
             TeamDataPanel.Dispose();
             SelectionPanel.Dispose();
-            BuildingPanel.Dispose();
+            if(BuildingPanel != null) BuildingPanel.Dispose();
         }
 
         private void BuildBounds(RTSRenderer renderer) {
@@ -88,27 +94,13 @@ namespace RTS.Input {
             };
             rectBounds.LayerDepth = 1f;
         }
-        private void BuildMinimap(RTSRenderer renderer, int buf, int s) {
-            rectMapBack = new RectWidget(wrMain, null);
-            rectMapBack.Height = s + buf * 2;
-            rectMapBack.Width = rectMapBack.Height;
-            rectMapBack.AlignX = Alignment.RIGHT;
-            rectMapBack.AlignY = Alignment.BOTTOM;
-            rectMapBack.OffsetAlignX = Alignment.RIGHT;
-            rectMapBack.OffsetAlignY = Alignment.BOTTOM;
-            rectMapBack.Parent = rectBounds;
-            rectMapBack.Color = UserConfig.MainScheme.WidgetBorder;
-
-            Minimap = new RectWidget(wrMain, renderer.Minimap.Terrain);
-            Minimap.Width = s;
-            Minimap.Height = s;
-            Minimap.Color = Color.White;
-            Minimap.AlignX = Alignment.RIGHT;
-            Minimap.AlignY = Alignment.BOTTOM;
-            Minimap.Offset = new Point(-buf, -buf);
-            Minimap.OffsetAlignX = Alignment.RIGHT;
-            Minimap.OffsetAlignY = Alignment.BOTTOM;
-            Minimap.Parent = rectMapBack;
+        private void BuildMinimap(RTSRenderer renderer, UICMinimap uic) {
+            Minimap = new RTSUIMinimap(renderer, wrMain, renderer.Minimap.Terrain, null, uic);
+            Minimap.WidgetBase.AlignX = Alignment.RIGHT;
+            Minimap.WidgetBase.AlignY = Alignment.BOTTOM;
+            Minimap.WidgetBase.OffsetAlignX = Alignment.RIGHT;
+            Minimap.WidgetBase.OffsetAlignY = Alignment.BOTTOM;
+            Minimap.WidgetBase.Parent = rectBounds;
         }
         private void BuildBBPanel(RTSRenderer renderer) {
             BBPanel = new RTSUIBuildingButtonPanel(wrMain, uic.BBRows, uic.BBColumns, uic.BBIconSize, uic.BBIconBuffer);
@@ -120,9 +112,11 @@ namespace RTS.Input {
             BBPanel.IconLibrary = renderer.IconLibrary;
             BBPanel.BackPanel.Color = UserConfig.MainScheme.WidgetBase;
         }
-        private void BuildBuildingPanel() {
+        private void BuildBuildingPanel(bool b) {
+            if(!b) return;
             BuildingPanel = new RTSUIBuildPanel(wrMain, 180, 26, 5, 12, 24);
-            BuildingPanel.Parent = BBPanel.BackPanel;
+            BuildingPanel.Menu.Widget.AlignY = Alignment.BOTTOM;
+            BuildingPanel.Menu.Parent = BBPanel.BackPanel;
         }
         private void BuildSelectionPanel(RTSRenderer renderer) {
             SelectionPanel = new RTSUISelectionPanel(wrMain, uic.SelectionRows, uic.SelectionColumns, uic.SelectionIconSize, uic.SelectionIconBuffer);
@@ -142,30 +136,28 @@ namespace RTS.Input {
         }
 
         public void SetTeam(RTSTeam team) {
-            BuildingPanel.Build(team);
-            BuildingPanel.Hook();
+            if(BuildingPanel != null) {
+                BuildingPanel.Build(team);
+                BuildingPanel.Hook();
+            }
         }
 
         public bool Inside(int x, int y) {
             return
-                Minimap.Inside(x, y) ||
+                Minimap.WidgetBase.Inside(x, y) ||
                 SelectionPanel.BackPanel.Inside(x, y) ||
                 BBPanel.BackPanel.Inside(x, y) ||
-                BuildingPanel.Inside(x, y) ||
+                (BuildingPanel == null ? false : BuildingPanel.Inside(x, y)) ||
                 TeamDataPanel.Inside(x, y);
         }
 
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             wrMain.Draw(batch);
-            Rectangle rMap = new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height);
+            Rectangle rMap = new Rectangle(Minimap.MapRect.X, Minimap.MapRect.Y, Minimap.MapRect.Width, Minimap.MapRect.Height);
             batch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
             batch.Draw(renderer.Minimap.TeamMap, rMap, Color.White);
             batch.End();
-            renderer.Minimap.DrawCamera(renderer, new Rectangle(Minimap.X, Minimap.Y, Minimap.Width, Minimap.Height));
+            renderer.Minimap.DrawCamera(renderer, rMap);
         }
-
-        //private void OnWindowResize() {
-        //    PanelBottom.Width = rectBounds.Width;
-        //}
     }
 }

@@ -83,6 +83,8 @@ namespace RTSEngine.Interfaces {
 
     // Reasons About How Combat Damage Should Be Performed To A Unit's Target
     public abstract class ACUnitCombatController : ACUnitController {
+        // Reset Any State This Controller Might Have To Manage Combat
+        public abstract void Reset();
         // Scripted Logic For Attacking
         public abstract void Attack(GameState g, float dt);
     }
@@ -153,7 +155,6 @@ namespace RTSEngine.Interfaces {
     // A Super Controller Called By The Gameplay Controller
     public abstract class ACBuildingActionController : ACBuildingController {
         public Queue<GameInputEvent> EventQueue;
-        public bool Enabled; // Allow user to turn on and off building (resource extraction)
 
         // Scripted Super-Controller Logic
         public abstract void DecideAction(GameState g, float dt);
@@ -188,13 +189,6 @@ namespace RTSEngine.Interfaces {
 
     public abstract class ACBuildingAnimationController : ACBuildingController {
 
-    }
-
-    public enum ButtonType {
-        Type0Unit,
-        Type1Unit,
-        Type2Unit,
-        Enable // Enable or disable the building
     }
     #endregion
 
@@ -242,12 +236,6 @@ namespace RTSEngine.Interfaces {
             get { return waypoints; }
             set { waypoints = value; }
         }
-
-        // The Whole Squad Will Move At The Min Default Movespeed
-        public float MinDefaultMoveSpeed { get; set; } 
-
-        // Used For Movement Halting Logic
-        public float SquadRadiusSquared { get; set; }
 
         // Pathfinder To Be Run On A Separate Thread         
         protected Pathfinder pathfinder;
@@ -328,6 +316,7 @@ namespace RTSEngine.Interfaces {
             }
         }
         public abstract void Tick(GameState s);
+        public abstract void ApplyFrame(GameState s, float dt);
 
         public abstract List<LEVoxel> CreateVoxels(VoxAtlas atlas);
         public abstract void LESave(VoxWorld world, int w, int h, DirectoryInfo dir);

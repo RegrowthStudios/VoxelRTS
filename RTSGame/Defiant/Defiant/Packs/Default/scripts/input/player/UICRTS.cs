@@ -11,8 +11,8 @@ namespace RTS.Input {
         public string Font;
         public int FontSize;
 
-        public int MinimapBorder;
-        public int MinimapSize;
+        public UICMinimap UICMinimap;
+        public UICAlertQueue UICAlertQueue;
 
         public int BBRows;
         public int BBColumns;

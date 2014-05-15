@@ -72,7 +72,7 @@ namespace Grey.Graphics {
 
         public void DrawAll(Matrix mWorld, Matrix mView, Matrix mProj) {
             G.DepthStencilState = DepthStencilState.Default;
-            G.BlendState = BlendState.Opaque;
+            G.BlendState = BlendState.NonPremultiplied;
             G.RasterizerState = RasterizerState.CullNone;
 
             fxpVP.SetValue(mView * mProj);

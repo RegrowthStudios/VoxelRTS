@@ -7,6 +7,7 @@ sampler2D Model : register(s0);
 sampler2D Color : register(s1);
 sampler2D Overlay : register(s2);
 sampler2D FOW : register(s3);
+sampler2D BuildNoise : register(s3);
 
 // Used For RGB Palette Color Calculation
 float3 CPrimary;
@@ -24,21 +25,37 @@ struct VSI {
     float4 Position : POSITION0;
     float2 UV : TEXCOORD0;
 };
-struct VSO {
+struct VSOBuilding {
     float4 Position : POSITION0;
     float2 UV : TEXCOORD0;
+	float BuildAmount : TEXCOORD1;
 };
-
-VSO VS_Inst(VSI input, float4x4 InstWorld : POSITION1) {
-    VSO output;
+VSOBuilding VSBuilding(VSI input, float4x4 InstWorld : POSITION1, float BuildAmount : TEXCOORD1) {
+    VSOBuilding output;
 
     float4 worldPosition = mul(InstWorld, input.Position);
     output.Position = mul(worldPosition, VP);
     output.UV = input.UV;
+	output.BuildAmount = BuildAmount;
 
     return output;
 }
-VSO VS_Anim(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD1) {
+float4 PSBuilding(VSOBuilding input) : COLOR0 {
+	float alpha = input.BuildAmount - tex2D(BuildNoise, input.UV).x;
+	clip(alpha + 0.3);
+	
+	float4 swatch = tex2D(Overlay, input.UV);
+	float4 color = tex2D(Color, input.UV);
+    float3 sv = swatch.r * CPrimary + swatch.g * CSecondary + swatch.b * CTertiary;
+    float3 cNorm = lerp(color.xyz, sv, swatch.a);
+	return float4(lerp(CPrimary, cNorm, saturate(input.BuildAmount + alpha * 6)), 1);
+}
+
+struct VSO {
+    float4 Position : POSITION0;
+    float2 UV : TEXCOORD0;
+};
+VSO VSUnit(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD1) {
     VSO output;
 
     // Get The UV Coordinates In The Model Texture
@@ -55,8 +72,7 @@ VSO VS_Anim(VSI input, float4x4 InstWorld : POSITION1, float InstAnim : TEXCOORD
 
     return output;
 }
-
-float4 PS_Swatch(VSO input) : COLOR0 {
+float4 PSUnit(VSO input) : COLOR0 {
     float4 swatch = tex2D(Overlay, input.UV);
     float4 color = tex2D(Color, input.UV);
     float3 sv = swatch.r * CPrimary + swatch.g * CSecondary + swatch.b * CTertiary;
@@ -76,7 +92,6 @@ struct VSOHealth {
 	float4 Tint : COLOR0;
 	float3 DH : TEXCOORD1;
 };
-
 VSOHealth VSHealth(VSIHealth input) {
 	VSOHealth output;
 
@@ -112,12 +127,12 @@ float4 PSHealth(VSOHealth input) : COLOR0 {
 
 technique Entity {
     pass Building {
-        VertexShader = compile vs_3_0 VS_Inst();
-        PixelShader = compile ps_3_0 PS_Swatch();
+        VertexShader = compile vs_3_0 VSBuilding();
+        PixelShader = compile ps_3_0 PSBuilding();
     }
     pass Unit {
-        VertexShader = compile vs_3_0 VS_Anim();
-        PixelShader = compile ps_3_0 PS_Swatch();
+        VertexShader = compile vs_3_0 VSUnit();
+        PixelShader = compile ps_3_0 PSUnit();
     }
 }
 

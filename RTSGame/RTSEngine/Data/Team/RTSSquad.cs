@@ -191,6 +191,26 @@ namespace RTSEngine.Data.Team {
             }
         }
 
+        // The Radius If All Units Made A Tight Circle
+        public float Radius() {
+            float r = 0;
+            foreach(var unit in units.ToArray()) {
+                r += unit.CollisionGeometry.BoundingRadius;
+            }
+            return r;
+        }
+
+        // The Min Default Movespeed Of Units In The Squad
+        public float MinDefaultMoveSpeed() {
+            float minms = float.MaxValue;
+            foreach(var unit in units.ToArray()) {
+                float ms = unit.MovementSpeed / unit.MovementMultiplier;
+                if(ms < minms)
+                    minms = ms;
+            }
+            return minms;
+        }
+
         // When A Unit Dies, It Must Be Removed From Here
         private void OnUnitDestruction(IEntity u) {
             Remove(u as RTSUnit);

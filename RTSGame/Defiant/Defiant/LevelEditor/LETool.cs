@@ -69,6 +69,85 @@ namespace RTS {
             }
         }
     }
+    public class LETRect : LETool {
+
+        public LETRect()
+            : base() {
+            CurVoxID = 0;
+            Name = "Rect";
+        }
+
+        bool hasStart;
+        Vector3I start;
+
+        public override void OnMouseClick(VoxState s, FreeCamera camera, Vector2 mPos, MouseButton button, Viewport vp) {
+            Ray r = camera.GetViewRay(mPos, vp.Width, vp.Height);
+            if(button == MouseButton.Left) {
+                VoxLocation? vl = VRayHelper.GetInner(r, s);
+                if(vl.HasValue) {
+                    var loc = vl.Value;
+                    if(hasStart) {
+                        Vector3I end = new Vector3I(
+                            loc.RegionLoc.X * Region.WIDTH + loc.VoxelLoc.X,
+                            loc.VoxelLoc.Y,
+                            loc.RegionLoc.Y * Region.DEPTH + loc.VoxelLoc.Z
+                            );
+                        Vector3I min = new Vector3I(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Min(start.Z, end.Z));
+                        Vector3I max = new Vector3I(Math.Max(start.X, end.X), Math.Max(start.Y, end.Y), Math.Max(start.Z, end.Z));
+                        for(int ry = min.Y; ry <= max.Y; ry++) {
+                            for(int rz = min.Z; rz <= max.Z; rz++) {
+                                for(int rx = min.X; rx <= max.X; rx++) {
+                                    loc = new VoxLocation(new Vector3I(rx, ry, rz));
+                                    s.World.regions[loc.RegionIndex].RemoveVoxel(loc.VoxelLoc.X, loc.VoxelLoc.Y, loc.VoxelLoc.Z);
+                                }
+                            }
+                        }
+                        hasStart = false;
+                    }
+                    else {
+                        start = new Vector3I(
+                            loc.RegionLoc.X * Region.WIDTH + loc.VoxelLoc.X,
+                            loc.VoxelLoc.Y,
+                            loc.RegionLoc.Y * Region.DEPTH + loc.VoxelLoc.Z
+                            );
+                        hasStart = true;
+                    }
+                }
+            }
+            else if(button == MouseButton.Right) {
+                VoxLocation? vl = VRayHelper.GetOuter(r, s);
+                if(vl.HasValue) {
+                    var loc = vl.Value;
+                    if(hasStart) {
+                        Vector3I end = new Vector3I(
+                            loc.RegionLoc.X * Region.WIDTH + loc.VoxelLoc.X,
+                            loc.VoxelLoc.Y,
+                            loc.RegionLoc.Y * Region.DEPTH + loc.VoxelLoc.Z
+                            );
+                        Vector3I min = new Vector3I(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y), Math.Min(start.Z, end.Z));
+                        Vector3I max = new Vector3I(Math.Max(start.X, end.X), Math.Max(start.Y, end.Y), Math.Max(start.Z, end.Z));
+                        for(int ry = min.Y; ry <= max.Y; ry++) {
+                            for(int rz = min.Z; rz <= max.Z; rz++) {
+                                for(int rx = min.X; rx <= max.X; rx++) {
+                                    loc = new VoxLocation(new Vector3I(rx, ry, rz));
+                                    s.World.regions[loc.RegionIndex].AddVoxel(loc.VoxelLoc.X, loc.VoxelLoc.Y, loc.VoxelLoc.Z, CurVoxID);
+                                }
+                            }
+                        }
+                        hasStart = false;
+                    }
+                    else {
+                        start = new Vector3I(
+                            loc.RegionLoc.X * Region.WIDTH + loc.VoxelLoc.X,
+                            loc.VoxelLoc.Y,
+                            loc.RegionLoc.Y * Region.DEPTH + loc.VoxelLoc.Z
+                            );
+                        hasStart = true;
+                    }
+                }
+            }
+        }
+    }
     public class LETCluster : LETool {
         public LETCluster()
             : base() {
@@ -86,7 +165,7 @@ namespace RTS {
         public override void OnMouseClick(VoxState s, FreeCamera camera, Vector2 mPos, MouseButton button, Viewport vp) {
             List<VoxLocation> locs = new List<VoxLocation>();
             if(button == MouseButton.Left) {
-                foreach(var r in GetRays(mPos, Vector2.One * 3, new Point(9, 9), camera, vp)) {
+                foreach(var r in GetRays(mPos, Vector2.One * 1, new Point(39, 39), camera, vp)) {
                     VoxLocation? vl = VRayHelper.GetInner(r, s);
                     if(vl.HasValue) locs.Add(vl.Value);
                 }
@@ -94,7 +173,7 @@ namespace RTS {
                     s.World.regions[loc.RegionIndex].RemoveVoxel(loc.VoxelLoc.X, loc.VoxelLoc.Y, loc.VoxelLoc.Z);
             }
             else if(button == MouseButton.Right) {
-                foreach(var r in GetRays(mPos, Vector2.One * 5, new Point(9, 9), camera, vp)) {
+                foreach(var r in GetRays(mPos, Vector2.One * 1, new Point(39, 39), camera, vp)) {
                     VoxLocation? vl = VRayHelper.GetOuter(r, s);
                     if(vl.HasValue) locs.Add(vl.Value);
                 }

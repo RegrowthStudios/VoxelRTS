@@ -19,6 +19,8 @@ namespace RTS.Default.Unit {
         ACUnitMovementController mc;
 
         // Targeting Behavior State Info
+        const int PF_COOLDOWN = 10; // Number Of ChaseTarget Calls Before A New Path Query Is Sent
+        int pfCounter = 0;
         Point targetCellPrev = Point.Zero;
         IEntity prevTarget = null;
         Vector2 origin = Vector2.Zero;
@@ -54,9 +56,8 @@ namespace RTS.Default.Unit {
             teamIndex = unit.Team.Index;
         }
 
-        private void SetState(int state) {
-            unit.State = state;
-            switch(unit.State) {
+        private void SetState(int state) {            
+            switch(state) {
                 case BehaviorFSM.Rest:
                     fDecide = DSMain;
                     fApply = ASRest;
@@ -66,14 +67,18 @@ namespace RTS.Default.Unit {
                     fApply = mc.ApplyMove;
                     break;
                 case BehaviorFSM.CombatRanged:
+                    if(unit.State != state) cc.Reset();
                     fDecide = DSCombatRanged;
                     fApply = ASCombatRanged;
                     break;
                 case BehaviorFSM.CombatMelee:
+                    if(unit.State != state) cc.Reset();
                     fDecide = DSCombatMelee;
                     fApply = ASCombatMelee;
                     break;
             }
+            // Update The Unit's State
+            unit.State = state;
         }
 
         void DSMain(GameState g, float dt) {
@@ -117,24 +122,35 @@ namespace RTS.Default.Unit {
                     float mr = unit.Data.BaseCombatData.MaxRange;
                     float d = (unit.Target.GridPosition - unit.GridPosition).Length();
                     float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
-                    switch(unit.CombatOrders) {
-                        case BehaviorFSM.UseRangedAttack:
-                            if(d <= mr * 0.75) {
-                                SetState(BehaviorFSM.CombatRanged);
-                                return;
-                            }
-                            break;
-                        case BehaviorFSM.UseMeleeAttack:
-                            if(dBetween <= unit.CollisionGeometry.InnerRadius * 0.2f) {
-                                SetState(BehaviorFSM.CombatMelee);
-                                return;
-                            }
-                            break;
+                    if(unit.Target.Team.Index != teamIndex) { // Moved Team-Check Here So It Can Be Toggled To Test Target Chasing
+                        switch(unit.CombatOrders) {
+                            case BehaviorFSM.UseRangedAttack:
+                                if(d <= mr * 0.75) {
+                                    SetState(BehaviorFSM.CombatRanged);
+                                    return;
+                                }
+                                break;
+                            case BehaviorFSM.UseMeleeAttack:
+                                if(dBetween <= unit.CollisionGeometry.InnerRadius * 0.2f) {
+                                    SetState(BehaviorFSM.CombatMelee);
+                                    return;
+                                }
+                                break;
+                        }
                     }
                     Point targetCellCurr = HashHelper.Hash(unit.Target.GridPosition, g.CGrid.numCells, g.CGrid.size);
                     bool sameTarget = prevTarget == unit.Target;
-                    // If The Target Has Changed Cells And Is Out Of Range, We Need To Pathfind To It
-                    if(sameTarget && (targetCellCurr.X != targetCellPrev.X || targetCellCurr.Y != targetCellPrev.Y)) {
+                    bool considerPF = pfCounter >= PF_COOLDOWN && sameTarget;
+                    if(!sameTarget || pfCounter >= PF_COOLDOWN) {
+                        pfCounter = 0;
+                    }
+                    else if(sameTarget) {
+                        pfCounter += 1;
+                    }
+                    bool reachedGoalNotTarget = mc.IsValid(mc.CurrentWaypointIndex) && mc.CurrentWaypointIndex == 0;
+                    reachedGoalNotTarget &= unit.Target.Team.Index != teamIndex; // Treat Allies As Open Space
+                    // If The Target Has Changed Cells And Is Out Of Range, We Might Need To Pathfind To It
+                    if(considerPF && (targetCellCurr.X != targetCellPrev.X || targetCellCurr.Y != targetCellPrev.Y) || reachedGoalNotTarget) {
                         mc.Query = mc.Pathfinder.ReissuePathQuery(mc.Query, unit.GridPosition, unit.Target.GridPosition, unit.Team.Index);
                         SetState(BehaviorFSM.Rest);
                     }
@@ -180,14 +196,24 @@ namespace RTS.Default.Unit {
         }
 
         void DSCombatRanged(GameState g, float dt) {
+            // Check If Target Is Null
             if(unit.Target == null || cc == null) {
                 SetState(BehaviorFSM.Rest);
                 return;
             }
+            // Check If Target Is Out Of Range
+            else if(unit.Target != null) {
+                float mr = unit.Data.BaseCombatData.MaxRange;
+                float d2 = (unit.Target.GridPosition - unit.GridPosition).LengthSquared();
+                if(d2 > mr * mr) {
+                    SetState(BehaviorFSM.Rest);
+                    return;
+                }
+            }
             SetState(BehaviorFSM.CombatRanged);
         }
         void ASCombatRanged(GameState g, float dt) {
-            if(unit.Target == null || unit.CombatOrders != BehaviorFSM.UseRangedAttack) {
+            if(unit.Target == null || unit.CombatOrders != BehaviorFSM.UseRangedAttack || cc == null) {
                 SetState(BehaviorFSM.Rest);
                 return;
             }
@@ -226,6 +252,10 @@ namespace RTS.Default.Unit {
         private float attackCooldown;
 
         public override void Init(GameState s, GameplayController c, object args) {
+        }
+
+        public override void Reset() {
+            attackCooldown = unit.Data.BaseCombatData.AttackTimer;
         }
 
         public override void Attack(GameState g, float dt) {
@@ -325,15 +355,27 @@ namespace RTS.Default.Unit {
             doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
             if(!doMove) return;
             // If The Old Path Has Become Invalidated, Send A New Query
+            // Note: These Invalidation Checks Ignore Fog, But The Idea Is To Look Only A Small Distance Ahead (Within Sight)
             invalid = false;
             int end = Math.Max(CurrentWaypointIndex - lookahead, 0);
             for(int i = CurrentWaypointIndex; i > end; i--) {
-                Vector2 wp = Waypoints[i];
-                Point wpCell = HashHelper.Hash(wp, g.CGrid.numCells, g.CGrid.size);
-                if(g.CGrid.GetCollision(wpCell.X, wpCell.Y)) {
+                Vector2 wp2 = Waypoints[i];
+                Point cell2 = HashHelper.Hash(wp2, g.CGrid.numCells, g.CGrid.size);
+                if(g.CGrid.GetCollision(cell2.X, cell2.Y)) {
                     invalid = true;
                     break;
                 }
+                // Check For Walls Too
+                Point cell1 = HashHelper.Hash(unit.GridPosition, g.CGrid.numCells, g.CGrid.size);
+                if(IsValid(i + 1)) {
+                    Vector2 wp1 = Waypoints[i + 1];
+                    cell1 = HashHelper.Hash(wp1, g.CGrid.numCells, g.CGrid.size);
+                }
+                if(!g.CGrid.CanMoveFrom(cell1, cell2)) {
+                    invalid = true;
+                    break;
+                }
+
             }
             if(stuck || invalid && (Query == null || Query != null && Query.IsOld)) {
                 Vector2 goal = Waypoints[0];
@@ -344,7 +386,7 @@ namespace RTS.Default.Unit {
         public override void ApplyMove(GameState g, float dt) {
             if(NetForce != Vector2.Zero) {
                 float magnitude = NetForce.Length();
-                Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MovementController.MinDefaultMoveSpeed * dt;
+                Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MinDefaultMoveSpeed() * dt;
                 // TODO: Make Sure We Don't Overshoot The Goal But Otherwise Move At Max Speed
                 if(scaledChange.LengthSquared() > magnitude * magnitude)
                     unit.Move(NetForce);
@@ -368,14 +410,14 @@ namespace RTS.Default.Unit {
             //    tempIdx++;
             //}
 
+            Vector2 waypoint = Waypoints[CurrentWaypointIndex];
+#if DEBUG
             Vector2 first = Waypoints[Waypoints.Count - 1];
             Vector3 oFirst = new Vector3(first.X, g.CGrid.HeightAt(first), first.Y);
             g.AddParticle(new AlertParticle(oFirst, 1f, Color.Red, oFirst + Vector3.Up, 0.2f, Color.Green, g.TotalGameTime, 1f));
-
-            Vector2 waypoint = Waypoints[CurrentWaypointIndex];
             Vector3 oWP = new Vector3(waypoint.X, g.CGrid.HeightAt(waypoint), waypoint.Y);
             g.AddParticle(new AlertParticle(oWP, 1f, Color.Blue, oWP + Vector3.Up, 0.2f, Color.Purple, g.TotalGameTime, 3f));
-
+#endif
             if(Query != null && !Query.IsOld && Query.IsComplete) {
                 Query.IsOld = true; // Only Do This Once Per Query
                 Waypoints = Query.waypoints;
@@ -399,10 +441,11 @@ namespace RTS.Default.Unit {
             }
             // Set Waypoint...
             Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
-            float SquadRadiusSquared = unit.Squad.MovementController.SquadRadiusSquared;
+            float sqr2 = unit.Squad.Radius();
+            sqr2 *= sqr2;
             bool inGoalCell = unitCell.X == currWaypointCell.X && unitCell.Y == currWaypointCell.Y;
             bool withinCellDistSq = (waypoint - unit.GridPosition).LengthSquared() < cg.cellSize;
-            bool withinSquad = (waypoint - unit.GridPosition).LengthSquared() < 1.5 * SquadRadiusSquared;
+            bool withinSquad = (waypoint - unit.GridPosition).LengthSquared() < 1.5 * sqr2;
             if(inGoalCell || (!wasStuck && (withinSquad || withinCellDistSq))) {
                 CurrentWaypointIndex--;
                 if(CurrentWaypointIndex < 0)
@@ -522,13 +565,10 @@ namespace RTS.Default.Unit {
                     alCurrent = alWalk;
                     alCurrent.Restart(true);
                     break;
+                case BehaviorFSM.CombatRanged:
                 case BehaviorFSM.CombatMelee:
                     alCurrent = alMelee;
-                    alCurrent.Restart(false);
-                    break;
-                case BehaviorFSM.CombatRanged:
-                    alCurrent = alFire;
-                    alCurrent.Restart(false);
+                    alCurrent.Restart(true);
                     break;
                 case BehaviorFSM.Rest:
                     alCurrent = alRest;

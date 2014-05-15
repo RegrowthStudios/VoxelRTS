@@ -215,9 +215,11 @@ namespace RTS.Input {
 
             int wi = 0;
             var bd = ic.Team.Race.Buildings[bType].DefaultButtonControllers;
+            int bci = 0;
             foreach(var bc in bd) {
                 if(wi >= groups.Length) break;
-                string key = string.Join(".", ic.Team.Race.FriendlyName, bc.TypeName);
+                string key = string.Join(".", ic.Team.Race.FriendlyName, ic.Team.Race.Buildings[bType].FriendlyName, bci);
+                bci++;
                 if(!IconLibrary.ContainsKey(key)) continue;
                 Texture2D t = IconLibrary[key];
                 if(t == null) continue;

@@ -1,5 +1,6 @@
 ﻿// Friendly Team Name
-Name            [Gaia]
+Name                [Gaia]
+GlobalBuildSpeed    [5]
 
 // Default Squad Controllers
 SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Squad.Action})

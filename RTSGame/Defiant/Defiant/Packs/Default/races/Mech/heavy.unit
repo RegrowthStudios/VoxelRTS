@@ -34,7 +34,7 @@ BBOXMAX         [0.4 , 1.0 , 0.4]
 BASECOMBAT <RTSEngine.Data.BaseCombatData> {
     ARMOR           [0]
     MINRANGE        [0]
-    MAXRANGE        [16]
+    MAXRANGE        [12]
     ATTACKTIMER     [2.5]
     ATTACKDAMAGE    [40]
     CRITICALDAMAGE  [60]

@@ -92,6 +92,18 @@ namespace RTSEngine.Controllers {
         // Pathfinding
         public Pathfinder pathfinder;
 
+        private List<SquadQuery> squadQueries = new List<SquadQuery> ();
+
+        public struct SquadQuery {
+            public RTSSquad Squad;
+            public PathQuery Query;
+
+            public SquadQuery(RTSSquad s, PathQuery q) {
+                Squad = s;
+                Query = q;
+            }
+        }
+
         // Vox World Manager
         WorldManager vManager;
 
@@ -147,10 +159,14 @@ namespace RTSEngine.Controllers {
         // The Update Function
         public void Update(GameState s, float dt) {
             s.IncrementFrame(dt);
+            s.gtC.ApplyFrame(s, dt);
 
             // Input Pass
             ResolveInput(s, dt);
             ApplyInput(s, dt);
+
+            // Apply Any Finished Squad-Level Pathfinding Queries
+            ApplySquadQueries();
 
             // Logic Pass
             ApplyLogic(s, dt);
@@ -244,7 +260,11 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                squad.TargetingController.Target = e.Target;
+                // Assign The Target To Every Unit In The Squad
+                for(int u = 0; u < squad.Units.Count; u++) {
+                    RTSUnit unit = squad.Units[u];
+                    unit.Target = e.Target;
+                }
                 AddTask(s, squad);
                 SendSquadQuery(s, squad, e);
             }
@@ -273,8 +293,29 @@ namespace RTSEngine.Controllers {
                 }
 
             }
-            var query = squad.MovementController.Query;
-            squad.MovementController.Query = pathfinder.ReissuePathQuery(query, start, goal, e.Team);
+            var query = pathfinder.ReissuePathQuery(new PathQuery(start, goal, e.Team), start, goal, e.Team);
+            squadQueries.Add(new SquadQuery(squad, query));
+        }
+
+        private void ApplySquadQueries() {
+            List<SquadQuery> newSquadQueries = new List<SquadQuery>();
+            foreach(var sq in squadQueries) {
+                if(sq.Query.IsComplete && !sq.Query.IsOld) {
+                    sq.Query.IsOld = true; // Pathfinder Needs To Know It Can Clear This
+                    foreach(var unit in sq.Squad.Units) {
+                        List<Vector2> waypoints = new List<Vector2>();
+                        foreach(var wp in sq.Query.waypoints) {
+                            waypoints.Add(wp);
+                        }
+                        unit.MovementController.Waypoints = waypoints;
+                        unit.MovementController.CurrentWaypointIndex = waypoints.Count - 1;
+                    }
+                }
+                if(!sq.Query.IsOld) {
+                    newSquadQueries.Add(sq);
+                }
+            }
+            squadQueries = newSquadQueries;
         }
 
         private void ApplyInput(GameState s, float dt, SpawnUnitEvent e) {
@@ -282,7 +323,7 @@ namespace RTSEngine.Controllers {
             RTSUnit unit = team.AddUnit(e.Type, e.Position);
 
             // Check If A Unit Was Possible
-            if (unit == null) { return; }
+            if(unit == null) { return; }
 
             // Add Decision Tasks
             AddTask(s, unit);
@@ -304,7 +345,14 @@ namespace RTSEngine.Controllers {
             if(building == null) return;
 
             // Check For Instant Building
-            if(e.InstantBuild) building.BuildAmountLeft = 0;
+            if(e.InstantBuild) {
+                building.BuildAmountLeft = 0;
+            }
+            else {
+                building.OnBuildingFinished += (b) => {
+                    s.SendAlert(building.Data.FriendlyName + " Is Built", AlertLevel.Passive);
+                };
+            }
 
             // Check If A Building Was Possible
             if(building == null) return;

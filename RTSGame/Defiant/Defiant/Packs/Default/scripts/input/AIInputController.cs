@@ -22,7 +22,7 @@ namespace RTS.Input {
         public Random random;
         public int spawnCap;
         public int[] unitSpawnP;
-        List<BarrackController> barrackControllers;
+        List<BarracksController> barracksControllers;
         public RTSTeam player;
         public int playerIndex;
         public List<List<IEntity>> squads;
@@ -32,20 +32,19 @@ namespace RTS.Input {
             Type = RTSInputType.AI;
         }
 
-        public override void Init(GameState s, int ti) {
-            base.Init(s, ti);
-            
+        public override void Init(GameState s, int ti, object args) {
+            base.Init(s, ti, args);
             Team.OnBuildingSpawn += OnBuildingSpawn;
             Team.OnUnitSpawn += OnUnitSpawn;
             random = new Random();
             spawnCap = 1;
             unitSpawnP = new int[] { 33, 33, 34 };
-            barrackControllers = new List<BarrackController>();
+            barracksControllers = new List<BarracksController>();
             squads = new List<List<IEntity>>();
 
             foreach (var b in Team.Buildings) {
                 DevConsole.AddCommand("added barracks");
-                barrackControllers.Add(new BarrackController(this, b));
+                barracksControllers.Add(new BarracksController(this, b));
             }
           
 
@@ -67,8 +66,8 @@ namespace RTS.Input {
             Point cc = HashHelper.Hash(u.GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
             RTSBuilding b = GameState.CGrid.EStatic[cc.X, cc.Y];
             if (b != null) {
-                foreach (var bc in barrackControllers) {
-                    if (b.UUID == bc.barrack.UUID) {
+                foreach (var bc in barracksControllers) {
+                    if (b.UUID == bc.barracks.UUID) {
                         bc.army.Add(u);
                         u.OnDestruction += bc.OnUnitDeath;
                     }
@@ -79,23 +78,23 @@ namespace RTS.Input {
         public void OnBuildingSpawn(RTSBuilding b) {
     
             DevConsole.AddCommand("added barracks");
-            barrackControllers.Add(new BarrackController(this, b));
+            barracksControllers.Add(new BarracksController(this, b));
             Team.Buildings.Add(b);
             b.OnDestruction += OnBuildingDestruction;
 
         }
 
         public void OnBuildingDestruction(IEntity b) {
-            BarrackController destroyed = null;
+            BarracksController destroyed = null;
             
-            foreach (var bc in barrackControllers) {
-                if (bc.barrack.UUID == b.UUID) {
+            foreach (var bc in barracksControllers) {
+                if (bc.barracks.UUID == b.UUID) {
                     destroyed = bc;
                 }
             }
             if (destroyed != null) {
                 destroyed.Dispose();
-                barrackControllers.Remove(destroyed);
+                barracksControllers.Remove(destroyed);
             }
         }
 
@@ -106,7 +105,7 @@ namespace RTS.Input {
                     Thread.Sleep(1000);
                     continue;
                 }
-                foreach (var bc in barrackControllers) {
+                foreach (var bc in barracksControllers) {
                     bc.SpawnUnits();
                     bc.DecideTarget();
                     bc.ApplyTarget();

@@ -59,7 +59,7 @@ namespace RTSEngine.Interfaces {
         public abstract void Dispose();
 
         // Called After Controller Is Created
-        public virtual void Init(GameState s, int t) {
+        public virtual void Init(GameState s, int t, object args) {
             GameState = s;
             TeamIndex = t;
         }

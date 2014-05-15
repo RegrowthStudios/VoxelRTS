@@ -274,7 +274,8 @@ namespace RTS {
             tools = new LETool[] {
                 new LETSingle(),
                 new LETCluster(),
-                new LETPaint()
+                new LETPaint(),
+                new LETRect()
             };
             curTool = tools[0];
 
@@ -474,6 +475,8 @@ namespace RTS {
                         else if(ramp >= 0 && ramp < COUNT_RAMP) break;
                         else if(scen >= 0 && ramp < COUNT_SCENERY) {
                             data.AddRange(BitConverter.GetBytes(scen));
+                            data.AddRange(BitConverter.GetBytes(vl.RegionIndex));
+                            data.AddRange(BitConverter.GetBytes(vl.VoxelIndex));
                         }
                     }
                     data.AddRange(BitConverter.GetBytes(-1));

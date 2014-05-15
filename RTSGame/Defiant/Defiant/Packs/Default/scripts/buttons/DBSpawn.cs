@@ -10,15 +10,17 @@ using RTSEngine.Interfaces;
 using Microsoft.Xna.Framework;
 
 namespace RTS.Default.Buttons.Spawn {
-    public abstract class ACUnit : ACBuildingButtonController {
-        public abstract int UnitType {
+    public class Unit : ACBuildingButtonController {
+        public int UnitType {
             get;
+            private set;
         }
         public override int QueueTime {
             get { return building.Team.Race.Units[UnitType].BuildTime; }
         }
 
         public override void Init(GameState s, GameplayController c, object args) {
+            UnitType = (int)args;
         }
 
         public override void OnQueueFinished(GameState s) {
@@ -41,27 +43,6 @@ namespace RTS.Default.Buttons.Spawn {
         public override void Serialize(BinaryWriter s) {
         }
         public override void Deserialize(BinaryReader s) {
-        }
-    }
-
-    public class Worker : ACUnit {
-        public override int UnitType {
-            get { return 0; }
-        }
-    }
-    public class Soldier : ACUnit {
-        public override int UnitType {
-            get { return 1; }
-        }
-    }
-    public class Heavy : ACUnit {
-        public override int UnitType {
-            get { return 2; }
-        }
-    }
-    public class Armored : ACUnit {
-        public override int UnitType {
-            get { return 3; }
         }
     }
 }

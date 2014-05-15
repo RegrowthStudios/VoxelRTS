@@ -2,8 +2,8 @@
 ViewModel(
     {~~RENDERER~~}
     {~~FILEROOTDIR~~}
-    {models\Soldier.model}
-    {{animations\Soldier.png} {textures\Main.png} {textures\Key.png}}
+    {models\Light.model}
+    {{animations\Light.png} {textures\LightMain.png} {textures\LightKey.png}}
 )
 ViewIcon(
     {~~RENDERER~~}
@@ -34,7 +34,7 @@ BBOXMAX         [0.4 , 1.0 , 0.4]
 BASECOMBAT <RTSEngine.Data.BaseCombatData> {
     ARMOR           [0]
     MINRANGE        [0]
-    MAXRANGE        [10]
+    MAXRANGE        [8]
     ATTACKTIMER     [0.5]
     ATTACKDAMAGE    [10]
     CRITICALDAMAGE  [15]
