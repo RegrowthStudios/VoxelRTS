@@ -61,7 +61,10 @@ float4 PS(VSO input) : COLOR0 {
 
 	float2 uv = fmod(input.UV, 1);
 	uv = input.UVRect.xy + input.UVRect.zw * uv;
-    return tex2D(VoxMap, uv) * input.Tint * fow;
+	float4 col = tex2D(VoxMap, uv) * input.Tint;
+	clip(col.a - 0.3);
+	
+	return col * fow;
 }
 
 technique Default {

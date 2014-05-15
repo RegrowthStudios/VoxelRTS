@@ -319,6 +319,7 @@ namespace RTSEngine.Graphics {
         }
         public void CreateVoxGeos(VoxAtlas atlas) {
             float DUV = 0.125f;
+            int vi;
             for(int i = 1; i < 6; i++) {
                 var vgpTop = new VGPCube6();
                 var vgpTrans = new VGPCube6();
@@ -347,10 +348,10 @@ namespace RTSEngine.Graphics {
                 atlas[(ushort)(i + 5)].GeoProvider = vgpTrans;
                 atlas[(ushort)(i + 10)].GeoProvider = vgpCliff;
             }
-            for(int vi = 0; vi < 4; vi++) {
+            for(vi = 0; vi < 4; vi++) {
                 var vd = atlas[(ushort)(vi + 16)];
                 var vgp = new VGPCustom();
-                Vector4 uvr = new Vector4(DUV * 3, DUV * 0, DUV, DUV);
+                Vector4 uvr = new Vector4(DUV * 5, DUV * 0, DUV, DUV);
                 switch(vi) {
                     case 0:
                     case 1:
@@ -397,6 +398,45 @@ namespace RTSEngine.Graphics {
                     }
                 }
                 vd.GeoProvider = vgp;
+            }
+            vi = 20;
+            for(int i = 0; i < 5; i++) {
+                var vgp = new VGPCube6();
+                for(int fi = 0; fi < 6; fi++) {
+                    vgp.Colors[fi] = Color.White;
+                    switch(fi) {
+                        case Voxel.FACE_NY:
+                            vgp.UVRects[fi] = new Vector4(DUV * i, DUV * 7, DUV, DUV);
+                            break;
+                        case Voxel.FACE_PY:
+                            vgp.UVRects[fi] = new Vector4(DUV * i, DUV * 5, DUV, DUV);
+                            break;
+                        default:
+                            vgp.UVRects[fi] = new Vector4(DUV * i, DUV * 6, DUV, DUV);
+                            break;
+                    }
+                }
+                atlas[(ushort)(vi + i)].GeoProvider = vgp;
+            }
+            vi += 5;
+            for(int i = 0; i < 5; i++) {
+                var vgp = new VGPCustom();
+                Vector4 uvr = new Vector4(DUV * 7, DUV * i, DUV, DUV);
+                vgp.CustomVerts[Voxel.FACE_PY] = new VertexVoxel[] {
+                    new VertexVoxel(new Vector3(0, 0, 0), Vector2.Zero, uvr, Color.White),
+                    new VertexVoxel(new Vector3(1, 0, 1), Vector2.UnitX, uvr, Color.White),
+                    new VertexVoxel(new Vector3(0, -1, 0), Vector2.UnitY, uvr, Color.White),
+                    new VertexVoxel(new Vector3(1, -1, 1), Vector2.One, uvr, Color.White),
+                    new VertexVoxel(new Vector3(0, 0, 1), Vector2.Zero, uvr, Color.White),
+                    new VertexVoxel(new Vector3(1, 0, 0), Vector2.UnitX, uvr, Color.White),
+                    new VertexVoxel(new Vector3(0, -1, 1), Vector2.UnitY, uvr, Color.White),
+                    new VertexVoxel(new Vector3(1, -1, 0), Vector2.One, uvr, Color.White)
+                };
+                vgp.CustomInds[Voxel.FACE_PY] = new int[] {
+                    0, 1, 2, 2, 1, 3,
+                    4, 5, 6, 6, 5, 7
+                };
+                atlas[(ushort)(vi + i)].GeoProvider = vgp;
             }
         }
         private void LoadTeamVisuals(GameState state, int ti) {
@@ -507,7 +547,6 @@ namespace RTSEngine.Graphics {
                 bm.UpdateInstances(G, fFVB);
         }
 
-        // Draw The Map
         public void DrawMap(Matrix mV, Matrix mP) {
             // Set States
             G.DepthStencilState = DepthStencilState.Default;
@@ -520,8 +559,6 @@ namespace RTSEngine.Graphics {
             G.SamplerStates[1] = SamplerState.PointClamp;
             Map.Draw(G, mV, mP);
         }
-
-        // Draw Buildings
         private void DrawBuildings() {
             // Set Camera
             fxAnim.VP = Camera.View * Camera.Projection;
@@ -551,8 +588,6 @@ namespace RTSEngine.Graphics {
                 buildingModel.DrawInstances(G);
             }
         }
-
-        // Draw Units
         private void DrawUnits() {
             // Set Camera
             fxAnim.VP = Camera.View * Camera.Projection;
@@ -584,8 +619,6 @@ namespace RTSEngine.Graphics {
             G.VertexTextures[0] = null;
             G.VertexSamplerStates[0] = SamplerState.LinearClamp;
         }
-
-        // Draw Selection Box
         private void DrawSelectionBox() {
             fxSimple.TextureEnabled = false;
             fxSimple.VertexColorEnabled = true;
@@ -609,8 +642,6 @@ namespace RTSEngine.Graphics {
                     new VertexPositionColor(max, new Color(1f, 0, 0f, 0.3f)),
                 }, 0, 2, VertexPositionColor.VertexDeclaration);
         }
-
-        // Draw Selection Circles Under Selected Units
         private void DrawSelectionCircles(Vector3 c) {
             if(SelectionCircleTexture == null)
                 return;
@@ -709,8 +740,6 @@ namespace RTSEngine.Graphics {
 
             healthView.Draw(G, lhv);
         }
-
-        // Draw Particles
         private void DrawParticles(float t) {
             //float t = (float)(DateTime.Now.TimeOfDay.TotalSeconds % 1000);            
 

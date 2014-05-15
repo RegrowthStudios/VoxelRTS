@@ -87,6 +87,9 @@
     <Compile Include="LevelEditor\LEMenu.cs" />
     <Compile Include="LevelEditor\LEScreen.cs" />
     <Compile Include="LevelEditor\LETool.cs" />
+    <Content Include="LevelEditor\Mouse\Rect.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\races\Mech\animations\Light.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
