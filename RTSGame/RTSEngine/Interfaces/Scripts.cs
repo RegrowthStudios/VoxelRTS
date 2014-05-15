@@ -83,6 +83,8 @@ namespace RTSEngine.Interfaces {
 
     // Reasons About How Combat Damage Should Be Performed To A Unit's Target
     public abstract class ACUnitCombatController : ACUnitController {
+        // Reset Any State This Controller Might Have To Manage Combat
+        public abstract void Reset();
         // Scripted Logic For Attacking
         public abstract void Attack(GameState g, float dt);
     }
