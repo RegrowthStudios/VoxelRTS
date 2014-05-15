@@ -140,7 +140,7 @@
     <Content Include="Packs\Default\scripts\input\AIInputController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Packs\Default\scripts\input\BarrackController.cs">
+    <Content Include="Packs\Default\scripts\input\BarracksController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\scripts\input\environment\EnvironmentInputController.cs">

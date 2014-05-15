@@ -22,7 +22,7 @@ namespace RTS.Input {
         public Random random;
         public int spawnCap;
         public int[] unitSpawnP;
-        List<BarrackController> barrackControllers;
+        List<BarracksController> barracksControllers;
         public RTSTeam player;
         public int playerIndex;
         public List<List<IEntity>> squads;
@@ -39,13 +39,13 @@ namespace RTS.Input {
             random = new Random();
             spawnCap = 1;
             unitSpawnP = new int[] { 33, 33, 34 };
-            barrackControllers = new List<BarrackController>();
+            barracksControllers = new List<BarracksController>();
             squads = new List<List<IEntity>>();
 
          
             foreach (var b in Team.Buildings) {
                 DevConsole.AddCommand("added barracks");
-                barrackControllers.Add(new BarrackController(this, b));
+                barracksControllers.Add(new BarracksController(this, b));
             }
           
 
@@ -65,23 +65,23 @@ namespace RTS.Input {
         public void OnBuildingSpawn(RTSBuilding b) {
     
             DevConsole.AddCommand("added barracks");
-            barrackControllers.Add(new BarrackController(this, b));
+            barracksControllers.Add(new BarracksController(this, b));
             Team.Buildings.Add(b);
             b.OnDestruction += OnBuildingDestruction;
 
         }
 
         public void OnBuildingDestruction(IEntity b) {
-            BarrackController destroyed = null;
+            BarracksController destroyed = null;
             
-            foreach (var bc in barrackControllers) {
-                if (bc.barrack.UUID == b.UUID) {
+            foreach (var bc in barracksControllers) {
+                if (bc.barracks.UUID == b.UUID) {
                     destroyed = bc;
                 }
             }
             if (destroyed != null) {
                 destroyed.Dispose();
-                barrackControllers.Remove(destroyed);
+                barracksControllers.Remove(destroyed);
             }
 
             RTSBuilding destroyedB = null;
@@ -103,7 +103,7 @@ namespace RTS.Input {
                     continue;
                 }
                 DevConsole.AddCommand("thread");
-                foreach (var bc in barrackControllers) {
+                foreach (var bc in barracksControllers) {
                     bc.SpawnUnits();
                     bc.DecideTarget();
                     bc.ApplyTarget();

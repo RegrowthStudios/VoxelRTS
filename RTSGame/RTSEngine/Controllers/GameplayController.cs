@@ -245,7 +245,11 @@ namespace RTSEngine.Controllers {
                     }
                 }
                 if(squad == null) return;
-                squad.TargetingController.Target = e.Target;
+                //squad.TargetingController.Target = e.Target;
+                for(int u = 0; u < squad.Units.Count; u++) {
+                    RTSUnit unit = squad.Units[u];
+                    unit.Target = e.Target;
+                }
                 AddTask(s, squad);
                 SendSquadQuery(s, squad, e);
             }

@@ -22,17 +22,17 @@ namespace RTS.Default.Squad {
         }
 
         public override void DecideAction(GameState g, float dt) {
-            if(tc != null) { 
-                tc.DecideTarget(g, dt);
-            }
-            if(mc != null) {
-                mc.DecideMove(g, dt);
-            }
+            //if(tc != null) { 
+            //    tc.DecideTarget(g, dt);
+            //}
+            //if(mc != null) {
+            //    mc.DecideMove(g, dt);
+            //}
         }
         public override void ApplyAction(GameState g, float dt) {
-            if(tc != null) {
-                tc.ApplyTarget(g, dt);
-            }
+            //if(tc != null) {
+            //    tc.ApplyTarget(g, dt);
+            //}
             if(mc != null) {
                 mc.ApplyMove(g, dt);
             }
@@ -79,6 +79,7 @@ namespace RTS.Default.Squad {
                 RTSTeam team = g.activeTeams[ti].Team;
                 for(int i = 0; i < team.Units.Count; i++) {
                     // This Check Makes Sure The Candidate Target Is In Range Of The Squad
+                    // TODO: ^Make That Statement True (Currently Only Check Team Fog)
                     if(g.CGrid.GetFogOfWar(team.Units[i].GridPosition, teamIndex) != FogOfWar.Active)
                         continue;
                     float d = (team.Units[i].GridPosition - squad.GridPosition).LengthSquared();
@@ -99,6 +100,7 @@ namespace RTS.Default.Squad {
                 RTSTeam team = g.activeTeams[ti].Team;
                 for(int i = 0; i < team.Units.Count; i++) {
                     // This Check Makes Sure The Candidate Target Is In Range Of The Squad
+                    // TODO: ^Make That Statement True (Currently Only Check Team Fog)
                     if(g.CGrid.GetFogOfWar(team.Buildings[i].GridPosition, teamIndex) != FogOfWar.Active)
                         continue;
                     float d = (team.Buildings[i].GridPosition - squad.GridPosition).LengthSquared();
@@ -111,10 +113,9 @@ namespace RTS.Default.Squad {
         }
 
         public override void ApplyTarget(GameState g, float dt) {
-            // TODO: Think About Targeting Buildings & Melee Units
             for(int u = 0; u < squad.Units.Count; u++) {
                 RTSUnit unit = squad.Units[u];
-                if(unit.TargetingOrders != BehaviorFSM.TargetNone)
+                if(unit.TargetingOrders == BehaviorFSM.TargetAsSquad)
                     unit.Target = target;
             }
         }
