@@ -600,6 +600,14 @@ namespace RTSEngine.Controllers {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.CGrid);
                     unit.GridPosition = unit.CollisionGeometry.Center;
                     unit.Height = unit.CollisionGeometry.Height;
+
+                    // Check To Make Sure Unit Is Inside The Map
+                    if(unit.GridPosition.X < 0 || unit.GridPosition.X > s.CGrid.size.X ||
+                       unit.GridPosition.Y < 0 || unit.GridPosition.Y > s.CGrid.size.Y
+                       ) {
+                        // Damage The Unit If It Is Outside
+                        unit.Damage(1);
+                    }
                 }
             }
         }
