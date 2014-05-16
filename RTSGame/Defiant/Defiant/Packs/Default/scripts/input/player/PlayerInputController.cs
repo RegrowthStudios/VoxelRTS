@@ -320,6 +320,12 @@ namespace RTS.Input {
                 case Keys.Escape:
                     buildingToPlace = null;
                     break;
+                case Keys.K:
+                    foreach(var entity in selected) {
+                        RTSUnit unit = entity as RTSUnit;
+                        if(unit != null) unit.MovementOrders = BehaviorFSM.AttackMove;
+                    }
+                    break;
             }
         }
         public void OnKeyRelease(object sender, KeyEventArgs args) {

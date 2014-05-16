@@ -225,7 +225,14 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyInput(GameState s, float dt, SelectEvent e) {
-            s.teams[e.Team].Input.Select(e.Selected, e.Append);
+            RTSTeam team = s.teams[e.Team];
+            team.Input.Select(e.Selected, e.Append);
+            if(team.Input.Type == RTSInputType.Player) {
+                foreach(var entity in e.Selected) {
+                    RTSUnit unit = entity as RTSUnit;
+                    if(unit != null) unit.MovementOrders = BehaviorFSM.JustMove;
+                }
+            }
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
             RTSTeam team = s.teams[e.Team];
