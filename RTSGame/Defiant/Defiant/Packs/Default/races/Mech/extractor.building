@@ -9,10 +9,10 @@ ViewModel(
 // Unit Data
 Name            [Extractor]
 IconKey         [Mech.Extractor]
-Health          [800]
-CapitalCost     [20]
+Health          [7000]
+CapitalCost     [200]
 PopCapChange    [10]
-Impact          [10]
+Impact          [200]
 BuildAmount     [500]
 SightRadius     [14]
 GridSize        [1, 2]
@@ -24,4 +24,4 @@ MaxCount        [1000]
 SetBBox ({-0.8, 0, -1.5} {0.8, 1, 1.5})
 
 // Controllers
-SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Extractor})

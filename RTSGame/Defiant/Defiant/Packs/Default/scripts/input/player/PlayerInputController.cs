@@ -275,6 +275,7 @@ namespace RTS.Input {
                             rh *= new Vector3(2f, 1f, 2f);
                             Point bp = HashHelper.Hash(new Vector2(rh.X, rh.Z), GameState.CGrid.numCells, GameState.CGrid.size);
                             AddEvent(new SpawnBuildingEvent(TeamIndex, buildingToPlace.Index, bp));
+                            AddEvent(new ImpactEvent(TeamIndex, new Vector2(bp.X, bp.Y), buildingToPlace.Impact));
                         }
                         if(!isShiftPressed) buildingToPlace = null;
                         return;

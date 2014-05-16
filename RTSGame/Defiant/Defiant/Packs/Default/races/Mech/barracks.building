@@ -9,10 +9,10 @@ ViewModel(
 // Unit Data
 Name            [Barracks]
 IconKey         [Mech.Barracks]
-Health          [1000]
-CapitalCost     [20]
+Health          [5000]
+CapitalCost     [60]
 PopCapChange    [0]
-Impact          [10]
+Impact          [180]
 BuildAmount     [800]
 SightRadius     [24]
 GridSize        [2, 2]

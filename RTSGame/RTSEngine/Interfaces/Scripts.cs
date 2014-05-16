@@ -164,9 +164,9 @@ namespace RTSEngine.Interfaces {
 
     // A Super Controller Called By The Gameplay Controller
     public abstract class ACBuildingActionController : ACBuildingController {
-        public Queue<ACBuildingButtonController> ButtonQueue;
-        public float QueueTimer;
-        public ACBuildingButtonController CurrentButton;
+        public Queue<ACBuildingButtonController> ButtonQueue = new Queue<ACBuildingButtonController>();
+        public float QueueTimer = float.MaxValue;
+        public ACBuildingButtonController CurrentButton = null;
         public int QueueCap;
 
         // Scripted Super-Controller Logic

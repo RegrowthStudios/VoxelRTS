@@ -18,6 +18,7 @@ namespace RTS.Packs.Default.scripts.input {
         private AI AIInput;
         public IEntity target;
         public int? currentTarget;
+        public bool active;
 
         public BarracksController(AI input, RTSBuilding b) {
             army = new List<IEntity>();
@@ -25,6 +26,7 @@ namespace RTS.Packs.Default.scripts.input {
             AIInput = input;
             barracks = b;
             currentTarget = null;
+            active = false;
         }
 
         public void SpawnUnits() {
@@ -37,7 +39,6 @@ namespace RTS.Packs.Default.scripts.input {
         }
 
         public void OnUnitDeath(IEntity e) {
-            DevConsole.AddCommand("death");
             bool removedArmy = army.Remove(e);
             bool removedSentArmy = sentArmy.Remove(e);
         }
@@ -54,7 +55,7 @@ namespace RTS.Packs.Default.scripts.input {
                 }
             }
             // If Player Has No More Buildings, Set Closest Unit As Target
-            if (target != null && target.IsAlive) { DevConsole.AddCommand("found building target");  return; }
+            if (target != null && target.IsAlive) { return; }
             minDist = float.MaxValue;
             foreach (var u in AIInput.player.Units) {
                 float dist = (u.GridPosition - barracks.GridPosition).Length();
@@ -63,47 +64,38 @@ namespace RTS.Packs.Default.scripts.input {
                     target = u;
                 }
             }
-            DevConsole.AddCommand("found unit target");
         }
 
         public void ApplyTarget() {
-            if (target == null || !target.IsAlive) { DevConsole.AddCommand("return");  return; }
+            if (target == null || !target.IsAlive) { return; }
             if (sentArmy.Count == 0 && army.Count == AIInput.spawnCap) {
                 sentArmy.Clear();
                 foreach (var u in army) {
-                    DevConsole.AddCommand("added unit");
                     sentArmy.Add(u);
                 }
                 army.Clear();
-                DevConsole.AddCommand("targetting 1");
-                SetTarget(sentArmy);
+                AIInput.SetTarget(sentArmy, target);
                 currentTarget = target.UUID;
             }
             else if (sentArmy.Count > 0 && (!currentTarget.HasValue || currentTarget != target.UUID)) {
-                DevConsole.AddCommand("targetting 2");
-                SetTarget(sentArmy);
+                AIInput.SetTarget(sentArmy, target);
                 currentTarget = target.UUID;
             }
-        }
-
-        private void SetTarget(List<IEntity> units) {
-            AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, units));
-            foreach (var u in units) {
-                AIInput.AddEvent(new SetOrdersEvent(AIInput.TeamIndex, u.UUID, BehaviorFSM.AttackMove, 3));
-            }
-            AIInput.AddEvent(new SetWayPointEvent(AIInput.TeamIndex, target.GridPosition));
         }
 
         public void Dispose() {
             DecideTarget();
             if (army.Count > 0 && target != null) {
-                SetTarget(army);
+                AIInput.SetTarget(army, target);
                 AIInput.squads.Add(army);
             }
             if (sentArmy.Count > 0) {
                 AIInput.squads.Add(sentArmy);
             }
             foreach (var u in army) {
+                u.OnDestruction -= OnUnitDeath;
+            }
+            foreach (var u in sentArmy) {
                 u.OnDestruction -= OnUnitDeath;
             }
         }

@@ -21,7 +21,7 @@ namespace RTS.Default.Building.Extraction {
 
         public override void Init(GameState s, GameplayController c) {
             ActivityInterval = 10;
-            ExtractAmount = 5;
+            ExtractAmount = 10;
             currTime = 0;
             Enabled = true;
         }
