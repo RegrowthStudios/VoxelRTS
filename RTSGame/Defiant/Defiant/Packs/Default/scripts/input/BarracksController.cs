@@ -76,24 +76,32 @@ namespace RTS.Packs.Default.scripts.input {
                 }
                 army.Clear();
                 DevConsole.AddCommand("targetting 1");
-                AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, sentArmy));
-                AIInput.AddEvent(new SetTargetEvent(AIInput.TeamIndex, target));
+                SetTarget(sentArmy);
                 currentTarget = target.UUID;
             }
             else if (sentArmy.Count > 0 && (!currentTarget.HasValue || currentTarget != target.UUID)) {
                 DevConsole.AddCommand("targetting 2");
-                AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, sentArmy));
-                AIInput.AddEvent(new SetTargetEvent(AIInput.TeamIndex, target));
+                SetTarget(sentArmy);
                 currentTarget = target.UUID;
             }
         }
 
+        private void SetTarget(List<IEntity> units) {
+            AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, units));
+            foreach (var u in units) {
+                AIInput.AddEvent(new SetOrdersEvent(AIInput.TeamIndex, u.UUID, BehaviorFSM.AttackMove, 3));
+            }
+            AIInput.AddEvent(new SetWayPointEvent(AIInput.TeamIndex, target.GridPosition));
+        }
 
         public void Dispose() {
             DecideTarget();
             if (army.Count > 0 && target != null) {
-                AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, army));
-                AIInput.AddEvent(new SetTargetEvent(AIInput.TeamIndex, target));
+                SetTarget(army);
+                AIInput.squads.Add(army);
+            }
+            if (sentArmy.Count > 0) {
+                AIInput.squads.Add(sentArmy);
             }
             foreach (var u in army) {
                 u.OnDestruction -= OnUnitDeath;

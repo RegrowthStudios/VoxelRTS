@@ -104,8 +104,7 @@ namespace RTS.Input {
         }
 
         private void WorkThread() {
-            while (running) {
-                
+            while (running) {  
                 if (paused) {
                     Thread.Sleep(1000);
                     continue;
@@ -114,10 +113,10 @@ namespace RTS.Input {
                     bc.SpawnUnits();
                     bc.DecideTarget();
                     bc.ApplyTarget();
-
+                }
+                foreach (var s in squads) {
 
                 }
-                //DevConsole.AddCommand("thread");
                 Thread.Sleep(2000);
             }
         }
