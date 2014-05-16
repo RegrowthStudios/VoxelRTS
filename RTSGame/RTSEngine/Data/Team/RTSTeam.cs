@@ -278,13 +278,14 @@ namespace RTSEngine.Data.Team {
                 OnUnitSpawn(unit);
             return unit;
         }
-        public void RemoveAll(Predicate<RTSUnit> f) {
+        public void RemoveAll(Predicate<RTSUnit> f, Action<int> fRemoval) {
             var nu = new List<RTSUnit>(units.Count);
             int pc = 0;
             for(int i = 0; i < units.Count; i++) {
                 if(f(units[i])) {
                     pc += units[i].Data.PopulationCost;
                     units[i].Data.CurrentCount--;
+                    fRemoval(units[i].UUID);
                 }
                 else
                     nu.Add(units[i]);
@@ -335,7 +336,7 @@ namespace RTSEngine.Data.Team {
                 OnBuildingSpawn(b);
             return b;
         }
-        public void RemoveAll(Predicate<RTSBuilding> f) {
+        public void RemoveAll(Predicate<RTSBuilding> f, Action<int> fRemoval) {
             var nb = new List<RTSBuilding>(buildings.Count);
             int pc = 0;
             for(int i = 0; i < buildings.Count; i++) {
@@ -344,6 +345,7 @@ namespace RTSEngine.Data.Team {
                         pc += buildings[i].Data.PopCapChange;
                     }
                     buildings[i].Data.CurrentCount--;
+                    fRemoval(buildings[i].UUID);
                 }
                 else
                     nb.Add(buildings[i]);

@@ -5,16 +5,10 @@ ViewModel(
     {models\Base.model}
     {{animations\Heavy.png} {textures\Main.png} {textures\Key.png}}
 )
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Heavy Soldier}
-    {~~FILEROOTDIR~~}
-    {icons\Heavy.png}
-)
 
 // Unit Data
 NAME            [Heavy Soldier]
+ICONKEY         [Mech.Heavy]
 HEALTH          [600]
 SPEED           [2.2]
 CAPITALCOST     [6]
@@ -34,7 +28,7 @@ BBOXMAX         [0.4 , 1.0 , 0.4]
 BASECOMBAT <RTSEngine.Data.BaseCombatData> {
     ARMOR           [0]
     MINRANGE        [0]
-    MAXRANGE        [7]
+    MAXRANGE        [25]
     ATTACKTIMER     [2.5]
     SETUPTIMER      [2.0]
     ATTACKDAMAGE    [40]

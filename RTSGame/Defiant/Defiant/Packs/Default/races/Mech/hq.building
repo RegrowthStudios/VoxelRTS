@@ -5,40 +5,10 @@ ViewModel(
     {models\HQ.model}
     {{textures\HQMain.png} {textures\HQKey.png}}
 )
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Headquarters}
-    {~~FILEROOTDIR~~}
-    {icons\HQ.png}
-)
-ViewButton(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Headquarters}
-    {0}
-    {~~FILEROOTDIR~~}
-    {icons\Soldier.png}
-)
-ViewButton(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Headquarters}
-    {1}
-    {~~FILEROOTDIR~~}
-    {icons\Heavy.png}
-)
-ViewButton(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Headquarters}
-    {2}
-    {~~FILEROOTDIR~~}
-    {icons\Armored.png}
-)
 
 // Unit Data
 Name            [Headquarters]
+IconKey         [Mech.HQ]
 Health          [120]
 CapitalCost     [200]
 PopCapChange    [20]

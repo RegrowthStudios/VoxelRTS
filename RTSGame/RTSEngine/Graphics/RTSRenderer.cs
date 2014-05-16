@@ -35,6 +35,8 @@ namespace RTSEngine.Graphics {
 
         public string FXParticle;
         public ParticleEffectConfig ParticleConfig;
+
+        public string[] Icons;
     }
     public class RTSRenderer : IDisposable {
         private const float SELECTION_RADIUS_MODIFIER = 1.1f;
@@ -145,8 +147,11 @@ namespace RTSEngine.Graphics {
             NonFriendlyBuildingModels = new List<RTSBuildingModel>();
             FriendlyBuildingModels = new List<RTSBuildingModel>();
             IconLibrary = new Dictionary<string, Texture2D>();
+            for(int i = 0; i < ria.Icons.Length; i += 2) {
+                IconLibrary.Add(ria.Icons[i], LoadTexture2D(ria.Icons[i + 1]));
+            }
 
-            tPixel = CreateTexture2D(1, 1);
+                tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
             IconLibrary.Add("None", tPixel);
 
@@ -480,17 +485,23 @@ namespace RTSEngine.Graphics {
         public void UpdateAnimations(GameState s, float dt) {
             var np = s.GetParticles();
             if(np == null) np = new List<Particle>();
-            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                RTSTeam team = s.activeTeams[ti].Team;
-                for(int i = 0; i < team.Units.Count; i++) {
-                    if(team.Units[i].AnimationController != null) {
-                        team.Units[i].AnimationController.Update(s, dt);
-                        if(team.Units[i].AnimationController.HasParticles) {
-                            team.Units[i].AnimationController.GetParticles(np);
-                        }
-                    }
-                }
+            for(int i = 0; i < FriendlyUnitModels.Count; i++) {
+                FriendlyUnitModels[i].Animate(s, dt, np);
             }
+            for(int i = 0; i < NonFriendlyUnitModels.Count; i++) {
+                NonFriendlyUnitModels[i].Animate(s, dt, np);
+            }
+            //for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+            //    RTSTeam team = s.activeTeams[ti].Team;
+            //    for(int i = 0; i < team.Units.Count; i++) {
+            //        if(team.Units[i].AnimationController != null) {
+            //            team.Units[i].AnimationController.Update(s, dt);
+            //            if(team.Units[i].AnimationController.HasParticles) {
+            //                team.Units[i].AnimationController.GetParticles(np);
+            //            }
+            //        }
+            //    }
+            //}
             pRenderer.Update(np, dt);
         }
 

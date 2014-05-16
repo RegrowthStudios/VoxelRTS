@@ -13,6 +13,9 @@ namespace RTSEngine.Interfaces {
         // Entity's Unique ID
         int UUID { get; }
 
+        // Entity's Icon Key
+        string IconKey { get; }
+
         // State For Deciding Actions
         int State { get; set; }
 

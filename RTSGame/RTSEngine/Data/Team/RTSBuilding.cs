@@ -74,6 +74,9 @@ namespace RTSEngine.Data.Team {
             get;
             private set;
         }
+        public string IconKey {
+            get { return Data.IconKey; }
+        }
 
         // Building's Team
         public RTSTeam Team {
@@ -263,6 +266,12 @@ namespace RTSEngine.Data.Team {
         public void AddButton(ACBuildingButtonController b) {
             if(b != null) b.SetBuilding(this);
             bControllers.Add(b);
+        }
+    }
+
+    public static class RTSBuildingExt {
+        public static float GetBuildRatio(this RTSBuilding b) {
+            return (float)(b.Data.BuildAmount - b.BuildAmountLeft) / (float)b.Data.BuildAmount;
         }
     }
 }

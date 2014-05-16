@@ -2,19 +2,13 @@
 ViewModel(
     {~~RENDERER~~}
     {~~FILEROOTDIR~~}
-    {models\DC.model}
-    {{textures\DCMain.png} {textures\DCKey.png}}
-)
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Distribution Center}
-    {~~FILEROOTDIR~~}
-    {icons\Factory.png}
+    {models\Extractor.model}
+    {{textures\ExtractorMain.png} {textures\ExtractorKey.png}}
 )
 
 // Unit Data
-Name            [Distribution Center]
+Name            [Extractor]
+IconKey         [Mech.Extractor]
 Health          [800]
 CapitalCost     [20]
 PopCapChange    [10]
@@ -23,7 +17,7 @@ BuildAmount     [500]
 SightRadius     [14]
 GridSize        [1, 1]
 IsResource      [False]
-Depositable		  [True]
+Depositable		[True]
 MaxCount        [1000]
 
 // Collision Data

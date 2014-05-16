@@ -12,6 +12,7 @@ using RTSEngine.Data;
 namespace RTSEngine.Graphics {
     public class RTSUnitModel {
         public const ParsingFlags MODEL_READ_FLAGS = ParsingFlags.ConversionOpenGL;
+        public const int MAX_DEAD = 100;
 
         // Visual Information
         public Texture2D ModelTexture {
@@ -45,8 +46,9 @@ namespace RTSEngine.Graphics {
         private VertexRTSAnimInst[] instVerts;
         private List<RTSUnit> instances;
         private List<RTSUnit> visible;
+        private List<RTSUnit> dead;
         public int VisibleInstanceCount {
-            get { return visible.Count; }
+            get { return Math.Min(visible.Count, instVerts.Length); }
         }
 
         public RTSUnitModel(RTSRenderer renderer, Stream sModel, Texture2D tAnim) {
@@ -83,6 +85,7 @@ namespace RTSEngine.Graphics {
             visible = new List<RTSUnit>();
             instVerts = new VertexRTSAnimInst[Data.MaxCount];
             instances = new List<RTSUnit>(Data.MaxCount);
+            dead = new List<RTSUnit>();
             for(int i = 0; i < team.Units.Count; i++) {
                 OnUnitSpawn(team.Units[i]);
             }
@@ -96,20 +99,36 @@ namespace RTSEngine.Graphics {
         }
 
         public void UpdateInstances(GraphicsDevice g, Predicate<RTSUnit> fRemoval, Predicate<RTSUnit> fVisible) {
-            instances.RemoveAll(fRemoval);
+            var oldInst = instances;
+            instances = new List<RTSUnit>(instances.Capacity);
+            for(int i = 0; i < oldInst.Count; i++) {
+                if(fRemoval(oldInst[i]))
+                    dead.Add(oldInst[i]);
+                else
+                    instances.Add(oldInst[i]);
+            }
+            if(dead.Count > MAX_DEAD)
+                dead.RemoveRange(0, dead.Count - MAX_DEAD);
+
             visible = new List<RTSUnit>();
             for(int i = 0; i < instances.Count; i++) {
                 if(fVisible(instances[i]))
                     visible.Add(instances[i]);
             }
-            for(int i = 0; i < VisibleInstanceCount; i++) {
-                instVerts[i].World =
+            for(int i = 0; i < dead.Count; i++) {
+                if(fVisible(dead[i]))
+                    visible.Add(dead[i]);
+            }
+
+            int vic = VisibleInstanceCount;
+            for(int vi = 0; vi < vic; vi++) {
+                instVerts[vi].World =
                     Matrix.CreateRotationY(
-                        (float)Math.Atan2(-visible[i].ViewDirection.Y, visible[i].ViewDirection.X)
+                        (float)Math.Atan2(-visible[vi].ViewDirection.Y, visible[vi].ViewDirection.X)
                     ) *
-                    Matrix.CreateTranslation(visible[i].WorldPosition)
+                    Matrix.CreateTranslation(visible[vi].WorldPosition)
                     ;
-                instVerts[i].AnimationFrame = visible[i].AnimationController == null ? 0 : visible[i].AnimationController.AnimationFrame;
+                instVerts[vi].AnimationFrame = visible[vi].AnimationController == null ? 0 : visible[vi].AnimationController.AnimationFrame;
             }
             if(rebuildDVB) {
                 dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
@@ -117,6 +136,24 @@ namespace RTSEngine.Graphics {
             }
             dvbInstances.SetData(instVerts);
         }
+
+        public void Animate(GameState s, float dt, List<Particle> lp) {
+            for(int i = 0; i < instances.Count; i++) {
+                if(instances[i].AnimationController != null) {
+                    instances[i].AnimationController.Update(s, dt);
+                    if(instances[i].AnimationController.HasParticles)
+                        instances[i].AnimationController.GetParticles(lp);
+                }
+            }
+            for(int i = 0; i < dead.Count; i++) {
+                if(dead[i].AnimationController != null) {
+                    dead[i].AnimationController.Update(s, dt);
+                    if(dead[i].AnimationController.HasParticles)
+                        dead[i].AnimationController.GetParticles(lp);
+                }
+            }
+        }
+
         public void SetInstances(GraphicsDevice g) {
             g.SetVertexBuffers(
                 new VertexBufferBinding(vbModel),

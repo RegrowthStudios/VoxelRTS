@@ -26,6 +26,7 @@ namespace RTS.Default.Unit {
         bool attackMoving = false;
         bool passivelyTargeting = false;
         Vector2 origin;
+        float prepareCooldown;
 
         public override void SetUnit(RTSUnit u) {
             base.SetUnit(u);
@@ -72,6 +73,14 @@ namespace RTS.Default.Unit {
                 case BehaviorFSM.Walking:
                     fDecide = DSMain;
                     fApply = mc.ApplyMove;
+                    break;
+                case BehaviorFSM.PrepareCombatRanged:
+                    if(unit.State != state) {
+                        cc.Reset();
+                        fDecide = DSPrepareCombatRanged;
+                        fApply = ASPrepareCombatRanged;
+                        prepareCooldown = unit.Data.BaseCombatData.SetupTimer;
+                    }
                     break;
                 case BehaviorFSM.CombatRanged:
                     if(unit.State != state) cc.Reset();
@@ -180,7 +189,7 @@ namespace RTS.Default.Unit {
                         switch(unit.CombatOrders) {
                             case BehaviorFSM.UseRangedAttack:
                                 if(d <= mr * 0.75) {
-                                    SetState(BehaviorFSM.CombatRanged);
+                                    SetState(BehaviorFSM.PrepareCombatRanged);
                                     return;
                                 }
                                 break;
@@ -230,7 +239,20 @@ namespace RTS.Default.Unit {
                 if(unit.Target != null) passivelyTargeting = true;
                 DSChaseTarget(g, dt);
             }
-        }      
+        }
+
+        void DSPrepareCombatRanged(GameState g, float dt) {
+            // Just Wait
+        }
+        void ASPrepareCombatRanged(GameState g, float dt) {
+            prepareCooldown -= dt;
+            if(prepareCooldown < 0) {
+                SetState(BehaviorFSM.CombatRanged);
+            }
+            if(unit.Target != null) {
+                unit.TurnToFace(unit.Target.GridPosition);
+            }
+        }
 
         void DSCombatRanged(GameState g, float dt) {
             // Check If Target Is Null
@@ -375,6 +397,7 @@ namespace RTS.Default.Unit {
         }
 
         public override void DecideMove(GameState g, float dt) {
+            if(!unit.IsAlive) return;
             stuck = false;
             if(unitHistory.Count >= historySize) {
                 Vector2 delta = Vector2.Zero;
@@ -421,6 +444,7 @@ namespace RTS.Default.Unit {
             SetNetForceAndWaypoint(g);
         }
         public override void ApplyMove(GameState g, float dt) {
+            if(!unit.IsAlive) return;
             if(NetForce != Vector2.Zero) {
                 float magnitude = NetForce.Length();
                 Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MinDefaultMoveSpeed() * dt;
@@ -622,6 +646,7 @@ namespace RTS.Default.Unit {
             base.SetUnit(u);
             if(unit != null) {
                 unit.OnAttackMade += unit_OnAttackMade;
+                unit.OnDestruction += unit_OnDestruction;
             }
         }
 
@@ -640,6 +665,10 @@ namespace RTS.Default.Unit {
             bp.Tint = initArgs.BulletTint;
             AddParticle(bp);
         }
+        void unit_OnDestruction(IEntity e) {
+            alDeath.Restart(false);
+            System.Threading.Interlocked.Exchange(ref alCurrent, alDeath);
+        }
 
         private void SetAnimation(int state) {
             switch(state) {
@@ -651,9 +680,13 @@ namespace RTS.Default.Unit {
                     alCurrent = alWalk;
                     alCurrent.Restart(true);
                     break;
+                case BehaviorFSM.PrepareCombatRanged:
+                    alCurrent = alPrepareFire;
+                    alCurrent.Restart(false);
+                    break;
                 case BehaviorFSM.CombatRanged:
                     alCurrent = alFire;
-                    alCurrent.Restart(true);
+                    alCurrent.Restart(false);
                     break;
                 case BehaviorFSM.CombatMelee:
                     alCurrent = alMelee;
@@ -669,6 +702,15 @@ namespace RTS.Default.Unit {
             }
         }
         public override void Update(GameState s, float dt) {
+            // Animate Death
+            if(!unit.IsAlive) {
+                if(AnimationFrame == alDeath.EndFrame)
+                    return;
+                alDeath.Step(dt);
+                AnimationFrame = alDeath.CurrentFrame;
+                return;
+            }
+
             if(lastState != unit.State) {
                 // A New Animation State If Provided
                 SetAnimation(unit.State);

@@ -88,6 +88,8 @@ namespace RTSEngine.Data.Team {
         public string FriendlyName;
         public string InfoFile;
         public readonly int Index;
+        [ZXParse("ICONKEY")]
+        public string IconKey;
 
         // Health Of The Unit
         [ZXParse("HEALTH")]

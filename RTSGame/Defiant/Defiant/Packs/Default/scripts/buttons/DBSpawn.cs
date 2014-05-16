@@ -18,13 +18,16 @@ namespace RTS.Default.Buttons.Spawn {
         public override int QueueTime {
             get { return building.Team.Race.Units[UnitType].BuildTime; }
         }
+        public override string IconKey {
+            get { return building.Team.Race.Units[UnitType].IconKey; }
+        }
 
         public override void Init(GameState s, GameplayController c, object args) {
             UnitType = (int)args;
         }
 
         public override bool CanFinish(GameState g) {
-            return 
+            return
                 building.Team.Capital >= building.Team.Race.Units[UnitType].CapitalCost;
         }
         public override void OnQueueFinished(GameState s) {

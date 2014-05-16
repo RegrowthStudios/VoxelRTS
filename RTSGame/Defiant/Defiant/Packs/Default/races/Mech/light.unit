@@ -5,16 +5,10 @@ ViewModel(
     {models\Light.model}
     {{animations\Light.png} {textures\LightMain.png} {textures\LightKey.png}}
 )
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Light Soldier}
-    {~~FILEROOTDIR~~}
-    {icons\Soldier.png}
-)
 
 // Unit Data
 NAME            [Light Soldier]
+ICONKEY         [Mech.Light]
 HEALTH          [600]
 SPEED           [3]
 CAPITALCOST     [5]
@@ -34,7 +28,7 @@ BBOXMAX         [0.4 , 1.0 , 0.4]
 BASECOMBAT <RTSEngine.Data.BaseCombatData> {
     ARMOR           [0]
     MINRANGE        [0]
-    MAXRANGE        [7]
+    MAXRANGE        [13]
     ATTACKTIMER     [0.5]
     SETUPTIMER      [0.75]
     ATTACKDAMAGE    [10]

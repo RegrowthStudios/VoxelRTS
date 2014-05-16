@@ -78,6 +78,7 @@ namespace RTSEngine.Graphics {
 
             // Add New Particles
             for(int i = 0; i < newParticles.Count; i++) {
+                if(newParticles[i] == null) continue;
                 if(newParticles[i].Type == Type) {
                     particles.Add(newParticles[i] as PType);
                     add = true;

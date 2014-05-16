@@ -5,16 +5,10 @@ ViewModel(
     {models\Factory.model}
     {{textures\FactoryMain.png} {textures\FactoryKey.png}}
 )
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Factory}
-    {~~FILEROOTDIR~~}
-    {icons\Factory.png}
-)
 
 // Unit Data
 Name            [Factory]
+IconKey         [Mech.Factory]
 Health          [1200]
 CapitalCost     [20]
 PopCapChange    [10]

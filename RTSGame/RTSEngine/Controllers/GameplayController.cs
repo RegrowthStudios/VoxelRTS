@@ -221,6 +221,9 @@ namespace RTSEngine.Controllers {
                     case GameEventType.SetOrders:
                         ApplyInput(s, dt, e as SetOrdersEvent);
                         break;
+                    case GameEventType.Damage:
+                        ApplyInput(s, dt, e as DamageEvent);
+                        break;
                     default:
                         throw new Exception("Event does not exist.");
                 }
@@ -230,12 +233,6 @@ namespace RTSEngine.Controllers {
         private void ApplyInput(GameState s, float dt, SelectEvent e) {
             RTSTeam team = s.teams[e.Team];
             team.Input.Select(e.Selected, e.Append);
-            if(team.Input.Type == RTSInputType.Player && e.Selected != null) {
-                foreach(var entity in e.Selected) {
-                    RTSUnit unit = entity as RTSUnit;
-                    if(unit != null) unit.MovementOrders = BehaviorFSM.JustMove;
-                }
-            }
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
             RTSTeam team = s.teams[e.Team];
@@ -339,6 +336,7 @@ namespace RTSEngine.Controllers {
 
             // Check If A Unit Was Possible
             if(unit == null) { return; }
+            s.EntityHashSet.Add(unit.UUID, unit);
 
             // Add Decision Tasks
             AddTask(s, unit);
@@ -371,12 +369,12 @@ namespace RTSEngine.Controllers {
 
             // Check If A Building Was Possible
             if(building == null) return;
+            s.EntityHashSet.Add(building.UUID, building);
 
             // Set Default Height
             building.Height = s.CGrid.HeightAt(building.GridPosition);
             building.CollisionGeometry.Height = building.Height;
             s.CGrid.Add(building);
-
             // Add Building Decision Task
             AddTask(s, building, e.Team, e.Type);
         }
@@ -391,7 +389,17 @@ namespace RTSEngine.Controllers {
         }
         private void ApplyInput(GameState s, float dt, SetOrdersEvent e) {
             if (e.Index < 0 || e.Index > 3) { return; }
+            IEntity unit;
+            bool hasValue = s.EntityHashSet.TryGetValue(e.UnitID, out unit);
+            if (hasValue) {
+                unit.State = BehaviorFSM.SetByte(unit.State, e.Orders, e.Index);
+            }
 
+        }
+        private void ApplyInput(GameState s, float dt, DamageEvent e) {
+            IEntity ent;
+            if(s.EntityHashSet.TryGetValue(e.UUID, out ent))
+                ent.Damage(e.ChangeAmount);
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
@@ -635,8 +643,8 @@ namespace RTSEngine.Controllers {
             // Remove All Dead Entities
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 RTSTeam team = s.activeTeams[ti].Team;
-                team.RemoveAll(IsUnitDead);
-                team.RemoveAll(IsBuildingDead);
+                team.RemoveAll(IsUnitDead, (i) => { s.EntityHashSet.Remove(i); });
+                team.RemoveAll(IsBuildingDead, (i) => { s.EntityHashSet.Remove(i); });
                 team.RemoveAll(IsSquadEmpty);
             }
         }
