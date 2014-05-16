@@ -51,6 +51,7 @@ namespace RTS.Default.Unit {
             passivelyTargeting = false;
             targetCellPrev = Point.Zero;
             prevTarget = null;
+            fDecide = DSMain;
         }
 
         public override void Init(GameState s, GameplayController c, object args) {
@@ -146,8 +147,9 @@ namespace RTS.Default.Unit {
             float minDistSq = unit.Data.BaseCombatData.MaxRange;
             minDistSq *= minDistSq;
             foreach (IndexedTeam t in g.activeTeams.ToArray()) {
-                if(teamIndex != t.Index) { // Enemy team check
-                    foreach (RTSUnit enemy in g.teams[t.Index].Units.ToArray()) {
+                RTSTeam team = t.Team;
+                if(teamIndex != t.Index && team.Input.Type != RTSInputType.Environment) { // Enemy team check
+                    foreach (RTSUnit enemy in team.Units.ToArray()) {
                         if(g.CGrid.GetFogOfWar(enemy.GridPosition, teamIndex) != FogOfWar.Active)
                             continue;
                         if(!enemy.IsAlive) continue;
@@ -164,7 +166,8 @@ namespace RTS.Default.Unit {
                 minDistSq = unit.Data.BaseCombatData.MaxRange;
                 minDistSq *= minDistSq;
                 foreach(IndexedTeam t in g.activeTeams.ToArray()) {
-                    if(teamIndex != t.Index) { // Enemy team check
+                    RTSTeam team = t.Team;
+                    if(teamIndex != t.Index && team.Input.Type != RTSInputType.Environment) { // Enemy team check
                         foreach(RTSBuilding enemy in g.teams[t.Index].Buildings.ToArray()) {
                             if(g.CGrid.GetFogOfWar(enemy.GridPosition, teamIndex) != FogOfWar.Active)
                                 continue;
@@ -192,7 +195,8 @@ namespace RTS.Default.Unit {
                     float mr = unit.Data.BaseCombatData.MaxRange;
                     float d = (unit.Target.GridPosition - unit.GridPosition).Length();
                     float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
-                    if(unit.Target.Team.Index != teamIndex) { // Moved Team-Check Here So It Can Be Toggled To Test Target Chasing
+                    // Ignore Same Team And Environment
+                    if(unit.Target.Team.Index != teamIndex && unit.Target.Team.Input.Type != RTSInputType.Environment) {
                         switch(unit.CombatOrders) {
                             case BehaviorFSM.UseRangedAttack:
                                 if(d <= mr * 0.75) {
