@@ -157,6 +157,9 @@
     <Content Include="Packs\Default\scripts\input\player\RTSBuildingDataPanel.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Packs\Default\scripts\Extractor.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="RTSScreen.cs" />
     <Compile Include="WispScreen.cs" />
     <Content Include="Packs\Default\scripts\buttons\DBSpawn.cs">

@@ -24,4 +24,4 @@ MaxCount        [1000]
 SetBBox ({-0.8, 0, -1.5} {0.8, 1, 1.5})
 
 // Controllers
-SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
+SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Extractor})
