@@ -36,6 +36,7 @@ BASECOMBAT <RTSEngine.Data.BaseCombatData> {
     MINRANGE        [0]
     MAXRANGE        [7]
     ATTACKTIMER     [2.5]
+    SETUPTIMER      [2.0]
     ATTACKDAMAGE    [40]
     CRITICALDAMAGE  [60]
     CRITICALCHANCE  [0.05]

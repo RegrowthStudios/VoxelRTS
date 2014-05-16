@@ -41,6 +41,8 @@ namespace RTSEngine.Data {
         // Amount Of Time To Wait Before An Attack Can Be Utilized
         [ZXParse("ATTACKTIMER")]
         public float AttackTimer;
+        [ZXParse("SETUPTIMER")]
+        public float SetupTimer;
 
         // Subtracts Source Damage By Armor Amount
         [ZXParse("ARMOR")]
