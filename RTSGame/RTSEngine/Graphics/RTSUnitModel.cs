@@ -48,7 +48,7 @@ namespace RTSEngine.Graphics {
         private List<RTSUnit> visible;
         private List<RTSUnit> dead;
         public int VisibleInstanceCount {
-            get { return Math.Min(visible.Count + dead.Count, instVerts.Length); }
+            get { return Math.Min(visible.Count, instVerts.Length); }
         }
 
         public RTSUnitModel(RTSRenderer renderer, Stream sModel, Texture2D tAnim) {
@@ -115,8 +115,13 @@ namespace RTSEngine.Graphics {
                 if(fVisible(instances[i]))
                     visible.Add(instances[i]);
             }
-            int vi;
-            for(vi = 0; vi < visible.Count; vi++) {
+            for(int i = 0; i < dead.Count; i++) {
+                if(fVisible(dead[i]))
+                    visible.Add(dead[i]);
+            }
+
+            int vic = VisibleInstanceCount;
+            for(int vi = 0; vi < vic; vi++) {
                 instVerts[vi].World =
                     Matrix.CreateRotationY(
                         (float)Math.Atan2(-visible[vi].ViewDirection.Y, visible[vi].ViewDirection.X)
@@ -124,15 +129,6 @@ namespace RTSEngine.Graphics {
                     Matrix.CreateTranslation(visible[vi].WorldPosition)
                     ;
                 instVerts[vi].AnimationFrame = visible[vi].AnimationController == null ? 0 : visible[vi].AnimationController.AnimationFrame;
-            }
-            for(int i = 0; i < dead.Count && vi < instVerts.Length; vi++, i++) {
-                instVerts[vi].World =
-                    Matrix.CreateRotationY(
-                        (float)Math.Atan2(-dead[i].ViewDirection.Y, dead[i].ViewDirection.X)
-                    ) *
-                    Matrix.CreateTranslation(dead[i].WorldPosition)
-                    ;
-                instVerts[vi].AnimationFrame = dead[i].AnimationController == null ? 0 : dead[i].AnimationController.AnimationFrame;
             }
             if(rebuildDVB) {
                 dvbInstances = new DynamicVertexBuffer(g, VertexRTSAnimInst.Declaration, instVerts.Length, BufferUsage.WriteOnly);
