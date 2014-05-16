@@ -397,6 +397,7 @@ namespace RTS.Default.Unit {
         }
 
         public override void DecideMove(GameState g, float dt) {
+            if(!unit.IsAlive) return;
             stuck = false;
             if(unitHistory.Count >= historySize) {
                 Vector2 delta = Vector2.Zero;
@@ -443,6 +444,7 @@ namespace RTS.Default.Unit {
             SetNetForceAndWaypoint(g);
         }
         public override void ApplyMove(GameState g, float dt) {
+            if(!unit.IsAlive) return;
             if(NetForce != Vector2.Zero) {
                 float magnitude = NetForce.Length();
                 Vector2 scaledChange = (NetForce / magnitude) * unit.Squad.MinDefaultMoveSpeed() * dt;
@@ -644,6 +646,7 @@ namespace RTS.Default.Unit {
             base.SetUnit(u);
             if(unit != null) {
                 unit.OnAttackMade += unit_OnAttackMade;
+                unit.OnDestruction += unit_OnDestruction;
             }
         }
 
@@ -661,6 +664,10 @@ namespace RTS.Default.Unit {
             BulletParticle bp = new BulletParticle(o, d, 0.05f, 1.4f, 0.1f);
             bp.Tint = initArgs.BulletTint;
             AddParticle(bp);
+        }
+        void unit_OnDestruction(IEntity e) {
+            alDeath.Restart(false);
+            System.Threading.Interlocked.Exchange(ref alCurrent, alDeath);
         }
 
         private void SetAnimation(int state) {
@@ -695,6 +702,15 @@ namespace RTS.Default.Unit {
             }
         }
         public override void Update(GameState s, float dt) {
+            // Animate Death
+            if(!unit.IsAlive) {
+                if(AnimationFrame == alDeath.EndFrame)
+                    return;
+                alDeath.Step(dt);
+                AnimationFrame = alDeath.CurrentFrame;
+                return;
+            }
+
             if(lastState != unit.State) {
                 // A New Animation State If Provided
                 SetAnimation(unit.State);

@@ -14,7 +14,8 @@ namespace RTSEngine.Data {
         SpawnUnit,
         SpawnBuilding,
         Impact,
-        Capital
+        Capital,
+        Damage
     }
 
     public class GameInputEvent {
@@ -142,6 +143,23 @@ namespace RTSEngine.Data {
 
         public CapitalEvent(int t, int amount)
             : base(GameEventType.Capital, t) {
+            ChangeAmount = amount;
+        }
+    }
+
+    public class DamageEvent : GameInputEvent {
+        public IEntity Entity {
+            get;
+            private set;
+        }
+        public int ChangeAmount {
+            get;
+            private set;
+        }
+
+        public DamageEvent(int t, IEntity e, int amount)
+            : base(GameEventType.Damage, t) {
+            Entity = e;
             ChangeAmount = amount;
         }
     }

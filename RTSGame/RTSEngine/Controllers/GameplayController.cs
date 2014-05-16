@@ -218,6 +218,9 @@ namespace RTSEngine.Controllers {
                     case GameEventType.Capital:
                         ApplyInput(s, dt, e as CapitalEvent);
                         break;
+                    case GameEventType.Damage:
+                        ApplyInput(s, dt, e as DamageEvent);
+                        break;
                     default:
                         throw new Exception("Event does not exist.");
                 }
@@ -377,6 +380,9 @@ namespace RTSEngine.Controllers {
             RTSTeam team = s.teams[e.Team];
 
             team.Capital += e.ChangeAmount;
+        }
+        private void ApplyInput(GameState s, float dt, DamageEvent e) {
+            e.Entity.Damage(e.ChangeAmount);
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit

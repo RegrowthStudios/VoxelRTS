@@ -480,17 +480,23 @@ namespace RTSEngine.Graphics {
         public void UpdateAnimations(GameState s, float dt) {
             var np = s.GetParticles();
             if(np == null) np = new List<Particle>();
-            for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-                RTSTeam team = s.activeTeams[ti].Team;
-                for(int i = 0; i < team.Units.Count; i++) {
-                    if(team.Units[i].AnimationController != null) {
-                        team.Units[i].AnimationController.Update(s, dt);
-                        if(team.Units[i].AnimationController.HasParticles) {
-                            team.Units[i].AnimationController.GetParticles(np);
-                        }
-                    }
-                }
+            for(int i = 0; i < FriendlyUnitModels.Count; i++) {
+                FriendlyUnitModels[i].Animate(s, dt, np);
             }
+            for(int i = 0; i < NonFriendlyUnitModels.Count; i++) {
+                NonFriendlyUnitModels[i].Animate(s, dt, np);
+            }
+            //for(int ti = 0; ti < s.activeTeams.Length; ti++) {
+            //    RTSTeam team = s.activeTeams[ti].Team;
+            //    for(int i = 0; i < team.Units.Count; i++) {
+            //        if(team.Units[i].AnimationController != null) {
+            //            team.Units[i].AnimationController.Update(s, dt);
+            //            if(team.Units[i].AnimationController.HasParticles) {
+            //                team.Units[i].AnimationController.GetParticles(np);
+            //            }
+            //        }
+            //    }
+            //}
             pRenderer.Update(np, dt);
         }
 
