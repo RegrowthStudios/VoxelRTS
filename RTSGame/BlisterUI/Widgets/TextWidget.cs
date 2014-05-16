@@ -37,13 +37,13 @@ namespace BlisterUI.Widgets {
             : base(r) {
             Font = f == null ? r.DefaultFont : f;
         }
+        protected override void DisposeOther() {
+        }
 
         public override void PreInit() {
             drawText = new DrawableText();
             drawText.Text = "";
             OnRecompute += OnSelfCompute;
-        }
-        protected override void DisposeOther() {
         }
 
         public override void AddAllDrawables(WidgetRenderer r) {

@@ -107,6 +107,9 @@ namespace BlisterUI.Widgets {
         }
         protected override void DisposeOther() {
             base.DisposeOther();
+            OnMouseEntry = null;
+            OnButtonPress = null;
+            OnMouseExit = null;
             Unhook();
         }
 

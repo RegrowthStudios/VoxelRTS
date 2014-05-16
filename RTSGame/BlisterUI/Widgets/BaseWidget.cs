@@ -159,7 +159,9 @@ namespace BlisterUI.Widgets {
             AddAllDrawables(renderer);
         }
         public void Dispose() {
+            OnRecompute = null;
             RemoveAllDrawables(renderer);
+            DisposeOther();
         }
         protected abstract void DisposeOther();
 
