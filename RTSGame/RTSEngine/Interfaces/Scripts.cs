@@ -51,6 +51,10 @@ namespace RTSEngine.Interfaces {
         // Scripted Super-Controller Logic
         public abstract void DecideAction(GameState g, float dt);
         public abstract void ApplyAction(GameState g, float dt);
+
+        // TODO: Fix This Horrible Quick & Dirty Style
+        // Reset Any Extra State Variables This Action Controller Keeps
+        public abstract void Reset();
     }
 
     // Steps Animations And May Send Particle Events

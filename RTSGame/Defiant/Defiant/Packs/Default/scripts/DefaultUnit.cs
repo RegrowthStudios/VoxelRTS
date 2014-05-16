@@ -23,9 +23,9 @@ namespace RTS.Default.Unit {
         int pfCounter = 0;
         Point targetCellPrev = Point.Zero;
         IEntity prevTarget = null;
-        Vector2 origin = Vector2.Zero;
-        bool sideTracked = false; // For A-Move
-        bool moveToOrigin = false;
+        bool attackMoving = false;
+        bool passivelyTargeting = false;
+        Vector2 origin;
 
         public override void SetUnit(RTSUnit u) {
             base.SetUnit(u);
@@ -45,6 +45,11 @@ namespace RTS.Default.Unit {
             fApply(g, dt);
         }
 
+        public override void Reset() {
+            attackMoving = false;
+            passivelyTargeting = false;
+        }
+
         public override void Init(GameState s, GameplayController c, object args) {
             cc = unit.CombatController;
             mc = unit.MovementController;
@@ -55,6 +60,7 @@ namespace RTS.Default.Unit {
             SetState(BehaviorFSM.Rest);
 
             teamIndex = unit.Team.Index;
+            origin = unit.GridPosition;
         }
 
         private void SetState(int state) {            
@@ -91,12 +97,12 @@ namespace RTS.Default.Unit {
                 if(unit.MovementOrders == BehaviorFSM.AttackMove) {
                     FindTarget(g, dt);
                     if(unit.Target != null) {
-                        sideTracked = true;
+                        attackMoving = true;
                         DSChaseTarget(g, dt);
                     }
-                    else if(sideTracked) {
+                    else if(attackMoving) {
                         unit.Team.Input.AddEvent(new SetWayPointEvent(teamIndex, mc.Goal));
-                        sideTracked = false;
+                        attackMoving = false;
                     }
                 }
             }
@@ -126,23 +132,33 @@ namespace RTS.Default.Unit {
 
         public void FindTarget(GameState g, float dt) {
             // If enemy unit is around, target him automatically
+            float minDistSq = unit.Data.BaseCombatData.MaxRange;
+            minDistSq *= minDistSq;
             foreach (IndexedTeam t in g.activeTeams) {
-                float minDist = unit.Data.BaseCombatData.MaxRange;
-                if (teamIndex != t.Index) { // Enemy team check
-                    foreach (RTSUnit enemy in g.teams[t.Index].Units) { // Enemy poition check
-                        float d = (enemy.GridPosition - unit.GridPosition).Length();
-                        if (d <= minDist) {
+                if(teamIndex != t.Index) { // Enemy team check
+                    foreach (RTSUnit enemy in g.teams[t.Index].Units) {
+                        if(g.CGrid.GetFogOfWar(enemy.GridPosition, teamIndex) != FogOfWar.Active)
+                            continue;
+                        if(enemy.UUID == unit.UUID) continue;
+                        float d = (enemy.GridPosition - unit.GridPosition).LengthSquared();
+                        if (d <= minDistSq) {
                             unit.Target = enemy;
-                            minDist = d;
+                            minDistSq = d;
                         }
                     }
-                    // If no unit target was found, search for building target
-                    if (unit.Target == null) {
+                }
+            }
+            // If no unit target was found, search for building target
+            if (unit.Target == null) {
+                foreach(IndexedTeam t in g.activeTeams) {
+                    if(teamIndex != t.Index) { // Enemy team check
                         foreach (RTSBuilding enemyB in g.teams[t.Index].Buildings) {
-                            float d = (enemyB.GridPosition - unit.GridPosition).Length();
-                            if (d <= minDist) {
+                            if(g.CGrid.GetFogOfWar(enemyB.GridPosition, teamIndex) != FogOfWar.Active)
+                                continue;
+                            float d = (enemyB.GridPosition - unit.GridPosition).LengthSquared();
+                            if (d <= minDistSq) {
                                 unit.Target = enemyB;
-                                minDist = d;
+                                minDistSq = d;
                             }
                         }
                     }
@@ -201,38 +217,21 @@ namespace RTS.Default.Unit {
                     break;
             }
         }
+
         void DSPassiveTarget(GameState g, float dt) {
-            unit.State = BehaviorFSM.Rest;
+            if(!passivelyTargeting) origin = unit.GridPosition;
             Vector2 d = unit.GridPosition - origin;
             float mr = unit.Data.BaseCombatData.MaxRange;
-            if(d.LengthSquared() > mr * mr) {
-                moveToOrigin = true;
+            if(passivelyTargeting && d.LengthSquared() > mr * mr) {
+                unit.Team.Input.AddEvent(new SetWayPointEvent(teamIndex, origin));
+                passivelyTargeting = false;
             }
             else {
+                if(unit.Target == null) FindTarget(g, dt);
+                if(unit.Target != null) passivelyTargeting = true;
                 DSChaseTarget(g, dt);
             }
-        }
-        void ASPassiveTarget(GameState g, float dt) {
-            if(moveToOrigin) {
-                Vector2 dir = origin - unit.GridPosition;
-                float dl = dir.Length();
-                if(dl > 0.001) {
-                    dir /= dl;
-                    float m = unit.MovementSpeed * dt;
-                    if(m > dl) {
-                        unit.Move(dir * dl);
-                    }
-                    else {
-                        unit.Move(dir * m);
-                    }
-                }
-                moveToOrigin = dl < unit.CollisionGeometry.InnerRadius;
-                unit.State = moveToOrigin ? BehaviorFSM.Walking : BehaviorFSM.Rest;
-            }
-            else {
-                //ASChaseTarget(g, dt);
-            }
-        }
+        }      
 
         void DSCombatRanged(GameState g, float dt) {
             // Check If Target Is Null
@@ -465,19 +464,21 @@ namespace RTS.Default.Unit {
             // Set Net Force...
             NetForce = pForce * UnitForce(unit.GridPosition, waypoint);
             Point unitCell = HashHelper.Hash(unit.GridPosition, cg.numCells, cg.size);
-            // Apply Forces From Other Units In This One's Cell
-            foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
-                NetForce += dForce * UnitForce(unit.GridPosition, otherUnit.GridPosition);
-            }
-            // Apply Forces From Buildings And Other Units Near This One
-            foreach(Point n in Pathfinder.Neighborhood(unitCell)) {
-                RTSBuilding b = cg.EStatic[n.X, n.Y];
-                if(b != null)
-                    NetForce += sForce * UnitForce(unit.GridPosition, b.GridPosition);
-                foreach(var otherUnit in cg.EDynamic[n.X, n.Y]) {
-                    NetForce += sForce * UnitForce(unit.GridPosition, otherUnit.GridPosition);
-                }
-            }
+            
+            //// Apply Forces From Other Units In This One's Cell
+            //foreach(var otherUnit in cg.EDynamic[unitCell.X, unitCell.Y]) {
+            //    NetForce += dForce * UnitForce(unit.GridPosition, otherUnit.GridPosition);
+            //}
+            //// Apply Forces From Buildings And Other Units Near This One
+            //foreach(Point n in Pathfinder.Neighborhood(unitCell)) {
+            //    RTSBuilding b = cg.EStatic[n.X, n.Y];
+            //    if(b != null)
+            //        NetForce += sForce * UnitForce(unit.GridPosition, b.GridPosition);
+            //    foreach(var otherUnit in cg.EDynamic[n.X, n.Y]) {
+            //        NetForce += sForce * UnitForce(unit.GridPosition, otherUnit.GridPosition);
+            //    }
+            //}
+            
             // Set Waypoint...
             Point currWaypointCell = HashHelper.Hash(waypoint, cg.numCells, cg.size);
             float sqr2 = unit.Squad.Radius();
@@ -493,6 +494,7 @@ namespace RTS.Default.Unit {
             }
         }
 
+        // TODO: Unstupify This Function
         // There Is A Straight-Line Path From A To B That Intersects No Collidable Objects (Ignores Dynamic Entities)
         private bool CoastIsClear(Vector2 a, Vector2 b, float stepSize, float radius, CollisionGrid cg) {
             Vector2 diff = b - a;

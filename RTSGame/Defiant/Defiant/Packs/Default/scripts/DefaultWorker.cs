@@ -45,6 +45,10 @@ namespace RTS.Default.Worker {
             fApply(g, dt);
         }
 
+        public override void Reset() {
+
+        }
+
         public override void Init(RTSEngine.Data.GameState s, RTSEngine.Controllers.GameplayController c, object args) {
             cc = unit.CombatController;
             mc = unit.MovementController;

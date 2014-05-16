@@ -237,7 +237,8 @@ namespace RTSEngine.Controllers {
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
                         u.Target = null;
-                        u.MovementController.Goal = e.Waypoint;
+                        if(u.MovementController != null) u.MovementController.Goal = e.Waypoint;
+                        if(u.ActionController != null) u.ActionController.Reset();
                         squad.Add(u);
                     }
                 }
@@ -257,6 +258,7 @@ namespace RTSEngine.Controllers {
                     RTSUnit u = unit as RTSUnit;
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
+                        if(u.ActionController != null) u.ActionController.Reset();
                         squad.Add(u);
                     }
                 }
