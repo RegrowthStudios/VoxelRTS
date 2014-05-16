@@ -39,7 +39,7 @@ ViewButton(
 
 // Unit Data
 Name            [Barracks]
-Health          [120]
+Health          [1000]
 CapitalCost     [20]
 PopCapChange    [0]
 Impact          [10]

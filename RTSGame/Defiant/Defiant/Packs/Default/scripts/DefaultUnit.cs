@@ -99,21 +99,41 @@ namespace RTS.Default.Unit {
                         SetState(BehaviorFSM.Walking);
                 }
                 else {
-                    if(unit.Target != null) { // This Is A SquadTC-Set Target
-                        switch(unit.TargetingOrders) {
-                            case BehaviorFSM.TargetPassively:
-                                // TODO: Implement/Verify
-                                break;
-                            case BehaviorFSM.TargetAggressively:
-                                DSChaseTarget(g, dt);
-                                break;
-                        }
+                    if(unit.Target == null) { // Automatic targeting goes here
+                        FindTarget(g, dt);
+                        DSChaseTarget(g, dt);
                     }
                 }
             }
         }
         void ASRest(GameState g, float dt) {
             // Do Nothing
+        }
+
+        public void FindTarget(GameState g, float dt) {
+            // If enemy unit is around, target him automatically
+            foreach (IndexedTeam t in g.activeTeams) {
+                float minDist = unit.Data.BaseCombatData.MaxRange;
+                if (teamIndex != t.Index) { // Enemy team check
+                    foreach (RTSUnit enemy in g.teams[t.Index].Units) { // Enemy poition check
+                        float d = (enemy.GridPosition - unit.GridPosition).Length();
+                        if (d <= minDist) {
+                            unit.Target = enemy;
+                            minDist = d;
+                        }
+                    }
+                    // If no unit target was found, search for building target
+                    if (unit.Target == null) {
+                        foreach (RTSBuilding enemyB in g.teams[t.Index].Buildings) {
+                            float d = (enemyB.GridPosition - unit.GridPosition).Length();
+                            if (d <= minDist) {
+                                unit.Target = enemyB;
+                                minDist = d;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         void DSChaseTarget(GameState g, float dt) {
