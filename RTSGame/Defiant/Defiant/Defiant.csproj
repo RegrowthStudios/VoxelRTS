@@ -132,6 +132,7 @@
     <Content Include="Packs\Default\scripts\input\BarracksController.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="OptionsScreen.cs" />
     <Compile Include="RTSScreen.cs" />
     <Compile Include="WispScreen.cs" />
     <Content Include="Packs\Default\scripts\buttons\DBSpawn.cs">
