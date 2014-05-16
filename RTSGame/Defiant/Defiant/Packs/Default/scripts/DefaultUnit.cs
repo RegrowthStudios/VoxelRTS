@@ -24,6 +24,7 @@ namespace RTS.Default.Unit {
         Point targetCellPrev = Point.Zero;
         IEntity prevTarget = null;
         Vector2 origin = Vector2.Zero;
+        bool sideTracked = false; // For A-Move
         bool moveToOrigin = false;
 
         public override void SetUnit(RTSUnit u) {
@@ -84,25 +85,38 @@ namespace RTS.Default.Unit {
         void DSMain(GameState g, float dt) {
             // Default: Rest
             SetState(BehaviorFSM.Rest);
-            if(unit.Target != null) {
+            if(mc == null) return; // Units Must Have A Movement Controller
+            // Check For A-Move
+            if(unit.Target == null) {
+                if(unit.MovementOrders == BehaviorFSM.AttackMove) {
+                    FindTarget(g, dt);
+                    if(unit.Target != null) {
+                        sideTracked = true;
+                        DSChaseTarget(g, dt);
+                    }
+                    else if(sideTracked) {
+                        unit.Team.Input.AddEvent(new SetWayPointEvent(teamIndex, mc.Goal));
+                        sideTracked = false;
+                    }
+                }
+            }
+            else {
                 bool inFog = g.CGrid.GetFogOfWar(unit.Target.GridPosition, teamIndex) != FogOfWar.Active;
                 if(!unit.Target.IsAlive || inFog)
                     unit.Target = null;
             }
-            if(mc != null) {
-                mc.DecideMove(g, dt);
-                var doMove = mc.doMove;
-                if(doMove) {
-                    if(unit.Target != null)  // This Is A User-Set Target
-                        DSChaseTarget(g, dt);
-                    else
-                        SetState(BehaviorFSM.Walking);
-                }
-                else {
-                    if(unit.Target == null) { // Automatic targeting goes here
-                        FindTarget(g, dt);
-                        DSChaseTarget(g, dt);
-                    }
+            mc.DecideMove(g, dt);
+            var doMove = mc.doMove;
+            if(doMove) {
+                if(unit.Target != null)  // This Is A User-Set Target
+                    DSChaseTarget(g, dt);
+                else
+                    SetState(BehaviorFSM.Walking);
+            }
+            else {
+                if(unit.Target == null) { // Passive Targeting
+                    FindTarget(g, dt);
+                    DSChaseTarget(g, dt);
                 }
             }
         }

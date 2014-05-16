@@ -237,6 +237,7 @@ namespace RTSEngine.Controllers {
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
                         u.Target = null;
+                        u.MovementController.Goal = e.Waypoint;
                         squad.Add(u);
                     }
                 }

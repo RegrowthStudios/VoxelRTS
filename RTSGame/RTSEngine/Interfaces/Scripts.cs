@@ -104,6 +104,12 @@ namespace RTSEngine.Interfaces {
             set { waypoints = value; }
         }
 
+        // Goal From A Set Waypoint Event
+        public Vector2 Goal {
+            get;
+            set;
+        }
+
         // Index Of Squad Waypoint That This Controller's Unit Is Currently Attempting To Reach
         public int CurrentWaypointIndex { get; set; }
 
