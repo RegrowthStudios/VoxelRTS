@@ -121,6 +121,9 @@
     <Content Include="Packs\Default\races\Mech\textures\LightMain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Packs\Default\races\Mech\models\Armor.model">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Packs\Default\scripts\buttons\DBEnable.cs" />
     <None Include="Packs\Default\scripts\ExtractionBuilding.cs" />
     <Content Include="Packs\Default\scripts\input\player\CombatStatsButton.png">
