@@ -50,4 +50,4 @@ Colors [
    {Default}
 ]
 GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
-Map         [Packs\Default\maps\0\test.map]
+Map         [Packs\Default\maps\Caldera\test.map]

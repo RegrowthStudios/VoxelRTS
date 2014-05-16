@@ -98,9 +98,13 @@ namespace RTS.Default {
                 if(s.CurrentFrame < MERCY_TIME)
                     return null;
 
-                // Lose If All The Buildings And Units Are Destroyed
-                if(pTeam.Buildings.Count < 1 && pTeam.Units.Count < 1)
+                // Lose If All Headquarters Are Destroyed
+                if(pTeam.Race.Buildings[0].CurrentCount <= 0)
                     return -1;
+
+                // Lose If All The Buildings And Units Are Destroyed
+                //if(pTeam.Buildings.Count < 1 && pTeam.Units.Count < 1)
+                //    return -1;
 
                 // Win If All Enemies Destroyed
                 int c = 0;

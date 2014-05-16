@@ -176,7 +176,12 @@ namespace RTSEngine.Algorithms {
             return false;
         }
 
-        private Point FindClosestGoal(Point e, int[,] f, bool[,] c, out int s) {
+        private Point FindClosestGoal(Point e, int[,] f, bool[,] c, out int s, int iters) {
+            // Prevent Stack Overflow
+            if(iters > 20) {
+                s = int.MaxValue;
+                return e;
+            }
             if(InGrid(e) && c[e.X, e.Y] == false) {
                 c[e.X, e.Y] = true;
 
@@ -190,7 +195,7 @@ namespace RTSEngine.Algorithms {
 
                 int ns;
                 foreach(var n in NeighborhoodAlign(e)) {
-                    Point np = FindClosestGoal(n, f, c, out ns);
+                    Point np = FindClosestGoal(n, f, c, out ns, iters+1);
                     if(ns != int.MaxValue && ns < s) {
                         s = ns;
                         p = np;
@@ -277,7 +282,7 @@ namespace RTSEngine.Algorithms {
                 int s;
                 bool[,] ch = new bool[World.numCells.X, World.numCells.Y];
                 Array.Clear(ch, 0, ch.Length);
-                Point cg = FindClosestGoal(end, fScore, ch, out s);
+                Point cg = FindClosestGoal(end, fScore, ch, out s, 0);
                 if(s == int.MaxValue) {
                     // Impossible
                 }
