@@ -60,7 +60,7 @@ namespace RTS.Input {
             numActive = 0;
             timeElapsed = 0;
             level = AggressionLevel.None;
-            dt = 2; //5
+            dt = 10; //5
 
             foreach (var b in Team.Buildings) {
                 DevConsole.AddCommand("added barracks");
@@ -125,7 +125,7 @@ namespace RTS.Input {
 
         public void OnBuildingSpawn(RTSBuilding b) {
     
-            DevConsole.AddCommand("added barracks");
+            //DevConsole.AddCommand("added barracks");
             barracksControllers.Add(new BarracksController(this, b));
             Team.Buildings.Add(b);
             b.OnDestruction += OnBuildingDestruction;
@@ -133,7 +133,7 @@ namespace RTS.Input {
         }
 
         public void OnBuildingDestruction(IEntity b) {
-            DevConsole.AddCommand("building destroyed");
+            //DevConsole.AddCommand("building destroyed");
             BarracksController destroyed = null;
             
             foreach (var bc in barracksControllers) {
@@ -161,16 +161,16 @@ namespace RTS.Input {
         private void UpdateLevel() {
 
             AggressionLevel newLevel = level;
-            if (timeElapsed > 30 * dt) {
+            if (timeElapsed > 40 * dt) {
                 newLevel = AggressionLevel.VeryHigh;
             }
-            else if (timeElapsed > 20 * dt) {
+            else if (timeElapsed > 28 * dt) {
                 newLevel = AggressionLevel.High;
             }
-            else if (timeElapsed > 12 * dt) {
+            else if (timeElapsed > 14 * dt) {
                 newLevel = AggressionLevel.Medium;
             }
-            else if (timeElapsed > 6 * dt) {
+            else if (timeElapsed > 7 * dt) {
                 newLevel = AggressionLevel.Low;
             }
             else if (timeElapsed > 2 * dt) {
@@ -181,12 +181,12 @@ namespace RTS.Input {
                 level = newLevel;
                 switch (level) {
                     case AggressionLevel.VeryLow:
-                        DevConsole.AddCommand("very low level");
+                        //DevConsole.AddCommand("very low level");
                         IncreaseActive(1);
                         spawnCap += 1;
                         break;
                     case AggressionLevel.Low:
-                        DevConsole.AddCommand("low level");
+                        //DevConsole.AddCommand("low level");
                         IncreaseActive(1);
                         spawnCap += 1;
                         break;

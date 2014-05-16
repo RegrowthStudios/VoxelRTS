@@ -28,7 +28,8 @@ namespace RTS.Default.Buttons.Spawn {
 
         public override bool CanFinish(GameState g) {
             return
-                building.Team.Capital >= building.Team.Race.Units[UnitType].CapitalCost;
+                building.Team.Capital >= building.Team.Race.Units[UnitType].CapitalCost &&
+                building.Team.Units.Count < building.Team.PopulationCap;
         }
         public override void OnQueueFinished(GameState s) {
             building.Team.Input.AddEvent(new SpawnUnitEvent(

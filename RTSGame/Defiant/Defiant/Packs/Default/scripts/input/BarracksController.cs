@@ -34,7 +34,7 @@ namespace RTS.Packs.Default.scripts.input {
             int numSpawn = AIInput.spawnCap - army.Count;
             for (int i = 0; i < numSpawn; i++) {
                 int type = AIInput.random.Next(barracks.ButtonControllers.Count);
-                barracks.ButtonControllers[type].OnQueueFinished(AIInput.GameState);                
+                barracks.ButtonControllers[type].OnClick();                
             } 
         }
 

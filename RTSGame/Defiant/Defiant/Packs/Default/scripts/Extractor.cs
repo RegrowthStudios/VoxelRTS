@@ -47,10 +47,10 @@ namespace RTS.Default.Building {
         public override void ApplyAction(GameState g, float dt) {
             if(resources.Count < 1) return;
 
-            if(g.CurrentFrame % 100 == 0) {
+            if(g.CurrentFrame % 300 == 0) {
                 g.AddParticle(new AlertParticle(
                     building.WorldPosition + Vector3.Up * 0.2f, 0.1f, Color.White,
-                    building.WorldPosition + Vector3.Up * 0.2f, harvestradius * 1.4f, Color.Pink,
+                    building.WorldPosition + Vector3.Up * 0.2f, harvestradius * 1.4f, Color.Transparent,
                     g.TotalGameTime, 2f
                     ));
                 foreach(var b in resources) {
