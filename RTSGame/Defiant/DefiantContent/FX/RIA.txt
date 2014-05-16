@@ -30,3 +30,14 @@ ParticleConfig      <RTSEngine.Graphics.ParticleEffectConfig> {
     PassAlert            [Alert]
 }
 
+Icons   [
+    {Mech.Light}  {Packs\Default\races\Mech\icons\Light.png}
+    {Mech.Heavy}  {Packs\Default\races\Mech\icons\Heavy.png}
+    {Mech.Armor}  {Packs\Default\races\Mech\icons\Armor.png}
+    {Mech.HQ}  {Packs\Default\races\Mech\icons\HQ.png}
+    {Mech.Factory}  {Packs\Default\races\Mech\icons\Factory.png}
+    {Mech.Barracks}  {Packs\Default\races\Mech\icons\Barracks.png}
+    {Mech.Extractor}  {Packs\Default\races\Mech\icons\Extractor.png}
+    {Gaia.Tree}  {Packs\Default\races\Gaia\icons\Tree.png}
+    {Gaia.Gem}  {Packs\Default\races\Gaia\icons\Gem.png}
+]

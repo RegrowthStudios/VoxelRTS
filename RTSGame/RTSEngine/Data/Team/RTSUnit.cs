@@ -110,6 +110,9 @@ namespace RTSEngine.Data.Team {
             get;
             private set;
         }
+        public string IconKey {
+            get { return Data.IconKey; }
+        }
 
         // Unit's Team And Squad
         public RTSTeam Team {

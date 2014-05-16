@@ -169,8 +169,7 @@ namespace RTS.Input {
             int wi = 0;
             foreach(var kv in buildings) {
                 if(wi >= groups.Length) break;
-                string key = string.Join(".", kv.Value[0].Team.Race.FriendlyName, kv.Key.FriendlyName);
-                Texture2D t = IconLibrary[key];
+                Texture2D t = IconLibrary[kv.Key.IconKey];
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;
                 groups[wi].Data = kv.Value;
@@ -179,8 +178,7 @@ namespace RTS.Input {
             }
             foreach(var kv in units) {
                 if(wi >= groups.Length) break;
-                string key = string.Join(".", kv.Value[0].Team.Race.FriendlyName, kv.Key.FriendlyName);
-                Texture2D t = IconLibrary[key];
+                Texture2D t = IconLibrary[kv.Key.IconKey];
                 if(t == null) continue;
                 groups[wi].Widget.Texture = t;
                 groups[wi].Data = kv.Value;
@@ -215,22 +213,15 @@ namespace RTS.Input {
 
             int wi = 0;
             var bd = ic.Team.Race.Buildings[bType].DefaultButtonControllers;
-            int bci = 0;
-            foreach(var bc in bd) {
+            foreach(var bc in sBuildings[0].ButtonControllers) {
                 if(wi >= groups.Length) break;
-                string key = string.Join(".", ic.Team.Race.FriendlyName, ic.Team.Race.Buildings[bType].FriendlyName, bci);
-                bci++;
-                if(!IconLibrary.ContainsKey(key)) continue;
-                Texture2D t = IconLibrary[key];
-                if(t == null) continue;
-                groups[wi].Widget.Texture = t;
-
+                if(!IconLibrary.ContainsKey(bc.IconKey)) continue;
+                groups[wi].Widget.Texture = IconLibrary[bc.IconKey];
                 var bcs = new List<ACBuildingButtonController>();
-                foreach(var b in sBuildings) {
-                    bcs.Add(b.ButtonControllers[wi]);
+                foreach(var nb in sBuildings) {
+                    bcs.Add(nb.ButtonControllers[wi]);
                 }
                 groups[wi].Data = bcs;
-
                 Show(groups[wi]);
                 wi++;
             }

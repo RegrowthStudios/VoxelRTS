@@ -628,8 +628,10 @@ namespace RTS.Default.Unit {
 
         private float rt;
         private int lastState;
+        int isInit;
 
         public Animation() {
+            isInit = 0;
         }
 
         public override void Init(GameState s, GameplayController c, object args) {
@@ -651,6 +653,8 @@ namespace RTS.Default.Unit {
             alDeath = new AnimationLoop(initArgs.Splices[5].X, initArgs.Splices[5].Y);
             alDeath.FrameSpeed = initArgs.Speeds[5];
             SetAnimation(BehaviorFSM.None);
+
+            System.Threading.Interlocked.Exchange(ref isInit, 1);
         }
 
         public override void SetUnit(RTSUnit u) {
@@ -713,6 +717,9 @@ namespace RTS.Default.Unit {
             }
         }
         public override void Update(GameState s, float dt) {
+            if(System.Threading.Interlocked.CompareExchange(ref isInit, 1, 1) == 0)
+                return;
+
             // Animate Death
             if(!unit.IsAlive) {
                 if(AnimationFrame == alDeath.EndFrame)

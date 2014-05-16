@@ -2,19 +2,13 @@
 ViewModel(
     {~~RENDERER~~}
     {~~FILEROOTDIR~~}
-    {models\Ore.model}
-    {{textures\Ore.png} {..\..\textures\NoKey.png}}
-)
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Ore}
-    {~~FILEROOTDIR~~}
-    {icons\Ore.png}
+    {models\Gem.model}
+    {{textures\Gem.png} {..\..\textures\NoKey.png}}
 )
 
 // Unit Data
-Name            [Ore]
+Name            [Gem]
+IconKey         [Gaia.Gem]
 Health          [2000]
 CapitalCost     [0]
 PopCapChange    [20]

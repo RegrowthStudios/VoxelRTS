@@ -15,6 +15,7 @@ namespace RTSEngine.Data {
         SpawnBuilding,
         Impact,
         Capital,
+        SetOrders,
         Damage
     }
 
@@ -147,19 +148,44 @@ namespace RTSEngine.Data {
         }
     }
 
-    public class DamageEvent : GameInputEvent {
-        public IEntity Entity {
-            get;
-            private set;
-        }
-        public int ChangeAmount {
+    public class SetOrdersEvent : GameInputEvent {
+        public int UnitID {
             get;
             private set;
         }
 
-        public DamageEvent(int t, IEntity e, int amount)
+        public int Orders {
+            get;
+            private set;
+        }
+
+        public int Index {
+            get; 
+            private set;
+        }
+
+        public SetOrdersEvent(int t, int id, int o, int i)
+            : base(GameEventType.SetOrders, t) {
+            UnitID = id;
+            Orders = o;
+            Index = i;
+        }
+    }
+
+    public class DamageEvent : GameInputEvent {
+        public int UUID {
+            get;
+            private set;
+        }
+        public int ChangeAmount {
+
+            get;
+            private set;
+        }
+
+        public DamageEvent(int t, int uuid, int amount)
             : base(GameEventType.Damage, t) {
-            Entity = e;
+            UUID = uuid;
             ChangeAmount = amount;
         }
     }

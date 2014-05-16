@@ -60,10 +60,17 @@ namespace RTS.Input {
                     case 0:
                         SelectionPanel.BackPanel.Offset = new Point(0, 0);
                         UnitDataPanel.WidgetBase.Offset = new Point(0, 1000000);
+                        BuildingDataPanel.WidgetBase.Offset = new Point(0, 1000000);
                         break;
                     case 1:
                         SelectionPanel.BackPanel.Offset = new Point(0, 1000000);
                         UnitDataPanel.WidgetBase.Offset = new Point(0, 0);
+                        BuildingDataPanel.WidgetBase.Offset = new Point(0, 1000000);
+                        break;
+                    case 2:
+                        SelectionPanel.BackPanel.Offset = new Point(0, 1000000);
+                        UnitDataPanel.WidgetBase.Offset = new Point(0, 1000000);
+                        BuildingDataPanel.WidgetBase.Offset = new Point(0, 0);
                         break;
                 }
             }
@@ -73,6 +80,10 @@ namespace RTS.Input {
             private set;
         }
         public RTSUnitDataPanel UnitDataPanel {
+            get;
+            private set;
+        }
+        public RTSBuildingDataPanel BuildingDataPanel {
             get;
             private set;
         }
@@ -90,6 +101,7 @@ namespace RTS.Input {
             BuildBuildingPanel(showBuildPanel);
             BuildSelectionPanel(renderer);
             BuildUnitDataPanel(renderer);
+            BuildBuildingDataPanel(renderer);
             BuildTeamDataPanel();
             AlertQueue = new RTSUIAlertQueue(wrMain, uic.UICAlertQueue);
             AlertQueue.WidgetBase.Parent = Minimap.WidgetBase;
@@ -101,6 +113,8 @@ namespace RTS.Input {
             Minimap.Dispose();
             TeamDataPanel.Dispose();
             SelectionPanel.Dispose();
+            UnitDataPanel.Dispose();
+            BuildingDataPanel.Dispose();
             if(BuildingPanel != null) BuildingPanel.Dispose();
         }
 
@@ -132,7 +146,7 @@ namespace RTS.Input {
             BBPanel.BackPanel.Parent = rectBounds;
             BBPanel.BackPanel.AlignY = Alignment.BOTTOM;
             BBPanel.BackPanel.OffsetAlignY = Alignment.BOTTOM;
-            BBPanel.BackPanel.Offset = new Point(uic.BBIconBuffer, 0);
+            BBPanel.BackPanel.Offset = new Point(0, 0);
             BBPanel.IconLibrary = renderer.IconLibrary;
             BBPanel.BackPanel.Color = UserConfig.MainScheme.WidgetBase;
         }
@@ -163,6 +177,15 @@ namespace RTS.Input {
             UnitDataPanel.WidgetBase.Offset = new Point(0, 0);
             UnitDataPanel.WidgetBase.Parent = BBPanel.BackPanel;
         }
+        private void BuildBuildingDataPanel(RTSRenderer renderer) {
+            BuildingDataPanel = new RTSBuildingDataPanel(renderer, wrMain, uic.UICBuildingData);
+            BuildingDataPanel.WidgetBase.AlignX = Alignment.LEFT;
+            BuildingDataPanel.WidgetBase.AlignY = Alignment.BOTTOM;
+            BuildingDataPanel.WidgetBase.OffsetAlignX = Alignment.RIGHT;
+            BuildingDataPanel.WidgetBase.OffsetAlignY = Alignment.BOTTOM;
+            BuildingDataPanel.WidgetBase.Offset = new Point(0, 0);
+            BuildingDataPanel.WidgetBase.Parent = BBPanel.BackPanel;
+        }
         private void BuildTeamDataPanel() {
             TeamDataPanel = new RTSUITeamDataPanel(wrMain);
             TeamDataPanel.Width = (rectBounds.Width * 5) / 7;
@@ -180,6 +203,7 @@ namespace RTS.Input {
                 Minimap.WidgetBase.Inside(x, y) ||
                 SelectionPanel.BackPanel.Inside(x, y) ||
                 UnitDataPanel.WidgetBase.Inside(x, y) ||
+                BuildingDataPanel.WidgetBase.Inside(x, y) ||
                 BBPanel.BackPanel.Inside(x, y) ||
                 (BuildingPanel == null ? false : BuildingPanel.Inside(x, y)) ||
                 TeamDataPanel.Inside(x, y);

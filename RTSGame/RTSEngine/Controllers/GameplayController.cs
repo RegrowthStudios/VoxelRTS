@@ -218,6 +218,9 @@ namespace RTSEngine.Controllers {
                     case GameEventType.Capital:
                         ApplyInput(s, dt, e as CapitalEvent);
                         break;
+                    case GameEventType.SetOrders:
+                        ApplyInput(s, dt, e as SetOrdersEvent);
+                        break;
                     case GameEventType.Damage:
                         ApplyInput(s, dt, e as DamageEvent);
                         break;
@@ -264,13 +267,15 @@ namespace RTSEngine.Controllers {
                         if(squad == null) squad = u.Team.AddSquad();
                         if(u.ActionController != null) u.ActionController.Reset();
                         squad.Add(u);
+                        DevConsole.AddCommand("gc 1");
                     }
                 }
-                if(squad == null) return;
+                if (squad == null) { DevConsole.AddCommand("gc return"); return; }
                 // Assign The Target To Every Unit In The Squad
                 for(int u = 0; u < squad.Units.Count; u++) {
                     RTSUnit unit = squad.Units[u];
                     unit.Target = e.Target;
+                    DevConsole.AddCommand("gc target");
                 }
                 AddTask(s, squad);
                 SendSquadQuery(s, squad, e);
@@ -331,6 +336,7 @@ namespace RTSEngine.Controllers {
 
             // Check If A Unit Was Possible
             if(unit == null) { return; }
+            s.EntityHashSet.Add(unit.UUID, unit);
 
             // Add Decision Tasks
             AddTask(s, unit);
@@ -363,12 +369,12 @@ namespace RTSEngine.Controllers {
 
             // Check If A Building Was Possible
             if(building == null) return;
+            s.EntityHashSet.Add(building.UUID, building);
 
             // Set Default Height
             building.Height = s.CGrid.HeightAt(building.GridPosition);
             building.CollisionGeometry.Height = building.Height;
             s.CGrid.Add(building);
-
             // Add Building Decision Task
             AddTask(s, building, e.Team, e.Type);
         }
@@ -381,8 +387,19 @@ namespace RTSEngine.Controllers {
 
             team.Capital += e.ChangeAmount;
         }
+        private void ApplyInput(GameState s, float dt, SetOrdersEvent e) {
+            if (e.Index < 0 || e.Index > 3) { return; }
+            IEntity unit;
+            bool hasValue = s.EntityHashSet.TryGetValue(e.UnitID, out unit);
+            if (hasValue) {
+                unit.State = BehaviorFSM.SetByte(unit.State, e.Orders, e.Index);
+            }
+
+        }
         private void ApplyInput(GameState s, float dt, DamageEvent e) {
-            e.Entity.Damage(e.ChangeAmount);
+            IEntity ent;
+            if(s.EntityHashSet.TryGetValue(e.UUID, out ent))
+                ent.Damage(e.ChangeAmount);
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
@@ -626,8 +643,8 @@ namespace RTSEngine.Controllers {
             // Remove All Dead Entities
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 RTSTeam team = s.activeTeams[ti].Team;
-                team.RemoveAll(IsUnitDead);
-                team.RemoveAll(IsBuildingDead);
+                team.RemoveAll(IsUnitDead, (i) => { s.EntityHashSet.Remove(i); });
+                team.RemoveAll(IsBuildingDead, (i) => { s.EntityHashSet.Remove(i); });
                 team.RemoveAll(IsSquadEmpty);
             }
         }

@@ -35,6 +35,8 @@ namespace RTSEngine.Graphics {
 
         public string FXParticle;
         public ParticleEffectConfig ParticleConfig;
+
+        public string[] Icons;
     }
     public class RTSRenderer : IDisposable {
         private const float SELECTION_RADIUS_MODIFIER = 1.1f;
@@ -145,8 +147,11 @@ namespace RTSEngine.Graphics {
             NonFriendlyBuildingModels = new List<RTSBuildingModel>();
             FriendlyBuildingModels = new List<RTSBuildingModel>();
             IconLibrary = new Dictionary<string, Texture2D>();
+            for(int i = 0; i < ria.Icons.Length; i += 2) {
+                IconLibrary.Add(ria.Icons[i], LoadTexture2D(ria.Icons[i + 1]));
+            }
 
-            tPixel = CreateTexture2D(1, 1);
+                tPixel = CreateTexture2D(1, 1);
             tPixel.SetData(new Color[] { Color.White });
             IconLibrary.Add("None", tPixel);
 

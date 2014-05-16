@@ -319,7 +319,7 @@ namespace RTS.Input {
                 case Keys.Delete:
                     var arr = selected.ToArray();
                     foreach(var e in arr)
-                        AddEvent(new DamageEvent(TeamIndex, e, 1000000));
+                        AddEvent(new DamageEvent(TeamIndex, e.UUID, 1000000));
                     break;
                 case Keys.LeftShift:
                 case Keys.RightShift:
@@ -331,7 +331,13 @@ namespace RTS.Input {
                 case Keys.K:
                     foreach(var entity in selected) {
                         RTSUnit unit = entity as RTSUnit;
-                        if(unit != null) unit.MovementOrders = BehaviorFSM.AttackMove;
+                        if(unit != null) AddEvent (new SetOrdersEvent(TeamIndex, unit.UUID, BehaviorFSM.AttackMove, 3));
+                    }
+                    break;
+                case Keys.M:
+                    foreach (var entity in selected) {
+                        RTSUnit unit = entity as RTSUnit;
+                        if (unit != null) AddEvent(new SetOrdersEvent(TeamIndex, unit.UUID, BehaviorFSM.JustMove, 3));
                     }
                     break;
             }
@@ -359,7 +365,8 @@ namespace RTS.Input {
                     UI.UnitDataPanel.SetData(u);
                 }
                 else if(b != null) {
-                    // TODO: Add Building Data
+                    UI.SelectionToggle = 2;
+                    UI.BuildingDataPanel.SetData(b);
                 }
             }
         }
@@ -407,6 +414,7 @@ namespace RTS.Input {
 
         public void Update(RTSRenderer renderer, GameState s) {
             UI.AlertQueue.Update();
+            UI.BuildingDataPanel.Update();
         }
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             UI.Draw(renderer, batch);

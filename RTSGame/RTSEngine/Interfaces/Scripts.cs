@@ -121,7 +121,7 @@ namespace RTSEngine.Interfaces {
         public bool doMove { get; set; }
 
         // The Net Force On This Unit
-        public Vector2 NetForce {get; set; }
+        public Vector2 NetForce { get; set; }
 
         // Does The Provided Index Point To A Valid Squad Waypoint?
         public bool IsValid(int idx) {
@@ -179,6 +179,9 @@ namespace RTSEngine.Interfaces {
         private int enqueueCount;
 
         public abstract int QueueTime {
+            get;
+        }
+        public abstract string IconKey {
             get;
         }
 

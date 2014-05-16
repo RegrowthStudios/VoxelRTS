@@ -42,12 +42,6 @@ namespace RTSEngine.Data.Parsers {
             View.ModelTexture = renderer.LoadTexture2D(Path.Combine(rootPath, tex[1]));
             View.ColorCodeTexture = renderer.LoadTexture2D(Path.Combine(rootPath, tex[2]));
         }
-        [ZXParse("ViewIcon")]
-        public void BuildIcon(RTSRenderer renderer, RTSRace race, string name, string rootPath, string icon) {
-            string key = string.Join(".", race.FriendlyName, name);
-            if(!renderer.IconLibrary.ContainsKey(key))
-                renderer.IconLibrary.Add(key, renderer.LoadTexture2D(Path.Combine(rootPath, icon)));
-        }
     }
 
     public static class RTSUnitDataParser {
