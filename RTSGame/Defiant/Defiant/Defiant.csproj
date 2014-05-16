@@ -485,6 +485,9 @@
     <Content Include="Packs\schemes\wheeler.scheme">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Packs\presets\TestAI.game">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\BlisterUI\BlisterUI.csproj">

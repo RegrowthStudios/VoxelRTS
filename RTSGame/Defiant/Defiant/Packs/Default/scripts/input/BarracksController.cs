@@ -16,7 +16,7 @@ namespace RTS.Packs.Default.scripts.input {
         public List<IEntity> army;
         public List<IEntity> sentArmy;
         private AI AIInput;
-        public RTSBuilding target;
+        public IEntity target;
 
         public BarracksController(AI input, RTSBuilding b) {
             army = new List<IEntity>();
@@ -41,27 +41,40 @@ namespace RTS.Packs.Default.scripts.input {
         }
 
         public void DecideTarget() {
-            if (target != null) { return; }
+            if (target != null && target.IsAlive) { return; }
             float minDist = float.MaxValue;
             foreach (var b in AIInput.player.Buildings) {
                 float dist = (b.GridPosition - barracks.GridPosition).Length();
-                if (dist < minDist) {
+                if (dist < minDist && b.IsAlive) {
                     minDist = dist;
                     target = b;
+                }
+            }
+            if (target != null && target.IsAlive) { return; }
+            minDist = float.MaxValue;
+            foreach (var u in AIInput.player.Units) {
+                float dist = (u.GridPosition - barracks.GridPosition).Length();
+                if (dist < minDist && u.IsAlive) {
+                    minDist = dist;
+                    target = u;
                 }
             }
         }
 
         public void ApplyTarget() {
-            if (army.Count < AIInput.spawnCap || sentArmy.Count > 0 || target == null) { return; }
-            foreach (var u in army) {
-                sentArmy.Add(u);
+            if (army.Count == AIInput.spawnCap && sentArmy.Count == 0 && target != null) {
+                foreach (var u in army) {
+                    sentArmy.Add(u);
+                }
+                army.Clear();
             }
-            army.Clear();
-            AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, sentArmy));
-            AIInput.AddEvent(new SetTargetEvent(AIInput.TeamIndex, target));
-            
+
+            if (target != null) {
+                AIInput.AddEvent(new SelectEvent(AIInput.TeamIndex, sentArmy));
+                AIInput.AddEvent(new SetTargetEvent(AIInput.TeamIndex, target));
+            }
         }
+
 
         public void Dispose() {
             DecideTarget();

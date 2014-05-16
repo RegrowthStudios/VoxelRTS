@@ -34,6 +34,8 @@ namespace RTS.Input {
 
         public override void Init(GameState s, int ti, object args) {
             base.Init(s, ti, args);
+            Team.Capital = int.MaxValue/2;
+            Team.PopulationCap = int.MaxValue/2;
             Team.OnBuildingSpawn += OnBuildingSpawn;
             Team.OnUnitSpawn += OnUnitSpawn;
             random = new Random();
@@ -96,6 +98,8 @@ namespace RTS.Input {
                 destroyed.Dispose();
                 barracksControllers.Remove(destroyed);
             }
+            RTSBuilding bb = b as RTSBuilding;
+            Team.Buildings.Remove(bb);
         }
 
         private void WorkThread() {
