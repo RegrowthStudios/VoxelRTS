@@ -25,6 +25,9 @@ namespace RTSEngine.Graphics {
 
         public int AlertMaxCount;
         public string AlertImage;
+
+        public int BloodMaxCount;
+        public string BloodImage;
     }
 
     public class ParticleRenderer {
@@ -33,6 +36,7 @@ namespace RTSEngine.Graphics {
         private ParticleList<FireParticle, VertexFireInstance> plFires;
         private ParticleList<LightningParticle, VertexLightningInstance> plBolts;
         private ParticleList<AlertParticle, VertexAlertInstance> plAlerts;
+        private ParticleList<BloodParticle, VertexAlertInstance> plBloods;
 
         private ParticleEffect fxParticle;
         public Vector2 MapSize {
@@ -44,6 +48,7 @@ namespace RTSEngine.Graphics {
         private Texture2D tFireNoise;
         private Texture2D tFireAlpha;
         private Texture2D tAlert;
+        private Texture2D tBlood;
 
         public ParticleRenderer(Effect fx, ParticleEffectConfig peConf) {
             fxParticle = new ParticleEffect(fx, peConf);
@@ -71,6 +76,11 @@ namespace RTSEngine.Graphics {
             plAlerts = new ParticleList<AlertParticle, VertexAlertInstance>(renderer, o.AlertMaxCount, ParticleType.Alert);
             BuildAlertModel(renderer);
             tAlert = renderer.LoadTexture2D(o.AlertImage);
+
+            // Create Blood System
+            plBloods = new ParticleList<BloodParticle, VertexAlertInstance>(renderer, o.BloodMaxCount, ParticleType.Blood);
+            BuildBloodModel(renderer);
+            tBlood = renderer.LoadTexture2D(o.BloodImage);
         }
         private void LoadBulletModel(RTSRenderer renderer, Stream s, ParsingFlags pf = ParsingFlags.ConversionOpenGL) {
             VertexPositionNormalTexture[] v;
@@ -146,15 +156,42 @@ namespace RTSEngine.Graphics {
             plAlerts.IBuffer = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, 6, BufferUsage.WriteOnly);
             plAlerts.IBuffer.SetData(new short[] { 0, 1, 2, 2, 1, 3 });
         }
+        private void BuildBloodModel(RTSRenderer renderer) {
+            plBloods.VBuffer = renderer.CreateVertexBuffer(VertexPositionTexture.VertexDeclaration, 12, BufferUsage.WriteOnly);
+            plBloods.VBuffer.SetData(new VertexPositionTexture[] {
+                new VertexPositionTexture(new Vector3(0, 1, -1), Vector2.Zero),
+                new VertexPositionTexture(new Vector3(0, 1, 1), Vector2.UnitX),
+                new VertexPositionTexture(new Vector3(0, -1, -1), Vector2.UnitY),
+                new VertexPositionTexture(new Vector3(0, -1, 1), Vector2.One),
+
+                new VertexPositionTexture(new Vector3(-1, 0, -1), Vector2.Zero),
+                new VertexPositionTexture(new Vector3(1, 0, -1), Vector2.UnitX),
+                new VertexPositionTexture(new Vector3(-1, 0, 1), Vector2.UnitY),
+                new VertexPositionTexture(new Vector3(1, 0, 1), Vector2.One),
+
+                new VertexPositionTexture(new Vector3(-1, 1, 0), Vector2.Zero),
+                new VertexPositionTexture(new Vector3(1, 1, 0), Vector2.UnitX),
+                new VertexPositionTexture(new Vector3(-1, -1, 0), Vector2.UnitY),
+                new VertexPositionTexture(new Vector3(1, -1, 0), Vector2.One)
+            });
+            plBloods.IBuffer = renderer.CreateIndexBuffer(IndexElementSize.SixteenBits, 18, BufferUsage.WriteOnly);
+            plBloods.IBuffer.SetData(new short[] { 
+                0, 1, 2, 2, 1, 3,
+                4, 5, 6, 6, 5, 7,
+                8, 9, 10, 10, 9, 11
+            });
+        }
 
         public void Update(List<Particle> newParticles, float dt) {
             plBullets.Update(newParticles, dt);
             plFires.Update(newParticles, dt);
             plBolts.Update(newParticles, dt);
             plAlerts.Update(newParticles, dt);
+            plBloods.Update(newParticles, dt);
         }
 
         public void SetupAll(GraphicsDevice g, Matrix mVP, float t, Texture2D tFOW) {
+            g.RasterizerState = RasterizerState.CullNone;
             fxParticle.SetupBasic(g, mVP, t, tFOW);
         }
 
@@ -196,6 +233,16 @@ namespace RTSEngine.Graphics {
         public void DrawAlerts(GraphicsDevice g) {
             if(plAlerts.ParticleCount > 0)
                 g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plAlerts.VertexCount, 0, plAlerts.TriCount, plAlerts.ParticleCount);
+        }
+
+        public void SetBloods(GraphicsDevice g) {
+            fxParticle.ApplyAlert(g, tBlood);
+            g.SetVertexBuffers(plBloods.VBBinds);
+            g.Indices = plBloods.IBuffer;
+        }
+        public void DrawBloods(GraphicsDevice g) {
+            if(plBloods.ParticleCount > 0)
+                g.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, plBloods.VertexCount, 0, plBloods.TriCount, plBloods.ParticleCount);
         }
     }
 }

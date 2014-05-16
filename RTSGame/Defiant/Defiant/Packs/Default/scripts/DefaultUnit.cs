@@ -600,6 +600,8 @@ namespace RTS.Default.Unit {
         public Vector3 BulletOffset;
         public Vector3 BulletDirection;
 
+        public Color BloodTint;
+
         public AnimationInitArgs() {
             Splices = new Point[] {
                 new Point(0, 59),
@@ -620,6 +622,8 @@ namespace RTS.Default.Unit {
             BulletTint = Color.Yellow;
             BulletOffset = new Vector3(-0.1f, 1f, 0.2f);
             BulletDirection = new Vector3(0, 0, 1);
+
+            BloodTint = Color.Red;
         }
     }
     public class Animation : ACUnitAnimationController {
@@ -633,6 +637,7 @@ namespace RTS.Default.Unit {
         private float rt;
         private int lastState;
         int isInit;
+        bool addBlood;
 
         public Animation() {
             isInit = 0;
@@ -666,6 +671,7 @@ namespace RTS.Default.Unit {
             if(unit != null) {
                 unit.OnAttackMade += unit_OnAttackMade;
                 unit.OnDestruction += unit_OnDestruction;
+                unit.OnDamage += unit_OnDamage;
             }
         }
 
@@ -683,6 +689,13 @@ namespace RTS.Default.Unit {
             BulletParticle bp = new BulletParticle(o, d, 0.05f, 1.4f, 0.1f);
             bp.Tint = initArgs.BulletTint;
             AddParticle(bp);
+        }
+        void unit_OnDamage(IEntity arg1, int v) {
+            addBlood = true;
+        }
+        void Splurt(float ct) {
+            Vector3 o = unit.WorldPosition + Vector3.Up;
+            AddParticle(new BloodParticle(o, initArgs.BloodTint, 0.1f, 1f, ct, 1f));
         }
         void unit_OnDestruction(IEntity e) {
             alDeath.Restart(false);
@@ -723,6 +736,11 @@ namespace RTS.Default.Unit {
         public override void Update(GameState s, float dt) {
             if(System.Threading.Interlocked.CompareExchange(ref isInit, 1, 1) == 0)
                 return;
+
+            if(addBlood) {
+                Splurt(s.TotalGameTime);
+                addBlood = false;
+            }
 
             // Animate Death
             if(!unit.IsAlive) {
