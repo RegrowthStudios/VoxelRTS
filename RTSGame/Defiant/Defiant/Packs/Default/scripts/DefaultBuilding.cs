@@ -18,13 +18,7 @@ namespace RTS.Default.Building {
         }
 
         public override void DecideAction(GameState g, float dt) {
-            // Process event queue if there is any
-            if(ButtonQueue.Count > 0 && CurrentButton == null) {
-                CurrentButton = ButtonQueue.Dequeue();
-                QueueTimer = CurrentButton.QueueTime;
-            }
         }
-
         public override void ApplyAction(GameState g, float dt) {
             if (CurrentButton != null) {
                 // If The Unit Is Still Being Produced
@@ -32,11 +26,26 @@ namespace RTS.Default.Building {
                     QueueTimer -= dt;
                 }
                 // If Finished Building The Unit
-                if (QueueTimer <= 0) {
+                if(QueueTimer <= 0 && CurrentButton.CanFinish(g)) {
                     CurrentButton.OnQueueFinished(g);
                     QueueTimer = float.MaxValue;
                     CurrentButton = null;
                 }
+            }
+
+            // Add New Buttons To The Queue
+            for(int i = 0; i < building.ButtonControllers.Count; i++) {
+                int ec = building.ButtonControllers[i].GetEnqueueCount();
+                while(ec > 0) {
+                    ButtonQueue.Enqueue(building.ButtonControllers[i]);
+                    ec--;
+                }
+            }
+
+            // Get New Button
+            if(CurrentButton == null && ButtonQueue.Count > 0) {
+                CurrentButton = ButtonQueue.Dequeue();
+                QueueTimer = CurrentButton.QueueTime;
             }
         }
 
@@ -47,23 +56,4 @@ namespace RTS.Default.Building {
             // TODO: Implement Deserialize
         }
     }
-
-    /*public class Animation : ACBuildingAnimationController {
-
-        public override void SetBuilding(RTSEngine.Data.Team.RTSBuilding b) {
-            base.SetBuilding(b);
-        }
-
-        public override void Init(GameState s, GameplayController c) {
-            throw new NotImplementedException();
-        }
-
-        public override void Serialize(BinaryWriter s) {
-            throw new NotImplementedException();
-        }
-
-        public override void Deserialize(BinaryReader s) {
-            throw new NotImplementedException();
-        }
-    }*/
 }

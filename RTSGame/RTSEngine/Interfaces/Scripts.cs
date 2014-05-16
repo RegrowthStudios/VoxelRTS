@@ -183,6 +183,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // Scripted Button Logic
+        public abstract bool CanFinish(GameState s);
         public abstract void OnQueueFinished(GameState s);
 
         public abstract void OnClick();
@@ -190,7 +191,7 @@ namespace RTSEngine.Interfaces {
         protected void Enqueue() {
             System.Threading.Interlocked.Increment(ref enqueueCount);
         }
-        protected int GetEnqueueCount() {
+        public int GetEnqueueCount() {
             int c = System.Threading.Interlocked.Exchange(ref enqueueCount, 0);
             return c;
         }
