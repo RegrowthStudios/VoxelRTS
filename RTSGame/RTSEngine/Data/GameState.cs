@@ -95,6 +95,12 @@ namespace RTSEngine.Data {
             get;
             private set;
         }
+        
+        // Entities
+        public Dictionary<int, IEntity> EntityHashSet {
+            get;
+            private set;
+        }
 
         // Constant List Of Teams
         public readonly RTSTeam[] teams;
@@ -132,8 +138,11 @@ namespace RTSEngine.Data {
         public event Action<string, Rectangle> OnNewPopup;
         public event Action<string, AlertLevel> OnAlert;
 
+
         public GameState() {
             UUIDGenerator.SetUUID(0);
+            EntityHashSet = new Dictionary<int, IEntity>();
+
             teams = new RTSTeam[MAX_PLAYERS];
             activeTeams = new IndexedTeam[0];
             Regions = new List<ImpactRegion>();

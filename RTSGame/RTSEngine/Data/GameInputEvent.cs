@@ -148,7 +148,7 @@ namespace RTSEngine.Data {
     }
 
     public class DamageEvent : GameInputEvent {
-        public IEntity Entity {
+        public int UUID {
             get;
             private set;
         }
@@ -157,9 +157,9 @@ namespace RTSEngine.Data {
             private set;
         }
 
-        public DamageEvent(int t, IEntity e, int amount)
+        public DamageEvent(int t, int uuid, int amount)
             : base(GameEventType.Damage, t) {
-            Entity = e;
+            UUID = uuid;
             ChangeAmount = amount;
         }
     }

@@ -331,6 +331,7 @@ namespace RTSEngine.Controllers {
 
             // Check If A Unit Was Possible
             if(unit == null) { return; }
+            s.EntityHashSet.Add(unit.UUID, unit);
 
             // Add Decision Tasks
             AddTask(s, unit);
@@ -363,12 +364,12 @@ namespace RTSEngine.Controllers {
 
             // Check If A Building Was Possible
             if(building == null) return;
+            s.EntityHashSet.Add(building.UUID, building);
 
             // Set Default Height
             building.Height = s.CGrid.HeightAt(building.GridPosition);
             building.CollisionGeometry.Height = building.Height;
             s.CGrid.Add(building);
-
             // Add Building Decision Task
             AddTask(s, building, e.Team, e.Type);
         }
@@ -382,7 +383,9 @@ namespace RTSEngine.Controllers {
             team.Capital += e.ChangeAmount;
         }
         private void ApplyInput(GameState s, float dt, DamageEvent e) {
-            e.Entity.Damage(e.ChangeAmount);
+            IEntity ent;
+            if(s.EntityHashSet.TryGetValue(e.UUID, out ent))
+                ent.Damage(e.ChangeAmount);
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit
@@ -626,8 +629,8 @@ namespace RTSEngine.Controllers {
             // Remove All Dead Entities
             for(int ti = 0; ti < s.activeTeams.Length; ti++) {
                 RTSTeam team = s.activeTeams[ti].Team;
-                team.RemoveAll(IsUnitDead);
-                team.RemoveAll(IsBuildingDead);
+                team.RemoveAll(IsUnitDead, (i) => { s.EntityHashSet.Remove(i); });
+                team.RemoveAll(IsBuildingDead, (i) => { s.EntityHashSet.Remove(i); });
                 team.RemoveAll(IsSquadEmpty);
             }
         }

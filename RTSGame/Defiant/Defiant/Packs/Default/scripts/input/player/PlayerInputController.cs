@@ -319,7 +319,7 @@ namespace RTS.Input {
                 case Keys.Delete:
                     var arr = selected.ToArray();
                     foreach(var e in arr)
-                        AddEvent(new DamageEvent(TeamIndex, e, 1000000));
+                        AddEvent(new DamageEvent(TeamIndex, e.UUID, 1000000));
                     break;
                 case Keys.LeftShift:
                 case Keys.RightShift:
