@@ -291,19 +291,14 @@ namespace RTSEngine.Controllers {
                 goal = swe.Waypoint;
             else if(ste != null && ste.Target != null)
                 goal = ste.Target.GridPosition;
-            // Handle The Case Where The Squad Centroid Ends Up Inside A Building
-            CollisionGrid cg = s.CGrid;
-            if(cg.GetCollision(start)) {
-                float minDistSq = float.MaxValue;
-                for(int u = 0; u < squad.Units.Count; u++) {
-                    RTSUnit unit = squad.Units[u];
-                    float distSq = (goal - unit.GridPosition).LengthSquared();
-                    if(distSq < minDistSq) {
-                        minDistSq = distSq;
-                        start = unit.GridPosition;
-                    }
+            float minDistSq = float.MaxValue;
+            for(int u = 0; u < squad.Units.Count; u++) {
+                RTSUnit unit = squad.Units[u];
+                float distSq = (goal - unit.GridPosition).LengthSquared();
+                if(distSq < minDistSq) {
+                    minDistSq = distSq;
+                    start = unit.GridPosition;
                 }
-
             }
             var query = pathfinder.ReissuePathQuery(new PathQuery(start, goal, e.Team), start, goal, e.Team);
             squadQueries.Add(new SquadQuery(squad, query));

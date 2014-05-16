@@ -51,6 +51,7 @@ namespace RTS.Default.Unit {
             passivelyTargeting = false;
             targetCellPrev = Point.Zero;
             prevTarget = null;
+            fDecide = DSMain;
         }
 
         public override void Init(GameState s, GameplayController c, object args) {
@@ -146,8 +147,9 @@ namespace RTS.Default.Unit {
             float minDistSq = unit.Data.BaseCombatData.MaxRange;
             minDistSq *= minDistSq;
             foreach (IndexedTeam t in g.activeTeams.ToArray()) {
-                if(teamIndex != t.Index) { // Enemy team check
-                    foreach (RTSUnit enemy in g.teams[t.Index].Units.ToArray()) {
+                RTSTeam team = t.Team;
+                if(teamIndex != t.Index && team.Input.Type != RTSInputType.Environment) { // Enemy team check
+                    foreach (RTSUnit enemy in team.Units.ToArray()) {
                         if(g.CGrid.GetFogOfWar(enemy.GridPosition, teamIndex) != FogOfWar.Active)
                             continue;
                         if(!enemy.IsAlive) continue;
@@ -164,7 +166,8 @@ namespace RTS.Default.Unit {
                 minDistSq = unit.Data.BaseCombatData.MaxRange;
                 minDistSq *= minDistSq;
                 foreach(IndexedTeam t in g.activeTeams.ToArray()) {
-                    if(teamIndex != t.Index) { // Enemy team check
+                    RTSTeam team = t.Team;
+                    if(teamIndex != t.Index && team.Input.Type != RTSInputType.Environment) { // Enemy team check
                         foreach(RTSBuilding enemy in g.teams[t.Index].Buildings.ToArray()) {
                             if(g.CGrid.GetFogOfWar(enemy.GridPosition, teamIndex) != FogOfWar.Active)
                                 continue;
@@ -192,7 +195,8 @@ namespace RTS.Default.Unit {
                     float mr = unit.Data.BaseCombatData.MaxRange;
                     float d = (unit.Target.GridPosition - unit.GridPosition).Length();
                     float dBetween = d - unit.CollisionGeometry.BoundingRadius - unit.Target.CollisionGeometry.BoundingRadius;
-                    if(unit.Target.Team.Index != teamIndex) { // Moved Team-Check Here So It Can Be Toggled To Test Target Chasing
+                    // Ignore Same Team And Environment
+                    if(unit.Target.Team.Index != teamIndex && unit.Target.Team.Input.Type != RTSInputType.Environment) {
                         switch(unit.CombatOrders) {
                             case BehaviorFSM.UseRangedAttack:
                                 if(d <= mr * 0.75) {
@@ -596,6 +600,8 @@ namespace RTS.Default.Unit {
         public Vector3 BulletOffset;
         public Vector3 BulletDirection;
 
+        public Color BloodTint;
+
         public AnimationInitArgs() {
             Splices = new Point[] {
                 new Point(0, 59),
@@ -616,6 +622,8 @@ namespace RTS.Default.Unit {
             BulletTint = Color.Yellow;
             BulletOffset = new Vector3(-0.1f, 1f, 0.2f);
             BulletDirection = new Vector3(0, 0, 1);
+
+            BloodTint = Color.Red;
         }
     }
     public class Animation : ACUnitAnimationController {
@@ -629,6 +637,7 @@ namespace RTS.Default.Unit {
         private float rt;
         private int lastState;
         int isInit;
+        bool addBlood;
 
         public Animation() {
             isInit = 0;
@@ -662,6 +671,7 @@ namespace RTS.Default.Unit {
             if(unit != null) {
                 unit.OnAttackMade += unit_OnAttackMade;
                 unit.OnDestruction += unit_OnDestruction;
+                unit.OnDamage += unit_OnDamage;
             }
         }
 
@@ -679,6 +689,13 @@ namespace RTS.Default.Unit {
             BulletParticle bp = new BulletParticle(o, d, 0.05f, 1.4f, 0.1f);
             bp.Tint = initArgs.BulletTint;
             AddParticle(bp);
+        }
+        void unit_OnDamage(IEntity arg1, int v) {
+            addBlood = true;
+        }
+        void Splurt(float ct) {
+            Vector3 o = unit.WorldPosition + Vector3.Up;
+            AddParticle(new BloodParticle(o, initArgs.BloodTint, 0.1f, 1f, ct, 1f));
         }
         void unit_OnDestruction(IEntity e) {
             alDeath.Restart(false);
@@ -719,6 +736,11 @@ namespace RTS.Default.Unit {
         public override void Update(GameState s, float dt) {
             if(System.Threading.Interlocked.CompareExchange(ref isInit, 1, 1) == 0)
                 return;
+
+            if(addBlood) {
+                Splurt(s.TotalGameTime);
+                addBlood = false;
+            }
 
             // Animate Death
             if(!unit.IsAlive) {

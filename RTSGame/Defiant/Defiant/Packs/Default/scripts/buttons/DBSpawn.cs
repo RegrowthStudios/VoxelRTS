@@ -35,7 +35,8 @@ namespace RTS.Default.Buttons.Spawn {
                 building.Team.Index, UnitType, building.GridPosition));
         }
         public override void OnClick() {
-            Enqueue();
+            if (building.ActionController.ButtonQueue.Count < building.ActionController.QueueCap)
+                Enqueue();
         }
 
         public override void DecideAction(GameState s, float dt) {
