@@ -11,7 +11,8 @@ namespace RTSEngine.Graphics {
         Fire,
         Lightning,
         Popup,
-        Alert
+        Alert,
+        Blood
     }
     public abstract class Particle {
         public static bool IsParticleDead(Particle p) {
@@ -249,6 +250,15 @@ namespace RTSEngine.Graphics {
         public AlertParticle(Vector3 o, float s1, Color c1, Vector3 t, float s2, Color c2, float curTime, float timeAlive)
             : base(timeAlive, ParticleType.Alert) {
             CustomVertex = new VertexAlertInstance(o, t, new Vector4(curTime, timeAlive, s1, s2), c1, c2);
+            Vertex = CustomVertex;
+        }
+    }
+    public class BloodParticle : Particle {
+        public VertexAlertInstance CustomVertex;
+
+        public BloodParticle(Vector3 o, Color c1, float s1, float s2, float curTime, float timeAlive)
+            : base(timeAlive, ParticleType.Blood) {
+            CustomVertex = new VertexAlertInstance(o, o, new Vector4(curTime, timeAlive, s1, s2), c1, Color.Transparent);
             Vertex = CustomVertex;
         }
     }

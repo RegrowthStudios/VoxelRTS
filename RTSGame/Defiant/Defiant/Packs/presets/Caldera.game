@@ -1,0 +1,53 @@
+﻿Name        [Caldera]
+PlayerTypes [
+    {Player}
+    {Computer}
+    {Environment}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+]
+InputTypes [
+    {RTS.Input.Player}
+    {RTS.Input.AI}
+    {RTS.Input.Environment}
+    {}
+    {}
+    {}
+    {}
+    {}
+]
+InputInitArgs [
+    <System.Boolean> { True }
+    { NULL }
+    <RTS.Input.EnvInitArgs> { DoWork [False] }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+    { NULL }
+]
+Races [
+    {Mech}
+    {Mech}
+    {Gaia}
+    {None}
+    {None}
+    {None}
+    {None}
+    {None}
+]
+Colors [
+   {Blue}
+   {Red}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+   {Default}
+]
+GameType    [RTS.Default.GameTypes.SPEscapeThePlanet]
+Map         [Packs\Default\maps\0\test.map]

@@ -491,17 +491,6 @@ namespace RTSEngine.Graphics {
             for(int i = 0; i < NonFriendlyUnitModels.Count; i++) {
                 NonFriendlyUnitModels[i].Animate(s, dt, np);
             }
-            //for(int ti = 0; ti < s.activeTeams.Length; ti++) {
-            //    RTSTeam team = s.activeTeams[ti].Team;
-            //    for(int i = 0; i < team.Units.Count; i++) {
-            //        if(team.Units[i].AnimationController != null) {
-            //            team.Units[i].AnimationController.Update(s, dt);
-            //            if(team.Units[i].AnimationController.HasParticles) {
-            //                team.Units[i].AnimationController.GetParticles(np);
-            //            }
-            //        }
-            //    }
-            //}
             pRenderer.Update(np, dt);
         }
 
@@ -771,6 +760,9 @@ namespace RTSEngine.Graphics {
 
             pRenderer.SetAlerts(G);
             pRenderer.DrawAlerts(G);
+
+            pRenderer.SetBloods(G);
+            pRenderer.DrawBloods(G);
         }
 
         // Selection Box Handling

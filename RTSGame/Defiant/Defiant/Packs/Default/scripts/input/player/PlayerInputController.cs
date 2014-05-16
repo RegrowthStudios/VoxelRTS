@@ -330,13 +330,13 @@ namespace RTS.Input {
                     buildingToPlace = null;
                     break;
                 case Keys.K:
-                    foreach(var entity in selected) {
+                    foreach(var entity in selected.ToArray()) {
                         RTSUnit unit = entity as RTSUnit;
                         if(unit != null) AddEvent (new SetOrdersEvent(TeamIndex, unit.UUID, BehaviorFSM.AttackMove, 3));
                     }
                     break;
                 case Keys.M:
-                    foreach (var entity in selected) {
+                    foreach (var entity in selected.ToArray()) {
                         RTSUnit unit = entity as RTSUnit;
                         if (unit != null) AddEvent(new SetOrdersEvent(TeamIndex, unit.UUID, BehaviorFSM.JustMove, 3));
                     }
