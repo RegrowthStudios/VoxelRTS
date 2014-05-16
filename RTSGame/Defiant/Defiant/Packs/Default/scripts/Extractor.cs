@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using RTSEngine.Interfaces;
 using RTSEngine.Data;
+using RTSEngine.Graphics;
 using RTSEngine.Controllers;
 using RTSEngine.Data.Team;
 using Microsoft.Xna.Framework;
@@ -14,6 +15,7 @@ namespace RTS.Default.Building {
         List<RTSBuilding> resources;
         int harvestradius;
         Point hStart, hEnd;
+        Random r = new Random();
 
         public override void Init(GameState s, GameplayController c, object initArgs) {
             resources = new List<RTSBuilding>();
@@ -43,17 +45,31 @@ namespace RTS.Default.Building {
             }
         }
         public override void ApplyAction(GameState g, float dt) {
+            if(resources.Count < 1) return;
+
             if(g.CurrentFrame % 100 == 0) {
+                g.AddParticle(new AlertParticle(
+                    building.WorldPosition + Vector3.Up * 0.2f, 0.1f, Color.White,
+                    building.WorldPosition + Vector3.Up * 0.2f, harvestradius * 1.4f, Color.Pink,
+                    g.TotalGameTime, 2f
+                    ));
                 foreach(var b in resources) {
-                    building.Team.Input.AddEvent(new CapitalEvent(
-                        building.Team.Index,
-                        b.Data.Index == 0 ? 5 : 20
-                        ));
-                    building.Team.Input.AddEvent(new DamageEvent(
-                        building.Team.Index,
-                        b.UUID,
-                        10
-                        ));
+                    if(r.NextDouble() > 0.5) {
+                        building.Team.Input.AddEvent(new CapitalEvent(
+                            building.Team.Index,
+                            b.Data.Index == 0 ? 5 : 20
+                            ));
+                        building.Team.Input.AddEvent(new DamageEvent(
+                            building.Team.Index,
+                            b.UUID,
+                            10
+                            ));
+                        g.AddParticle(new AlertParticle(
+                            b.WorldPosition + Vector3.Up * 0.2f, 2f, Color.White,
+                            b.WorldPosition + Vector3.Up * 3.2f, 1f, Color.Black,
+                            g.TotalGameTime, 2f
+                            ));
+                    }
                 }
             }
         }
