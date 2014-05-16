@@ -15,13 +15,13 @@ PopCapChange    [10]
 Impact          [10]
 BuildAmount     [500]
 SightRadius     [14]
-GridSize        [1, 1]
+GridSize        [1, 2]
 IsResource      [False]
 Depositable		[True]
 MaxCount        [1000]
 
 // Collision Data
-SetBBox ({-1, 0, -1} {1, 2, 1})
+SetBBox ({-0.8, 0, -1.5} {0.8, 1, 1.5})
 
 // Controllers
 SetController({~~DICTSCRIPTS~~} {Action} {RTS.Default.Building.Action})
