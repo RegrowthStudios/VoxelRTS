@@ -23,17 +23,16 @@ namespace RTS.Default.Buttons.Spawn {
             UnitType = (int)args;
         }
 
+        public override bool CanFinish(GameState g) {
+            return 
+                building.Team.Capital >= building.Team.Race.Units[UnitType].CapitalCost;
+        }
         public override void OnQueueFinished(GameState s) {
             building.Team.Input.AddEvent(new SpawnUnitEvent(
                 building.Team.Index, UnitType, building.GridPosition));
         }
-        public override void OnClick() { 
-            if (building.Team.Capital >= building.Team.Race.Units[UnitType].CapitalCost && 
-                building.ActionController.ButtonQueue.Count < building.ActionController.QueueCap){
-                    building.Team.Input.AddEvent(new CapitalEvent
-                            (building.Team.Index, -building.Team.Race.Units[UnitType].CapitalCost));
-                    building.ActionController.ButtonQueue.Enqueue(this);
-            }
+        public override void OnClick() {
+            Enqueue();
         }
 
         public override void DecideAction(GameState s, float dt) {
