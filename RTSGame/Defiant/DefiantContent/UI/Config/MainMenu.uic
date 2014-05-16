@@ -13,13 +13,7 @@ Buttons [
         ColorInactive   [14, 14, 14, 255]
         ColorActive     [110, 140, 200, 255]
         ColorText       [200, 200, 200, 255]
-    }
-    <RTS.UICMMButton> {
-        Text            [Army Painter]
-        Image           [Content\UI\MainP2.png]
-        ColorInactive   [14, 14, 14, 255]
-        ColorActive     [110, 140, 200, 255]
-        ColorText       [200, 200, 200, 255]
+        ActionIndex     [0]
     }
     <RTS.UICMMButton> {
         Text            [Options]
@@ -27,6 +21,7 @@ Buttons [
         ColorInactive   [14, 14, 14, 255]
         ColorActive     [110, 140, 200, 255]
         ColorText       [200, 200, 200, 255]
+        ActionIndex     [1]
     }
     <RTS.UICMMButton> {
         Text            [Exit]
@@ -34,10 +29,32 @@ Buttons [
         ColorInactive   [14, 14, 14, 255]
         ColorActive     [110, 140, 200, 255]
         ColorText       [200, 200, 200, 255]
+        ActionIndex     [4]
+    }
+    <RTS.UICMMButton> {
+        Text            [Army Painter]
+        Image           [Content\UI\MainP2.png]
+        ColorInactive   [14, 14, 14, 255]
+        ColorActive     [110, 140, 200, 255]
+        ColorText       [200, 200, 200, 255]
+        ActionIndex     [2]
+    }
+    <RTS.UICMMButton> {
+        Text            [Level Editor]
+        Image           [Content\UI\MainP5.png]
+        ColorInactive   [14, 14, 14, 255]
+        ColorActive     [110, 140, 200, 255]
+        ColorText       [200, 200, 200, 255]
+        ActionIndex     [3]
     }
 ]
 ButtonSpacing   [10, 10]
 ButtonTextSize  [32]
+
+ButtonImageUp           [Content\UI\Up.png]
+ButtonImageDown         [Content\UI\Down.png]
+ButtonUDInactiveColor   [14, 14, 14, 255]
+ButtonUDActiveColor     [110, 140, 200, 255]
 
 SoundClick  [Content\Audio\btnClick.wav]
 SoundHover  [Content\Audio\btnHover.wav]

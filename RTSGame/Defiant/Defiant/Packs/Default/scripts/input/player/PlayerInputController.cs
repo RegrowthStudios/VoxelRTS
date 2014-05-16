@@ -320,6 +320,12 @@ namespace RTS.Input {
                 case Keys.Escape:
                     buildingToPlace = null;
                     break;
+                case Keys.K:
+                    foreach(var entity in selected) {
+                        RTSUnit unit = entity as RTSUnit;
+                        if(unit != null) unit.MovementOrders = BehaviorFSM.AttackMove;
+                    }
+                    break;
             }
         }
         public void OnKeyRelease(object sender, KeyEventArgs args) {
@@ -368,7 +374,7 @@ namespace RTS.Input {
                     int c = isShiftPressed ? 5 : 1;
                     for(int ci = 0; ci < c; ci++) {
                         for(int i = 0; i < bbs.Count; i++) {
-                            bbs[i].OnQueueFinished(GameState);
+                            bbs[i].OnClick();
                         }
                     }
                 }

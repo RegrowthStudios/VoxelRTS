@@ -45,6 +45,9 @@ namespace BlisterUI.Input {
             IsActive = false;
         }
         public void Dispose() {
+            OnTextEntered = null;
+            OnTextChanged = null;
+            OnCaretMoved = null;
             Deactivate();
             text.Clear();
             text = null;

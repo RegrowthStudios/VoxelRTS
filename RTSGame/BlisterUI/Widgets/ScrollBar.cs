@@ -78,6 +78,7 @@ namespace BlisterUI.Widgets {
             RefreshScroll();
         }
         protected override void DisposeOther() {
+            OnScrollValueChanged = null;
             base.DisposeOther();
             ScrollButton.Dispose();
         }

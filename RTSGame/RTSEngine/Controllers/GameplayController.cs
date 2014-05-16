@@ -225,7 +225,14 @@ namespace RTSEngine.Controllers {
             }
         }
         private void ApplyInput(GameState s, float dt, SelectEvent e) {
-            s.teams[e.Team].Input.Select(e.Selected, e.Append);
+            RTSTeam team = s.teams[e.Team];
+            team.Input.Select(e.Selected, e.Append);
+            if(team.Input.Type == RTSInputType.Player) {
+                foreach(var entity in e.Selected) {
+                    RTSUnit unit = entity as RTSUnit;
+                    if(unit != null) unit.MovementOrders = BehaviorFSM.JustMove;
+                }
+            }
         }
         private void ApplyInput(GameState s, float dt, SetWayPointEvent e) {
             RTSTeam team = s.teams[e.Team];
@@ -237,6 +244,8 @@ namespace RTSEngine.Controllers {
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
                         u.Target = null;
+                        if(u.MovementController != null) u.MovementController.Goal = e.Waypoint;
+                        if(u.ActionController != null) u.ActionController.Reset();
                         squad.Add(u);
                     }
                 }
@@ -256,6 +265,7 @@ namespace RTSEngine.Controllers {
                     RTSUnit u = unit as RTSUnit;
                     if(u != null) {
                         if(squad == null) squad = u.Team.AddSquad();
+                        if(u.ActionController != null) u.ActionController.Reset();
                         squad.Add(u);
                     }
                 }
@@ -599,6 +609,14 @@ namespace RTSEngine.Controllers {
                     CollisionController.CollideHeightmap(unit.CollisionGeometry, s.CGrid);
                     unit.GridPosition = unit.CollisionGeometry.Center;
                     unit.Height = unit.CollisionGeometry.Height;
+
+                    // Check To Make Sure Unit Is Inside The Map
+                    if(unit.GridPosition.X < 0 || unit.GridPosition.X > s.CGrid.size.X ||
+                       unit.GridPosition.Y < 0 || unit.GridPosition.Y > s.CGrid.size.Y
+                       ) {
+                        // Damage The Unit If It Is Outside
+                        unit.Damage(1);
+                    }
                 }
             }
         }

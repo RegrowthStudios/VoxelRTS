@@ -18,18 +18,21 @@ namespace RTS.Packs.Default.scripts.buttons {
             
         }
 
+        public override bool CanFinish(GameState g) {
+            return true;
+        }
         public override void OnClick() {
-            RTS.Default.Building.Extraction.Action ac = building.ActionController as RTS.Default.Building.Extraction.Action;
-            if (ac != null) {
-                ac.Enabled = !ac.Enabled;
-            }
+            Enqueue();
+        }
+
+        public override void OnQueueFinished(GameState s) {
+            var ac = building.ActionController as RTS.Default.Building.Extraction.Action;
+            if (ac != null) ac.Enabled = !ac.Enabled;
         }
 
         public override void DecideAction(GameState s, float dt) { }
 
         public override void ApplyAction(GameState s, float dt) { }
-
-        public override void OnQueueFinished(GameState s) { }
 
         public override void Serialize(BinaryWriter s) { }
 

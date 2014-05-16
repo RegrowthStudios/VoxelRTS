@@ -15,7 +15,7 @@ ViewIcon(
 
 // Unit Data
 Name            [Factory]
-Health          [120]
+Health          [1200]
 CapitalCost     [20]
 PopCapChange    [10]
 Impact          [10]

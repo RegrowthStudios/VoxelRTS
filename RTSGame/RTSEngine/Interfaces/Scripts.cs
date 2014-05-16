@@ -51,6 +51,10 @@ namespace RTSEngine.Interfaces {
         // Scripted Super-Controller Logic
         public abstract void DecideAction(GameState g, float dt);
         public abstract void ApplyAction(GameState g, float dt);
+
+        // TODO: Fix This Horrible Quick & Dirty Style
+        // Reset Any Extra State Variables This Action Controller Keeps
+        public abstract void Reset();
     }
 
     // Steps Animations And May Send Particle Events
@@ -104,6 +108,12 @@ namespace RTSEngine.Interfaces {
             set { waypoints = value; }
         }
 
+        // Goal From A Set Waypoint Event
+        public Vector2 Goal {
+            get;
+            set;
+        }
+
         // Index Of Squad Waypoint That This Controller's Unit Is Currently Attempting To Reach
         public int CurrentWaypointIndex { get; set; }
 
@@ -154,7 +164,10 @@ namespace RTSEngine.Interfaces {
 
     // A Super Controller Called By The Gameplay Controller
     public abstract class ACBuildingActionController : ACBuildingController {
-        public Queue<GameInputEvent> EventQueue;
+        public Queue<ACBuildingButtonController> ButtonQueue;
+        public float QueueTimer;
+        public ACBuildingButtonController CurrentButton;
+        public int QueueCap;
 
         // Scripted Super-Controller Logic
         public abstract void DecideAction(GameState g, float dt);
@@ -170,6 +183,7 @@ namespace RTSEngine.Interfaces {
         }
 
         // Scripted Button Logic
+        public abstract bool CanFinish(GameState s);
         public abstract void OnQueueFinished(GameState s);
 
         public abstract void OnClick();
@@ -177,7 +191,7 @@ namespace RTSEngine.Interfaces {
         protected void Enqueue() {
             System.Threading.Interlocked.Increment(ref enqueueCount);
         }
-        protected int GetEnqueueCount() {
+        public int GetEnqueueCount() {
             int c = System.Threading.Interlocked.Exchange(ref enqueueCount, 0);
             return c;
         }

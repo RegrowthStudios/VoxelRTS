@@ -15,7 +15,7 @@ ViewIcon(
 
 // Unit Data
 Name            [Distribution Center]
-Health          [120]
+Health          [800]
 CapitalCost     [20]
 PopCapChange    [10]
 Impact          [10]

@@ -75,6 +75,10 @@ namespace RTS {
             get;
             private set;
         }
+        public OptionsScreen OptionsScreen {
+            get;
+            private set;
+        }
 
         public MouseRenderer mRenderer;
         public Texture2D tMouseMain;
@@ -102,6 +106,7 @@ namespace RTS {
             RTSScreen = new RTS.RTSScreen();
             LEScreen = new RTS.LEScreen();
             ColorSchemeScreen = new RTS.ColorSchemeScreen();
+            OptionsScreen = new RTS.OptionsScreen();
         }
 
         protected override void FullInitialize() {
@@ -137,7 +142,8 @@ namespace RTS {
                 LoadScreen,
                 RTSScreen,
                 LEScreen,
-                ColorSchemeScreen
+                ColorSchemeScreen,
+                OptionsScreen
                 );
         }
 

@@ -21,6 +21,10 @@ namespace System {
         private static readonly Dictionary<string, Type> searchedTypes = new Dictionary<string, Type>();
         private static readonly Dictionary<string, object> environment = new Dictionary<string, object>();
 
+        public static void AddDynamicType(string s, Type t) {
+            if(searchedTypes.ContainsKey(s)) return;
+            searchedTypes.Add(s, t);
+        }
         private static Type GetTypeFromString(string t) {
             Type type;
             if(searchedTypes.TryGetValue(t, out type))

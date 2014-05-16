@@ -17,6 +17,8 @@ namespace RTS {
         public Color ColorActive;
         [ZXParse("ColorText")]
         public Color ColorText;
+
+        public int ActionIndex;
     }
 
     public class UICMainMenu {
@@ -41,6 +43,11 @@ namespace RTS {
         public Point ButtonSpacing;
         [ZXParse("ButtonTextSize")]
         public int ButtonTextSize;
+
+        public string ButtonImageUp;
+        public string ButtonImageDown;
+        public Color ButtonUDInactiveColor;
+        public Color ButtonUDActiveColor;
 
         [ZXParse("SoundClick")]
         public string SoundClick;

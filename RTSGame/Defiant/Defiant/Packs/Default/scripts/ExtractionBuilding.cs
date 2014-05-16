@@ -35,6 +35,7 @@ namespace RTS.Default.Building.Extraction {
                 if (currTime >= ActivityInterval) {
                     currTime = 0;
                     building.Team.Input.AddEvent(new CapitalEvent(building.Team.Index, ExtractAmount));
+                    building.Team.Input.AddEvent(new ImpactEvent(building.Team.Index, building.GridPosition, ExtractAmount));
                 }
             }
         }

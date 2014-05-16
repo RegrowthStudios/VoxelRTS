@@ -31,19 +31,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FX\Fire.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Name>Fire</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
     <Compile Include="FX\Map.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Name>Map</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
     <Compile Include="FX\Particle.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Name>Particle</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
@@ -52,180 +49,194 @@
       <Name>Bullet</Name>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="FX\RIA.txt">
+    <Content Include="FX\RIA.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>RIA</Name>
-    </None>
+    </Content>
     <Compile Include="FX\RTS.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Name>RTS</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
     <Compile Include="FX\Voxel.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Name>Voxel</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
-    <None Include="LoadImages\Modern.png">
+    <Content Include="LoadImages\Modern.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Modern</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\Defeat.png">
+    </Content>
+    <Content Include="Textures\Defeat.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Defeat</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\FireAlpha.png">
+    </Content>
+    <Content Include="Textures\FireAlpha.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>FireAlpha</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\FireColor.png">
+    </Content>
+    <Content Include="Textures\FireColor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>FireColor</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\FireColorLogo.png">
+    </Content>
+    <Content Include="Textures\FireColorLogo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>FireColorLogo</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\FireNoise.png">
+    </Content>
+    <Content Include="Textures\FireNoise.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>FireNoise</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\INDUZTRY.png">
+    </Content>
+    <Content Include="Textures\INDUZTRY.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>INDUZTRY</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\Victory.png">
+    </Content>
+    <Content Include="Textures\Victory.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Victory</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\Wisp.png">
+    </Content>
+    <Content Include="Textures\Wisp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Wisp</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\Cancel Button.png">
+    </Content>
+    <Content Include="UI\Cancel Button.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Cancel Button</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\Factory Button.png">
+    </Content>
+    <Content Include="UI\Down.png">
+      <Name>Down</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\MainP5.png">
+      <Name>MainP5</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Up.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Name>Up</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Content>
+    <Content Include="UI\Factory Button.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Factory Button</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\HQ Button.png">
+    </Content>
+    <Content Include="UI\HQ Button.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>HQ Button</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\MainP1.png">
+    </Content>
+    <Content Include="UI\MainP1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>MainP1</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\MainP2.png">
+    </Content>
+    <Content Include="UI\MainP2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>MainP2</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\MainP3.png">
+    </Content>
+    <Content Include="UI\MainP3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>MainP3</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\MainP4.png">
+    </Content>
+    <Content Include="UI\MainP4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>MainP4</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\Mouse\Main.png">
+    </Content>
+    <Content Include="UI\Mouse\Main.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Main</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\Press Enter.png">
+    </Content>
+    <Content Include="UI\Press Enter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Press Enter</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\tips.txt">
+    </Content>
+    <Content Include="UI\tips.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>tips</Name>
-    </None>
-    <None Include="Textures\SelectionCircle.png">
+    </Content>
+    <Content Include="Textures\SelectionCircle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>SelectionCircle</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\Lightning.png">
+    </Content>
+    <Content Include="Textures\Lightning.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Lightning</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\Laser.png">
+    </Content>
+    <Content Include="Textures\Laser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Laser</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="Textures\CamPointer.png">
+    </Content>
+    <Content Include="Textures\CamPointer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>CamPointer</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="UI\Config\CompanyLogo.uic">
+    </Content>
+    <Content Include="UI\Config\CompanyLogo.uic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>CompanyLogo</Name>
-    </None>
-    <None Include="UI\Config\InduZtry.uic">
+    </Content>
+    <Content Include="UI\Config\InduZtry.uic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>InduZtry</Name>
-    </None>
-    <None Include="UI\Config\MainMenu.uic">
+    </Content>
+    <Content Include="UI\Config\MainMenu.uic">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>MainMenu</Name>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FX\Particles\ParticleFire.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Name>ParticleFire</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
     <Compile Include="FX\Particles\ParticleLightning.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Name>ParticleLightning</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
@@ -261,103 +272,102 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FX\VoxelLE.fx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Name>VoxelLE</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Audio\btnClick.wav">
+    <Content Include="Audio\btnClick.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>btnClick</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-    </None>
-    <None Include="Audio\btnHover.wav">
+    </Content>
+    <Content Include="Audio\btnHover.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>btnHover</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-    </None>
-    <None Include="Audio\Fire.wav">
+    </Content>
+    <Content Include="Audio\Fire.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Fire</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-    </None>
-    <None Include="Audio\IntroTheme.wav">
+    </Content>
+    <Content Include="Audio\IntroTheme.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>IntroTheme</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-    </None>
-    <None Include="Audio\lightning.wav">
+    </Content>
+    <Content Include="Audio\lightning.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>lightning</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-    </None>
-    <None Include="Audio\Theme.wav">
+    </Content>
+    <Content Include="Audio\Theme.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Theme</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-    </None>
-    <None Include="Audio\thunder.wav">
+    </Content>
+    <Content Include="Audio\thunder.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>thunder</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
-    </None>
-    <None Include="FX\Particles\Bullet.png">
+    </Content>
+    <Content Include="FX\Particles\Bullet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Bullet</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="FX\Particles\FireAlpha.png">
+    </Content>
+    <Content Include="FX\Particles\FireAlpha.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>FireAlpha</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="FX\Particles\FireColor.png">
+    </Content>
+    <Content Include="FX\Particles\FireColor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>FireColor</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="FX\Particles\FireNoise.png">
+    </Content>
+    <Content Include="FX\Particles\FireNoise.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>FireNoise</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
-    <None Include="FX\Particles\LightningMap.png">
+    </Content>
+    <Content Include="FX\Particles\LightningMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>LightningMap</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FX\Particles\Bullet.model">
+    <Content Include="FX\Particles\Bullet.model">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Bullet</Name>
-    </None>
-    <None Include="FX\Particles\Particle.conf">
+    </Content>
+    <Content Include="FX\Particles\Particle.conf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>Particle</Name>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Textures\BuildNoise.png">
+    <Content Include="Textures\BuildNoise.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Name>BuildNoise</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-    </None>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 

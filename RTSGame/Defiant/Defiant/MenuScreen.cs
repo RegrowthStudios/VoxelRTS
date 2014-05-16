@@ -32,7 +32,10 @@ namespace RTS {
 
         WidgetRenderer wr;
         RectButton[] buttons;
+        private int row;
+        RectButton btnUp, btnDown;
         TextWidget[] buttonsText;
+
         TextWidget txtMainMenu;
         SoundEffect seHover, seClick;
         Texture2D[] tPanels;
@@ -58,12 +61,21 @@ namespace RTS {
                 seHover = SoundEffect.FromStream(s);
             }
 
+            // List Of Possible Button Actions
+            Action<RectButton, Vector2>[] fBPs = {
+                OnBPPlay,
+                OnBPOptions,
+                OnBPArmyPainter,
+                OnBPLevelEditor,
+                OnBPExit
+            };
+
             buttons = new RectButton[uic.Buttons.Length];
             buttonsText = new TextWidget[buttons.Length];
-            tPanels = new Texture2D[buttons.Length];
+            tPanels = new Texture2D[buttons.Length + 2];
             int bw = G.Viewport.Width;
-            bw -= (buttons.Length + 1) * uic.ButtonSpacing.X;
-            bw /= buttons.Length;
+            bw -= 5 * uic.ButtonSpacing.X;
+            bw /= 4;
             int bh = G.Viewport.Height - uic.ButtonSpacing.Y * 3 - uic.TitlePanelTextSize;
             for(int i = 0; i < buttons.Length; i++) {
                 var uicButton = uic.Buttons[i];
@@ -73,11 +85,12 @@ namespace RTS {
                 buttons[i] = new RectButton(wr, bw, bh, uicButton.ColorInactive, uicButton.ColorActive, tPanels[i]);
                 buttons[i].Hook();
                 buttons[i].OnButtonPress += MenuScreen_OnButtonPress;
+                buttons[i].OnButtonPress += fBPs[uicButton.ActionIndex];
                 buttons[i].OnMouseEntry += MenuScreen_OnMouseEntry;
                 buttons[i].LayerDepth = 1f;
                 buttons[i].OffsetAlignX = Alignment.RIGHT;
                 buttons[i].Offset = new Point(uic.ButtonSpacing.X, 0);
-                if(i > 0)
+                if(i % 3 != 0)
                     buttons[i].Parent = buttons[i - 1];
 
                 buttonsText[i] = new TextWidget(wr);
@@ -93,7 +106,28 @@ namespace RTS {
                 buttonsText[i].Height = uic.ButtonTextSize;
                 buttonsText[i].Text = uicButton.Text;
             }
-            buttons[0].Anchor = new Point(uic.ButtonSpacing.X, uic.TitlePanelTextSize + 2 * uic.ButtonSpacing.Y);
+            using(var s = File.OpenRead(uic.ButtonImageUp)) {
+                tPanels[buttons.Length] = Texture2D.FromStream(G, s);
+            }
+            btnUp = new RectButton(wr, bw, bh / 2, uic.ButtonUDInactiveColor, uic.ButtonUDActiveColor, tPanels[buttons.Length]);
+            btnUp.Offset = new Point((bw + uic.ButtonSpacing.X) * 3, 0);
+            btnUp.OnButtonPress += MenuScreen_OnButtonPress;
+            btnUp.OnMouseEntry += MenuScreen_OnMouseEntry;
+            btnUp.OnButtonPress += OnBPUp;
+            btnUp.Hook();
+            using(var s = File.OpenRead(uic.ButtonImageDown)) {
+                tPanels[buttons.Length + 1] = Texture2D.FromStream(G, s);
+            }
+            btnDown = new RectButton(wr, bw, bh / 2, uic.ButtonUDInactiveColor, uic.ButtonUDActiveColor, tPanels[buttons.Length + 1]);
+            btnDown.OffsetAlignY = Alignment.BOTTOM;
+            btnDown.Parent = btnUp;
+            btnDown.OnButtonPress += MenuScreen_OnButtonPress;
+            btnDown.OnMouseEntry += MenuScreen_OnMouseEntry;
+            btnDown.OnButtonPress += OnBPDown;
+            btnDown.Hook();
+
+            row = 0;
+            ViewRow(row);
 
             txtMainMenu = new TextWidget(wr);
             txtMainMenu.Anchor = new Point(G.Viewport.Width / 2, uic.ButtonSpacing.Y);
@@ -112,6 +146,8 @@ namespace RTS {
                 button.OnMouseEntry -= MenuScreen_OnMouseEntry;
                 button.Dispose();
             }
+            btnUp.Dispose();
+            btnDown.Dispose();
             buttons = null;
             foreach(var bt in buttonsText) {
                 bt.Dispose();
@@ -142,33 +178,53 @@ namespace RTS {
                     break;
             }
         }
+
+        // Button Logic
         private void MenuScreen_OnButtonPress(RectButton obj, Vector2 m) {
             seClick.Play();
-            if(obj == buttons[0]) {
-                Next = game.LobbyScreen.Index;
-                State = ScreenState.ChangeNext;
-            }
-            else if(obj == buttons[1]) {
-                Next = game.ColorSchemeScreen.Index;
-                State = ScreenState.ChangeNext;
-            }
-            else if(obj == buttons[2]) {
-                Next = game.LEScreen.Index;
-                State = ScreenState.ChangeNext;
-
-                //RTSEngine.Data.UserConfig.UseFullscreen = !RTSEngine.Data.UserConfig.UseFullscreen;
-                //RTSEngine.Data.UserConfig.Save(App.USER_CONFIG_FILE_PATH);
-                //ProcessStartInfo psi = new ProcessStartInfo("RTS.exe");
-                //psi.WorkingDirectory = Process.GetCurrentProcess().StartInfo.WorkingDirectory;
-                //Process.Start(psi);
-                //State = ScreenState.ExitApplication;
-            }
-            else if(obj == buttons[3]) {
-                State = ScreenState.ExitApplication;
-            }
         }
         private void MenuScreen_OnMouseEntry(RectButton obj, Vector2 m) {
             seHover.Play();
+        }
+        private void OnBPPlay(RectButton button, Vector2 p) {
+            Next = game.LobbyScreen.Index;
+            State = ScreenState.ChangeNext;
+        }
+        private void OnBPOptions(RectButton button, Vector2 p) {
+            Next = game.OptionsScreen.Index;
+            State = ScreenState.ChangeNext;
+        }
+        private void OnBPLevelEditor(RectButton button, Vector2 p) {
+            Next = game.LEScreen.Index;
+            State = ScreenState.ChangeNext;
+        }
+        private void OnBPArmyPainter(RectButton button, Vector2 p) {
+            Next = game.ColorSchemeScreen.Index;
+            State = ScreenState.ChangeNext;
+        }
+        private void OnBPExit(RectButton button, Vector2 p) {
+            State = ScreenState.ExitApplication;
+        }
+        private void OnBPUp(RectButton button, Vector2 p) {
+            row--;
+            if(row < 0) row = (buttons.Length - 1) / 3;
+            ViewRow(row);
+        }
+        private void OnBPDown(RectButton button, Vector2 p) {
+            row++;
+            if(row * 3 > buttons.Length) row = 0;
+            ViewRow(row);
+        }
+
+        private void ViewRow(int r) {
+            for(int ri = 0; ri <= buttons.Length; ri += 3) {
+                if(ri / 3 == r) {
+                    buttons[ri].Anchor = new Point(uic.ButtonSpacing.X, uic.TitlePanelTextSize + 2 * uic.ButtonSpacing.Y);
+                    btnUp.Parent = buttons[ri];
+                }
+                else
+                    buttons[ri].Anchor = new Point(G.Viewport.Width, G.Viewport.Height);
+            }
         }
     }
 }
