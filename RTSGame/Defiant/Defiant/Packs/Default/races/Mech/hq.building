@@ -9,10 +9,10 @@ ViewModel(
 // Unit Data
 Name            [Headquarters]
 IconKey         [Mech.HQ]
-Health          [120]
-CapitalCost     [200]
+Health          [8000]
+CapitalCost     [500]
 PopCapChange    [20]
-Impact          [10]
+Impact          [300]
 BuildAmount     [2000]
 SightRadius     [48]
 GridSize        [2, 3]

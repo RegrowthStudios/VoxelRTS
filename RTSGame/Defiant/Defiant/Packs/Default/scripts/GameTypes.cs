@@ -23,7 +23,7 @@ namespace RTS.Default {
                 Color.Purple, Color.Gray
             };
             public const int MERCY_TIME = 100;
-            public const int STARTING_CAPITAL = 1000;
+            public const int STARTING_CAPITAL = 1500;
             public const float DUV = 1f / 8f;
 
             // The Teams
