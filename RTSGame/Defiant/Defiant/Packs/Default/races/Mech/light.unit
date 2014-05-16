@@ -5,16 +5,10 @@ ViewModel(
     {models\Light.model}
     {{animations\Light.png} {textures\LightMain.png} {textures\LightKey.png}}
 )
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Light Soldier}
-    {~~FILEROOTDIR~~}
-    {icons\Soldier.png}
-)
 
 // Unit Data
 NAME            [Light Soldier]
+ICONKEY         [Mech.Light]
 HEALTH          [600]
 SPEED           [3]
 CAPITALCOST     [5]

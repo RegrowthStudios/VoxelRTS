@@ -5,16 +5,10 @@ ViewModel(
     {models\Tree.model}
     {{textures\Tree.png} {..\..\textures\NoKey.png}}
 )
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Tree}
-    {~~FILEROOTDIR~~}
-    {icons\Tree.png}
-)
 
 // Unit Data
 Name            [Tree]
+IconKey         [Gaia.Tree]
 Health          [120]
 CapitalCost     [0]
 PopCapChange    [2]

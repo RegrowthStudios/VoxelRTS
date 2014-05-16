@@ -5,16 +5,10 @@ ViewModel(
     {models\Base.model}
     {{animations\Heavy.png} {textures\Main.png} {textures\Key.png}}
 )
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Heavy Soldier}
-    {~~FILEROOTDIR~~}
-    {icons\Heavy.png}
-)
 
 // Unit Data
 NAME            [Heavy Soldier]
+ICONKEY         [Mech.Heavy]
 HEALTH          [600]
 SPEED           [2.2]
 CAPITALCOST     [6]

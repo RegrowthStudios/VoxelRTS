@@ -3,18 +3,12 @@ ViewModel(
     {~~RENDERER~~}
     {~~FILEROOTDIR~~}
     {models\Base.model}
-    {{animations\Armored.png} {textures\Main.png} {textures\Key.png}}
-)
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Armored Soldier}
-    {~~FILEROOTDIR~~}
-    {icons\Armored.png}
+    {{animations\Armor.png} {textures\Main.png} {textures\Key.png}}
 )
 
 // Unit Data
 NAME            [Armored Soldier]
+ICONKEY         [Mech.Armor]
 HEALTH          [800]
 SPEED           [1.5]
 CAPITALCOST     [20]

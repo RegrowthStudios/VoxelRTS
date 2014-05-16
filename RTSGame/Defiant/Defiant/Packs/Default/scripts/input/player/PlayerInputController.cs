@@ -359,7 +359,8 @@ namespace RTS.Input {
                     UI.UnitDataPanel.SetData(u);
                 }
                 else if(b != null) {
-                    // TODO: Add Building Data
+                    UI.SelectionToggle = 2;
+                    UI.BuildingDataPanel.SetData(b);
                 }
             }
         }
@@ -407,6 +408,7 @@ namespace RTS.Input {
 
         public void Update(RTSRenderer renderer, GameState s) {
             UI.AlertQueue.Update();
+            UI.BuildingDataPanel.Update();
         }
         public void Draw(RTSRenderer renderer, SpriteBatch batch) {
             UI.Draw(renderer, batch);

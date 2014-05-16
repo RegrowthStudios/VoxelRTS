@@ -5,40 +5,10 @@ ViewModel(
     {models\Barracks.model}
     {{textures\BarracksMain.png} {textures\BarracksKey.png}}
 )
-ViewIcon(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Barracks}
-    {~~FILEROOTDIR~~}
-    {icons\Barracks.png}
-)
-ViewButton(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Barracks}
-    {0}
-    {~~FILEROOTDIR~~}
-    {icons\Soldier.png}
-)
-ViewButton(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Barracks}
-    {1}
-    {~~FILEROOTDIR~~}
-    {icons\Heavy.png}
-)
-ViewButton(
-    {~~RENDERER~~}
-    {~~RACE~~}
-    {Barracks}
-    {2}
-    {~~FILEROOTDIR~~}
-    {icons\Armored.png}
-)
 
 // Unit Data
 Name            [Barracks]
+IconKey         [Mech.Barracks]
 Health          [1000]
 CapitalCost     [20]
 PopCapChange    [0]

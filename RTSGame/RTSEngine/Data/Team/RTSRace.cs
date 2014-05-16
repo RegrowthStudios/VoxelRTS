@@ -52,6 +52,8 @@ namespace RTSEngine.Data.Team {
         public string FriendlyName;
         public FileInfo InfoFile;
 
+        public string IconKey;
+
         public readonly RTSUnitData[] Units;
         public RTSUnitData[] ActiveUnits;
 

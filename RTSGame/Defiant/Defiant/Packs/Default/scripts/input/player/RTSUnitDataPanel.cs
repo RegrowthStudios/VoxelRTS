@@ -125,11 +125,10 @@ namespace RTS.Input {
 
             u.OnDamage += u_OnDamage;
             rectHealthFore.Width = (int)(u.GetHealthRatio() * uic.IconSize);
-            rectHealthFore.Color = Color.Lerp(uic.HealthMinColor, uic.HealthMaxColor, u.GetHealthRatio());        
+            rectHealthFore.Color = Color.Lerp(uic.HealthMinColor, uic.HealthMaxColor, u.GetHealthRatio());
 
-            string iconKey = string.Join(".", u.Team.Race.FriendlyName, u.Data.FriendlyName);
             Texture2D t;
-            if(iconLib.TryGetValue(iconKey, out t)) {
+            if(iconLib.TryGetValue(u.IconKey, out t)) {
                 icon.Texture = t;
             }
 
@@ -140,7 +139,7 @@ namespace RTS.Input {
         public void Update(int mx, int my) {
             uiCSHover.Update(mx, my);
         }
-        
+
         void u_OnDamage(IEntity arg1, int arg2) {
             rectHealthFore.Width = (int)(arg1.GetHealthRatio() * uic.IconSize);
             rectHealthFore.Color = Color.Lerp(uic.HealthMinColor, uic.HealthMaxColor, arg1.GetHealthRatio());
