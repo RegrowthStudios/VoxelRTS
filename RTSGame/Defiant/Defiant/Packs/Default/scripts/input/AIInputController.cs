@@ -15,6 +15,20 @@ using RTSEngine.Controllers;
 namespace RTS.Input {
 
     public class AI : ACInputController {
+        public enum AggressionLevel {
+            None,
+            VeryLow,
+            Low,
+            Medium,
+            High,
+            VeryHigh
+        };
+
+        private int numActive;
+        private int timeElapsed;
+        private int dt;
+        private AggressionLevel level;
+
         Thread thread;
         private bool running;
         private bool paused;
@@ -39,17 +53,20 @@ namespace RTS.Input {
             Team.OnBuildingSpawn += OnBuildingSpawn;
             Team.OnUnitSpawn += OnUnitSpawn;
             random = new Random();
-            spawnCap = 3;
+            spawnCap = 0;
             unitSpawnP = new int[] { 33, 33, 34 };
             barracksControllers = new List<BarracksController>();
             squads = new List<List<IEntity>>();
+            numActive = 0;
+            timeElapsed = 0;
+            level = AggressionLevel.None;
+            dt = 2; //5
 
             foreach (var b in Team.Buildings) {
                 DevConsole.AddCommand("added barracks");
                 barracksControllers.Add(new BarracksController(this, b));
             }
           
-
             for (int i = 0; i < s.activeTeams.Length; i++) {
                 if (s.activeTeams[i].Team.Input.Type == RTSInputType.Player)
                     playerIndex = s.activeTeams[i].Team.Index;
@@ -61,6 +78,22 @@ namespace RTS.Input {
             running = true;
             paused = true;
              
+        }
+
+        private void IncreaseActive(int n) {
+            int numIncrease = n;
+            if (n + numActive > barracksControllers.Count) {
+                numIncrease = barracksControllers.Count - numActive;
+            }
+            if (numIncrease == 0) { return; }
+            numActive += numIncrease;
+            foreach (var bc in barracksControllers) {
+                if (!bc.active && numIncrease > 0) {
+                    bc.active = true;
+                    DevConsole.AddCommand("new active");
+                    numIncrease--;
+                }
+            }
         }
 
         public void OnUnitSpawn(RTSUnit u) {
@@ -115,11 +148,67 @@ namespace RTS.Input {
                 foreach (var u in destroyed.sentArmy) {
                     u.OnDestruction += OnUnitDeath;
                 }
+                if (destroyed.active) {
+                    numActive--;
+                }
                 destroyed.Dispose();  
                 barracksControllers.Remove(destroyed);
             }
             RTSBuilding bb = b as RTSBuilding;
             Team.Buildings.Remove(bb);
+        }
+
+        private void UpdateLevel() {
+
+            AggressionLevel newLevel = level;
+            if (timeElapsed > 30 * dt) {
+                newLevel = AggressionLevel.VeryHigh;
+            }
+            else if (timeElapsed > 20 * dt) {
+                newLevel = AggressionLevel.High;
+            }
+            else if (timeElapsed > 12 * dt) {
+                newLevel = AggressionLevel.Medium;
+            }
+            else if (timeElapsed > 6 * dt) {
+                newLevel = AggressionLevel.Low;
+            }
+            else if (timeElapsed > 2 * dt) {
+                newLevel = AggressionLevel.VeryLow;
+            }
+
+            if (newLevel != level) {
+                level = newLevel;
+                switch (level) {
+                    case AggressionLevel.VeryLow:
+                        DevConsole.AddCommand("very low level");
+                        IncreaseActive(1);
+                        spawnCap += 1;
+                        break;
+                    case AggressionLevel.Low:
+                        DevConsole.AddCommand("low level");
+                        IncreaseActive(1);
+                        spawnCap += 1;
+                        break;
+                    case AggressionLevel.Medium:
+                        DevConsole.AddCommand("medium level");
+                        IncreaseActive(barracksControllers.Count / 3);
+                        spawnCap += 2;
+                        break;
+                    case AggressionLevel.High:
+                        DevConsole.AddCommand("high level");
+                        IncreaseActive(barracksControllers.Count / 2);
+                        spawnCap += 2;
+                        break;
+                    case AggressionLevel.VeryHigh:
+                        DevConsole.AddCommand("very high level");
+                        IncreaseActive(barracksControllers.Count);
+                        spawnCap += 3;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         private void WorkThread() {
@@ -128,11 +217,16 @@ namespace RTS.Input {
                     Thread.Sleep(1000);
                     continue;
                 }
+                UpdateLevel();
+
                 foreach (var bc in barracksControllers) {
                     bc.SpawnUnits();
-                    bc.DecideTarget();
-                    bc.ApplyTarget();
+                    if (bc.active) {
+                        bc.DecideTarget();
+                        bc.ApplyTarget();
+                    }
                 }
+
                 foreach (var s in squads) {
                     IEntity target = s.First().Target;
                     if (target == null || !target.IsAlive) {
@@ -142,6 +236,8 @@ namespace RTS.Input {
                         }
                     }
                 }
+                timeElapsed++;
+                DevConsole.AddCommand("tick");
                 Thread.Sleep(2000);
             }
         }
