@@ -23,11 +23,32 @@ UICAlertQueue <RTS.Input.UICAlertQueue> {
     TextHeight  [24]
     Buffer      [5]
 }
+UICCombatStats <RTS.Input.UICCombatStats> {
+    TextHeight      [28]
+    TextBuffer      [5]
+    TextSeparation  [10]
+    PanelWidth      [340]
+    TextColor       [255, 255, 0, 255]
+    BaseColor       [60, 20, 10, 180]
+}
+UICUnitData <RTS.Input.UICUnitData> {
+    PanelImage      [Packs\Default\scripts\input\player\UnitDataPanel.png]
+    PanelSize       [300, 150]
+    PanelColor      [20, 20, 20, 255]
+    IconSize        [80]
+    IconBuffer      [5]
+    HealthHeight    [40]
+    HealthMinColor  [255, 0, 0, 255]
+    HealthMaxColor  [0, 0, 255, 255]
+    TextHeight      [24]
+    CombatSize      [40]
+    CombatImage     [Packs\Default\scripts\input\player\CombatStatsButton.png]
+}
 
 BBRows                  [3]
 BBColumns               [4]
-BBIconSize              [32]
-BBIconBuffer            [4]
+BBIconSize              [36]
+BBIconBuffer            [6]
 BBTexture               [Packs\Default\textures\BBPanel.png]
 
 SelectionRows           [2]

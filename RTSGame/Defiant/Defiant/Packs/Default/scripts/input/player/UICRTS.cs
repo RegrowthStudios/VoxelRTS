@@ -13,6 +13,8 @@ namespace RTS.Input {
 
         public UICMinimap UICMinimap;
         public UICAlertQueue UICAlertQueue;
+        public UICCombatStats UICCombatStats;
+        public UICUnitData UICUnitData;
 
         public int BBRows;
         public int BBColumns;

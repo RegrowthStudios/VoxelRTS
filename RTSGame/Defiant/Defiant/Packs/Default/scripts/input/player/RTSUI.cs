@@ -34,10 +34,6 @@ namespace RTS.Input {
             private set;
         }
 
-        public RTSUISelectionPanel SelectionPanel {
-            get;
-            private set;
-        }
         public RTSUIBuildingButtonPanel BBPanel {
             get;
             private set;
@@ -55,6 +51,32 @@ namespace RTS.Input {
             private set;
         }
 
+        private int selToggle;
+        public int SelectionToggle {
+            get { return selToggle; }
+            set {
+                selToggle = value;
+                switch(selToggle) {
+                    case 0:
+                        SelectionPanel.BackPanel.Offset = new Point(0, 0);
+                        UnitDataPanel.WidgetBase.Offset = new Point(0, 1000000);
+                        break;
+                    case 1:
+                        SelectionPanel.BackPanel.Offset = new Point(0, 1000000);
+                        UnitDataPanel.WidgetBase.Offset = new Point(0, 0);
+                        break;
+                }
+            }
+        }
+        public RTSUISelectionPanel SelectionPanel {
+            get;
+            private set;
+        }
+        public RTSUnitDataPanel UnitDataPanel {
+            get;
+            private set;
+        }
+
         public RTSUI(RTSRenderer renderer, string uicFile, bool showBuildPanel) {
             uic = ZXParser.ParseFile(uicFile, typeof(UICRTS)) as UICRTS;
 
@@ -67,9 +89,11 @@ namespace RTS.Input {
             BuildBBPanel(renderer);
             BuildBuildingPanel(showBuildPanel);
             BuildSelectionPanel(renderer);
+            BuildUnitDataPanel(renderer);
             BuildTeamDataPanel();
             AlertQueue = new RTSUIAlertQueue(wrMain, uic.UICAlertQueue);
             AlertQueue.WidgetBase.Parent = Minimap.WidgetBase;
+            SelectionToggle = 0;
         }
         public void Dispose() {
             wrButtonPanel.Dispose();
@@ -121,14 +145,23 @@ namespace RTS.Input {
         private void BuildSelectionPanel(RTSRenderer renderer) {
             SelectionPanel = new RTSUISelectionPanel(wrMain, uic.SelectionRows, uic.SelectionColumns, uic.SelectionIconSize, uic.SelectionIconBuffer);
             SelectionPanel.BackPanel.Texture = renderer.LoadTexture2D(uic.SelectionTexture);
-            SelectionPanel.BackPanel.Parent = BBPanel.BackPanel;
+            SelectionPanel.IconLibrary = renderer.IconLibrary;
             SelectionPanel.BackPanel.AlignX = Alignment.LEFT;
             SelectionPanel.BackPanel.AlignY = Alignment.BOTTOM;
             SelectionPanel.BackPanel.OffsetAlignX = Alignment.RIGHT;
             SelectionPanel.BackPanel.OffsetAlignY = Alignment.BOTTOM;
-            SelectionPanel.BackPanel.Offset = new Point(0, 0);
-            SelectionPanel.IconLibrary = renderer.IconLibrary;
             SelectionPanel.BackPanel.Color = UserConfig.MainScheme.WidgetBase;
+            SelectionPanel.BackPanel.Offset = new Point(0, 0);
+            SelectionPanel.BackPanel.Parent = BBPanel.BackPanel;
+        }
+        private void BuildUnitDataPanel(RTSRenderer renderer) {
+            UnitDataPanel = new RTSUnitDataPanel(renderer, wrMain, uic.UICUnitData, uic.UICCombatStats);
+            UnitDataPanel.WidgetBase.AlignX = Alignment.LEFT;
+            UnitDataPanel.WidgetBase.AlignY = Alignment.BOTTOM;
+            UnitDataPanel.WidgetBase.OffsetAlignX = Alignment.RIGHT;
+            UnitDataPanel.WidgetBase.OffsetAlignY = Alignment.BOTTOM;
+            UnitDataPanel.WidgetBase.Offset = new Point(0, 0);
+            UnitDataPanel.WidgetBase.Parent = BBPanel.BackPanel;
         }
         private void BuildTeamDataPanel() {
             TeamDataPanel = new RTSUITeamDataPanel(wrMain);
@@ -146,6 +179,7 @@ namespace RTS.Input {
             return
                 Minimap.WidgetBase.Inside(x, y) ||
                 SelectionPanel.BackPanel.Inside(x, y) ||
+                UnitDataPanel.WidgetBase.Inside(x, y) ||
                 BBPanel.BackPanel.Inside(x, y) ||
                 (BuildingPanel == null ? false : BuildingPanel.Inside(x, y)) ||
                 TeamDataPanel.Inside(x, y);

@@ -46,7 +46,6 @@ namespace RTS.Input {
         public Player()
             : base() {
             Type = RTSInputType.Player;
-            //bvh = new BVH();
         }
 
         public override void Init(GameState s, int ti, object args) {
@@ -75,6 +74,7 @@ namespace RTS.Input {
             UI.SetTeam(Team);
             OnNewSelection += UI.SelectionPanel.OnNewSelection;
             OnNewSelection += UI.BBPanel.OnNewSelection;
+            OnNewSelection += Player_OnNewSelection;
             GameState.OnAlert += UI.AlertQueue.OnAlert;
 
             Team.OnPopulationChange += (t, c) => { UI.TeamDataPanel.Population = Team.Population; };
@@ -84,6 +84,7 @@ namespace RTS.Input {
         public override void Begin() {
             useSelectRect = false;
             MouseEventDispatcher.OnMouseRelease += OnMouseRelease;
+            MouseEventDispatcher.OnMouseMotion += OnMouseMotion;
             MouseEventDispatcher.OnMousePress += OnMousePress;
             KeyboardEventDispatcher.OnKeyPressed += OnKeyPress;
             KeyboardEventDispatcher.OnKeyReleased += OnKeyRelease;
@@ -92,9 +93,11 @@ namespace RTS.Input {
                 System.Windows.Forms.Form.ActiveForm.KeyUp += ActiveForm_KeyPress;
             }
             UI.Minimap.Hook();
+            UI.UnitDataPanel.Hook();
         }
         public override void Dispose() {
             MouseEventDispatcher.OnMouseRelease -= OnMouseRelease;
+            MouseEventDispatcher.OnMouseMotion -= OnMouseMotion;
             MouseEventDispatcher.OnMousePress -= OnMousePress;
             KeyboardEventDispatcher.OnKeyPressed -= OnKeyPress;
             KeyboardEventDispatcher.OnKeyReleased -= OnKeyRelease;
@@ -238,6 +241,10 @@ namespace RTS.Input {
                 }
             }
         }
+        public void OnMouseMotion(Vector2 pos, Vector2 disp) {
+            Point m = new Point((int)pos.X, (int)pos.Y);
+            UI.UnitDataPanel.Update(m.X, m.Y);
+        }
         public void OnMousePress(Vector2 location, MouseButton b) {
             if(Camera == null) return;
             Camera.Controller.IsActive = false;
@@ -338,6 +345,22 @@ namespace RTS.Input {
         }
         void ActiveForm_KeyPress(object sender, System.Windows.Forms.KeyEventArgs e) {
             isShiftPressed = (System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Shift) == System.Windows.Forms.Keys.Shift;
+        }
+
+        void Player_OnNewSelection(ACInputController arg1, List<IEntity> arg2) {
+            if(arg2 == null || arg2.Count != 1)
+                UI.SelectionToggle = 0;
+            else {
+                var u = arg2[0] as RTSUnit;
+                var b = arg2[0] as RTSBuilding;
+                if(u != null) {
+                    UI.SelectionToggle = 1;
+                    UI.UnitDataPanel.SetData(u);
+                }
+                else if(b != null) {
+                    // TODO: Add Building Data
+                }
+            }
         }
 
         public void OnUIPress(Point p, MouseButton b) {

@@ -111,10 +111,22 @@
     </Content>
     <Content Include="Packs\Default\scripts\buttons\DBEnable.cs" />
     <Content Include="Packs\Default\scripts\ExtractionBuilding.cs" />
+    <Content Include="Packs\Default\scripts\input\player\CombatStatsButton.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\scripts\input\player\UnitDataPanel.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Packs\Default\scripts\input\player\MMImpact.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\scripts\input\player\MMPhysical.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\scripts\input\player\RTSUICombatStats.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\scripts\input\player\RTSUIHoverPanel.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Packs\Default\scripts\input\player\RTSUIMinimap.cs">
@@ -128,6 +140,9 @@
     </Content>
     <Compile Include="OptionsScreen.cs" />
     <Content Include="Packs\Default\scripts\input\environment\EnvironmentData.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Packs\Default\scripts\input\player\RTSUnitDataPanel.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="RTSScreen.cs" />
