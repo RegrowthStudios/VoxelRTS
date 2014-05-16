@@ -15,6 +15,10 @@ using Grey.Vox;
 using Grey.Graphics;
 
 namespace RTS.Input {
+    public class EnvInitArgs {
+        public bool DoWork;
+    }
+
     public class Environment : ACInputController {
         Thread thread;
         private bool running;
@@ -157,27 +161,7 @@ namespace RTS.Input {
         public override void Init(GameState s, int ti, object args) {
             base.Init(s, ti, args);
             grid = GameState.IGrid;
-            random = new Random();
-            thread = new Thread(WorkThread);
-            thread.IsBackground = true;
-            running = true;
-            paused = true;
             eData = EnvironmentData.Default;
-            minNumSpawn = new int[3][] { eData.L1MinNumSpawn, eData.L1MaxNumSpawn, eData.L2MinNumSpawn };
-            maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
-            treeLocations = new List<Point>();
-            treeLocations.Add(new Point(1, 1));
-            FireStarts = new List<Point>();
-
-            for(int i = 0; i < Team.Buildings.Count; i++) {
-                Team.Buildings[i].OnDamage += OnBuildingDamage;
-                grid.AddImpactGenerator(Team.Buildings[i]);
-                if(Team.Buildings[i].Data.FriendlyName.Equals(FloraData.FriendlyName)) {
-                    Point treeC = HashHelper.Hash(Team.Buildings[i].GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
-                    treeLocations.Add(treeC);
-                }
-            }
-
 
             // Open File
             FileInfo fi = new FileInfo(s.LevelGrid.Directory.FullName + @"\env.dat");
@@ -194,6 +178,32 @@ namespace RTS.Input {
                 r.BaseStream.Dispose();
             }
 
+            var eia = args as EnvInitArgs;
+            if(eia != null) {
+                if(!eia.DoWork)
+                    return;
+            }
+
+            random = new Random();
+            thread = new Thread(WorkThread);
+            thread.IsBackground = true;
+            running = true;
+            paused = true;
+            minNumSpawn = new int[3][] { eData.L1MinNumSpawn, eData.L1MaxNumSpawn, eData.L2MinNumSpawn };
+            maxNumSpawn = new int[3][] { eData.L2MaxNumSpawn, eData.L3MinNumSpawn, eData.L3MaxNumSpawn };
+            treeLocations = new List<Point>();
+            treeLocations.Add(new Point(1, 1));
+            FireStarts = new List<Point>();
+
+            for(int i = 0; i < Team.Buildings.Count; i++) {
+                Team.Buildings[i].OnDamage += OnBuildingDamage;
+                grid.AddImpactGenerator(Team.Buildings[i]);
+                if(Team.Buildings[i].Data.FriendlyName.Equals(FloraData.FriendlyName)) {
+                    Point treeC = HashHelper.Hash(Team.Buildings[i].GridPosition, GameState.CGrid.numCells, GameState.CGrid.size);
+                    treeLocations.Add(treeC);
+                }
+            }
+
             Team.OnBuildingSpawn += (b) => {
                 b.OnDamage += OnBuildingDamage;
                 grid.AddImpactGenerator(b);
@@ -207,9 +217,6 @@ namespace RTS.Input {
                 }
             }
             Team.OnUnitSpawn += OnUnitSpawn;
-            
-            AddEvent(new SpawnBuildingEvent(TeamIndex, FloraType, new Point(60,60)));
-            treeLocations.Add(new Point(60, 60));
         }
 
         private void WorkThread() {
