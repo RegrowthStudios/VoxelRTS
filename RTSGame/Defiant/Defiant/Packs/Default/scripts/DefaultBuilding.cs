@@ -7,47 +7,35 @@ using RTSEngine.Controllers;
 using RTSEngine.Data;
 using RTSEngine.Interfaces;
 
-// TODO: Verify
 namespace RTS.Default.Building {
     public class Action : ACBuildingActionController {
-        private GameInputEvent currentEvent;
-        public float buildTime; // How Long It Takes To Finish Producing The Unit
-
+        
         public override void Init(GameState s, GameplayController c, object args) {
-            EventQueue = new Queue<GameInputEvent>();
-            buildTime = 0;
-            currentEvent = null;
+            ButtonQueue = new Queue<ACBuildingButtonController>();
+            QueueTimer = float.MaxValue;
+            CurrentButton = null;
+            QueueCap = 5;
         }
 
         public override void DecideAction(GameState g, float dt) {
             // Process event queue if there is any
-            if(EventQueue.Count > 0 && currentEvent == null) {
-                currentEvent = EventQueue.Dequeue();
-                switch(currentEvent.Action) {
-                    // Production event
-                    case GameEventType.SpawnUnit:
-                        SpawnUnitEvent spawnUnit = currentEvent as SpawnUnitEvent;
-                        buildTime = building.Team.Race.Units[spawnUnit.Type].BuildTime;
-                        break;
-                }
+            if(ButtonQueue.Count > 0 && CurrentButton == null) {
+                CurrentButton = ButtonQueue.Dequeue();
+                QueueTimer = CurrentButton.QueueTime;
             }
         }
 
         public override void ApplyAction(GameState g, float dt) {
-            if (currentEvent != null) {
-                switch (currentEvent.Action) {
-                    case GameEventType.SpawnUnit:
-                        // If The Unit Is Still Being Produced
-                        if (buildTime > 0) {
-                            buildTime -= dt;
-                            // If Finished Building The Unit
-                            if (buildTime < 0) {
-                                building.Team.Input.AddEvent(currentEvent);
-                                buildTime = 0;
-                                currentEvent = null;
-                            }
-                        }
-                        break;
+            if (CurrentButton != null) {
+                // If The Unit Is Still Being Produced
+                if (QueueTimer != float.MaxValue && QueueTimer > 0) {
+                    QueueTimer -= dt;
+                }
+                // If Finished Building The Unit
+                if (QueueTimer <= 0) {
+                    CurrentButton.OnQueueFinished(g);
+                    QueueTimer = float.MaxValue;
+                    CurrentButton = null;
                 }
             }
         }

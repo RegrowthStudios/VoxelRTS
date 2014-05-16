@@ -19,6 +19,10 @@ namespace RTS.Packs.Default.scripts.buttons {
         }
 
         public override void OnClick() {
+            building.ActionController.ButtonQueue.Enqueue(this);
+        }
+
+        public override void OnQueueFinished(GameState s) {
             RTS.Default.Building.Extraction.Action ac = building.ActionController as RTS.Default.Building.Extraction.Action;
             if (ac != null) {
                 ac.Enabled = !ac.Enabled;
@@ -28,8 +32,6 @@ namespace RTS.Packs.Default.scripts.buttons {
         public override void DecideAction(GameState s, float dt) { }
 
         public override void ApplyAction(GameState s, float dt) { }
-
-        public override void OnQueueFinished(GameState s) { }
 
         public override void Serialize(BinaryWriter s) { }
 
