@@ -2,8 +2,8 @@
 ViewModel(
     {~~RENDERER~~}
     {~~FILEROOTDIR~~}
-    {models\Base.model}
-    {{animations\Heavy.png} {textures\Main.png} {textures\Key.png}}
+    {models\Heavy.model}
+    {{animations\Heavy.png} {textures\HeavyMain.png} {textures\HeavyKey.png}}
 )
 
 // Unit Data
@@ -37,6 +37,6 @@ BASECOMBAT <RTSEngine.Data.BaseCombatData> {
 }
 
 SCRCONTROL({~~DICTSCRIPTS~~} {Action} {RTS.Default.Unit.Action})
-SCRCONTROL({~~DICTSCRIPTS~~} {Anim}   {RTS.Mech.Animation})
+SCRCONTROL({~~DICTSCRIPTS~~} {Anim}   {RTS.Default.Unit.Animation})
 SCRCONTROL({~~DICTSCRIPTS~~} {Combat} {RTS.Default.Unit.Combat})
 SCRCONTROL({~~DICTSCRIPTS~~} {Move}   {RTS.Default.Unit.Movement})
