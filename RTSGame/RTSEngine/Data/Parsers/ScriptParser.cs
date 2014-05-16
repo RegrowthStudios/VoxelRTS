@@ -43,8 +43,12 @@ namespace RTSEngine.Data.Parsers {
             Assembly a = cr.CompiledAssembly;
             Type[] types = a.GetExportedTypes();
             foreach(Type t in types) {
+                ZXPProxy.Add(t);
+                ZXParser.AddDynamicType(t.FullName, t);
+
                 // We Don't Want Abstract Classes Or Interfaces
                 if(t.IsAbstract || t.IsInterface) continue;
+
 
                 // Check For The Superclass
                 if(t.IsSubclassOf(typeof(ACScript))) {

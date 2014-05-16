@@ -69,6 +69,13 @@ namespace System {
         public const BindingFlags SEARCH_TYPE = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         private static readonly Dictionary<string, ZXPProxy> proxies = new Dictionary<string, ZXPProxy>();
 
+        public static void Add(Type t) {
+            if(proxies.ContainsKey(t.FullName)) return;
+            ZXPProxy zpp = new ZXPProxy(t);
+            proxies.Add(t.FullName, zpp);
+            zpp.CreateProxy();
+            return;
+        }
         public static ZXPProxy GetProxy(Type t) {
             // Try To Get The Proxy
             ZXPProxy zpp;

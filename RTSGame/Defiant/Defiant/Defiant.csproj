@@ -127,6 +127,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="OptionsScreen.cs" />
+    <Content Include="Packs\Default\scripts\input\environment\EnvironmentData.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="RTSScreen.cs" />
     <Compile Include="WispScreen.cs" />
     <Content Include="Packs\Default\scripts\buttons\DBSpawn.cs">

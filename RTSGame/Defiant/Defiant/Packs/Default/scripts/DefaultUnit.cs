@@ -57,7 +57,7 @@ namespace RTS.Default.Unit {
             teamIndex = unit.Team.Index;
         }
 
-        private void SetState(int state) {            
+        private void SetState(int state) {
             switch(state) {
                 case BehaviorFSM.Rest:
                     fDecide = DSMain;
@@ -126,21 +126,21 @@ namespace RTS.Default.Unit {
 
         public void FindTarget(GameState g, float dt) {
             // If enemy unit is around, target him automatically
-            foreach (IndexedTeam t in g.activeTeams) {
+            foreach(IndexedTeam t in g.activeTeams) {
                 float minDist = unit.Data.BaseCombatData.MaxRange;
-                if (teamIndex != t.Index) { // Enemy team check
-                    foreach (RTSUnit enemy in g.teams[t.Index].Units) { // Enemy poition check
+                if(teamIndex != t.Index) { // Enemy team check
+                    foreach(RTSUnit enemy in g.teams[t.Index].Units) { // Enemy poition check
                         float d = (enemy.GridPosition - unit.GridPosition).Length();
-                        if (d <= minDist) {
+                        if(d <= minDist) {
                             unit.Target = enemy;
                             minDist = d;
                         }
                     }
                     // If no unit target was found, search for building target
-                    if (unit.Target == null) {
-                        foreach (RTSBuilding enemyB in g.teams[t.Index].Buildings) {
+                    if(unit.Target == null) {
+                        foreach(RTSBuilding enemyB in g.teams[t.Index].Buildings) {
                             float d = (enemyB.GridPosition - unit.GridPosition).Length();
-                            if (d <= minDist) {
+                            if(d <= minDist) {
                                 unit.Target = enemyB;
                                 minDist = d;
                             }
@@ -386,9 +386,9 @@ namespace RTS.Default.Unit {
                     delta += oldest2 - oldest;
                 }
                 delta += unit.GridPosition - unitHistory.Dequeue();
-                delta /= unitHistory.Count+1;
+                delta /= unitHistory.Count + 1;
                 float r = unit.CollisionGeometry.BoundingRadius;
-                wasStuck = stuck = Waypoints != null && Waypoints.Count > 0 && delta.LengthSquared() < 1.2*r * 1.2*r;
+                wasStuck = stuck = Waypoints != null && Waypoints.Count > 0 && delta.LengthSquared() < 1.2 * r * 1.2 * r;
             }
             AddToHistory(unit.GridPosition);
             doMove = IsValid(CurrentWaypointIndex) && (Query == null || Query.IsComplete);
@@ -550,9 +550,42 @@ namespace RTS.Default.Unit {
         }
     }
 
+    public class AnimationInitArgs {
+        public static readonly AnimationInitArgs Default = new AnimationInitArgs();
+
+        public Point[] Splices;
+        public float[] Speeds;
+
+        public Color BulletTint;
+        public Vector3 BulletOffset;
+        public Vector3 BulletDirection;
+
+        public AnimationInitArgs() {
+            Splices = new Point[] {
+                new Point(0, 59),
+                new Point(60, 119),
+                new Point(120, 149),
+                new Point(150, 179),
+                new Point(180, 199),
+                new Point(200, 259)
+            };
+            Speeds = new float[] {
+                30,
+                80,
+                30,
+                50,
+                60,
+                40
+            };
+            BulletTint = Color.Yellow;
+            BulletOffset = new Vector3(-0.1f, 1f, 0.2f);
+            BulletDirection = new Vector3(0, 0, 1);
+        }
+    }
     public class Animation : ACUnitAnimationController {
         private static Random r = new Random();
         private GameState state;
+        AnimationInitArgs initArgs;
 
         private AnimationLoop alRest, alWalk, alMelee, alPrepareFire, alFire, alDeath;
         private AnimationLoop alCurrent;
@@ -561,24 +594,27 @@ namespace RTS.Default.Unit {
         private int lastState;
 
         public Animation() {
-            alRest = new AnimationLoop(0, 59);
-            alRest.FrameSpeed = 30;
-            alWalk = new AnimationLoop(60, 119);
-            alWalk.FrameSpeed = 80;
-            alMelee = new AnimationLoop(120, 149);
-            alMelee.FrameSpeed = 30;
-            alPrepareFire = new AnimationLoop(150, 179);
-            alPrepareFire.FrameSpeed = 50;
-            alFire = new AnimationLoop(180, 199);
-            alFire.FrameSpeed = 60;
-            alDeath = new AnimationLoop(200, 259);
-            alDeath.FrameSpeed = 40;
-
-            SetAnimation(BehaviorFSM.None);
         }
 
         public override void Init(GameState s, GameplayController c, object args) {
             state = s;
+
+            initArgs = args == null ? null : args as AnimationInitArgs;
+            if(initArgs == null) initArgs = AnimationInitArgs.Default;
+
+            alRest = new AnimationLoop(initArgs.Splices[0].X, initArgs.Splices[0].Y);
+            alRest.FrameSpeed = initArgs.Speeds[0];
+            alWalk = new AnimationLoop(initArgs.Splices[1].X, initArgs.Splices[1].Y);
+            alWalk.FrameSpeed = initArgs.Speeds[1];
+            alMelee = new AnimationLoop(initArgs.Splices[2].X, initArgs.Splices[2].Y);
+            alMelee.FrameSpeed = initArgs.Speeds[2];
+            alPrepareFire = new AnimationLoop(initArgs.Splices[3].X, initArgs.Splices[3].Y);
+            alPrepareFire.FrameSpeed = initArgs.Speeds[3];
+            alFire = new AnimationLoop(initArgs.Splices[4].X, initArgs.Splices[4].Y);
+            alFire.FrameSpeed = initArgs.Speeds[4];
+            alDeath = new AnimationLoop(initArgs.Splices[5].X, initArgs.Splices[5].Y);
+            alDeath.FrameSpeed = initArgs.Speeds[5];
+            SetAnimation(BehaviorFSM.None);
         }
 
         public override void SetUnit(RTSUnit u) {
@@ -589,22 +625,35 @@ namespace RTS.Default.Unit {
         }
 
         void unit_OnAttackMade(ICombatEntity arg1, IEntity arg2) {
-            Vector3 o = arg1.WorldPosition + Vector3.Up;
-            Vector3 d = arg2.WorldPosition + Vector3.Up;
-            d -= o;
+            Vector2 cpvd = new Vector2(arg1.ViewDirection.Y, -arg1.ViewDirection.X);
+
+            Vector2 o2 = cpvd * initArgs.BulletOffset.X + arg1.ViewDirection * initArgs.BulletOffset.Z;
+            Vector3 o = new Vector3(o2.X, initArgs.BulletOffset.Y, o2.Y);
+            o += arg1.WorldPosition;
+
+            Vector2 d2 = cpvd * initArgs.BulletDirection.X + arg1.ViewDirection * initArgs.BulletDirection.Z;
+            Vector3 d = new Vector3(d2.X, initArgs.BulletDirection.Y, d2.Y);
             d.Normalize();
+
             BulletParticle bp = new BulletParticle(o, d, 0.05f, 1.4f, 0.1f);
-            bp.Tint = Color.Red;
+            bp.Tint = initArgs.BulletTint;
             AddParticle(bp);
         }
 
         private void SetAnimation(int state) {
             switch(state) {
+                case BehaviorFSM.None:
+                    alCurrent = null;
+                    AnimationFrame = 0;
+                    break;
                 case BehaviorFSM.Walking:
                     alCurrent = alWalk;
                     alCurrent.Restart(true);
                     break;
                 case BehaviorFSM.CombatRanged:
+                    alCurrent = alFire;
+                    alCurrent.Restart(true);
+                    break;
                 case BehaviorFSM.CombatMelee:
                     alCurrent = alMelee;
                     alCurrent.Restart(true);
