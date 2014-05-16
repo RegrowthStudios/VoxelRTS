@@ -14,7 +14,8 @@ namespace RTSEngine.Data {
         SpawnUnit,
         SpawnBuilding,
         Impact,
-        Capital
+        Capital,
+        SetOrders
     }
 
     public class GameInputEvent {
@@ -143,6 +144,30 @@ namespace RTSEngine.Data {
         public CapitalEvent(int t, int amount)
             : base(GameEventType.Capital, t) {
             ChangeAmount = amount;
+        }
+    }
+
+    public class SetOrdersEvent : GameInputEvent {
+        public int UnitID {
+            get;
+            private set;
+        }
+
+        public int Orders {
+            get;
+            private set;
+        }
+
+        public int Index {
+            get;
+            private set;
+        }
+
+        public SetOrdersEvent(int t, int id, int o, int i)
+            : base(GameEventType.SetOrders, t) {
+            UnitID = id;
+            Orders = o;
+            Index = i;
         }
     }
 }

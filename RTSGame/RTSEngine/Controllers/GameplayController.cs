@@ -218,6 +218,9 @@ namespace RTSEngine.Controllers {
                     case GameEventType.Capital:
                         ApplyInput(s, dt, e as CapitalEvent);
                         break;
+                    case GameEventType.SetOrders:
+                        ApplyInput(s, dt, e as SetOrdersEvent);
+                        break;
                     default:
                         throw new Exception("Event does not exist.");
                 }
@@ -227,7 +230,7 @@ namespace RTSEngine.Controllers {
         private void ApplyInput(GameState s, float dt, SelectEvent e) {
             RTSTeam team = s.teams[e.Team];
             team.Input.Select(e.Selected, e.Append);
-            if(team.Input.Type == RTSInputType.Player) {
+            if(team.Input.Type == RTSInputType.Player && e.Selected != null) {
                 foreach(var entity in e.Selected) {
                     RTSUnit unit = entity as RTSUnit;
                     if(unit != null) unit.MovementOrders = BehaviorFSM.JustMove;
@@ -267,13 +270,15 @@ namespace RTSEngine.Controllers {
                         if(squad == null) squad = u.Team.AddSquad();
                         if(u.ActionController != null) u.ActionController.Reset();
                         squad.Add(u);
+                        DevConsole.AddCommand("gc 1");
                     }
                 }
-                if(squad == null) return;
+                if (squad == null) { DevConsole.AddCommand("gc return"); return; }
                 // Assign The Target To Every Unit In The Squad
                 for(int u = 0; u < squad.Units.Count; u++) {
                     RTSUnit unit = squad.Units[u];
                     unit.Target = e.Target;
+                    DevConsole.AddCommand("gc target");
                 }
                 AddTask(s, squad);
                 SendSquadQuery(s, squad, e);
@@ -383,6 +388,10 @@ namespace RTSEngine.Controllers {
             RTSTeam team = s.teams[e.Team];
 
             team.Capital += e.ChangeAmount;
+        }
+        private void ApplyInput(GameState s, float dt, SetOrdersEvent e) {
+            if (e.Index < 0 || e.Index > 3) { return; }
+
         }
         private void AddTask(GameState s, RTSUnit unit) {
             // Init The Unit

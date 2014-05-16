@@ -39,7 +39,7 @@ namespace RTS.Input {
             Team.OnBuildingSpawn += OnBuildingSpawn;
             Team.OnUnitSpawn += OnUnitSpawn;
             random = new Random();
-            spawnCap = 1;
+            spawnCap = 3;
             unitSpawnP = new int[] { 33, 33, 34 };
             barracksControllers = new List<BarracksController>();
             squads = new List<List<IEntity>>();
@@ -87,6 +87,7 @@ namespace RTS.Input {
         }
 
         public void OnBuildingDestruction(IEntity b) {
+            DevConsole.AddCommand("building destroyed");
             BarracksController destroyed = null;
             
             foreach (var bc in barracksControllers) {
@@ -113,8 +114,10 @@ namespace RTS.Input {
                     bc.SpawnUnits();
                     bc.DecideTarget();
                     bc.ApplyTarget();
+
+
                 }
-                
+                //DevConsole.AddCommand("thread");
                 Thread.Sleep(2000);
             }
         }
